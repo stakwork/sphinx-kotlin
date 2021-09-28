@@ -24,11 +24,9 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -130,11 +128,11 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         replyingToMessage: Boolean = false
     ) {
         val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
-        val listSizeBeforeDispatch = messages.size - 1
+        val listSizeBeforeDispatch = messages.size
 
         callback()
 
-        val listSizeAfterDispatch = messages.size - 1
+        val listSizeAfterDispatch = messages.size
 
         if (
             (!viewModel.isMessageSelected() || replyingToMessage)           &&
@@ -209,14 +207,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
     inner class MessageViewHolder(
         private val binding: LayoutMessageHolderBinding
-    ): RecyclerView.ViewHolder(binding.root) {
+    ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(10)
+        private val holderJobs: ArrayList<Job> = ArrayList(14)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
         private val onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
-
         init {
             binding.includeMessageHolderBubble.apply {
 
@@ -230,17 +227,16 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
 
-                val selectedMessageLongClickListener = OnLongClickListener { v ->
+                val selectedMessageLongClickListener = OnLongClickListener {
                     SelectedMessageViewState.SelectedMessage.instantiate(
                         messageHolderViewState = currentViewState,
-                        holderYPosTop = Px(binding.root.y),
+                        holderYPosTop = Px(binding.root.y + binding.includeMessageHolderBubble.root.y),
                         holderHeight = Px(binding.root.measuredHeight.toFloat()),
                         holderWidth = Px(binding.root.measuredWidth.toFloat()),
                         bubbleXPosStart = Px(root.x),
                         bubbleWidth = Px(root.measuredWidth.toFloat()),
                         bubbleHeight = Px(root.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
-                        statusHeaderHeight = Px(binding.includeMessageStatusHeader.root.measuredHeight.toFloat()),
                         recyclerViewWidth = recyclerViewWidth,
                         screenHeight = screenHeight
                     ).let { vs ->
@@ -261,6 +257,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
                 textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
+
+                includeMessageTypeBotResponse.webViewMessageTypeBotResponse.setOnLongClickListener(onSphinxInteractionListener)
 
                 includeMessageLinkPreviewContact.apply contact@ {
                     root.setOnLongClickListener(selectedMessageLongClickListener)
@@ -309,6 +307,16 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                     buttonPayAttachment.setOnLongClickListener(selectedMessageLongClickListener)
                 }
+
+                includeMessageTypeAudioAttachment.apply {
+                    textViewAttachmentPlayPauseButton.setOnClickListener {
+                        viewModel.audioPlayerController.togglePlayPause(
+                            currentViewState?.bubbleAudioAttachment
+                        )
+                    }
+                    seekBarAttachmentAudio.setOnTouchListener { _, _ -> true }
+                }
+
             }
 
             binding.includeMessageTypeGroupActionHolder.let { holder ->
@@ -386,21 +394,53 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         fun bind(position: Int) {
             val viewState = messages.elementAtOrNull(position).also { currentViewState = it } ?: return
+            audioAttachmentJob?.cancel()
 
             binding.setView(
                 lifecycleOwner.lifecycleScope,
                 holderJobs,
                 disposables,
                 viewModel.dispatchers,
+                viewModel.audioPlayerController,
                 imageLoader,
                 viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
-                onSphinxInteractionListener,
+                onSphinxInteractionListener
             )
 
+            observeAudioAttachmentState()
+        }
+
+        private var audioAttachmentJob: Job? = null
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            audioAttachmentJob?.let { job ->
+                if (!job.isActive) {
+                    observeAudioAttachmentState()
+                }
+            }
+        }
+
+        private fun observeAudioAttachmentState() {
+            currentViewState?.bubbleAudioAttachment?.let { audioAttachment ->
+                if (audioAttachment is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable) {
+                    audioAttachmentJob?.cancel()
+                    audioAttachmentJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.audioPlayerController.getAudioState(audioAttachment)?.collect { audioState ->
+                            binding.includeMessageHolderBubble
+                                .includeMessageTypeAudioAttachment
+                                .setAudioAttachmentLayoutForState(audioState)
+                        }
+                    }
+                }
+            }
+        }
+
+        init {
+            lifecycleOwner.lifecycle.addObserver(this)
         }
 
     }

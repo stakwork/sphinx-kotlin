@@ -6,6 +6,8 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.view.MotionEvent
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.view.Window
 import android.widget.ImageView
@@ -21,12 +23,14 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.adapters.MessageListAdapter
+import chat.sphinx.chat_common.adapters.MessageListFooterAdapter
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewState
@@ -61,14 +65,14 @@ import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
-import chat.sphinx.wrapper_message.getColorKey
-import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
-import chat.sphinx.wrapper_message.retrieveTextToShow
-import chat.sphinx.wrapper_message.toReplyUUID
+import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.isSphinxText
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -88,7 +92,7 @@ import java.io.IOException
 abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
-        VM: ChatViewModel<ARGS>,
+        VM: ChatViewModel<ARGS>
         >(@LayoutRes layoutId: Int): MotionLayoutFragment<
         Nothing,
         ChatSideEffectFragment,
@@ -116,7 +120,7 @@ abstract class ChatFragment<
 
     private val sendMessageBuilder = SendMessage.Builder()
 
-    private val holderJobs: ArrayList<Job> = ArrayList(8)
+    private val holderJobs: ArrayList<Job> = ArrayList(11)
     private val disposables: ArrayList<Disposable> = ArrayList(4)
 
     override val chatFragmentContext: Context
@@ -169,6 +173,7 @@ abstract class ChatFragment<
         val insetterActivity = (requireActivity() as InsetterActivity)
         setupMenu(insetterActivity)
         setupFooter(insetterActivity)
+        setupAttachmentPriceView()
         setupHeader(insetterActivity)
         setupSelectedMessage()
         setupAttachmentSendPreview(insetterActivity)
@@ -304,46 +309,64 @@ abstract class ChatFragment<
             insetterActivity.addNavigationBarPadding(root)
 
             textViewChatFooterSend.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
-                sendMessageBuilder.setText(editTextChatFooter.text?.toString())
+                    sendMessageBuilder.setMessagePrice(
+                        attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
+                    )
 
-                sendMessageBuilder.setMessagePrice(
-                    attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
-                )
+                    val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
 
-                val attachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+                    @Exhaustive
+                    when (attachmentViewState) {
+                        is AttachmentSendViewState.Idle -> {
+                            sendMessageBuilder.setAttachmentInfo(null)
+                        }
+                        is AttachmentSendViewState.Preview -> {
+                            if (attachmentViewState.type.isImage) {
+                                attachmentViewState.file?.let { nnFile ->
+                                    sendMessageBuilder.setAttachmentInfo(
+                                        AttachmentInfo(
+                                            file = nnFile,
+                                            mediaType = attachmentViewState.type,
+                                            isLocalFile = true,
+                                        )
+                                    )
+                                }
+                            } else if (attachmentViewState.type.isSphinxText) {
 
-                @Exhaustive
-                when (attachmentViewState) {
-                    is AttachmentSendViewState.Idle -> {
-                        sendMessageBuilder.setAttachmentInfo(null)
+                                val text = attachmentViewState.paidMessage?.first ?: editTextChatFooter.text?.toString()
+
+                                viewModel.createPaidMessageFile(text)?.let { file ->
+                                    sendMessageBuilder.setAttachmentInfo(
+                                        AttachmentInfo(
+                                            file = file,
+                                            mediaType = MediaType.Text,
+                                            isLocalFile = true,
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                        is AttachmentSendViewState.PreviewGiphy -> {
+                            sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
+                        }
                     }
-                    is AttachmentSendViewState.Preview -> {
-                        sendMessageBuilder.setAttachmentInfo(
-                            AttachmentInfo(
-                                file = attachmentViewState.file,
-                                mediaType = attachmentViewState.type,
-                                isLocalFile = true,
-                            )
-                        )
-                    }
-                    is AttachmentSendViewState.PreviewGiphy -> {
-                        sendMessageBuilder.setGiphyData(attachmentViewState.giphyData)
-                    }
-                }
 
-                viewModel.sendMessage(sendMessageBuilder)?.let {
-                    // if it did not return null that means it was valid
-                    if (attachmentViewState !is AttachmentSendViewState.Idle) {
-                        viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                        viewModel.updateFooterViewState(FooterViewState.Default)
+                    viewModel.sendMessage(sendMessageBuilder)?.let {
+                        // if it did not return null that means it was valid
+                        if (attachmentViewState !is AttachmentSendViewState.Idle) {
+                            viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                            viewModel.updateFooterViewState(FooterViewState.Default)
+                        }
+
+                        sendMessageBuilder.clear()
+                        editTextChatFooter.setText("")
+                        attachmentSendBinding.editTextMessagePrice.setText("")
+
+                        viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
                     }
-
-                    sendMessageBuilder.clear()
-                    editTextChatFooter.setText("")
-                    attachmentSendBinding.editTextMessagePrice.setText("")
-
-                    viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
                 }
             }
 
@@ -379,6 +402,30 @@ abstract class ChatFragment<
                 }
             }
 
+            editTextChatFooter.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    val sendAttachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
+                    if (sendAttachmentViewState is AttachmentSendViewState.Preview && sendAttachmentViewState.type.isSphinxText) {
+                        s?.toString()?.let { text ->
+                            val price = attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull() ?: 0
+
+                            viewModel.updateAttachmentSendViewState(
+                                AttachmentSendViewState.Preview(
+                                    null,
+                                    sendAttachmentViewState.type,
+                                    Pair(text, price),
+                                )
+                            )
+                        }
+                    }
+                }
+            })
+
             editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
             editTextChatFooter.addTextChangedListener { editable ->
                 textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
@@ -394,6 +441,32 @@ abstract class ChatFragment<
 
             root.setBackgroundColor(getColor(R.color.headerBG))
         }
+    }
+
+    private fun setupAttachmentPriceView() {
+        attachmentSendBinding.editTextMessagePrice.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                val sendAttachmentViewState = viewModel.getAttachmentSendViewStateFlow().value
+
+                if (sendAttachmentViewState is AttachmentSendViewState.Preview && sendAttachmentViewState.type.isSphinxText) {
+                    footerBinding.editTextChatFooter.text?.toString()?.let { text ->
+                        val price = s?.toString()?.toLongOrNull() ?: 0
+
+                        viewModel.updateAttachmentSendViewState(
+                            AttachmentSendViewState.Preview(
+                                null,
+                                sendAttachmentViewState.type,
+                                Pair(text, price),
+                            )
+                        )
+                    }
+                }
+            }
+        })
     }
 
     private fun setupHeader(insetterActivity: InsetterActivity) {
@@ -583,19 +656,22 @@ abstract class ChatFragment<
             imageLoader,
             userColorsHelper
         )
+        val footerAdapter = MessageListFooterAdapter()
         recyclerView.apply {
             setHasFixedSize(false)
             layoutManager = linearLayoutManager
-            adapter = messageListAdapter
+            adapter = ConcatAdapter(messageListAdapter, footerAdapter)
             itemAnimator = null
         }
     }
 
-    protected fun scrollToBottom(
+    private fun scrollToBottom(
         callback: () -> Unit,
         replyingToMessage: Boolean = false
     ) {
-        (recyclerView.adapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+        (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
+            (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+        }
     }
 
     override fun onStart() {
@@ -679,11 +755,20 @@ abstract class ChatFragment<
                             replyingMessageBinding.apply {
 
                                 textViewReplyMessageLabel.apply {
-                                    textViewReplyMessageLabel.goneIfFalse(false)
+                                    textViewReplyMessageLabel.gone
+                                    textViewReplyTextOverlay.gone
 
-                                    message.retrieveTextToShow()?.let { messageText ->
-                                        textViewReplyMessageLabel.text = messageText
-                                        textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                    if (message.isAudioMessage) {
+                                        textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
+                                        textViewReplyMessageLabel.visible
+
+                                        textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
+                                        textViewReplyTextOverlay.visible
+                                    } else {
+                                        message.retrieveTextToShow()?.let { messageText ->
+                                            textViewReplyMessageLabel.text = messageText
+                                            textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
+                                        }
                                     }
                                 }
 
@@ -906,12 +991,14 @@ abstract class ChatFragment<
                         }
 
                         selectedMessageHolderBinding.apply {
-                            root.y = viewState.holderYPos.value + viewState.statusHeaderHeight.value
+                            root.y = viewState.holderYPos.value
+
                             setView(
                                 lifecycleScope,
                                 holderJobs,
                                 disposables,
                                 viewModel.dispatchers,
+                                viewModel.audioPlayerController,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
@@ -941,29 +1028,55 @@ abstract class ChatFragment<
 
                             this@message.includeLayoutSelectedMessageMenu.apply {
                                 spaceSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
-                                imageViewSelectedMessageMenuArrowTop.goneIfFalse(!viewState.showMenuTop)
+                                layoutConstraintSelectedMessageMenuArrowTopContainer.goneIfFalse(!viewState.showMenuTop)
 
                                 spaceSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
-                                imageViewSelectedMessageMenuArrowBottom.goneIfFalse(viewState.showMenuTop)
+                                layoutConstraintSelectedMessageMenuArrowBottomContainer.goneIfFalse(viewState.showMenuTop)
+
+                                imageViewSelectedMessageMenuArrowBottomCenter.gone
+                                imageViewSelectedMessageMenuArrowBottomRight.gone
+                                imageViewSelectedMessageMenuArrowBottomLeft.gone
+
+                                imageViewSelectedMessageMenuArrowTopCenter.gone
+                                imageViewSelectedMessageMenuArrowTopRight.gone
+                                imageViewSelectedMessageMenuArrowTopLeft.gone
                             }
 
-                            this@message.includeLayoutSelectedMessageMenu.root.apply menu@ {
+                            this@message.includeLayoutSelectedMessageMenu.apply menu@ {
 
-                                this@menu.y = if (viewState.showMenuTop) {
+                                this@menu.root.y = if (viewState.showMenuTop) {
                                     viewState.holderYPos.value -
-                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) +
-                                            viewState.statusHeaderHeight.value -
-                                            Dp(10F).toPx(context).value
+                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) -
+                                            Dp(10F).toPx(root.context).value
                                 } else {
-                                    viewState.holderYPos.value          +
-                                            viewState.bubbleHeight.value        +
-                                            viewState.statusHeaderHeight.value  +
-                                            Dp(10F).toPx(context).value
+                                    viewState.holderYPos.value +
+                                            viewState.bubbleHeight.value +
+                                            Dp(10F).toPx(root.context).value
                                 }
-                                val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
 
-                                // TODO: Handle small bubbles better
-                                this@menu.x = viewState.bubbleCenterXPos.value - (menuWidth / 2F)
+                                val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
+                                var menuXPos = viewState.bubbleCenterXPos.value - (menuWidth / 2F)
+
+                                when {
+                                    (menuXPos + menuWidth > viewState.recyclerViewWidth.value) -> {
+                                        menuXPos = viewState.recyclerViewWidth.value - menuWidth - Dp(16F).toPx(root.context).value
+
+                                        this@menu.imageViewSelectedMessageMenuArrowBottomRight.visible
+                                        this@menu.imageViewSelectedMessageMenuArrowTopRight.visible
+                                    }
+                                    (menuXPos < 0F) -> {
+                                        menuXPos = Dp(16F).toPx(root.context).value
+
+                                        this@menu.imageViewSelectedMessageMenuArrowBottomLeft.visible
+                                        this@menu.imageViewSelectedMessageMenuArrowTopLeft.visible
+                                    }
+                                    else -> {
+                                        this@menu.imageViewSelectedMessageMenuArrowBottomCenter.visible
+                                        this@menu.imageViewSelectedMessageMenuArrowTopCenter.visible
+                                    }
+                                }
+
+                                this@menu.root.x = menuXPos
                             }
                             this@message.setMenuColor(viewState.messageHolderViewState)
                             this@message.setMenuItems(viewState.messageHolderViewState.selectionMenuItems)
@@ -1018,6 +1131,7 @@ abstract class ChatFragment<
                     when (viewState) {
                         is AttachmentSendViewState.Idle -> {
                             root.gone
+                            includePaidTextMessageSendPreview.root.gone
                             imageViewAttachmentSendPreview.setImageDrawable(null)
                         }
                         is AttachmentSendViewState.Preview -> {
@@ -1037,21 +1151,41 @@ abstract class ChatFragment<
                                     is MediaType.Video -> {
                                         text = getString(R.string.attachment_send_header_video)
                                     }
-                                    is MediaType.Text,
+                                    is MediaType.Text -> {
+                                        text = getString(R.string.attachment_send_header_paid_message)
+                                    }
                                     is MediaType.Unknown -> {}
                                 }
                             }
 
-                            root.visible
+                            if (viewState.type is MediaType.Image) {
 
-                            // will load almost immediately b/c it's a file, so
-                            // no need to launch separate coroutine.
-                            lifecycleScope.launch(viewModel.mainImmediate) {
-                                val disposable = imageLoader.load(imageViewAttachmentSendPreview, viewState.file)
-                                attachmentSendViewStateDisposables.add(disposable)
-                            }.let { job ->
-                                attachmentSendViewStateJobs.add(job)
+                                // will load almost immediately b/c it's a file, so
+                                // no need to launch separate coroutine.
+                                viewState.file?.let { nnFile ->
+                                    lifecycleScope.launch(viewModel.mainImmediate) {
+                                        val disposable = imageLoader.load(imageViewAttachmentSendPreview, nnFile)
+                                        attachmentSendViewStateDisposables.add(disposable)
+                                    }.let { job ->
+                                        attachmentSendViewStateJobs.add(job)
+                                    }
+                                }
+
+                            } else if (viewState.type == MediaType.Text) {
+
+                                includePaidTextMessageSendPreview.apply {
+                                    textViewPaidMessagePreviewText.text = viewState.paidMessage?.first ?: footerBinding.editTextChatFooter.text
+
+                                    textViewPaidMessagePreviewPrice.text =
+                                        (viewState.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
+                                        ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
+
+                                    root.visible
+                                }
+
                             }
+
+                            root.visible
                         }
                         is AttachmentSendViewState.PreviewGiphy -> {
 
@@ -1157,6 +1291,11 @@ abstract class ChatFragment<
     override fun onPause() {
         super.onPause()
         viewModel.readMessages()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.audioPlayerController.pauseMediaIfPlaying()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: ChatSideEffect) {

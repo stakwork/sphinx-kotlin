@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">訊息...</string>
     <string name="edit_text_optional_message_hint">可選訊息...</string>
-    <string name="text_view_loading_attachment">Loading/Decrypting...</string>
+    <string name="text_view_loading_attachment">解密中...</string>
 
     <string name="chat_muted_message"> 聊天室已靜音. Push 通知已關閉</string>
     <string name="chat_muted_waiting_on_network">載入中....…</string>
@@ -14,6 +14,10 @@
     <string name="join_call_header_label_text">加入通話…</string>
 
     <string name="failed_message">傳送訊息 失敗</string>
+
+    <string name="send_message_empty_destination_error">Contact or Chat is required</string>
+    <string name="send_message_empty_content_error">Message or Attachment is required</string>
+    <string name="send_message_empty_price_error">Price is required</string>
 
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">附加檔案 訊息</string>
@@ -94,15 +98,19 @@
     <string name="attachment_send_header_image">傳送圖片</string>
     <string name="attachment_send_header_video">傳送影片</string>
     <string name="attachment_send_header_giphy">傳送 GIPHY</string>
+    <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
 
     <!-- Pay Attachment -->
+    <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
+    <string name="paid_message_loading">LOADING MESSAGE...</string>
+    <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
     <string name="attachment_price_label">費: </string>
-    <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
-    <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
+    <string name="alert_confirm_pay_attachment_title">確認購物</string>
+    <string name="alert_confirm_pay_attachment_message">確定買這品商品？</string>
 
     <!-- Save Attachment -->
-    <string name="saved_attachment_successfully">成功保存附件</string>
-    <string name="failed_to_save_file">無法保存文件</string>
+    <string name="saved_attachment_successfully">附加檔案儲存成功</string>
+    <string name="failed_to_save_file">附件檔案儲存失敗</string>
 
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">目前不支持刪除自己的tribe</string>

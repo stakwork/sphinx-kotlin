@@ -15,6 +15,10 @@
 
     <string name="failed_message">Failed Message</string>
 
+    <string name="send_message_empty_destination_error">Contact or Chat is required</string>
+    <string name="send_message_empty_content_error">Message or Attachment is required</string>
+    <string name="send_message_empty_price_error">Price is required</string>
+
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">Attachment Message</string>
     <string name="placeholder_display_name_message_type_bot_response">Bot Response Message</string>
@@ -94,8 +98,12 @@
     <string name="attachment_send_header_image">SEND IMAGE</string>
     <string name="attachment_send_header_video">SEND VIDEO</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
+    <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
 
     <!-- Pay Attachment -->
+    <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
+    <string name="paid_message_loading">LOADING MESSAGE...</string>
+    <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
     <string name="attachment_price_label">Price: </string>
     <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
     <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>

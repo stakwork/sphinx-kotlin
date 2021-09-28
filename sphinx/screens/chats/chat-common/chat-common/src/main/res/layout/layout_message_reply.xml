@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/message_reply_holder_height"
     android:visibility="gone"
-    tools:visibility="visible">
+    tools:visibility="visible"
+    tools:background="@color/body">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -19,51 +20,60 @@
         <View
             android:id="@+id/view_reply_bar_leading"
             android:layout_width="5dp"
-            android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
+            android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
             android:layout_height="@dimen/reply_message_media_image_xy"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_reply_media_image"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:background="@color/lightPurple" />
 
 
-        <!-- Optional Media Image -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_reply_media_image"
-            android:layout_width="@dimen/reply_message_media_image_xy"
-            android:layout_height="@dimen/reply_message_media_image_xy"
-            android:contentDescription="@string/reply_message_media_content_description"
-            android:scaleType="centerCrop"
-            android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
-            android:visibility="gone"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_media_container"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/text_view_reply_sender_label"
             app:layout_constraintStart_toEndOf="@+id/view_reply_bar_leading"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/backgrounds/scenic"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="parent">
 
+            <!-- Optional Media Image -->
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_reply_media_image"
+                android:layout_width="@dimen/reply_message_media_image_xy"
+                android:layout_height="@dimen/reply_message_media_image_xy"
+                android:contentDescription="@string/reply_message_media_content_description"
+                android:scaleType="centerCrop"
+                android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@tools:sample/backgrounds/scenic"
+                tools:visibility="gone" />
 
-        <!-- Optional Media Image Overlay Icon -->
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/image_view_reply_text_overlay"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:fontFamily="@font/material_icons_regular"
-            android:gravity="center"
-            android:scaleType="fitCenter"
-            android:textColor="@color/text"
-            android:textSize="@dimen/reply_message_media_icon_text_size"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/image_view_reply_media_image"
-            app:layout_constraintEnd_toEndOf="@+id/image_view_reply_media_image"
-            app:layout_constraintStart_toStartOf="@+id/image_view_reply_media_image"
-            app:layout_constraintTop_toTopOf="@id/image_view_reply_media_image"
-            tools:srcCompat="@tools:sample/backgrounds/scenic"
-            tools:text="@string/material_icon_name_videocam"
-            tools:visibility="visible" />
+            <!-- Optional Media Image Overlay Icon -->
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_reply_text_overlay"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="@dimen/default_inner_spacing_list_item_title"
+                android:fontFamily="@font/material_icons_regular"
+                android:gravity="center"
+                android:scaleType="fitCenter"
+                android:textColor="@color/text"
+                android:textSize="@dimen/reply_message_media_icon_text_size"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@tools:sample/backgrounds/scenic"
+                tools:text="@string/material_icon_name_volume_up"
+                tools:visibility="gone" />
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_reply_sender_label"
@@ -78,7 +88,7 @@
             android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintBottom_toTopOf="@id/text_view_reply_message_label"
             app:layout_constraintEnd_toStartOf="@+id/text_view_reply_close"
-            app:layout_constraintStart_toEndOf="@id/image_view_reply_media_image"
+            app:layout_constraintStart_toEndOf="@id/layout_constraint_media_container"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Name of Original Sender" />
 
@@ -93,7 +103,7 @@
             android:lines="1"
             android:textColor="@color/washedOutReceivedText"
             app:layout_constraintEnd_toStartOf="@+id/text_view_reply_close"
-            app:layout_constraintStart_toEndOf="@id/image_view_reply_media_image"
+            app:layout_constraintStart_toEndOf="@id/layout_constraint_media_container"
             app:layout_constraintBottom_toBottomOf="parent"
             tools:text="Text content of original message" />
 

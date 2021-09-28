@@ -5,12 +5,14 @@
     <dimen name="default_half_layout_margin">8dp</dimen>
     <dimen name="default_layout_margin">16dp</dimen>
     <dimen name="default_double_layout_margin">32dp</dimen>
+    <dimen name="default_big_layout_margin">64dp</dimen>
     <dimen name="default_list_row_padding_vertical">10dp</dimen>
     <dimen name="default_header_height">65dp</dimen>
     <dimen name="default_header_navigation_xy">56dp</dimen>
     <dimen name="default_header_navigation_padding">16dp</dimen>
     <dimen name="default_header_navigation_margin_start">8dp</dimen>
     <dimen name="default_chat_initial_image_xy">46dp</dimen>
+    <dimen name="default_small_chat_initial_image_xy">26dp</dimen>
     <dimen name="default_invite_qr_image_xy">40dp</dimen>
     <dimen name="default_message_action_image_xy">28dp</dimen>
     <dimen name="default_header_margin_horizontal">24dp</dimen>
@@ -24,6 +26,7 @@
     <dimen name="default_header_text_size">14sp</dimen>
     <dimen name="default_text_size_large_title_3">22sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
+    <dimen name="default_text_size_small_headline">15sp</dimen>
     <dimen name="default_text_size_body">12sp</dimen>
     <dimen name="default_text_size_action_button_label">12sp</dimen>
     <dimen name="default_text_size_sub_headline">11sp</dimen>

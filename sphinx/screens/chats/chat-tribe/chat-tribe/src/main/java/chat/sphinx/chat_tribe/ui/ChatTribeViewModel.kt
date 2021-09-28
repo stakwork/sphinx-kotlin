@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -26,16 +27,19 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -50,6 +54,7 @@ internal class ChatTribeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
     private val tribeChatNavigator: TribeChatNavigator,
+    repositoryMedia: RepositoryMedia,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -65,6 +70,7 @@ internal class ChatTribeViewModel @Inject constructor(
     dispatchers,
     memeServerTokenHandler,
     tribeChatNavigator,
+    repositoryMedia,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -113,7 +119,7 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    override suspend fun getChatNameIfNull(): ChatName? {
+    override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
     }
 
@@ -230,7 +236,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
-    override fun goToChatDetailScreen() {
+    override fun navigateToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
             (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
         }

@@ -7,13 +7,19 @@ import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.getColorKey
+import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.isAudio
 import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.isSphinxText
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -22,6 +28,12 @@ inline val Message.isCopyLinkAllowed: Boolean
     get() = retrieveTextToShow()?.let {
         SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
     } ?: false
+
+inline val Message.shouldAdaptBubbleWidth: Boolean
+    get() = type.isMessage() &&
+            replyUUID == null &&
+            !isCopyLinkAllowed &&
+            !status.isDeleted()
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -37,9 +49,11 @@ internal sealed class MessageHolderViewState(
     chat: Chat,
     val background: BubbleBackground,
     val initialHolder: InitialHolderViewState,
-    private val messageSenderName: (Message) -> String,
+    private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+    private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+    private val onBindDownloadMedia: () -> Unit,
 ) {
 
     companion object {
@@ -54,7 +68,10 @@ internal sealed class MessageHolderViewState(
     }
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isImage != true) {
+        if (
+            unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isSphinxText != true &&
+            message.messageMedia?.mediaType?.isImage != true && message.messageMedia?.mediaType?.isAudio != true
+        ) {
             LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
@@ -110,6 +127,26 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.retrieveTextToShow() != null || !message.isPaidTextMessage) {
+            null
+        } else {
+            val purchaseStatus = message.retrievePurchaseStatus()
+
+            if (this is Sent) {
+                LayoutState.Bubble.ContainerThird.PaidMessage(
+                    true,
+                    purchaseStatus
+                )
+            } else {
+                LayoutState.Bubble.ContainerThird.PaidMessage(
+                    false,
+                    purchaseStatus
+                )
+            }
+        }
+    }
+
     val bubbleCallInvite: LayoutState.Bubble.ContainerSecond.CallInvite? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveSphinxCallLink()?.let { callLink ->
             LayoutState.Bubble.ContainerSecond.CallInvite(!callLink.startAudioOnly)
@@ -161,6 +198,38 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val bubbleAudioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isAudio) {
+
+                nnMessageMedia.localFile?.let { nnFile ->
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(nnFile)
+
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    // will only be called once when value is lazily initialized upon binding
+                    // data to view.
+                    if (!pendingPayment) {
+                        onBindDownloadMedia.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(pendingPayment)
+                }
+            } else {
+                null
+            }
+        }
+//        message.retrieveAudioUrlAndMessageMedia()?.let { mediaData ->
+//            LayoutState.Bubble.ContainerSecond.AudioAttachment(
+//                mediaData.first,
+//                mediaData.second,
+//                (this is Received && message.isPaidPendingMessage)
+//            )
+//        }
+    }
+
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
         message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
             LayoutState.Bubble.ContainerSecond.ImageAttachment(
@@ -186,37 +255,45 @@ internal sealed class MessageHolderViewState(
             if (nnReactions.isEmpty()) {
                 null
             } else {
-                val set: MutableSet<BoostReactionImageHolder> = LinkedHashSet(1)
+                val set: MutableSet<BoostSenderHolder> = LinkedHashSet(0)
                 var total: Long = 0
+                var boostedByOwner = false
+                val owner = accountOwner()
+
                 for (reaction in nnReactions) {
-//                    if (chatType?.isConversation() != true) {
-//                        reaction.senderPic?.value?.let { url ->
-//                            set.add(SenderPhotoUrl(url))
-//                        } ?: reaction.senderAlias?.value?.let { alias ->
-//                            set.add(SenderInitials(alias.getInitials()))
-//                        }
-//                    }
+                    if (reaction.sender == owner.id) {
+                        boostedByOwner = true
+
+                        set.add(BoostSenderHolder(
+                            owner.photoUrl,
+                            owner.alias,
+                            owner.getColorKey()
+                        ))
+                    } else {
+                        if (chat.type.isConversation()) {
+                            val senderInfo = messageSenderInfo(reaction)
+
+                            set.add(BoostSenderHolder(
+                                senderInfo.first,
+                                senderInfo.second,
+                                senderInfo.third
+                            ))
+                        } else {
+                            set.add(BoostSenderHolder(
+                                reaction.senderPic,
+                                reaction.senderAlias?.value?.toContactAlias(),
+                                reaction.getColorKey()
+                            ))
+                        }
+                    }
                     total += reaction.amount.value
                 }
 
-//                if (chatType?.isConversation() == true) {
-//
-//                    // TODO: Use Account Owner Initial Holder depending on sent/received
-//                    @Exhaustive
-//                    when (initialHolder) {
-//                        is InitialHolderViewState.Initials -> {
-//                            set.add(SenderInitials(initialHolder.initials))
-//                        }
-//                        is InitialHolderViewState.None -> {}
-//                        is InitialHolderViewState.Url -> {
-//                            set.add(SenderPhotoUrl(initialHolder.photoUrl.value))
-//                        }
-//                    }
-//                }
-
                 LayoutState.Bubble.ContainerFourth.Boost(
+                    showSent = (this is Sent),
+                    boostedByOwner = boostedByOwner,
+                    senders = set,
                     totalAmount = Sat(total),
-                    senderPics = set,
                 )
             }
         }
@@ -234,9 +311,10 @@ internal sealed class MessageHolderViewState(
 
             LayoutState.Bubble.ContainerFirst.ReplyMessage(
                 showSent = this is Sent,
-                messageSenderName(nnReplyMessage),
+                messageSenderInfo(nnReplyMessage).second?.value ?: "",
                 nnReplyMessage.getColorKey(),
                 nnReplyMessage.retrieveTextToShow() ?: "",
+                nnReplyMessage.isAudioMessage,
                 mediaUrl,
                 messageMedia
             )
@@ -274,6 +352,13 @@ internal sealed class MessageHolderViewState(
                 linkPreviewLayoutState ?: previewProvider.invoke(nnPreview)
                     ?.also { linkPreviewLayoutState = it }
             }
+        }
+    }
+
+    private val paidTextMessageContentLock = Mutex()
+    suspend fun retrievePaidTextMessageContent(): LayoutState.Bubble.ContainerThird.Message? {
+        return bubbleMessage ?: paidTextMessageContentLock.withLock {
+            bubbleMessage ?: paidTextAttachmentContentProvider.invoke(message)
         }
     }
 
@@ -329,17 +414,21 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
-        replyMessageSenderName: (Message) -> String,
+        messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+        paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+        onBindDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
         background,
         InitialHolderViewState.None,
-        replyMessageSenderName,
+        messageSenderInfo,
         accountOwner,
         previewProvider,
+        paidTextMessageContentProvider,
+        onBindDownloadMedia,
     )
 
     class Received(
@@ -347,16 +436,20 @@ internal sealed class MessageHolderViewState(
         chat: Chat,
         background: BubbleBackground,
         initialHolder: InitialHolderViewState,
-        replyMessageSenderName: (Message) -> String,
+        messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+        paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+        onBindDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
         background,
         initialHolder,
-        replyMessageSenderName,
+        messageSenderInfo,
         accountOwner,
         previewProvider,
+        paidTextMessageContentProvider,
+        onBindDownloadMedia,
     )
 }

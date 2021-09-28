@@ -11,7 +11,9 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +26,8 @@ interface MessageRepository {
     fun getPaymentsTotalFor(feedId: Long): Flow<Sat?>
 
     suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
+
+    fun updateMessageContentDecrypted(messageId: MessageId, messageContentDecrypted: MessageContentDecrypted)
 
     val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
 
@@ -44,6 +48,8 @@ interface MessageRepository {
     )
 
     suspend fun deleteMessage(message: Message) : Response<Any, ResponseError>
+
+    suspend fun getPaymentTemplates() : Response<List<PaymentTemplate>, ResponseError>
 
     suspend fun sendPayment(
         sendPayment: SendPayment?

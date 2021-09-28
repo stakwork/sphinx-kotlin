@@ -14,6 +14,7 @@
         android:id="@+id/web_view_message_type_bot_response"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clickable="false"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
