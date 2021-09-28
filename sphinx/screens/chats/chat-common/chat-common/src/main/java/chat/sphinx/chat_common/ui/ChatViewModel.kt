@@ -1095,10 +1095,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     @JvmSynthetic
     internal fun chatMenuOptionPaymentRequest() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("Request amount not implemented yet")
-            )
+        contactId?.let { id ->
+            viewModelScope.launch(mainImmediate) {
+                audioPlayerController.pauseMediaIfPlaying()
+                chatNavigator.toPaymentReceiveDetail(id, chatId)
+            }
+            updateViewState(ChatMenuViewState.Closed)
         }
     }
 

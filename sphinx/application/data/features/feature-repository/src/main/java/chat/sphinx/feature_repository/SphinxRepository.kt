@@ -14,11 +14,11 @@ import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
-import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.MessageDto
+import chat.sphinx.concept_network_query_message.model.PostChatRequestPaymentDto
 import chat.sphinx.concept_network_query_message.model.PostMessageDto
 import chat.sphinx.concept_network_query_message.model.PostPaymentDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
@@ -31,10 +31,10 @@ import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
 import chat.sphinx.concept_repository_lightning.LightningRepository
-import chat.sphinx.concept_repository_lightning.model.RequestPayment
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
+import chat.sphinx.concept_repository_message.model.SendPaymentRequest
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
@@ -2677,20 +2677,101 @@ abstract class SphinxRepository(
         }
     }
 
-    // TODO: Remove from repository as it does not interact with
-    //  persistence layer at all and does not belong.
-    override suspend fun requestPayment(requestPayment: RequestPayment): Response<LightningPaymentRequest, ResponseError> {
-        val postRequestPaymentDto = PostRequestPaymentDto(
-            requestPayment.chatId?.value,
-            requestPayment.contactId?.value,
-            requestPayment.amount,
-            requestPayment.memo,
-        )
-
-        var response: Response<LightningPaymentRequest, ResponseError>? = null
+    override suspend fun sendPaymentRequest(requestPayment: SendPaymentRequest): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
-            networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val contact: ContactDbo? = requestPayment.contactId?.let {
+                withContext(io) {
+                    queries.contactGetById(it).executeAsOneOrNull()
+                }
+            }
+
+            val owner: Contact? = accountOwner.value
+                ?: let {
+                    // TODO: Handle this better...
+                    var owner: Contact? = null
+                    try {
+                        accountOwner.collect {
+                            if (it != null) {
+                                owner = it
+                                throw Exception()
+                            }
+                        }
+                    } catch (e: Exception) {}
+                    delay(25L)
+                    owner
+                }
+
+            if (owner == null) {
+                response = Response.Error(
+                    ResponseError("Owner cannot be null")
+                )
+                return@launch
+            }
+
+            var encryptedMemo: MessageContent? = null
+            var encryptedRemoteMemo: MessageContent? = null
+
+            requestPayment.memo?.let { msgText ->
+                encryptedMemo = owner
+                    .rsaPublicKey
+                    ?.let { pubKey ->
+                        val encResponse = rsa.encrypt(
+                            pubKey,
+                            UnencryptedString(msgText),
+                            formatOutput = false,
+                            dispatcher = default,
+                        )
+
+                        @Exhaustive
+                        when (encResponse) {
+                            is Response.Error -> {
+                                LOG.e(TAG, encResponse.message, encResponse.exception)
+                                null
+                            }
+                            is Response.Success -> {
+                                MessageContent(encResponse.value.value)
+                            }
+                        }
+                    }
+
+                contact?.let { contact ->
+                    encryptedRemoteMemo = contact
+                        .public_key
+                        ?.let { pubKey ->
+                            val encResponse = rsa.encrypt(
+                                pubKey,
+                                UnencryptedString(msgText),
+                                formatOutput = false,
+                                dispatcher = default,
+                            )
+
+                            @Exhaustive
+                            when (encResponse) {
+                                is Response.Error -> {
+                                    LOG.e(TAG, encResponse.message, encResponse.exception)
+                                    null
+                                }
+                                is Response.Success -> {
+                                    MessageContent(encResponse.value.value)
+                                }
+                            }
+                        }
+                }
+            }
+
+            val postRequestPaymentDto = PostChatRequestPaymentDto(
+                requestPayment.chatId?.value,
+                requestPayment.contactId?.value,
+                requestPayment.amount,
+                encryptedMemo?.value,
+                encryptedRemoteMemo?.value
+            )
+
+            networkQueryMessage.sendPaymentRequest(postRequestPaymentDto).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
@@ -2699,20 +2780,43 @@ abstract class SphinxRepository(
                         response = loadResponse
                     }
                     is Response.Success -> {
-                        response = try {
-                            Response.Success(LightningPaymentRequest(loadResponse.value.invoice))
-                        } catch (e: IllegalArgumentException) {
-                            val msg = "Network response returned an empty value"
-                            LOG.e(TAG, msg, e)
+                        response = Response.Success(true)
 
-                            Response.Error(ResponseError(msg, e))
+                        val message = loadResponse.value
+
+                        decryptMessageDtoContentIfAvailable(
+                            message,
+                            coroutineScope { this },
+                        )
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+
+                                    queries.transaction {
+                                        upsertMessage(message, queries)
+
+                                        if (message.updateChatDboLatestMessage) {
+                                            message.chat_id?.toChatId()?.let { chatId ->
+                                                updateChatDboLatestMessage(
+                                                    message,
+                                                    chatId,
+                                                    latestMessageUpdatedTimeMap,
+                                                    queries
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                }
+                            }
                         }
                     }
                 }
             }
         }.join()
 
-        return response ?: Response.Error(ResponseError(""))
+        return response ?: Response.Error(ResponseError("Failed to send payment request"))
     }
 
     override suspend fun payAttachment(message: Message) : Response<Any, ResponseError> {

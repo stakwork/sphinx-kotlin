@@ -38,6 +38,7 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_PAYMENT = "/payment"
         private const val ENDPOINT_PAYMENTS = "${ENDPOINT_PAYMENT}s"
         private const val ENDPOINT_PAY_ATTACHMENT = "/purchase"
+        private const val ENDPOINT_INVOICES = "/invoices"
     }
 
     override fun getMessages(
@@ -85,6 +86,18 @@ class NetworkQueryMessageImpl(
             responseJsonClass = MessageRelayResponse::class.java,
             relayEndpoint = ENDPOINT_PAYMENT,
             requestBodyJsonClass = PostPaymentDto::class.java,
+            requestBody = postPaymentDto,
+            relayData = relayData
+        )
+
+    override fun sendPaymentRequest(
+        postPaymentDto: PostChatRequestPaymentDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_INVOICES,
+            requestBodyJsonClass = PostChatRequestPaymentDto::class.java,
             requestBody = postPaymentDto,
             relayData = relayData
         )

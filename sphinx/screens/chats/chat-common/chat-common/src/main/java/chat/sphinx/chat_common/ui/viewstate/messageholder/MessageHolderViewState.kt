@@ -103,7 +103,7 @@ internal sealed class MessageHolderViewState(
     }
 
     val invoiceExpirationHeader: LayoutState.InvoiceExpirationHeader? by lazy(LazyThreadSafetyMode.NONE) {
-        if (message.type.isInvoice()) {
+        if (message.type.isInvoice() && !message.status.isDeleted()) {
             LayoutState.InvoiceExpirationHeader(
                 message.isExpiredInvoice,
                 message.status.isConfirmed(),

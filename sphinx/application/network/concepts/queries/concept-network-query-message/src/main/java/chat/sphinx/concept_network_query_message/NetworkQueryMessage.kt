@@ -48,6 +48,11 @@ abstract class NetworkQueryMessage {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<MessageDto, ResponseError>>
 
+    abstract fun sendPaymentRequest(
+        postPaymentDto: PostChatRequestPaymentDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<MessageDto, ResponseError>>
+
     abstract fun sendKeySendPayment(
         postPaymentDto: PostPaymentDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,

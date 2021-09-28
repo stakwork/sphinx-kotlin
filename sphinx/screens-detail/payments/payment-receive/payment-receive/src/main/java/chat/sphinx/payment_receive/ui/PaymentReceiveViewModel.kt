@@ -3,10 +3,12 @@ package chat.sphinx.payment_receive.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_lightning.LightningRepository
-import chat.sphinx.concept_repository_lightning.model.RequestPayment
-import chat.sphinx.kotlin_response.Response
+import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_message.model.SendPaymentRequest
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.payment_common.ui.PaymentSideEffect
 import chat.sphinx.payment_common.ui.PaymentViewModel
 import chat.sphinx.payment_common.ui.viewstate.AmountViewState
@@ -21,6 +23,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -46,7 +49,8 @@ internal class PaymentReceiveViewModel @Inject constructor(
     private val paymentReceiveNavigator: PaymentReceiveNavigator,
     private val app: Application,
     private val contactRepository: ContactRepository,
-    private val lightningRepository: LightningRepository,
+    private val networkQueryLightning: NetworkQueryLightning,
+    private val messageRepository: MessageRepository,
 ): PaymentViewModel<PaymentReceiveFragmentArgs, PaymentReceiveViewState>(
     dispatchers,
     paymentReceiveNavigator,
@@ -58,7 +62,7 @@ internal class PaymentReceiveViewModel @Inject constructor(
     override val chatId: ChatId? = args.chatId
     override val contactId: ContactId? = args.contactId
 
-    private val requestPaymentBuilder = RequestPayment.Builder()
+    private val sendPaymentRequestBuilder = SendPaymentRequest.Builder()
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -78,16 +82,63 @@ internal class PaymentReceiveViewModel @Inject constructor(
     }
 
     fun requestPayment(message: String? = null) {
-        viewModelScope.launch(mainImmediate) {
-            requestPaymentBuilder.setChatId(args.chatId)
-            requestPaymentBuilder.setContactId(args.contactId)
-            requestPaymentBuilder.setMemo(message)
+        sendPaymentRequestBuilder.setChatId(args.chatId)
+        sendPaymentRequestBuilder.setContactId(args.contactId)
+        sendPaymentRequestBuilder.setMemo(message)
 
-            val requestPayment = requestPaymentBuilder.build()
+        if (sendPaymentRequestBuilder.isContactRequest) {
+            sendPaymentRequest()
+            return
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            val requestPayment = sendPaymentRequestBuilder.build()
 
             if (requestPayment != null) {
                 updateViewState(PaymentReceiveViewState.ProcessingRequest)
-                val response = lightningRepository.requestPayment(requestPayment)
+
+                val postRequestPaymentDto = PostRequestPaymentDto(
+                    requestPayment.amount,
+                    requestPayment.memo,
+                )
+
+                networkQueryLightning.postRequestPayment(postRequestPaymentDto).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            submitSideEffect(
+                                PaymentSideEffect.Notify(app.getString(R.string.failed_to_request_payment))
+                            )
+                            refreshViewState()
+                        }
+                        is Response.Success -> {
+                            paymentReceiveNavigator.toQRCodeDetail(
+                                loadResponse.value.invoice,
+                                app.getString(R.string.qr_code_view_title),
+                                app.getString(R.string.amount_n_sats, requestPayment.amount),
+                                false
+                            )
+                            refreshViewState()
+                            delay(100L)
+                            updateAmount("")
+                        }
+                    }
+                }
+            } else {
+                submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
+            }
+        }
+    }
+
+    fun sendPaymentRequest() {
+        viewModelScope.launch(mainImmediate) {
+            val requestPayment = sendPaymentRequestBuilder.build()
+
+            if (requestPayment != null) {
+                updateViewState(PaymentReceiveViewState.ProcessingRequest)
+
+                val response = messageRepository.sendPaymentRequest(requestPayment)
 
                 @Exhaustive
                 when (response) {
@@ -98,23 +149,13 @@ internal class PaymentReceiveViewModel @Inject constructor(
                         refreshViewState()
                     }
                     is Response.Success -> {
-                        paymentReceiveNavigator.toQRCodeDetail(
-                            response.value.value,
-                            app.getString(R.string.qr_code_title),
-                            app.getString(R.string.amount_n_sats, requestPayment.amount),
-                            false
-                        )
-                        refreshViewState()
-                        delay(100L)
-                        updateAmount("")
+                        navigator.closeDetailScreen()
                     }
                 }
             } else {
                 submitSideEffect(PaymentSideEffect.Notify("Failed to request payment"))
             }
         }
-
-
     }
 
     override fun updateAmount(amountString: String) {
@@ -127,7 +168,7 @@ internal class PaymentReceiveViewModel @Inject constructor(
                 null
             }
 
-            requestPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
+            sendPaymentRequestBuilder.setAmount(updatedAmount?.toLong() ?: 0)
 
             when {
                 updatedAmount == null -> {
