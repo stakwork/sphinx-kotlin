@@ -43,7 +43,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/layout_constraint_chat_footer_actions"
         app:layout_constraintStart_toEndOf="@+id/text_view_chat_footer_attachment"
-        tools:text="Text which we have" />
+        tools:text="Text which we have"
+        />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_chat_footer_recording_actions"
@@ -54,13 +55,12 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/layout_constraint_chat_footer_actions"
         app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="gone"
         >
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_recording_indicator"
-            android:layout_width="@dimen/chat_footer_send_button_xy"
-            android:layout_height="@dimen/chat_footer_send_button_xy"
+            android:layout_width="@dimen/chat_footer_record_button_xy"
+            android:layout_height="@dimen/chat_footer_record_button_xy"
             android:layout_marginStart="@dimen/default_layout_margin"
             android:background="@drawable/circular_button"
             android:backgroundTint="@color/badgeRed"
@@ -74,6 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/default_layout_margin"
             android:text="00:00"
+            android:textColor="@color/blueTextAccent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/image_view_recording_indicator"
@@ -83,7 +84,8 @@
             android:id="@+id/text_view_recording_slide_to_cancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="&lt;&lt; Slide to cancel"
+            android:text="@string/slide_to_cancel"
+            android:textColor="@color/blueTextAccent"
             app:layout_constraintStart_toEndOf="@+id/text_view_recording_timer"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

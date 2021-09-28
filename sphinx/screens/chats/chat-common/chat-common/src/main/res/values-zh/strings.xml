@@ -134,4 +134,5 @@
     <string name="bottom_menu_call_header_text">通話選項</string>
     <string name="bottom_menu_call_option_audio">語音</string>
     <string name="bottom_menu_call_option_video_or_audio">映像 或 語音</string>
+    <string name="slide_to_cancel">&lt;&lt; 滑动取消</string>
 </resources>

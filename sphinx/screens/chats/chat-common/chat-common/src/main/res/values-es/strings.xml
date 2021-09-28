@@ -135,4 +135,5 @@
     <string name="bottom_menu_call_header_text">Opciones de LLamada</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video o Audio</string>
+    <string name="slide_to_cancel">&lt;&lt; Deslizar para cancelar</string>
 </resources>

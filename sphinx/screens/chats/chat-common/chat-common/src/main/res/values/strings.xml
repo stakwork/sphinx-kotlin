@@ -134,6 +134,7 @@
     <string name="bottom_menu_call_header_text">Call Options</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+    <string name="slide_to_cancel">&lt;&lt; Slide to cancel</string>
 
 
 </resources>

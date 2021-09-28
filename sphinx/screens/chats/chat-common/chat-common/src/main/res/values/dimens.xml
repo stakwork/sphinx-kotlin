@@ -6,6 +6,7 @@
     <dimen name="chat_footer_episode_title_text_size">14sp</dimen>
     <dimen name="chat_footer_button_icon_text_size">28sp</dimen>
     <dimen name="chat_footer_send_button_xy">37dp</dimen>
+    <dimen name="chat_footer_record_button_xy">22dp</dimen>
     <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
     <dimen name="chat_footer_progress_line_height">2dp</dimen>
 
