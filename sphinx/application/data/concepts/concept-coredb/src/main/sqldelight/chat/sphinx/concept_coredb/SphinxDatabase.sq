@@ -619,6 +619,11 @@ UPDATE messageDbo
 SET status = :status
 WHERE id = ?;
 
+messageUpdateInvoiceAsPaidByPaymentHash:
+UPDATE messageDbo
+SET status = 1
+WHERE type = 2 AND payment_hash = ?;
+
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
 messageUpsert {

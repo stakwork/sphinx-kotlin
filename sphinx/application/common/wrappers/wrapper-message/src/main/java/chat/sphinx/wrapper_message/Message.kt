@@ -35,6 +35,7 @@ inline fun Message.retrieveTextToShow(): String? =
         decrypted.value
     }
 
+//Invoice memo shows on a different TextView than messageContent
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveInvoiceTextToShow(): String? =
     messageContentDecrypted?.let { decrypted ->
@@ -212,7 +213,7 @@ inline val Message.isMediaAttachmentAvailable: Boolean
             (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
-    get() = (this.retrieveTextToShow() ?: "").isNotEmpty()
+    get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()
 
 inline val Message.isReplyAllowed: Boolean
     get() = (type.isAttachment() || type.isMessage() || type.isBotRes()) &&

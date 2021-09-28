@@ -1408,7 +1408,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             return
         }
 
-
         val sideEffect = ChatSideEffect.AlertConfirmPayAttachment {
             payAttachmentJob = viewModelScope.launch(mainImmediate) {
 
@@ -1420,6 +1419,32 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     is Response.Success -> {
                         // give time for DB to push new data to render to screen
                         // to inhibit firing of another payAttachment
+                        delay(100L)
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(sideEffect)
+        }
+    }
+
+    private var payInvoiceJob: Job? = null
+    fun payInvoice(message: Message) {
+        if (payInvoiceJob?.isActive == true) {
+            return
+        }
+
+        val sideEffect = ChatSideEffect.AlertConfirmPayInvoice {
+            payInvoiceJob = viewModelScope.launch(mainImmediate) {
+
+                @Exhaustive
+                when (val response = messageRepository.payPaymentRequest(message)) {
+                    is Response.Error -> {
+                        submitSideEffect(ChatSideEffect.Notify(response.cause.message))
+                    }
+                    is Response.Success -> {
                         delay(100L)
                     }
                 }

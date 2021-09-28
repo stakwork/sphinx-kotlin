@@ -308,6 +308,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     buttonPayAttachment.setOnLongClickListener(selectedMessageLongClickListener)
                 }
 
+                includeMessageTypeInvoice.apply {
+                    buttonPay.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.payInvoice(message)
+                        }
+                    }
+                }
+
                 includeMessageTypeAudioAttachment.apply {
                     textViewAttachmentPlayPauseButton.setOnClickListener {
                         viewModel.audioPlayerController.togglePlayPause(
@@ -316,7 +324,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                     seekBarAttachmentAudio.setOnTouchListener { _, _ -> true }
                 }
-
             }
 
             binding.includeMessageTypeGroupActionHolder.let { holder ->

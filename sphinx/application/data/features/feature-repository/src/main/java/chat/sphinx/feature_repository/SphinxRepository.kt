@@ -17,10 +17,7 @@ import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
-import chat.sphinx.concept_network_query_message.model.MessageDto
-import chat.sphinx.concept_network_query_message.model.PostChatRequestPaymentDto
-import chat.sphinx.concept_network_query_message.model.PostMessageDto
-import chat.sphinx.concept_network_query_message.model.PostPaymentDto
+import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
@@ -2763,7 +2760,7 @@ abstract class SphinxRepository(
                 }
             }
 
-            val postRequestPaymentDto = PostChatRequestPaymentDto(
+            val postRequestPaymentDto = PostPaymentRequestDto(
                 requestPayment.chatId?.value,
                 requestPayment.contactId?.value,
                 requestPayment.amount,
@@ -2819,8 +2816,63 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to send payment request"))
     }
 
+    override suspend fun payPaymentRequest(message: Message) : Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError>? = null
+
+        message.paymentRequest?.let { lightningPaymentRequest ->
+            applicationScope.launch(mainImmediate) {
+                val queries = coreDB.getSphinxDatabaseQueries()
+
+                val putPaymentRequestDto = PutPaymentRequestDto(
+                    lightningPaymentRequest.value,
+                )
+
+                networkQueryMessage.payPaymentRequest(
+                    putPaymentRequestDto,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+
+                        is Response.Error -> {
+                            response = Response.Error(
+                                ResponseError(loadResponse.message, loadResponse.exception)
+                            )
+                        }
+                        is Response.Success -> {
+                            response = loadResponse
+
+                            val message = loadResponse.value
+
+                            messageLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertMessage(message, queries)
+
+                                        if (message.updateChatDboLatestMessage) {
+                                            message.chat_id?.toChatId()?.let { chatId ->
+                                                updateChatDboLatestMessage(
+                                                    message,
+                                                    chatId,
+                                                    latestMessageUpdatedTimeMap,
+                                                    queries
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }.join()
+        }
+
+        return response ?: Response.Error(ResponseError("Failed to pay invoice"))
+    }
+
     override suspend fun payAttachment(message: Message) : Response<Any, ResponseError> {
-        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pay for attachment"))
+        var response: Response<Any, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -2861,7 +2913,7 @@ abstract class SphinxRepository(
             }
         }.join()
 
-        return response
+        return response ?: Response.Error(ResponseError("Failed to pay for attachment"))
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
