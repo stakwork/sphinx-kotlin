@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingTop="@dimen/chat_message_inner_padding"
-    android:paddingBottom="@dimen/chat_message_inner_padding"
+    android:paddingTop="@dimen/chat_message_big_inner_padding"
+    android:paddingBottom="@dimen/chat_message_big_inner_padding"
     android:visibility="gone"
     tools:visibility="visible">
 

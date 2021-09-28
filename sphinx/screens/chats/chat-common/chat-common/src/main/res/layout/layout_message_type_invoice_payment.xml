@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:visibility="gone"
+    android:paddingBottom="@dimen/chat_message_inner_padding"
     tools:visibility="visible">
 
     <androidx.appcompat.widget.AppCompatTextView

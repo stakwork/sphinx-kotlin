@@ -368,7 +368,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         (isOutgoing && !message.isPaidInvoice) ||
                         (!isOutgoing && message.isPaidInvoice)
                     ) {
-                        
+
                         newList.add(
                             MessageHolderViewState.Sent(
                                 message,

@@ -129,7 +129,7 @@ internal sealed class MessageHolderViewState(
     val invoicePayment: LayoutState.InvoicePayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isInvoicePayment()) {
             LayoutState.InvoicePayment(
-                gravityStart = this is Received,
+                showSent = this is Sent,
                 paymentDateString = message.date.invoicePaymentDateFormat()
             )
         } else {

@@ -54,9 +54,12 @@ internal sealed class LayoutState private constructor() {
     ): LayoutState()
 
     data class InvoicePayment(
-        val gravityStart: Boolean,
+        val showSent: Boolean,
         val paymentDateString: String,
-    ): LayoutState()
+    ): LayoutState() {
+        val showReceived: Boolean
+            get() = !showSent
+    }
 
     sealed class Bubble private constructor(): LayoutState() {
 

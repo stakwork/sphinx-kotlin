@@ -388,8 +388,18 @@ internal inline fun LayoutMessageHolderBinding.setBubbleInvoiceLayout(
     includeMessageHolderBubble.includeMessageTypeInvoice.apply {
         if (invoice == null) {
             root.gone
+
+            includeMessageInvoiceDottedLinesHolder.apply {
+                viewInvoiceBottomLeftLine.gone
+                viewInvoiceBottomRightLine.gone
+            }
         } else {
             root.visible
+
+            includeMessageInvoiceDottedLinesHolder.apply {
+                viewInvoiceBottomLeftLine.goneIfFalse(invoice.showReceived && invoice.isPaid)
+                viewInvoiceBottomRightLine.goneIfFalse(invoice.showSent && invoice.isPaid)
+            }
 
             if (!invoice.isExpired && !invoice.isPaid) {
                 receivedBubbleArrow.visibility = View.INVISIBLE
@@ -672,10 +682,20 @@ internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
     includeMessageTypeInvoicePayment.apply {
         if (invoicePayment == null) {
             root.gone
+
+            includeMessageInvoiceDottedLinesHolder.apply {
+                layoutConstraintInvoicePaymentLeftLine.gone
+                layoutConstraintInvoicePaymentRightLine.gone
+            }
         } else {
             root.visible
 
-            val gravity = if (invoicePayment.gravityStart) {
+            includeMessageInvoiceDottedLinesHolder.apply {
+                layoutConstraintInvoicePaymentLeftLine.goneIfFalse(invoicePayment.showReceived)
+                layoutConstraintInvoicePaymentRightLine.goneIfFalse(invoicePayment.showSent)
+            }
+
+            val gravity = if (invoicePayment.showReceived) {
                 Gravity.START
             } else {
                 Gravity.END
