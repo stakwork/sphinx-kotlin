@@ -27,7 +27,7 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
             get() = R.string.edit_text_optional_message_hint
     }
 
-    object RecordAudioAttachment: FooterViewState() {
+    class RecordingAudioAttachment(val duration: Long): FooterViewState() {
         override val showMenuIcon: Boolean
             get() = false
         override val showSendIcon: Boolean

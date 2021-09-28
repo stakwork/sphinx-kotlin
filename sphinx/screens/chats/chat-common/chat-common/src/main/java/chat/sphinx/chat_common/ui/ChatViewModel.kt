@@ -142,7 +142,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .build()
     }
 
-    var recorder: SphinxMediaRecorder? = null
+
 
     val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
         ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
@@ -1267,6 +1267,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         )
     }
 
+    internal val audioRecorderController: AudioRecorderController<ARGS> by lazy {
+        AudioRecorderController(
+            this,
+            viewModelScope,
+            mediaCacheHandler,
+            dispatchers
+        )
+    }
+
     fun goToChatDetailScreen() {
         audioPlayerController.pauseMediaIfPlaying()
         navigateToChatDetailScreen()
@@ -1429,6 +1438,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     override fun onCleared() {
         super.onCleared()
         (audioPlayerController as AudioPlayerControllerImpl).onCleared()
+        audioRecorderController?.clear()
     }
 }
 

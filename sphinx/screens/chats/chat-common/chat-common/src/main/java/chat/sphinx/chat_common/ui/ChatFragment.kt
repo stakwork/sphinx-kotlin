@@ -39,13 +39,14 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.chat_common.ui.viewstate.messageholder.toTimestamp
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
-import chat.sphinx.chat_common.util.SphinxMediaRecorder
+import chat.sphinx.chat_common.util.AudioRecorderController
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -87,7 +88,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.io.IOException
 
 abstract class ChatFragment<
         VB: ViewBinding,
@@ -381,7 +381,7 @@ abstract class ChatFragment<
 
             imageViewChatFooterMicrophone.setOnTouchListener { v, event ->
                 v.onTouchEvent(event)
-                if (event.action == MotionEvent.ACTION_UP && viewModel.recorder?.isRecording() == true) {
+                if (event.action == MotionEvent.ACTION_UP && viewModel.audioRecorderController?.isRecording() == true) {
                     sendRecording()
                 }
                 return@setOnTouchListener true
@@ -1103,6 +1103,10 @@ abstract class ChatFragment<
                     textViewChatFooterSend.isEnabled = viewState.messagingEnabled
                     textViewChatFooterAttachment.isEnabled = viewState.messagingEnabled
                     root.alpha = if (viewState.messagingEnabled) 1.0f else 0.4f
+
+                    if (viewState is FooterViewState.RecordingAudioAttachment) {
+                        textViewRecordingTimer.text = viewState.duration.toTimestamp()
+                    }
                 }
             }
         }
@@ -1317,41 +1321,29 @@ abstract class ChatFragment<
     }
 
     private fun startRecording() {
-        viewModel.recorder = SphinxMediaRecorder(viewModel.mediaCacheHandler).apply {
-            try {
-                startAudioRecording()
-            } catch (e: IOException) {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.submitSideEffect(
-                        ChatSideEffect.Notify("Failed to start recording")
-                    )
-                }
-            }
-            viewModel.updateFooterViewState(
-                FooterViewState.RecordAudioAttachment
-            )
-        }
+        viewModel.audioRecorderController.startAudioRecording()
     }
 
     private fun sendRecording() {
-        viewModel.recorder?.stopAudioRecording()
-        viewModel.recorder?.recordingTempFile?.let {
+        viewModel.audioRecorderController.stopAudioRecording()
+        viewModel.audioRecorderController.recordingTempFile?.let {
             sendMessageBuilder.setAttachmentInfo(
                 AttachmentInfo(
                     file = it,
-                    mediaType = MediaType.Audio("audio/m4a"),
+                    mediaType = MediaType.Audio(AudioRecorderController.AUDIO_FORMAT_MIME_TYPE),
                     isLocalFile = true,
                 )
             )
 
             viewModel.sendMessage(sendMessageBuilder)?.let {
                 // if it did not return null that means it was valid
+                viewModel.audioRecorderController.clear()
                 viewModel.updateFooterViewState(FooterViewState.Default)
 
                 sendMessageBuilder.clear()
                 viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
             }
+
         }
-        viewModel.recorder = null
     }
 }
