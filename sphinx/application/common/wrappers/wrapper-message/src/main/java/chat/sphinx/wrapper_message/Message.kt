@@ -246,6 +246,9 @@ inline val Message.isPodcastBoost: Boolean
 inline val Message.isExpiredInvoice: Boolean
     get() = type.isInvoice() && !status.isConfirmed() && expirationDate != null && expirationDate!!.time < System.currentTimeMillis()
 
+inline val Message.isPaidInvoice: Boolean
+    get() = type.isInvoice() && status.isConfirmed()
+
 abstract class Message {
     abstract val id: MessageId
     abstract val uuid: MessageUUID?

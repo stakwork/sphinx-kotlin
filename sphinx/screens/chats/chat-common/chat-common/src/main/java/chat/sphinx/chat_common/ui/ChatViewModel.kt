@@ -263,10 +263,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     abstract suspend fun getInitialHolderViewStateForReceivedMessage(
-        message: Message
+        message: Message,
+        owner: Contact
     ): InitialHolderViewState
 
-    private suspend fun getOwner(): Contact {
+    protected suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
@@ -361,7 +362,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                     groupingDate = groupingDateAndBubbleBackground.first
 
-                    if (message.sender == chat.contactIds.firstOrNull()) {
+                    val isOutgoing = message.sender == chat.contactIds.firstOrNull()
+
+                    if (
+                        (isOutgoing && !message.isPaidInvoice) ||
+                        (!isOutgoing && message.isPaidInvoice)
+                    ) {
+                        
                         newList.add(
                             MessageHolderViewState.Sent(
                                 message,
@@ -444,7 +451,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         InitialHolderViewState.None
                                     }
                                     else -> {
-                                        getInitialHolderViewStateForReceivedMessage(message)
+                                        getInitialHolderViewStateForReceivedMessage(message, owner)
                                     }
                                 },
                                 messageSenderInfo = { messageCallback ->

@@ -180,7 +180,18 @@ internal class ChatContactViewModel @Inject constructor(
         }
     }
 
-    override suspend fun getInitialHolderViewStateForReceivedMessage(message: Message): InitialHolderViewState {
+    override suspend fun getInitialHolderViewStateForReceivedMessage(message: Message, owner: Contact): InitialHolderViewState {
+        if (message.sender == owner.id) {
+            owner.photoUrl?.let { photoUrl ->
+                return InitialHolderViewState.Url(photoUrl)
+            } ?: owner.alias?.let { alias ->
+                return InitialHolderViewState.Initials(
+                    alias.value.getInitials(),
+                    owner.getColorKey()
+                )
+            }
+        }
+
         headerInitialHolderSharedFlow.replayCache.firstOrNull()?.let { initialHolder ->
             if (initialHolder !is InitialHolderViewState.None) {
                 return initialHolder
