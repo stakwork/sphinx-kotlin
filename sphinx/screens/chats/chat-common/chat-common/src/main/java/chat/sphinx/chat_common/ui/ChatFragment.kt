@@ -5,9 +5,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
-import android.view.MotionEvent
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.MotionEvent
 import android.view.View
 import android.view.Window
 import android.widget.ImageView
@@ -158,7 +158,7 @@ abstract class ChatFragment<
         }
     }
 
-    private var recorder: SphinxMediaRecorder? = null
+    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -381,7 +381,7 @@ abstract class ChatFragment<
 
             imageViewChatFooterMicrophone.setOnTouchListener { v, event ->
                 v.onTouchEvent(event)
-                if (event.action == MotionEvent.ACTION_UP && recorder?.isRecording() == true) {
+                if (event.action == MotionEvent.ACTION_UP && viewModel.recorder?.isRecording() == true) {
                     sendRecording()
                 }
                 return@setOnTouchListener true
@@ -1317,7 +1317,7 @@ abstract class ChatFragment<
     }
 
     private fun startRecording() {
-        recorder = SphinxMediaRecorder(viewModel.mediaCacheHandler).apply {
+        viewModel.recorder = SphinxMediaRecorder(viewModel.mediaCacheHandler).apply {
             try {
                 startAudioRecording()
             } catch (e: IOException) {
@@ -1334,8 +1334,8 @@ abstract class ChatFragment<
     }
 
     private fun sendRecording() {
-        recorder?.stopAudioRecording()
-        recorder?.recordingTempFile?.let {
+        viewModel.recorder?.stopAudioRecording()
+        viewModel.recorder?.recordingTempFile?.let {
             sendMessageBuilder.setAttachmentInfo(
                 AttachmentInfo(
                     file = it,
@@ -1352,13 +1352,6 @@ abstract class ChatFragment<
                 viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
             }
         }
-        recorder = null
+        viewModel.recorder = null
     }
-
-    override fun onStop() {
-        super.onStop()
-        recorder?.release()
-        recorder = null
-    }
-
 }

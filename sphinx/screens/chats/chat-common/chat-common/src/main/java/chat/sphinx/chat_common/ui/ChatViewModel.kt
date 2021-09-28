@@ -142,6 +142,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .build()
     }
 
+    var recorder: SphinxMediaRecorder? = null
+
     val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
         ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
     }
