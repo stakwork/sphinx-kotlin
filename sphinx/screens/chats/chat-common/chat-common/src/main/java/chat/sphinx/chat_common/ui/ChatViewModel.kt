@@ -1276,6 +1276,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         )
     }
 
+    fun stopAndDeleteAudioRecording() {
+        audioRecorderController.stopAndDeleteAudioRecording()
+        updateFooterViewState(FooterViewState.Default)
+    }
+
     fun goToChatDetailScreen() {
         audioPlayerController.pauseMediaIfPlaying()
         navigateToChatDetailScreen()

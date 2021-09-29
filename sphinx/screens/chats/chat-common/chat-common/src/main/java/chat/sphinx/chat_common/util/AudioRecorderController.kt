@@ -63,6 +63,7 @@ class AudioRecorderController<ARGS : NavArgs>(
         cancelDispatchJob()
         // TODO: Delete audio recording
         clear()
+
     }
 
     fun isRecording(): Boolean {

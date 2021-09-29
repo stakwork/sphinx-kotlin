@@ -7,9 +7,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.MotionEvent
-import android.view.View
-import android.view.Window
+import android.view.*
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -45,6 +43,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
+import chat.sphinx.chat_common.ui.widgets.SlideToCancelImageView
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
 import chat.sphinx.chat_common.util.AudioRecorderController
 import chat.sphinx.concept_image_loader.Disposable
@@ -100,7 +99,7 @@ abstract class ChatFragment<
         ChatMenuViewState,
         VM,
         VB
-        >(layoutId), ChatSideEffectFragment
+        >(layoutId), ChatSideEffectFragment, SlideToCancelImageView.SlideToCancelListener
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
@@ -370,23 +369,17 @@ abstract class ChatFragment<
                 }
             }
 
+            imageViewChatFooterMicrophone.slideToCancelListener = this@ChatFragment
             imageViewChatFooterMicrophone.setOnLongClickListener {
-                if (isRecordingPermissionsGranted()) {
-                    startRecording()
-                } else {
-                    requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                if (!viewModel.audioRecorderController.isRecording()) {
+                    if (isRecordingPermissionsGranted()) {
+                        startRecording()
+                    } else {
+                        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
                 }
                 return@setOnLongClickListener true
             }
-
-            imageViewChatFooterMicrophone.setOnTouchListener { v, event ->
-                v.onTouchEvent(event)
-                if (event.action == MotionEvent.ACTION_UP && viewModel.audioRecorderController?.isRecording() == true) {
-                    sendRecording()
-                }
-                return@setOnTouchListener true
-            }
-
             textViewChatFooterAttachment.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     editTextChatFooter.let { editText ->
@@ -1106,6 +1099,8 @@ abstract class ChatFragment<
 
                     if (viewState is FooterViewState.RecordingAudioAttachment) {
                         textViewRecordingTimer.text = viewState.duration.toTimestamp()
+                    } else {
+                        layoutConstraintChatFooterActions.translationX = 0f
                     }
                 }
             }
@@ -1324,7 +1319,23 @@ abstract class ChatFragment<
         viewModel.audioRecorderController.startAudioRecording()
     }
 
-    private fun sendRecording() {
+    override fun slidableView(): View {
+        return footerBinding.layoutConstraintChatFooterActions
+    }
+
+    override fun isActive(): Boolean {
+        return viewModel.audioRecorderController.isRecording()
+    }
+
+    override fun thresholdX(): Float {
+        return footerBinding.textViewRecordingSlideToCancel.x
+    }
+
+    override fun onSlideToCancel() {
+        viewModel.stopAndDeleteAudioRecording()
+    }
+
+    override fun onInteractionComplete() {
         viewModel.audioRecorderController.stopAudioRecording()
         viewModel.audioRecorderController.recordingTempFile?.let {
             sendMessageBuilder.setAttachmentInfo(
