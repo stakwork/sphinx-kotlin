@@ -77,12 +77,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 when {
                     old is MessageHolderViewState.Received && new is MessageHolderViewState.Received -> {
-                        old.background == new.background        &&
-                        old.message    == new.message
+                        old.background                         == new.background        &&
+                        old.message                            == new.message           &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
                     }
                     old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
-                        old.background == new.background        &&
-                        old.message    == new.message
+                        old.background                         == new.background        &&
+                        old.message                            == new.message           &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
                     }
                     else -> {
                         false
