@@ -398,19 +398,19 @@ internal inline fun LayoutMessageHolderBinding.setBubbleInvoiceLayout(
             root.visible
 
             includeMessageInvoiceDottedLinesHolder.apply {
-                viewInvoiceBottomLeftLine.goneIfFalse(invoice.showReceived && invoice.isPaid)
-                viewInvoiceBottomRightLine.goneIfFalse(invoice.showSent && invoice.isPaid)
+                viewInvoiceBottomLeftLine.goneIfFalse(invoice.showReceived && invoice.showPaidInvoiceBottomLine)
+                viewInvoiceBottomRightLine.goneIfFalse(invoice.showSent && invoice.showPaidInvoiceBottomLine)
             }
 
             //Pending invoices shows with no bubble but dashed border line. Arrows can't be hide
-            //since status header is visible and they are needed for constarints
-            if (!invoice.isExpired && !invoice.isPaid) {
+            //since status header is visible and they are needed for constraints
+            if (invoice.hideBubbleArrows) {
                 receivedBubbleArrow.visibility = View.INVISIBLE
                 sentBubbleArrow.visibility = View.INVISIBLE
             }
 
-            layoutConstraintPayButtonContainer.goneIfFalse(!invoice.isExpired && !invoice.isPaid && invoice.showReceived)
-            layoutConstraintInvoiceDashedBorder.goneIfFalse(!invoice.isExpired && !invoice.isPaid)
+            layoutConstraintPayButtonContainer.goneIfFalse(invoice.showPayButton)
+            layoutConstraintInvoiceDashedBorder.goneIfFalse(invoice.showDashedBorder)
 
             viewInvoiceDashedBorder.background = AppCompatResources.getDrawable(
                 root.context,
@@ -419,7 +419,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleInvoiceLayout(
 
             imageViewQrIconLeading.setImageDrawable(
                 AppCompatResources.getDrawable(root.context,
-                    if (invoice.isExpired) {
+                    if (invoice.showExpiredLayout) {
                         R.drawable.qr_code_error
                     } else {
                         R.drawable.ic_qr_code
@@ -434,7 +434,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleInvoiceLayout(
             textViewInvoiceMessage.goneIfFalse(invoice.text.isNotEmpty())
 
             val amountAndUnitColor = ContextCompat.getColor(root.context,
-                if (invoice.isExpired) {
+                if (invoice.showExpiredLayout) {
                     if (invoice.showReceived) R.color.washedOutReceivedText else R.color.washedOutSentText
                 } else {
                     R.color.text
@@ -633,18 +633,22 @@ internal inline fun LayoutMessageHolderBinding.setInvoiceExpirationHeader(
         } else {
             root.visible
 
-            layoutConstraintInvoiceExpirationReceivedContainer.goneIfFalse(!invoiceExpirationHeader.isPaid && invoiceExpirationHeader.showReceived)
-            layoutConstraintInvoiceExpirationSentContainer.goneIfFalse(!invoiceExpirationHeader.isPaid && invoiceExpirationHeader.showSent)
+            layoutConstraintInvoiceExpirationReceivedContainer.goneIfFalse(invoiceExpirationHeader.showExpirationReceivedHeader)
+            layoutConstraintInvoiceExpirationSentContainer.goneIfFalse(invoiceExpirationHeader.showExpirationSentHeader)
 
-            val expirationText = if (invoiceExpirationHeader.isExpired) {
-                getString(R.string.request_expired)
-            } else if (!invoiceExpirationHeader.isPaid) {
-                root.context.getString(
-                    R.string.request_expiration,
-                    invoiceExpirationHeader.expirationTimestamp ?: "-"
-                )
-            } else {
-                ""
+            val expirationText = when {
+                invoiceExpirationHeader.showExpiredLabel -> {
+                    getString(R.string.request_expired)
+                }
+                invoiceExpirationHeader.showExpiresAtLabel -> {
+                    root.context.getString(
+                        R.string.request_expiration,
+                        invoiceExpirationHeader.expirationTimestamp ?: "-"
+                    )
+                }
+                else -> {
+                    ""
+                }
             }
 
             textViewInvoiceExpirationReceivedText.text = expirationText
@@ -688,8 +692,8 @@ internal fun LayoutMessageHolderBinding.setInvoiceDottedLinesLayout(
             viewInvoiceBottomLeftLine.gone
             viewInvoiceBottomRightLine.gone
         } else {
-            viewInvoiceBottomLeftLine.goneIfFalse(invoice.showReceived && invoice.isPaid)
-            viewInvoiceBottomRightLine.goneIfFalse(invoice.showSent && invoice.isPaid)
+            viewInvoiceBottomLeftLine.goneIfFalse(invoice.showReceived && invoice.showPaidInvoiceBottomLine)
+            viewInvoiceBottomRightLine.goneIfFalse(invoice.showSent && invoice.showPaidInvoiceBottomLine)
         }
     }
 

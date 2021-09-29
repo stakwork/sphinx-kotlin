@@ -32,14 +32,12 @@ internal sealed class LayoutState private constructor() {
     }
 
     data class InvoiceExpirationHeader(
-        val isExpired: Boolean,
-        val isPaid: Boolean,
+        val showExpirationReceivedHeader: Boolean,
+        val showExpirationSentHeader: Boolean,
+        val showExpiredLabel: Boolean,
+        val showExpiresAtLabel: Boolean,
         val expirationTimestamp: String?,
-        val showSent: Boolean,
-    ): LayoutState() {
-        val showReceived: Boolean
-            get() = !showSent
-    }
+    ): LayoutState()
 
     data class GroupActionIndicator(
         val actionType: MessageType.GroupAction,
@@ -105,8 +103,11 @@ internal sealed class LayoutState private constructor() {
                 val showSent: Boolean,
                 val amount: Sat,
                 val text: String,
-                val isExpired: Boolean,
-                val isPaid: Boolean,
+                val showPaidInvoiceBottomLine: Boolean,
+                val hideBubbleArrows: Boolean,
+                val showPayButton: Boolean,
+                val showDashedBorder: Boolean,
+                val showExpiredLayout: Boolean,
             ): ContainerSecond() {
                 val showReceived: Boolean
                     get() = !showSent

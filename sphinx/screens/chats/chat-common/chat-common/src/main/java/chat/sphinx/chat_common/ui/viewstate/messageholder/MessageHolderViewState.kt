@@ -106,10 +106,11 @@ internal sealed class MessageHolderViewState(
     val invoiceExpirationHeader: LayoutState.InvoiceExpirationHeader? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isInvoice() && !message.status.isDeleted()) {
             LayoutState.InvoiceExpirationHeader(
-                message.isExpiredInvoice,
-                message.status.isConfirmed(),
-                message.expirationDate?.invoiceExpirationTimeFormat(),
-                this is Sent,
+                showExpirationReceivedHeader = !message.isPaidInvoice && this is Received,
+                showExpirationSentHeader = !message.isPaidInvoice && this is Sent,
+                showExpiredLabel = message.isExpiredInvoice,
+                showExpiresAtLabel = !message.isExpiredInvoice && !message.isPaidInvoice,
+                expirationTimestamp = message.expirationDate?.invoiceExpirationTimeFormat(),
             )
         } else {
             null
@@ -152,8 +153,11 @@ internal sealed class MessageHolderViewState(
                 showSent = this is Sent,
                 amount = message.amount,
                 text = message.retrieveInvoiceTextToShow() ?: "",
-                isExpired = message.isExpiredInvoice,
-                isPaid = message.status.isConfirmed(),
+                showPaidInvoiceBottomLine = message.isPaidInvoice,
+                hideBubbleArrows = !message.isExpiredInvoice && !message.isPaidInvoice,
+                showPayButton = !message.isExpiredInvoice && !message.isPaidInvoice && this is Received,
+                showDashedBorder = !message.isExpiredInvoice && !message.isPaidInvoice,
+                showExpiredLayout = message.isExpiredInvoice
             )
         } else {
             null
