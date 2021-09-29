@@ -103,6 +103,7 @@ abstract class ChatFragment<
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val recordingCircleBinding: LayoutChatRecordingCircleBinding
     protected abstract val replyingMessageBinding: LayoutMessageReplyBinding
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
@@ -301,6 +302,10 @@ abstract class ChatFragment<
             ).build()
 
         callMenuBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+
+        recordingCircleBinding.apply {
             insetterActivity.addNavigationBarPadding(root)
         }
 
@@ -1086,7 +1091,6 @@ abstract class ChatFragment<
                 footerBinding.apply {
                     editTextChatFooter.hint = getString(viewState.hintTextStringId)
 
-                    editTextChatFooter.goneIfTrue(viewState.recordingEnabled)
                     layoutConstraintChatFooterRecordingActions.goneIfFalse(viewState.recordingEnabled)
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
@@ -1095,13 +1099,16 @@ abstract class ChatFragment<
                     editTextChatFooter.isEnabled = viewState.messagingEnabled
                     textViewChatFooterSend.isEnabled = viewState.messagingEnabled
                     textViewChatFooterAttachment.isEnabled = viewState.messagingEnabled
-                    root.alpha = if (viewState.messagingEnabled) 1.0f else 0.4f
 
                     if (viewState is FooterViewState.RecordingAudioAttachment) {
                         textViewRecordingTimer.text = viewState.duration.toTimestamp()
                     } else {
                         layoutConstraintChatFooterActions.translationX = 0f
                     }
+                }
+
+                recordingCircleBinding.apply {
+                    root.goneIfFalse(viewState.recordingEnabled)
                 }
             }
         }
@@ -1317,10 +1324,6 @@ abstract class ChatFragment<
 
     private fun startRecording() {
         viewModel.audioRecorderController.startAudioRecording()
-    }
-
-    override fun slidableView(): View {
-        return footerBinding.layoutConstraintChatFooterActions
     }
 
     override fun isActive(): Boolean {

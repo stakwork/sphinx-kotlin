@@ -45,6 +45,16 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <include
+        android:id="@+id/include_chat_recording_circle"
+        layout="@layout/layout_chat_recording_circle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/include_chat_group_footer"
+        app:layout_constraintTop_toTopOf="@+id/include_chat_group_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
         android:id="@+id/include_chat_group_selected_message"
         layout="@layout/layout_selected_message"
         tools:visibility="gone" />

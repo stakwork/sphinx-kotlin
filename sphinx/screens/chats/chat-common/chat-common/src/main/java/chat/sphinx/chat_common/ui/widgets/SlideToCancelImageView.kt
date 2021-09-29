@@ -27,11 +27,8 @@ class SlideToCancelImageView : AppCompatImageView {
         ): Boolean {
             slideToCancelListener?.let { slideToCancelListener ->
                 if (slideToCancelListener.isActive()) {
-                    slideToCancelListener.slidableView().let { slidableView ->
-                        slidableView.translationX = e2.rawX - e1.x - (slidableView.x ?: x)
-                        if (slideToCancelListener.thresholdX() > e2.rawX) {
-                            slideToCancelListener.onSlideToCancel()
-                        }
+                    if (slideToCancelListener.thresholdX() > e2.rawX) {
+                        slideToCancelListener.onSlideToCancel()
                     }
 
                 }
@@ -46,7 +43,6 @@ class SlideToCancelImageView : AppCompatImageView {
     }
 
     interface SlideToCancelListener {
-        fun slidableView(): View
         fun isActive(): Boolean
         fun thresholdX(): Float
 
