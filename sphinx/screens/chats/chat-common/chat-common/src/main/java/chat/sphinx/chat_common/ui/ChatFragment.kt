@@ -141,23 +141,23 @@ abstract class ChatFragment<
             viewModel.handleActivityResultUri(uri)
         }
 
-    private val requestPermissionLauncher by lazy(LazyThreadSafetyMode.NONE) {
-        registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { granted ->
-            if (granted) {
-                startRecording()
-            } else {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.submitSideEffect(
-                        ChatSideEffect.Notify("Recording permissions required")
-                    )
-                }
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.submitSideEffect(
+                    ChatSideEffect.Notify(getString(R.string.recording_permission_granted))
+                )
+            }
+        } else {
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.submitSideEffect(
+                    ChatSideEffect.Notify(getString(R.string.recording_permission_required))
+                )
             }
         }
     }
-
-    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

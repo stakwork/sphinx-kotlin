@@ -135,4 +135,6 @@
     <string name="bottom_menu_call_option_audio">語音</string>
     <string name="bottom_menu_call_option_video_or_audio">映像 或 語音</string>
     <string name="slide_to_cancel">&lt;&lt; 滑动取消</string>
+    <string name="recording_permission_granted">授予录音许可</string>
+    <string name="recording_permission_required">需要录制权限</string>
 </resources>
