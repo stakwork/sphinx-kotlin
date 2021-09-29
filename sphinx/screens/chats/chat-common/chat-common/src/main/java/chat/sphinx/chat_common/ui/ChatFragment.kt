@@ -1328,7 +1328,7 @@ abstract class ChatFragment<
     }
 
     override fun thresholdX(): Float {
-        return footerBinding.textViewRecordingSlideToCancel.x
+        return footerBinding.textViewRecordingSlideToCancel.x + footerBinding.textViewRecordingSlideToCancel.measuredWidth
     }
 
     override fun onSlideToCancel() {
