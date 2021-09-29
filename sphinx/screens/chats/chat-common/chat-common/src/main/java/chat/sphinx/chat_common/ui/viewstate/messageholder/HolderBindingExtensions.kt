@@ -114,11 +114,7 @@ internal fun LayoutMessageHolderBinding.setView(
         setBubbleBackground(viewState, recyclerViewWidth)
         setDeletedMessageLayout(viewState.deletedMessage)
         setInvoicePaymentLayout(viewState.invoicePayment)
-        setInvoiceDottedLinesLayout(
-            viewState.invoiceLinesHolderViewState,
-            viewState.invoicePayment,
-            viewState.bubbleInvoice
-        )
+        setInvoiceDottedLinesLayout(viewState)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
 
         if (viewState.background !is BubbleBackground.Gone) {
@@ -683,21 +679,11 @@ internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
 
 @MainThread
 internal fun LayoutMessageHolderBinding.setInvoiceDottedLinesLayout(
-    linesHolderViewState: InvoiceLinesHolderViewState,
-    invoicePayment: LayoutState.InvoicePayment?,
-    invoice: LayoutState.Bubble.ContainerSecond.Invoice?
+    viewState: MessageHolderViewState
 ) {
     includeMessageInvoiceDottedLinesHolder.apply {
-        if (invoicePayment == null) {
-            layoutConstraintInvoicePaymentLeftLine.gone
-            layoutConstraintInvoicePaymentRightLine.gone
-        } else {
-            layoutConstraintInvoicePaymentLeftLine.goneIfFalse(invoicePayment.showReceived)
-            layoutConstraintInvoicePaymentRightLine.goneIfFalse(invoicePayment.showSent)
-        }
-    }
+        val invoice = viewState.bubbleInvoice
 
-    includeMessageInvoiceDottedLinesHolder.apply {
         if (invoice == null) {
             viewInvoiceBottomLeftLine.gone
             viewInvoiceBottomRightLine.gone
@@ -708,8 +694,20 @@ internal fun LayoutMessageHolderBinding.setInvoiceDottedLinesLayout(
     }
 
     includeMessageInvoiceDottedLinesHolder.apply {
-        viewInvoiceLeftLine.goneIfFalse(linesHolderViewState.left)
-        viewInvoiceRightLine.goneIfFalse(linesHolderViewState.right)
+        val invoicePayment = viewState.invoicePayment
+
+        if (invoicePayment == null) {
+            layoutConstraintInvoicePaymentLeftLine.gone
+            layoutConstraintInvoicePaymentRightLine.gone
+        } else {
+            layoutConstraintInvoicePaymentLeftLine.goneIfFalse(invoicePayment.showReceived)
+            layoutConstraintInvoicePaymentRightLine.goneIfFalse(invoicePayment.showSent)
+        }
+    }
+
+    includeMessageInvoiceDottedLinesHolder.apply {
+        viewInvoiceLeftLine.goneIfFalse(viewState.invoiceLinesHolderViewState.left)
+        viewInvoiceRightLine.goneIfFalse(viewState.invoiceLinesHolderViewState.right)
     }
 }
 

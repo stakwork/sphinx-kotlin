@@ -348,8 +348,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             withContext(default) {
 
                 var groupingDate: DateTime? = null
-                var sentPaidInvoicesCount = 0
-                var receivedPaidInvoicesCount = 0
+                var openSentPaidInvoicesCount = 0
+                var openReceivedPaidInvoicesCount = 0
 
                 for ((index, message) in messages.withIndex()) {
 
@@ -369,15 +369,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                     if (message.type.isInvoicePayment()) {
                         if (sent) {
-                            receivedPaidInvoicesCount -= 1
+                            openReceivedPaidInvoicesCount -= 1
                         } else {
-                            sentPaidInvoicesCount -= 1
+                            openSentPaidInvoicesCount -= 1
                         }
                     }
 
                     val invoiceLinesHolderViewState = InvoiceLinesHolderViewState(
-                        sentPaidInvoicesCount > 0,
-                        receivedPaidInvoicesCount > 0
+                        openSentPaidInvoicesCount > 0,
+                        openReceivedPaidInvoicesCount > 0
                     )
 
                     if (
@@ -513,9 +513,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                     if (message.isPaidInvoice) {
                         if (sent) {
-                            sentPaidInvoicesCount += 1
+                            openSentPaidInvoicesCount += 1
                         } else {
-                            receivedPaidInvoicesCount += 1
+                            openReceivedPaidInvoicesCount += 1
                         }
                     }
                 }

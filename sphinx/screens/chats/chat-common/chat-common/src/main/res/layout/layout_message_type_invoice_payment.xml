@@ -17,6 +17,7 @@
         android:lines="1"
         android:textColor="@color/text"
         android:textSize="@dimen/default_text_size_sub_headline"
+        android:background="@color/body"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
