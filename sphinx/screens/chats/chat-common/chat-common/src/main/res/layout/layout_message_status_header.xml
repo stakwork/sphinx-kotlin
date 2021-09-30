@@ -30,6 +30,7 @@
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_caption1"
             android:visibility="gone"
+            android:background="@color/body"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/text_view_message_status_received_timestamp"
             app:layout_constraintHorizontal_bias="0.0"
@@ -49,6 +50,7 @@
             android:lines="1"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_caption1"
+            android:background="@color/body"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/text_view_message_status_received_lock_icon"
             app:layout_constraintHorizontal_bias="0.5"
@@ -73,7 +75,6 @@
             tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <!-- Header for Sent messages -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -144,6 +145,7 @@
             android:lines="1"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_caption1"
+            android:background="@color/body"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/text_view_message_status_sent_lock_icon"

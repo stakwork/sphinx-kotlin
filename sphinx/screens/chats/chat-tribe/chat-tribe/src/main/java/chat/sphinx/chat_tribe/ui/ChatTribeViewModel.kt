@@ -32,6 +32,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -124,7 +125,8 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
     override suspend fun getInitialHolderViewStateForReceivedMessage(
-        message: Message
+        message: Message,
+        owner: Contact
     ): InitialHolderViewState {
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)

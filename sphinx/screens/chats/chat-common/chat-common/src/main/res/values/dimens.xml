@@ -12,6 +12,8 @@
     <dimen name="chat_header_exit_tribe_width">28sp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>
     <dimen name="chat_message_inner_padding">8dp</dimen>
+    <dimen name="chat_message_big_inner_padding">12dp</dimen>
+    <dimen name="chat_message_half_inner_padding">4dp</dimen>
     <dimen name="chat_message_rounded_corner_radius">9dp</dimen>
 
     <dimen name="chat_message_attachment_price_text_size">12sp</dimen>
@@ -54,11 +56,13 @@
     <!-- message_holder_in_photo_holder_xy + 8dp -->
     <dimen name="message_holder_space_width_left">44dp</dimen>
     <dimen name="message_holder_space_width_right">6dp</dimen>
+    <dimen name="message_holder_space_bottom">3dp</dimen>
     <dimen name="message_holder_text_view_padding_end">14dp</dimen>
 
     <!-- Message type heights  -->
     <dimen name="message_type_boost_height">50dp</dimen>
     <dimen name="message_type_podcast_boost_width">180dp</dimen>
+    <dimen name="message_type_expired_invoice_width">210dp</dimen>
     <dimen name="message_type_boost_width">220dp</dimen>
     <dimen name="message_type_direct_payment_height">46dp</dimen>
     <dimen name="message_type_image_attachment_min_height">170dp</dimen>
@@ -84,6 +88,15 @@
     <dimen name="loading_image_progress_xy">50dp</dimen>
     <dimen name="loading_image_label_text_size">10sp</dimen>
 
+    <!-- Invoice Lines and dots-->
+    <dimen name="invoice_dot_xy">6dp</dimen>
+    <dimen name="invoice_line_width">2dp</dimen>
+    <dimen name="invoice_bottom_line_height">20dp</dimen>
+    <dimen name="invoice_dot_top_margin">5dp</dimen>
+    <dimen name="invoice_dot_left_margin">65dp</dimen>
+    <dimen name="invoice_dot_right_margin">25dp</dimen>
+    <dimen name="invoice_line_left_margin">67dp</dimen>
+    <dimen name="invoice_line_right_margin">27dp</dimen>
 
     <!-- Icons -->
     <dimen name="icon_file_attachment_xy">30dp</dimen>
@@ -93,7 +106,6 @@
     <dimen name="icon_play_pause_button_text_size">25sp</dimen>
     <dimen name="paywall_overlay_video_icon_text_size">40sp</dimen>
     <dimen name="icon_message_boost_xy">20dp</dimen>
-
 
     <!-- Link Previews  -->
     <dimen name="web_link_preview_holder_min_height">70dp</dimen>

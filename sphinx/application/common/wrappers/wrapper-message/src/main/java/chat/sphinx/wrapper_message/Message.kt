@@ -1,8 +1,6 @@
 package chat.sphinx.wrapper_message
 
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.Seen
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
@@ -31,7 +29,20 @@ inline fun Message.retrieveTextToShow(): String? =
         if (type.isBotRes()) {
             return null
         }
+        if (type.isInvoice()) {
+            return null
+        }
         decrypted.value
+    }
+
+//Invoice memo shows on a different TextView than messageContent
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveInvoiceTextToShow(): String? =
+    messageContentDecrypted?.let { decrypted ->
+        if (type.isInvoice() && !isExpiredInvoice) {
+            return decrypted.value
+        }
+        return null
     }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -187,7 +198,7 @@ inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.shouldAvoidGrouping(): Boolean {
     return status.isPending() || status.isFailed() || status.isDeleted() ||
-            type.isInvoice() || type.isPayment() || type.isGroupAction()
+            type.isInvoice() || type.isInvoicePayment() || type.isGroupAction()
 }
 
 //Message Actions
@@ -202,7 +213,7 @@ inline val Message.isMediaAttachmentAvailable: Boolean
             (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
-    get() = (this.retrieveTextToShow() ?: "").isNotEmpty()
+    get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()
 
 inline val Message.isReplyAllowed: Boolean
     get() = (type.isAttachment() || type.isMessage() || type.isBotRes()) &&
@@ -228,6 +239,15 @@ inline val Message.isSphinxCallLink: Boolean
 
 inline val Message.isAudioMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isAudio == true
+
+inline val Message.isPodcastBoost: Boolean
+    get() = type.isBoost() && podBoost != null
+
+inline val Message.isExpiredInvoice: Boolean
+    get() = type.isInvoice() && !status.isConfirmed() && expirationDate != null && expirationDate!!.time < System.currentTimeMillis()
+
+inline val Message.isPaidInvoice: Boolean
+    get() = type.isInvoice() && status.isConfirmed()
 
 abstract class Message {
     abstract val id: MessageId
