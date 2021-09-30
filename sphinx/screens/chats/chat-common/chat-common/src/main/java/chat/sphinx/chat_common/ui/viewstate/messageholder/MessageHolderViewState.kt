@@ -9,6 +9,8 @@ import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
+import chat.sphinx.wrapper_common.invoiceExpirationTimeFormat
+import chat.sphinx.wrapper_common.invoicePaymentDateFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
@@ -48,6 +50,7 @@ internal sealed class MessageHolderViewState(
     val message: Message,
     chat: Chat,
     val background: BubbleBackground,
+    val invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
     val initialHolder: InitialHolderViewState,
     private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
     private val accountOwner: () -> Contact,
@@ -60,7 +63,6 @@ internal sealed class MessageHolderViewState(
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
                 MessageType.Attachment,
-                MessageType.Invoice,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
             )
@@ -82,7 +84,10 @@ internal sealed class MessageHolderViewState(
     }
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
-        if (background is BubbleBackground.First) {
+        val isFirstBubble = (background is BubbleBackground.First)
+        val isInvoicePayment = (message.type.isInvoicePayment() && message.status.isConfirmed())
+
+        if (isFirstBubble || isInvoicePayment) {
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 if (initialHolder is InitialHolderViewState.Initials) initialHolder.colorKey else message.getColorKey(),
@@ -92,6 +97,20 @@ internal sealed class MessageHolderViewState(
                 this is Sent && message.status.isFailed(),
                 message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 message.date.chatTimeFormat(),
+            )
+        } else {
+            null
+        }
+    }
+
+    val invoiceExpirationHeader: LayoutState.InvoiceExpirationHeader? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoice() && !message.status.isDeleted()) {
+            LayoutState.InvoiceExpirationHeader(
+                showExpirationReceivedHeader = !message.isPaidInvoice && this is Received,
+                showExpirationSentHeader = !message.isPaidInvoice && this is Sent,
+                showExpiredLabel = message.isExpiredInvoice,
+                showExpiresAtLabel = !message.isExpiredInvoice && !message.isPaidInvoice,
+                expirationTimestamp = message.expirationDate?.invoiceExpirationTimeFormat(),
             )
         } else {
             null
@@ -109,9 +128,37 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val invoicePayment: LayoutState.InvoicePayment? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoicePayment()) {
+            LayoutState.InvoicePayment(
+                showSent = this is Sent,
+                paymentDateString = message.date.invoicePaymentDateFormat()
+            )
+        } else {
+            null
+        }
+    }
+
     val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
             LayoutState.Bubble.ContainerSecond.DirectPayment(showSent = this is Sent, amount = message.amount)
+        } else {
+            null
+        }
+    }
+
+    val bubbleInvoice: LayoutState.Bubble.ContainerSecond.Invoice? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoice()) {
+            LayoutState.Bubble.ContainerSecond.Invoice(
+                showSent = this is Sent,
+                amount = message.amount,
+                text = message.retrieveInvoiceTextToShow() ?: "",
+                showPaidInvoiceBottomLine = message.isPaidInvoice,
+                hideBubbleArrows = !message.isExpiredInvoice && !message.isPaidInvoice,
+                showPayButton = !message.isExpiredInvoice && !message.isPaidInvoice && this is Received,
+                showDashedBorder = !message.isExpiredInvoice && !message.isPaidInvoice,
+                showExpiredLayout = message.isExpiredInvoice
+            )
         } else {
             null
         }
@@ -221,13 +268,6 @@ internal sealed class MessageHolderViewState(
                 null
             }
         }
-//        message.retrieveAudioUrlAndMessageMedia()?.let { mediaData ->
-//            LayoutState.Bubble.ContainerSecond.AudioAttachment(
-//                mediaData.first,
-//                mediaData.second,
-//                (this is Received && message.isPaidPendingMessage)
-//            )
-//        }
     }
 
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
@@ -414,6 +454,7 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
@@ -423,6 +464,7 @@ internal sealed class MessageHolderViewState(
         message,
         chat,
         background,
+        invoiceLinesHolderViewState,
         InitialHolderViewState.None,
         messageSenderInfo,
         accountOwner,
@@ -435,6 +477,7 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         initialHolder: InitialHolderViewState,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
@@ -445,6 +488,7 @@ internal sealed class MessageHolderViewState(
         message,
         chat,
         background,
+        invoiceLinesHolderViewState,
         initialHolder,
         messageSenderInfo,
         accountOwner,

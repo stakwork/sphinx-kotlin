@@ -1,5 +1,8 @@
 # ChangeLog
 
+## Version 1.0.0-alpha26 (2021-09-30)
+ - Adds chat invoices
+
 ## Version 1.0.0-alpha25 (2021-09-24)
  - Adds ability to receive Audio Messages
  - Adds Payment Template functionality

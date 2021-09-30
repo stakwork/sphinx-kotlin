@@ -77,12 +77,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 when {
                     old is MessageHolderViewState.Received && new is MessageHolderViewState.Received -> {
-                        old.background == new.background        &&
-                        old.message    == new.message
+                        old.background                         == new.background        &&
+                        old.message                            == new.message           &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
                     }
                     old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
-                        old.background == new.background        &&
-                        old.message    == new.message
+                        old.background                         == new.background        &&
+                        old.message                            == new.message           &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
                     }
                     else -> {
                         false
@@ -308,6 +310,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     buttonPayAttachment.setOnLongClickListener(selectedMessageLongClickListener)
                 }
 
+                includeMessageTypeInvoice.apply {
+                    buttonPay.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.payInvoice(message)
+                        }
+                    }
+                }
+
                 includeMessageTypeAudioAttachment.apply {
                     textViewAttachmentPlayPauseButton.setOnClickListener {
                         viewModel.audioPlayerController.togglePlayPause(
@@ -316,7 +326,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                     seekBarAttachmentAudio.setOnTouchListener { _, _ -> true }
                 }
-
             }
 
             binding.includeMessageTypeGroupActionHolder.let { holder ->

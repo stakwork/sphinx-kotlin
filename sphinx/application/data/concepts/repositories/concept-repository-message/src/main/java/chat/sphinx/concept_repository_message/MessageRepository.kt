@@ -1,5 +1,6 @@
 package chat.sphinx.concept_repository_message
 
+import chat.sphinx.concept_repository_message.model.SendPaymentRequest
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.kotlin_response.LoadResponse
@@ -54,6 +55,12 @@ interface MessageRepository {
     suspend fun sendPayment(
         sendPayment: SendPayment?
     ): Response<Any, ResponseError>
+
+    suspend fun sendPaymentRequest(
+        requestPayment: SendPaymentRequest
+    ): Response<Any, ResponseError>
+
+    suspend fun payPaymentRequest(message: Message) : Response<Any, ResponseError>
 
     suspend fun boostMessage(
         chatId: ChatId,

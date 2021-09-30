@@ -78,7 +78,7 @@
         <include
             android:id="@+id/include_message_type_invoice"
             layout="@layout/layout_message_type_invoice"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <!--  Podcast boost  -->
         <include
