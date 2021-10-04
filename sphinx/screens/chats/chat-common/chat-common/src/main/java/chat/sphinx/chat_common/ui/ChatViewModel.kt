@@ -1269,9 +1269,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     internal val audioRecorderController: AudioRecorderController<ARGS> by lazy {
         AudioRecorderController(
-            this,
-            viewModelScope,
-            mediaCacheHandler,
+            viewModelScope = viewModelScope,
+            mediaCacheHandler = mediaCacheHandler,
+            updateDurationCallback = { duration ->
+                  updateFooterViewState(
+                      FooterViewState.RecordingAudioAttachment(duration)
+                  )
+            },
             dispatchers
         )
     }

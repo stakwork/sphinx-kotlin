@@ -2,72 +2,82 @@ package chat.sphinx.chat_common.util
 
 import android.media.MediaRecorder
 import androidx.navigation.NavArgs
-import chat.sphinx.chat_common.ui.ChatViewModel
-import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 
-class AudioRecorderController<ARGS : NavArgs>(
-    private val viewModel: ChatViewModel<ARGS>,
+internal class AudioRecorderController<ARGS : NavArgs>(
     private val viewModelScope: CoroutineScope,
-    val mediaCacheHandler: MediaCacheHandler,
-    dispatchers: CoroutineDispatchers,
+    private val mediaCacheHandler: MediaCacheHandler,
+    private val updateDurationCallback: (Long) -> Unit,
+    private val dispatchers: CoroutineDispatchers,
 ): CoroutineDispatchers by dispatchers {
-    var recordingTempFile: File? = null
-    private var recorder: MediaRecorder? = null
+    private val lock = Mutex()
+    var recorderAndFile: Pair<MediaRecorder, File>? = null
+
+    val recordingTempFile: File?
+        get() = recorderAndFile?.second
 
     private var dispatchStateJob: Job? = null
     fun startAudioRecording() {
-        if (dispatchStateJob?.isActive == true) {
-            return
-        }
+        viewModelScope.launch(dispatchers.mainImmediate) {
+            lock.withLock {
+                if (dispatchStateJob?.isActive == true) {
+                    return@launch
+                }
 
-        recorder = MediaRecorder().apply {
-            recordingTempFile  = mediaCacheHandler.createAudioFile(AUDIO_FORMAT_EXTENSION)
-
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-            setOutputFile(recordingTempFile?.absolutePath)
-            setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC)
-
-            prepare()
-
-            start()
-
-            dispatchStateJob = viewModelScope.launch(mainImmediate) {
-                var duration = 0L
-                while (isActive) {
-                    viewModel.updateFooterViewState(
-                        FooterViewState.RecordingAudioAttachment(duration)
+                MediaRecorder().apply {
+                    val recordingTempFile = mediaCacheHandler.createAudioFile(
+                        AUDIO_FORMAT_EXTENSION
+                    ).also { file ->
+                        setAudioSource(MediaRecorder.AudioSource.MIC)
+                        setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
+                        setOutputFile(file.absolutePath)
+                        setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC)
+                    }
+                    recorderAndFile = Pair(
+                        this,
+                        recordingTempFile
                     )
-                    if (!isRecording()) {
-                        break
-                    } else {
-                        duration += 250L
-                        delay(250L)
+
+                    prepare()
+
+                    start()
+
+                    dispatchStateJob = viewModelScope.launch(mainImmediate) {
+                        var duration = 0L
+                        while (isActive) {
+                            updateDurationCallback(duration)
+                            if (!isRecording()) {
+                                break
+                            } else {
+                                duration += 250L
+                                delay(250L)
+                            }
+                        }
                     }
                 }
             }
+
         }
     }
 
     fun stopAudioRecording() {
-        recorder?.stop()
+        recorderAndFile?.first?.stop()
         cancelDispatchJob()
     }
 
     fun stopAndDeleteAudioRecording() {
-        recorder?.stop()
-        cancelDispatchJob()
+        recorderAndFile?.first?.stop()
         // TODO: Delete audio recording
         clear()
-
     }
 
     fun isRecording(): Boolean {
-        return recordingTempFile != null
+        return recorderAndFile != null
     }
 
     private fun cancelDispatchJob() {
@@ -76,11 +86,14 @@ class AudioRecorderController<ARGS : NavArgs>(
     }
 
     fun clear() {
-        dispatchStateJob?.cancel()
-        recorder?.release()
+        viewModelScope.launch(mainImmediate) {
+            lock.withLock {
+                cancelDispatchJob()
+                recorderAndFile?.first?.release()
 
-        recorder = null
-        recordingTempFile = null
+                recorderAndFile = null
+            }
+        }
     }
 
     companion object {

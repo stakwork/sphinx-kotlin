@@ -145,14 +145,12 @@ abstract class ChatFragment<
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
-        if (granted) {
-            lifecycleScope.launch(viewModel.mainImmediate) {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            if (granted) {
                 viewModel.submitSideEffect(
                     ChatSideEffect.Notify(getString(R.string.recording_permission_granted))
                 )
-            }
-        } else {
-            lifecycleScope.launch(viewModel.mainImmediate) {
+            } else {
                 viewModel.submitSideEffect(
                     ChatSideEffect.Notify(getString(R.string.recording_permission_required))
                 )
@@ -1351,13 +1349,12 @@ abstract class ChatFragment<
 
             viewModel.sendMessage(sendMessageBuilder)?.let {
                 // if it did not return null that means it was valid
-                viewModel.audioRecorderController.clear()
                 viewModel.updateFooterViewState(FooterViewState.Default)
 
                 sendMessageBuilder.clear()
                 viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
             }
-
+            viewModel.audioRecorderController.clear()
         }
     }
 }
