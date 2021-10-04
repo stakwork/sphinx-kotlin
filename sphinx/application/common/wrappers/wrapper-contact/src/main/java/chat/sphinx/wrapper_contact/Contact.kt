@@ -18,6 +18,10 @@ import java.net.URL
 inline fun Contact.isInviteContact(): Boolean =
     status.isPending() && inviteId != null
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Contact.isOnVirtualNode(): Boolean =
+    routeHint != null && routeHint.value.isNotEmpty()
+
 inline val Contact.avatarUrl: URL?
     get() {
         return try {
