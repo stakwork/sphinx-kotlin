@@ -146,15 +146,15 @@ abstract class ChatFragment<
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         lifecycleScope.launch(viewModel.mainImmediate) {
-            if (granted) {
-                viewModel.submitSideEffect(
-                    ChatSideEffect.Notify(getString(R.string.recording_permission_granted))
+            viewModel.submitSideEffect(
+                ChatSideEffect.Notify(
+                    if (granted) {
+                        getString(R.string.recording_permission_granted)
+                    } else {
+                        getString(R.string.recording_permission_required)
+                    }
                 )
-            } else {
-                viewModel.submitSideEffect(
-                    ChatSideEffect.Notify(getString(R.string.recording_permission_required))
-                )
-            }
+            )
         }
     }
 
