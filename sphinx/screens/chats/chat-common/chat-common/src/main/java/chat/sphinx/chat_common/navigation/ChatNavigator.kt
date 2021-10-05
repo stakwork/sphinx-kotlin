@@ -18,6 +18,8 @@ abstract class ChatNavigator(
 {
     abstract suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?)
 
+    abstract suspend fun toPaymentReceiveDetail(contactId: ContactId, chatId: ChatId?)
+
     abstract suspend fun toAddContactDetail(
         pubKey: LightningNodePubKey? = null,
         routeHint: LightningRouteHint? = null

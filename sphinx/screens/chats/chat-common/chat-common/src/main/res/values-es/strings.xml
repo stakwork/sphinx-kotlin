@@ -19,6 +19,13 @@
     <string name="send_message_empty_content_error">Mensaje o Archivo adjunto requeridos</string>
     <string name="send_message_empty_price_error">Precio requerido</string>
 
+    <!--  Message type invoices  -->
+    <string name="request_expired">Solicitud caducada</string>
+    <string name="request_expiration">Expira: %s</string>
+    <string name="invoice_paid_on">Invoice pagado en %s</string>
+    <string name="alert_confirm_pay_chat_invoice_title">Confirmar Pago</string>
+    <string name="alert_confirm_pay_chat_invoice_message">¿Estas seguro de que quieres pagar esta solicitud?</string>
+
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">Mensaje de Archivo</string>
     <string name="placeholder_display_name_message_type_bot_response">Mensaje de Respuesta de Bot</string>

@@ -16,7 +16,7 @@ inline fun MessageType.isInvoice(): Boolean =
     this is MessageType.Invoice
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPayment(): Boolean =
+inline fun MessageType.isInvoicePayment(): Boolean =
     this is MessageType.Payment
 
 @Suppress("NOTHING_TO_INLINE")

@@ -365,6 +365,12 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
         dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID()
     )
+
+    if (dto.type.toMessageType()?.isInvoicePayment()) {
+        dto.payment_hash?.toLightningPaymentHash()?.let {
+            queries.messageUpdateInvoiceAsPaidByPaymentHash(it)
+        }
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")

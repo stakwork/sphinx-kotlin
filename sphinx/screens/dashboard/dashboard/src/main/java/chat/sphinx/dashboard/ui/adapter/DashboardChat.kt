@@ -92,56 +92,11 @@ sealed class DashboardChat {
                 message == null -> {
                     ""
                 }
-                message.messageDecryptionError -> {
-                    context.getString(R.string.decryption_error)
-                }
+
                 message.status.isDeleted() -> {
                     context.getString(R.string.last_message_description_message_deleted)
                 }
-                message.type.isMessage() -> {
-                    message.messageContentDecrypted?.value?.let { decrypted ->
-                        when {
-                            message.giphyData != null -> {
-                                context.getString(
-                                    R.string.last_message_description_gif_shared,
-                                    getMessageSender(message, context)
-                                )
-                            }
-                            message.podBoost != null -> {
-                                val amount: String = (message.podBoost?.amount ?: message.amount)
-                                    .asFormattedString(separator = ',', appendUnit = true)
-
-                                context.getString(
-                                    R.string.last_message_description_boost,
-                                    getMessageSender(message, context),
-                                    amount
-                                )
-                            }
-                            message.isSphinxCallLink -> {
-                                context.getString(
-                                    R.string.last_message_description_call_invite,
-                                    getMessageSender(message, context)
-                                )
-                            }
-                            // TODO: check for clip::
-                            else -> {
-                                "${getMessageSender(message, context)}$decrypted"
-                            }
-                        }
-                    } ?: "${getMessageSender(message, context)}..."
-                }
-                message.type.isInvoice() -> {
-                    val amount: String = message.amount
-                        .asFormattedString(separator = ',', appendUnit = true)
-
-                    if (isMessageSenderSelf(message)) {
-                        context.getString(R.string.last_message_description_invoice_sent, amount)
-                    } else {
-                        context.getString(R.string.last_message_description_invoice_receive, amount)
-                    }
-
-                }
-                message.type.isPayment() || message.type.isDirectPayment() -> {
+                message.type.isInvoicePayment() -> {
                     val amount: String = message.amount
                         .asFormattedString(separator = ',', appendUnit = true)
 
@@ -150,42 +105,6 @@ sealed class DashboardChat {
                     } else {
                         context.getString(R.string.last_message_description_payment_received, amount)
                     }
-                }
-                message.type.isAttachment() -> {
-                    message.messageMedia?.let { media ->
-                        when (val type = media.mediaType) {
-                            is MediaType.Audio -> {
-                                R.string.last_message_description_an_audio_clip
-                            }
-                            is MediaType.Image -> {
-                                if (type.isGif) {
-                                    R.string.last_message_description_a_gif
-                                } else {
-                                    R.string.last_message_description_an_image
-                                }
-                            }
-                            is MediaType.Pdf -> {
-                                R.string.last_message_description_a_pdf
-                            }
-                            is MediaType.Text -> {
-                                R.string.last_message_description_a_paid_message
-                            }
-                            is MediaType.Unknown -> {
-                                R.string.last_message_description_an_attachment
-                            }
-                            is MediaType.Video -> {
-                                R.string.last_message_description_a_video
-                            }
-                            else -> {
-                                null
-                            }
-                        }?.let { stringId ->
-                            val sentString = context.getString(R.string.last_message_description_sent)
-                            val element = context.getString(stringId)
-
-                            "${getMessageSender(message, context,false)} $sentString $element"
-                        }
-                    } ?: ""
                 }
                 message.type.isGroupJoin() -> {
                     context.getString(
@@ -240,6 +159,98 @@ sealed class DashboardChat {
                         getMessageSender(message, context, true),
                         amount
                     )
+                }
+                message.messageDecryptionError -> {
+                    context.getString(R.string.decryption_error)
+                }
+                message.type.isMessage() -> {
+                    message.messageContentDecrypted?.value?.let { decrypted ->
+                        when {
+                            message.giphyData != null -> {
+                                context.getString(
+                                    R.string.last_message_description_gif_shared,
+                                    getMessageSender(message, context)
+                                )
+                            }
+                            message.podBoost != null -> {
+                                val amount: String = (message.podBoost?.amount ?: message.amount)
+                                    .asFormattedString(separator = ',', appendUnit = true)
+
+                                context.getString(
+                                    R.string.last_message_description_boost,
+                                    getMessageSender(message, context),
+                                    amount
+                                )
+                            }
+                            message.isSphinxCallLink -> {
+                                context.getString(
+                                    R.string.last_message_description_call_invite,
+                                    getMessageSender(message, context)
+                                )
+                            }
+                            // TODO: check for clip::
+                            else -> {
+                                "${getMessageSender(message, context)}$decrypted"
+                            }
+                        }
+                    } ?: "${getMessageSender(message, context)}..."
+                }
+                message.type.isInvoice() -> {
+                    val amount: String = message.amount
+                        .asFormattedString(separator = ',', appendUnit = true)
+
+                    if (isMessageSenderSelf(message)) {
+                        context.getString(R.string.last_message_description_invoice_sent, amount)
+                    } else {
+                        context.getString(R.string.last_message_description_invoice_receive, amount)
+                    }
+
+                }
+                message.type.isDirectPayment() -> {
+                    val amount: String = message.amount
+                        .asFormattedString(separator = ',', appendUnit = true)
+
+                    if (isMessageSenderSelf(message)) {
+                        context.getString(R.string.last_message_description_payment_sent, amount)
+                    } else {
+                        context.getString(R.string.last_message_description_payment_received, amount)
+                    }
+                }
+                message.type.isAttachment() -> {
+                    message.messageMedia?.let { media ->
+                        when (val type = media.mediaType) {
+                            is MediaType.Audio -> {
+                                R.string.last_message_description_an_audio_clip
+                            }
+                            is MediaType.Image -> {
+                                if (type.isGif) {
+                                    R.string.last_message_description_a_gif
+                                } else {
+                                    R.string.last_message_description_an_image
+                                }
+                            }
+                            is MediaType.Pdf -> {
+                                R.string.last_message_description_a_pdf
+                            }
+                            is MediaType.Text -> {
+                                R.string.last_message_description_a_paid_message
+                            }
+                            is MediaType.Unknown -> {
+                                R.string.last_message_description_an_attachment
+                            }
+                            is MediaType.Video -> {
+                                R.string.last_message_description_a_video
+                            }
+                            else -> {
+                                null
+                            }
+                        }?.let { stringId ->
+                            val sentString = context.getString(R.string.last_message_description_sent)
+                            val element = context.getString(stringId)
+
+                            "${getMessageSender(message, context,false)} $sentString $element"
+                        }
+                    } ?: ""
                 }
                 else -> {
                     ""

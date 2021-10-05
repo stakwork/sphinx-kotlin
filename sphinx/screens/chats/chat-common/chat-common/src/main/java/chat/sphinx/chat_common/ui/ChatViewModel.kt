@@ -34,6 +34,7 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
+import chat.sphinx.chat_common.ui.viewstate.messageholder.InvoiceLinesHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -265,10 +266,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     abstract suspend fun getInitialHolderViewStateForReceivedMessage(
-        message: Message
+        message: Message,
+        owner: Contact
     ): InitialHolderViewState
 
-    private suspend fun getOwner(): Contact {
+    protected suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
@@ -348,6 +350,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             withContext(default) {
 
                 var groupingDate: DateTime? = null
+                var openSentPaidInvoicesCount = 0
+                var openReceivedPaidInvoicesCount = 0
 
                 for ((index, message) in messages.withIndex()) {
 
@@ -363,13 +367,35 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                     groupingDate = groupingDateAndBubbleBackground.first
 
-                    if (message.sender == chat.contactIds.firstOrNull()) {
+                    val sent = message.sender == chat.contactIds.firstOrNull()
+
+                    if (message.type.isInvoicePayment()) {
+                        if (sent) {
+                            openReceivedPaidInvoicesCount -= 1
+                        } else {
+                            openSentPaidInvoicesCount -= 1
+                        }
+                    }
+
+                    val invoiceLinesHolderViewState = InvoiceLinesHolderViewState(
+                        openSentPaidInvoicesCount > 0,
+                        openReceivedPaidInvoicesCount > 0
+                    )
+
+                    if (
+                        (sent && !message.isPaidInvoice) ||
+                        (!sent && message.isPaidInvoice)
+                    ) {
+
                         newList.add(
                             MessageHolderViewState.Sent(
                                 message,
                                 chat,
                                 background =  when {
                                     message.status.isDeleted() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
+                                    message.type.isInvoicePayment() -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
                                     }
                                     message.type.isGroupAction() -> {
@@ -379,6 +405,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         groupingDateAndBubbleBackground.second
                                     }
                                 },
+                                invoiceLinesHolderViewState = invoiceLinesHolderViewState,
                                 messageSenderInfo = { messageCallback ->
                                     when {
                                         messageCallback.sender == chat.contactIds.firstOrNull() -> {
@@ -428,6 +455,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     isDeleted -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
                                     }
+                                    message.type.isInvoicePayment() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
                                     message.type.isGroupAction() -> {
                                         BubbleBackground.Gone(setSpacingEqual = true)
                                     }
@@ -435,13 +465,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         groupingDateAndBubbleBackground.second
                                     }
                                 },
+                                invoiceLinesHolderViewState = invoiceLinesHolderViewState,
                                 initialHolder = when {
-                                    isDeleted ||
-                                            message.type.isGroupAction() -> {
+                                    isDeleted || message.type.isGroupAction() -> {
                                         InitialHolderViewState.None
                                     }
                                     else -> {
-                                        getInitialHolderViewStateForReceivedMessage(message)
+                                        getInitialHolderViewStateForReceivedMessage(message, owner)
                                     }
                                 },
                                 messageSenderInfo = { messageCallback ->
@@ -481,6 +511,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 }
                             )
                         )
+                    }
+
+                    if (message.isPaidInvoice) {
+                        if (sent) {
+                            openSentPaidInvoicesCount += 1
+                        } else {
+                            openReceivedPaidInvoicesCount += 1
+                        }
                     }
                 }
             }
@@ -1092,10 +1130,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     @JvmSynthetic
     internal fun chatMenuOptionPaymentRequest() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                ChatSideEffect.Notify("Request amount not implemented yet")
-            )
+        contactId?.let { id ->
+            viewModelScope.launch(mainImmediate) {
+                audioPlayerController.pauseMediaIfPlaying()
+                chatNavigator.toPaymentReceiveDetail(id, chatId)
+            }
+            updateViewState(ChatMenuViewState.Closed)
         }
     }
 
@@ -1421,7 +1461,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             return
         }
 
-
         val sideEffect = ChatSideEffect.AlertConfirmPayAttachment {
             payAttachmentJob = viewModelScope.launch(mainImmediate) {
 
@@ -1433,6 +1472,32 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     is Response.Success -> {
                         // give time for DB to push new data to render to screen
                         // to inhibit firing of another payAttachment
+                        delay(100L)
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(sideEffect)
+        }
+    }
+
+    private var payInvoiceJob: Job? = null
+    fun payInvoice(message: Message) {
+        if (payInvoiceJob?.isActive == true) {
+            return
+        }
+
+        val sideEffect = ChatSideEffect.AlertConfirmPayInvoice {
+            payInvoiceJob = viewModelScope.launch(mainImmediate) {
+
+                @Exhaustive
+                when (val response = messageRepository.payPaymentRequest(message)) {
+                    is Response.Error -> {
+                        submitSideEffect(ChatSideEffect.Notify(response.cause.message))
+                    }
+                    is Response.Success -> {
                         delay(100L)
                     }
                 }

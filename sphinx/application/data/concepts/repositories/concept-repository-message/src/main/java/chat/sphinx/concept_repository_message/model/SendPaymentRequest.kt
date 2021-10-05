@@ -1,9 +1,9 @@
-package chat.sphinx.concept_repository_lightning.model
+package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 
-class RequestPayment private constructor(
+class SendPaymentRequest private constructor(
     val chatId: ChatId?,
     val contactId: ContactId?,
     val memo: String?,
@@ -60,11 +60,11 @@ class RequestPayment private constructor(
         }
 
         @Synchronized
-        fun build(): RequestPayment? =
+        fun build(): SendPaymentRequest? =
             if (!isValid) {
                 null
             } else {
-                RequestPayment(
+                SendPaymentRequest(
                     chatId,
                     contactId,
                     memo,

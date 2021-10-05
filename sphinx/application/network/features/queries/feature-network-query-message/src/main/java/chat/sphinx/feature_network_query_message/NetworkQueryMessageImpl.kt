@@ -9,6 +9,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
@@ -38,6 +39,7 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_PAYMENT = "/payment"
         private const val ENDPOINT_PAYMENTS = "${ENDPOINT_PAYMENT}s"
         private const val ENDPOINT_PAY_ATTACHMENT = "/purchase"
+        private const val ENDPOINT_INVOICES = "/invoices"
     }
 
     override fun getMessages(
@@ -86,6 +88,30 @@ class NetworkQueryMessageImpl(
             relayEndpoint = ENDPOINT_PAYMENT,
             requestBodyJsonClass = PostPaymentDto::class.java,
             requestBody = postPaymentDto,
+            relayData = relayData
+        )
+
+    override fun sendPaymentRequest(
+        postPaymentRequestDto: PostPaymentRequestDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_INVOICES,
+            requestBodyJsonClass = PostPaymentRequestDto::class.java,
+            requestBody = postPaymentRequestDto,
+            relayData = relayData
+        )
+
+    override fun payPaymentRequest(
+        putPaymentRequestDto: PutPaymentRequestDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_INVOICES,
+            requestBodyJsonClass = PutPaymentRequestDto::class.java,
+            requestBody = putPaymentRequestDto,
             relayData = relayData
         )
 
