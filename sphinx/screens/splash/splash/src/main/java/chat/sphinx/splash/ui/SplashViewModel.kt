@@ -90,7 +90,7 @@ internal class SplashViewModel @Inject constructor(
 
                 @Exhaustive
                 when (onBoardStep) {
-                    is OnBoardStep.Step1_Welcome -> {
+                    is OnBoardStep.Step1_WelcomeMessage -> {
                         navigator.toOnBoardScreen(onBoardStep)
                     }
                     is OnBoardStep.Step2_Name -> {
@@ -127,7 +127,7 @@ internal class SplashViewModel @Inject constructor(
 
                                 @Exhaustive
                                 when (onBoardStep) {
-                                    is OnBoardStep.Step1_Welcome -> {
+                                    is OnBoardStep.Step1_WelcomeMessage -> {
                                         navigator.toOnBoardScreen(onBoardStep)
                                     }
                                     is OnBoardStep.Step2_Name -> {
@@ -154,7 +154,7 @@ internal class SplashViewModel @Inject constructor(
 
                     @Exhaustive
                     when (onBoardStep) {
-                        is OnBoardStep.Step1_Welcome -> {
+                        is OnBoardStep.Step1_WelcomeMessage -> {
                             navigator.toOnBoardScreen(onBoardStep)
                         }
                         is OnBoardStep.Step2_Name -> {
@@ -168,8 +168,10 @@ internal class SplashViewModel @Inject constructor(
                         }
                         null -> {
                             // Display OnBoard
-                            delay(100L) // need a slight delay for window to fully hand over to splash
-                            updateViewState(SplashViewState.Transition_Set2_ShowWelcome)
+                            delay(1000L) // need a slight delay for window to fully hand over to splash
+                            navigator.toOnBoardWelcome()
+
+//                            updateViewState(SplashViewState.Transition_Set2_ShowWelcome)
                         }
                     }
 
@@ -312,17 +314,17 @@ internal class SplashViewModel @Inject constructor(
                 }
                 is Response.Success -> {
 
-                    val step1: OnBoardStep.Step1_Welcome? = onBoardStepHandler.persistOnBoardStep1Data(
+                    val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
                         relayUrl,
                         authToken,
                         inviterData
                     )
 
-                    if (step1 == null) {
+                    if (step1Message == null) {
                         updateViewState(SplashViewState.HideLoadingWheel)
                         submitSideEffect(SplashSideEffect.GenerateTokenFailed)
                     } else {
-                        navigator.toOnBoardScreen(step1)
+                        navigator.toOnBoardScreen(step1Message)
                     }
 
                 }

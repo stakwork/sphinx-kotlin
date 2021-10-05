@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="on_board_welcome_button_height">62dp</dimen>
+    <dimen name="on_board_welcome_title_text_size">30sp</dimen>
+    <dimen name="on_board_welcome_title_margin_bottom">80dp</dimen>
+    <dimen name="on_board_welcome_button_text_size">17sp</dimen>
+
     <dimen name="on_board_welcome_message_invited_to_sphinx_text_size">25sp</dimen>
     <dimen name="on_board_welcome_message_inviter_name_text_size">20sp</dimen>
     <dimen name="on_board_welcome_message_inviter_message_text_size">17sp</dimen>

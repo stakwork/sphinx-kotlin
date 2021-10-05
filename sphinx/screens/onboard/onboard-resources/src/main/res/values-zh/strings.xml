@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="on_board_welcome">歡迎</string>
+    <string name="on_board_new_user">New User</string>
+    <string name="on_board_existing_user">Existing User</string>
+
     <string name="on_board_finish_button">完成</string>
     <string name="on_board_next_button">下一步</string>
 

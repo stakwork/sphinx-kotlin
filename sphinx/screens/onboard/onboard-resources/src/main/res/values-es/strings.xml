@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="on_board_welcome">Bienvenido</string>
+    <string name="on_board_new_user">Nuevo Usuario</string>
+    <string name="on_board_existing_user">Usuario Existente</string>
+
     <string name="on_board_finish_button">Terminar</string>
     <string name="on_board_next_button">Siguiente</string>
 

@@ -27,6 +27,7 @@ import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
+import chat.sphinx.onboard_welcome.navigation.OnBoardWelcomeNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
 import chat.sphinx.payment_template.navigation.PaymentTemplateNavigator
@@ -134,6 +135,12 @@ internal object NavigationModule {
         onBoardNavigatorImpl: OnBoardNavigatorImpl
     ): OnBoardNavigator =
         onBoardNavigatorImpl
+
+    @Provides
+    fun provideOnBoardWelcomeNavigator(
+        onBoardWelcomeNavigatorImpl: OnBoardWelcomeNavigatorImpl
+    ): OnBoardWelcomeNavigator =
+        onBoardWelcomeNavigatorImpl
 
     @Provides
     fun provideOnBoardNameNavigator(
