@@ -6,11 +6,17 @@
     android:layout_height="match_parent"
     android:background="@color/body">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_chats"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/swipeContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/layout_dashboard_chat_holder" />
+        android:layout_height="match_parent">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_chats"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/layout_dashboard_chat_holder" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="match_parent"

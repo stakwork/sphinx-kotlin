@@ -14,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.Disposable
@@ -80,6 +81,15 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.layoutDashboardChats.swipeContainer.setOnRefreshListener{
+            viewModel.networkRefresh()
+
+            findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
+
+            setupChats()
+            binding.layoutDashboardChats.swipeContainer.setRefreshing(false);
+        }
         BackPressHandler(binding.root.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
@@ -265,6 +275,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onStart() {
         super.onStart()
+				
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             binding.layoutDashboardHeader.textViewDashboardHeaderUpgradeApp.goneIfFalse(
