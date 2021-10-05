@@ -23,6 +23,7 @@ internal class AudioRecorderController<ARGS : NavArgs>(
 
     private var dispatchStateJob: Job? = null
     fun startAudioRecording() {
+        // TODO: Pause other media playing
         viewModelScope.launch(dispatchers.mainImmediate) {
             lock.withLock {
                 if (dispatchStateJob?.isActive == true) {
