@@ -28,6 +28,7 @@ import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
 import chat.sphinx.onboard_connected.navigation.OnBoardConnectedNavigator
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
+import chat.sphinx.onboard_lightning.navigation.OnBoardLightningNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
@@ -169,6 +170,12 @@ internal object NavigationModule {
         onBoardConnectedNavigatorImpl: OnBoardConnectedNavigatorImpl
     ): OnBoardConnectedNavigator =
         onBoardConnectedNavigatorImpl
+
+    @Provides
+    fun provideOnBoardLightningNavigator(
+        onBoardLightningNavigatorImpl: OnBoardLightningNavigatorImpl
+    ): OnBoardLightningNavigator =
+        onBoardLightningNavigatorImpl
 
     @Provides
     fun provideOnBoardNameNavigator(

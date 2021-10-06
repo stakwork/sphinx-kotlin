@@ -17,6 +17,7 @@
     <include app:graph="@navigation/on_board_connect_nav_graph" />
     <include app:graph="@navigation/on_board_connecting_nav_graph" />
     <include app:graph="@navigation/on_board_connected_nav_graph" />
+    <include app:graph="@navigation/on_board_lightning_nav_graph" />
     <include app:graph="@navigation/on_board_nav_graph" />
     <include app:graph="@navigation/on_board_name_nav_graph" />
     <include app:graph="@navigation/on_board_picture_nav_graph" />

@@ -6,50 +6,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/listBG"
-    tools:context=".ui.OnBoardConnectedFragment">
+    tools:context=".ui.OnBoardLightningFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_on_board_lightning"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/lightning_network"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_onboard_connecting_title"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/on_board_lightning_title_text_size"
+        android:textColor="@color/text"
+        android:text="@string/on_board_lightning_title"
+        android:textAllCaps="false"
+        android:gravity="center"
         android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_marginTop="@dimen/default_big_layout_margin"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_on_board_connected_icon"
-            android:layout_width="67dp"
-            android:layout_height="67dp"
-            android:src="@drawable/confirmed_icon"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_onboard_connecting_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/montserrat_regular"
-            android:textSize="@dimen/on_board_welcome_title_text_size"
-            android:textColor="@color/text"
-            android:text="@string/on_board_welcome"
-            android:textAllCaps="true"
-            android:layout_marginTop="@dimen/default_double_layout_margin"
-            app:layout_constraintTop_toBottomOf="@+id/image_view_on_board_connected_icon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_onboard_connecting_subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_regular"
-            android:textSize="@dimen/on_board_connected_subtitle_text_size"
-            android:textColor="@color/secondaryText"
-            android:text="@string/on_board_connected_subtitle"
-            android:layout_marginTop="@dimen/default_small_layout_margin"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_onboard_connecting_title"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_continue_button_container"
@@ -57,8 +37,9 @@
             android:layout_height="@dimen/on_board_welcome_button_height"
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryBlue"
-            android:layout_marginTop="@dimen/default_double_layout_margin"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_onboard_connecting_subtitle"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:layout_marginBottom="@dimen/on_board_button_bottom_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -90,6 +71,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

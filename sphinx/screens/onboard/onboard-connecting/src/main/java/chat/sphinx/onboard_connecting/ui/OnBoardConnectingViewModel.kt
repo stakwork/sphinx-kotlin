@@ -33,7 +33,8 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             delay(2000L)
 
-            navigator.toOnBoardConnectedScreen()
+//            navigator.toOnBoardConnectedScreen()
+            navigator.toOnBoardLightningScreen()
         }
     }
 }
