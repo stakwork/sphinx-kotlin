@@ -9,6 +9,8 @@
     <dimen name="on_board_connecting_image_width">205dp</dimen>
     <dimen name="on_board_connecting_image_height">127dp</dimen>
     <dimen name="on_board_connecting_text_size">18sp</dimen>
+    <dimen name="on_board_connected_subtitle_text_size">20sp</dimen>
+    <dimen name="on_board_connected_arrow_text_size">19sp</dimen>
 
     <dimen name="on_board_welcome_message_invited_to_sphinx_text_size">25sp</dimen>
     <dimen name="on_board_welcome_message_inviter_name_text_size">20sp</dimen>

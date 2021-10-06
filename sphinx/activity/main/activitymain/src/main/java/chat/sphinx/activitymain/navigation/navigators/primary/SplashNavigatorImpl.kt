@@ -15,6 +15,7 @@ import javax.inject.Inject
 internal class SplashNavigatorImpl @Inject constructor(
     navigationDriver: PrimaryNavigationDriver
 ): SplashNavigator(navigationDriver) {
+
     override suspend fun toDashboardScreen(
         privateMode: Boolean,
         updateBackgroundLoginTime: Boolean,

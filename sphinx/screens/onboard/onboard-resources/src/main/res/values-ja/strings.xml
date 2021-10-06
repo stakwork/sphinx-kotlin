@@ -11,6 +11,7 @@
     <string name="on_board_submit">Submit</string>
     <string name="on_board_connect_paste_connection_code">Paste your connection code...</string>
     <string name="on_board_connect_paste_keys">Paste your keys...</string>
+    <string name="on_board_connected_subtitle">Your app is now connected</string>
 
     <string name="on_board_finish_button">完了</string>
     <string name="on_board_next_button">次へ</string>

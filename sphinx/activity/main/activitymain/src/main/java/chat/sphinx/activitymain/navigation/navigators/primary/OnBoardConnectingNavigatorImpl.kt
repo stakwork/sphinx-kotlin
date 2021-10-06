@@ -1,8 +1,11 @@
 package chat.sphinx.activitymain.navigation.navigators.primary
 
+import chat.sphinx.activitymain.R
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.dashboard.navigation.ToDashboardScreen
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
+import chat.sphinx.onboard_connected.navigation.ToOnBoardConnectedScreen
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
 import javax.inject.Inject
 
@@ -11,7 +14,11 @@ internal class OnBoardConnectingNavigatorImpl @Inject constructor(
 ): OnBoardConnectingNavigator(navigationDriver) {
 
     override suspend fun toOnBoardConnectedScreen() {
-        //TODO("Not yet implemented")
+        navigationDriver.submitNavigationRequest(
+            ToOnBoardConnectedScreen(
+                popUpToId = R.id.main_primary_nav_graph
+            )
+        )
     }
 
     override suspend fun toOnBoardMessageScreen(onBoardStep1Message: OnBoardStep.Step1_WelcomeMessage) {

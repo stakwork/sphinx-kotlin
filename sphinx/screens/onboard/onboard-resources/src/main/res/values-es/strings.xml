@@ -11,6 +11,7 @@
     <string name="on_board_submit">Enviar</string>
     <string name="on_board_connect_paste_connection_code">Pegá tu código de conexión...</string>
     <string name="on_board_connect_paste_keys">Pegá tus claves...</string>
+    <string name="on_board_connected_subtitle">Ya estás conectado</string>
 
     <string name="on_board_finish_button">Terminar</string>
     <string name="on_board_next_button">Siguiente</string>
