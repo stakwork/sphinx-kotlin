@@ -84,10 +84,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         binding.layoutDashboardChats.swipeContainer.setOnRefreshListener{
             viewModel.networkRefresh()
-
-            findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
-
-            setupChats()
             binding.layoutDashboardChats.swipeContainer.setRefreshing(false);
         }
         BackPressHandler(binding.root.context)
