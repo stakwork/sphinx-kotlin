@@ -13,6 +13,9 @@
     <string name="on_board_connect_paste_keys">Paste your keys...</string>
     <string name="on_board_connected_subtitle">Your app is now connected</string>
     <string name="on_board_lightning_title">"You are now on the\nLightning Network!"</string>
+    <string name="on_board_desktop_title">"Don't you have\nSphinx for desktop?"</string>
+    <string name="on_board_desktop_skip">Skip</string>
+    <string name="on_board_desktop_get_it_now">Get It Now</string>
 
     <string name="on_board_finish_button">完成</string>
     <string name="on_board_next_button">下一步</string>

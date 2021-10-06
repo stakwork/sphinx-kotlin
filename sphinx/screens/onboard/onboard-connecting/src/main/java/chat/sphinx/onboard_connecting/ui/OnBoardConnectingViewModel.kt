@@ -34,7 +34,8 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             delay(2000L)
 
 //            navigator.toOnBoardConnectedScreen()
-            navigator.toOnBoardLightningScreen()
+//            navigator.toOnBoardLightningScreen()
+            navigator.toOnBoardDesktopScreen()
         }
     }
 }

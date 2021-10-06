@@ -285,3 +285,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
 include ':sphinx:screens:onboard:onboard-connected'
 include ':sphinx:screens:onboard:onboard-lightning'
+include ':sphinx:screens:onboard:onboard-desktop'
