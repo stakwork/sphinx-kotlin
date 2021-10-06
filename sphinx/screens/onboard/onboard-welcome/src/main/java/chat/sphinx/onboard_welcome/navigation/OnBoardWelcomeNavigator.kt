@@ -9,6 +9,9 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class OnBoardWelcomeNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
+
+    abstract suspend fun toOnBoardDescriptionScreen(newUser: Boolean)
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }

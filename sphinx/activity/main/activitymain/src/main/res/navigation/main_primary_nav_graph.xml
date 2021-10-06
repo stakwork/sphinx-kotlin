@@ -13,6 +13,7 @@
     <include app:graph="@navigation/chat_tribe_nav_graph" />
     <include app:graph="@navigation/dashboard_nav_graph" />
     <include app:graph="@navigation/on_board_welcome_nav_graph" />
+    <include app:graph="@navigation/on_board_description_nav_graph" />
     <include app:graph="@navigation/on_board_nav_graph" />
     <include app:graph="@navigation/on_board_name_nav_graph" />
     <include app:graph="@navigation/on_board_picture_nav_graph" />

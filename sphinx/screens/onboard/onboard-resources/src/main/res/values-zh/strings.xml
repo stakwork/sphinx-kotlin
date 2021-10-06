@@ -3,6 +3,9 @@
     <string name="on_board_welcome">歡迎</string>
     <string name="on_board_new_user">New User</string>
     <string name="on_board_existing_user">Existing User</string>
+    <string name="on_board_continue">繼續</string>
+    <string name="on_board_paste_connection_code">"Paste your connection code\ninto Sphinx"</string>
+    <string name="on_board_paste_keys">"Copy your keys from your\ndesktop app and paste it here"</string>
 
     <string name="on_board_finish_button">完成</string>
     <string name="on_board_next_button">下一步</string>

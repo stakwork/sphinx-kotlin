@@ -1,6 +1,5 @@
 package chat.sphinx.onboard_welcome.ui
 
-import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
@@ -11,12 +10,10 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_welcome.R
 import chat.sphinx.onboard_welcome.databinding.FragmentOnBoardWelcomeBinding
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 
 @AndroidEntryPoint
-internal class OnBoardWelcomeFragment: SideEffectFragment<
-        Context,
-        OnBoardWelcomeSideEffect,
+internal class OnBoardWelcomeFragment: BaseFragment<
         OnBoardWelcomeViewState,
         OnBoardWelcomeViewModel,
         FragmentOnBoardWelcomeBinding
@@ -48,11 +45,7 @@ internal class OnBoardWelcomeFragment: SideEffectFragment<
             .addNavigationBarPadding(binding.layoutConstraintOnBoardWelcome)
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: OnBoardWelcomeSideEffect) {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun onViewStateFlowCollect(viewState: OnBoardWelcomeViewState) {
-        TODO("Not yet implemented")
+        //TODO("Not yet implemented")
     }
 }

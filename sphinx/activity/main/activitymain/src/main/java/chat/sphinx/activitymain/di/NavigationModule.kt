@@ -23,6 +23,7 @@ import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
+import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
@@ -141,6 +142,12 @@ internal object NavigationModule {
         onBoardWelcomeNavigatorImpl: OnBoardWelcomeNavigatorImpl
     ): OnBoardWelcomeNavigator =
         onBoardWelcomeNavigatorImpl
+
+    @Provides
+    fun provideOnBoardDescriptionNavigator(
+        onBoardDescriptionNavigatorImpl: OnBoardDescriptionNavigatorImpl
+    ): OnBoardDescriptionNavigator =
+        onBoardDescriptionNavigatorImpl
 
     @Provides
     fun provideOnBoardNameNavigator(
