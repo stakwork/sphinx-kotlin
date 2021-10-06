@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -41,8 +42,16 @@ internal class OnBoardConnectFragment: SideEffectFragment<
         setupHeaderAndFooter()
         setupEditText()
 
-        binding.imageButtonScanner.setOnClickListener {
-            viewModel.navigateToScanner()
+        binding.apply {
+            imageButtonScanner.setOnClickListener {
+                viewModel.navigateToScanner()
+            }
+
+            textViewHeaderBack.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
+            }
         }
     }
 
