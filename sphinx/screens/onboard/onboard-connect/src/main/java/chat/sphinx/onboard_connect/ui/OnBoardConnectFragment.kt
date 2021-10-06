@@ -52,6 +52,10 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
+
+            buttonSubmit.setOnClickListener {
+                viewModel.continueToConnectingScreen()
+            }
         }
     }
 
@@ -113,6 +117,7 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 when (viewState) {
                     is OnBoardConnectSubmitButtonViewState.Disabled -> {
                         binding.apply {
+                            buttonSubmit.isEnabled = false
                             buttonSubmit.background.colorFilter = PorterDuffColorFilter(
                                 ContextCompat.getColor(
                                     root.context,
@@ -128,6 +133,7 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                     }
                     is OnBoardConnectSubmitButtonViewState.Enabled -> {
                         binding.apply {
+                            buttonSubmit.isEnabled = true
                             buttonSubmit.background.colorFilter = PorterDuffColorFilter(
                                 ContextCompat.getColor(
                                     root.context,

@@ -86,6 +86,8 @@ internal class OnBoardConnectViewModel @Inject constructor(
     }
 
     fun continueToConnectingScreen() {
-
+        viewModelScope.launch(mainImmediate) {
+            navigator.toOnBoardConnectingScreen(args.newUser, null, null)
+        }
     }
 }

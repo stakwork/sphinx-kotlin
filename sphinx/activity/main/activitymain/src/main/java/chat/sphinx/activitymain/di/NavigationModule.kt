@@ -26,6 +26,7 @@ import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard.navigation.OnBoardNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
+import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
@@ -155,6 +156,12 @@ internal object NavigationModule {
         onBoardConnectNavigatorImpl: OnBoardConnectNavigatorImpl
     ): OnBoardConnectNavigator =
         onBoardConnectNavigatorImpl
+
+    @Provides
+    fun provideOnBoardConnectingNavigator(
+        onBoardConnectingNavigatorImpl: OnBoardConnectingNavigatorImpl
+    ): OnBoardConnectingNavigator =
+        onBoardConnectingNavigatorImpl
 
     @Provides
     fun provideOnBoardNameNavigator(

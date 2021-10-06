@@ -47,7 +47,6 @@ dependencies {
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
     api project(path: ':sphinx:screens-detail:common:detail-resources')
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
-//    api project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
