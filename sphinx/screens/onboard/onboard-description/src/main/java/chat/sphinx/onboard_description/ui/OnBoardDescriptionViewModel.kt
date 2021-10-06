@@ -2,12 +2,14 @@ package chat.sphinx.onboard_description.ui
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal inline val OnBoardDescriptionFragmentArgs.newUser: Boolean
@@ -17,7 +19,7 @@ internal inline val OnBoardDescriptionFragmentArgs.newUser: Boolean
 internal class OnBoardDescriptionViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
-    val navigator: OnBoardDescriptionNavigator,
+    private val navigator: OnBoardDescriptionNavigator,
 ): SideEffectViewModel<
         Context,
         OnBoardDescriptionSideEffect,
@@ -38,6 +40,8 @@ internal class OnBoardDescriptionViewModel @Inject constructor(
     }
 
     fun continueToConnectScreen() {
-
+        viewModelScope.launch(mainImmediate) {
+            navigator.toOnBoardConnectScreen(args.newUser)
+        }
     }
 }

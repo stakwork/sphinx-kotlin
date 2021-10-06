@@ -37,32 +37,10 @@ internal class OnBoardDescriptionFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        BackPressHandler(viewLifecycleOwner, requireActivity())
-
         setupHeaderAndFooter()
 
         binding.buttonOnboardContinue.setOnClickListener {
             viewModel.continueToConnectScreen()
-        }
-    }
-
-    private inner class BackPressHandler(
-        owner: LifecycleOwner,
-        activity: FragmentActivity,
-    ): OnBackPressedCallback(true) {
-        init {
-            activity.apply {
-                onBackPressedDispatcher.addCallback(
-                    owner,
-                    this@BackPressHandler
-                )
-            }
-        }
-
-        override fun handleOnBackPressed() {
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.navigator.popBackStack()
-            }
         }
     }
 

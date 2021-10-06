@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_on_board_connect"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/listBG"
+    tools:context=".ui.OnBoardConnectFragment">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_onboard_connect_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/on_board_welcome_title_text_size"
+        android:textColor="@android:color/white"
+        android:text="@string/on_board_connect"
+        android:textAllCaps="true"
+        android:layout_marginBottom="@dimen/on_board_welcome_title_margin_bottom"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_field_button_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    </androidx.appcompat.widget.AppCompatTextView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_field_button_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/edit_text_code_input_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/on_board_welcome_button_height"
+            android:background="@drawable/background_button_transparent_bordered"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:layout_marginBottom="@dimen/default_layout_margin"
+            app:layout_constraintBottom_toTopOf="@+id/button_submit">
+
+            <androidx.appcompat.widget.AppCompatEditText
+                android:id="@+id/edit_text_code_input"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:hint=""
+                android:inputType="text"
+                android:singleLine="true"
+                android:textColor="@color/text"
+                android:textColorHint="@color/placeholderTextInverted"
+                android:textSize="17sp"
+                android:fontFamily="@font/roboto_regular"
+                android:backgroundTint="@android:color/transparent"
+                android:textCursorDrawable="@drawable/cursor"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/image_button_scanner"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/image_button_scanner"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_scan"
+                android:tint="@color/secondaryText"
+                android:background="@android:color/transparent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_submit"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/on_board_welcome_button_height"
+            android:fontFamily="@font/roboto_medium"
+            android:textSize="@dimen/on_board_welcome_button_text_size"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+            android:background="@drawable/button_background"
+            android:backgroundTint="@color/on_board_submit_disabled_button"
+            android:text="@string/on_board_submit"
+            android:textAllCaps="false"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

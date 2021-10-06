@@ -6,6 +6,10 @@
     <string name="on_board_continue">繼續</string>
     <string name="on_board_paste_connection_code">"Paste your connection code\ninto Sphinx"</string>
     <string name="on_board_paste_keys">"Copy your keys from your\ndesktop app and paste it here"</string>
+    <string name="on_board_connect">Connect</string>
+    <string name="on_board_submit">Submit</string>
+    <string name="on_board_connect_paste_connection_code">Paste your connection code...</string>
+    <string name="on_board_connect_paste_keys">Paste your keys...</string>
 
     <string name="on_board_finish_button">完成</string>
     <string name="on_board_next_button">下一步</string>

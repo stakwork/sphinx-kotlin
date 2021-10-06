@@ -52,6 +52,7 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-ready')
     api project(path: ':sphinx:screens:onboard:onboard-welcome')
     api project(path: ':sphinx:screens:onboard:onboard-description')
+    api project(path: ':sphinx:screens:onboard:onboard-connect')
     api project(path: ':sphinx:screens:profile:profile')
     api project(path: ':sphinx:screens:splash:splash')
 

@@ -6,6 +6,10 @@
     <string name="on_board_continue">Continuar</string>
     <string name="on_board_paste_connection_code">"Pegá tu código de conexión\nen Sphinx"</string>
     <string name="on_board_paste_keys">"Copiá tus claves desde\nla app de escritorio y pegalas aquí."</string>
+    <string name="on_board_connect">Conectar</string>
+    <string name="on_board_submit">Enviar</string>
+    <string name="on_board_connect_paste_connection_code">Pegá tu código de conexión...</string>
+    <string name="on_board_connect_paste_keys">Pegá tus claves...</string>
 
     <string name="on_board_finish_button">Terminar</string>
     <string name="on_board_next_button">Siguiente</string>
