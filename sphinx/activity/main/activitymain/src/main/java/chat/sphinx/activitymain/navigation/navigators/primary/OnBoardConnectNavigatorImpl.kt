@@ -12,13 +12,10 @@ internal class OnBoardConnectNavigatorImpl @Inject constructor(
 ): OnBoardConnectNavigator(navigationDriver) {
 
     override suspend fun toOnBoardConnectingScreen(
-        newUser: Boolean,
         code: String,
     ) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardConnectingScreen(
-                popUpToId = R.id.main_primary_nav_graph,
-                newUser = newUser,
                 code = code,
             )
         )

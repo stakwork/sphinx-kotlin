@@ -9,7 +9,6 @@
     app:layoutDescription="@xml/motion_scene_splash"
     tools:context=".ui.SplashFragment">
 
-
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_line_horizontal_mid"
         android:layout_width="0dp"

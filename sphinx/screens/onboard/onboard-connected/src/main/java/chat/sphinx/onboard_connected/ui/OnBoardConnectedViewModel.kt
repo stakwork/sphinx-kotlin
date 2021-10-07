@@ -19,7 +19,7 @@ internal class OnBoardConnectedViewModel @Inject constructor(
 
     fun continueToDashboardScreen() {
         viewModelScope.launch(mainImmediate) {
-//            navigator.toDashboardScreen(updateBackgroundLoginTime = true)
+            navigator.toDashboardScreen(updateBackgroundLoginTime = true)
         }
     }
 }

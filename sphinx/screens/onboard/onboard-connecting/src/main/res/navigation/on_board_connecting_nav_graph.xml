@@ -10,10 +10,7 @@
         android:name="chat.sphinx.onboard_connecting.ui.OnBoardConnectingFragment"
         tools:layout="@layout/fragment_on_board_connecting">
         <argument
-            android:name="argNewUser"
-            app:argType="boolean" />
-        <argument
-            android:name="argRestoreKeys"
+            android:name="argCode"
             app:argType="string" />
     </fragment>
 

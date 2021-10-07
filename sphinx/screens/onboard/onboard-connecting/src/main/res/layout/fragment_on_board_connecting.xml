@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_on_board_connecting"
+    android:id="@+id/layout_motion_on_board_connecting"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/listBG"
+    app:layoutDescription="@xml/motion_scene_on_board_connecting"
     tools:context=".ui.OnBoardConnectingFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_connecting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -42,4 +44,8 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <include
+        android:id="@+id/layout_authentication"
+        layout="@layout/layout_authentication" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

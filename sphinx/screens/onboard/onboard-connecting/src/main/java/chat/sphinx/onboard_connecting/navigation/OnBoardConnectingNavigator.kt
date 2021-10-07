@@ -12,10 +12,6 @@ abstract class OnBoardConnectingNavigator(
 
     abstract suspend fun toOnBoardConnectedScreen()
 
-    abstract suspend fun toOnBoardLightningScreen()
-
-    abstract suspend fun toOnBoardDesktopScreen()
-
     abstract suspend fun toOnBoardMessageScreen(onBoardStep1Message: OnBoardStep.Step1_WelcomeMessage)
 
     suspend fun popBackStack() {

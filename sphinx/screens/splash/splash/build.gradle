@@ -47,7 +47,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
 
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
-    implementation project(path: ':sphinx:screens:splash:key-restore')
+    implementation project(path: ':sphinx:screens:onboard:key-restore')
     api project(path: ':sphinx:screens:onboard:onboard-common')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
 

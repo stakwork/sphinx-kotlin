@@ -10,7 +10,6 @@ abstract class OnBoardConnectNavigator(
 ): Navigator<NavController>(navigationDriver) {
 
     abstract suspend fun toOnBoardConnectingScreen(
-        newUser: Boolean,
         code: String,
     )
 

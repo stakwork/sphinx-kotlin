@@ -17,6 +17,15 @@
     <string name="on_board_desktop_skip">Más tarde</string>
     <string name="on_board_desktop_get_it_now">Obtener ahora</string>
 
+    <string name="on_board_welcome_info_decrypt">Ingresa tu PIN\npara desencriptar</string>
+    <string name="on_board_edit_text_hint_decrypt">Ingresa tu PIN…</string>
+
+    <string name="side_effect_decryption_failure">Desencriptado fallido</string>
+    <string name="side_effect_empty_input">El valor no puede ser vacío</string>
+    <string name="side_effect_pin_length">Longitud del PIN inválida</string>
+    <string name="side_effect_invalid_code">Código inválido</string>
+    <string name="side_effect_invalid_pin">PIN inválido</string>
+
     <string name="on_board_finish_button">Terminar</string>
     <string name="on_board_next_button">Siguiente</string>
 

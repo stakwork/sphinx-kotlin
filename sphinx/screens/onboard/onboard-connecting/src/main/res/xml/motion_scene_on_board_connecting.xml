@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////// Constraint Sets /////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+
+    <!--
+           Set 1
+    -->
+    <ConstraintSet
+        android:id="@+id/motion_scene_connecting_set1">
+
+        <Constraint android:id="@+id/layout_connecting">
+            <Layout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_authentication">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+
+    <!--
+           Set 2: Enter PIN to Decrypt Existing Keys
+    -->
+    <ConstraintSet
+        android:id="@+id/motion_scene_connecting_set2"
+        app:deriveConstraintsFrom="@+id/motion_scene_connecting_set1">
+
+        <Constraint android:id="@+id/layout_connecting">
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_authentication">
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////// Transitions /////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+    <!-- ////////////////////////////////////////////////////////////////////////////////-->
+
+
+    <!--
+           Set 1 >> Set 2
+    -->
+    <Transition
+        android:id="@+id/transition_connecting_set1_to_set2"
+        app:constraintSetEnd="@+id/motion_scene_connecting_set2"
+        app:constraintSetStart="@+id/motion_scene_connecting_set1"
+        app:motionInterpolator="linear" />
+
+</MotionScene>

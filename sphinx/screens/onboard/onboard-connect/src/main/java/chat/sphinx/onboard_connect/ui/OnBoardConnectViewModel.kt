@@ -102,7 +102,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
 
         if (submitButtonVS is OnBoardConnectSubmitButtonViewState.Enabled) {
             viewModelScope.launch(mainImmediate) {
-                navigator.toOnBoardConnectingScreen(args.newUser, code)
+                navigator.toOnBoardConnectingScreen(code)
             }
         } else {
             viewModelScope.launch(mainImmediate) {

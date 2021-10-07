@@ -112,6 +112,9 @@ include ':sphinx:screens:onboard:onboard-welcome'
 include ':sphinx:screens:onboard:onboard-description'
 include ':sphinx:screens:onboard:onboard-connect'
 include ':sphinx:screens:onboard:onboard-connecting'
+include ':sphinx:screens:onboard:onboard-connected'
+include ':sphinx:screens:onboard:onboard-lightning'
+include ':sphinx:screens:onboard:onboard-desktop'
 include ':sphinx:screens:onboard:onboard'
 include ':sphinx:screens:onboard:onboard-common'
 include ':sphinx:screens:onboard:onboard-name'
@@ -120,7 +123,7 @@ include ':sphinx:screens:onboard:onboard-ready'
 include ':sphinx:screens:onboard:onboard-resources'
 include ':sphinx:screens:profile:profile'
 include ':sphinx:screens:splash:splash'
-include ':sphinx:screens:splash:key-restore'
+include ':sphinx:screens:onboard:key-restore'
 
 // Screens-Detail
 include ':sphinx:screens-detail:add-friend:add-friend'
@@ -283,6 +286,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:screens:onboard:onboard-connected'
-include ':sphinx:screens:onboard:onboard-lightning'
-include ':sphinx:screens:onboard:onboard-desktop'

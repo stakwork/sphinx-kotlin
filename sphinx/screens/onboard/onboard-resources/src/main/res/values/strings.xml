@@ -17,6 +17,17 @@
     <string name="on_board_desktop_skip">Skip</string>
     <string name="on_board_desktop_get_it_now">Get It Now</string>
 
+    <string name="side_effect_generate_token_failed">Generate token failed</string>
+
+    <string name="on_board_welcome_info_decrypt">Enter PIN\nto decrypt</string>
+    <string name="on_board_edit_text_hint_decrypt">Enter PIN…</string>
+
+    <string name="side_effect_decryption_failure">Failed to decrypt</string>
+    <string name="side_effect_empty_input">Input must not be empty</string>
+    <string name="side_effect_pin_length">Invalid PIN length</string>
+    <string name="side_effect_invalid_code">Invalid Code</string>
+    <string name="side_effect_invalid_pin">Invalid PIN</string>
+
     <string name="on_board_finish_button">Finish</string>
     <string name="on_board_next_button">Next</string>
 
@@ -26,7 +37,6 @@
     <string name="side_effect_create_inviter_failed">Failed to create inviter</string>
     <string name="side_effect_get_contacts_failed">Failed to retrieve main contact</string>
     <string name="side_effect_update_owner_failed">Failed to update main contact</string>
-    <string name="side_effect_generate_token_failed">Generate token failed</string>
 
     <string name="sign_up_name_edit_text_hint">Set Your Name</string>
     <string name="sign_up_name_text_view">Your Name</string>
