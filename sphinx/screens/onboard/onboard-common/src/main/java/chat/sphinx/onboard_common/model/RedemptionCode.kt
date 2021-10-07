@@ -1,4 +1,4 @@
-package chat.sphinx.splash.model
+package chat.sphinx.onboard_common.model
 
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -12,7 +12,7 @@ import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import kotlin.jvm.Throws
 
-internal sealed class RedemptionCode(val identifier: String) {
+sealed class RedemptionCode(val identifier: String) {
 
     companion object {
         fun decode(code: String): RedemptionCode? {

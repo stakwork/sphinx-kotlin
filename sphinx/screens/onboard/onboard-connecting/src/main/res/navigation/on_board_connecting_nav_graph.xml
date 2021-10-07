@@ -14,12 +14,7 @@
             app:argType="boolean" />
         <argument
             android:name="argRestoreKeys"
-            app:argType="string"
-            app:nullable="true" />
-        <argument
-            android:name="argConnectionCode"
-            app:argType="string"
-            app:nullable="true" />
+            app:argType="string" />
     </fragment>
 
 </navigation>

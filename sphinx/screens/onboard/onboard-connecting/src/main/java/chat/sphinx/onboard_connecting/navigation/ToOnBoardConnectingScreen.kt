@@ -10,16 +10,14 @@ import io.matthewnelson.concept_navigation.NavigationRequest
 class ToOnBoardConnectingScreen(
     @IdRes private val popUpToId: Int,
     private val newUser: Boolean,
-    private val restoreKeys: String? = null,
-    private val connectionCode: String? = null,
+    private val code: String,
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {
 
         OnBoardConnectingFragmentArgs.Builder(
             newUser,
-            restoreKeys,
-            connectionCode
+            code,
         ).build().toBundle()?.let { args ->
 
             controller.navigate(

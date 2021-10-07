@@ -11,8 +11,7 @@ abstract class OnBoardConnectNavigator(
 
     abstract suspend fun toOnBoardConnectingScreen(
         newUser: Boolean,
-        restoreKeys: String? = null,
-        connectionCode: String? = null
+        code: String,
     )
 
     suspend fun popBackStack() {

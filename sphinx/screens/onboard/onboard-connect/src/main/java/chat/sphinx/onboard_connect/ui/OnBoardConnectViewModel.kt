@@ -17,6 +17,9 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import chat.sphinx.onboard_common.model.RedemptionCode
+import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -54,30 +57,39 @@ internal class OnBoardConnectViewModel @Inject constructor(
     }
 
     fun validateCode(code: String) {
+        val vs = currentViewState
+        val redemptionCode = RedemptionCode.decode(code)
+        var isValid = false
+
+        if (vs is OnBoardConnectViewState.NewUser) {
+            if (code.toValidInviteStringOrNull() != null) {
+                isValid = true
+            }
+            if (redemptionCode != null &&
+                redemptionCode is RedemptionCode.NodeInvite) {
+                isValid = true
+            }
+
+        } else if (vs is OnBoardConnectViewState.ExistingUser) {
+            if (redemptionCode != null &&
+                redemptionCode is RedemptionCode.AccountRestoration) {
+                isValid = true
+            }
+        }
+
         submitButtonViewStateContainer.updateViewState(
-            OnBoardConnectSubmitButtonViewState.Enabled
+            if (isValid) {
+                OnBoardConnectSubmitButtonViewState.Enabled
+            } else {
+                OnBoardConnectSubmitButtonViewState.Disabled
+            }
         )
     }
 
     fun navigateToScanner() {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
-                ScannerRequest(
-                    filter = object : ScannerFilter() {
-                        override suspend fun checkData(data: String): Response<Any, String> {
-                            return Response.Success(Any())
-//                            if (data.toValidInviteStringOrNull() != null) {
-//                                return Response.Success(Any())
-//                            }
-//
-//                            if (RedemptionCode.decode(data) != null) {
-//                                return Response.Success(Any())
-//                            }
-//
-//                            return Response.Error("QR code is not an account restore code")
-                        }
-                    }
-                )
+                ScannerRequest()
             )
             if (response is Response.Success) {
                 submitSideEffect(OnBoardConnectSideEffect.FromScanner(response.value))
@@ -85,9 +97,25 @@ internal class OnBoardConnectViewModel @Inject constructor(
         }
     }
 
-    fun continueToConnectingScreen() {
-        viewModelScope.launch(mainImmediate) {
-            navigator.toOnBoardConnectingScreen(args.newUser, null, null)
+    fun continueToConnectingScreen(code: String) {
+        val submitButtonVS = submitButtonViewStateContainer.value
+
+        if (submitButtonVS is OnBoardConnectSubmitButtonViewState.Enabled) {
+            viewModelScope.launch(mainImmediate) {
+                navigator.toOnBoardConnectingScreen(args.newUser, code)
+            }
+        } else {
+            viewModelScope.launch(mainImmediate) {
+                val vs = currentViewState
+
+                submitSideEffect(OnBoardConnectSideEffect.Notify(
+                    msg = if (vs is OnBoardConnectViewState.NewUser) {
+                        "Code is not a connection or invite code"
+                    } else  {
+                        "Code is not an account restore code"
+                    }
+                ))
+            }
         }
     }
 }
