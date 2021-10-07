@@ -70,7 +70,7 @@ internal class OnBoardViewModel @Inject constructor(
                                     relayUrl = relayUrl,
                                     callback = { url ->
                                         if (url != null) {
-                                            proceedToNameScreen(authToken, inviterData, url)
+                                            proceedToLightningScreen(authToken, inviterData, url)
                                         } else {
                                             // cancelled
                                             updateViewState(OnBoardViewState.Idle)
@@ -79,7 +79,7 @@ internal class OnBoardViewModel @Inject constructor(
                                 )
                             )
                         } else {
-                            proceedToNameScreen(authToken, inviterData, relayUrl)
+                            proceedToLightningScreen(authToken, inviterData, relayUrl)
                         }
                     }
                     is AuthenticationResponse.Success.Key -> {
@@ -91,7 +91,7 @@ internal class OnBoardViewModel @Inject constructor(
     }
 
     private var proceedJob: Job? = null
-    private fun proceedToNameScreen(
+    private fun proceedToLightningScreen(
         authorizationToken: AuthorizationToken,
         inviterData: OnBoardInviterData,
         relayUrl: RelayUrl,
@@ -108,7 +108,7 @@ internal class OnBoardViewModel @Inject constructor(
 
             if (step2 != null) {
                 updateViewState(OnBoardViewState.Idle)
-                navigator.toOnBoardNameScreen(step2)
+                navigator.toOnBoardLightning(step2)
             } else {
                 // TODO: Handle persistence error
                 updateViewState(OnBoardViewState.Error)

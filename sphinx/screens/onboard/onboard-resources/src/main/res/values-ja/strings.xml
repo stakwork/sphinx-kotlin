@@ -24,6 +24,7 @@
     <string name="side_effect_empty_input">入力が必須です</string>
     <string name="side_effect_pin_length">PINコードの長さが無効です</string>
     <string name="side_effect_invalid_code">無効なコード</string>
+    <string name="side_effect_invalid_invite">無効な招待</string>
     <string name="side_effect_invalid_pin">無効なPINコード</string>
 
     <string name="on_board_finish_button">完了</string>

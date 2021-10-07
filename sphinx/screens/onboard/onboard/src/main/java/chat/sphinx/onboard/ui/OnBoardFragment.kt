@@ -23,7 +23,6 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
@@ -36,6 +35,7 @@ internal class OnBoardFragment: SideEffectFragment<
         >(R.layout.fragment_on_board)
 {
     private val args: OnBoardFragmentArgs by navArgs()
+
     private val relayUrl: RelayUrl by lazy(LazyThreadSafetyMode.NONE) { args.relayUrl }
     private val authorizationToken: AuthorizationToken by lazy(LazyThreadSafetyMode.NONE) { args.authorizationToken }
     private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }

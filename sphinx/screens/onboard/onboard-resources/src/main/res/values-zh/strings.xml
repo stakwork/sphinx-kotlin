@@ -24,6 +24,7 @@
     <string name="side_effect_empty_input">輸入不可無填</string>
     <string name="side_effect_pin_length">PIN 長短不對</string>
     <string name="side_effect_invalid_code">無效 Code</string>
+    <string name="side_effect_invalid_invite">邀請無效</string>
     <string name="side_effect_invalid_pin">無效 PIN</string>
 
     <string name="on_board_finish_button">完成</string>

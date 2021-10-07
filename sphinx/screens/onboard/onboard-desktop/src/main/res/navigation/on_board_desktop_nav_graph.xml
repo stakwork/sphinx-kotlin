@@ -8,6 +8,31 @@
     <fragment
         android:id="@+id/navigation_on_board_desktop_fragment"
         android:name="chat.sphinx.onboard_desktop.ui.OnBoardDesktopFragment"
-        tools:layout="@layout/fragment_on_board_desktop" />
+        tools:layout="@layout/fragment_on_board_desktop">
+        <argument
+            android:name="arg_nickname"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_pubkey"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_route_hint"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_message"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_action"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_pin"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
 
 </navigation>

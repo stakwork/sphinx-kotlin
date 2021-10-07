@@ -24,6 +24,7 @@
     <string name="side_effect_empty_input">El valor no puede ser vacío</string>
     <string name="side_effect_pin_length">Longitud del PIN inválida</string>
     <string name="side_effect_invalid_code">Código inválido</string>
+    <string name="side_effect_invalid_invite">Invitación inválida</string>
     <string name="side_effect_invalid_pin">PIN inválido</string>
 
     <string name="on_board_finish_button">Terminar</string>

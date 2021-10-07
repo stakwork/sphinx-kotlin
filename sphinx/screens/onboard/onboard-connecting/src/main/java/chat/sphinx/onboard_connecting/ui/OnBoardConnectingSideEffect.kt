@@ -17,15 +17,21 @@ internal sealed class OnBoardConnectingSideEffect: SideEffect<Context>() {
         }
     }
 
+    object GenerateTokenFailed: OnBoardConnectingSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.side_effect_generate_token_failed)
+        }
+    }
+
     object InvalidCode: OnBoardConnectingSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils().show(value, R.string.side_effect_invalid_code)
         }
     }
 
-    object InputNullOrEmpty: OnBoardConnectingSideEffect() {
+    object InvalidInvite: OnBoardConnectingSideEffect() {
         override suspend fun execute(value: Context) {
-            SphinxToastUtils().show(value, R.string.side_effect_empty_input)
+            SphinxToastUtils().show(value, R.string.side_effect_invalid_invite)
         }
     }
 

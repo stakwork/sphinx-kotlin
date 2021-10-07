@@ -9,7 +9,8 @@ import io.matthewnelson.concept_navigation.Navigator
 abstract class OnBoardNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(navigationDriver) {
-    abstract suspend fun toOnBoardNameScreen(onBoardStep2: OnBoardStep.Step2_Name)
+
+    abstract suspend fun toOnBoardLightning(onBoardStep2: OnBoardStep.Step2_Name)
 
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())

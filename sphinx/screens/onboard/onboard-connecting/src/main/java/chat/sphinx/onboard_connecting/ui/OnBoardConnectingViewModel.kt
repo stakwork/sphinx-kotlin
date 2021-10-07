@@ -3,23 +3,39 @@ package chat.sphinx.onboard_connecting.ui
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
+import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
+import chat.sphinx.concept_network_tor.TorManager
+import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.onboard_common.OnBoardStepHandler
+import chat.sphinx.onboard_common.model.OnBoardInviterData
+import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
+import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
+import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.isOnionAddress
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
-import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 internal inline val OnBoardConnectingFragmentArgs.restoreCode: RedemptionCode.AccountRestoration?
@@ -51,6 +67,11 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     handle: SavedStateHandle,
     val navigator: OnBoardConnectingNavigator,
     private val keyRestore: KeyRestore,
+    private val relayDataHandler: RelayDataHandler,
+    private val torManager: TorManager,
+    private val networkQueryContact: NetworkQueryContact,
+    private val networkQueryInvite: NetworkQueryInvite,
+    private val onBoardStepHandler: OnBoardStepHandler,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -64,25 +85,30 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             delay(500L)
+
             processCode()
         }
     }
 
     private fun processCode() {
-        args.restoreCode?.let { restoreCode ->
-            updateViewState(
-                OnBoardConnectingViewState.Transition_Set2_DecryptKeys(restoreCode)
-            )
-            return
-        } ?: args.connectionCode?.let { connectionCode ->
-            return
-        } ?: args.inviteCode?.let { inviteCode ->
-            return
-        }
-
         viewModelScope.launch(mainImmediate) {
-            submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
-            navigator.popBackStack()
+            args.restoreCode?.let { restoreCode ->
+                updateViewState(
+                    OnBoardConnectingViewState.Transition_Set2_DecryptKeys(restoreCode)
+                )
+            } ?: args.connectionCode?.let { connectionCode ->
+                registerTokenAndStartOnBoard(
+                    ip = connectionCode.ip,
+                    nodePubKey = null,
+                    password = connectionCode.password,
+                    redeemInviteDto = null
+                )
+            } ?: args.inviteCode?.let { inviteCode ->
+                redeemInvite(inviteCode)
+            } ?: run {
+                submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
+                navigator.popBackStack()
+            }
         }
     }
 
@@ -154,6 +180,81 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 )
                 exception.printStackTrace()
                 submitSideEffect(OnBoardConnectingSideEffect.DecryptionFailure)
+            }
+        }
+    }
+
+    private suspend fun redeemInvite(input: InviteString) {
+        networkQueryInvite.redeemInvite(input).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    submitSideEffect(OnBoardConnectingSideEffect.InvalidInvite)
+                }
+                is Response.Success -> {
+                    val inviteResponse = loadResponse.value.response
+
+                    inviteResponse?.invite?.let { invite ->
+                        registerTokenAndStartOnBoard(
+                            ip = RelayUrl(inviteResponse.ip),
+                            nodePubKey = inviteResponse.pubkey,
+                            password = null,
+                            redeemInviteDto = invite,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun registerTokenAndStartOnBoard(
+        ip: RelayUrl,
+        nodePubKey: String?,
+        password: String?,
+        redeemInviteDto: RedeemInviteDto?,
+    ) {
+        @OptIn(RawPasswordAccess::class)
+        val authToken = AuthorizationToken(
+            PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+        )
+
+        val relayUrl = relayDataHandler.formatRelayUrl(ip)
+        torManager.setTorRequired(relayUrl.isOnionAddress)
+
+        val inviterData: OnBoardInviterData? = redeemInviteDto?.let { dto ->
+            OnBoardInviterData(
+                dto.nickname,
+                dto.pubkey?.toLightningNodePubKey(),
+                dto.route_hint,
+                dto.message,
+                dto.action,
+                dto.pin
+            )
+        }
+
+        networkQueryContact.generateToken(relayUrl, authToken, password, nodePubKey).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
+                    navigator.popBackStack()
+                }
+                is Response.Success -> {
+                    val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
+                        relayUrl,
+                        authToken,
+                        inviterData
+                    )
+
+                    if (step1Message == null) {
+                        submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
+                        navigator.popBackStack()
+                    } else {
+                        navigator.toOnBoardMessageScreen(step1Message)
+                    }
+                }
             }
         }
     }

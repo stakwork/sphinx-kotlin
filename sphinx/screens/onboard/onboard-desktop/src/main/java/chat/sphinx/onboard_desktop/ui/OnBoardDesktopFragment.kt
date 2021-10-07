@@ -3,12 +3,14 @@ package chat.sphinx.onboard_desktop.ui
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_desktop.R
 import chat.sphinx.onboard_desktop.databinding.FragmentOnBoardDesktopBinding
+import chat.sphinx.onboard_desktop.navigation.inviterData
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 
@@ -19,6 +21,8 @@ internal class OnBoardDesktopFragment: BaseFragment<
         FragmentOnBoardDesktopBinding
         >(R.layout.fragment_on_board_desktop)
 {
+
+    private val args: OnBoardDesktopFragmentArgs by navArgs()
     override val viewModel: OnBoardDesktopViewModel by viewModels()
     override val binding: FragmentOnBoardDesktopBinding by viewBinding(FragmentOnBoardDesktopBinding::bind)
 
@@ -26,6 +30,16 @@ internal class OnBoardDesktopFragment: BaseFragment<
         super.onViewCreated(view, savedInstanceState)
 
         setupHeaderAndFooter()
+
+        binding.apply {
+            buttonDesktopGetItNow.setOnClickListener {
+                viewModel.getDesktopApp()
+            }
+
+            buttonDesktopSkip.setOnClickListener {
+                viewModel.nextScreen(args.inviterData)
+            }
+        }
     }
 
     private fun setupHeaderAndFooter() {

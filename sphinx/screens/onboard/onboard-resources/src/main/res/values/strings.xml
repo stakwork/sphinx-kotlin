@@ -26,6 +26,7 @@
     <string name="side_effect_empty_input">Input must not be empty</string>
     <string name="side_effect_pin_length">Invalid PIN length</string>
     <string name="side_effect_invalid_code">Invalid Code</string>
+    <string name="side_effect_invalid_invite">Invalid Invite</string>
     <string name="side_effect_invalid_pin">Invalid PIN</string>
 
     <string name="on_board_finish_button">Finish</string>

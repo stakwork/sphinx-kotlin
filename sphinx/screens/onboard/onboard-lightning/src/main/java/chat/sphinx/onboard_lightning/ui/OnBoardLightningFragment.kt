@@ -5,13 +5,16 @@ import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_lightning.R
 import chat.sphinx.onboard_lightning.databinding.FragmentOnBoardLightningBinding
+import chat.sphinx.onboard_lightning.navigation.inviterData
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
@@ -24,8 +27,12 @@ internal class OnBoardLightningFragment: BaseFragment<
         FragmentOnBoardLightningBinding
         >(R.layout.fragment_on_board_lightning)
 {
+    private val args: OnBoardLightningFragmentArgs by navArgs()
+
     override val viewModel: OnBoardLightningViewModel by viewModels()
     override val binding: FragmentOnBoardLightningBinding by viewBinding(FragmentOnBoardLightningBinding::bind)
+
+    private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
 
     @Inject
     lateinit var imageLoaderInj: ImageLoader<ImageView>
@@ -43,6 +50,10 @@ internal class OnBoardLightningFragment: BaseFragment<
                 binding.imageViewOnBoardLightning,
                 R.drawable.lightning_network,
             )
+        }
+
+        binding.buttonContinue.setOnClickListener {
+            viewModel.nextScreen(args.inviterData)
         }
     }
 
