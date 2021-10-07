@@ -208,14 +208,16 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         }
     }
 
+    private var tokenRetries = 0
     private suspend fun registerTokenAndStartOnBoard(
         ip: RelayUrl,
         nodePubKey: String?,
         password: String?,
         redeemInviteDto: RedeemInviteDto?,
+        token: AuthorizationToken? = null
     ) {
         @OptIn(RawPasswordAccess::class)
-        val authToken = AuthorizationToken(
+        val authToken = token ?: AuthorizationToken(
             PasswordGenerator(passwordLength = 20).password.value.joinToString("")
         )
 
@@ -238,8 +240,20 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             when (loadResponse) {
                 is LoadResponse.Loading -> {}
                 is Response.Error -> {
-                    submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
-                    navigator.popBackStack()
+                    if (tokenRetries < 3) {
+                        tokenRetries += 1
+
+                        registerTokenAndStartOnBoard(
+                            ip,
+                            nodePubKey,
+                            password,
+                            redeemInviteDto,
+                            authToken
+                        )
+                    } else {
+                        submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
+                        navigator.popBackStack()
+                    }
                 }
                 is Response.Success -> {
                     val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
