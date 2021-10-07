@@ -1,6 +1,7 @@
 package chat.sphinx.splash.ui
 
 import android.os.Bundle
+import android.view.View
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -25,9 +26,13 @@ internal class SplashFragment: BaseFragment<
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setupHeaderAndFooter()
-
         viewModel.screenInit()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupHeaderAndFooter()
     }
 
     private fun setupHeaderAndFooter() {

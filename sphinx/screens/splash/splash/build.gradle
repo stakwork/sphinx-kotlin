@@ -37,6 +37,7 @@ dependencies {
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
 
     // Sphinx
+    implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
