@@ -2,9 +2,7 @@ package chat.sphinx.onboard_desktop.ui
 
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageView
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -13,8 +11,6 @@ import chat.sphinx.onboard_desktop.R
 import chat.sphinx.onboard_desktop.databinding.FragmentOnBoardDesktopBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
-import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class OnBoardDesktopFragment: BaseFragment<

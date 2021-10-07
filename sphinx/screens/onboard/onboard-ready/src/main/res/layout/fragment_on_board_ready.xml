@@ -89,13 +89,13 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_continue"
-            android:textAllCaps="true"
+            android:textAllCaps="false"
             android:gravity="center"
-            android:fontFamily="@font/montserrat_semi_bold"
+            android:fontFamily="@font/roboto_medium"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="@string/on_board_finish_button"
-            android:textSize="@dimen/on_board_sphinx_ready_button_text_size"
+            android:textSize="@dimen/on_board_welcome_button_text_size"
             android:textColor="@color/textInverted"
             android:background="@android:color/transparent" />
 
