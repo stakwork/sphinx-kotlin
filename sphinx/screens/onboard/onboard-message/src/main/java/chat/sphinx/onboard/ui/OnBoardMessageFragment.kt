@@ -10,7 +10,7 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard.R
-import chat.sphinx.onboard.databinding.FragmentOnBoardBinding
+import chat.sphinx.onboard.databinding.FragmentOnBoardMessageBinding
 import chat.sphinx.onboard.navigation.authorizationToken
 import chat.sphinx.onboard.navigation.inviterData
 import chat.sphinx.onboard.navigation.relayUrl
@@ -26,22 +26,22 @@ import io.matthewnelson.android_feature_screens.util.visible
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
-internal class OnBoardFragment: SideEffectFragment<
+internal class OnBoardMessageFragment: SideEffectFragment<
         Context,
-        OnBoardSideEffect,
-        OnBoardViewState,
-        OnBoardViewModel,
-        FragmentOnBoardBinding
-        >(R.layout.fragment_on_board)
+        OnBoardMessageSideEffect,
+        OnBoardMessageViewState,
+        OnBoardMessageViewModel,
+        FragmentOnBoardMessageBinding
+        >(R.layout.fragment_on_board_message)
 {
-    private val args: OnBoardFragmentArgs by navArgs()
+    private val args: OnBoardMessageFragmentArgs by navArgs()
 
     private val relayUrl: RelayUrl by lazy(LazyThreadSafetyMode.NONE) { args.relayUrl }
     private val authorizationToken: AuthorizationToken by lazy(LazyThreadSafetyMode.NONE) { args.authorizationToken }
     private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
 
-    override val viewModel: OnBoardViewModel by viewModels()
-    override val binding: FragmentOnBoardBinding by viewBinding(FragmentOnBoardBinding::bind)
+    override val viewModel: OnBoardMessageViewModel by viewModels()
+    override val binding: FragmentOnBoardMessageBinding by viewBinding(FragmentOnBoardMessageBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -66,20 +66,20 @@ internal class OnBoardFragment: SideEffectFragment<
             .addNavigationBarPadding(binding.layoutConstraintOnBoard)
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: OnBoardSideEffect) {
+    override suspend fun onSideEffectCollect(sideEffect: OnBoardMessageSideEffect) {
         sideEffect.execute(binding.root.context)
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: OnBoardViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: OnBoardMessageViewState) {
         @Exhaustive
         when (viewState) {
-            is OnBoardViewState.Idle -> {
+            is OnBoardMessageViewState.Idle -> {
                 binding.welcomeGetStartedProgress.gone
             }
-            is OnBoardViewState.Saving -> {
+            is OnBoardMessageViewState.Saving -> {
                 binding.welcomeGetStartedProgress.visible
             }
-            is OnBoardViewState.Error -> {
+            is OnBoardMessageViewState.Error -> {
                 binding.welcomeGetStartedProgress.gone
             }
         }

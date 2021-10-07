@@ -24,7 +24,7 @@ import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
-import chat.sphinx.onboard.navigation.OnBoardNavigator
+import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
 import chat.sphinx.onboard_connected.navigation.OnBoardConnectedNavigator
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
@@ -138,8 +138,8 @@ internal object NavigationModule {
 
     @Provides
     fun provideOnBoardNavigator(
-        onBoardNavigatorImpl: OnBoardNavigatorImpl
-    ): OnBoardNavigator =
+        onBoardNavigatorImpl: OnBoardMessageNavigatorImpl
+    ): OnBoardMessageNavigator =
         onBoardNavigatorImpl
 
     @Provides

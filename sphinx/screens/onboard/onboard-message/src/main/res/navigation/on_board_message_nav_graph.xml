@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/on_board_nav_graph"
-    app:startDestination="@+id/navigation_on_board_fragment">
+    app:startDestination="@+id/navigation_on_board_message_fragment">
 
     <fragment
-        android:id="@+id/navigation_on_board_fragment"
-        android:name="chat.sphinx.onboard.ui.OnBoardFragment"
-        tools:layout="@layout/fragment_on_board" >
+        android:id="@+id/navigation_on_board_message_fragment"
+        android:name="chat.sphinx.onboard.ui.OnBoardMessageFragment"
+        tools:layout="@layout/fragment_on_board_message" >
         <argument
             android:name="arg_relay_url"
             app:argType="string" />

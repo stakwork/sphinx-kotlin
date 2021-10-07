@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/listBG"
-    tools:context=".ui.OnBoardFragment">
+    tools:context=".ui.OnBoardMessageFragment">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/invited_to_sphinx_text_view"

@@ -3,10 +3,9 @@ package chat.sphinx.onboard.ui
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.onboard.navigation.OnBoardNavigator
+import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_common.OnBoardStepHandler
 import chat.sphinx.onboard_common.model.OnBoardInviterData
-import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.isOnionAddress
@@ -25,17 +24,17 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @HiltViewModel
-internal class OnBoardViewModel @Inject constructor(
+internal class OnBoardMessageViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
-    private val navigator: OnBoardNavigator,
+    private val navigator: OnBoardMessageNavigator,
     private val onBoardStepHandler: OnBoardStepHandler,
     private val relayDataHandler: RelayDataHandler,
     private val authenticationCoordinator: AuthenticationCoordinator
 ): SideEffectViewModel<
         Context,
-        OnBoardSideEffect,
-        OnBoardViewState
-        >(dispatchers, OnBoardViewState.Idle)
+        OnBoardMessageSideEffect,
+        OnBoardMessageViewState
+        >(dispatchers, OnBoardMessageViewState.Idle)
 {
 
     private var loginJob: Job? = null
@@ -48,7 +47,7 @@ internal class OnBoardViewModel @Inject constructor(
             return
         }
 
-        updateViewState(OnBoardViewState.Saving)
+        updateViewState(OnBoardMessageViewState.Saving)
 
         loginJob = viewModelScope.launch(mainImmediate) {
             authenticationCoordinator.submitAuthenticationRequest(
@@ -66,14 +65,14 @@ internal class OnBoardViewModel @Inject constructor(
 
                         if (relayUrl.value.startsWith("http://") && !relayUrl.isOnionAddress) {
                             submitSideEffect(
-                                OnBoardSideEffect.RelayUrlHttpConfirmation(
+                                OnBoardMessageSideEffect.RelayUrlHttpConfirmation(
                                     relayUrl = relayUrl,
                                     callback = { url ->
                                         if (url != null) {
                                             proceedToLightningScreen(authToken, inviterData, url)
                                         } else {
                                             // cancelled
-                                            updateViewState(OnBoardViewState.Idle)
+                                            updateViewState(OnBoardMessageViewState.Idle)
                                         }
                                     }
                                 )
@@ -107,11 +106,11 @@ internal class OnBoardViewModel @Inject constructor(
             val step2 = onBoardStepHandler.persistOnBoardStep2Data(inviterData)
 
             if (step2 != null) {
-                updateViewState(OnBoardViewState.Idle)
+                updateViewState(OnBoardMessageViewState.Idle)
                 navigator.toOnBoardLightning(step2)
             } else {
                 // TODO: Handle persistence error
-                updateViewState(OnBoardViewState.Error)
+                updateViewState(OnBoardMessageViewState.Error)
             }
         }
     }

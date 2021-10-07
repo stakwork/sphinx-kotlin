@@ -6,12 +6,12 @@ import chat.sphinx.onboard.R
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 
-internal sealed class OnBoardSideEffect: SideEffect<Context>() {
+internal sealed class OnBoardMessageSideEffect: SideEffect<Context>() {
 
     class RelayUrlHttpConfirmation(
         private val relayUrl: RelayUrl,
         private val callback: (RelayUrl?) -> Unit,
-    ): OnBoardSideEffect() {
+    ): OnBoardMessageSideEffect() {
 
         override suspend fun execute(value: Context) {
             val builder = AlertDialog.Builder(value)

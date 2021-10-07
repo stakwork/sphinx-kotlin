@@ -3,7 +3,7 @@ package chat.sphinx.onboard.navigation
 import androidx.annotation.IdRes
 import androidx.navigation.NavController
 import chat.sphinx.onboard.R
-import chat.sphinx.onboard.ui.OnBoardFragmentArgs
+import chat.sphinx.onboard.ui.OnBoardMessageFragmentArgs
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
@@ -12,13 +12,13 @@ import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 
-internal inline val OnBoardFragmentArgs.relayUrl: RelayUrl
+internal inline val OnBoardMessageFragmentArgs.relayUrl: RelayUrl
     get() = RelayUrl(argRelayUrl)
 
-internal inline val OnBoardFragmentArgs.authorizationToken: AuthorizationToken
+internal inline val OnBoardMessageFragmentArgs.authorizationToken: AuthorizationToken
     get() = AuthorizationToken(argAuthorizationToken)
 
-internal inline val OnBoardFragmentArgs.inviterData: OnBoardInviterData
+internal inline val OnBoardMessageFragmentArgs.inviterData: OnBoardInviterData
     get() = OnBoardInviterData(
         argNickname?.ifEmpty { null },
         argPubkey?.toLightningNodePubKey(),
@@ -34,7 +34,7 @@ class ToOnBoardScreen(
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {
-        OnBoardFragmentArgs.Builder(
+        OnBoardMessageFragmentArgs.Builder(
             onBoardStep.relayUrl.value,
             onBoardStep.authorizationToken.value,
             onBoardStep.inviterData.nickname,

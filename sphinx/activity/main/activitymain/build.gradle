@@ -46,7 +46,7 @@ dependencies {
     api project(path: ':sphinx:screens:chats:chat-group:chat-group')
     api project(path: ':sphinx:screens:chats:chat-tribe:chat-tribe')
     api project(path: ':sphinx:screens:dashboard:dashboard')
-    api project(path: ':sphinx:screens:onboard:onboard')
+    api project(path: ':sphinx:screens:onboard:onboard-message')
     api project(path: ':sphinx:screens:onboard:onboard-name')
     api project(path: ':sphinx:screens:onboard:onboard-picture')
     api project(path: ':sphinx:screens:onboard:onboard-ready')
