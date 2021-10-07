@@ -40,7 +40,7 @@ internal class OnBoardDescriptionFragment: SideEffectFragment<
         setupHeaderAndFooter()
 
         binding.buttonOnboardContinue.setOnClickListener {
-            viewModel.continueToConnectScreen()
+            viewModel.nextScreen()
         }
     }
 
