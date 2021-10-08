@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_on_board"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/listBG"
+    tools:context=".ui.OnBoardMessageFragment">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/invited_to_sphinx_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:text="@string/on_board_friend_message"
+        android:textColor="@color/text"
+        android:fontFamily="@font/roboto_light"
+        android:textSize="@dimen/on_board_welcome_message_invited_to_sphinx_text_size"
+        android:layout_marginTop="@dimen/on_board_welcome_message_top_margin"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/welcome_message_inviter_profile_picture"
+            android:layout_width="@dimen/on_board_welcome_message_inviter_picture_xy"
+            android:layout_height="@dimen/on_board_welcome_message_inviter_picture_xy"
+            android:src="@drawable/ic_profile_avatar_circle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/inviter_name_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:text=""
+            android:textColor="@color/text"
+            android:fontFamily="@font/roboto_medium"
+            android:textSize="@dimen/on_board_welcome_message_inviter_name_text_size"
+            android:layout_marginTop="@dimen/on_board_welcome_message_inviter_name_top_margin"
+            app:layout_constraintTop_toBottomOf="@+id/welcome_message_inviter_profile_picture"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Susan Johnson"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/inviter_message_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:text=""
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/on_board_welcome_message_inviter_message_text_size"
+            android:layout_marginTop="@dimen/on_board_welcome_message_inviter_name_bottom_margin"
+            app:layout_constraintTop_toBottomOf="@+id/inviter_name_text_view"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Welcome to Sphinx!"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_continue_content"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/on_board_welcome_message_button_height"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/on_board_button_bottom_margin"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/primaryBlue"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/button_continue_arrow_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:gravity="center"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:text="@string/material_icon_name_nav_forward"
+            android:textColor="@color/text"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="@dimen/on_board_button_arrow_text_size"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ProgressBar
+            android:layout_width="@dimen/on_board_button_progress_bar_xy"
+            android:layout_height="@dimen/on_board_button_progress_bar_xy"
+            android:layout_marginLeft="@dimen/default_layout_margin"
+            android:id="@+id/welcome_get_started_progress"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_continue"
+            style="@style/SignUpButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="@string/on_board_get_started_button"
+            android:textSize="@dimen/on_board_welcome_message_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@android:color/transparent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

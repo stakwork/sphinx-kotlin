@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/on_board_nav_graph"
+    app:startDestination="@+id/navigation_on_board_message_fragment">
+
+    <fragment
+        android:id="@+id/navigation_on_board_message_fragment"
+        android:name="chat.sphinx.onboard.ui.OnBoardMessageFragment"
+        tools:layout="@layout/fragment_on_board_message" >
+        <argument
+            android:name="arg_relay_url"
+            app:argType="string" />
+        <argument
+            android:name="arg_authorization_token"
+            app:argType="string" />
+        <argument
+            android:name="arg_nickname"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_pubkey"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_route_hint"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_message"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_action"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="arg_pin"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+
+</navigation>

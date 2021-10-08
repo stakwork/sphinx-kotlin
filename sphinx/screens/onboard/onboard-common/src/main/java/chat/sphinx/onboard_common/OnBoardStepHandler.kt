@@ -49,7 +49,7 @@ class OnBoardStepHandler @Inject constructor(
         relayUrl: RelayUrl,
         authorizationToken: AuthorizationToken,
         inviterData: OnBoardInviterData?
-    ): OnBoardStep.Step1_Welcome? {
+    ): OnBoardStep.Step1_WelcomeMessage? {
         lock.withLock {
             val inviterDataRealized: OnBoardInviterData = inviterData
                 ?: OnBoardInviterData(
@@ -61,7 +61,7 @@ class OnBoardStepHandler @Inject constructor(
                     pin = null,
                 )
 
-            val step1 = OnBoardStep.Step1_Welcome(
+            val step1 = OnBoardStep.Step1_WelcomeMessage(
                 relayUrl,
                 authorizationToken,
                 inviterDataRealized

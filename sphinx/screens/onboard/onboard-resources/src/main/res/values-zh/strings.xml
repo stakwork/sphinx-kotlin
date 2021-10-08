@@ -1,5 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="on_board_welcome">歡迎</string>
+    <string name="on_board_new_user">New User</string>
+    <string name="on_board_existing_user">Existing User</string>
+    <string name="on_board_continue">繼續</string>
+    <string name="on_board_paste_connection_code">"Paste your connection code\ninto Sphinx"</string>
+    <string name="on_board_paste_keys">"Copy your keys from your\ndesktop app and paste it here"</string>
+    <string name="on_board_connect">Connect</string>
+    <string name="on_board_connecting">Connecting...</string>
+    <string name="on_board_submit">Submit</string>
+    <string name="on_board_connect_paste_connection_code">Paste your connection code...</string>
+    <string name="on_board_connect_paste_keys">Paste your keys...</string>
+    <string name="on_board_connected_subtitle">Your app is now connected</string>
+    <string name="on_board_lightning_title">"You are now on the\nLightning Network!"</string>
+    <string name="on_board_desktop_title">"Don't you have\nSphinx for desktop?"</string>
+    <string name="on_board_desktop_skip">Skip</string>
+    <string name="on_board_desktop_get_it_now">Get It Now</string>
+
+    <string name="on_board_welcome_info_decrypt">輸入 PIN\n解碼</string>
+    <string name="on_board_edit_text_hint_decrypt">輸入 PIN …</string>
+
+    <string name="side_effect_decryption_failure">解碼失敗</string>
+    <string name="side_effect_empty_input">輸入不可無填</string>
+    <string name="side_effect_pin_length">PIN 長短不對</string>
+    <string name="side_effect_invalid_code">無效 Code</string>
+    <string name="side_effect_invalid_invite">邀請無效</string>
+    <string name="side_effect_invalid_pin">無效 PIN</string>
+
     <string name="on_board_finish_button">完成</string>
     <string name="on_board_next_button">下一步</string>
 

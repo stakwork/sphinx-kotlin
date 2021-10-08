@@ -104,7 +104,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:feature-socket-io')
     implementation project(path: ':sphinx:application:network:features:tor:feature-network-tor')
 
-    implementation project(path: ':sphinx:screens:splash:key-restore')
+    implementation project(path: ':sphinx:screens:onboard:key-restore')
 
     implementation project(path: ':sphinx:service:features:media-player:feature-service-media-player-android')
 

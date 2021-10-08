@@ -6,7 +6,7 @@ import chat.sphinx.wrapper_relay.RelayUrl
 @Suppress("DataClassPrivateConstructor", "ClassName")
 sealed class OnBoardStep {
 
-    data class Step1_Welcome private constructor(
+    data class Step1_WelcomeMessage private constructor(
         val relayUrl: RelayUrl,
         val authorizationToken: AuthorizationToken,
         val inviterData: OnBoardInviterData
@@ -18,8 +18,8 @@ sealed class OnBoardStep {
                 relayUrl: RelayUrl,
                 authorizationToken: AuthorizationToken,
                 inviterData: OnBoardInviterData
-            ) : Step1_Welcome =
-                Step1_Welcome(relayUrl, authorizationToken, inviterData)
+            ) : Step1_WelcomeMessage =
+                Step1_WelcomeMessage(relayUrl, authorizationToken, inviterData)
         }
 
     }

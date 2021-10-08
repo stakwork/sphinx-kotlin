@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_on_board_description"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primaryBlue"
+    tools:context=".ui.OnBoardDescriptionFragment">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_onboard_description"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerInside"
+        tools:src="@drawable/existing_user_description"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_onboard_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/default_double_layout_margin"
+        android:fontFamily="@font/roboto_medium"
+        android:textSize="@dimen/on_board_description_text_size"
+        android:textColor="@android:color/white"
+        android:gravity="center"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toTopOf="@+id/button_onboard_continue"
+        tools:text="@string/on_board_paste_connection_code"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_onboard_continue"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/on_board_welcome_button_height"
+        android:fontFamily="@font/roboto_medium"
+        android:textSize="@dimen/on_board_welcome_button_text_size"
+        android:textColor="@android:color/black"
+        android:gravity="center"
+        android:background="@drawable/button_background"
+        android:backgroundTint="@android:color/white"
+        android:text="@string/on_board_continue"
+        android:textAllCaps="false"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/on_board_button_bottom_margin"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

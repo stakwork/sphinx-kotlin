@@ -23,10 +23,17 @@ import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
-import chat.sphinx.onboard.navigation.OnBoardNavigator
+import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
+import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
+import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
+import chat.sphinx.onboard_connected.navigation.OnBoardConnectedNavigator
+import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
+import chat.sphinx.onboard_desktop.navigation.OnBoardDesktopNavigator
+import chat.sphinx.onboard_lightning.navigation.OnBoardLightningNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
+import chat.sphinx.onboard_welcome.navigation.OnBoardWelcomeNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
 import chat.sphinx.payment_template.navigation.PaymentTemplateNavigator
@@ -131,9 +138,51 @@ internal object NavigationModule {
 
     @Provides
     fun provideOnBoardNavigator(
-        onBoardNavigatorImpl: OnBoardNavigatorImpl
-    ): OnBoardNavigator =
+        onBoardNavigatorImpl: OnBoardMessageNavigatorImpl
+    ): OnBoardMessageNavigator =
         onBoardNavigatorImpl
+
+    @Provides
+    fun provideOnBoardWelcomeNavigator(
+        onBoardWelcomeNavigatorImpl: OnBoardWelcomeNavigatorImpl
+    ): OnBoardWelcomeNavigator =
+        onBoardWelcomeNavigatorImpl
+
+    @Provides
+    fun provideOnBoardDescriptionNavigator(
+        onBoardDescriptionNavigatorImpl: OnBoardDescriptionNavigatorImpl
+    ): OnBoardDescriptionNavigator =
+        onBoardDescriptionNavigatorImpl
+
+    @Provides
+    fun provideOnBoardConnectNavigator(
+        onBoardConnectNavigatorImpl: OnBoardConnectNavigatorImpl
+    ): OnBoardConnectNavigator =
+        onBoardConnectNavigatorImpl
+
+    @Provides
+    fun provideOnBoardConnectingNavigator(
+        onBoardConnectingNavigatorImpl: OnBoardConnectingNavigatorImpl
+    ): OnBoardConnectingNavigator =
+        onBoardConnectingNavigatorImpl
+
+    @Provides
+    fun provideOnBoardConnectedNavigator(
+        onBoardConnectedNavigatorImpl: OnBoardConnectedNavigatorImpl
+    ): OnBoardConnectedNavigator =
+        onBoardConnectedNavigatorImpl
+
+    @Provides
+    fun provideOnBoardLightningNavigator(
+        onBoardLightningNavigatorImpl: OnBoardLightningNavigatorImpl
+    ): OnBoardLightningNavigator =
+        onBoardLightningNavigatorImpl
+
+    @Provides
+    fun provideOnBoardDesktopNavigator(
+        onBoardDesktopNavigatorImpl: OnBoardDesktopNavigatorImpl
+    ): OnBoardDesktopNavigator =
+        onBoardDesktopNavigatorImpl
 
     @Provides
     fun provideOnBoardNameNavigator(

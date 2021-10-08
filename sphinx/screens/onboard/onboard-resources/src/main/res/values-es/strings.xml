@@ -1,5 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="on_board_welcome">Bienvenido</string>
+    <string name="on_board_new_user">Nuevo Usuario</string>
+    <string name="on_board_existing_user">Usuario Existente</string>
+    <string name="on_board_continue">Continuar</string>
+    <string name="on_board_paste_connection_code">"Pegá tu código de conexión\nen Sphinx"</string>
+    <string name="on_board_paste_keys">"Copiá tus claves desde\nla app de escritorio y pegalas aquí."</string>
+    <string name="on_board_connect">Conectar</string>
+    <string name="on_board_connecting">Conectando...</string>
+    <string name="on_board_submit">Enviar</string>
+    <string name="on_board_connect_paste_connection_code">Pegá tu código de conexión...</string>
+    <string name="on_board_connect_paste_keys">Pegá tus claves...</string>
+    <string name="on_board_connected_subtitle">Ya estás conectado</string>
+    <string name="on_board_lightning_title">"Ahora estás en\nLightning Network!"</string>
+    <string name="on_board_desktop_title">"¿Ya tienes Sphinx\npara escritorio?"</string>
+    <string name="on_board_desktop_skip">Más tarde</string>
+    <string name="on_board_desktop_get_it_now">Obtener ahora</string>
+
+    <string name="on_board_welcome_info_decrypt">Ingresa tu PIN\npara desencriptar</string>
+    <string name="on_board_edit_text_hint_decrypt">Ingresa tu PIN…</string>
+
+    <string name="side_effect_decryption_failure">Desencriptado fallido</string>
+    <string name="side_effect_empty_input">El valor no puede ser vacío</string>
+    <string name="side_effect_pin_length">Longitud del PIN inválida</string>
+    <string name="side_effect_invalid_code">Código inválido</string>
+    <string name="side_effect_invalid_invite">Invitación inválida</string>
+    <string name="side_effect_invalid_pin">PIN inválido</string>
+
     <string name="on_board_finish_button">Terminar</string>
     <string name="on_board_next_button">Siguiente</string>
 
