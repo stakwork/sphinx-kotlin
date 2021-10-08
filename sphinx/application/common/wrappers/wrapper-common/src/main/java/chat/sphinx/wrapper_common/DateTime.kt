@@ -16,6 +16,11 @@ inline fun String.toDateTime(): DateTime =
     DateTime(DateTime.getFormatRelay().parse(this))
 
 @Suppress("NOTHING_TO_INLINE")
+@Throws(ParseException::class)
+inline fun String.toDateTimeWithFormat(format: SimpleDateFormat): DateTime =
+    DateTime(format.parse(this))
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Long.toDateTime(): DateTime =
     DateTime(Date(this))
 
@@ -62,6 +67,14 @@ inline fun DateTime.chatTimeFormat(
     }
 
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun DateTime.invoiceExpirationTimeFormat(): String =
+    DateTime.getFormathmma().format(value)
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun DateTime.invoicePaymentDateFormat(): String =
+    DateTime.getFormatMMMEEEdd().format(value)
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun DateTime.eeemmddhmma(): String =
     DateTime.getFormateeemmddhmma().format(value)
 
@@ -75,6 +88,13 @@ inline fun DateTime.after(dateTime: DateTime): Boolean =
 @Suppress("NOTHING_TO_INLINE")
 inline fun DateTime.before(dateTime: DateTime): Boolean =
     value.before(dateTime.value)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun DateTime.getMinutesDifferenceWithDateTime(dateTime: DateTime): Double {
+    val diff: Long = this.time - dateTime.time
+    val seconds = diff.toDouble() / 1000
+    return seconds / 60
+}
 
 /**
  * DateTime format from Relay: 2021-02-26T10:48:20.025Z
@@ -93,8 +113,10 @@ value class DateTime(val value: Date) {
         private const val FORMAT_EEE_H_MM_A = "EEE h:mm a"
         private const val FORMAT_MMM = "MMM"
         private const val FORMAT_EEE_DD = "EEE dd"
+        private const val FORMAT_MMM_EEE_DD = "EEE, MMM dd"
         private const val FORMAT_EEE_MM_DD_H_MM_A = "EEE MMM dd, h:mm a"
         private const val FORMAT_DD_MMM_HH_MM = "dd MMM, HH:mm"
+        private const val FORMAT_MMM_DD_YYYY = "MMM dd, yyyy"
 
         private const val SIX_DAYS_IN_MILLISECONDS = 518_400_000L
 
@@ -239,6 +261,36 @@ value class DateTime(val value: Date) {
                     .also {
                         it.timeZone = TimeZone.getDefault()
                         formatEEEdd = it
+                    }
+            }
+
+        @Volatile
+        private var formatMMMEEEdd: SimpleDateFormat? = null
+        fun getFormatMMMEEEdd(): SimpleDateFormat =
+            formatMMMEEEdd?.also {
+                it.timeZone = TimeZone.getDefault()
+            } ?: synchronized(this) {
+                formatMMMEEEdd?.also {
+                    it.timeZone = TimeZone.getDefault()
+                } ?: SimpleDateFormat(FORMAT_MMM_EEE_DD, Locale.getDefault())
+                    .also {
+                        it.timeZone = TimeZone.getDefault()
+                        formatMMMEEEdd = it
+                    }
+            }
+
+        @Volatile
+        private var formatMMMddyyyy: SimpleDateFormat? = null
+        fun getFormatMMMddyyyy(timeZone: TimeZone = TimeZone.getDefault()): SimpleDateFormat =
+            formatMMMddyyyy?.also {
+                it.timeZone = timeZone
+            } ?: synchronized(this) {
+                formatMMMddyyyy?.also {
+                    it.timeZone = timeZone
+                } ?: SimpleDateFormat(FORMAT_MMM_DD_YYYY, Locale.getDefault())
+                    .also {
+                        it.timeZone = timeZone
+                        formatMMMddyyyy = it
                     }
             }
     }

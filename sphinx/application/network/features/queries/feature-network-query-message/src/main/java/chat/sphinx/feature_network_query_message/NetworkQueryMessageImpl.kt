@@ -9,12 +9,14 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.isMemberApprove
+import chat.sphinx.wrapper_message_media.MediaToken
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +38,8 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_MESSAGES = "${ENDPOINT_MESSAGE}s"
         private const val ENDPOINT_PAYMENT = "/payment"
         private const val ENDPOINT_PAYMENTS = "${ENDPOINT_PAYMENT}s"
+        private const val ENDPOINT_PAY_ATTACHMENT = "/purchase"
+        private const val ENDPOINT_INVOICES = "/invoices"
     }
 
     override fun getMessages(
@@ -87,6 +91,30 @@ class NetworkQueryMessageImpl(
             relayData = relayData
         )
 
+    override fun sendPaymentRequest(
+        postPaymentRequestDto: PostPaymentRequestDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_INVOICES,
+            requestBodyJsonClass = PostPaymentRequestDto::class.java,
+            requestBody = postPaymentRequestDto,
+            relayData = relayData
+        )
+
+    override fun payPaymentRequest(
+        putPaymentRequestDto: PutPaymentRequestDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_INVOICES,
+            requestBodyJsonClass = PutPaymentRequestDto::class.java,
+            requestBody = putPaymentRequestDto,
+            relayData = relayData
+        )
+
     override fun sendKeySendPayment(
         postPaymentDto: PostPaymentDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
@@ -126,6 +154,31 @@ class NetworkQueryMessageImpl(
             relayData = relayData
         )
     }
+
+    override fun payAttachment(
+        chatId: ChatId,
+        contactId: ContactId?,
+        amount: Sat,
+        mediaToken: MediaToken,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<MessageDto, ResponseError>> {
+
+        val payAttachmentDto = PostPayAttachmentDto(
+                chat_id = chatId.value,
+                contact_id = contactId?.value,
+                amount = amount.value,
+                media_token = mediaToken.value
+            )
+
+        return networkRelayCall.relayPost(
+            responseJsonClass = MessageRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_PAY_ATTACHMENT,
+            requestBodyJsonClass = PostPayAttachmentDto::class.java,
+            requestBody = payAttachmentDto,
+            relayData = relayData
+        )
+    }
+
 
     override fun readMessages(
         chatId: ChatId,

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="new_contact_nickname_label">Alias *</string>
+    <string name="new_contact_address_label">Dirección *</string>
+    <string name="new_contact_route_hint_label">Pista de Ruta</string>
+    <string name="new_contact_nickname_address_empty">Alias y dirección son obligatorios</string>
+    <string name="new_contact_privacy_setting_help">Cuando la configuración de privacidad está activada, el contacto solo estará visible si se utilizó el PIN Privado para ingresar en Sphinx. Primero debes setear el PIN Privado desde el Perfil para user esta funcionalidad</string>
+    <string name="new_contact_invalid_public_key_error">Clave Pública inválida</string>
+    <string name="new_contact_invalid_route_hint_error">Pista de Ruta inválida</string>
+    <string name="failed_to_update_contact">No se pudo guardar el contacto</string>
+    <string name="edit_contact_header_subscribe_button">Suscribirse</string>
+    <string name="edit_contact_header_subscribed_button">Suscripto</string>
+</resources>

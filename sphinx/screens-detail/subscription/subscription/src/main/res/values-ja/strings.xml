@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_header_name">購読する</string>
+    <string name="amount">額</string>
+    <string name="custom_amount">任意の金額: </string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="time_interval">頻度</string>
+    <string name="daily">毎日</string>
+    <string name="weekly">毎週</string>
+    <string name="monthly">毎月</string>
+    <string name="end_rule">終了条件</string>
+    <string name="make">支払い回数: </string>
+    <string name="payments">回</string>
+    <string name="pay_until">支払い期限</string>
+    <string name="delete_subscription">購読を解約する</string>
+    <string name="are_you_sure_you_want_to_delete_subscription">購読を解約しますか？</string>
+    <string name="amount_is_required">金額を入力してください</string>
+    <string name="time_interval_is_required">頻度を指定してください</string>
+    <string name="please_set_either_the_number_of_payments_to_make_or_end_date">支払い回数または支払い終了日のどちらかを設定してください</string>
+    <string name="failed_to_save_subscription">購読できませんでした</string>
+    <string name="saved_subscription_successfully">購読しました</string>
+    <string name="deleting_subscription">購読を解約中</string>
+    <string name="failed_to_pause_subscription">購読を一時停止できませんでした</string>
+    <string name="successfully_paused_subscription">購読を一時停止しました</string>
+    <string name="failed_to_restart_subscription">購読を再開できませんでした</string>
+    <string name="successfully_restarted_subscription">購読を再開しました</string>
+    <string name="subscribe">購読する</string>
+    <string name="update_subscription">購読状況を更新</string>
+    <string name="failed_to_delete_subscription">購読を解約できませんでした</string>
+</resources>

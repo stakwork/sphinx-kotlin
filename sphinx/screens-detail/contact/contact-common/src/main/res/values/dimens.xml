@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="new_contact_form_horizontal_margin">30dp</dimen>
+    <dimen name="new_contact_edit_text_left_margin">-4dp</dimen>
+    <dimen name="new_contact_form_field_container_height">85dp</dimen>
+    <dimen name="save_contact_button_height">52dp</dimen>
+    <dimen name="save_to_contacts_button_text_size">14sp</dimen>
+    <dimen name="save_to_contacts_button_bottom_margin">33dp</dimen>
+    <dimen name="save_to_contacts_button_width">230dp</dimen>
+    <dimen name="save_progress_bar_xy">25dp</dimen>
+    <dimen name="save_progress_bar_margin_left">10dp</dimen>
+
+    <dimen name="edit_contact_header_subscribe_button_height">30dp</dimen>
+    <dimen name="edit_contact_header_subscribe_button_text_size">14sp</dimen>
+</resources>

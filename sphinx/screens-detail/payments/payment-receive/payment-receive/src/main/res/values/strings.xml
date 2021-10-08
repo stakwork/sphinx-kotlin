@@ -4,5 +4,5 @@
     <string name="requested_amount_too_high">Requested amount is too high</string>
     <string name="failed_to_request_payment">Failed to request payment</string>
     <string name="amount_n_sats">Amount: %d sats</string>
-    <string name="qr_code_title">Payment Request</string>
+    <string name="qr_code_view_title">Payment Request</string>
 </resources>

@@ -31,27 +31,19 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
-    implementation project(path: ':kotlin:encoders:base64')
 
     // Sphinx
+    implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
-
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
 
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
-    implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
-
-    implementation project(path: ':sphinx:screens:authentication:authentication-resources')
-    implementation project(path: ':sphinx:screens:splash:key-restore')
     api project(path: ':sphinx:screens:onboard:onboard-common')
-    implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
-
-    implementation deps.jncryptor
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

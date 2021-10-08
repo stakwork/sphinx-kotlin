@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_motion_splash"
+    android:id="@+id/layout_constraint_splash"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_splash"
-    app:layoutDescription="@xml/motion_scene_splash"
     tools:context=".ui.SplashFragment">
-
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guide_line_horizontal_mid"
@@ -28,16 +26,4 @@
         app:layout_constraintTop_toTopOf="@+id/guide_line_horizontal_mid"
         tools:ignore="ContentDescription" />
 
-    <!-- Background showing is just from tools attribute -->
-    <include
-        android:id="@+id/layout_on_board"
-        layout="@layout/layout_on_board_input"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/image_view_splash_logo" />
-
-    <include
-        android:id="@+id/layout_authentication"
-        layout="@layout/layout_authentication" />
-
-</androidx.constraintlayout.motion.widget.MotionLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

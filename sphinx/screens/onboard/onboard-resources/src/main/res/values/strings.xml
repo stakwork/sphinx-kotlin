@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="on_board_welcome">Welcome</string>
+    <string name="on_board_new_user">New User</string>
+    <string name="on_board_existing_user">Existing User</string>
+    <string name="on_board_continue">Continue</string>
+    <string name="on_board_paste_connection_code">"Paste your connection code\ninto Sphinx"</string>
+    <string name="on_board_paste_keys">"Copy your keys from your\ndesktop app and paste it here"</string>
+    <string name="on_board_connect">Connect</string>
+    <string name="on_board_connecting">Connecting...</string>
+    <string name="on_board_submit">Submit</string>
+    <string name="on_board_connect_paste_connection_code">Paste your connection code...</string>
+    <string name="on_board_connect_paste_keys">Paste your keys...</string>
+    <string name="on_board_connected_subtitle">Your app is now connected</string>
+    <string name="on_board_lightning_title">"You are now on the\nLightning Network!"</string>
+    <string name="on_board_desktop_title">"Don't you have\nSphinx for desktop?"</string>
+    <string name="on_board_desktop_skip">Skip</string>
+    <string name="on_board_desktop_get_it_now">Get It Now</string>
+
+    <string name="side_effect_generate_token_failed">Generate token failed</string>
+
+    <string name="on_board_welcome_info_decrypt">Enter PIN\nto decrypt</string>
+    <string name="on_board_edit_text_hint_decrypt">Enter PIN…</string>
+
+    <string name="side_effect_decryption_failure">Failed to decrypt</string>
+    <string name="side_effect_empty_input">Input must not be empty</string>
+    <string name="side_effect_pin_length">Invalid PIN length</string>
+    <string name="side_effect_invalid_code">Invalid Code</string>
+    <string name="side_effect_invalid_invite">Invalid Invite</string>
+    <string name="side_effect_invalid_pin">Invalid PIN</string>
+
     <string name="on_board_finish_button">Finish</string>
     <string name="on_board_next_button">Next</string>
 
@@ -9,7 +38,6 @@
     <string name="side_effect_create_inviter_failed">Failed to create inviter</string>
     <string name="side_effect_get_contacts_failed">Failed to retrieve main contact</string>
     <string name="side_effect_update_owner_failed">Failed to update main contact</string>
-    <string name="side_effect_generate_token_failed">Generate token failed</string>
 
     <string name="sign_up_name_edit_text_hint">Set Your Name</string>
     <string name="sign_up_name_text_view">Your Name</string>

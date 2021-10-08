@@ -11,6 +11,8 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
+import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
@@ -38,18 +40,14 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.ExternalAuthorizeLink
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.isValidExternalAuthorizeLink
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.toExternalAuthorizeLink
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
-import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_contact.isInviteContact
-import chat.sphinx.wrapper_contact.isTrue
+import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
@@ -90,6 +88,8 @@ internal class DashboardViewModel @Inject constructor(
     private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
 
+    private val accountOwner: StateFlow<Contact?>,
+
     val dashboardNavigator: DashboardNavigator,
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
@@ -103,6 +103,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryVersion: NetworkQueryVersion,
+    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -138,6 +139,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleTribeJoinLink(tribeJoinLink)
             } ?: deepLink?.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
                 handleExternalAuthorizeLink(externalAuthorizeLink)
+            } ?: deepLink?.toPeopleConnectLink()?.let { peopleConnectLink ->
+                handlePeopleConnectLink(peopleConnectLink)
             }
         }
     }
@@ -151,6 +154,7 @@ internal class DashboardViewModel @Inject constructor(
                             return when {
                                 data.isValidTribeJoinLink ||
                                 data.isValidExternalAuthorizeLink ||
+                                data.isValidPeopleConnectLink ||
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ->
@@ -179,6 +183,10 @@ internal class DashboardViewModel @Inject constructor(
                 } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
 
                     handleExternalAuthorizeLink(externalAuthorizeLink)
+
+                } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
+
+                    handlePeopleConnectLink(peopleConnectLink)
 
                 } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
 
@@ -242,13 +250,17 @@ internal class DashboardViewModel @Inject constructor(
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
 
-            chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
-
-                dashboardNavigator.toChatContact(chat.id, contact.id)
-                
-            } ?: dashboardNavigator.toChatContact(null, contact.id)
+            goToContactChat(contact)
 
         } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
+    }
+
+    private suspend fun goToContactChat(contact: Contact) {
+        chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
+
+            dashboardNavigator.toChatContact(chat.id, contact.id)
+
+        } ?: dashboardNavigator.toChatContact(null, contact.id)
     }
 
     private fun handleExternalAuthorizeLink(link: ExternalAuthorizeLink) {
@@ -257,18 +269,140 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
-    fun authorizeExternal() {
-        val deepLinkViewState = deepLinkPopupViewStateContainer.viewStateFlow.value
-        if (deepLinkViewState is DeepLinkPopupViewState.ExternalAuthorizePopup) {
+    private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
+        link.publicKey.toLightningNodePubKey()?.let { lightningNodePubKey ->
+            contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()?.let { contact ->
 
-            viewModelScope.launch(mainImmediate) {
+                goToContactChat(contact)
+
+            } ?: loadPeopleConnectPopup(link)
+        }
+    }
+
+    private suspend fun loadPeopleConnectPopup(link: PeopleConnectLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo
+        )
+
+        networkQueryAuthorizeExternal.getPersonInfo(link.host, link.publicKey).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+
+                    deepLinkPopupViewStateContainer.updateViewState(
+                        DeepLinkPopupViewState.PopupDismissed
+                    )
+
+                    submitSideEffect(
+                        DashboardSideEffect.Notify(
+                            app.getString(R.string.dashboard_connect_retrieve_person_data_error)
+                        )
+                    )
+
+                }
+                is Response.Success -> {
+                    deepLinkPopupViewStateContainer.updateViewState(
+                        DeepLinkPopupViewState.PeopleConnectPopup(
+                            loadResponse.value.owner_alias,
+                            loadResponse.value.description ?: app.getString(R.string.dashboard_connect_description_missing),
+                            loadResponse.value.price_to_meet ?: 0,
+                            loadResponse.value.img,
+                            loadResponse.value
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun connectToContact(message: String?) {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        viewModelScope.launch(mainImmediate) {
+
+            if (message.isNullOrEmpty()) {
+                submitSideEffect(
+                    DashboardSideEffect.Notify(
+                        app.getString(R.string.dashboard_connect_message_empty)
+                    )
+                )
+
+                return@launch
+            }
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PeopleConnectPopupProcessing
+            )
+
+            var errorMessage = app.getString(R.string.dashboard_connect_generic_error)
+
+            if (viewState is DeepLinkPopupViewState.PeopleConnectPopup) {
+                val alias = viewState.personInfoDto.owner_alias.toContactAlias() ?: ContactAlias(app.getString(R.string.unknown))
+                val priceToMeet = viewState.personInfoDto.price_to_meet?.toSat() ?: Sat(0)
+                val routeHint = viewState.personInfoDto.owner_route_hint?.toLightningRouteHint()
+                val photoUrl = viewState.personInfoDto.img?.toPhotoUrl()
+
+                viewState.personInfoDto.owner_pubkey.toLightningNodePubKey()?.let { pubKey ->
+                    viewState.personInfoDto.owner_contact_key.toContactKey()?.let { contactKey ->
+                        val response = contactRepository.connectToContact(
+                            alias,
+                            pubKey,
+                            routeHint,
+                            contactKey,
+                            message,
+                            photoUrl,
+                            priceToMeet
+                        )
+
+                        when (response) {
+                            is Response.Error -> {
+                                errorMessage = response.cause.message
+                            }
+                            is Response.Success -> {
+                                response.value?.let { contactId ->
+                                    dashboardNavigator.toChatContact(null, contactId)
+                                }
+
+                                deepLinkPopupViewStateContainer.updateViewState(
+                                    DeepLinkPopupViewState.PopupDismissed
+                                )
+
+                                return@launch
+                            }
+                        }
+                    }
+                }
+            }
+
+            submitSideEffect(
+                DashboardSideEffect.Notify(errorMessage)
+            )
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
+            )
+        }
+    }
+
+    fun authorizeExternal() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        viewModelScope.launch(mainImmediate) {
+
+            if (viewState is DeepLinkPopupViewState.ExternalAuthorizePopup) {
+
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.ExternalAuthorizePopupProcessing
+                )
 
                 val relayUrl: RelayUrl = relayDataHandler.retrieveRelayUrl() ?: return@launch
 
                 val response = repositoryDashboard.authorizeExternal(
                     relayUrl.value,
-                    deepLinkViewState.link.host,
-                    deepLinkViewState.link.challenge
+                    viewState.link.host,
+                    viewState.link.challenge
                 )
 
                 when (response) {
@@ -281,16 +415,23 @@ internal class DashboardViewModel @Inject constructor(
                         val i = Intent(Intent.ACTION_VIEW)
                         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
                         i.data = Uri.parse(
-                            "https://${deepLinkViewState.link.host}?challenge=${deepLinkViewState.link.challenge}"
+                            "https://${viewState.link.host}?challenge=${viewState.link.challenge}"
                         )
                         app.startActivity(i)
                     }
                 }
 
-                deepLinkPopupViewStateContainer.updateViewState(
-                    DeepLinkPopupViewState.PopupDismissed
+            } else {
+                submitSideEffect(
+                    DashboardSideEffect.Notify(
+                        app.getString(R.string.dashboard_authorize_generic_error)
+                    )
                 )
             }
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
+            )
         }
     }
 
@@ -322,6 +463,10 @@ internal class DashboardViewModel @Inject constructor(
 
     val deepLinkPopupViewStateContainer: ViewStateContainer<DeepLinkPopupViewState> by lazy {
         ViewStateContainer(DeepLinkPopupViewState.PopupDismissed)
+    }
+
+    val createTribeButtonViewStateContainer: ViewStateContainer<CreateTribeButtonViewState> by lazy {
+        ViewStateContainer(CreateTribeButtonViewState.Hidden)
     }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
@@ -455,15 +600,38 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
-        // Prime it...
         viewModelScope.launch(mainImmediate) {
-            try {
-                repositoryDashboard.accountOwner.collect {
-                    if (it != null) {
-                        throw Exception()
-                    }
+            val owner = getOwner()
+
+            createTribeButtonViewStateContainer.updateViewState(
+                if (owner.isOnVirtualNode()) {
+                    CreateTribeButtonViewState.Hidden
+                } else {
+                    CreateTribeButtonViewState.Visible
                 }
-            } catch (e: Exception) {}
+            )
+        }
+    }
+
+    private suspend fun getOwner(): Contact {
+        return accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
         }
     }
 
@@ -586,9 +754,23 @@ internal class DashboardViewModel @Inject constructor(
                                 continue
                             }
                         }
-                        currentChats.add(
-                            DashboardChat.Inactive.Conversation(contact)
-                        )
+
+                        var updatedContactChat: DashboardChat = DashboardChat.Inactive.Conversation(contact)
+
+                        for (chat in currentChatViewState.list) {
+                            if (chat is DashboardChat.Active.Conversation) {
+                                if (chat.contact.id == contact.id) {
+                                    updatedContactChat = DashboardChat.Active.Conversation(
+                                        chat.chat,
+                                        chat.message,
+                                        contact,
+                                        chat.unseenMessageFlow
+                                    )
+                                }
+                            }
+                        }
+
+                        currentChats.add(updatedContactChat)
                     }
                 }
 

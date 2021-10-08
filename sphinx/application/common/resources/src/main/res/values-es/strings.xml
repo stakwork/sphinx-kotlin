@@ -11,6 +11,7 @@
     <string name="unknown">Desconocido</string>
     <string name="decryption_error">ERROR DE DECRIPTACIÓN...</string>
     <string name="null_name_error">ERROR: NOMBRE VACÍO</string>
+    <string name="public_key">Clave Pública</string>
 
     <!--  Number Pad   -->
     <string name="_1">1</string>
@@ -39,6 +40,7 @@
     <string name="material_icon_name_cloud_download">cloud_download</string>
     <string name="material_icon_name_play_button">play_arrow</string>
     <string name="material_icon_name_pause_button">pause</string>
+    <string name="material_icon_name_volume_up">volume_up</string>
     <string name="material_icon_name_video_camera">videocam</string>
     <string name="material_icon_name_microphone">mic</string>
     <string name="material_icon_name_payment_accepted">check</string>

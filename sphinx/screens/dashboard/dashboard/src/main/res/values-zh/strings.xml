@@ -73,6 +73,15 @@
     <string name="last_message_description_invite_expired">已失效</string>
 
     <!-- Deep link authorize popup -->
-    <string name="dashboard_authorize_popup_title">Do you want to authorize with:</string>
-    <string name="dashboard_authorize_button">AUTHORIZE</string>
+    <string name="dashboard_authorize_popup_title">允許連結外部授權嗎？</string>
+    <string name="dashboard_authorize_button">允許</string>
+    <string name="dashboard_authorize_generic_error">外部連結失敗，請稍後再試</string>
+
+    <string name="dashboard_connect_button">連接</string>
+    <string name="dashboard_connect_price_to_meet">會合費用: %s</string>
+    <string name="dashboard_connect_description_missing">無細節</string>
+    <string name="dashboard_connect_initial_message_hint">%s的首次訊息</string>
+    <string name="dashboard_connect_retrieve_person_data_error">個人資訊下載失敗</string>
+    <string name="dashboard_connect_message_empty">訊息不可無填</string>
+    <string name="dashboard_connect_generic_error">聯絡人連結失敗，請稍後再試</string>
 </resources>

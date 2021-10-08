@@ -56,6 +56,16 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <include
+        android:id="@+id/include_chat_recording_circle"
+        layout="@layout/layout_chat_recording_circle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/include_chat_tribe_footer"
+        app:layout_constraintTop_toTopOf="@+id/include_chat_tribe_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <include
         android:id="@+id/include_chat_tribe_selected_message"
         layout="@layout/layout_selected_message"
         tools:visibility="gone" />
@@ -68,6 +78,15 @@
         app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone" />
+
+
+    <include
+        android:id="@+id/include_chat_tribe_attachment_fullscreen"
+        layout="@layout/layout_attachment_fullscreen"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"
+        />
 
     <include
         android:id="@+id/include_chat_tribe_menu"

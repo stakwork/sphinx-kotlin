@@ -25,6 +25,10 @@ import chat.sphinx.wrapper_common.lightning.LightningRouteHint;
 import chat.sphinx.wrapper_common.lightning.Sat;
 import chat.sphinx.wrapper_common.message.MessageId;
 import chat.sphinx.wrapper_common.message.MessageUUID;
+import chat.sphinx.wrapper_common.subscription.Cron;
+import chat.sphinx.wrapper_common.subscription.EndNumber;
+import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
+import chat.sphinx.wrapper_common.subscription.SubscriptionId;
 import chat.sphinx.wrapper_contact.ContactAlias;
 import chat.sphinx.wrapper_contact.ContactStatus;
 import chat.sphinx.wrapper_contact.DeviceId;
@@ -507,7 +511,8 @@ CREATE TABLE messageDbo(
     sender_alias                TEXT            AS SenderAlias,
     sender_pic                  TEXT            AS PhotoUrl,
     original_muid               TEXT            AS MessageMUID,
-    reply_uuid                  TEXT            AS ReplyUUID
+    reply_uuid                  TEXT            AS ReplyUUID,
+    muid                        TEXT            AS MessageMUID
 );
 
 messageGetAllReactionsByUUID:
@@ -517,6 +522,13 @@ WHERE chat_id = :chat_id
 AND (type = 29
     AND reply_uuid IN :reply_uuids
 );
+
+messageGetAllPurchaseItemsByMUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND type IN (7, 8, 9)
+AND muid IN :muids;
 
 messageGetAllByUUID:
 SELECT *
@@ -607,6 +619,11 @@ UPDATE messageDbo
 SET status = :status
 WHERE id = ?;
 
+messageUpdateInvoiceAsPaidByPaymentHash:
+UPDATE messageDbo
+SET status = 1
+WHERE type = 2 AND payment_hash = ?;
+
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
 messageUpsert {
@@ -639,7 +656,8 @@ messageUpsert {
         sender_alias,
         sender_pic,
         original_muid,
-        reply_uuid
+        reply_uuid,
+        muid
     )
     VALUES (
         :id,
@@ -660,7 +678,8 @@ messageUpsert {
         :sender_alias,
         :sender_pic,
         :original_muid,
-        :reply_uuid
+        :reply_uuid,
+        :muid
     );
 }
 
@@ -731,3 +750,102 @@ WHERE id = ?;
 messageMediaDeleteByChatId:
 DELETE FROM messageMediaDbo
 WHERE chat_id = ?;
+
+CREATE TABLE subscriptionDbo(
+    id                          INTEGER         AS SubscriptionId NOT NULL PRIMARY KEY,
+    cron                        TEXT            AS Cron NOT NULL,
+    amount                      INTEGER         AS Sat NOT NULL,
+    end_number                  INTEGER         AS EndNumber,
+    count                       INTEGER         AS SubscriptionCount NOT NULL,
+    end_date                    INTEGER         AS DateTime,
+    ended                       INTEGER         AS Boolean DEFAULT 0 NOT NULL,
+    paused                      INTEGER         AS Boolean DEFAULT 0 NOT NULL,
+    created_at                  INTEGER         AS DateTime NOT NULL,
+    updated_at                  INTEGER         AS DateTime NOT NULL,
+    chat_id                     INTEGER         AS ChatId NOT NULL,
+    contact_id                  INTEGER         AS ContactId NOT NULL
+);
+
+subscriptionGetById:
+SELECT *
+FROM subscriptionDbo
+WHERE id = ?;
+
+subscriptionGetLastActiveByContactId:
+SELECT *
+FROM subscriptionDbo
+WHERE ended = 0 AND contact_id = ?
+ORDER BY id DESC
+LIMIT 1;
+
+subscriptionGetAllByChatId:
+SELECT *
+FROM subscriptionDbo
+WHERE chat_id = ?;
+
+subscriptionGetAll:
+SELECT *
+FROM subscriptionDbo;
+
+subscriptionUpsert {
+    UPDATE subscriptionDbo
+    SET cron = :cron,
+        amount = :amount,
+        end_number = :end_number,
+        count = :count,
+        end_date = :end_date,
+        ended = :ended,
+        paused = :paused,
+        created_at = :created_at,
+        updated_at = :updated_at,
+        chat_id = :chat_id,
+        contact_id = :contact_id
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO subscriptionDbo(
+        id,
+        cron,
+        amount,
+        end_number,
+        count,
+        end_date,
+        ended,
+        paused,
+        created_at,
+        updated_at,
+        chat_id,
+        contact_id
+    )
+    VALUES (
+        :id,
+        :cron,
+        :amount,
+        :end_number,
+        :count,
+        :end_date,
+        :ended,
+        :paused,
+        :created_at,
+        :updated_at,
+        :chat_id,
+        :contact_id
+    );
+}
+
+subscriptionDeleteById:
+DELETE FROM subscriptionDbo
+WHERE id = ?;
+
+subscriptionUpdatePaused:
+UPDATE subscriptionDbo
+SET paused = :paused
+WHERE id = ?;
+
+subscriptionUpdateEnded:
+UPDATE subscriptionDbo
+SET ended = :ended
+WHERE id = ?;
+
+subscriptionDeleteByContactId:
+DELETE FROM subscriptionDbo
+WHERE contact_id = ?;

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="new_contact_nickname_label">Nickname *</string>
+    <string name="new_contact_address_label">Address *</string>
+    <string name="new_contact_route_hint_label">Route Hint</string>
+    <string name="new_contact_nickname_address_empty">Nickname and Address are required</string>
+    <string name="new_contact_privacy_setting_help">If the privacy setting is active, the contact will only show when the correct privacy PIN is used to log into Sphinx. You first need to set Privacy PIN from Profile to use this feature</string>
+    <string name="new_contact_invalid_public_key_error">Invalid Public Key</string>
+    <string name="new_contact_invalid_route_hint_error">Invalid Route Hint</string>
+    <string name="failed_to_update_contact">Failed to save contact</string>
+    <string name="edit_contact_header_subscribe_button">Subscribe</string>
+    <string name="edit_contact_header_subscribed_button">Subscribed</string>
+</resources>

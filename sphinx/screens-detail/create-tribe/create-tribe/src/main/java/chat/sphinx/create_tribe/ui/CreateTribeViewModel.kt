@@ -103,7 +103,7 @@ internal class CreateTribeViewModel @Inject constructor(
             CreateTribe.Builder.Tag("Tech", R.drawable.ic_tech),
             CreateTribe.Builder.Tag("Altcoins", R.drawable.ic_altcoins),
             CreateTribe.Builder.Tag("Music", R.drawable.ic_music),
-            CreateTribe.Builder.Tag("Pod", R.drawable.ic_podcast),
+            CreateTribe.Builder.Tag("Podcast", R.drawable.ic_podcast),
         )
     )
 
@@ -225,7 +225,7 @@ internal class CreateTribeViewModel @Inject constructor(
                             }
                         }
                     } else {
-                        when(chatRepository.updateTribe(chatId!!, it)) {
+                        when(chatRepository.updateTribe(chatId, it)) {
                             is Response.Error -> {
                                 submitSideEffect(CreateTribeSideEffect.FailedToUpdateTribe)
                             }

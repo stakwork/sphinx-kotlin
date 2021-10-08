@@ -25,17 +25,33 @@ internal inline fun LayoutSelectedMessageBinding.setMenuColor(viewState: Message
             is MessageHolderViewState.Received -> {
                 layoutConstraintSelectedMessageMenuItemContainer
                     .setBackgroundResource(R.drawable.background_selected_received_message_menu)
-                imageViewSelectedMessageMenuArrowTop
+                imageViewSelectedMessageMenuArrowTopCenter
                     .setBackgroundResource(R.drawable.selected_received_message_top_arrow)
-                imageViewSelectedMessageMenuArrowBottom
+                imageViewSelectedMessageMenuArrowBottomCenter
+                    .setBackgroundResource(R.drawable.selected_received_message_bottom_arrow)
+                imageViewSelectedMessageMenuArrowTopRight
+                    .setBackgroundResource(R.drawable.selected_received_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottomRight
+                    .setBackgroundResource(R.drawable.selected_received_message_bottom_arrow)
+                imageViewSelectedMessageMenuArrowTopLeft
+                    .setBackgroundResource(R.drawable.selected_received_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottomLeft
                     .setBackgroundResource(R.drawable.selected_received_message_bottom_arrow)
             }
             is MessageHolderViewState.Sent -> {
                 layoutConstraintSelectedMessageMenuItemContainer
                     .setBackgroundResource(R.drawable.background_selected_sent_message_menu)
-                imageViewSelectedMessageMenuArrowTop
+                imageViewSelectedMessageMenuArrowTopCenter
                     .setBackgroundResource(R.drawable.selected_sent_message_top_arrow)
-                imageViewSelectedMessageMenuArrowBottom
+                imageViewSelectedMessageMenuArrowBottomCenter
+                    .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
+                imageViewSelectedMessageMenuArrowTopRight
+                    .setBackgroundResource(R.drawable.selected_sent_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottomRight
+                    .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
+                imageViewSelectedMessageMenuArrowTopLeft
+                    .setBackgroundResource(R.drawable.selected_sent_message_top_arrow)
+                imageViewSelectedMessageMenuArrowBottomLeft
                     .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
             }
         }

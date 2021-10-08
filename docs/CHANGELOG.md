@@ -1,5 +1,47 @@
 # ChangeLog
 
+## Version 1.0.0-alpha27 (2021-10-08)
+ - Adds ability to record and send audio messages
+ - Adds new onboard screens
+ - Adds pull down to refresh on dashboard
+ - Fixes Podcast tag on tribes
+ - Fixes hiding CREATE TRIBE button on virtual nodes
+
+## Version 1.0.0-alpha26 (2021-09-30)
+ - Adds chat invoices
+
+## Version 1.0.0-alpha25 (2021-09-24)
+ - Adds ability to receive Audio Messages
+ - Adds Payment Template functionality
+
+## Version 1.0.0-alpha24 (2021-09-17)
+ - Adds ability to reply to Bot responses
+ - Selected message menu improvements
+ - Adds variability of message bubble size depending on content
+ - Message Boost UI improvements
+
+## Version 1.0.0-alpha23 (2021-09-10)
+ - Adds message grouping
+ - Adds ability to send/receive paid text messages
+ - Fixes for paid images
+
+## Version 1.0.0-alpha22 (2021-09-02)
+ - Adds ability to send an image with a price
+ - Adds ability to receive and pay for an image with a price
+ - Adds swipe to close feature when viewing full screen images
+ - Adds ability to create and modify subscriptions (recurring payments) for contacts
+
+## Version 1.0.0-alpha21 (2021-08-27)
+ - Improvements to loading of messages that contain Images
+ - Improvements to Save Image functionality
+ - Adds ability to Edit a contact's details
+
+## Version 1.0.0-alpha20 (2021-08-25)
+ - Fixes to podcast functionality within the Tribe Chat screen
+ - Adds ability to view Images in full screen mode
+ - Adds ability to save images to gallery
+ - Adds ability to add a contact for a price
+
 ## Version 1.0.0-alpha19 (2021-08-19)
  - Fixes issue with onboard where data was being persisted prior to successful token
    generation network request

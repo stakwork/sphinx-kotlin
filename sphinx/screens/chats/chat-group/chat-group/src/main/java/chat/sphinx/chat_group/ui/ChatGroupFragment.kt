@@ -28,6 +28,9 @@ internal class ChatGroupFragment: ChatFragment<
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_group_header
     )
+    override val recordingCircleBinding: LayoutChatRecordingCircleBinding by viewBinding(
+        LayoutChatRecordingCircleBinding::bind, R.id.include_chat_recording_circle
+    )
     override val replyingMessageBinding: LayoutMessageReplyBinding by viewBinding(
         LayoutMessageReplyBinding::bind, R.id.include_chat_group_message_reply
     )
@@ -40,6 +43,11 @@ internal class ChatGroupFragment: ChatFragment<
     override val attachmentSendBinding: LayoutAttachmentSendPreviewBinding by viewBinding(
         LayoutAttachmentSendPreviewBinding::bind, R.id.include_chat_group_attachment_send_preview
     )
+
+    override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding by viewBinding(
+        LayoutAttachmentFullscreenBinding::bind, R.id.include_chat_group_attachment_fullscreen
+    )
+
     override val menuBinding: LayoutChatMenuBinding by viewBinding(
         LayoutChatMenuBinding::bind, R.id.include_chat_group_menu
     )
@@ -67,5 +75,4 @@ internal class ChatGroupFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
-
 }

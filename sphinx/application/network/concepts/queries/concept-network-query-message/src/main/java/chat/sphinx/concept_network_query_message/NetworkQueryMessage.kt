@@ -5,12 +5,13 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_message.MessageStatus
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message_media.MediaToken
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -47,10 +48,28 @@ abstract class NetworkQueryMessage {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<MessageDto, ResponseError>>
 
+    abstract fun sendPaymentRequest(
+        postPaymentRequestDto: PostPaymentRequestDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<MessageDto, ResponseError>>
+
+    abstract fun payPaymentRequest(
+        putPaymentRequestDto: PutPaymentRequestDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+    ): Flow<LoadResponse<MessageDto, ResponseError>>
+
     abstract fun sendKeySendPayment(
         postPaymentDto: PostPaymentDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null,
     ): Flow<LoadResponse<KeySendPaymentDto, ResponseError>>
+
+    abstract fun payAttachment(
+        chatId: ChatId,
+        contactId: ContactId?,
+        amount: Sat,
+        mediaToken: MediaToken,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<MessageDto, ResponseError>>
 
     abstract fun readMessages(
         chatId: ChatId,
@@ -78,5 +97,4 @@ abstract class NetworkQueryMessage {
         type: MessageType,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>>
-
 }

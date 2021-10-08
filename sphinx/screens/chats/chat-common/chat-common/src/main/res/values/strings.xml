@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">Message...</string>
     <string name="edit_text_optional_message_hint">Optional Message...</string>
+    <string name="text_view_loading_attachment">Loading/Decrypting...</string>
 
     <string name="chat_muted_message"> Chat is now muted. You won\'t get push notifications for incoming messages on this chat</string>
     <string name="chat_muted_waiting_on_network">Waiting on network…</string>
@@ -13,6 +14,17 @@
     <string name="join_call_header_label_text">Join call by…</string>
 
     <string name="failed_message">Failed Message</string>
+
+    <string name="send_message_empty_destination_error">Contact or Chat is required</string>
+    <string name="send_message_empty_content_error">Message or Attachment is required</string>
+    <string name="send_message_empty_price_error">Price is required</string>
+
+    <!--  Message type invoices  -->
+    <string name="request_expired">REQUEST EXPIRED</string>
+    <string name="request_expiration">EXPIRES AT: %s</string>
+    <string name="invoice_paid_on">Invoice paid on %s</string>
+    <string name="alert_confirm_pay_chat_invoice_title">Confirm Paying Invoice</string>
+    <string name="alert_confirm_pay_chat_invoice_message">Are you sure you want to pay for this invoice?</string>
 
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">Attachment Message</string>
@@ -29,9 +41,9 @@
     <string name="paid_message_details_status_label_processing_payment">Processing payment…</string>
 
     <!-- Paid Message Overlays -->
-    <string name="paywall_overlay_label_text_message_received">Pay to Unlock Message</string>
-    <string name="paywall_overlay_content_description_image_message_received">Pay to Unlock This Image</string>
-    <string name="paywall_overlay_content_description_video_message_received">Pay to Unlock This Video</string>
+    <string name="paywall_overlay_label_text_message_received">Pay to unlock Message</string>
+    <string name="paywall_overlay_content_description_image_message_received">Pay to unlock this Image</string>
+    <string name="paywall_overlay_content_description_video_message_received">Pay to unlock this Video</string>
 
 
     <!-- Link Previews -->
@@ -93,6 +105,19 @@
     <string name="attachment_send_header_image">SEND IMAGE</string>
     <string name="attachment_send_header_video">SEND VIDEO</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
+    <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
+
+    <!-- Pay Attachment -->
+    <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
+    <string name="paid_message_loading">LOADING MESSAGE...</string>
+    <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
+    <string name="attachment_price_label">Price: </string>
+    <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
+    <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
+
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">Saved attachment successfully</string>
+    <string name="failed_to_save_file">Failed to save file</string>
 
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>
@@ -116,5 +141,9 @@
     <string name="bottom_menu_call_header_text">Call Options</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+    <string name="slide_to_cancel">&lt;&lt; Slide to cancel</string>
+    <string name="recording_permission_granted">Recording permission granted</string>
+    <string name="recording_permission_required">Recording permissions required</string>
+
 
 </resources>

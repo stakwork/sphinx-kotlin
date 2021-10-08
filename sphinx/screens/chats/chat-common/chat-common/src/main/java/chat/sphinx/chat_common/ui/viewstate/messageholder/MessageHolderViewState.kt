@@ -7,13 +7,21 @@ import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
+import chat.sphinx.wrapper_common.invoiceExpirationTimeFormat
+import chat.sphinx.wrapper_common.invoicePaymentDateFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_contact.getColorKey
+import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.isAudio
 import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.isSphinxText
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -22,6 +30,12 @@ inline val Message.isCopyLinkAllowed: Boolean
     get() = retrieveTextToShow()?.let {
         SphinxLinkify.SphinxPatterns.COPYABLE_LINKS.matcher(it).find()
     } ?: false
+
+inline val Message.shouldAdaptBubbleWidth: Boolean
+    get() = type.isMessage() &&
+            replyUUID == null &&
+            !isCopyLinkAllowed &&
+            !status.isDeleted()
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -36,17 +50,19 @@ internal sealed class MessageHolderViewState(
     val message: Message,
     chat: Chat,
     val background: BubbleBackground,
+    val invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
     val initialHolder: InitialHolderViewState,
-    private val messageSenderName: (Message) -> String,
+    private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
     private val accountOwner: () -> Contact,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+    private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+    private val onBindDownloadMedia: () -> Unit,
 ) {
 
     companion object {
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
                 MessageType.Attachment,
-                MessageType.Invoice,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
             )
@@ -54,7 +70,10 @@ internal sealed class MessageHolderViewState(
     }
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isImage != true) {
+        if (
+            unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isSphinxText != true &&
+            message.messageMedia?.mediaType?.isImage != true && message.messageMedia?.mediaType?.isAudio != true
+        ) {
             LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
@@ -65,7 +84,10 @@ internal sealed class MessageHolderViewState(
     }
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
-        if (background is BubbleBackground.First) {
+        val isFirstBubble = (background is BubbleBackground.First)
+        val isInvoicePayment = (message.type.isInvoicePayment() && message.status.isConfirmed())
+
+        if (isFirstBubble || isInvoicePayment) {
             LayoutState.MessageStatusHeader(
                 if (chat.type.isConversation()) null else message.senderAlias?.value,
                 if (initialHolder is InitialHolderViewState.Initials) initialHolder.colorKey else message.getColorKey(),
@@ -75,6 +97,20 @@ internal sealed class MessageHolderViewState(
                 this is Sent && message.status.isFailed(),
                 message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
                 message.date.chatTimeFormat(),
+            )
+        } else {
+            null
+        }
+    }
+
+    val invoiceExpirationHeader: LayoutState.InvoiceExpirationHeader? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoice() && !message.status.isDeleted()) {
+            LayoutState.InvoiceExpirationHeader(
+                showExpirationReceivedHeader = !message.isPaidInvoice && this is Received,
+                showExpirationSentHeader = !message.isPaidInvoice && this is Sent,
+                showExpiredLabel = message.isExpiredInvoice,
+                showExpiresAtLabel = !message.isExpiredInvoice && !message.isPaidInvoice,
+                expirationTimestamp = message.expirationDate?.invoiceExpirationTimeFormat(),
             )
         } else {
             null
@@ -92,9 +128,37 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val invoicePayment: LayoutState.InvoicePayment? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoicePayment()) {
+            LayoutState.InvoicePayment(
+                showSent = this is Sent,
+                paymentDateString = message.date.invoicePaymentDateFormat()
+            )
+        } else {
+            null
+        }
+    }
+
     val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
             LayoutState.Bubble.ContainerSecond.DirectPayment(showSent = this is Sent, amount = message.amount)
+        } else {
+            null
+        }
+    }
+
+    val bubbleInvoice: LayoutState.Bubble.ContainerSecond.Invoice? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.type.isInvoice()) {
+            LayoutState.Bubble.ContainerSecond.Invoice(
+                showSent = this is Sent,
+                amount = message.amount,
+                text = message.retrieveInvoiceTextToShow() ?: "",
+                showPaidInvoiceBottomLine = message.isPaidInvoice,
+                hideBubbleArrows = !message.isExpiredInvoice && !message.isPaidInvoice,
+                showPayButton = !message.isExpiredInvoice && !message.isPaidInvoice && this is Received,
+                showDashedBorder = !message.isExpiredInvoice && !message.isPaidInvoice,
+                showExpiredLayout = message.isExpiredInvoice
+            )
         } else {
             null
         }
@@ -106,6 +170,26 @@ internal sealed class MessageHolderViewState(
                 LayoutState.Bubble.ContainerThird.Message(text = text)
             } else {
                 null
+            }
+        }
+    }
+
+    val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.retrieveTextToShow() != null || !message.isPaidTextMessage) {
+            null
+        } else {
+            val purchaseStatus = message.retrievePurchaseStatus()
+
+            if (this is Sent) {
+                LayoutState.Bubble.ContainerThird.PaidMessage(
+                    true,
+                    purchaseStatus
+                )
+            } else {
+                LayoutState.Bubble.ContainerThird.PaidMessage(
+                    false,
+                    purchaseStatus
+                )
             }
         }
     }
@@ -128,21 +212,21 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val bubblePaidMessageDetails: LayoutState.Bubble.ContainerFourth.PaidMessageDetails? by lazy(LazyThreadSafetyMode.NONE) {
-        if (!message.isPaidMessage) {
+    val bubblePaidMessageReceivedDetails: LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails? by lazy(LazyThreadSafetyMode.NONE) {
+        if (!message.isPaidMessage || this is Sent) {
             null
         } else {
-            val isPaymentPending = message.status.isPending()
-
-            message.type.let { type ->
-                LayoutState.Bubble.ContainerFourth.PaidMessageDetails(
-                    amount = message.amount,
-                    purchaseType = if (type.isPurchase()) type else null,
-                    isShowingReceivedMessage = this is Received,
-                    showPaymentAcceptedIcon = type.isPurchaseAccepted(),
-                    showPaymentProgressWheel = type.isPurchaseProcessing(),
-                    showSendPaymentIcon = this !is Sent && !isPaymentPending,
-                    showPaymentReceivedIcon = this is Sent && !isPaymentPending,
+            message.retrievePurchaseStatus()?.let { purchaseStatus ->
+                LayoutState.Bubble.ContainerFourth.PaidMessageReceivedDetails(
+                    amount = message.messageMedia?.price ?: Sat(0),
+                    purchaseStatus = purchaseStatus,
+                    showStatusIcon = purchaseStatus.isPurchaseAccepted() ||
+                            purchaseStatus.isPurchaseDenied(),
+                    showProcessingProgressBar = purchaseStatus.isPurchaseProcessing(),
+                    showStatusLabel = purchaseStatus.isPurchaseProcessing() ||
+                            purchaseStatus.isPurchaseAccepted() ||
+                            purchaseStatus.isPurchaseDenied(),
+                    showPayElements = purchaseStatus.isPurchasePending()
                 )
             }
         }
@@ -152,11 +236,36 @@ internal sealed class MessageHolderViewState(
         if (!message.isPaidMessage || this !is Sent) {
             null
         } else {
-            message.type.let { type ->
+            message.retrievePurchaseStatus()?.let { purchaseStatus ->
                 LayoutState.Bubble.ContainerSecond.PaidMessageSentStatus(
-                    amount = message.amount,
-                    purchaseType = if (type.isPurchase()) type else null,
+                    amount = message.messageMedia?.price ?: Sat(0),
+                    purchaseStatus = purchaseStatus
                 )
+            }
+        }
+    }
+
+    val bubbleAudioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isAudio) {
+
+                nnMessageMedia.localFile?.let { nnFile ->
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(nnFile)
+
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    // will only be called once when value is lazily initialized upon binding
+                    // data to view.
+                    if (!pendingPayment) {
+                        onBindDownloadMedia.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(pendingPayment)
+                }
+            } else {
+                null
             }
         }
     }
@@ -165,7 +274,8 @@ internal sealed class MessageHolderViewState(
         message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
             LayoutState.Bubble.ContainerSecond.ImageAttachment(
                 mediaData.first,
-                mediaData.second
+                mediaData.second,
+                (this is Received && message.isPaidPendingMessage)
             )
         }
     }
@@ -185,37 +295,45 @@ internal sealed class MessageHolderViewState(
             if (nnReactions.isEmpty()) {
                 null
             } else {
-                val set: MutableSet<BoostReactionImageHolder> = LinkedHashSet(1)
+                val set: MutableSet<BoostSenderHolder> = LinkedHashSet(0)
                 var total: Long = 0
+                var boostedByOwner = false
+                val owner = accountOwner()
+
                 for (reaction in nnReactions) {
-//                    if (chatType?.isConversation() != true) {
-//                        reaction.senderPic?.value?.let { url ->
-//                            set.add(SenderPhotoUrl(url))
-//                        } ?: reaction.senderAlias?.value?.let { alias ->
-//                            set.add(SenderInitials(alias.getInitials()))
-//                        }
-//                    }
+                    if (reaction.sender == owner.id) {
+                        boostedByOwner = true
+
+                        set.add(BoostSenderHolder(
+                            owner.photoUrl,
+                            owner.alias,
+                            owner.getColorKey()
+                        ))
+                    } else {
+                        if (chat.type.isConversation()) {
+                            val senderInfo = messageSenderInfo(reaction)
+
+                            set.add(BoostSenderHolder(
+                                senderInfo.first,
+                                senderInfo.second,
+                                senderInfo.third
+                            ))
+                        } else {
+                            set.add(BoostSenderHolder(
+                                reaction.senderPic,
+                                reaction.senderAlias?.value?.toContactAlias(),
+                                reaction.getColorKey()
+                            ))
+                        }
+                    }
                     total += reaction.amount.value
                 }
 
-//                if (chatType?.isConversation() == true) {
-//
-//                    // TODO: Use Account Owner Initial Holder depending on sent/received
-//                    @Exhaustive
-//                    when (initialHolder) {
-//                        is InitialHolderViewState.Initials -> {
-//                            set.add(SenderInitials(initialHolder.initials))
-//                        }
-//                        is InitialHolderViewState.None -> {}
-//                        is InitialHolderViewState.Url -> {
-//                            set.add(SenderPhotoUrl(initialHolder.photoUrl.value))
-//                        }
-//                    }
-//                }
-
                 LayoutState.Bubble.ContainerFourth.Boost(
+                    showSent = (this is Sent),
+                    boostedByOwner = boostedByOwner,
+                    senders = set,
                     totalAmount = Sat(total),
-                    senderPics = set,
                 )
             }
         }
@@ -233,9 +351,10 @@ internal sealed class MessageHolderViewState(
 
             LayoutState.Bubble.ContainerFirst.ReplyMessage(
                 showSent = this is Sent,
-                messageSenderName(nnReplyMessage),
+                messageSenderInfo(nnReplyMessage).second?.value ?: "",
                 nnReplyMessage.getColorKey(),
                 nnReplyMessage.retrieveTextToShow() ?: "",
+                nnReplyMessage.isAudioMessage,
                 mediaUrl,
                 messageMedia
             )
@@ -276,6 +395,13 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    private val paidTextMessageContentLock = Mutex()
+    suspend fun retrievePaidTextMessageContent(): LayoutState.Bubble.ContainerThird.Message? {
+        return bubbleMessage ?: paidTextMessageContentLock.withLock {
+            bubbleMessage ?: paidTextAttachmentContentProvider.invoke(message)
+        }
+    }
+
     val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
         if (
             background is BubbleBackground.Gone         ||
@@ -289,6 +415,10 @@ internal sealed class MessageHolderViewState(
 
             if (this is Received && message.isBoostAllowed) {
                 list.add(MenuItemState.Boost)
+            }
+
+            if (message.isMediaAttachmentAvailable) {
+                list.add(MenuItemState.SaveFile)
             }
 
             if (message.isCopyLinkAllowed) {
@@ -324,34 +454,46 @@ internal sealed class MessageHolderViewState(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
-        replyMessageSenderName: (Message) -> String,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
+        messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+        paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+        onBindDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
         background,
+        invoiceLinesHolderViewState,
         InitialHolderViewState.None,
-        replyMessageSenderName,
+        messageSenderInfo,
         accountOwner,
         previewProvider,
+        paidTextMessageContentProvider,
+        onBindDownloadMedia,
     )
 
     class Received(
         message: Message,
         chat: Chat,
         background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         initialHolder: InitialHolderViewState,
-        replyMessageSenderName: (Message) -> String,
+        messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
+        paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
+        onBindDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
         background,
+        invoiceLinesHolderViewState,
         initialHolder,
-        replyMessageSenderName,
+        messageSenderInfo,
         accountOwner,
         previewProvider,
+        paidTextMessageContentProvider,
+        onBindDownloadMedia,
     )
 }

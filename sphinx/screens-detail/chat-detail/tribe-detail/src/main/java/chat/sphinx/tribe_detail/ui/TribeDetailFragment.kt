@@ -183,7 +183,7 @@ internal class TribeDetailFragment: SideEffectFragment<
                         fromUser: Boolean
                     ) {
 
-                        SLIDER_VALUES[progress]?.let {
+                        SLIDER_VALUES[progress].let {
                             textViewPodcastSatsPerMinuteValue.text = it.toString()
                         }
                     }
@@ -192,7 +192,7 @@ internal class TribeDetailFragment: SideEffectFragment<
 
                     override fun onStopTrackingTouch(seekBar: SeekBar?) {
                         seekBar?.let {
-                            SLIDER_VALUES[seekBar.progress]?.let {
+                            SLIDER_VALUES[seekBar.progress].let {
                                 viewModel.updateSatsPerMinute(it.toLong())
                             }
                         }
@@ -269,10 +269,10 @@ internal class TribeDetailFragment: SideEffectFragment<
                         )
                     }
 
-                    viewState.podcast?.let {
+                    viewState.chat.metaData?.let { nnMetaData ->
                         constrainLayoutPodcastLightningControls.visible
 
-                        val satsPerMinute = viewState.chat.metaData?.satsPerMinute?.value ?: it.satsPerMinute
+                        val satsPerMinute = nnMetaData.satsPerMinute.value
                         val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
                         val index = SLIDER_VALUES.indexOf(closest)
 

@@ -89,6 +89,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:features:feature-relay')
     implementation project(path: ':sphinx:application:data:features:feature-repository-android')
     implementation project(path: ':sphinx:application:network:features:feature-link-preview')
+    implementation project(path: ':sphinx:application:network:features:feature-meme-input-stream')
     implementation project(path: ':sphinx:application:network:features:feature-network-client')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-chat')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-contact')
@@ -103,7 +104,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:feature-socket-io')
     implementation project(path: ':sphinx:application:network:features:tor:feature-network-tor')
 
-    implementation project(path: ':sphinx:screens:splash:key-restore')
+    implementation project(path: ':sphinx:screens:onboard:key-restore')
 
     implementation project(path: ':sphinx:service:features:media-player:feature-service-media-player-android')
 

@@ -79,7 +79,7 @@ internal class OnBoardPictureViewModel @Inject constructor(
             val step4 = onBoardStepHandler.persistOnBoardStep4Data(inviterData)
 
             if (step4 != null) {
-                navigator.toOnBoardReadyScreen(step4)
+                navigator.toOnBoardDesktopScreen(step4)
             } else {
                 // TODO: Handle Persistence Error
             }

@@ -2,8 +2,11 @@ package chat.sphinx.concept_repository_message.model
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.ReplyUUID
+import chat.sphinx.wrapper_message_media.isSphinxText
+import java.io.File
 
 class SendMessage private constructor(
     val attachmentInfo: AttachmentInfo?,
@@ -11,8 +14,10 @@ class SendMessage private constructor(
     val contactId: ContactId?,
     val replyUUID: ReplyUUID?,
     val text: String?,
-    val giphyData: GiphyData? = null,
-    val isBoost: Boolean = false
+    val giphyData: GiphyData?,
+    val isBoost: Boolean,
+    val messagePrice: Sat?,
+    val priceToMeet: Sat?
 ) {
 
     class Builder {
@@ -23,6 +28,12 @@ class SendMessage private constructor(
         private var text: String?                   = null
         private var giphyData: GiphyData?           = null
         private var isBoost: Boolean                = false
+        private var messagePrice: Sat?              = null
+        private var priceToMeet: Sat?               = null
+
+        enum class ValidationError {
+            EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
+        }
 
         @Synchronized
         fun clear() {
@@ -33,29 +44,46 @@ class SendMessage private constructor(
             text = null
             giphyData = null
             isBoost = false
+            messagePrice = null
+            priceToMeet = null
         }
 
-        @get:Synchronized
-        val isValid: Boolean
-            get() = (
-                        attachmentInfo?.file?.let {
-                            try {
-                                if (!it.exists() || !it.isFile) {
-                                    return false
-                                }
+        @Synchronized
+        fun isValid(): Pair<Boolean, ValidationError?> {
+            if (chatId == null && contactId == null) {
+                return Pair(false, ValidationError.EMPTY_DESTINATION)
+            }
 
-                                it
-                            } catch (e: Exception) {
-                                return false
-                            }
-                        }                                   != null     ||
-                        !text.isNullOrEmpty()                           ||
-                        giphyData != null
-                    )                                                   &&
-                    (
-                        chatId                              != null     ||
-                        contactId                           != null
-                    )
+            val file: File? = attachmentInfo?.file?.let {
+                try {
+                    if (it.exists() && it.isFile) {
+                        it
+                    } else {
+                        null
+                    }
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            when {
+                (file == null) -> {
+                    if (text.isNullOrEmpty() && giphyData == null) {
+                        return Pair(false, ValidationError.EMPTY_CONTENT)
+                    }
+                }
+                else -> {
+                    val isPaidTextMessage = attachmentInfo?.mediaType?.isSphinxText == true
+                    val messagePrice = messagePrice?.value ?: 0
+
+                    if (isPaidTextMessage && messagePrice == 0.toLong()) {
+                        return Pair(false, ValidationError.EMPTY_PRICE)
+                    }
+                }
+            }
+
+            return Pair(true, null)
+        }
 
         @Synchronized
         fun setAttachmentInfo(attachmentInfo: AttachmentInfo?): Builder {
@@ -104,19 +132,38 @@ class SendMessage private constructor(
         }
 
         @Synchronized
-        fun build(): SendMessage? =
-            if (!isValid) {
-                null
+        fun setPriceToMeet(priceToMeet: Sat?): Builder {
+            this.priceToMeet = priceToMeet
+            return this
+        }
+
+        @Synchronized
+        fun setMessagePrice(messagePrice: Sat?): Builder {
+            this.messagePrice = messagePrice
+            return this
+        }
+
+        @Synchronized
+        fun build(): Pair<SendMessage?, ValidationError?> {
+            val isValid = isValid()
+
+            if (!isValid.first) {
+                return Pair(null, isValid.second)
             } else {
-                SendMessage(
-                    attachmentInfo,
-                    chatId,
-                    contactId,
-                    replyUUID,
-                    text,
-                    giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
-                    isBoost
+                return Pair(
+                    SendMessage(
+                        attachmentInfo,
+                        chatId,
+                        contactId,
+                        replyUUID,
+                        text,
+                        giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
+                        isBoost,
+                        messagePrice,
+                        priceToMeet
+                    ), null
                 )
             }
+        }
     }
 }

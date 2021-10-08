@@ -12,28 +12,37 @@ import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.contact_detail.navigation.ContactDetailNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
-import chat.sphinx.onboard.navigation.OnBoardNavigator
+import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
+import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
+import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
+import chat.sphinx.onboard_connected.navigation.OnBoardConnectedNavigator
+import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
+import chat.sphinx.onboard_desktop.navigation.OnBoardDesktopNavigator
+import chat.sphinx.onboard_lightning.navigation.OnBoardLightningNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
 import chat.sphinx.onboard_picture.navigation.OnBoardPictureNavigator
 import chat.sphinx.onboard_ready.navigation.OnBoardReadyNavigator
+import chat.sphinx.onboard_welcome.navigation.OnBoardWelcomeNavigator
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.payment_send.navigation.PaymentSendNavigator
+import chat.sphinx.payment_template.navigation.PaymentTemplateNavigator
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
 import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
+import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
@@ -129,9 +138,51 @@ internal object NavigationModule {
 
     @Provides
     fun provideOnBoardNavigator(
-        onBoardNavigatorImpl: OnBoardNavigatorImpl
-    ): OnBoardNavigator =
+        onBoardNavigatorImpl: OnBoardMessageNavigatorImpl
+    ): OnBoardMessageNavigator =
         onBoardNavigatorImpl
+
+    @Provides
+    fun provideOnBoardWelcomeNavigator(
+        onBoardWelcomeNavigatorImpl: OnBoardWelcomeNavigatorImpl
+    ): OnBoardWelcomeNavigator =
+        onBoardWelcomeNavigatorImpl
+
+    @Provides
+    fun provideOnBoardDescriptionNavigator(
+        onBoardDescriptionNavigatorImpl: OnBoardDescriptionNavigatorImpl
+    ): OnBoardDescriptionNavigator =
+        onBoardDescriptionNavigatorImpl
+
+    @Provides
+    fun provideOnBoardConnectNavigator(
+        onBoardConnectNavigatorImpl: OnBoardConnectNavigatorImpl
+    ): OnBoardConnectNavigator =
+        onBoardConnectNavigatorImpl
+
+    @Provides
+    fun provideOnBoardConnectingNavigator(
+        onBoardConnectingNavigatorImpl: OnBoardConnectingNavigatorImpl
+    ): OnBoardConnectingNavigator =
+        onBoardConnectingNavigatorImpl
+
+    @Provides
+    fun provideOnBoardConnectedNavigator(
+        onBoardConnectedNavigatorImpl: OnBoardConnectedNavigatorImpl
+    ): OnBoardConnectedNavigator =
+        onBoardConnectedNavigatorImpl
+
+    @Provides
+    fun provideOnBoardLightningNavigator(
+        onBoardLightningNavigatorImpl: OnBoardLightningNavigatorImpl
+    ): OnBoardLightningNavigator =
+        onBoardLightningNavigatorImpl
+
+    @Provides
+    fun provideOnBoardDesktopNavigator(
+        onBoardDesktopNavigatorImpl: OnBoardDesktopNavigatorImpl
+    ): OnBoardDesktopNavigator =
+        onBoardDesktopNavigatorImpl
 
     @Provides
     fun provideOnBoardNameNavigator(
@@ -191,6 +242,12 @@ internal object NavigationModule {
         newContactNavigatorImpl
 
     @Provides
+    fun provideEditContactNavigator(
+        editContactNavigatorImpl: EditContactNavigatorImpl
+    ): EditContactNavigator =
+        editContactNavigatorImpl
+
+    @Provides
     fun providePaymentReceiveNavigator(
         paymentReceiveNavigatorImpl: PaymentReceiveNavigatorImpl
     ): PaymentReceiveNavigator =
@@ -201,6 +258,12 @@ internal object NavigationModule {
         paymentSendNavigatorImpl: PaymentSendNavigatorImpl
     ): PaymentSendNavigator =
         paymentSendNavigatorImpl
+
+    @Provides
+    fun providePaymentTemplateNavigator(
+        paymentTemplateNavigatorImpl: PaymentTemplateNavigatorImpl
+    ): PaymentTemplateNavigator =
+        paymentTemplateNavigatorImpl
 
     @Provides
     fun provideScannerNavigator(
@@ -219,6 +282,12 @@ internal object NavigationModule {
         profileNavigatorImpl: ProfileNavigatorImpl
     ): ProfileNavigator =
         profileNavigatorImpl
+
+    @Provides
+    fun provideSubscriptionNavigator(
+        subscriptionNavigatorImpl: SubscriptionNavigatorImpl
+    ): SubscriptionNavigator =
+        subscriptionNavigatorImpl
 
     @Provides
     fun provideSupportTicketNavigator(
@@ -261,11 +330,5 @@ internal object NavigationModule {
         tribeDetailNavigatorImpl: TribeDetailNavigatorImpl
     ): TribeDetailNavigator =
         tribeDetailNavigatorImpl
-
-    @Provides
-    fun provideContactDetailNavigator(
-        contactDetailNavigatorImpl: ContactDetailNavigatorImpl
-    ): ContactDetailNavigator =
-        contactDetailNavigatorImpl
 
 }

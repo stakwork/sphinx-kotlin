@@ -2,12 +2,18 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_message_media.MessageMedia
+import java.io.File
 
 internal sealed class LayoutState private constructor() {
 
@@ -25,6 +31,14 @@ internal sealed class LayoutState private constructor() {
             get() = !showSent
     }
 
+    data class InvoiceExpirationHeader(
+        val showExpirationReceivedHeader: Boolean,
+        val showExpirationSentHeader: Boolean,
+        val showExpiredLabel: Boolean,
+        val showExpiresAtLabel: Boolean,
+        val expirationTimestamp: String?,
+    ): LayoutState()
+
     data class GroupActionIndicator(
         val actionType: MessageType.GroupAction,
         val chatType: ChatType?,
@@ -37,6 +51,14 @@ internal sealed class LayoutState private constructor() {
         val timestamp: String,
     ): LayoutState()
 
+    data class InvoicePayment(
+        val showSent: Boolean,
+        val paymentDateString: String,
+    ): LayoutState() {
+        val showReceived: Boolean
+            get() = !showSent
+    }
+
     sealed class Bubble private constructor(): LayoutState() {
 
         sealed class ContainerFirst private constructor(): Bubble() {
@@ -46,6 +68,7 @@ internal sealed class LayoutState private constructor() {
                 val sender: String,
                 val colorKey: String,
                 val text: String,
+                val isAudio: Boolean,
                 val url: String?,
                 val media: MessageMedia?,
             ): ContainerFirst() {
@@ -59,7 +82,7 @@ internal sealed class LayoutState private constructor() {
 
             data class PaidMessageSentStatus(
                 val amount: Sat,
-                val purchaseType: MessageType.Purchase?,
+                val purchaseStatus: PurchaseStatus?,
             ): ContainerSecond() {
                 val amountText: String
                     get() = amount.asFormattedString(appendUnit = true)
@@ -76,9 +99,34 @@ internal sealed class LayoutState private constructor() {
                     get() = amount.unit
             }
 
+            data class Invoice(
+                val showSent: Boolean,
+                val amount: Sat,
+                val text: String,
+                val showPaidInvoiceBottomLine: Boolean,
+                val hideBubbleArrows: Boolean,
+                val showPayButton: Boolean,
+                val showDashedBorder: Boolean,
+                val showExpiredLayout: Boolean,
+            ): ContainerSecond() {
+                val showReceived: Boolean
+                    get() = !showSent
+
+                val unitLabel: String
+                    get() = amount.unit
+            }
+
+            sealed class AudioAttachment: ContainerSecond() {
+
+                data class FileAvailable(val file: File): AudioAttachment()
+
+                data class FileUnavailable(val showPaidOverlay: Boolean): AudioAttachment()
+            }
+
             data class ImageAttachment(
                 val url: String,
                 val media: MessageMedia?,
+                val showPaidOverlay: Boolean
             ): ContainerSecond()
 
             data class PodcastBoost(
@@ -108,6 +156,11 @@ internal sealed class LayoutState private constructor() {
 
             data class Message(
                 val text: String
+            ): ContainerThird()
+
+            data class PaidMessage(
+                val showSent: Boolean,
+                val purchaseStatus: PurchaseStatus?
             ): ContainerThird()
 
             sealed class LinkPreview private constructor(): ContainerThird() {
@@ -148,8 +201,10 @@ internal sealed class LayoutState private constructor() {
         sealed class ContainerFourth private constructor(): Bubble() {
 
             data class Boost(
+                val showSent: Boolean,
+                val boostedByOwner: Boolean,
+                val senders: Set<BoostSenderHolder>,
                 private val totalAmount: Sat,
-                val senderPics: Set<BoostReactionImageHolder>
             ): ContainerFourth() {
                 val amountText: String
                     get() = totalAmount.asFormattedString()
@@ -159,21 +214,20 @@ internal sealed class LayoutState private constructor() {
 
                 // will be gone if null is returned
                 val numberUniqueBoosters: Int?
-                    get() = if (senderPics.size > 1) {
-                        senderPics.size
+                    get() = if (senders.size > 1) {
+                        senders.size
                     } else {
                         null
                     }
             }
 
-            data class PaidMessageDetails(
+            data class PaidMessageReceivedDetails(
                 val amount: Sat,
-                val purchaseType: MessageType.Purchase?,
-                val isShowingReceivedMessage: Boolean,
-                val showPaymentAcceptedIcon: Boolean,
-                val showPaymentProgressWheel: Boolean,
-                val showSendPaymentIcon: Boolean,
-                val showPaymentReceivedIcon: Boolean,
+                val purchaseStatus: PurchaseStatus,
+                val showStatusIcon: Boolean,
+                val showProcessingProgressBar: Boolean,
+                val showStatusLabel: Boolean,
+                val showPayElements: Boolean,
             ): ContainerFourth() {
                 val amountText: String
                     get() = amount.asFormattedString(appendUnit = true)
@@ -182,12 +236,8 @@ internal sealed class LayoutState private constructor() {
     }
 }
 
-// TODO: TEMPORARY!!! until Initial holder can be refactored...
-
-@JvmInline
-value class SenderPhotoUrl(val value: String): BoostReactionImageHolder
-
-@JvmInline
-value class SenderInitials(val value: String): BoostReactionImageHolder
-
-sealed interface BoostReactionImageHolder
+data class BoostSenderHolder(
+    val photoUrl: PhotoUrl?,
+    val alias: ContactAlias?,
+    val colorKey: String,
+)

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="subscription_header_name">訂閱</string>
+    <string name="amount">數量</string>
+    <string name="custom_amount">自訂金額：</string>
+    <string name="_500_sats">500 sats</string>
+    <string name="_1000_sats">1000 sats</string>
+    <string name="_2000_sats">2000 sats</string>
+    <string name="time_interval">間隔時間</string>
+    <string name="daily">每日</string>
+    <string name="weekly">每週</string>
+    <string name="monthly">每月</string>
+    <string name="end_rule">有效期</string>
+    <string name="make">支付次數</string>
+    <string name="payments">回</string>
+    <string name="pay_until">結束日期</string>
+    <string name="delete_subscription">取消訂閱</string>
+    <string name="are_you_sure_you_want_to_delete_subscription">確認取消訂閱？</string>
+    <string name="amount_is_required">金額不可無填</string>
+    <string name="time_interval_is_required">間隔時間不可無填</string>
+    <string name="please_set_either_the_number_of_payments_to_make_or_end_date">請設支付次數或時間間隔</string>
+    <string name="failed_to_save_subscription">儲存訂閱失敗</string>
+    <string name="saved_subscription_successfully">儲存訂閱成功</string>
+    <string name="deleting_subscription">訂閱刪除中</string>
+    <string name="failed_to_pause_subscription">暫停訂閱失敗</string>
+    <string name="successfully_paused_subscription">暫停訂閱成功</string>
+    <string name="failed_to_restart_subscription">訂閱重新啟動失敗</string>
+    <string name="successfully_restarted_subscription">訂閱重新啟動</string>
+    <string name="subscribe">訂閱</string>
+    <string name="update_subscription">更新訂閱</string>
+    <string name="failed_to_delete_subscription">訂閱刪除失敗</string>
+</resources>

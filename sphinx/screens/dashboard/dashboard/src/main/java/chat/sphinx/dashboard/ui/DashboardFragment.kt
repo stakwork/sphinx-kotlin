@@ -14,16 +14,20 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
+import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -34,6 +38,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -44,6 +49,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -89,7 +95,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupDashboardHeader()
         setupNavBar()
         setupNavDrawer()
-        setupPopup()
+        setupPopups()
     }
 
     override fun onResume() {
@@ -124,6 +130,12 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
+        binding.layoutDashboardChats.layoutSwipeRefreshChats.apply {
+            setOnRefreshListener {
+                viewModel.networkRefresh()
+                isRefreshing = false
+            }
+        }
         binding.layoutDashboardChats.recyclerViewChats.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             val chatListAdapter = ChatListAdapter(
@@ -136,7 +148,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                 userColorsHelper
             )
 
-            val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
+            val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, onStopSupervisor, viewModel)
             this.setHasFixedSize(false)
             layoutManager = linearLayoutManager
             adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
@@ -232,8 +244,8 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    private fun setupPopup() {
-        binding.layoutDashboardPopup.apply {
+    private fun setupPopups() {
+        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
             textViewDashboardPopupClose.setOnClickListener {
                 viewModel.deepLinkPopupViewStateContainer.updateViewState(
                     DeepLinkPopupViewState.PopupDismissed
@@ -241,8 +253,21 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
 
             buttonAuthorize.setOnClickListener {
-                progressBarAuthorize.visible
                 viewModel.authorizeExternal()
+            }
+        }
+
+        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+
+            buttonConnect.setOnClickListener {
+                viewModel.connectToContact(
+                    editTextDashboardPeoplePopupMessage.text?.toString()
+                )
             }
         }
     }
@@ -355,6 +380,9 @@ internal class DashboardFragment : MotionLayoutFragment<
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
     }
 
+    private var disposable: Disposable? = null
+    private var imageJob: Job? = null
+
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
 
@@ -362,18 +390,101 @@ internal class DashboardFragment : MotionLayoutFragment<
             viewModel.deepLinkPopupViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
+                    is DeepLinkPopupViewState.ExternalAuthorizePopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
+                            textViewDashboardPopupAuthorizeName.text = viewState.link.host
+                            layoutConstraintAuthorizePopup.visible
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
+                    }
+                    is DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo -> {
+                        disposable?.dispose()
+                        imageJob?.cancel()
+
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
+                            layoutConstraintDashboardConnectLoading.visible
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.PeopleConnectPopup -> {
+                        disposable?.dispose()
+                        imageJob?.cancel()
+
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
+
+                            val alias = viewState.alias
+                            textViewDashboardPeoplePopupName.text = alias
+
+                            editTextDashboardPeoplePopupMessage.hint = getString(R.string.dashboard_connect_initial_message_hint, alias)
+                            textViewDashboardPeoplePopupDescription.text = viewState.description
+
+                            val priceToMeet = (viewState.priceToMeet).toSat()?.asFormattedString(appendUnit = true) ?: ""
+                            textViewDashboardPeoplePopupPriceToMeet.text = getString(R.string.dashboard_connect_price_to_meet, priceToMeet)
+
+                            viewState.photoUrl?.let { url ->
+
+                                lifecycleScope.launch {
+                                    imageLoader.load(
+                                        imageViewProfilePicture,
+                                        url,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    ).also {
+                                        disposable = it
+                                    }
+                                }.let { job ->
+                                    imageJob = job
+                                }
+
+                            } ?: imageViewProfilePicture.setImageDrawable(
+                                ContextCompat.getDrawable(
+                                    binding.root.context,
+                                    R.drawable.ic_profile_avatar_circle
+                                )
+                            )
+
+                            layoutConstraintDashboardConnectLoading.gone
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.PeopleConnectPopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.progressBarConnect.visible
+                    }
                     is DeepLinkPopupViewState.PopupDismissed -> {
-                        binding.layoutDashboardPopup.apply {
+                        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
                             root.gone
                             progressBarAuthorize.gone
                         }
-                    }
-                    is DeepLinkPopupViewState.ExternalAuthorizePopup -> {
-                        binding.layoutDashboardPopup.apply {
-                            textViewDashboardPopupAuthorizeName.text = viewState.link.host
 
-                            layoutConstraintAuthorizePopup.visible
-                            root.visible
+                        binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
+                            root.gone
+                            progressBarConnect.gone
+                        }
+
+                        binding.layoutDashboardPopup.root.gone
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.createTribeButtonViewStateContainer.collect { viewState ->
+                binding.layoutDashboardNavDrawer.let { navDrawer ->
+                    @Exhaustive
+                    when (viewState) {
+                        is CreateTribeButtonViewState.Visible -> {
+                            navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.visible
+                        }
+                        is CreateTribeButtonViewState.Hidden -> {
+                            navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.gone
                         }
                     }
                 }

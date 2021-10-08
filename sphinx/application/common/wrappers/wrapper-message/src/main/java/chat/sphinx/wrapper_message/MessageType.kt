@@ -16,7 +16,7 @@ inline fun MessageType.isInvoice(): Boolean =
     this is MessageType.Invoice
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPayment(): Boolean =
+inline fun MessageType.isInvoicePayment(): Boolean =
     this is MessageType.Payment
 
 @Suppress("NOTHING_TO_INLINE")
@@ -30,16 +30,6 @@ inline fun MessageType.isDirectPayment(): Boolean =
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageType.isAttachment(): Boolean =
     this is MessageType.Attachment
-
-@OptIn(ExperimentalContracts::class)
-@Suppress("NOTHING_TO_INLINE")
-inline fun MessageType.isPurchase(): Boolean {
-    contract {
-        returns(true) implies (this@isPurchase is MessageType.Purchase)
-    }
-
-    return this is MessageType.Purchase
-}
 
 @OptIn(ExperimentalContracts::class)
 @Suppress("NOTHING_TO_INLINE")

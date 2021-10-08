@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/subscription_nav_graph"
+    app:startDestination="@+id/navigation_subscription_fragment">
+
+    <fragment
+        android:id="@+id/navigation_subscription_fragment"
+        android:name="chat.sphinx.subscription.ui.SubscriptionFragment"
+        tools:layout="@layout/fragment_subscription">
+        <argument
+            android:name="argContactId"
+            app:argType="long" />
+    </fragment>
+
+</navigation>

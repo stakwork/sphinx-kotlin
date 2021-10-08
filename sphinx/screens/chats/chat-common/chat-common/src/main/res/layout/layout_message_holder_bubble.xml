@@ -36,13 +36,16 @@
         <include
             android:id="@+id/include_message_type_direct_payment"
             layout="@layout/layout_message_type_direct_payment"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <!--  Image Attachment  -->
         <include
             android:id="@+id/include_message_type_image_attachment"
             layout="@layout/layout_message_type_attachment_image"
-            tools:visibility="gone" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/include_message_type_direct_payment"
+            tools:visibility="visible" />
 
         <!--  File Attachment  -->
         <include
@@ -75,7 +78,7 @@
         <include
             android:id="@+id/include_message_type_invoice"
             layout="@layout/layout_message_type_invoice"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <!--  Podcast boost  -->
         <include
@@ -108,15 +111,30 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_message_text"
             style="@style/chat_message_body_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/default_layout_margin"
+            android:paddingEnd="@dimen/message_holder_text_view_padding_end"
+            android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="Contrary to popular belief"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_paid_message_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_italic"
+            android:textSize="@dimen/chat_paid_message_notice_text_size"
+            android:textColor="@color/textMessages"
             android:paddingHorizontal="@dimen/default_layout_margin"
             android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
-            tools:text="Contrary to popular belief"
-            tools:visibility="visible" />
-
+            tools:text="@string/paid_message_pay_to_unlock"
+            tools:visibility="gone" />
 
         <!-- Contact link preview  -->
         <include
@@ -148,7 +166,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_message_bubble_container_forth"
         android:layout_width="match_parent"
@@ -169,10 +186,10 @@
             android:id="@+id/include_paid_message_received_details_holder"
             layout="@layout/layout_paid_message_received"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/paid_attachment_view_height"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
+            app:layout_constraintTop_toBottomOf="@+id/include_message_type_boost"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

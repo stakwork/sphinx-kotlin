@@ -14,6 +14,10 @@ inline fun String.toMediaHostOrNull(): MediaHost? =
 inline fun MediaHost.toMediaUrl(mediaToken: MediaToken): MediaUrl =
     MediaUrl("https://$value/file/${mediaToken.value}")
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun MediaHost.toTemplateUrl(mediaMUID: MediaMUID): MediaUrl =
+    MediaUrl("https://$value/template/${mediaMUID.value}")
+
 @JvmInline
 value class MediaHost(val value: String) {
 

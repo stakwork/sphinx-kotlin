@@ -5,6 +5,7 @@
     android:id="@+id/layout_constraint_chat_footer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="55dp"
     android:background="@color/headerBG">
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -24,10 +25,9 @@
         app:layout_constraintBottom_toBottomOf="@+id/edit_text_chat_footer"
         app:layout_constraintEnd_toStartOf="@+id/edit_text_chat_footer"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer"
-         />
+        app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer" />
 
-    <chat.sphinx.chat_common.ui.SphinxEditText
+    <chat.sphinx.chat_common.ui.widgets.SphinxEditText
         android:id="@+id/edit_text_chat_footer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -41,38 +41,99 @@
         android:textCursorDrawable="@drawable/cursor"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_chat_footer_send"
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_chat_footer_actions"
         app:layout_constraintStart_toEndOf="@+id/text_view_chat_footer_attachment"
         tools:text="Text which we have" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_chat_footer_send"
-        android:layout_width="@dimen/chat_footer_send_button_xy"
-        android:layout_height="@dimen/chat_footer_send_button_xy"
-        android:layout_marginEnd="@dimen/chat_footer_send_button_margin_horizontal"
-        android:background="@drawable/button_background_white_rad_48"
-        android:backgroundTint="@color/primaryBlue"
-        android:fontFamily="@font/material_icons_regular"
-        android:text="@string/material_icon_name_message_editor_send"
-        android:textSize="19sp"
-        android:textColor="@android:color/white"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="@+id/edit_text_chat_footer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer" />
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_chat_footer_microphone"
-        android:layout_width="@dimen/chat_footer_button_xy"
-        android:layout_height="@dimen/chat_footer_button_xy"
-        android:layout_marginEnd="@dimen/default_layout_margin"
-        android:src="@drawable/ic_baseline_mic_20"
-        android:tint="@color/textInverted"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/edit_text_chat_footer"
-        app:layout_constraintEnd_toEndOf="parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_chat_footer_recording_actions"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:background="@color/headerBG"
         app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer"
-        tools:visibility="visible" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_chat_footer_actions"
+        app:layout_constraintStart_toStartOf="parent">
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_recording_indicator"
+            android:layout_width="@dimen/chat_footer_record_button_xy"
+            android:layout_height="@dimen/chat_footer_record_button_xy"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:background="@drawable/circular_button"
+            android:backgroundTint="@color/badgeRed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_recording_timer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_footer_recording_audio_duration_text_size"
+            android:text="00:00"
+            android:textColor="@color/text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/image_view_recording_indicator" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_recording_slide_to_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/slide_to_cancel"
+            android:textColor="@color/secondaryText"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/chat_footer_recording_audio_slide_text_size"
+            android:layout_marginStart="@dimen/default_double_layout_margin"
+            app:layout_constraintStart_toEndOf="@+id/text_view_recording_timer"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_chat_footer_actions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/chat_footer_send_button_margin_horizontal"
+        android:background="@color/headerBG"
+        app:layout_constraintBottom_toBottomOf="@+id/edit_text_chat_footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_chat_footer_send"
+            android:layout_width="@dimen/chat_footer_send_button_xy"
+            android:layout_height="@dimen/chat_footer_send_button_xy"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_message_editor_send"
+            android:textSize="19sp"
+            android:textColor="@android:color/white"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="invisible"/>
+
+        <chat.sphinx.chat_common.ui.widgets.SlideToCancelImageView
+            android:id="@+id/image_view_chat_footer_microphone"
+            android:layout_width="@dimen/chat_footer_send_button_xy"
+            android:layout_height="@dimen/chat_footer_send_button_xy"
+            android:padding="6dp"
+            android:src="@drawable/ic_baseline_mic_20"
+            android:tint="@color/secondaryText"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

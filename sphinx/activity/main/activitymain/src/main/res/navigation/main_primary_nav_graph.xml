@@ -12,7 +12,14 @@
     <include app:graph="@navigation/chat_group_nav_graph" />
     <include app:graph="@navigation/chat_tribe_nav_graph" />
     <include app:graph="@navigation/dashboard_nav_graph" />
-    <include app:graph="@navigation/on_board_nav_graph" />
+    <include app:graph="@navigation/on_board_welcome_nav_graph" />
+    <include app:graph="@navigation/on_board_description_nav_graph" />
+    <include app:graph="@navigation/on_board_connect_nav_graph" />
+    <include app:graph="@navigation/on_board_connecting_nav_graph" />
+    <include app:graph="@navigation/on_board_connected_nav_graph" />
+    <include app:graph="@navigation/on_board_lightning_nav_graph" />
+    <include app:graph="@navigation/on_board_desktop_nav_graph" />
+    <include app:graph="@navigation/on_board_message_nav_graph" />
     <include app:graph="@navigation/on_board_name_nav_graph" />
     <include app:graph="@navigation/on_board_picture_nav_graph" />
     <include app:graph="@navigation/on_board_ready_nav_graph" />

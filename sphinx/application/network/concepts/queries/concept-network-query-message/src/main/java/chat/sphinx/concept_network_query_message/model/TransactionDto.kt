@@ -25,7 +25,7 @@ data class TransactionDto(
 ) {
 
     fun isIncomingWithSender(ownerId: ContactId): Boolean {
-        return sender != null && sender != ownerId.value
+        return sender != ownerId.value
     }
 
     fun isOutgoingWithReceiver(ownerId: ContactId): Boolean {

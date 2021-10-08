@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_constraint_on_board_connected"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/listBG"
+    tools:context=".ui.OnBoardConnectedFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_on_board_connected_icon"
+            android:layout_width="67dp"
+            android:layout_height="67dp"
+            android:src="@drawable/confirmed_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_onboard_connecting_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/montserrat_regular"
+            android:textSize="@dimen/on_board_welcome_title_text_size"
+            android:textColor="@color/text"
+            android:text="@string/on_board_welcome"
+            android:textAllCaps="true"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            app:layout_constraintTop_toBottomOf="@+id/image_view_on_board_connected_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_onboard_connecting_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/on_board_connected_subtitle_text_size"
+            android:textColor="@color/secondaryText"
+            android:text="@string/on_board_connected_subtitle"
+            android:layout_marginTop="@dimen/default_small_layout_margin"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_onboard_connecting_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_continue_button_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/on_board_welcome_button_height"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_onboard_connecting_subtitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_continue_button_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:gravity="center"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:text="@string/material_icon_name_nav_forward"
+                android:textColor="@android:color/white"
+                android:fontFamily="@font/material_icons_regular"
+                android:textSize="@dimen/on_board_connected_arrow_text_size"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_continue"
+                android:textAllCaps="false"
+                android:fontFamily="@font/roboto_medium"
+                android:textSize="@dimen/on_board_welcome_button_text_size"
+                android:textColor="@android:color/white"
+                android:text="@string/on_board_continue"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

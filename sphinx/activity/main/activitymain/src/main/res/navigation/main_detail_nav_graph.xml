@@ -6,16 +6,18 @@
 
     <include app:graph="@navigation/add_friend_nav_graph" />
     <include app:graph="@navigation/camera_nav_graph" />
-    <include app:graph="@navigation/contact_detail_nav_graph" />
     <include app:graph="@navigation/create_tribe_nav_graph" />
+    <include app:graph="@navigation/edit_contact_nav_graph" />
     <include app:graph="@navigation/invite_friend_nav_graph" />
     <include app:graph="@navigation/join_tribe_nav_graph" />
     <include app:graph="@navigation/new_contact_nav_graph" />
     <include app:graph="@navigation/payment_receive_nav_graph" />
     <include app:graph="@navigation/payment_send_nav_graph" />
+    <include app:graph="@navigation/payment_template_nav_graph" />
     <include app:graph="@navigation/podcast_player_nav_graph" />
     <include app:graph="@navigation/qr_code_nav_graph" />
     <include app:graph="@navigation/scanner_nav_graph" />
+    <include app:graph="@navigation/subscription_nav_graph" />
     <include app:graph="@navigation/support_ticket_nav_graph" />
     <include app:graph="@navigation/transactions_nav_graph" />
     <include app:graph="@navigation/tribe_detail_nav_graph" />

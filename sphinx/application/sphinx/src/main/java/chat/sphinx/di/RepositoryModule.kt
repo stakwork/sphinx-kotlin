@@ -2,21 +2,23 @@ package chat.sphinx.di
 
 import android.content.Context
 import chat.sphinx.concept_crypto_rsa.RSA
+import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
-import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
-import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
 import chat.sphinx.feature_coredb.CoreDBImpl
@@ -36,6 +38,7 @@ import dagger.hilt.components.SingletonComponent
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.*
@@ -118,6 +121,8 @@ object RepositoryModule {
         coreDBImpl: CoreDBImpl,
         dispatchers: CoroutineDispatchers,
         moshi: Moshi,
+        mediaCacheHandler: MediaCacheHandler,
+        memeInputStreamHandler: MemeInputStreamHandler,
         memeServerTokenHandler: MemeServerTokenHandler,
         networkQueryMemeServer: NetworkQueryMemeServer,
         networkQueryChat: NetworkQueryChat,
@@ -126,6 +131,7 @@ object RepositoryModule {
         networkQueryMessage: NetworkQueryMessage,
         networkQueryInvite: NetworkQueryInvite,
         networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+        networkQuerySubscription: NetworkQuerySubscription,
         socketIOManager: SocketIOManager,
         rsa: RSA,
         sphinxLogger: SphinxLogger,
@@ -138,6 +144,8 @@ object RepositoryModule {
             coreDBImpl,
             dispatchers,
             moshi,
+            mediaCacheHandler,
+            memeInputStreamHandler,
             memeServerTokenHandler,
             networkQueryMemeServer,
             networkQueryChat,
@@ -146,6 +154,7 @@ object RepositoryModule {
             networkQueryMessage,
             networkQueryInvite,
             networkQueryAuthorizeExternal,
+            networkQuerySubscription,
             rsa,
             socketIOManager,
             sphinxLogger,
@@ -173,6 +182,12 @@ object RepositoryModule {
     fun provideMessageRepository(
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): MessageRepository =
+        sphinxRepositoryAndroid
+
+    @Provides
+    fun provideSubscriptionRepository(
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
+    ): SubscriptionRepository =
         sphinxRepositoryAndroid
 
     @Provides

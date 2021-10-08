@@ -3,6 +3,7 @@ package chat.sphinx.concept_repository_message.model
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.payment.PaymentTemplate
 
 class SendPayment private constructor(
     val chatId: ChatId?,
@@ -10,13 +11,15 @@ class SendPayment private constructor(
     val text: String?,
     val destinationKey: LightningNodePubKey?,
     val amount: Long,
+    val paymentTemplate: PaymentTemplate?,
 ) {
     class Builder {
-        private var chatId: ChatId?         = null
-        private var contactId: ContactId?   = null
-        private var text: String?           = null
+        private var chatId: ChatId?                      = null
+        private var contactId: ContactId?                = null
+        private var text: String?                        = null
         private var destinationKey: LightningNodePubKey? = null
-        private var amount: Long            = 0
+        private var amount: Long                         = 0
+        private var paymentTemplate: PaymentTemplate?    = null
 
         @Synchronized
         fun clear() {
@@ -25,6 +28,7 @@ class SendPayment private constructor(
             text = null
             amount = 0
             destinationKey = null
+            paymentTemplate = null
         }
 
         @get:Synchronized
@@ -85,6 +89,12 @@ class SendPayment private constructor(
         }
 
         @Synchronized
+        fun setPaymentTemplate(paymentTemplate: PaymentTemplate?): Builder {
+            this.paymentTemplate = paymentTemplate
+            return this
+        }
+
+        @Synchronized
         fun setText(text: String?): Builder {
             if (text == null || text.isEmpty()) {
                 this.text = null
@@ -104,7 +114,8 @@ class SendPayment private constructor(
                     contactId,
                     text,
                     destinationKey,
-                    amount
+                    amount,
+                    paymentTemplate
                 )
             }
     }

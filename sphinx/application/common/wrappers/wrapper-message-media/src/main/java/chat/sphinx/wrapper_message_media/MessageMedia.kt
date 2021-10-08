@@ -30,8 +30,6 @@ abstract class MessageMedia {
         private const val _17 = 17
         @Suppress("ObjectPropertyName")
         private const val _31 = 31
-
-        private const val AMT = "amt"
     }
 
     override fun hashCode(): Int {
@@ -53,10 +51,7 @@ abstract class MessageMedia {
     }
 
     val price: Sat by lazy {
-        mediaToken.getMediaAttributeWithName(AMT)
-            ?.toLongOrNull()
-            ?.toSat()
-            ?: Sat(0)
+        mediaToken.getPriceFromMediaToken()
     }
 
     val host: MediaHost? by lazy {
@@ -65,6 +60,12 @@ abstract class MessageMedia {
 
     val url: MediaUrl? by lazy {
         host?.toMediaUrl(mediaToken)
+    }
+
+    val templateUrl: MediaUrl? by lazy {
+        muid?.let { nnMUID ->
+            host?.toTemplateUrl(nnMUID)
+        } ?: null
     }
 
     @Suppress("SpellCheckingInspection")

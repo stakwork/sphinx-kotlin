@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="edit_text_message_hint">Mensaje…</string>
     <string name="edit_text_optional_message_hint">Mensaje opcional…</string>
+    <string name="text_view_loading_attachment">Cargando/Desencriptando...</string>
 
     <string name="chat_muted_message">La conversación está ahora silenciada. No recibirás notificaciones para las mensajes entrantes en esta conversación</string>
     <string name="chat_muted_waiting_on_network">Esperando conexión…</string>
@@ -13,6 +14,17 @@
     <string name="join_call_header_label_text">Unirse mediante…</string>
 
     <string name="failed_message">Mensaje Fallido</string>
+
+    <string name="send_message_empty_destination_error">Contacto o Chat requeridos</string>
+    <string name="send_message_empty_content_error">Mensaje o Archivo adjunto requeridos</string>
+    <string name="send_message_empty_price_error">Precio requerido</string>
+
+    <!--  Message type invoices  -->
+    <string name="request_expired">Solicitud caducada</string>
+    <string name="request_expiration">Expira: %s</string>
+    <string name="invoice_paid_on">Invoice pagado en %s</string>
+    <string name="alert_confirm_pay_chat_invoice_title">Confirmar Pago</string>
+    <string name="alert_confirm_pay_chat_invoice_message">¿Estas seguro de que quieres pagar esta solicitud?</string>
 
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">Mensaje de Archivo</string>
@@ -94,6 +106,19 @@
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>
     <string name="attachment_send_header_video">ENVIAR VIDEO</string>
     <string name="attachment_send_header_giphy">ENVIAR GIPHY</string>
+    <string name="attachment_send_header_paid_message">ENVIAR MENSAJE PAGO</string>
+
+    <!-- Pay Attachment -->
+    <string name="paid_message_pay_to_unlock">PAGA PARA DESBLOQUEAR</string>
+    <string name="paid_message_loading">CARGANDO MENSAJE...</string>
+    <string name="paid_message_unable_to_load">ERROR AL CARGAR EL MENSAJE</string>
+    <string name="attachment_price_label">Precio: </string>
+    <string name="alert_confirm_pay_attachment_title">Confirmar Compra</string>
+    <string name="alert_confirm_pay_attachment_message">¿Estas seguro de que quieres comprar este artículo?</string>
+
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">Archivo adjunto guardado correctamente</string>
+    <string name="failed_to_save_file">No se pudo guardar el archivo</string>
 
     <!-- Exit Tribe -->
     <string name="delete_own_tribe_not_supported">Eliminar la tribu no esta soportado aún</string>
@@ -117,4 +142,7 @@
     <string name="bottom_menu_call_header_text">Opciones de LLamada</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video o Audio</string>
+    <string name="slide_to_cancel">&lt;&lt; Desliza para cancelar</string>
+    <string name="recording_permission_granted">Permiso de grabación concedido</string>
+    <string name="recording_permission_required">Se requieren permisos de grabación</string>
 </resources>
