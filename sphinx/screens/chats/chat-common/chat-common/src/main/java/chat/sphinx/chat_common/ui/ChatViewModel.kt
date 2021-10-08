@@ -114,7 +114,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
-    protected val mediaCacheHandler: MediaCacheHandler,
+    val mediaCacheHandler: MediaCacheHandler,
     protected val savedStateHandle: SavedStateHandle,
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
@@ -142,6 +142,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .transformation(Transformation.CircleCrop)
             .build()
     }
+
+
 
     val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
         ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
@@ -1305,6 +1307,24 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         )
     }
 
+    internal val audioRecorderController: AudioRecorderController<ARGS> by lazy {
+        AudioRecorderController(
+            viewModelScope = viewModelScope,
+            mediaCacheHandler = mediaCacheHandler,
+            updateDurationCallback = { duration ->
+                  updateFooterViewState(
+                      FooterViewState.RecordingAudioAttachment(duration)
+                  )
+            },
+            dispatchers
+        )
+    }
+
+    fun stopAndDeleteAudioRecording() {
+        audioRecorderController.stopAndDeleteAudioRecording()
+        updateFooterViewState(FooterViewState.Default)
+    }
+
     fun goToChatDetailScreen() {
         audioPlayerController.pauseMediaIfPlaying()
         navigateToChatDetailScreen()
@@ -1492,6 +1512,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     override fun onCleared() {
         super.onCleared()
         (audioPlayerController as AudioPlayerControllerImpl).onCleared()
+        audioRecorderController?.clear()
     }
 }
 

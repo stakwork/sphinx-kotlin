@@ -141,5 +141,8 @@
     <string name="bottom_menu_call_header_text">コール方法</string>
     <string name="bottom_menu_call_option_audio">音声</string>
     <string name="bottom_menu_call_option_video_or_audio">動画または音声</string>
+    <string name="slide_to_cancel">&lt;&lt; スライドしてキャンセル</string>
+    <string name="recording_permission_granted">録音許可が付与されました</string>
+    <string name="recording_permission_required">録音権限が必要です</string>
 
 </resources>

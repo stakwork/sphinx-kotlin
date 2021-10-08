@@ -2,15 +2,25 @@ package chat.sphinx.dashboard.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.dashboard.databinding.LayoutDashboardChatsFooterBinding
 import chat.sphinx.dashboard.ui.DashboardViewModel
+import chat.sphinx.dashboard.ui.collectChatViewState
+import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 internal class ChatListFooterAdapter(
     private val lifecycleOwner: LifecycleOwner,
+    private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DashboardViewModel
 ): RecyclerView.Adapter<ChatListFooterAdapter.FooterViewHolder>() {
 
@@ -43,6 +53,20 @@ internal class ChatListFooterAdapter(
             binding.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.setOnClickListener {
                 lifecycleOwner.lifecycleScope.launch {
                     viewModel.navDrawerNavigator.toCreateTribeDetail()
+                }
+            }
+
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                viewModel.createTribeButtonViewStateContainer.collect { viewState ->
+                    @Exhaustive
+                    when (viewState) {
+                        is CreateTribeButtonViewState.Visible -> {
+                            binding.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.visible
+                        }
+                        is CreateTribeButtonViewState.Hidden -> {
+                            binding.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.gone
+                        }
+                    }
                 }
             }
         }

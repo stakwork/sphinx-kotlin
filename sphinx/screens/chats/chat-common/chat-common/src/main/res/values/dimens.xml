@@ -6,8 +6,12 @@
     <dimen name="chat_footer_episode_title_text_size">14sp</dimen>
     <dimen name="chat_footer_button_icon_text_size">28sp</dimen>
     <dimen name="chat_footer_send_button_xy">37dp</dimen>
+    <dimen name="chat_footer_record_button_xy">22dp</dimen>
     <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
     <dimen name="chat_footer_progress_line_height">2dp</dimen>
+    <dimen name="chat_footer_recording_audio_height">50dp</dimen>
+    <dimen name="chat_footer_recording_audio_duration_text_size">20sp</dimen>
+    <dimen name="chat_footer_recording_audio_slide_text_size">15sp</dimen>
 
     <dimen name="chat_header_exit_tribe_width">28sp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>

@@ -10,11 +10,13 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
     open val hintTextStringId: Int
         get() = R.string.edit_text_message_hint
     open val showSendIcon: Boolean
-        get() = true
+        get() = false
     open val showRecordAudioIcon: Boolean
         get() = !showSendIcon
     open val messagingEnabled: Boolean
         get() = true
+    open val recordingEnabled: Boolean
+        get() = false
 
     object Default: FooterViewState()
 
@@ -23,6 +25,17 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
             get() = false
         override val hintTextStringId: Int
             get() = R.string.edit_text_optional_message_hint
+    }
+
+    class RecordingAudioAttachment(val duration: Long): FooterViewState() {
+        override val showMenuIcon: Boolean
+            get() = false
+        override val showSendIcon: Boolean
+            get() = false
+        override val recordingEnabled: Boolean
+            get() = true
+        override val messagingEnabled: Boolean
+            get() = !recordingEnabled
     }
 
     object Disabled: FooterViewState() {

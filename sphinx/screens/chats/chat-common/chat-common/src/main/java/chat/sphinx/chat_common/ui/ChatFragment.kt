@@ -1,19 +1,22 @@
 package chat.sphinx.chat_common.ui
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
-import android.view.Window
+import android.view.*
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.LayoutRes
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -34,12 +37,15 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
+import chat.sphinx.chat_common.ui.viewstate.messageholder.toTimestamp
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
+import chat.sphinx.chat_common.ui.widgets.SlideToCancelImageView
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
+import chat.sphinx.chat_common.util.AudioRecorderController
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -74,6 +80,7 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
@@ -92,10 +99,11 @@ abstract class ChatFragment<
         ChatMenuViewState,
         VM,
         VB
-        >(layoutId), ChatSideEffectFragment
+        >(layoutId), ChatSideEffectFragment, SlideToCancelImageView.SlideToCancelListener
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val recordingCircleBinding: LayoutChatRecordingCircleBinding
     protected abstract val replyingMessageBinding: LayoutMessageReplyBinding
     protected abstract val selectedMessageBinding: LayoutSelectedMessageBinding
     protected abstract val selectedMessageHolderBinding: LayoutMessageHolderBinding
@@ -133,6 +141,22 @@ abstract class ChatFragment<
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             viewModel.handleActivityResultUri(uri)
         }
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.submitSideEffect(
+                ChatSideEffect.Notify(
+                    if (granted) {
+                        getString(R.string.recording_permission_granted)
+                    } else {
+                        getString(R.string.recording_permission_required)
+                    }
+                )
+            )
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -279,6 +303,10 @@ abstract class ChatFragment<
             insetterActivity.addNavigationBarPadding(root)
         }
 
+        recordingCircleBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+
         footerBinding.apply {
             insetterActivity.addNavigationBarPadding(root)
 
@@ -344,6 +372,17 @@ abstract class ChatFragment<
                 }
             }
 
+            imageViewChatFooterMicrophone.slideToCancelListener = this@ChatFragment
+            imageViewChatFooterMicrophone.setOnLongClickListener {
+                if (!viewModel.audioRecorderController.isRecording()) {
+                    if (isRecordingPermissionsGranted()) {
+                        startRecording()
+                    } else {
+                        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
+                }
+                return@setOnLongClickListener true
+            }
             textViewChatFooterAttachment.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     editTextChatFooter.let { editText ->
@@ -384,6 +423,10 @@ abstract class ChatFragment<
             })
 
             editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
+            editTextChatFooter.addTextChangedListener { editable ->
+                textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
+                imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+            }
         }
 
         replyingMessageBinding.apply {
@@ -1045,6 +1088,8 @@ abstract class ChatFragment<
             viewModel.getFooterViewStateFlow().collect { viewState ->
                 footerBinding.apply {
                     editTextChatFooter.hint = getString(viewState.hintTextStringId)
+
+                    layoutConstraintChatFooterRecordingActions.goneIfFalse(viewState.recordingEnabled)
                     imageViewChatFooterMicrophone.goneIfFalse(viewState.showRecordAudioIcon)
                     textViewChatFooterSend.goneIfFalse(viewState.showSendIcon)
                     textViewChatFooterAttachment.goneIfFalse(viewState.showMenuIcon)
@@ -1052,7 +1097,16 @@ abstract class ChatFragment<
                     editTextChatFooter.isEnabled = viewState.messagingEnabled
                     textViewChatFooterSend.isEnabled = viewState.messagingEnabled
                     textViewChatFooterAttachment.isEnabled = viewState.messagingEnabled
-                    root.alpha = if (viewState.messagingEnabled) 1.0f else 0.4f
+
+                    if (viewState is FooterViewState.RecordingAudioAttachment) {
+                        textViewRecordingTimer.text = viewState.duration.toTimestamp()
+                    } else {
+                        layoutConstraintChatFooterActions.translationX = 0f
+                    }
+                }
+
+                recordingCircleBinding.apply {
+                    root.goneIfFalse(viewState.recordingEnabled)
                 }
             }
         }
@@ -1258,5 +1312,49 @@ abstract class ChatFragment<
         headerInitialHolderLastViewState = null
         fullscreenLastViewState = null
         attachmentSendLastViewState = null
+    }
+
+    private fun isRecordingPermissionsGranted() = arrayOf(Manifest.permission.RECORD_AUDIO).all {
+        ContextCompat.checkSelfPermission(
+            requireContext(), it
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun startRecording() {
+        viewModel.audioRecorderController.startAudioRecording()
+    }
+
+    override fun isActive(): Boolean {
+        return viewModel.audioRecorderController.isRecording()
+    }
+
+    override fun thresholdX(): Float {
+        return footerBinding.textViewRecordingSlideToCancel.x + footerBinding.textViewRecordingSlideToCancel.measuredWidth
+    }
+
+    override fun onSlideToCancel() {
+        viewModel.stopAndDeleteAudioRecording()
+    }
+
+    override fun onInteractionComplete() {
+        viewModel.audioRecorderController.stopAudioRecording()
+        viewModel.audioRecorderController.recordingTempFile?.let {
+            sendMessageBuilder.setAttachmentInfo(
+                AttachmentInfo(
+                    file = it,
+                    mediaType = MediaType.Audio(AudioRecorderController.AUDIO_FORMAT_MIME_TYPE),
+                    isLocalFile = true,
+                )
+            )
+
+            viewModel.sendMessage(sendMessageBuilder)?.let {
+                // if it did not return null that means it was valid
+                viewModel.updateFooterViewState(FooterViewState.Default)
+
+                sendMessageBuilder.clear()
+                viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+            }
+            viewModel.audioRecorderController.clear()
+        }
     }
 }

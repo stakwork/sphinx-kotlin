@@ -14,17 +14,20 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
+import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -127,6 +130,12 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
+        binding.layoutDashboardChats.layoutSwipeRefreshChats.apply {
+            setOnRefreshListener {
+                viewModel.networkRefresh()
+                isRefreshing = false
+            }
+        }
         binding.layoutDashboardChats.recyclerViewChats.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             val chatListAdapter = ChatListAdapter(
@@ -139,7 +148,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                 userColorsHelper
             )
 
-            val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, viewModel)
+            val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, onStopSupervisor, viewModel)
             this.setHasFixedSize(false)
             layoutManager = linearLayoutManager
             adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
@@ -461,6 +470,22 @@ internal class DashboardFragment : MotionLayoutFragment<
                         }
 
                         binding.layoutDashboardPopup.root.gone
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.createTribeButtonViewStateContainer.collect { viewState ->
+                binding.layoutDashboardNavDrawer.let { navDrawer ->
+                    @Exhaustive
+                    when (viewState) {
+                        is CreateTribeButtonViewState.Visible -> {
+                            navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.visible
+                        }
+                        is CreateTribeButtonViewState.Hidden -> {
+                            navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.gone
+                        }
                     }
                 }
             }

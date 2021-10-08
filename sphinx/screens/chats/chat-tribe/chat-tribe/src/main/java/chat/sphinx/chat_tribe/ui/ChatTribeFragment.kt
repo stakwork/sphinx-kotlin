@@ -49,6 +49,8 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
+    override val recordingCircleBinding: LayoutChatRecordingCircleBinding
+        get() = binding.includeChatRecordingCircle
     override val headerBinding: LayoutChatHeaderBinding
         get() = binding.includeChatTribeHeader
     override val replyingMessageBinding: LayoutMessageReplyBinding

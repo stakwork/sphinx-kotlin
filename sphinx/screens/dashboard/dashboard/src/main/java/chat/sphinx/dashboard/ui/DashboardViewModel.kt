@@ -88,6 +88,8 @@ internal class DashboardViewModel @Inject constructor(
     private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
 
+    private val accountOwner: StateFlow<Contact?>,
+
     val dashboardNavigator: DashboardNavigator,
     val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
@@ -463,6 +465,10 @@ internal class DashboardViewModel @Inject constructor(
         ViewStateContainer(DeepLinkPopupViewState.PopupDismissed)
     }
 
+    val createTribeButtonViewStateContainer: ViewStateContainer<CreateTribeButtonViewState> by lazy {
+        ViewStateContainer(CreateTribeButtonViewState.Hidden)
+    }
+
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)
     }
@@ -594,15 +600,38 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
-        // Prime it...
         viewModelScope.launch(mainImmediate) {
-            try {
-                repositoryDashboard.accountOwner.collect {
-                    if (it != null) {
-                        throw Exception()
-                    }
+            val owner = getOwner()
+
+            createTribeButtonViewStateContainer.updateViewState(
+                if (owner.isOnVirtualNode()) {
+                    CreateTribeButtonViewState.Hidden
+                } else {
+                    CreateTribeButtonViewState.Visible
                 }
-            } catch (e: Exception) {}
+            )
+        }
+    }
+
+    private suspend fun getOwner(): Contact {
+        return accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
         }
     }
 
