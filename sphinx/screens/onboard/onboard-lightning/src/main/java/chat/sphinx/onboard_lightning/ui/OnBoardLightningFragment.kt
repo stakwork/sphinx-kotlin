@@ -15,7 +15,9 @@ import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_lightning.R
 import chat.sphinx.onboard_lightning.databinding.FragmentOnBoardLightningBinding
 import chat.sphinx.onboard_lightning.navigation.inviterData
+import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,6 +45,10 @@ internal class OnBoardLightningFragment: BaseFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        CloseAppOnBackPress(view.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
+
         setupHeaderAndFooter()
 
         lifecycleScope.launch {
@@ -53,7 +59,7 @@ internal class OnBoardLightningFragment: BaseFragment<
         }
 
         binding.buttonContinue.setOnClickListener {
-            viewModel.nextScreen(args.inviterData)
+            viewModel.nextScreen(inviterData)
         }
     }
 

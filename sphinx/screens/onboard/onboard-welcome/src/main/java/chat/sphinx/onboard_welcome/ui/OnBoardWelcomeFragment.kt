@@ -9,7 +9,9 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_welcome.R
 import chat.sphinx.onboard_welcome.databinding.FragmentOnBoardWelcomeBinding
+import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 
 @AndroidEntryPoint
@@ -27,6 +29,10 @@ internal class OnBoardWelcomeFragment: BaseFragment<
         super.onViewCreated(view, savedInstanceState)
 
         setupHeaderAndFooter()
+
+        CloseAppOnBackPress(view.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
 
         binding.apply {
             buttonNewUser.setOnClickListener {

@@ -9,7 +9,9 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_connected.R
 import chat.sphinx.onboard_connected.databinding.FragmentOnBoardConnectedBinding
+import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 
 @AndroidEntryPoint
@@ -24,6 +26,10 @@ internal class OnBoardConnectedFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        CloseAppOnBackPress(view.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
 
         setupHeaderAndFooter()
 

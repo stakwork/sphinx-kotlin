@@ -54,7 +54,7 @@ internal class SplashViewModel @Inject constructor(
                 @Exhaustive
                 when (onBoardStep) {
                     is OnBoardStep.Step1_WelcomeMessage -> {
-                        navigator.toOnBoardScreen(onBoardStep)
+                        navigator.toOnBoardMessageScreen(onBoardStep)
                     }
                     is OnBoardStep.Step2_Name -> {
                         navigator.toOnBoardNameScreen(onBoardStep)
@@ -91,7 +91,7 @@ internal class SplashViewModel @Inject constructor(
                                 @Exhaustive
                                 when (onBoardStep) {
                                     is OnBoardStep.Step1_WelcomeMessage -> {
-                                        navigator.toOnBoardScreen(onBoardStep)
+                                        navigator.toOnBoardMessageScreen(onBoardStep)
                                     }
                                     is OnBoardStep.Step2_Name -> {
                                         navigator.toOnBoardNameScreen(onBoardStep)
@@ -118,7 +118,7 @@ internal class SplashViewModel @Inject constructor(
                     @Exhaustive
                     when (onBoardStep) {
                         is OnBoardStep.Step1_WelcomeMessage -> {
-                            navigator.toOnBoardScreen(onBoardStep)
+                            navigator.toOnBoardMessageScreen(onBoardStep)
                         }
                         is OnBoardStep.Step2_Name -> {
                             navigator.toOnBoardNameScreen(onBoardStep)
@@ -131,7 +131,7 @@ internal class SplashViewModel @Inject constructor(
                         }
                         null -> {
                             delay(1000L) // need a slight delay for window to fully hand over to splash
-                            navigator.toOnBoardWelcome()
+                            navigator.toOnBoardWelcomeScreen()
                         }
                     }
 
