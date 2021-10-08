@@ -81,7 +81,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         BackPressHandler(binding.root.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
@@ -129,12 +128,12 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupChats() {
-				binding.layoutDashboardChats.layoutSwipeRefreshChats.apply {
+        binding.layoutDashboardChats.layoutSwipeRefreshChats.apply {
             setOnRefreshListener {
                 viewModel.networkRefresh()
                 isRefreshing = false
             }
-				}
+        }
         binding.layoutDashboardChats.recyclerViewChats.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             val chatListAdapter = ChatListAdapter(
