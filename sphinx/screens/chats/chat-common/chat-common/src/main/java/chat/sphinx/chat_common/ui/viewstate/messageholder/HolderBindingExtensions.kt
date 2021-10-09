@@ -34,7 +34,6 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
@@ -176,6 +175,57 @@ internal fun LayoutMessageHolderBinding.setView(
                 holderJobs,
                 lifecycleScope
             )
+            setBubbleVideoAttachment(viewState.bubbleVideoAttachment) { imageView, url, media ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+
+//                    val file: File? = media?.localFile
+
+//                    val options: ImageLoaderOptions? = if (media != null) {
+//                        val builder = ImageLoaderOptions.Builder()
+//
+//                        builder.errorResId(
+//                            if (viewState is MessageHolderViewState.Sent) {
+//                                R.drawable.sent_image_not_available
+//                            } else {
+//                                R.drawable.received_image_not_available
+//                            }
+//                        )
+//
+//                        if (file == null) {
+//                            media.host?.let { host ->
+//                                memeServerTokenHandler.retrieveAuthenticationToken(host)
+//                                    ?.let { token ->
+//                                        builder.addHeader(token.headerKey, token.headerValue)
+//
+//                                        media.mediaKeyDecrypted?.value?.let { key ->
+//                                            val header = CryptoHeader.Decrypt.Builder()
+//                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
+//                                                .setPassword(key)
+//                                                .build()
+//
+//                                            builder.addHeader(header.key, header.value)
+//                                        }
+//                                    }
+//                            }
+//                        }
+//
+//                        builder.build()
+//                    } else {
+//                        null
+//                    }
+//
+//                    val disposable: Disposable = if (file != null) {
+//                        imageLoader.load(imageView, file, options)
+//                    } else {
+//                        imageLoader.load(imageView, url, options)
+//                    }
+//
+//                    disposables.add(disposable)
+//                    disposable.await()
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubblePaidMessageLayout(
@@ -1320,6 +1370,31 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
             textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
             textViewAttachmentPlayPauseButton.visible
 
+        }
+    }
+}
+
+internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
+    videoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment?,
+    loadVideoThumbnail: (ImageView, String, MessageMedia?) -> Unit,
+) {
+    includeMessageHolderBubble.includeMessageTypeVideoAttachment.apply {
+        if (videoAttachment == null) {
+            root.gone
+        } else {
+            root.visible
+
+            if (videoAttachment.showPaidOverlay) {
+                layoutConstraintPaidVideoOverlay.visible
+
+                imageViewAttachmentThumbnail.gone
+            } else {
+                layoutConstraintPaidVideoOverlay.gone
+
+                imageViewAttachmentThumbnail.visible
+
+                loadVideoThumbnail(imageViewAttachmentThumbnail, videoAttachment.url, videoAttachment.media)
+            }
         }
     }
 }

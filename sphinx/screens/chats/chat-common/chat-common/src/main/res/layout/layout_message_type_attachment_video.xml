@@ -4,43 +4,162 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="@dimen/message_type_image_attachment_min_height"
+    android:padding="2dp"
     android:visibility="gone"
     tools:layout_width="300dp"
     tools:visibility="visible">
 
-    <VideoView
-        android:id="@+id/video_view_attachment_video"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/message_type_video_attachment_height"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loading_video_progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
+        <ProgressBar
+            android:id="@+id/loading_video_progress"
+            android:layout_width="@dimen/loading_image_progress_xy"
+            android:layout_height="@dimen/loading_image_progress_xy"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@color/secondaryText"
+            android:indeterminate="true"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <!--  TODO: Create and apply drawable for Circular Play Button  -->
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/button_attachment_video_play"
-        android:layout_width="@dimen/video_attachment_play_pause_button_xy"
-        android:layout_height="@dimen/video_attachment_play_pause_button_xy"
-        android:src="@drawable/sphinx_white_logo"
-        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"
-        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"
-        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"
-        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loading_video_progress"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/loading_image_label_text_size"
+            android:textColor="@color/secondaryText"
+            android:layout_marginTop="@dimen/default_small_layout_margin"
+            android:text="@string/text_view_loading_attachment">
 
+        </androidx.appcompat.widget.AppCompatTextView>
 
-    <!--  TODO: Create and apply drawable for Circular Pause Button  -->
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/button_attachment_video_pause"
-        android:layout_width="@dimen/video_attachment_play_pause_button_xy"
-        android:layout_height="@dimen/video_attachment_play_pause_button_xy"
-        android:src="@drawable/sphinx_white_logo"
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_video_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardCornerRadius="@dimen/background_message_holder_default_corner_rad">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_attachment_thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/message_type_image_attachment_min_height"
+            android:clickable="false"
+            android:focusable="true"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_paid_video_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_overlay_video_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardElevation="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:cardCornerRadius="@dimen/background_message_holder_default_corner_rad">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/video_view_paid_video"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/message_type_image_attachment_min_height"
+                android:clickable="false"
+                android:focusable="true"
+                android:adjustViewBounds="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/paid_image_blurred_placeholder"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_pay_to_unlock_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:fontFamily="@font/material_icons_regular"
+                android:textSize="25sp"
+                android:textColor="@android:color/white"
+                android:text="@string/material_icon_name_lock"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_pay_to_unlock_icon"
+                android:layout_marginTop="@dimen/default_half_layout_margin"
+                android:fontFamily="@font/roboto_medium"
+                android:textSize="10sp"
+                android:textColor="@android:color/white"
+                android:text="@string/paywall_overlay_content_description_video_message_received"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_video_play_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/video_view_attachment_video"
-        app:layout_constraintEnd_toEndOf="@id/video_view_attachment_video"
-        app:layout_constraintStart_toStartOf="@id/video_view_attachment_video"
-        app:layout_constraintTop_toTopOf="@id/video_view_attachment_video"
-        tools:visibility="gone" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible">
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_attachment_play_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/message_type_image_attachment_min_height"
+            android:clickable="false"
+            android:focusable="true"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:tint="@color/primaryBlue"
+            app:srcCompat="@drawable/ic_podcast_play_circle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
