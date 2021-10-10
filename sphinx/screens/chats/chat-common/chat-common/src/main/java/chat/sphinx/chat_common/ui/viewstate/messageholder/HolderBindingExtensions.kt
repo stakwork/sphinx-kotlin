@@ -1337,6 +1337,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
 ) {
     includeMessageHolderBubble.includeMessageTypeVideoAttachment.apply {
         imageViewAttachmentThumbnail.gone
+        layoutConstraintVideoPlayButton.gone
         @Exhaustive
         when (videoAttachment) {
             null -> {
@@ -1349,11 +1350,14 @@ internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
 
                 if (thumbnail != null) {
                     imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                    layoutConstraintVideoPlayButton.visible
                 } else {
                     // TODO: Load error/blurry drawable
                 }
 
                 imageViewAttachmentThumbnail.visible
+
+
             }
             is LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable -> {
                 root.visible
