@@ -23,6 +23,7 @@ import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
+import chat.sphinx.chat_common.util.VideoPlayerController
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -62,6 +63,7 @@ internal fun LayoutMessageHolderBinding.setView(
     disposables: ArrayList<Disposable>,
     dispatchers: CoroutineDispatchers,
     audioPlayerController: AudioPlayerController,
+    videoPlayerController: VideoPlayerController,
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
@@ -175,57 +177,10 @@ internal fun LayoutMessageHolderBinding.setView(
                 holderJobs,
                 lifecycleScope
             )
-            setBubbleVideoAttachment(viewState.bubbleVideoAttachment) { imageView, url, media ->
-                lifecycleScope.launch(dispatchers.mainImmediate) {
-
-//                    val file: File? = media?.localFile
-
-//                    val options: ImageLoaderOptions? = if (media != null) {
-//                        val builder = ImageLoaderOptions.Builder()
-//
-//                        builder.errorResId(
-//                            if (viewState is MessageHolderViewState.Sent) {
-//                                R.drawable.sent_image_not_available
-//                            } else {
-//                                R.drawable.received_image_not_available
-//                            }
-//                        )
-//
-//                        if (file == null) {
-//                            media.host?.let { host ->
-//                                memeServerTokenHandler.retrieveAuthenticationToken(host)
-//                                    ?.let { token ->
-//                                        builder.addHeader(token.headerKey, token.headerValue)
-//
-//                                        media.mediaKeyDecrypted?.value?.let { key ->
-//                                            val header = CryptoHeader.Decrypt.Builder()
-//                                                .setScheme(CryptoScheme.Decrypt.JNCryptor)
-//                                                .setPassword(key)
-//                                                .build()
-//
-//                                            builder.addHeader(header.key, header.value)
-//                                        }
-//                                    }
-//                            }
-//                        }
-//
-//                        builder.build()
-//                    } else {
-//                        null
-//                    }
-//
-//                    val disposable: Disposable = if (file != null) {
-//                        imageLoader.load(imageView, file, options)
-//                    } else {
-//                        imageLoader.load(imageView, url, options)
-//                    }
-//
-//                    disposables.add(disposable)
-//                    disposable.await()
-                }.let { job ->
-                    holderJobs.add(job)
-                }
-            }
+            setBubbleVideoAttachment(
+                viewState.bubbleVideoAttachment,
+                videoPlayerController,
+            )
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
             setBubblePaidMessageLayout(
@@ -1374,26 +1329,35 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
     }
 }
 
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
     videoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment?,
-    loadVideoThumbnail: (ImageView, String, MessageMedia?) -> Unit,
+    videoPlayerController: VideoPlayerController
 ) {
     includeMessageHolderBubble.includeMessageTypeVideoAttachment.apply {
-        if (videoAttachment == null) {
-            root.gone
-        } else {
-            root.visible
+        imageViewAttachmentThumbnail.gone
+        @Exhaustive
+        when (videoAttachment) {
+            null -> {
+                root.gone
+            }
+            is LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable -> {
+                root.visible
 
-            if (videoAttachment.showPaidOverlay) {
-                layoutConstraintPaidVideoOverlay.visible
+                val thumbnail = videoPlayerController.loadThumbnail(videoAttachment.file)
 
-                imageViewAttachmentThumbnail.gone
-            } else {
-                layoutConstraintPaidVideoOverlay.gone
+                if (thumbnail != null) {
+                    imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                } else {
+                    // TODO: Load error/blurry drawable
+                }
 
                 imageViewAttachmentThumbnail.visible
-
-                loadVideoThumbnail(imageViewAttachmentThumbnail, videoAttachment.url, videoAttachment.media)
+            }
+            is LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable -> {
+                root.visible
+                // Downlading the file
             }
         }
     }

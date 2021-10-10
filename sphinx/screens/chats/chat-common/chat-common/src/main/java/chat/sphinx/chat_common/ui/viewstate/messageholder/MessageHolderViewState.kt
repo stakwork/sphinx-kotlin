@@ -279,12 +279,24 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleVideoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        message.retrieveVideoUrlAndMessageMedia()?.let { mediaData ->
-            LayoutState.Bubble.ContainerSecond.VideoAttachment(
-                mediaData.first,
-                mediaData.second,
-                (this is Received && message.isPaidPendingMessage)
-            )
+        message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isVideo) {
+                nnMessageMedia.localFile?.let { nnFile ->
+                    LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable(nnFile)
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    // will only be called once when value is lazily initialized upon binding
+                    // data to view.
+                    if (!pendingPayment) {
+                        onBindDownloadMedia.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable(pendingPayment)
+                }
+            } else {
+                null
+            }
         }
     }
 

@@ -411,6 +411,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 disposables,
                 viewModel.dispatchers,
                 viewModel.audioPlayerController,
+                viewModel.videoPlayerController,
                 imageLoader,
                 viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,

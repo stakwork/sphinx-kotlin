@@ -31,9 +31,9 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
-import chat.sphinx.concept_repository_message.model.SendPaymentRequest
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
+import chat.sphinx.concept_repository_message.model.SendPaymentRequest
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -4126,8 +4126,29 @@ abstract class SphinxRepository(
                             null
                         }
                         is MediaType.Video -> {
-                            // TODO: Implement (use download service via controller)
-                            null
+                            // TODO: Auto generate file extension (if app doesn't support media we can load via )
+                            type.value.split("/").lastOrNull()?.let { fileType ->
+                                when {
+                                    fileType.contains("webm", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("webm")
+                                    }
+                                    fileType.contains("3gpp", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("3gp")
+                                    }
+                                    fileType.contains("x-matroska", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("mkv")
+                                    }
+                                    fileType.contains("mp4", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("mp4")
+                                    }
+                                    fileType.contains("mov", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("mov")
+                                    }
+                                    else -> {
+                                        null
+                                    }
+                                }
+                            }
                         }
                         is MediaType.Unknown -> {
                             LOG.w(TAG, "Unknown MediaType for MessageMedia $messageId")

@@ -128,11 +128,10 @@ internal sealed class LayoutState private constructor() {
                 val showPaidOverlay: Boolean
             ): ContainerSecond()
 
-            data class VideoAttachment(
-                val url: String,
-                val media: MessageMedia?,
-                val showPaidOverlay: Boolean
-            ): ContainerSecond()
+            sealed class VideoAttachment : ContainerSecond()  {
+                data class FileAvailable(val file: File): VideoAttachment()
+                data class FileUnavailable(val showPaidOverlay: Boolean): VideoAttachment()
+            }
 
             data class PodcastBoost(
                 val amount: Sat,

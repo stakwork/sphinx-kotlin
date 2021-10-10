@@ -1307,6 +1307,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         )
     }
 
+    internal val videoPlayerController: VideoPlayerController by lazy {
+        VideoPlayerController(
+            app,
+        )
+    }
+
     internal val audioRecorderController: AudioRecorderController<ARGS> by lazy {
         AudioRecorderController(
             viewModelScope = viewModelScope,

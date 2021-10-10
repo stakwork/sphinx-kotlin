@@ -995,6 +995,7 @@ abstract class ChatFragment<
                                 disposables,
                                 viewModel.dispatchers,
                                 viewModel.audioPlayerController,
+                                viewModel.videoPlayerController,
                                 imageLoader,
                                 viewModel.imageLoaderDefaults,
                                 viewModel.memeServerTokenHandler,
