@@ -1,5 +1,12 @@
 # ChangeLog
 
+# Version 1.0.0-alpha28 (2021-10-11)
+ - Adds ability to record and send audio messages
+ - Adds new onboard screens
+ - Adds pull down to refresh on dashboard
+ - Fixes Podcast tag on tribes
+ - Fixes hiding CREATE TRIBE button on virtual nodes
+
 ## Version 1.0.0-alpha27 (2021-10-08)
  - Adds ability to record and send audio messages
  - Adds new onboard screens
