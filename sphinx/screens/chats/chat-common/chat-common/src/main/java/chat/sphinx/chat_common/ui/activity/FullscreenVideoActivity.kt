@@ -14,6 +14,8 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.ActivityFullscreenVideoBinding
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_viewmodel.collectViewState
+import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
 
 /**
@@ -21,9 +23,12 @@ import kotlinx.coroutines.launch
  * status bar and navigation/system bar) with user interaction.
  */
 @AndroidEntryPoint
-class FullscreenVideoActivity : AppCompatActivity() {
+internal class FullscreenVideoActivity : AppCompatActivity() {
+    private val onStopSupervisor: OnStopSupervisor = OnStopSupervisor()
+    private var currentViewState: FullscreenVideoViewState? = null
+
     private val viewModel: FullscreenVideoViewModel by viewModels()
-    val binding: ActivityFullscreenVideoBinding by viewBinding(ActivityFullscreenVideoBinding::bind)
+    private val binding: ActivityFullscreenVideoBinding by viewBinding(ActivityFullscreenVideoBinding::bind)
 
     private val mHideHandler = Handler()
     private val mHidePart2Runnable = Runnable {
@@ -91,7 +96,7 @@ class FullscreenVideoActivity : AppCompatActivity() {
             // Upon interacting with UI controls, delay any scheduled hide()
             // operations to prevent the jarring behavior of controls going away
             // while interacting with the UI.
-//            fullscreenContentControls.setOnTouchListener(mDelayHideTouchListener)
+            fullscreenContentControls.setOnTouchListener(mDelayHideTouchListener)
 //            textViewCurrentTime.setOnTouchListener(mDelayHideTouchListener)
 //            seekBarCurrentProgress.setOnTouchListener(mDelayHideTouchListener)
         }
@@ -177,6 +182,7 @@ class FullscreenVideoActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        subscribeToViewStateFlow()
         viewModel.initializeVideo()
     }
 
@@ -188,5 +194,37 @@ class FullscreenVideoActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         viewModel.videoPlayerController.stop()
+    }
+
+    private fun subscribeToViewStateFlow() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.collectViewState { viewState ->
+                if (currentViewState != viewState) {
+                    currentViewState = viewState
+                    onViewStateFlowCollect(viewState)
+                }
+            }
+        }
+    }
+
+    suspend fun onViewStateFlowCollect(viewState: FullscreenVideoViewState) {
+        when (viewState) {
+            is FullscreenVideoViewState.VideoMessage -> {
+                binding.textViewVideoMessageText.text = viewState.name
+            }
+            is FullscreenVideoViewState.MetaDataLoaded -> {
+                binding.seekBarCurrentProgress.max = viewState.duration
+            }
+            is FullscreenVideoViewState.CurrentTimeUpdate -> {
+                binding.seekBarCurrentProgress.progress = viewState.currentTime
+            }
+            is FullscreenVideoViewState.ContinuePlayback -> {
+                // TODO: Show pause button...
+            }
+            is FullscreenVideoViewState.PausePlayback -> {
+                // TODO: Show play button...
+            }
+
+        }
     }
 }

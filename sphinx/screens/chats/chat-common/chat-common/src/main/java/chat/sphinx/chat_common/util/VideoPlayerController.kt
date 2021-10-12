@@ -23,6 +23,11 @@ class VideoPlayerController : MediaController {
 
     fun initializeVideo(videoFile: File) {
         videoView?.setVideoURI(videoFile.toUri())
+        // Set duration...
+        play()
+    }
+
+    fun play() {
         videoView?.start()
     }
 
@@ -36,9 +41,9 @@ class VideoPlayerController : MediaController {
 
     fun togglePlayPause() {
         if (videoView?.isPlaying == true) {
-            videoView?.pause()
+            pause()
         } else {
-            videoView?.start()
+            play()
         }
     }
 
