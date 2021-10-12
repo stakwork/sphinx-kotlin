@@ -1,12 +1,11 @@
 package chat.sphinx.chat_common.ui.activity
 
+import android.content.pm.ActivityInfo
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.view.MotionEvent
-import android.view.View
+import android.view.*
 import android.view.View.OnTouchListener
-import android.view.WindowInsets
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +23,8 @@ import kotlinx.coroutines.launch
  */
 @AndroidEntryPoint
 internal class FullscreenVideoActivity : AppCompatActivity() {
+    private lateinit var orientationListener: OrientationEventListener
+
     private val onStopSupervisor: OnStopSupervisor = OnStopSupervisor()
     private var currentViewState: FullscreenVideoViewState? = null
 
@@ -101,6 +102,39 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
 //            seekBarCurrentProgress.setOnTouchListener(mDelayHideTouchListener)
         }
 
+        orientationListener =  object : OrientationEventListener(this) {
+            override fun onOrientationChanged(orientation: Int) {
+                val rotation = when {
+                    orientation <= 45 -> Surface.ROTATION_0
+                    orientation <= 135 -> Surface.ROTATION_90
+                    orientation <= 225 -> Surface.ROTATION_180
+                    orientation <= 315 -> Surface.ROTATION_270
+                    else -> Surface.ROTATION_0
+                }
+                when(rotation) {
+                    Surface.ROTATION_0 -> {
+                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                    }
+                    Surface.ROTATION_90 -> {
+                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
+                    }
+                    Surface.ROTATION_180 -> {
+                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT)
+                    }
+                    Surface.ROTATION_270 -> {
+                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                    }
+                }
+            }
+        }
+    }
+
+    @Synchronized
+    fun setOrientation(orientation: Int) {
+        if (requestedOrientation != orientation) {
+            // TODO: Delayed orientation update
+            requestedOrientation = orientation
+        }
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -184,6 +218,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
         super.onStart()
         subscribeToViewStateFlow()
         viewModel.initializeVideo()
+        orientationListener.enable()
     }
 
     override fun onPause() {
@@ -194,6 +229,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         viewModel.videoPlayerController.stop()
+        orientationListener.disable()
     }
 
     private fun subscribeToViewStateFlow() {
