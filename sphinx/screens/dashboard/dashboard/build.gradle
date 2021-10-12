@@ -56,6 +56,7 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
 
+    implementation deps.androidx.swipeRefreshLayout
     implementation deps.androidx.recyclerView
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
