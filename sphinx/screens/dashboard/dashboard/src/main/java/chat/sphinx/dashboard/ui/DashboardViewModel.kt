@@ -35,6 +35,7 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -54,6 +55,7 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
@@ -898,5 +900,14 @@ internal class DashboardViewModel @Inject constructor(
 
     override suspend fun onMotionSceneCompletion(value: Any) {
         // Unused
+    }
+
+    fun toastIfNetworkConnected(context: Context){
+        if (_networkStateFlow.value is Response.Error) {
+            SphinxToastUtils(true).show(context, R.string.dashboard_network_disconnected_node_toast)
+        }else{
+            SphinxToastUtils(true).show(context, R.string.dashboard_network_connected_node_toast)
+        }
+
     }
 }
