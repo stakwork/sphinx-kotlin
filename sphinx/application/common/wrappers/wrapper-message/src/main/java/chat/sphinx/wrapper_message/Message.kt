@@ -251,6 +251,9 @@ inline val Message.isSphinxCallLink: Boolean
 inline val Message.isAudioMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isAudio == true
 
+inline val Message.isVideoMessage: Boolean
+    get() = type.isAttachment() && messageMedia?.mediaType?.isVideo == true
+
 inline val Message.isPodcastBoost: Boolean
     get() = type.isBoost() && podBoost != null
 

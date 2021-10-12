@@ -1307,12 +1307,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         )
     }
 
-    internal val videoPlayerController: VideoPlayerController by lazy {
-        VideoPlayerController(
-            app,
-        )
-    }
-
     internal val audioRecorderController: AudioRecorderController<ARGS> by lazy {
         AudioRecorderController(
             viewModelScope = viewModelScope,
@@ -1334,6 +1328,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     fun goToChatDetailScreen() {
         audioPlayerController.pauseMediaIfPlaying()
         navigateToChatDetailScreen()
+    }
+
+    fun goToFullscreenVideo(messageId: MessageId) {
+        viewModelScope.launch(mainImmediate) {
+            chatNavigator.toFullscreenVideo(messageId)
+        }
     }
 
     protected abstract fun navigateToChatDetailScreen()

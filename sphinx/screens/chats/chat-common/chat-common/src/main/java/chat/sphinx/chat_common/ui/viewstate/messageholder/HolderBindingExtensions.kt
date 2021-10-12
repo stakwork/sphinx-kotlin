@@ -11,6 +11,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
+import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
@@ -18,12 +19,13 @@ import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBindi
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
+import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
 import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
-import chat.sphinx.chat_common.util.VideoPlayerController
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -57,13 +59,13 @@ import chat.sphinx.resources.R as common_R
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal fun LayoutMessageHolderBinding.setView(
+internal fun <ARGS: NavArgs>  LayoutMessageHolderBinding.setView(
     lifecycleScope: CoroutineScope,
     holderJobs: ArrayList<Job>,
     disposables: ArrayList<Disposable>,
+    viewModel: ChatViewModel<ARGS>,
     dispatchers: CoroutineDispatchers,
     audioPlayerController: AudioPlayerController,
-    videoPlayerController: VideoPlayerController,
     imageLoader: ImageLoader<ImageView>,
     imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
@@ -178,8 +180,9 @@ internal fun LayoutMessageHolderBinding.setView(
                 lifecycleScope
             )
             setBubbleVideoAttachment(
+                viewState.message,
                 viewState.bubbleVideoAttachment,
-                videoPlayerController,
+                viewModel
             )
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
@@ -1331,13 +1334,20 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
+internal inline fun <ARGS: NavArgs> LayoutMessageHolderBinding.setBubbleVideoAttachment(
+    message: Message,
     videoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment?,
-    videoPlayerController: VideoPlayerController
+    viewModel: ChatViewModel<ARGS>
 ) {
     includeMessageHolderBubble.includeMessageTypeVideoAttachment.apply {
         imageViewAttachmentThumbnail.gone
         layoutConstraintVideoPlayButton.gone
+
+        imageViewAttachmentPlayButton.setOnClickListener {
+            viewModel.goToFullscreenVideo(message.id)
+//            val intent = Intent(root.context, FullscreenVideoActivity::class.java)
+//            root.context.startActivity(intent)
+        }
         @Exhaustive
         when (videoAttachment) {
             null -> {
@@ -1346,7 +1356,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
             is LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable -> {
                 root.visible
 
-                val thumbnail = videoPlayerController.loadThumbnail(videoAttachment.file)
+                val thumbnail = VideoThumbnailUtil.loadThumbnail(videoAttachment.file)
 
                 if (thumbnail != null) {
                     imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
