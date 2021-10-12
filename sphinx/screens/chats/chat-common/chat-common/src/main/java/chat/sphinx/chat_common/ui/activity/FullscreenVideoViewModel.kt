@@ -1,7 +1,6 @@
 package chat.sphinx.chat_common.ui.activity
 
 import android.app.Application
-import android.widget.VideoView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +13,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -28,13 +28,12 @@ internal class FullscreenVideoViewModel @Inject constructor(
     private val args: FullscreenVideoActivityArgs by handle.navArgs()
     private val messageId = MessageId(args.argMessageId)
 
-    private var videoPlayerController: VideoPlayerController? = null
-
-    fun init(videoView: VideoView) {
-        videoPlayerController = VideoPlayerController(
-            app,
+    internal val videoPlayerController: VideoPlayerController by lazy {
+        VideoPlayerController(
+            app
         )
     }
+
     private val messageSharedFlow: SharedFlow<Message?> = flow {
         emitAll(messageRepository.getMessageById(messageId))
     }.distinctUntilChanged().shareIn(
@@ -67,9 +66,17 @@ internal class FullscreenVideoViewModel @Inject constructor(
         return message?.messageMedia?.localFile
     }
 
+    fun initializeVideo() {
+        viewModelScope.launch(mainImmediate) {
+            getVideoFile()?.let { videoFile ->
+                videoPlayerController.initializeVideo(videoFile)
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
 
-        videoPlayerController?.clear()
+        videoPlayerController.clear()
     }
 }

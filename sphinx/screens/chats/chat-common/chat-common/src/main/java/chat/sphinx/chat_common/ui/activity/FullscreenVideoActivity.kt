@@ -7,12 +7,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.View.OnTouchListener
 import android.view.WindowInsets
-import android.widget.VideoView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.databinding.ActivityFullscreenVideoBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -23,32 +23,34 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class FullscreenVideoActivity : AppCompatActivity() {
     private val viewModel: FullscreenVideoViewModel by viewModels()
+    val binding: ActivityFullscreenVideoBinding by viewBinding(ActivityFullscreenVideoBinding::bind)
 
     private val mHideHandler = Handler()
-    private var videoView: VideoView? = null
     private val mHidePart2Runnable = Runnable {
-        // Delayed removal of status and navigation bar
-        if (Build.VERSION.SDK_INT >= 30) {
-            videoView!!.windowInsetsController!!.hide(
-                WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
-            )
-        } else {
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            videoView!!.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            // Delayed removal of status and navigation bar
+            if (Build.VERSION.SDK_INT >= 30) {
+                binding.videoViewContent.windowInsetsController!!.hide(
+                    WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
+                )
+            } else {
+                // Note that some of these constants are new as of API 16 (Jelly Bean)
+                // and API 19 (KitKat). It is safe to use them, as they are inlined
+                // at compile-time and do nothing on earlier devices.
+                binding.videoViewContent.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+            }
         }
+
     }
-    private var mControlsView: View? = null
     private val mShowPart2Runnable = Runnable { // Delayed display of UI elements
-        val actionBar = supportActionBar
-        actionBar?.show()
-        mControlsView!!.visibility = View.VISIBLE
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            binding.fullscreenContentControls.visibility = View.VISIBLE
+        }
     }
     private var mVisible = false
     private val mHideRunnable = Runnable { hide() }
@@ -72,30 +74,28 @@ class FullscreenVideoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_fullscreen_video)
-        mVisible = true
-        mControlsView = findViewById(R.id.fullscreen_content_controls)
-        videoView = findViewById(R.id.video_view_content)
 
-        // Set up the user interaction to manually show or hide the system UI.
-        videoView?.setOnClickListener {
-            toggle()
-        }
+        binding.apply {
+            mVisible = true
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById<View>(R.id.image_view_play_pause_button).setOnTouchListener(mDelayHideTouchListener)
-        findViewById<View>(R.id.text_view_current_time).setOnTouchListener(mDelayHideTouchListener)
-        findViewById<View>(R.id.seek_bar_current_progress).setOnTouchListener(mDelayHideTouchListener)
-
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.getVideoFile()?.let { videoFile ->
-                videoView?.setVideoURI(videoFile.toUri())
-                videoView?.start()
+            // Set up the user interaction to manually show or hide the system UI.
+            videoViewContent.setOnClickListener {
+                toggle()
             }
+            viewModel.videoPlayerController.setVideo(binding.videoViewContent)
+
+            imageViewPlayPauseButton.setOnClickListener {
+                viewModel.videoPlayerController.togglePlayPause()
+            }
+            // Upon interacting with UI controls, delay any scheduled hide()
+            // operations to prevent the jarring behavior of controls going away
+            // while interacting with the UI.
+//            fullscreenContentControls.setOnTouchListener(mDelayHideTouchListener)
+//            textViewCurrentTime.setOnTouchListener(mDelayHideTouchListener)
+//            seekBarCurrentProgress.setOnTouchListener(mDelayHideTouchListener)
         }
+
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -116,32 +116,34 @@ class FullscreenVideoActivity : AppCompatActivity() {
     }
 
     private fun hide() {
-        // Hide UI first
-        val actionBar = supportActionBar
-        actionBar?.hide()
-        mControlsView!!.visibility = View.GONE
-        mVisible = false
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            // Hide UI first
+            binding.fullscreenContentControls.visibility = View.GONE
+            mVisible = false
 
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable)
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY.toLong())
+            // Schedule a runnable to remove the status and navigation bar after a delay
+            mHideHandler.removeCallbacks(mShowPart2Runnable)
+            mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY.toLong())
+        }
     }
 
     private fun show() {
-        // Show the system bar
-        if (Build.VERSION.SDK_INT >= 30) {
-            videoView!!.windowInsetsController!!.show(
-                WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
-            )
-        } else {
-            videoView!!.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-        }
-        mVisible = true
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            // Show the system bar
+            if (Build.VERSION.SDK_INT >= 30) {
+                binding.videoViewContent.windowInsetsController!!.show(
+                    WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
+                )
+            } else {
+                binding.videoViewContent.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
+            }
+            mVisible = true
 
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable)
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY.toLong())
+            // Schedule a runnable to display UI elements after a delay
+            mHideHandler.removeCallbacks(mHidePart2Runnable)
+            mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY.toLong())
+        }
     }
 
     /**
@@ -175,20 +177,16 @@ class FullscreenVideoActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-//        initializePlayer()
+        viewModel.initializeVideo()
     }
 
     override fun onPause() {
         super.onPause()
-        videoView?.pause()
+        viewModel.videoPlayerController.pause()
     }
 
     override fun onStop() {
         super.onStop()
-        releasePlayer()
-    }
-
-    private fun releasePlayer() {
-        videoView?.stopPlayback()
+        viewModel.videoPlayerController.stop()
     }
 }
