@@ -7,10 +7,10 @@ import android.os.Handler
 import android.view.*
 import android.view.View.OnTouchListener
 import android.widget.RelativeLayout
+import android.view.OrientationEventListener
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
@@ -20,6 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
 
@@ -87,60 +88,58 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
             layoutConstraintVideoControls.setOnTouchListener(mDelayHideTouchListener)
 //            textViewCurrentTime.setOnTouchListener(mDelayHideTouchListener)
 //            seekBarCurrentProgress.setOnTouchListener(mDelayHideTouchListener)
-        }
 
-        orientationListener =  object : OrientationEventListener(this) {
-            override fun onOrientationChanged(orientation: Int) {
-                val rotation = when {
-                    orientation <= 45 -> Surface.ROTATION_0
-                    orientation <= 135 -> Surface.ROTATION_90
-                    orientation <= 225 -> Surface.ROTATION_180
-                    orientation <= 315 -> Surface.ROTATION_270
-                    else -> Surface.ROTATION_0
-                }
-                when(rotation) {
-                    Surface.ROTATION_0 -> {
-                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+            orientationListener =  object : OrientationEventListener(this@FullscreenVideoActivity) {
+                override fun onOrientationChanged(orientation: Int) {
+                    val rotation = when {
+                        orientation <= 45 -> Surface.ROTATION_0
+                        orientation <= 135 -> Surface.ROTATION_90
+                        orientation <= 225 -> Surface.ROTATION_180
+                        orientation <= 315 -> Surface.ROTATION_270
+                        else -> Surface.ROTATION_0
                     }
-                    Surface.ROTATION_90 -> {
-                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
-                    }
-                    Surface.ROTATION_180 -> {
-                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT)
-                    }
-                    Surface.ROTATION_270 -> {
-                        setOrientation( ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                    when(rotation) {
+                        Surface.ROTATION_0 -> {
+                            setOrientation( ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+                        }
+                        Surface.ROTATION_90 -> {
+                            setOrientation( ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE)
+                        }
+                        Surface.ROTATION_180 -> {
+                            setOrientation( ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT)
+                        }
+                        Surface.ROTATION_270 -> {
+                            setOrientation( ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                        }
                     }
                 }
             }
+            viewModel.initializeVideo()
         }
     }
-
-    private var videoWidth: Int? = null
-    private var videoHeight: Int? = null
 
     @Synchronized
     fun setOrientation(orientation: Int) {
         if (requestedOrientation != orientation) {
             // TODO: Delayed orientation update
             requestedOrientation = orientation
-            binding.videoViewContent.apply {
-                videoHeight?.let { vidHeight ->
-                    videoWidth?.let { vidWidth ->
-                        layoutParams = if (vidWidth > vidHeight) {
-                            RelativeLayout.LayoutParams(
-                                RelativeLayout.LayoutParams.MATCH_PARENT,
-                                RelativeLayout.LayoutParams.WRAP_CONTENT
-                            )
-                        } else {
-                            RelativeLayout.LayoutParams(
-                                RelativeLayout.LayoutParams.WRAP_CONTENT,
-                                RelativeLayout.LayoutParams.MATCH_PARENT
-                            )
-                        }
-                    }
-                }
+            optimizeVideoSize()
+        }
+    }
 
+    fun optimizeVideoSize() {
+        binding.videoViewContent.apply {
+            // Video Width > Video Height
+            layoutParams = if (viewModel.currentViewState.videoDimensions.first > viewModel.currentViewState.videoDimensions.second) {
+                RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                )
+            } else {
+                RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+                )
             }
 
         }
@@ -221,7 +220,6 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         subscribeToViewStateFlow()
-        viewModel.initializeVideo()
         orientationListener.enable()
     }
 
@@ -257,18 +255,22 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                 binding.seekBarCurrentProgress.max = viewState.duration
                 binding.textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
 
-                videoWidth = viewState.videoWidth
-                videoHeight = viewState.videoHeight
+                optimizeVideoSize()
             }
             is FullscreenVideoViewState.CurrentTimeUpdate -> {
                 binding.seekBarCurrentProgress.progress = viewState.currentTime
                 binding.textViewCurrentTime.text = viewState.currentTime.toLong().toTimestamp()
             }
             is FullscreenVideoViewState.ContinuePlayback -> {
-                binding.textViewPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+                binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_pause_button)
             }
             is FullscreenVideoViewState.PausePlayback -> {
-                binding.textViewPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+                binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
+            }
+            is FullscreenVideoViewState.CompletePlayback -> {
+                binding.seekBarCurrentProgress.progress = 0
+                binding.textViewCurrentTime.text = 0L.toTimestamp()
+                binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
             }
             FullscreenVideoViewState.Idle -> {
 

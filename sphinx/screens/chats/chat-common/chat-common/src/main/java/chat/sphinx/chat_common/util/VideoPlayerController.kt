@@ -8,8 +8,10 @@ import java.io.File
 
 class VideoPlayerController(
     val viewModelScope: CoroutineScope,
+    private val updateIsPlaying: (Boolean) -> Unit,
     private val updateMetaDataCallback: (Int, Int, Int) -> Unit,
     private val updateCurrentTimeCallback: (Int) -> Unit,
+    private val completePlaybackCallback: () -> Unit,
     dispatchers: CoroutineDispatchers,
 ) : CoroutineDispatchers by dispatchers {
 
@@ -22,7 +24,7 @@ class VideoPlayerController(
     fun initializeVideo(videoFile: File) {
         videoView?.apply {
             setOnCompletionListener {
-                updateCurrentTimeCallback(0)
+                completePlaybackCallback()
             }
             setOnPreparedListener {
                 it.videoHeight
@@ -41,11 +43,13 @@ class VideoPlayerController(
     private fun play() {
         videoView?.start()
         startDispatchStateJob()
+        updateIsPlaying(true)
     }
 
     fun pause() {
         videoView?.pause()
         dispatchStateJob?.cancel()
+        updateIsPlaying(false)
     }
 
     fun togglePlayPause() {
