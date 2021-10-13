@@ -1404,17 +1404,27 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     ) {
         viewModelScope.launch(mainImmediate) {
             if (message.isMediaAttachmentAvailable) {
-                message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
-                    mediaUrlAndMessageMedia.second?.let { messageMedia ->
-                        val mediaContentValues = messageMedia.retrieveContentValues(message)
+                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia() ?: message.retrieveVideoUrlAndMessageMedia()
 
+                mediaUrlAndMessageMedia?.second?.let { messageMedia ->
+                    messageMedia.retrieveContentValues(message)?.let { mediaContentValues ->
                         messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
-                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: messageMedia.retrieveRemoteMediaInputStream(
-                                    mediaUrlAndMessageMedia.first,
-                                    memeServerTokenHandler,
-                                    memeInputStreamHandler
-                                )
+                                val inputStream: InputStream? = when {
+                                    (drawable != null) -> {
+                                        drawable?.drawableToBitmap()?.toInputStream()
+                                    }
+                                    (messageMedia.localFile != null) -> {
+                                        FileInputStream(messageMedia.localFile)
+                                    }
+                                    else -> {
+                                        messageMedia.retrieveRemoteMediaInputStream(
+                                            mediaUrlAndMessageMedia.first,
+                                            memeServerTokenHandler,
+                                            memeInputStreamHandler
+                                        )
+                                    }
+                                }
 
                                 try {
                                     inputStream?.use { nnInputStream ->
@@ -1545,12 +1555,21 @@ inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
-    return ContentValues().apply {
-        put(MediaStore.Images.Media.TITLE, message.id.value)
-        put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
-        put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
+inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues? {
+    if (this.mediaType.isImage) {
+        return ContentValues().apply {
+            put(MediaStore.Images.Media.TITLE, message.id.value)
+            put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        }
+    } else if (this.mediaType.isVideo) {
+        return ContentValues().apply {
+            put(MediaStore.Video.Media.TITLE, message.id.value)
+            put(MediaStore.Video.Media.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+        }
     }
+    return null
 }
 
 
