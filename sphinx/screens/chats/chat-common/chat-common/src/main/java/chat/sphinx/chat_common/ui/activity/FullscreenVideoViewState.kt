@@ -14,17 +14,14 @@ internal sealed  class FullscreenVideoViewState : ViewState<FullscreenVideoViewS
     ): FullscreenVideoViewState()
 
     class CurrentTimeUpdate(
-        val currentTime: Int,
-        val duration: Int
+        val currentTime: Int
     ): FullscreenVideoViewState()
 
     class PausePlayback(
-        val currentTime: Int,
-        val duration: Int
+        val currentTime: Int
     ): FullscreenVideoViewState()
 
     class ContinuePlayback(
-        val currentTime: Int,
-        val duration: Int
+        val currentTime: Int
     ): FullscreenVideoViewState()
 }

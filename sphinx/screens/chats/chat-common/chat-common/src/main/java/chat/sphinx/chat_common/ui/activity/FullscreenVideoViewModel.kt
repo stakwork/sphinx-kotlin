@@ -37,7 +37,23 @@ internal class FullscreenVideoViewModel @Inject constructor(
 
     internal val videoPlayerController: VideoPlayerController by lazy {
         VideoPlayerController(
-            app
+            app,
+            viewModelScope = viewModelScope,
+            updateDurationCallback = { duration ->
+                updateViewState(
+                    FullscreenVideoViewState.MetaDataLoaded(
+                        duration,
+                    )
+                )
+            },
+            updateCurrentTimeCallback = { currentTime ->
+                updateViewState(
+                    FullscreenVideoViewState.CurrentTimeUpdate(
+                        currentTime,
+                    )
+                )
+            },
+            dispatchers
         )
     }
 

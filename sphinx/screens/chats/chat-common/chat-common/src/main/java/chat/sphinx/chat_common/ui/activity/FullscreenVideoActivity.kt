@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.ActivityFullscreenVideoBinding
+import chat.sphinx.chat_common.ui.viewstate.messageholder.toTimestamp
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
@@ -228,7 +229,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        viewModel.videoPlayerController.stop()
+        viewModel.videoPlayerController.pause()
         orientationListener.disable()
     }
 
@@ -243,16 +244,18 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
         }
     }
 
-    suspend fun onViewStateFlowCollect(viewState: FullscreenVideoViewState) {
+    private suspend fun onViewStateFlowCollect(viewState: FullscreenVideoViewState) {
         when (viewState) {
             is FullscreenVideoViewState.VideoMessage -> {
                 binding.textViewVideoMessageText.text = viewState.name
             }
             is FullscreenVideoViewState.MetaDataLoaded -> {
                 binding.seekBarCurrentProgress.max = viewState.duration
+                binding.textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
             }
             is FullscreenVideoViewState.CurrentTimeUpdate -> {
                 binding.seekBarCurrentProgress.progress = viewState.currentTime
+                binding.textViewCurrentTime.text = viewState.currentTime.toLong().toTimestamp()
             }
             is FullscreenVideoViewState.ContinuePlayback -> {
                 // TODO: Show pause button...
@@ -260,7 +263,9 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
             is FullscreenVideoViewState.PausePlayback -> {
                 // TODO: Show play button...
             }
+            FullscreenVideoViewState.Idle -> {
 
+            }
         }
     }
 }

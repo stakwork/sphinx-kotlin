@@ -1,42 +1,48 @@
 package chat.sphinx.chat_common.util
 
-import android.content.Context
-import android.util.AttributeSet
-import android.widget.MediaController
+import android.app.Application
 import android.widget.VideoView
 import androidx.core.net.toUri
+import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.*
 import java.io.File
 
-class VideoPlayerController : MediaController {
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {}
-    constructor(context: Context, useFastForward: Boolean) : super(context, useFastForward) {}
-    constructor(context: Context) : super(context) {}
+class VideoPlayerController(
+    app: Application,
+    val viewModelScope: CoroutineScope,
+    private val updateDurationCallback: (Int) -> Unit,
+    private val updateCurrentTimeCallback: (Int) -> Unit,
+    dispatchers: CoroutineDispatchers,
+) : CoroutineDispatchers by dispatchers {
 
     private var videoView: VideoView? = null
 
     fun setVideo(videoView: VideoView) {
-        setMediaPlayer(videoView)
-//        videoView.setMediaController(this)
-
         this.videoView = videoView
     }
 
     fun initializeVideo(videoFile: File) {
-        videoView?.setVideoURI(videoFile.toUri())
-        // Set duration...
-        play()
+        videoView?.apply {
+            setOnCompletionListener {
+                updateCurrentTimeCallback(0)
+            }
+            setOnPreparedListener {
+                updateDurationCallback(it.duration)
+                play()
+            }
+            // TODO: Handle error...
+            setVideoURI(videoFile.toUri())
+        }
     }
 
-    fun play() {
+    private fun play() {
         videoView?.start()
+        startDispatchStateJob()
     }
 
     fun pause() {
         videoView?.pause()
-    }
-
-    fun stop() {
-        videoView?.stopPlayback()
+        dispatchStateJob?.cancel()
     }
 
     fun togglePlayPause() {
@@ -49,5 +55,27 @@ class VideoPlayerController : MediaController {
 
     fun clear() {
         videoView?.stopPlayback()
+        dispatchStateJob?.cancel()
+    }
+
+    private var dispatchStateJob: Job? = null
+    private fun startDispatchStateJob() {
+        if (dispatchStateJob?.isActive == true) {
+            return
+        }
+
+        dispatchStateJob = viewModelScope.launch(mainImmediate) {
+            videoView?.let { video ->
+                while (isActive) {
+                    updateCurrentTimeCallback(video.currentPosition)
+
+                    if (video.isPlaying) {
+                        delay(250L)
+                    } else {
+                        break
+                    }
+                }
+            }
+        }
     }
 }
