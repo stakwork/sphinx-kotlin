@@ -1,14 +1,13 @@
 package chat.sphinx.chat_common.util
 
-import android.app.Application
 import android.widget.VideoView
 import androidx.core.net.toUri
+import com.google.android.exoplayer2.C
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import java.io.File
 
 class VideoPlayerController(
-    app: Application,
     val viewModelScope: CoroutineScope,
     private val updateDurationCallback: (Int) -> Unit,
     private val updateCurrentTimeCallback: (Int) -> Unit,
@@ -30,7 +29,8 @@ class VideoPlayerController(
                 updateDurationCallback(it.duration)
                 play()
             }
-            // TODO: Handle error...
+
+
             setVideoURI(videoFile.toUri())
         }
     }

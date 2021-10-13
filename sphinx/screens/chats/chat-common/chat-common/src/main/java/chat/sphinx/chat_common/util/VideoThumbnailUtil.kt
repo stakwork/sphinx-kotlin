@@ -13,7 +13,7 @@ class VideoThumbnailUtil {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ThumbnailUtils.createVideoThumbnail(
                     file,
-                    Size(100, 100),
+                    Size(1000, 1000),
                     null
                 )
             } else {

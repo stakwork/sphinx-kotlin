@@ -8,12 +8,15 @@ import android.view.*
 import android.view.View.OnTouchListener
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.ActivityFullscreenVideoBinding
 import chat.sphinx.chat_common.ui.viewstate.messageholder.toTimestamp
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
@@ -33,33 +36,13 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     private val binding: ActivityFullscreenVideoBinding by viewBinding(ActivityFullscreenVideoBinding::bind)
 
     private val mHideHandler = Handler()
-    private val mHidePart2Runnable = Runnable {
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            // Delayed removal of status and navigation bar
-            if (Build.VERSION.SDK_INT >= 30) {
-                binding.videoViewContent.windowInsetsController!!.hide(
-                    WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
-                )
-            } else {
-                // Note that some of these constants are new as of API 16 (Jelly Bean)
-                // and API 19 (KitKat). It is safe to use them, as they are inlined
-                // at compile-time and do nothing on earlier devices.
-                binding.videoViewContent.systemUiVisibility = (View.SYSTEM_UI_FLAG_LOW_PROFILE
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-            }
-        }
 
-    }
     private val mShowPart2Runnable = Runnable { // Delayed display of UI elements
         lifecycleScope.launch(viewModel.mainImmediate) {
-            binding.fullscreenContentControls.visibility = View.VISIBLE
+            binding.layoutConstraintVideoControls.visible
         }
     }
-    private var mVisible = false
+
     private val mHideRunnable = Runnable { hide() }
 
     /**
@@ -84,21 +67,19 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
         setContentView(R.layout.activity_fullscreen_video)
 
         binding.apply {
-            mVisible = true
-
             // Set up the user interaction to manually show or hide the system UI.
             videoViewContent.setOnClickListener {
                 toggle()
             }
             viewModel.videoPlayerController.setVideo(binding.videoViewContent)
 
-            imageViewPlayPauseButton.setOnClickListener {
+            textViewPlayPauseButton.setOnClickListener {
                 viewModel.videoPlayerController.togglePlayPause()
             }
             // Upon interacting with UI controls, delay any scheduled hide()
             // operations to prevent the jarring behavior of controls going away
             // while interacting with the UI.
-            fullscreenContentControls.setOnTouchListener(mDelayHideTouchListener)
+            layoutConstraintVideoControls.setOnTouchListener(mDelayHideTouchListener)
 //            textViewCurrentTime.setOnTouchListener(mDelayHideTouchListener)
 //            seekBarCurrentProgress.setOnTouchListener(mDelayHideTouchListener)
         }
@@ -148,7 +129,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     }
 
     private fun toggle() {
-        if (mVisible) {
+        if (binding.layoutConstraintVideoControls.isVisible) {
             hide()
         } else {
             show()
@@ -158,12 +139,10 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     private fun hide() {
         lifecycleScope.launch(viewModel.mainImmediate) {
             // Hide UI first
-            binding.fullscreenContentControls.visibility = View.GONE
-            mVisible = false
+            binding.layoutConstraintVideoControls.gone
 
             // Schedule a runnable to remove the status and navigation bar after a delay
             mHideHandler.removeCallbacks(mShowPart2Runnable)
-            mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY.toLong())
         }
     }
 
@@ -178,10 +157,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                 binding.videoViewContent.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                         or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
             }
-            mVisible = true
-
             // Schedule a runnable to display UI elements after a delay
-            mHideHandler.removeCallbacks(mHidePart2Runnable)
             mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY.toLong())
         }
     }
@@ -244,10 +220,11 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun onViewStateFlowCollect(viewState: FullscreenVideoViewState) {
+    private fun onViewStateFlowCollect(viewState: FullscreenVideoViewState) {
         when (viewState) {
             is FullscreenVideoViewState.VideoMessage -> {
                 binding.textViewVideoMessageText.text = viewState.name
+                binding.layoutConstraintTitle.visible
             }
             is FullscreenVideoViewState.MetaDataLoaded -> {
                 binding.seekBarCurrentProgress.max = viewState.duration
@@ -258,10 +235,10 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                 binding.textViewCurrentTime.text = viewState.currentTime.toLong().toTimestamp()
             }
             is FullscreenVideoViewState.ContinuePlayback -> {
-                // TODO: Show pause button...
+                binding.textViewPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
             }
             is FullscreenVideoViewState.PausePlayback -> {
-                // TODO: Show play button...
+                binding.textViewPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
             }
             FullscreenVideoViewState.Idle -> {
 

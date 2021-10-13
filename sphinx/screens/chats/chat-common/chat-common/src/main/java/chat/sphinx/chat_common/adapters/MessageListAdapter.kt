@@ -302,7 +302,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
 
                 includeMessageTypeVideoAttachment.apply {
-                    imageViewAttachmentPlayButton.setOnClickListener {
+                    textViewAttachmentPlayButton.setOnClickListener {
                         currentViewState?.message?.let { message ->
                             viewModel.goToFullscreenVideo(message.id)
                         }

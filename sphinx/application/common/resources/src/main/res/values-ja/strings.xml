@@ -54,6 +54,7 @@
     <string name="material_icon_name_dismiss_modal_down">keyboard_arrow_down</string>
     <string name="material_icon_name_gif">gif</string>
     <string name="material_icon_name_verified_user">verified_user</string>
+    <string name="material_icon_name_play_outline">play_circle_outline</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>

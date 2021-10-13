@@ -2,6 +2,8 @@ package chat.sphinx.chat_common.ui.activity
 
 import android.app.Application
 import android.content.Context
+import android.widget.VideoView
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.util.VideoPlayerController
@@ -14,8 +16,10 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -37,7 +41,6 @@ internal class FullscreenVideoViewModel @Inject constructor(
 
     internal val videoPlayerController: VideoPlayerController by lazy {
         VideoPlayerController(
-            app,
             viewModelScope = viewModelScope,
             updateDurationCallback = { duration ->
                 updateViewState(

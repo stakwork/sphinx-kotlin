@@ -13,4 +13,5 @@
             android:name="argMessageId"
             app:argType="long" />
     </activity>
+
 </navigation>
