@@ -2,7 +2,6 @@ package chat.sphinx.chat_common.util
 
 import android.widget.VideoView
 import androidx.core.net.toUri
-import com.google.android.exoplayer2.C
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import java.io.File
@@ -29,7 +28,6 @@ class VideoPlayerController(
                 updateDurationCallback(it.duration)
                 play()
             }
-
 
             setVideoURI(videoFile.toUri())
         }
