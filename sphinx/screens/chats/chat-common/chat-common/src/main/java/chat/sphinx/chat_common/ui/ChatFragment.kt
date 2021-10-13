@@ -993,7 +993,6 @@ abstract class ChatFragment<
                                 lifecycleScope,
                                 holderJobs,
                                 disposables,
-                                viewModel,
                                 viewModel.dispatchers,
                                 viewModel.audioPlayerController,
                                 imageLoader,
