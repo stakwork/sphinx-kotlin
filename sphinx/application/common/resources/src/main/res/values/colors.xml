@@ -33,6 +33,7 @@
     <color name="primaryBlueFontColor">#A3C1FF</color>
     <color name="blueTextAccent">#5D8FDD</color>
 
+    <color name="black">#000000</color>
     <color name="shadow">#000000</color>
     <color name="bubbleShadow">#FFFFFF</color>
     <color name="selectedMessageBackground">#8C000000</color>

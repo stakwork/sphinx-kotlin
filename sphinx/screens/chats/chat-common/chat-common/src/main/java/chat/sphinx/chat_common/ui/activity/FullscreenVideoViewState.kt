@@ -10,7 +10,9 @@ internal sealed  class FullscreenVideoViewState : ViewState<FullscreenVideoViewS
     ): FullscreenVideoViewState()
 
     class MetaDataLoaded(
-        val duration: Int
+        val duration: Int,
+        val videoWidth: Int,
+        val videoHeight: Int,
     ): FullscreenVideoViewState()
 
     class CurrentTimeUpdate(

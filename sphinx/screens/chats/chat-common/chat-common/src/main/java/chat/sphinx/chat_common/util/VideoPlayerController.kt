@@ -8,7 +8,7 @@ import java.io.File
 
 class VideoPlayerController(
     val viewModelScope: CoroutineScope,
-    private val updateDurationCallback: (Int) -> Unit,
+    private val updateMetaDataCallback: (Int, Int, Int) -> Unit,
     private val updateCurrentTimeCallback: (Int) -> Unit,
     dispatchers: CoroutineDispatchers,
 ) : CoroutineDispatchers by dispatchers {
@@ -25,7 +25,12 @@ class VideoPlayerController(
                 updateCurrentTimeCallback(0)
             }
             setOnPreparedListener {
-                updateDurationCallback(it.duration)
+                it.videoHeight
+                updateMetaDataCallback(
+                    it.duration,
+                    it.videoWidth,
+                    it.videoHeight
+                )
                 play()
             }
 

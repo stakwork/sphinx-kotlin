@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.*
 import android.view.View.OnTouchListener
+import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -71,6 +73,9 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
             videoViewContent.setOnClickListener {
                 toggle()
             }
+            root.setOnClickListener {
+                toggle()
+            }
             viewModel.videoPlayerController.setVideo(binding.videoViewContent)
 
             textViewPlayPauseButton.setOnClickListener {
@@ -111,11 +116,33 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
         }
     }
 
+    private var videoWidth: Int? = null
+    private var videoHeight: Int? = null
+
     @Synchronized
     fun setOrientation(orientation: Int) {
         if (requestedOrientation != orientation) {
             // TODO: Delayed orientation update
             requestedOrientation = orientation
+            binding.videoViewContent.apply {
+                videoHeight?.let { vidHeight ->
+                    videoWidth?.let { vidWidth ->
+                        layoutParams = if (vidWidth > vidHeight) {
+                            RelativeLayout.LayoutParams(
+                                RelativeLayout.LayoutParams.MATCH_PARENT,
+                                RelativeLayout.LayoutParams.WRAP_CONTENT
+                            )
+                        } else {
+                            RelativeLayout.LayoutParams(
+                                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                                RelativeLayout.LayoutParams.MATCH_PARENT
+                            )
+                        }
+                    }
+                }
+
+            }
+
         }
     }
 
@@ -229,6 +256,9 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
             is FullscreenVideoViewState.MetaDataLoaded -> {
                 binding.seekBarCurrentProgress.max = viewState.duration
                 binding.textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
+
+                videoWidth = viewState.videoWidth
+                videoHeight = viewState.videoHeight
             }
             is FullscreenVideoViewState.CurrentTimeUpdate -> {
                 binding.seekBarCurrentProgress.progress = viewState.currentTime
