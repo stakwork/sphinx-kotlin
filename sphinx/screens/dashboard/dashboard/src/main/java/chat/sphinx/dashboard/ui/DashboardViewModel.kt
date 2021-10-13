@@ -126,8 +126,8 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow<Boolean>(false)
     }
 
-    val currentVersionNumber: MutableStateFlow<Long?> by lazy(LazyThreadSafetyMode.NONE) {
-        MutableStateFlow<Long?>(null)
+    val currentVersion: MutableStateFlow<String> by lazy(LazyThreadSafetyMode.NONE) {
+        MutableStateFlow("-")
     }
 
     init {
@@ -504,7 +504,7 @@ internal class DashboardViewModel @Inject constructor(
                     }
                     is Response.Success -> {
                         newVersionAvailable.value = loadResponse.value.kotlin > buildConfigVersionCode.value.toLong()
-                        currentVersionNumber.value = buildConfigVersionCode.value.toLong()
+                        currentVersion.value = "VERSION: ${buildConfigVersionCode.value}"
                     }
                 }
             }

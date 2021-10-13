@@ -284,13 +284,9 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.currentVersionNumber.asStateFlow().collect { currentVersion ->
+            viewModel.currentVersion.asStateFlow().collect { currentVersion ->
                 binding.layoutDashboardNavDrawer.textViewNavDrawerVersionNumber.apply {
-                    text = if (currentVersion != null) {
-                        "VERSION: $currentVersion"
-                    } else {
-                        ""
-                    }
+                    text = currentVersion
                 }
             }
         }
