@@ -39,30 +39,14 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     private val binding: ActivityFullscreenVideoBinding by viewBinding(ActivityFullscreenVideoBinding::bind)
 
     private val mHideHandler = Handler()
+    private val mHideRunnable = Runnable { toggle() }
 
-    private val mShowPart2Runnable = Runnable { // Delayed display of UI elements
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            binding.layoutConstraintVideoControls.visible
-        }
-    }
-
-    private val mHideRunnable = Runnable { hide() }
-
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private val mDelayHideTouchListener = OnTouchListener { view, motionEvent ->
-        when (motionEvent.action) {
-            MotionEvent.ACTION_DOWN -> if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS)
-            }
-            MotionEvent.ACTION_UP -> view.performClick()
-            else -> {
-            }
-        }
-        false
+    companion object {
+        /**
+         * If [.AUTO_HIDE] is set, the number of milliseconds to wait after
+         * user interaction before hiding the system UI.
+         */
+        private const val AUTO_HIDE_DELAY_MILLIS = 3000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +54,6 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
         setContentView(R.layout.activity_fullscreen_video)
 
         binding.apply {
-            // Set up the user interaction to manually show or hide the system UI.
             videoViewContent.setOnClickListener {
                 toggle()
             }
@@ -82,12 +65,8 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
             textViewPlayPauseButton.setOnClickListener {
                 viewModel.videoPlayerController.togglePlayPause()
             }
-            // Upon interacting with UI controls, delay any scheduled hide()
-            // operations to prevent the jarring behavior of controls going away
-            // while interacting with the UI.
-            layoutConstraintVideoControls.setOnTouchListener(mDelayHideTouchListener)
-//            textViewCurrentTime.setOnTouchListener(mDelayHideTouchListener)
-//            seekBarCurrentProgress.setOnTouchListener(mDelayHideTouchListener)
+
+            seekBarCurrentProgress.setOnTouchListener { _, _ -> true }
 
             orientationListener =  object : OrientationEventListener(this@FullscreenVideoActivity) {
                 override fun onOrientationChanged(orientation: Int) {
@@ -127,7 +106,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
         }
     }
 
-    fun optimizeVideoSize() {
+    private fun optimizeVideoSize() {
         binding.videoViewContent.apply {
             // Video Width > Video Height
             layoutParams = if (viewModel.currentViewState.videoDimensions.first > viewModel.currentViewState.videoDimensions.second) {
@@ -148,43 +127,15 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
 
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100)
+        delayedHide(1000)
     }
 
     private fun toggle() {
         if (binding.layoutConstraintVideoControls.isVisible) {
-            hide()
-        } else {
-            show()
-        }
-    }
-
-    private fun hide() {
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            // Hide UI first
             binding.layoutConstraintVideoControls.gone
-
-            // Schedule a runnable to remove the status and navigation bar after a delay
-            mHideHandler.removeCallbacks(mShowPart2Runnable)
-        }
-    }
-
-    private fun show() {
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            // Show the system bar
-            if (Build.VERSION.SDK_INT >= 30) {
-                binding.videoViewContent.windowInsetsController!!.show(
-                    WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
-                )
-            } else {
-                binding.videoViewContent.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)
-            }
-            // Schedule a runnable to display UI elements after a delay
-            mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY.toLong())
+        } else {
+            binding.layoutConstraintVideoControls.visible
+            delayedHide(AUTO_HIDE_DELAY_MILLIS)
         }
     }
 
@@ -195,26 +146,6 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     private fun delayedHide(delayMillis: Int) {
         mHideHandler.removeCallbacks(mHideRunnable)
         mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
-    }
-
-    companion object {
-        /**
-         * Whether or not the system UI should be auto-hidden after
-         * [.AUTO_HIDE_DELAY_MILLIS] milliseconds.
-         */
-        private const val AUTO_HIDE = true
-
-        /**
-         * If [.AUTO_HIDE] is set, the number of milliseconds to wait after
-         * user interaction before hiding the system UI.
-         */
-        private const val AUTO_HIDE_DELAY_MILLIS = 3000
-
-        /**
-         * Some older devices needs a small delay between UI widget updates
-         * and a change of the status and navigation bar.
-         */
-        private const val UI_ANIMATION_DELAY = 300
     }
 
     override fun onStart() {
@@ -272,9 +203,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                 binding.textViewCurrentTime.text = 0L.toTimestamp()
                 binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
             }
-            FullscreenVideoViewState.Idle -> {
-
-            }
+            FullscreenVideoViewState.Idle -> { }
         }
     }
 }
