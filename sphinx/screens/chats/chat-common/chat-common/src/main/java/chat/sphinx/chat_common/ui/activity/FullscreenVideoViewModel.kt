@@ -39,6 +39,21 @@ internal class FullscreenVideoViewModel @Inject constructor(
         VideoPlayerController(
             app,
             viewModelScope = viewModelScope,
+            updateIsPlaying = { isPlaying ->
+                if (isPlaying) {
+                    updateViewState(
+                        FullscreenVideoViewState.ContinuePlayback(
+                            0
+                        )
+                    )
+                } else {
+                    updateViewState(
+                        FullscreenVideoViewState.PausePlayback(
+                            0
+                        )
+                    )
+                }
+            },
             updateMetaDataCallback = { duration, videoWidth, videoHeight ->
                 updateViewState(
                     FullscreenVideoViewState.MetaDataLoaded(

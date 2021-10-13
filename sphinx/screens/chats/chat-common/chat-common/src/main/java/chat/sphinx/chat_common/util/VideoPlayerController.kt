@@ -10,6 +10,7 @@ import java.io.File
 class VideoPlayerController(
     app: Application,
     val viewModelScope: CoroutineScope,
+    private val updateIsPlaying: (Boolean) -> Unit,
     private val updateMetaDataCallback: (Int, Int, Int) -> Unit,
     private val updateCurrentTimeCallback: (Int) -> Unit,
     dispatchers: CoroutineDispatchers,
@@ -43,11 +44,13 @@ class VideoPlayerController(
     private fun play() {
         videoView?.start()
         startDispatchStateJob()
+        updateIsPlaying(true)
     }
 
     fun pause() {
         videoView?.pause()
         dispatchStateJob?.cancel()
+        updateIsPlaying(false)
     }
 
     fun togglePlayPause() {

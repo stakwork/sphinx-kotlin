@@ -9,6 +9,7 @@ import android.view.View.OnTouchListener
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
@@ -287,10 +288,14 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                 binding.textViewCurrentTime.text = viewState.currentTime.toLong().toTimestamp()
             }
             is FullscreenVideoViewState.ContinuePlayback -> {
-                // TODO: Show pause button...
+                binding.imageViewPlayPauseButton.setImageDrawable(
+                    AppCompatResources.getDrawable(this, R.drawable.exo_icon_pause)
+                )
             }
             is FullscreenVideoViewState.PausePlayback -> {
-                // TODO: Show play button...
+                binding.imageViewPlayPauseButton.setImageDrawable(
+                    AppCompatResources.getDrawable(this, R.drawable.exo_icon_play)
+                )
             }
             FullscreenVideoViewState.Idle -> {
 
