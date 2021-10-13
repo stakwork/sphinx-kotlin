@@ -1,6 +1,5 @@
 package chat.sphinx.chat_common.util
 
-import android.app.Application
 import android.widget.VideoView
 import androidx.core.net.toUri
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -8,11 +7,11 @@ import kotlinx.coroutines.*
 import java.io.File
 
 class VideoPlayerController(
-    app: Application,
     val viewModelScope: CoroutineScope,
     private val updateIsPlaying: (Boolean) -> Unit,
     private val updateMetaDataCallback: (Int, Int, Int) -> Unit,
     private val updateCurrentTimeCallback: (Int) -> Unit,
+    private val completePlaybackCallback: () -> Unit,
     dispatchers: CoroutineDispatchers,
 ) : CoroutineDispatchers by dispatchers {
 
@@ -25,7 +24,7 @@ class VideoPlayerController(
     fun initializeVideo(videoFile: File) {
         videoView?.apply {
             setOnCompletionListener {
-                updateCurrentTimeCallback(0)
+                completePlaybackCallback()
             }
             setOnPreparedListener {
                 it.videoHeight

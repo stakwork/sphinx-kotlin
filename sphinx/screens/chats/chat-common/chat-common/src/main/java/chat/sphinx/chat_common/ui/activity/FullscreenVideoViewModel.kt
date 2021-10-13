@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_message.retrieveTextToShow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
@@ -37,19 +38,26 @@ internal class FullscreenVideoViewModel @Inject constructor(
 
     internal val videoPlayerController: VideoPlayerController by lazy {
         VideoPlayerController(
-            app,
             viewModelScope = viewModelScope,
             updateIsPlaying = { isPlaying ->
                 if (isPlaying) {
                     updateViewState(
                         FullscreenVideoViewState.ContinuePlayback(
-                            0
+                            currentViewState.name,
+                            currentViewState.duration,
+                            currentViewState.videoDimensions,
+                            currentViewState.currentTime,
+                            isPlaying
                         )
                     )
                 } else {
                     updateViewState(
                         FullscreenVideoViewState.PausePlayback(
-                            0
+                            currentViewState.name,
+                            currentViewState.duration,
+                            currentViewState.videoDimensions,
+                            currentViewState.currentTime,
+                            isPlaying
                         )
                     )
                 }
@@ -57,16 +65,33 @@ internal class FullscreenVideoViewModel @Inject constructor(
             updateMetaDataCallback = { duration, videoWidth, videoHeight ->
                 updateViewState(
                     FullscreenVideoViewState.MetaDataLoaded(
+                        currentViewState.name,
                         duration,
-                        videoWidth,
-                        videoHeight
+                        Pair(videoWidth, videoHeight),
+                        currentViewState.currentTime,
+                        currentViewState.isPlaying
                     )
                 )
             },
             updateCurrentTimeCallback = { currentTime ->
                 updateViewState(
                     FullscreenVideoViewState.CurrentTimeUpdate(
+                        currentViewState.name,
+                        currentViewState.duration,
+                        currentViewState.videoDimensions,
                         currentTime,
+                        currentViewState.isPlaying
+                    )
+                )
+            },
+            completePlaybackCallback = {
+                updateViewState(
+                    FullscreenVideoViewState.CompletePlayback(
+                        currentViewState.name,
+                        currentViewState.duration,
+                        currentViewState.videoDimensions,
+                        currentTime = 0,
+                        isPlaying = false
                     )
                 )
             },
@@ -117,7 +142,15 @@ internal class FullscreenVideoViewModel @Inject constructor(
     fun initializeVideo() {
         viewModelScope.launch(mainImmediate) {
             getVideoTitle()?.let { title ->
-                updateViewState(FullscreenVideoViewState.VideoMessage(title))
+                updateViewState(
+                    FullscreenVideoViewState.VideoMessage(
+                        title,
+                        currentViewState.duration,
+                        currentViewState.videoDimensions,
+                        currentViewState.currentTime,
+                        currentViewState.isPlaying
+                    )
+                )
             }
             getVideoFile()?.let { videoFile ->
                 videoPlayerController.initializeVideo(videoFile)
