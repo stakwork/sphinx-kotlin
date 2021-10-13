@@ -27,10 +27,10 @@ value class TribeJoinLink(val value: String) {
     }
 
     inline val tribeHost : String
-        get() = getComponent(TRIBE_HOST) ?: ""
+        get() = (getComponent(TRIBE_HOST) ?: "").trim()
 
     inline val tribeUUID : String
-        get() = getComponent(TRIBE_UUID) ?: ""
+        get() = (getComponent(TRIBE_UUID) ?: "").trim()
 
     fun getComponent(k: String): String? {
         val components = value.replace("sphinx.chat://", "").split("&")
