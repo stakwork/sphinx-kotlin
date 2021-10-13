@@ -74,9 +74,9 @@ class VideoPlayerController(
         dispatchStateJob = viewModelScope.launch(mainImmediate) {
             videoView?.let { video ->
                 while (isActive) {
-                    updateCurrentTimeCallback(video.currentPosition)
-
                     if (video.isPlaying) {
+                        updateCurrentTimeCallback(video.currentPosition)
+
                         delay(250L)
                     } else {
                         break
