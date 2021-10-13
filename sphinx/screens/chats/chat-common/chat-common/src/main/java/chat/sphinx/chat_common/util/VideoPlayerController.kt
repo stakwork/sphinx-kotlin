@@ -27,7 +27,6 @@ class VideoPlayerController(
                 completePlaybackCallback()
             }
             setOnPreparedListener {
-                it.videoHeight
                 updateMetaDataCallback(
                     it.duration,
                     it.videoWidth,
