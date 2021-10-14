@@ -39,7 +39,7 @@ internal class OnClickCallback(val callback: (() -> Unit)) {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun PodcastViewState.Available.adjustState(
+internal inline fun PodcastViewState.PodcastVS.adjustState(
     showLoading: Boolean? = null,
     showPlayButton: Boolean? = null,
     title: String? = null,
@@ -48,18 +48,39 @@ internal inline fun PodcastViewState.Available.adjustState(
     clickBoost: OnClickCallback? = null,
     clickFastForward: OnClickCallback? = null,
     clickTitle: OnClickCallback? = null,
-): PodcastViewState.Available =
-    PodcastViewState.Available(
-        showLoading = showLoading ?: this.showLoading,
-        showPlayButton = showPlayButton ?: this.showPlayButton,
-        title = title ?: this.title,
-        playingProgress = playingProgress ?: this.playingProgress,
-        clickPlayPause = clickPlayPause ?: this.clickPlayPause,
-        clickBoost = clickBoost ?: this.clickBoost,
-        clickFastForward = clickFastForward ?: this.clickFastForward,
-        clickTitle = clickTitle ?: this.clickTitle,
-        podcast = podcast
-    )
+): PodcastViewState.PodcastVS? {
+    return when (this) {
+        is PodcastViewState.PodcastVS.Available -> {
+            PodcastViewState.PodcastVS.Available(
+                showLoading = showLoading ?: this.showLoading,
+                showPlayButton = showPlayButton ?: this.showPlayButton,
+                title = title ?: this.title,
+                playingProgress = playingProgress ?: this.playingProgress,
+                clickPlayPause = clickPlayPause ?: this.clickPlayPause,
+                clickBoost = clickBoost ?: this.clickBoost,
+                clickFastForward = clickFastForward ?: this.clickFastForward,
+                clickTitle = clickTitle ?: this.clickTitle,
+                podcast = podcast
+            )
+        }
+        is PodcastViewState.PodcastVS.Loaded -> {
+            PodcastViewState.PodcastVS.Loaded(
+                showLoading = showLoading ?: this.showLoading,
+                showPlayButton = showPlayButton ?: this.showPlayButton,
+                title = title ?: this.title,
+                playingProgress = playingProgress ?: this.playingProgress,
+                clickPlayPause = clickPlayPause ?: this.clickPlayPause,
+                clickBoost = clickBoost ?: this.clickBoost,
+                clickFastForward = clickFastForward ?: this.clickFastForward,
+                clickTitle = clickTitle ?: this.clickTitle,
+                podcast = podcast
+            )
+        }
+        else -> {
+            null
+        }
+    }
+}
 
 internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
 
@@ -79,15 +100,37 @@ internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
             get() = null
     }
 
-    data class Available(
-        val showLoading: Boolean,
-        val showPlayButton: Boolean,
-        val title: String,
-        val playingProgress: Int,
-        override val clickPlayPause: OnClickCallback?,
-        override val clickBoost: OnClickCallback?,
-        override val clickFastForward: OnClickCallback?,
-        override val clickTitle: OnClickCallback?,
-        val podcast: Podcast,
-    ): PodcastViewState()
+
+    abstract class PodcastVS : PodcastViewState() {
+
+        abstract val showLoading: Boolean
+        abstract val showPlayButton: Boolean
+        abstract val title: String
+        abstract val playingProgress: Int
+        abstract val podcast: Podcast
+
+        data class Available(
+            override val showLoading: Boolean,
+            override val showPlayButton: Boolean,
+            override val title: String,
+            override val playingProgress: Int,
+            override val clickPlayPause: OnClickCallback?,
+            override val clickBoost: OnClickCallback?,
+            override val clickFastForward: OnClickCallback?,
+            override val clickTitle: OnClickCallback?,
+            override val podcast: Podcast,
+        ) : PodcastVS()
+
+        data class Loaded(
+            override val showLoading: Boolean,
+            override val showPlayButton: Boolean,
+            override val title: String,
+            override val playingProgress: Int,
+            override val clickPlayPause: OnClickCallback?,
+            override val clickBoost: OnClickCallback?,
+            override val clickFastForward: OnClickCallback?,
+            override val clickTitle: OnClickCallback?,
+            override val podcast: Podcast,
+        ) : PodcastVS()
+    }
 }

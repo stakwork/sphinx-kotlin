@@ -187,8 +187,10 @@ internal class ChatTribeFragment: ChatFragment<
             podcastViewModel.collectViewState { viewState ->
                 podcastPlayerBinding.apply {
                     when (viewState) {
-                        is PodcastViewState.Available -> {
-
+                        is PodcastViewState.NoPodcast -> {
+                            root.gone
+                        }
+                        is PodcastViewState.PodcastVS -> {
                             textViewPlayPauseButton.text = if (viewState.showPlayButton) {
                                 getString(R.string.material_icon_name_play_button)
                             } else {
@@ -202,15 +204,16 @@ internal class ChatTribeFragment: ChatFragment<
                             textViewEpisodeTitle.text = viewState.title
 
                             if (viewState.showLoading) {
+                                textViewPlayPauseButton.isEnabled = false
                                 progressBarAudioLoading.visible
                             } else {
+                                textViewPlayPauseButton.isEnabled = true
                                 progressBarAudioLoading.gone
                             }
 
-                            root.visible
-                        }
-                        is PodcastViewState.NoPodcast -> {
-                            root.gone
+                            scrollToBottom(callback = {
+                                root.visible
+                            })
                         }
                     }
                 }
