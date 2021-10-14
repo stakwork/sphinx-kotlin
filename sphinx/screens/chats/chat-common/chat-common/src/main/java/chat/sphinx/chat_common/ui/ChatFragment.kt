@@ -46,6 +46,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.chat_common.ui.widgets.SlideToCancelImageView
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
 import chat.sphinx.chat_common.util.AudioRecorderController
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -73,6 +74,7 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
+import chat.sphinx.wrapper_message_media.isVideo
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -137,8 +139,8 @@ abstract class ChatFragment<
         )
     }
 
-    override val contentChooserContract: ActivityResultLauncher<String> =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    override val contentChooserContract: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             viewModel.handleActivityResultUri(uri)
         }
 
@@ -326,7 +328,7 @@ abstract class ChatFragment<
                             sendMessageBuilder.setAttachmentInfo(null)
                         }
                         is AttachmentSendViewState.Preview -> {
-                            if (attachmentViewState.type.isImage) {
+                            if (attachmentViewState.type.isImage || attachmentViewState.type.isVideo) {
                                 attachmentViewState.file?.let { nnFile ->
                                     sendMessageBuilder.setAttachmentInfo(
                                         AttachmentInfo(
@@ -1170,6 +1172,21 @@ abstract class ChatFragment<
                                     lifecycleScope.launch(viewModel.mainImmediate) {
                                         val disposable = imageLoader.load(imageViewAttachmentSendPreview, nnFile)
                                         attachmentSendViewStateDisposables.add(disposable)
+                                    }.let { job ->
+                                        attachmentSendViewStateJobs.add(job)
+                                    }
+                                }
+
+                            } else if (viewState.type is MediaType.Video) {
+
+                                // will load almost immediately b/c it's a file, so
+                                // no need to launch separate coroutine.
+                                viewState.file?.let { nnFile ->
+                                    lifecycleScope.launch(viewModel.mainImmediate) {
+                                        // TODO: Have a play icon
+                                        imageViewAttachmentSendPreview.setImageBitmap(
+                                            VideoThumbnailUtil.loadThumbnail(nnFile)
+                                        )
                                     }.let { job ->
                                         attachmentSendViewStateJobs.add(job)
                                     }
