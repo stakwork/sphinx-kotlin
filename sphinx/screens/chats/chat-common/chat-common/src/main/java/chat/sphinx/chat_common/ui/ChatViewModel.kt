@@ -1404,18 +1404,23 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     ) {
         viewModelScope.launch(mainImmediate) {
             if (message.isMediaAttachmentAvailable) {
+
+                val originalMessageMessageMedia = message.messageMedia
+
+                //Getting message media from purchase accept item if is paid.
+                //LocalFile and mediaType should be returned from original message
                 val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia() ?: message.retrieveVideoUrlAndMessageMedia()
 
                 mediaUrlAndMessageMedia?.second?.let { messageMedia ->
-                    messageMedia.retrieveContentValues(message)?.let { mediaContentValues ->
-                        messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
+                    originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
+                        originalMessageMessageMedia?.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
                                 val inputStream: InputStream? = when {
                                     (drawable != null) -> {
                                         drawable?.drawableToBitmap()?.toInputStream()
                                     }
-                                    (messageMedia.localFile != null) -> {
-                                        FileInputStream(messageMedia.localFile)
+                                    (originalMessageMessageMedia?.localFile != null) -> {
+                                        FileInputStream(originalMessageMessageMedia?.localFile)
                                     }
                                     else -> {
                                         messageMedia.retrieveRemoteMediaInputStream(
