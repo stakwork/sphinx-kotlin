@@ -18,10 +18,7 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MessageMedia
-import chat.sphinx.wrapper_message_media.isAudio
-import chat.sphinx.wrapper_message_media.isImage
-import chat.sphinx.wrapper_message_media.isSphinxText
+import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -72,7 +69,8 @@ internal sealed class MessageHolderViewState(
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
         if (
             unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isSphinxText != true &&
-            message.messageMedia?.mediaType?.isImage != true && message.messageMedia?.mediaType?.isAudio != true
+            message.messageMedia?.mediaType?.isImage != true && message.messageMedia?.mediaType?.isAudio != true &&
+            message.messageMedia?.mediaType?.isVideo != true
         ) {
             LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
                 messageType = message.type,
@@ -277,6 +275,28 @@ internal sealed class MessageHolderViewState(
                 mediaData.second,
                 (this is Received && message.isPaidPendingMessage)
             )
+        }
+    }
+
+    val bubbleVideoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isVideo) {
+                nnMessageMedia.localFile?.let { nnFile ->
+                    LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable(nnFile)
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    // will only be called once when value is lazily initialized upon binding
+                    // data to view.
+                    if (!pendingPayment) {
+                        onBindDownloadMedia.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable(pendingPayment)
+                }
+            } else {
+                null
+            }
         }
     }
 

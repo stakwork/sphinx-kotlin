@@ -1,5 +1,12 @@
 # ChangeLog
 
+# Version 1.0.0-alpha29 (2021-10-14)
+ - Adds ability to receive video messages and paid video messages
+ - Adds ability to watch for received video messages on full screen view
+ - Adds some missing Japanese translations
+ - Adds version label on left menu
+ - Improves Podcast loading process and prevents crashes
+
 # Version 1.0.0-alpha28 (2021-10-11)
  - Adds ability to record and send audio messages
  - Adds new onboard screens

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fullscreen_video_nav_graph"
+    app:startDestination="@+id/navigation_fullscreen_activity">
+
+    <activity
+        android:id="@+id/navigation_fullscreen_activity"
+        android:name="chat.sphinx.chat_common.ui.activity.FullscreenVideoActivity"
+        tools:layout="@layout/activity_fullscreen_video" >
+        <argument
+            android:name="argMessageId"
+            app:argType="long" />
+    </activity>
+
+</navigation>

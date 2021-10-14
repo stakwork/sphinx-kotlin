@@ -106,7 +106,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (messages.isEmpty()) {
                     messages.addAll(list)
                     notifyDataSetChanged()
-                    recyclerView.layoutManager?.scrollToPosition(messages.size - 1)
+                    recyclerView.layoutManager?.scrollToPosition(messages.size)
                 } else {
 
                     withContext(viewModel.dispatchers.default) {
@@ -299,6 +299,15 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                     imageViewAttachmentImage.setOnLongClickListener(selectedMessageLongClickListener)
+                }
+
+                includeMessageTypeVideoAttachment.apply {
+                    textViewAttachmentPlayButton.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.goToFullscreenVideo(message.id)
+                        }
+
+                    }
                 }
 
                 includePaidMessageReceivedDetailsHolder.apply {

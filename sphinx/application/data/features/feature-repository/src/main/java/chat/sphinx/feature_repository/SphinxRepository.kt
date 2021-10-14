@@ -31,9 +31,9 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
-import chat.sphinx.concept_repository_message.model.SendPaymentRequest
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
+import chat.sphinx.concept_repository_message.model.SendPaymentRequest
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -4058,8 +4058,13 @@ abstract class SphinxRepository(
     }
 
     private val downloadLockMap = SynchronizedMap<MessageId, Pair<Int, Mutex>>()
-    override fun downloadMediaIfApplicable(messageId: MessageId) {
+    override fun downloadMediaIfApplicable(
+        message: Message,
+        sent: Boolean
+    ) {
         applicationScope.launch(mainImmediate) {
+            val messageId: MessageId = message.id
+
             val downloadLock: Mutex = downloadLockMap.withLock { map ->
                 val localLock: Pair<Int, Mutex>? = map[messageId]
 
@@ -4077,23 +4082,26 @@ abstract class SphinxRepository(
             downloadLock.withLock {
                 val queries = coreDB.getSphinxDatabaseQueries()
 
-                val message: Message? = getMessageByIdImpl(messageId, queries).firstOrNull()
-                val media = message?.messageMedia
+                //Getting media data from purchase accepted item if is paid content
+                val media = message?.retrieveUrlAndMessageMedia()?.second
                 val host = media?.host
                 val url = media?.url
+
+                val localFile = message?.messageMedia?.localFile
 
                 if (
                     message != null &&
                     media != null &&
                     host != null &&
                     url != null &&
-                    media.localFile == null &&
+                    localFile == null &&
                     !message.status.isDeleted() &&
-                    !message.isPaidPendingMessage
+                    (!message.isPaidPendingMessage || sent)
                 ) {
-                    val streamToFile: File? = when (val type = media.mediaType) {
+
+                    val streamToFile: File? = when (val mediaType = message.messageMedia?.mediaType ?: media.mediaType) {
                         is MediaType.Audio -> {
-                            type.value.split("/").lastOrNull()?.let { fileType ->
+                            mediaType.value.split("/").lastOrNull()?.let { fileType ->
                                 when {
                                     fileType.contains("m4a", ignoreCase = true) -> {
                                         mediaCacheHandler.createAudioFile("m4a")
@@ -4106,6 +4114,9 @@ abstract class SphinxRepository(
                                     }
                                     fileType.contains("mpeg", ignoreCase = true) -> {
                                         mediaCacheHandler.createAudioFile("mpeg")
+                                    }
+                                    fileType.contains("wav", ignoreCase = true) -> {
+                                        mediaCacheHandler.createAudioFile("wav")
                                     }
                                     else -> {
                                         null
@@ -4126,8 +4137,29 @@ abstract class SphinxRepository(
                             null
                         }
                         is MediaType.Video -> {
-                            // TODO: Implement (use download service via controller)
-                            null
+                            // TODO: Auto generate file extension (if app doesn't support media we can load via )
+                            mediaType.value.split("/").lastOrNull()?.let { fileType ->
+                                when {
+                                    fileType.contains("webm", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("webm")
+                                    }
+                                    fileType.contains("3gpp", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("3gp")
+                                    }
+                                    fileType.contains("x-matroska", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("mkv")
+                                    }
+                                    fileType.contains("mp4", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("mp4")
+                                    }
+                                    fileType.contains("mov", ignoreCase = true) -> {
+                                        mediaCacheHandler.createVideoFile("mov")
+                                    }
+                                    else -> {
+                                        null
+                                    }
+                                }
+                            }
                         }
                         is MediaType.Unknown -> {
                             LOG.w(TAG, "Unknown MediaType for MessageMedia $messageId")
@@ -4136,9 +4168,7 @@ abstract class SphinxRepository(
                     }
 
                     if (streamToFile != null) {
-
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-
                             memeInputStreamHandler.retrieveMediaInputStream(
                                 url.value,
                                 token,

@@ -49,6 +49,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -275,9 +276,19 @@ internal class DashboardFragment : MotionLayoutFragment<
         super.onStart()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            binding.layoutDashboardHeader.textViewDashboardHeaderUpgradeApp.goneIfFalse(
-                viewModel.getNewVersionAvailable()
-            )
+            viewModel.newVersionAvailable.asStateFlow().collect { newVersionAvailable ->
+                binding.layoutDashboardHeader.textViewDashboardHeaderUpgradeApp.goneIfFalse(
+                    newVersionAvailable
+                )
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.currentVersion.asStateFlow().collect { currentVersion ->
+                binding.layoutDashboardNavDrawer.textViewNavDrawerVersionNumber.apply {
+                    text = currentVersion
+                }
+            }
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {

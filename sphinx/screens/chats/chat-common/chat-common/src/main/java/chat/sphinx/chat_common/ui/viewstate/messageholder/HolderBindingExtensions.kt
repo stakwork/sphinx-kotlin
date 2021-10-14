@@ -23,6 +23,7 @@ import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -34,7 +35,6 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
@@ -57,7 +57,7 @@ import chat.sphinx.resources.R as common_R
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal fun LayoutMessageHolderBinding.setView(
+internal fun  LayoutMessageHolderBinding.setView(
     lifecycleScope: CoroutineScope,
     holderJobs: ArrayList<Job>,
     disposables: ArrayList<Disposable>,
@@ -175,6 +175,9 @@ internal fun LayoutMessageHolderBinding.setView(
                 dispatchers,
                 holderJobs,
                 lifecycleScope
+            )
+            setBubbleVideoAttachment(
+                viewState.bubbleVideoAttachment,
             )
             setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
             setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
@@ -1320,6 +1323,48 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
             textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
             textViewAttachmentPlayPauseButton.visible
 
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
+    videoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment?,
+) {
+    includeMessageHolderBubble.includeMessageTypeVideoAttachment.apply {
+        imageViewAttachmentThumbnail.gone
+        layoutConstraintVideoPlayButton.gone
+
+        @Exhaustive
+        when (videoAttachment) {
+            null -> {
+                root.gone
+            }
+            is LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable -> {
+                root.visible
+
+                val thumbnail = VideoThumbnailUtil.loadThumbnail(videoAttachment.file)
+
+                if (thumbnail != null) {
+                    imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                    layoutConstraintVideoPlayButton.visible
+                }
+
+                imageViewAttachmentThumbnail.visible
+            }
+            is LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable -> {
+                if  (videoAttachment.showPaidOverlay) {
+                    layoutConstraintPaidVideoOverlay.visible
+
+                    imageViewAttachmentThumbnail.gone
+                } else {
+                    layoutConstraintPaidVideoOverlay.gone
+
+                    imageViewAttachmentThumbnail.visible
+                }
+                root.visible
+            }
         }
     }
 }

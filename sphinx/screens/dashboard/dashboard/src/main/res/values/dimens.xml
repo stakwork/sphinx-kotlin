@@ -5,6 +5,7 @@
 
     <!-- Text size -->
     <dimen name="nav_drawer_default_text_size">16sp</dimen>
+    <dimen name="nav_drawer_version_text_size">10sp</dimen>
     <dimen name="dashboard_search_text_size">14sp</dimen>
 
     <dimen name="nav_drawer_header_margin">32dp</dimen>

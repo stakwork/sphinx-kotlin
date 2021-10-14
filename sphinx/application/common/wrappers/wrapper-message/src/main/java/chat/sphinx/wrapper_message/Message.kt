@@ -1,16 +1,16 @@
 package chat.sphinx.wrapper_message
 
-import chat.sphinx.wrapper_common.*
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.*
-import chat.sphinx.wrapper_message_media.MessageMedia
-import chat.sphinx.wrapper_message_media.isAudio
-import chat.sphinx.wrapper_message_media.isImage
-import chat.sphinx.wrapper_message_media.isSphinxText
+import chat.sphinx.wrapper_common.time
+import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaUrl
 
 @Suppress("NOTHING_TO_INLINE")
@@ -78,6 +78,17 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
         }
     }
     return mediaData
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveVideoUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    return messageMedia?.let { media ->
+        if (media.mediaType.isVideo) {
+            retrieveUrlAndMessageMedia()
+        } else {
+            null
+        }
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -210,7 +221,8 @@ inline val Message.isBoostAllowed: Boolean
 
 inline val Message.isMediaAttachmentAvailable: Boolean
     get() = type.canContainMedia &&
-            (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
+            (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
+             retrieveVideoUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()
@@ -239,6 +251,9 @@ inline val Message.isSphinxCallLink: Boolean
 
 inline val Message.isAudioMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isAudio == true
+
+inline val Message.isVideoMessage: Boolean
+    get() = type.isAttachment() && messageMedia?.mediaType?.isVideo == true
 
 inline val Message.isPodcastBoost: Boolean
     get() = type.isBoost() && podBoost != null

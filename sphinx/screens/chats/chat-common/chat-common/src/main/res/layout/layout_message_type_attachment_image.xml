@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="@dimen/message_type_image_attachment_min_height"
+    android:minHeight="@dimen/message_type_image_loading_container_height"
     android:padding="2dp"
     android:visibility="gone"
     tools:layout_width="300dp"
@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/loading_image_progress_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -40,9 +40,7 @@
             android:textSize="@dimen/loading_image_label_text_size"
             android:textColor="@color/secondaryText"
             android:layout_marginTop="@dimen/default_small_layout_margin"
-            android:text="@string/text_view_loading_attachment">
-
-        </androidx.appcompat.widget.AppCompatTextView>
+            android:text="@string/text_view_loading_attachment"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -60,7 +58,7 @@
             android:id="@+id/image_view_attachment_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="@dimen/message_type_image_attachment_min_height"
+            android:minHeight="@dimen/message_type_image_loading_container_height"
             android:clickable="false"
             android:focusable="true"
             android:adjustViewBounds="true"
@@ -89,7 +87,7 @@
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_paid_image"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/message_type_image_attachment_min_height"
+                android:layout_height="@dimen/message_type_image_loading_container_height"
                 android:clickable="false"
                 android:focusable="true"
                 android:adjustViewBounds="true"
