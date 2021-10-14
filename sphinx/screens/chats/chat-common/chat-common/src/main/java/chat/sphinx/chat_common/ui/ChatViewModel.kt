@@ -1349,9 +1349,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         navigateToChatDetailScreen()
     }
 
-    fun goToFullscreenVideo(messageId: MessageId) {
+    fun goToFullscreenVideo(
+        messageId: MessageId,
+        videoFilepath: String? = null
+    ) {
         viewModelScope.launch(mainImmediate) {
-            chatNavigator.toFullscreenVideo(messageId)
+            chatNavigator.toFullscreenVideo(
+                messageId,
+                videoFilepath
+            )
         }
     }
 

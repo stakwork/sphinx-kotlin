@@ -64,10 +64,14 @@ abstract class ChatNavigator(
     }
 
     @JvmSynthetic
-    internal suspend fun toFullscreenVideo(messageId: MessageId) {
+    internal suspend fun toFullscreenVideo(
+        messageId: MessageId,
+        videoFilepath: String? = null
+    ) {
         navigationDriver.submitNavigationRequest(
             ToFullscreenVideoActivity(
-                messageId
+                messageId,
+                videoFilepath
             )
         )
     }

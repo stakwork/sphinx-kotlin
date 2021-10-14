@@ -68,6 +68,7 @@ import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -1139,6 +1140,7 @@ abstract class ChatFragment<
                             root.gone
                             includePaidTextMessageSendPreview.root.gone
                             imageViewAttachmentSendPreview.setImageDrawable(null)
+                            layoutConstraintVideoPlayButton.gone
                         }
                         is AttachmentSendViewState.Preview -> {
 
@@ -1183,7 +1185,13 @@ abstract class ChatFragment<
                                 // no need to launch separate coroutine.
                                 viewState.file?.let { nnFile ->
                                     lifecycleScope.launch(viewModel.mainImmediate) {
-                                        // TODO: Have a play icon
+                                        layoutConstraintVideoPlayButton.visible
+                                        textViewAttachmentPlayButton.setOnClickListener {
+                                            viewModel.goToFullscreenVideo(
+                                                messageId = MessageId(-1L),
+                                                nnFile.absolutePath
+                                            )
+                                        }
                                         imageViewAttachmentSendPreview.setImageBitmap(
                                             VideoThumbnailUtil.loadThumbnail(nnFile)
                                         )
