@@ -179,7 +179,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                 viewModel.goToAppUpgrade()
             }
             header.textViewDashboardHeaderNetwork.setOnClickListener {
-                viewModel.toastIfNetworkConnected(binding.root.context)
+                viewModel.toastIfNetworkConnected()
             }
         }
     }

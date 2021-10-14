@@ -35,7 +35,6 @@ import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -902,12 +901,19 @@ internal class DashboardViewModel @Inject constructor(
         // Unused
     }
 
-    fun toastIfNetworkConnected(context: Context){
-        if (_networkStateFlow.value is Response.Error) {
-            SphinxToastUtils(true).show(context, R.string.dashboard_network_disconnected_node_toast)
-        }else{
-            SphinxToastUtils(true).show(context, R.string.dashboard_network_connected_node_toast)
+    fun toastIfNetworkConnected(){
+        viewModelScope.launch(mainImmediate){
+            submitSideEffect(
+                DashboardSideEffect.Notify(
+                    app.getString(
+                        if (_networkStateFlow.value is Response.Error) {
+                            R.string.dashboard_network_disconnected_node_toast
+                        } else {
+                            R.string.dashboard_network_connected_node_toast
+                        }
+                    )
+                )
+            )
         }
-
     }
 }
