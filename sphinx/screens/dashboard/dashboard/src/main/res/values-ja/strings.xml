@@ -85,6 +85,6 @@
     <string name="dashboard_connect_message_empty">メッセージの入力は必須です</string>
     <string name="dashboard_connect_generic_error">ユーザーと接続できませんでした。後ほど再度お試しください。</string>
 
-    <string name="dashboard_network_disconnected_node_toast">切断されたノード</string>
-    <string name="dashboard_network_connected_node_toast">接続されたノード</string>
+    <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
+    <string name="dashboard_network_connected_node_toast">Connected node</string>
 </resources>

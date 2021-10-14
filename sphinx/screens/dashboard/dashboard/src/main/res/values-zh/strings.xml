@@ -85,6 +85,6 @@
     <string name="dashboard_connect_message_empty">訊息不可無填</string>
     <string name="dashboard_connect_generic_error">聯絡人連結失敗，請稍後再試</string>
 
-    <string name="dashboard_network_disconnected_node_toast">断开的节点</string>
-    <string name="dashboard_network_connected_node_toast">连接节点</string>
+    <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
+    <string name="dashboard_network_connected_node_toast">Connected node</string>
 </resources>
