@@ -661,7 +661,7 @@ abstract class ChatFragment<
         }
     }
 
-    private fun scrollToBottom(
+    protected fun scrollToBottom(
         callback: () -> Unit,
         replyingToMessage: Boolean = false
     ) {

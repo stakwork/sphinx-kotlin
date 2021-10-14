@@ -139,6 +139,11 @@ class Podcast(
         return progress.toInt()
     }
 
+    fun getPlayingProgress(duration: Int): Int {
+        val progress = (currentTime.toLong() * 100) / duration
+        return progress.toInt()
+    }
+
     fun didStartPlayingEpisode(
         episode: PodcastEpisode,
         time: Int,
