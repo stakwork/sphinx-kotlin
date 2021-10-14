@@ -2,7 +2,6 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -129,6 +128,11 @@ internal sealed class LayoutState private constructor() {
                 val showPaidOverlay: Boolean
             ): ContainerSecond()
 
+            sealed class VideoAttachment : ContainerSecond()  {
+                data class FileAvailable(val file: File): VideoAttachment()
+                data class FileUnavailable(val showPaidOverlay: Boolean): VideoAttachment()
+            }
+
             data class PodcastBoost(
                 val amount: Sat,
             ): ContainerSecond()
@@ -142,8 +146,6 @@ internal sealed class LayoutState private constructor() {
             ): ContainerSecond()
 
             // FileAttachment
-            // AudioAttachment
-            // VideoAttachment
             // Invoice
         }
 

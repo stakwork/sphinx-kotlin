@@ -439,7 +439,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         messageCallback -> handlePaidTextMessageContent(messageCallback)
                                  },
                                 onBindDownloadMedia = {
-                                    repositoryMedia.downloadMediaIfApplicable(message.id)
+                                    repositoryMedia.downloadMediaIfApplicable(message, sent)
                                 }
                             )
                         )
@@ -507,7 +507,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     handlePaidTextMessageContent(messageCallback)
                                  },
                                 onBindDownloadMedia = {
-                                    repositoryMedia.downloadMediaIfApplicable(message.id)
+                                    repositoryMedia.downloadMediaIfApplicable(message, sent)
                                 }
                             )
                         )
@@ -1330,6 +1330,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         navigateToChatDetailScreen()
     }
 
+    fun goToFullscreenVideo(messageId: MessageId) {
+        viewModelScope.launch(mainImmediate) {
+            chatNavigator.toFullscreenVideo(messageId)
+        }
+    }
+
     protected abstract fun navigateToChatDetailScreen()
 
     open fun handleContactTribeLinks(url: String?) {
@@ -1398,17 +1404,32 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     ) {
         viewModelScope.launch(mainImmediate) {
             if (message.isMediaAttachmentAvailable) {
-                message.retrieveImageUrlAndMessageMedia()?.let { mediaUrlAndMessageMedia ->
-                    mediaUrlAndMessageMedia.second?.let { messageMedia ->
-                        val mediaContentValues = messageMedia.retrieveContentValues(message)
 
-                        messageMedia.retrieveMediaStorageUri()?.let { mediaStorageUri ->
+                val originalMessageMessageMedia = message.messageMedia
+
+                //Getting message media from purchase accept item if is paid.
+                //LocalFile and mediaType should be returned from original message
+                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia() ?: message.retrieveVideoUrlAndMessageMedia()
+
+                mediaUrlAndMessageMedia?.second?.let { messageMedia ->
+                    originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
+                        originalMessageMessageMedia?.retrieveMediaStorageUri()?.let { mediaStorageUri ->
                             app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
-                                val inputStream = drawable?.drawableToBitmap()?.toInputStream() ?: messageMedia.retrieveRemoteMediaInputStream(
-                                    mediaUrlAndMessageMedia.first,
-                                    memeServerTokenHandler,
-                                    memeInputStreamHandler
-                                )
+                                val inputStream: InputStream? = when {
+                                    (drawable != null) -> {
+                                        drawable?.drawableToBitmap()?.toInputStream()
+                                    }
+                                    (originalMessageMessageMedia?.localFile != null) -> {
+                                        FileInputStream(originalMessageMessageMedia?.localFile)
+                                    }
+                                    else -> {
+                                        messageMedia.retrieveRemoteMediaInputStream(
+                                            mediaUrlAndMessageMedia.first,
+                                            memeServerTokenHandler,
+                                            memeInputStreamHandler
+                                        )
+                                    }
+                                }
 
                                 try {
                                     inputStream?.use { nnInputStream ->
@@ -1539,12 +1560,21 @@ inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues {
-    return ContentValues().apply {
-        put(MediaStore.Images.Media.TITLE, message.id.value)
-        put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
-        put(MediaStore.Images.Media.MIME_TYPE, mediaType.value.replace("jpg", "jpeg"))
+inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues? {
+    if (this.mediaType.isImage) {
+        return ContentValues().apply {
+            put(MediaStore.Images.Media.TITLE, message.id.value)
+            put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+        }
+    } else if (this.mediaType.isVideo) {
+        return ContentValues().apply {
+            put(MediaStore.Video.Media.TITLE, message.id.value)
+            put(MediaStore.Video.Media.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+        }
     }
+    return null
 }
 
 

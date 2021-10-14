@@ -301,6 +301,15 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     imageViewAttachmentImage.setOnLongClickListener(selectedMessageLongClickListener)
                 }
 
+                includeMessageTypeVideoAttachment.apply {
+                    textViewAttachmentPlayButton.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.goToFullscreenVideo(message.id)
+                        }
+
+                    }
+                }
+
                 includePaidMessageReceivedDetailsHolder.apply {
                     buttonPayAttachment.setOnClickListener {
                         currentViewState?.message?.let { message ->
