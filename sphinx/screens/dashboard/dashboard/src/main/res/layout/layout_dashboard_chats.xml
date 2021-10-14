@@ -7,15 +7,16 @@
     android:background="@color/body">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/layout_swipe_refresh_chats"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_view_chats"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:listitem="@layout/layout_dashboard_chat_holder" />
+
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <androidx.appcompat.widget.AppCompatImageView

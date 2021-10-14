@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -21,7 +20,6 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
@@ -68,7 +66,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         NavDrawerViewState,
         DashboardViewModel,
         FragmentDashboardBinding
-        >(R.layout.fragment_dashboard)
+        >(R.layout.fragment_dashboard), SwipeRefreshLayout.OnRefreshListener
 {
     @Inject
     @Suppress("ProtectedInFinal")
@@ -129,13 +127,14 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    override fun onRefresh() {
+        binding.layoutDashboardChats.layoutSwipeRefreshChats.isRefreshing = false
+        viewModel.networkRefresh()
+    }
+
     private fun setupChats() {
-        binding.layoutDashboardChats.layoutSwipeRefreshChats.apply {
-            setOnRefreshListener {
-                viewModel.networkRefresh()
-                isRefreshing = false
-            }
-        }
+        binding.layoutDashboardChats.layoutSwipeRefreshChats.setOnRefreshListener(this)
+
         binding.layoutDashboardChats.recyclerViewChats.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             val chatListAdapter = ChatListAdapter(
