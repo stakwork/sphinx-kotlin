@@ -22,6 +22,7 @@ import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.dashboard.BuildConfig
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -121,6 +122,14 @@ internal class DashboardViewModel @Inject constructor(
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
+    val newVersionAvailable: MutableStateFlow<Boolean> by lazy(LazyThreadSafetyMode.NONE) {
+        MutableStateFlow<Boolean>(false)
+    }
+
+    val currentVersion: MutableStateFlow<String> by lazy(LazyThreadSafetyMode.NONE) {
+        MutableStateFlow("-")
+    }
+
     init {
         if (args.updateBackgroundLoginTime) {
             viewModelScope.launch(default) {
@@ -128,6 +137,7 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
+        checkAppVersion()
         handleDeepLink(args.argDeepLink)
     }
 
@@ -483,21 +493,22 @@ internal class DashboardViewModel @Inject constructor(
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         repositoryDashboard.getAccountBalance()
 
-    suspend fun getNewVersionAvailable(): Boolean {
-        var newVersionAvailable = false
-
-        networkQueryVersion.getAppVersions().collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
-                is Response.Error -> {}
-                is Response.Success -> {
-                    newVersionAvailable = loadResponse.value.kotlin > buildConfigVersionCode.value.toLong()
+    private fun checkAppVersion() {
+        viewModelScope.launch(mainImmediate) {
+            networkQueryVersion.getAppVersions().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+                    }
+                    is Response.Success -> {
+                        newVersionAvailable.value = loadResponse.value.kotlin > buildConfigVersionCode.value.toLong()
+                        currentVersion.value = "VERSION: ${buildConfigVersionCode.value}"
+                    }
                 }
             }
         }
-
-        return newVersionAvailable
     }
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
@@ -893,6 +904,7 @@ internal class DashboardViewModel @Inject constructor(
         val i = Intent(Intent.ACTION_VIEW)
         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         i.data = Uri.parse("https://github.com/stakwork/sphinx-kotlin/releases")
+//        i.data = Uri.parse("https://play.google.com/store/apps/details?id=chat.sphinx")
         app.startActivity(i)
     }
 
