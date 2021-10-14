@@ -124,7 +124,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
 
-        delayedHide(500)
+        delayedHide(1000)
     }
 
     private fun toggle() {
