@@ -69,7 +69,7 @@
     <dimen name="message_type_expired_invoice_width">210dp</dimen>
     <dimen name="message_type_boost_width">220dp</dimen>
     <dimen name="message_type_direct_payment_height">46dp</dimen>
-    <dimen name="message_type_image_attachment_min_height">170dp</dimen>
+    <dimen name="message_type_image_loading_container_height">160dp</dimen>
     <dimen name="message_type_file_attachment_height">60dp</dimen>
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
     <dimen name="message_type_video_attachment_height">210dp</dimen>

@@ -1,17 +1,14 @@
 package chat.sphinx.chat_common.ui.activity
 
 import android.content.pm.ActivityInfo
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.view.*
-import android.view.View.OnTouchListener
 import android.widget.RelativeLayout
 import android.view.OrientationEventListener
 import androidx.activity.viewModels
 import androidx.core.view.isVisible
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.ActivityFullscreenVideoBinding
@@ -135,6 +132,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
             binding.layoutConstraintVideoControls.gone
         } else {
             binding.layoutConstraintVideoControls.visible
+
             delayedHide(AUTO_HIDE_DELAY_MILLIS)
         }
     }

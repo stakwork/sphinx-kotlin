@@ -115,7 +115,7 @@
             app:cardCornerRadius="@dimen/background_message_holder_default_corner_rad">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/video_view_paid_video"
+                android:id="@+id/image_view_blurred_placeholder"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clickable="false"

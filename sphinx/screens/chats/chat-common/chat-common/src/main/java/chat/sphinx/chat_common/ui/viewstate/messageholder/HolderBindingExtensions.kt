@@ -1349,17 +1349,21 @@ internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
                 if (thumbnail != null) {
                     imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
                     layoutConstraintVideoPlayButton.visible
-                } else {
-                    // TODO: Load error/blurry drawable
                 }
 
                 imageViewAttachmentThumbnail.visible
-
-
             }
             is LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable -> {
+                if  (videoAttachment.showPaidOverlay) {
+                    layoutConstraintPaidVideoOverlay.visible
+
+                    imageViewAttachmentThumbnail.gone
+                } else {
+                    layoutConstraintPaidVideoOverlay.gone
+
+                    imageViewAttachmentThumbnail.visible
+                }
                 root.visible
-                // Downlading the file
             }
         }
     }

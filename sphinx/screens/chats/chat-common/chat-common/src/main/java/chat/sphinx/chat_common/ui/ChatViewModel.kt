@@ -439,7 +439,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                         messageCallback -> handlePaidTextMessageContent(messageCallback)
                                  },
                                 onBindDownloadMedia = {
-                                    repositoryMedia.downloadMediaIfApplicable(message.id)
+                                    repositoryMedia.downloadMediaIfApplicable(message, sent)
                                 }
                             )
                         )
@@ -507,7 +507,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     handlePaidTextMessageContent(messageCallback)
                                  },
                                 onBindDownloadMedia = {
-                                    repositoryMedia.downloadMediaIfApplicable(message.id)
+                                    repositoryMedia.downloadMediaIfApplicable(message, sent)
                                 }
                             )
                         )
