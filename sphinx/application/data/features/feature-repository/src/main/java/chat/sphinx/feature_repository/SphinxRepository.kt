@@ -4107,6 +4107,9 @@ abstract class SphinxRepository(
                                     fileType.contains("mpeg", ignoreCase = true) -> {
                                         mediaCacheHandler.createAudioFile("mpeg")
                                     }
+                                    fileType.contains("wav", ignoreCase = true) -> {
+                                        mediaCacheHandler.createAudioFile("wav")
+                                    }
                                     else -> {
                                         null
                                     }
