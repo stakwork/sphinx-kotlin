@@ -2,8 +2,6 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
-import android.net.Uri
-import android.webkit.MimeTypeMap
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -18,22 +16,18 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
-import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
-import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.toMediaType
 import chat.sphinx.wrapper_relay.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
@@ -47,15 +41,11 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
-import java.io.FileInputStream
-import java.io.InputStream
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
@@ -154,8 +144,32 @@ internal class ProfileViewModel @Inject constructor(
     ): Response<Any, ResponseError> =
         contactRepository.updateOwner(alias, privatePhoto, tipAmount)
 
+    suspend fun updateMeetingServer(url: String?) {
+        _meetingServerUrlStateFlow.value = url
+
+        delay(50L)
+
+        if (url == null || url.isEmpty() || !URLUtil.isValidUrl(url)) {
+            submitSideEffect(ProfileSideEffect.InvalidMeetingServerUrl)
+            setServerUrls()
+            return
+        }
+
+        val appContext: Context = app.applicationContext
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences("server_urls", Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            serverUrlsSharedPreferences.edit().putString(SphinxCallLink.CALL_SERVER_URL_KEY, url)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                }
+        }
+    }
+
     suspend fun updateRelayUrl(url: String?)  {
-        if (url == null || url.isEmpty()) {
+        if (url == null || url.isEmpty() || url == _relayUrlStateFlow.value) {
             return
         }
 
@@ -324,11 +338,16 @@ internal class ProfileViewModel @Inject constructor(
     private val _pinTimeoutStateFlow: MutableStateFlow<Int?> by lazy {
         MutableStateFlow(null)
     }
+    private val _meetingServerUrlStateFlow: MutableStateFlow<String?> by lazy {
+        MutableStateFlow(null)
+    }
 
     val relayUrlStateFlow: StateFlow<String?>
         get() = _relayUrlStateFlow.asStateFlow()
     val pinTimeoutStateFlow: StateFlow<Int?>
         get() = _pinTimeoutStateFlow.asStateFlow()
+    val meetingServerUrlStateFlow: StateFlow<String?>
+        get() = _meetingServerUrlStateFlow.asStateFlow()
     val accountOwnerStateFlow: StateFlow<Contact?>
         get() = contactRepository.accountOwner
 
@@ -336,6 +355,20 @@ internal class ProfileViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             _relayUrlStateFlow.value =  relayDataHandler.retrieveRelayUrl()?.value
             _pinTimeoutStateFlow.value = backgroundLoginHandler.getTimeOutSetting()
+
+            setServerUrls()
         }
+    }
+
+    private fun setServerUrls() {
+        val appContext: Context = app.applicationContext
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences("server_urls", Context.MODE_PRIVATE)
+
+        val meetingServerUrl = serverUrlsSharedPreferences.getString(
+            SphinxCallLink.CALL_SERVER_URL_KEY,
+            SphinxCallLink.DEFAULT_CALL_SERVER_URL
+        ) ?: SphinxCallLink.DEFAULT_CALL_SERVER_URL
+
+        _meetingServerUrlStateFlow.value = meetingServerUrl
     }
 }

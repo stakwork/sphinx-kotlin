@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -1245,7 +1246,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         callMenuHandler.updateViewState(
             MenuBottomViewState.Closed
         )
-        SphinxCallLink.newCallInvite(audioOnly)?.value?.let { newCallLink ->
+
+        val appContext: Context = app.applicationContext
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences("server_urls", Context.MODE_PRIVATE)
+
+        val meetingServerUrl = serverUrlsSharedPreferences.getString(
+            SphinxCallLink.CALL_SERVER_URL_KEY,
+            SphinxCallLink.DEFAULT_CALL_SERVER_URL
+        ) ?: SphinxCallLink.DEFAULT_CALL_SERVER_URL
+
+        SphinxCallLink.newCallInvite(meetingServerUrl, audioOnly)?.value?.let { newCallLink ->
             val messageBuilder = SendMessage.Builder()
             messageBuilder.setText(newCallLink)
             sendMessage(messageBuilder)
