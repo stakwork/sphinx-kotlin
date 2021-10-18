@@ -1126,6 +1126,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             AttachmentSendViewState.Preview(null, MediaType.Text, null)
         )
         updateViewState(ChatMenuViewState.Closed)
+        updateFooterViewState(FooterViewState.Attachment)
     }
 
     @JvmSynthetic

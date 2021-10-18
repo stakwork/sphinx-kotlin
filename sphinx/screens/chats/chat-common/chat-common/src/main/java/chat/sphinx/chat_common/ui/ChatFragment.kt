@@ -427,8 +427,11 @@ abstract class ChatFragment<
 
             editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
             editTextChatFooter.addTextChangedListener { editable ->
-                textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
-                imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+                //Do not toggle microphone and send icon if on attachment mode
+                if (viewModel.getFooterViewStateFlow().value !is FooterViewState.Attachment) {
+                    textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
+                    imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+                }
             }
         }
 
