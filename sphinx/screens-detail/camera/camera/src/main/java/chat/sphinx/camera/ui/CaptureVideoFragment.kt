@@ -70,7 +70,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @AndroidEntryPoint
-internal class CameraFragment: SideEffectFragment<
+internal class CaptureVideoFragment: SideEffectFragment<
         FragmentActivity,
         CameraSideEffect,
         CameraViewState,
@@ -323,9 +323,9 @@ internal class CameraFragment: SideEffectFragment<
             }
         }
 
-        binding.includeCameraFooter.textViewCameraFooterCancel.text = "Take Video"
+        binding.includeCameraFooter.textViewCameraFooterCancel.text = "Take Picture"
         binding.includeCameraFooter.textViewCameraFooterCancel.setOnClickListener {
-            viewModel.goToCaptureVideoFragment()
+            viewModel.goToCapturePictureFragment()
         }
     }
 

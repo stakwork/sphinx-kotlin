@@ -11,6 +11,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera.coordinator.CameraViewModelCoordinator
 import chat.sphinx.camera.model.CameraItem
 import chat.sphinx.camera.model.LensFacing
+import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
@@ -32,7 +33,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 
 internal suspend inline fun CameraViewModel.collectImagePreviewViewState(
     crossinline action: suspend (value: CapturePreviewViewState) -> Unit
@@ -51,6 +51,7 @@ internal class CameraViewModel @Inject constructor(
     private val app: Application,
     private val applicationScope: CoroutineScope,
     dispatchers: CoroutineDispatchers,
+    private val cameraNavigator: CameraNavigator,
     private val cameraCoordinator: CameraViewModelCoordinator,
     private val mediaCacheHandler: MediaCacheHandler,
     private val LOG: SphinxLogger,
@@ -221,6 +222,20 @@ internal class CameraViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun goToCaptureVideoFragment() {
+        viewModelScope.launch(mainImmediate) {
+            cameraNavigator.toCaptureVideoDetailScreen()
+        }
+    }
+
+    fun goToCapturePictureFragment() {
+        viewModelScope.launch(mainImmediate) {
+            cameraNavigator.toCameraDetailScreen(
+                replacingVideoFragment = true
+            )
         }
     }
 }

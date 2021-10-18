@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/camera_footer_height"
     android:background="@color/bodyTransparent">
@@ -16,17 +17,18 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_camera_footer_cancel"
+        android:id="@+id/text_view_camera_footer_switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_double_layout_margin"
-        android:text="@string/camera_cancel"
         android:textColor="@color/text"
         android:textSize="17sp"
         android:fontFamily="@font/roboto_regular"
         app:layout_constraintBottom_toBottomOf="@+id/image_view_camera_footer_shutter"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/image_view_camera_footer_shutter" />
+        app:layout_constraintTop_toTopOf="@+id/image_view_camera_footer_shutter"
+        tools:text="Take Video"
+        />
 
     <!-- TODO: import drawable resource -->
     <androidx.appcompat.widget.AppCompatImageView

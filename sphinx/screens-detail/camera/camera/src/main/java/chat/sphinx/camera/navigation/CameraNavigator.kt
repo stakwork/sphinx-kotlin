@@ -10,8 +10,19 @@ abstract class CameraNavigator(
 ): Navigator<NavController>(navigationDriver) {
 
     @JvmSynthetic
-    internal suspend fun toCameraDetailScreen() {
-        navigationDriver.submitNavigationRequest(ToCameraDetail())
+    internal suspend fun toCameraDetailScreen(
+        replacingVideoFragment: Boolean = false
+    ) {
+        navigationDriver.submitNavigationRequest(
+            ToCameraDetail(
+                replacingVideoFragment = replacingVideoFragment
+            )
+        )
+    }
+
+    @JvmSynthetic
+    internal suspend fun toCaptureVideoDetailScreen() {
+        navigationDriver.submitNavigationRequest(ToCaptureVideoDetail())
     }
 
     @JvmSynthetic

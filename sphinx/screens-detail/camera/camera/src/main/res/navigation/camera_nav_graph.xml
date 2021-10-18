@@ -11,4 +11,9 @@
         tools:layout="@layout/fragment_camera" >
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_capture_video_fragment"
+        android:name="chat.sphinx.camera.ui.CaptureVideoFragment"
+        tools:layout="@layout/fragment_camera" >
+    </fragment>
 </navigation>
