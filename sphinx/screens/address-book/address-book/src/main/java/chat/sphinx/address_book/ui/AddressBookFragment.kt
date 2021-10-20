@@ -1,11 +1,14 @@
 package chat.sphinx.address_book.ui
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -22,8 +25,10 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.resources.inputMethodManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,28 +55,24 @@ internal class AddressBookFragment: BaseFragment<
     private val headerNavBack: TextView
         get() = binding.layoutAddressBookHeader.textViewAddressBookHeaderNavBack
 
-    @Inject
-    @Suppress("ProtectedInFinal")
-    protected lateinit var addressBookNavigator: AddressBookNavigator
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         headerNavBack.setOnClickListener {
             lifecycleScope.launch {
-                addressBookNavigator.popBackStack()
+                viewModel.addressBookNavigator.popBackStack()
             }
         }
 
         binding.layoutAddressBookButtonAddFriend.layoutConstraintAddressBookButtonAddFriend.setOnClickListener {
             lifecycleScope.launch {
-                addressBookNavigator.toAddFriendDetail()
+                viewModel.addressBookNavigator.toAddFriendDetail()
             }
         }
 
         setupAddressBookHeader()
-
         setupContacts()
+        setupSearch()
     }
 
     private fun setupAddressBookHeader() {
@@ -99,6 +100,45 @@ internal class AddressBookFragment: BaseFragment<
             })
 
             itemTouchHelper.attachToRecyclerView(binding.recyclerViewContacts)
+        }
+    }
+
+    private fun setupSearch() {
+        binding.layoutAddressBookSearchBar.apply {
+            editTextAddressBookSearch.addTextChangedListener { editable ->
+                buttonAddressBookSearchClear.goneIfFalse(editable.toString().isNotEmpty())
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.updateAddressBookListFilter(
+                        if (editable.toString().isNotEmpty()) {
+                            AddressBookFilter.FilterBy(editable.toString())
+                        } else {
+                            AddressBookFilter.ClearFilter
+                        }
+                    )
+                }
+            }
+
+            editTextAddressBookSearch.setOnEditorActionListener(object: TextView.OnEditorActionListener {
+                override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                    if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                        editTextAddressBookSearch.let { editText ->
+                            binding.root.context.inputMethodManager?.let { imm ->
+                                if (imm.isActive(editText)) {
+                                    imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                                    editText.clearFocus()
+                                }
+                            }
+                        }
+                        return true
+                    }
+                    return false
+                }
+            })
+
+            buttonAddressBookSearchClear.setOnClickListener {
+                editTextAddressBookSearch.setText("")
+            }
         }
     }
 

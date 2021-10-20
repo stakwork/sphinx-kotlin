@@ -188,6 +188,8 @@ internal class DashboardFragment : MotionLayoutFragment<
     private fun setupSearch() {
         binding.layoutDashboardSearchBar.apply {
             editTextDashboardSearch.addTextChangedListener { editable ->
+                buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
+
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     viewModel.updateChatListFilter(
                         if (editable.toString().isNotEmpty()) {
