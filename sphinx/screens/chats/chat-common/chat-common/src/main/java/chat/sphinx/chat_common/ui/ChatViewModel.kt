@@ -1028,6 +1028,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         is CameraResponse.Image -> {
                             MediaType.Image("${MediaType.IMAGE}/$ext")
                         }
+                        is CameraResponse.Video -> {
+                            MediaType.Image("${MediaType.VIDEO}/$ext")
+                        }
                     }
 
                     updateViewState(ChatMenuViewState.Closed)
@@ -1163,6 +1166,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     val mediaType: MediaType = when (response.value) {
                         is CameraResponse.Image -> {
                             MediaType.Image("${MediaType.IMAGE}/$ext")
+                        }
+                        is CameraResponse.Video -> {
+                            MediaType.Image("${MediaType.VIDEO}/$ext")
                         }
                     }
 

@@ -9,10 +9,11 @@ sealed class CapturePreviewViewState: ViewState<CapturePreviewViewState>() {
 
     sealed class Preview: CapturePreviewViewState() {
 
-        abstract val value: File
+        abstract val media: File
 
-        data class ImagePreview(override val value: File): Preview()
-        // data class VideoPreview(val value: File): Preview()
+        data class ImagePreview(override val media: File): Preview()
+
+        data class VideoPreview(override val media: File): Preview()
     }
 
 }

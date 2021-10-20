@@ -89,11 +89,12 @@ internal class CameraViewModel @Inject constructor(
                                     requestHolder,
                                     when (viewState) {
                                         is CapturePreviewViewState.Preview.ImagePreview -> {
-                                            CameraResponse.Image(viewState.value)
+                                            CameraResponse.Image(viewState.media)
                                         }
-//                                        is CapturePreviewViewState.Preview.VideoPreview -> {
-//                                            CameraResponse.Video(viewState.value)
-//                                        }
+                                        is CapturePreviewViewState.Preview.VideoPreview -> {
+                                            // TODO: Set video response
+                                            CameraResponse.Video(File(viewState.media.path))
+                                        }
                                     }
                                 )
                             ),
@@ -213,11 +214,20 @@ internal class CameraViewModel @Inject constructor(
             @Exhaustive
             when (val vs = currentCapturePreviewViewState) {
                 is CapturePreviewViewState.None -> {}
-                is CapturePreviewViewState.Preview -> {
+                is CapturePreviewViewState.Preview.ImagePreview -> {
                     // user hit back button, so no file was returned
                     applicationScope.launch(io) {
                         try {
-                            vs.value.delete()
+                            vs.media.delete()
+                        } catch (e: Exception) {}
+                    }
+                }
+                is CapturePreviewViewState.Preview.VideoPreview -> {
+                    // user hit back button, so no file was returned
+                    applicationScope.launch(io) {
+                        try {
+                            // TODO: Delete media
+//                            vs.media.delete()
                         } catch (e: Exception) {}
                     }
                 }

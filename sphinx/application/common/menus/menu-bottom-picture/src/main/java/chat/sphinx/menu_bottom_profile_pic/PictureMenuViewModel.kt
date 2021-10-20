@@ -16,11 +16,9 @@ import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.toMediaType
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileInputStream
 import java.io.InputStream
 
 interface PictureMenuViewModel {
@@ -84,7 +82,24 @@ class PictureMenuHandler(
                                 response.value.value,
                             )
                         }
-//                        is CameraResponse.Video -> {}
+                        is CameraResponse.Video -> {
+                            val ext = response.value.value.extension
+                            val mediaType = MediaType.Image(MediaType.VIDEO + "/$ext")
+
+                            viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+
+                            callback.invoke(
+                                object : InputStreamProvider() {
+                                    override fun newInputStream(): InputStream {
+                                        return response.value.value.inputStream()
+                                    }
+                                },
+                                mediaType,
+                                response.value.value.name,
+                                response.value.value.length(),
+                                response.value.value,
+                            )
+                        }
                     }
 
                 }

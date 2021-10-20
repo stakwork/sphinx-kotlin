@@ -7,5 +7,5 @@ sealed class CameraResponse {
     abstract val value: File
 
     data class Image(override val value: File): CameraResponse()
-//    data class Video(override val value: File): CameraResponse()
+    data class Video(override val value: File): CameraResponse()
 }

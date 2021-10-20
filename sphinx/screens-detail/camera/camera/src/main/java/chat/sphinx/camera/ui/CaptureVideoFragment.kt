@@ -4,13 +4,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.graphics.ImageFormat
 import android.hardware.camera2.*
-import android.media.ExifInterface
-import android.media.Image
 import android.media.ImageReader
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
@@ -18,8 +14,9 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.video.*
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toDrawable
+import androidx.core.util.Consumer
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -40,7 +37,6 @@ import chat.sphinx.resources.toPx
 import chat.sphinx.wrapper_view.Dp
 import chat.sphinx.wrapper_view.Px
 import com.example.android.camera.utils.OrientationLiveData
-import com.example.android.camera.utils.computeExifOrientation
 import com.example.android.camera.utils.getPreviewOutputSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
@@ -57,13 +53,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import java.io.Closeable
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.util.*
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -94,6 +85,28 @@ internal class CaptureVideoFragment: SideEffectFragment<
 
     override val binding: FragmentCameraBinding by viewBinding(FragmentCameraBinding::bind)
     override val viewModel: CameraViewModel by viewModels()
+
+    private lateinit var videoCapture: VideoCapture<Recorder>
+    private var activeRecording: ActiveRecording? = null
+    private lateinit var recordingState: VideoRecordEvent
+
+    private val mainThreadExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
+
+    private val captureListener = Consumer<VideoRecordEvent> { event ->
+        // cache the recording state
+        if (event !is VideoRecordEvent.Status)
+            recordingState = event
+
+//        updateUI(event)
+
+        if (event is VideoRecordEvent.Finalize) {
+            event.outputResults.outputUri.path?.let {
+                viewModel.updateImagePreviewViewState(
+                    CapturePreviewViewState.Preview.VideoPreview(File(it))
+                )
+            }
+        }
+    }
 
     @Inject
     @Suppress("ProtectedInFinal")
@@ -167,7 +180,6 @@ internal class CaptureVideoFragment: SideEffectFragment<
     }
 
     private val cameraThreadHolder = ThreadHolder()
-    private val imageReaderThreadHolder = ThreadHolder()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -305,8 +317,12 @@ internal class CaptureVideoFragment: SideEffectFragment<
                 @Exhaustive
                 when (val vs = viewModel.currentCapturePreviewViewState) {
                     is CapturePreviewViewState.None -> {}
-                    is CapturePreviewViewState.Preview -> {
-                        viewModel.deleteImage(vs.value)
+                    is CapturePreviewViewState.Preview.ImagePreview -> {
+                        viewModel.deleteImage(vs.media)
+                        viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                    }
+                    is CapturePreviewViewState.Preview.VideoPreview -> {
+                        viewModel.deleteImage(vs.media)
                         viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
                     }
                 }
@@ -323,8 +339,8 @@ internal class CaptureVideoFragment: SideEffectFragment<
             }
         }
 
-        binding.includeCameraFooter.textViewCameraFooterCancel.text = "Take Picture"
-        binding.includeCameraFooter.textViewCameraFooterCancel.setOnClickListener {
+        binding.includeCameraFooter.textViewCameraFooterSwitch.text = "Take Picture"
+        binding.includeCameraFooter.textViewCameraFooterSwitch.setOnClickListener {
             viewModel.goToCapturePictureFragment()
         }
     }
@@ -382,27 +398,27 @@ internal class CaptureVideoFragment: SideEffectFragment<
                 view.isEnabled = false
 
                 lifecycleScope.launch(viewModel.io) {
-                    takePhoto(
-                        cameraItem,
-                        imageReader,
-                        session,
-                    ).use { result ->
+                    if (activeRecording == null || recordingState is VideoRecordEvent.Finalize) {
+//                    fragmentCameraBinding.captureButton.setImageResource(androidx.camera.video.R.drawable.ic_pause)
+//                    fragmentCameraBinding.stopButton.visibility = View.VISIBLE
+//                    enableUI(false)
+                        startRecording()
+                    } else {
+                        when (recordingState) {
+                            is VideoRecordEvent.Start -> {
+                                activeRecording?.pause()
+//                            fragmentCameraBinding.stopButton.visibility = View.VISIBLE
+                            }
+                            is VideoRecordEvent.Pause -> {
+                                activeRecording?.resume()
+                            }
+                            is VideoRecordEvent.Resume -> {
+                                activeRecording?.pause()
+                            }
+                            else -> {
 
-                        val output = saveResult(cameraItem, result)
-
-                        // If the result is a JPEG file, update EXIF metadata with orientation info
-                        if (output.extension == "jpg") {
-                            val exif = ExifInterface(output.absolutePath)
-                            exif.setAttribute(
-                                ExifInterface.TAG_ORIENTATION,
-                                result.orientation.toString()
-                            )
-                            exif.saveAttributes()
+                            }
                         }
-
-                        viewModel.updateImagePreviewViewState(
-                            CapturePreviewViewState.Preview.ImagePreview(output)
-                        )
                     }
 
                     delay(200L)
@@ -413,6 +429,33 @@ internal class CaptureVideoFragment: SideEffectFragment<
             // re-enable button to switch between back/front camera
             binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = true
         }
+    }
+
+    /**
+     * Kick start the video recording
+     *   - config Recorder to capture to MediaStoreOutput
+     *   - register RecordEvent Listener
+     *   - apply audio request from user
+     *   - start recording!
+     * After this function, user could start/pause/resume/stop recording and application listens
+     * to VideoRecordEvent for the current recording status.
+     */
+    @SuppressLint("MissingPermission")
+    private fun startRecording() {
+        // create MediaStoreOutputOptions for our recorder: resulting our recording!
+        val fileOutputOptions = FileOutputOptions.Builder(
+            viewModel.createFile("mp4", false)
+        ).build()
+
+        // configure Recorder and Start recording to the mediaStoreOutput.
+        activeRecording =
+            videoCapture.output.prepareRecording(requireActivity(), fileOutputOptions)
+                .withEventListener(
+                    mainThreadExecutor,
+                    captureListener
+                )
+                .withAudioEnabled()
+                .start()
     }
 
     @SuppressLint("MissingPermission")
@@ -470,170 +513,6 @@ internal class CaptureVideoFragment: SideEffectFragment<
                 cont.resumeWithException(exc)
             }
         }, handler)
-    }
-
-    private val animationTask: Runnable by lazy {
-        Runnable {
-            binding.viewCameraOverlay.apply{
-                background = Color.argb(150, 255, 255, 255).toDrawable()
-                postDelayed(
-                    {
-                        background = null
-                    },
-                    ANIMATION_FAST_MILLIS
-                )
-            }
-        }
-    }
-
-    private suspend fun takePhoto(
-        cameraListItem: CameraItem,
-        imageReader: ImageReader,
-        session: CameraCaptureSession
-    ): CombinedCaptureResult =
-        suspendCoroutine { cont ->
-
-            // Flush any images left in the image reader
-            @Suppress("ControlFlowWithEmptyBody")
-            while (imageReader.acquireNextImage() != null) {}
-
-            val imageQueue = ArrayBlockingQueue<Image>(IMAGE_BUFFER_SIZE)
-            imageReader.setOnImageAvailableListener(
-                { reader ->
-                    val image = reader.acquireNextImage()
-                    imageQueue.add(image)
-                },
-                cameraThreadHolder.getHandler()
-            )
-
-            val captureRequest = session
-                .device
-                .createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE).apply {
-                    addTarget(imageReader.surface)
-                }
-
-            session.capture(
-                captureRequest.build(),
-                object : CameraCaptureSession.CaptureCallback() {
-                    override fun onCaptureStarted(
-                        session: CameraCaptureSession,
-                        request: CaptureRequest,
-                        timestamp: Long,
-                        frameNumber: Long
-                    ) {
-                        super.onCaptureStarted(session, request, timestamp, frameNumber)
-                        binding.autoFitSurfaceViewCamera.post(animationTask)
-                    }
-
-                    override fun onCaptureCompleted(
-                        session: CameraCaptureSession,
-                        request: CaptureRequest,
-                        result: TotalCaptureResult
-                    ) {
-                        super.onCaptureCompleted(session, request, result)
-                        val resultTimestamp = result.get(CaptureResult.SENSOR_TIMESTAMP)
-
-                        // Set a timeout in case image captured is dropped from the pipeline
-                        val exc = TimeoutException("Image dequeuing took too long")
-                        val timeoutRunnable = Runnable { cont.resumeWithException(exc) }
-
-                        imageReaderThreadHolder.getHandler().postDelayed(timeoutRunnable, IMAGE_CAPTURE_TIMEOUT_MILLIS)
-
-                        // Loop in the coroutine's context until an image with matching timestamp comes
-                        // We need to launch the coroutine context again because the callback is done in
-                        //  the handler provided to the `capture` method, not in our coroutine context
-                        @Suppress("BlockingMethodInNonBlockingContext")
-                        lifecycleScope.launch(cont.context) {
-                            while (true) {
-                                // Dequeue images while timestamps don't match
-                                val image = imageQueue.take()
-
-                                if (
-                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                                    image.format != ImageFormat.DEPTH_JPEG &&
-                                    image.timestamp != resultTimestamp
-                                ) {
-                                    continue
-                                }
-
-                                // Unset the image reader listener
-                                imageReaderThreadHolder.getHandler().removeCallbacks(timeoutRunnable)
-                                imageReader.setOnImageAvailableListener(null, null)
-
-                                // Clear the queue of images, if there are left
-                                while (imageQueue.size > 0) {
-                                    imageQueue.take().close()
-                                }
-
-                                // Compute EXIF orientation metadata
-                                val rotation = orientationLiveData?.value ?: Surface.ROTATION_0
-                                val mirrored = cameraListItem
-                                    .characteristics
-                                    .get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT
-                                val exifOrientation = computeExifOrientation(rotation, mirrored)
-
-                                // Build the result and resume progress
-                                cont.resume(
-                                    CombinedCaptureResult(
-                                        image,
-                                        result,
-                                        exifOrientation,
-                                        imageReader.imageFormat
-                                    )
-                                )
-                            }
-                        }
-                    }
-                },
-                cameraThreadHolder.getHandler()
-            )
-    }
-
-    @Suppress("BlockingMethodInNonBlockingContext")
-    private suspend fun saveResult(
-        cameraItem: CameraItem,
-        result: CombinedCaptureResult,
-    ): File = suspendCoroutine { cont ->
-        when (result.format) {
-
-            ImageFormat.JPEG,
-            ImageFormat.DEPTH_JPEG -> {
-                val buffer = result.image.planes[0].buffer
-                val bytes = ByteArray(buffer.remaining()).apply { buffer.get(this) }
-
-                try {
-                    val output = viewModel.createFile("jpg", image = true)
-                    FileOutputStream(output).use { it.write(bytes) }
-                    cont.resume(output)
-                } catch (e: IOException) {
-                    cont.resumeWithException(e)
-                }
-            }
-
-            ImageFormat.RAW_SENSOR -> {
-                val dngCreator = DngCreator(cameraItem.characteristics, result.metadata)
-
-                try {
-                    val output = viewModel.createFile("dng", image = true)
-                    FileOutputStream(output).use { dngCreator.writeImage(it, result.image) }
-                } catch (e: IOException) {
-                    cont.resumeWithException(e)
-                }
-            }
-
-            else -> {
-                cont.resumeWithException(RuntimeException("Unknown image format: ${result.image.format}"))
-            }
-        }
-    }
-
-    data class CombinedCaptureResult(
-        val image: Image,
-        val metadata: CaptureResult,
-        val orientation: Int,
-        val format: Int
-    ) : Closeable {
-        override fun close() = image.close()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CameraSideEffect) {
@@ -704,10 +583,19 @@ internal class CaptureVideoFragment: SideEffectFragment<
                 binding.includeCameraImagePreview.apply {
                     @Exhaustive
                     when (viewState) {
-                        is CapturePreviewViewState.Preview.ImagePreview -> {
-                            if (viewState.value.exists()) {
+                        is CapturePreviewViewState.Preview.VideoPreview -> {
+                            if (viewState.media.exists()) {
                                 root.visible
-                                imageLoader.load(imageViewCameraImagePreview, viewState.value)
+                                // TODO: Load Video thumbnail+playback
+//                                imageLoader.load(imageViewCameraImagePreview, viewState.media)
+                            } else {
+                                viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                            }
+                        }
+                        is CapturePreviewViewState.Preview.ImagePreview -> {
+                            if (viewState.media.exists()) {
+                                root.visible
+                                imageLoader.load(imageViewCameraImagePreview, viewState.media)
                             } else {
                                 viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
                             }

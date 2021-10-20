@@ -306,7 +306,7 @@ internal class CameraFragment: SideEffectFragment<
                 when (val vs = viewModel.currentCapturePreviewViewState) {
                     is CapturePreviewViewState.None -> {}
                     is CapturePreviewViewState.Preview -> {
-                        viewModel.deleteImage(vs.value)
+                        viewModel.deleteImage(vs.media)
                         viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
                     }
                 }
@@ -323,8 +323,8 @@ internal class CameraFragment: SideEffectFragment<
             }
         }
 
-        binding.includeCameraFooter.textViewCameraFooterCancel.text = "Take Video"
-        binding.includeCameraFooter.textViewCameraFooterCancel.setOnClickListener {
+        binding.includeCameraFooter.textViewCameraFooterSwitch.text = "Take Video"
+        binding.includeCameraFooter.textViewCameraFooterSwitch.setOnClickListener {
             viewModel.goToCaptureVideoFragment()
         }
     }
@@ -705,9 +705,18 @@ internal class CameraFragment: SideEffectFragment<
                     @Exhaustive
                     when (viewState) {
                         is CapturePreviewViewState.Preview.ImagePreview -> {
-                            if (viewState.value.exists()) {
+                            if (viewState.media.exists()) {
                                 root.visible
-                                imageLoader.load(imageViewCameraImagePreview, viewState.value)
+                                imageLoader.load(imageViewCameraImagePreview, viewState.media)
+                            } else {
+                                viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                            }
+                        }
+                        is CapturePreviewViewState.Preview.VideoPreview -> {
+                            if (viewState.media.exists()) {
+                                root.visible
+                                // TODO: Load video thumbnail+video playback?
+//                                imageLoader.load(imageViewCameraImagePreview, viewState.media)//
                             } else {
                                 viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
                             }
