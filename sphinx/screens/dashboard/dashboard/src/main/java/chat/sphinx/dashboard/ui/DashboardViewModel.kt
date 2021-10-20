@@ -529,6 +529,7 @@ internal class DashboardViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             delay(25L)
+
             repositoryDashboard.getAllChats.distinctUntilChanged().collect { chats ->
                 collectionLock.withLock {
                     chatsCollectionInitialized = true
@@ -598,7 +599,6 @@ internal class DashboardViewModel @Inject constructor(
                             }
                         }
                     }
-
                     chatViewStateContainer.updateDashboardChats(newList)
                 }
             }
@@ -703,11 +703,11 @@ internal class DashboardViewModel @Inject constructor(
             }
 
             withContext(default) {
-                val currentChats = currentChatViewState.list.toMutableList()
+                val currentChats = currentChatViewState.originalList.toMutableList()
                 val chatContactIds = mutableListOf<ContactId>()
 
                 var updateChatViewState = false
-                for (chat in currentChatViewState.list) {
+                for (chat in currentChatViewState.originalList) {
 
                     val contact: Contact? = when (chat) {
                         is DashboardChat.Active.Conversation -> {
@@ -768,7 +768,7 @@ internal class DashboardViewModel @Inject constructor(
 
                         var updatedContactChat: DashboardChat = DashboardChat.Inactive.Conversation(contact)
 
-                        for (chat in currentChatViewState.list) {
+                        for (chat in currentChatViewState.originalList) {
                             if (chat is DashboardChat.Active.Conversation) {
                                 if (chat.contact.id == contact.id) {
                                     updatedContactChat = DashboardChat.Active.Conversation(
