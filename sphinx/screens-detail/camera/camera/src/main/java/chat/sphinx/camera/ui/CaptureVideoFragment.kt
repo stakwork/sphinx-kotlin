@@ -9,13 +9,14 @@ import android.os.Bundle
 import android.view.*
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.AspectRatio
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.Preview
+import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
+import androidx.camera.video.VideoCapture
 import androidx.concurrent.futures.await
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -25,6 +26,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera.R
 import chat.sphinx.camera.databinding.FragmentCaptureVideoBinding
 import chat.sphinx.camera.model.CameraItem
+import chat.sphinx.camera.model.LensFacing
 import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -40,6 +42,8 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.*
 import java.io.File
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -63,11 +67,13 @@ internal class CaptureVideoFragment: SideEffectFragment<
 
     override val viewModel: CameraViewModel by viewModels()
 
+    private lateinit var imageCapture: ImageCapture
     private lateinit var videoCapture: VideoCapture<Recorder>
     private var activeRecording: ActiveRecording? = null
     private lateinit var recordingState: VideoRecordEvent
 
     private val mainThreadExecutor by lazy { ContextCompat.getMainExecutor(requireContext()) }
+    private lateinit var cameraExecutor: ExecutorService
 
     private val captureListener = Consumer<VideoRecordEvent> { event ->
         // cache the recording state
@@ -140,9 +146,11 @@ internal class CaptureVideoFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        cameraExecutor = Executors.newSingleThreadExecutor()
+
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.includeCameraFooter.root)
-            .addNavigationBarPadding(binding.includeCameraImagePreview.layoutConstraintCameraImagePreviewFooter)
+            .addNavigationBarPadding(binding.includeCameraMediaPreview.layoutConstraintCameraImagePreviewFooter)
 
         if (!hasPermissions(requireContext())) {
             requestPermissionLauncher.launch(PERMISSIONS_REQUIRED)
@@ -172,7 +180,7 @@ internal class CaptureVideoFragment: SideEffectFragment<
             }
         }
 
-        binding.includeCameraImagePreview.apply {
+        binding.includeCameraMediaPreview.apply {
             imageViewCameraImagePreview.setOnClickListener {
                 viewModel
             }
@@ -267,9 +275,16 @@ internal class CaptureVideoFragment: SideEffectFragment<
                     setSurfaceProvider(binding.previewViewCamera.surfaceProvider)
                 }
 
-            // build a recorder, which can:
-            //   - record video/audio to MediaStore(only use here), File, ParcelFileDescriptor
-            //   - be used create recording(s) (the recording performs recording)
+            imageCapture = ImageCapture.Builder()
+                .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                // We request aspect ratio but no resolution to match preview config, but letting
+                // CameraX optimize for whatever specific resolution best fits our use cases
+                .setTargetAspectRatio(screenAspectRatio())
+                // Set initial target rotation, we will have to call this again if rotation changes
+                // during the lifecycle of this use case
+                .setTargetRotation(binding.previewViewCamera.display.rotation)
+                .build()
+
             val recorder = Recorder.Builder().build()
             videoCapture = VideoCapture.withOutput(recorder)
 
@@ -279,13 +294,54 @@ internal class CaptureVideoFragment: SideEffectFragment<
                     requireParentFragment(),
                     cameraSelector,
                     videoCapture,
+                    imageCapture,
                     preview
                 )
             } catch (exc: Exception) {
                 resetUIandState()
             }
 
-            binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener { view ->
+            binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener {
+                lifecycleScope.launch(viewModel.io) {
+                    val photoFile = viewModel.createFile("jpg", true)
+
+                    // Setup image capture metadata
+                    val metadata = ImageCapture.Metadata().apply {
+                        // Mirror image when using the front camera
+                        isReversedHorizontal = cameraItem.lensFacing == LensFacing.Front
+                    }
+
+                    // Create output options object which contains file + metadata
+                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile)
+                        .setMetadata(metadata)
+                        .build()
+
+                    // Setup image capture listener which is triggered after photo has been taken
+                    imageCapture.takePicture(
+                        outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
+                            override fun onError(exc: ImageCaptureException) {
+                                // TODO: Give user feedback on failure
+                                lifecycleScope.launch(viewModel.io) {
+                                    delay(200L)
+                                }
+
+                            }
+
+                            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                lifecycleScope.launch(viewModel.io) {
+                                    viewModel.updateMediaPreviewViewState(
+                                        CapturePreviewViewState.Preview.ImagePreview(
+                                            output.savedUri?.toFile() ?: photoFile
+                                        )
+                                    )
+                                    delay(200L)
+                                }
+                            }
+                        })
+                }
+
+            }
+            binding.includeCameraFooter.imageViewCameraFooterShutter.setOnLongClickListener { view ->
                 view.gone
 
                 lifecycleScope.launch(viewModel.io) {
@@ -296,6 +352,8 @@ internal class CaptureVideoFragment: SideEffectFragment<
                         startRecording()
                     }
                 }
+
+                return@setOnLongClickListener true
             }
 
             binding.includeCameraFooter.imageViewCameraStop.setOnClickListener { view ->
@@ -311,6 +369,16 @@ internal class CaptureVideoFragment: SideEffectFragment<
             // re-enable button to switch between back/front camera
             binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = true
         }
+    }
+
+    private fun screenAspectRatio(): Int {
+        // TODO: Get window width and height
+//        width: Int, height: Int
+//        val previewRatio = max(width, height).toDouble() / min(width, height)
+//        if (abs(previewRatio - RATIO_4_3_VALUE) <= abs(previewRatio - RATIO_16_9_VALUE)) {
+//            return AspectRatio.RATIO_4_3
+//        }
+        return AspectRatio.RATIO_16_9
     }
 
     /**
@@ -400,22 +468,33 @@ internal class CaptureVideoFragment: SideEffectFragment<
         }
         onStopSupervisor.scope.launch(viewModel.io) {
             viewModel.collectImagePreviewViewState { viewState ->
-                binding.includeCameraImagePreview.apply {
+                binding.includeCameraMediaPreview.apply {
                     @Exhaustive
                     when (viewState) {
                         is CapturePreviewViewState.Preview.VideoPreview -> {
                             if (viewState.media.exists()) {
                                 root.visible
-                                // TODO: Load Video thumbnail+playback
-//                                imageLoader.load(imageViewCameraImagePreview, viewState.media)
+                                videoViewCameraVideoPreview.visible
+
+                                val uri = viewState.media.toUri()
+                                videoViewCameraVideoPreview.setVideoURI(uri)
+                                videoViewCameraVideoPreview.setOnPreparedListener { mediaPlayer ->
+                                    mediaPlayer.start()
+                                }
+                                videoViewCameraVideoPreview.setOnErrorListener { _, _, _ ->
+                                    return@setOnErrorListener true
+                                }
                             } else {
                                 viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                             }
                         }
                         is CapturePreviewViewState.Preview.ImagePreview -> {
                             if (viewState.media.exists()) {
-                                root.visible
-                                imageLoader.load(imageViewCameraImagePreview, viewState.media)
+                                lifecycleScope.launch(viewModel.mainImmediate) {
+                                    root.visible
+                                    imageViewCameraImagePreview.visible
+                                    imageLoader.load(imageViewCameraImagePreview, viewState.media)
+                                }
                             } else {
                                 viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                             }
@@ -428,5 +507,20 @@ internal class CaptureVideoFragment: SideEffectFragment<
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        // Shut down our background executor
+        cameraExecutor.shutdown()
+
+        // Unregister the broadcast receivers and listeners
+//        displayManager.unregisterDisplayListener(displayListener)
+    }
+
+    companion object {
+        private const val RATIO_4_3_VALUE = 4.0 / 3.0
+        private const val RATIO_16_9_VALUE = 16.0 / 9.0
     }
 }

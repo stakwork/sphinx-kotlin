@@ -38,7 +38,7 @@
 
     <include
         android:id="@+id/include_camera_image_preview"
-        layout="@layout/layout_camera_image_preview"
+        layout="@layout/layout_camera_media_preview"
         tools:visibility="gone" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

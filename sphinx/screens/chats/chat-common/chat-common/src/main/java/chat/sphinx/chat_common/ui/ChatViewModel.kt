@@ -1022,6 +1022,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 is Response.Error -> {}
                 is Response.Success -> {
 
+                    Log.d("Kgothatso", "Response: ${response.value}")
                     val ext = response.value.value.extension
 
                     val mediaType: MediaType = when (response.value) {
