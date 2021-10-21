@@ -1129,6 +1129,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             AttachmentSendViewState.Preview(null, MediaType.Text, null)
         )
         updateViewState(ChatMenuViewState.Closed)
+        updateFooterViewState(FooterViewState.Attachment)
     }
 
     @JvmSynthetic
@@ -1234,7 +1235,26 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             // TODO: Implement
                         }
                         is MediaType.Video -> {
-                            // TODO: Implement
+                            // TODO: Reduce code duplication
+                            viewModelScope.launch(mainImmediate) {
+                                val newFile: File = mediaCacheHandler.createVideoFile(ext)
+
+                                try {
+                                    mediaCacheHandler.copyTo(stream, newFile)
+                                    updateViewState(ChatMenuViewState.Closed)
+                                    updateFooterViewState(FooterViewState.Attachment)
+                                    attachmentSendStateContainer.updateViewState(
+                                        AttachmentSendViewState.Preview(newFile, mType, null)
+                                    )
+                                } catch (e: Exception) {
+                                    newFile.delete()
+                                    LOG.e(
+                                        TAG,
+                                        "Failed to copy content to new file: ${newFile.path}",
+                                        e
+                                    )
+                                }
+                            }
                         }
 
                         is MediaType.Text,
@@ -1336,9 +1356,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         navigateToChatDetailScreen()
     }
 
-    fun goToFullscreenVideo(messageId: MessageId) {
+    fun goToFullscreenVideo(
+        messageId: MessageId,
+        videoFilepath: String? = null
+    ) {
         viewModelScope.launch(mainImmediate) {
-            chatNavigator.toFullscreenVideo(messageId)
+            chatNavigator.toFullscreenVideo(
+                messageId,
+                videoFilepath
+            )
         }
     }
 

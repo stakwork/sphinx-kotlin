@@ -2,8 +2,6 @@ package chat.sphinx.chat_common.ui.activity
 
 import android.app.Application
 import android.content.Context
-import android.widget.VideoView
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.util.VideoPlayerController
@@ -17,10 +15,8 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -39,6 +35,9 @@ internal class FullscreenVideoViewModel @Inject constructor(
 
     private val args: FullscreenVideoActivityArgs by handle.navArgs()
     private val messageId = MessageId(args.argMessageId)
+    private val videoFile = args.argVideoFilepath?.let {
+        File(it)
+    }
 
     internal val videoPlayerController: VideoPlayerController by lazy {
         VideoPlayerController(
@@ -136,11 +135,11 @@ internal class FullscreenVideoViewModel @Inject constructor(
     }
 
     private suspend fun getVideoFile(): File? {
-        return getMessage()?.messageMedia?.localFile
+        return videoFile ?: getMessage()?.messageMedia?.localFile
     }
 
     private suspend fun getVideoTitle(): String? {
-        return getMessage()?.retrieveTextToShow()
+        return videoFile?.name ?: getMessage()?.retrieveTextToShow()
     }
 
     fun initializeVideo() {
