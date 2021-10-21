@@ -8,10 +8,10 @@ import io.matthewnelson.android_feature_navigation.R as nav_R
 
 internal class ToCaptureVideoDetail: NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
-        try {
-            controller.getBackStackEntry(R.id.navigation_capture_video_fragment)
-            return
-        } catch (e: IllegalArgumentException) {}
+//        try {
+//            controller.getBackStackEntry(R.id.navigation_capture_video_fragment)
+//            return
+//        } catch (e: IllegalArgumentException) {}
 
         controller.navigate(
             R.id.navigation_capture_video_fragment,

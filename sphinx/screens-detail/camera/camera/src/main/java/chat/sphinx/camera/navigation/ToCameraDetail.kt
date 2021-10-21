@@ -10,10 +10,10 @@ internal class ToCameraDetail(
     private val replacingVideoFragment: Boolean = false
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
-        try {
-            controller.getBackStackEntry(R.id.navigation_camera_fragment)
-            return
-        } catch (e: IllegalArgumentException) {}
+//        try {
+//            controller.getBackStackEntry(R.id.navigation_camera_fragment)
+//            return
+//        } catch (e: IllegalArgumentException) {}
 
         val navOptions = DetailNavOptions.default
             .setEnterAnim(nav_R.anim.slide_in_left)

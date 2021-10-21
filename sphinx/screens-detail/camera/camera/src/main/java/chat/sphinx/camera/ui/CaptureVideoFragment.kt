@@ -4,40 +4,33 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.ImageFormat
 import android.hardware.camera2.*
-import android.media.ImageReader
 import android.os.Bundle
-import android.os.Handler
-import android.os.HandlerThread
-import android.util.TypedValue
 import android.view.*
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.AspectRatio
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
+import androidx.concurrent.futures.await
 import androidx.core.content.ContextCompat
 import androidx.core.util.Consumer
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
-import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.camera.R
-import chat.sphinx.camera.databinding.FragmentCameraBinding
+import chat.sphinx.camera.databinding.FragmentCaptureVideoBinding
 import chat.sphinx.camera.model.CameraItem
 import chat.sphinx.camera.ui.viewstate.CameraViewState
 import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.resources.toPx
-import chat.sphinx.wrapper_view.Dp
-import chat.sphinx.wrapper_view.Px
 import com.example.android.camera.utils.OrientationLiveData
-import com.example.android.camera.utils.getPreviewOutputSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -45,20 +38,9 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
-import java.util.*
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 @AndroidEntryPoint
 internal class CaptureVideoFragment: SideEffectFragment<
@@ -66,24 +48,19 @@ internal class CaptureVideoFragment: SideEffectFragment<
         CameraSideEffect,
         CameraViewState,
         CameraViewModel,
-        FragmentCameraBinding,
+        FragmentCaptureVideoBinding,
         >(R.layout.fragment_camera)
 {
-    companion object {
-        const val ANIMATION_FAST_MILLIS = 50L
-        const val ANIMATION_SLOW_MILLIS = 100L
-
-        const val IMAGE_BUFFER_SIZE = 3
-        const val IMAGE_CAPTURE_TIMEOUT_MILLIS: Long = 5_000
-    }
-
     @Suppress("PrivatePropertyName")
     private val PERMISSIONS_REQUIRED = arrayOf(
         Manifest.permission.CAMERA,
         Manifest.permission.RECORD_AUDIO,
     )
 
-    override val binding: FragmentCameraBinding by viewBinding(FragmentCameraBinding::bind)
+    private var _binding: FragmentCaptureVideoBinding? = null
+    override val binding: FragmentCaptureVideoBinding
+        get() = _binding!!
+
     override val viewModel: CameraViewModel by viewModels()
 
     private lateinit var videoCapture: VideoCapture<Recorder>
@@ -97,13 +74,17 @@ internal class CaptureVideoFragment: SideEffectFragment<
         if (event !is VideoRecordEvent.Status)
             recordingState = event
 
-//        updateUI(event)
+        updateUI(event)
 
         if (event is VideoRecordEvent.Finalize) {
             event.outputResults.outputUri.path?.let {
-                viewModel.updateImagePreviewViewState(
-                    CapturePreviewViewState.Preview.VideoPreview(File(it))
-                )
+                lifecycleScope.launch(viewModel.io) {
+                    val file = File(it)
+                    viewModel.updateMediaPreviewViewState(
+                        CapturePreviewViewState.Preview.VideoPreview(file)
+                    )
+                }
+
             }
         }
     }
@@ -139,48 +120,6 @@ internal class CaptureVideoFragment: SideEffectFragment<
         }
     }
 
-    private inner class ThreadHolder: DefaultLifecycleObserver {
-
-        @Volatile
-        private var thread: HandlerThread? = null
-        private val threadLock = Object()
-
-        @Volatile
-        private var handler: Handler? = null
-        private val handlerLock = Object()
-
-        fun getThread(): HandlerThread =
-            thread ?: synchronized(threadLock) {
-                thread ?: HandlerThread("CameraThread").apply { start() }
-                    .also {
-                        thread = it
-                        lifecycleScope.launch(viewModel.main) {
-                            viewLifecycleOwner.lifecycle.addObserver(this@ThreadHolder)
-                        }
-                    }
-            }
-
-        fun getHandler(): Handler =
-            handler ?: synchronized(handlerLock) {
-                handler ?: Handler(getThread().looper)
-                    .also { handler = it }
-            }
-
-        override fun onDestroy(owner: LifecycleOwner) {
-            super.onDestroy(owner)
-            synchronized(handlerLock) {
-                synchronized(threadLock) {
-                    val thread = thread
-                    handler = null
-                    this.thread = null
-                    thread?.quitSafely()
-                }
-            }
-        }
-    }
-
-    private val cameraThreadHolder = ThreadHolder()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel
@@ -188,74 +127,15 @@ internal class CaptureVideoFragment: SideEffectFragment<
 
     @Volatile
     private var orientationLiveData: OrientationLiveData? = null
-    private val surfaceHolderState: MutableStateFlow<SurfaceHolder?> by lazy {
-        MutableStateFlow(null)
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCaptureVideoBinding.inflate(inflater, container, false)
+        return binding.root
     }
-
-    private inner class SpaceWidthSetter: DefaultLifecycleObserver {
-        private var width: Px? = null
-        private val lock = Mutex()
-
-        // if width is null, it will set them after the view is setup
-        // otherwise it does nothing (b/c they're already set
-        suspend fun setCameraSpacessIfNeeded() {
-            width ?: lock.withLock {
-                width ?: setSpaces()
-                    .also { width = it }
-            }
-        }
-
-        override fun onDestroy(owner: LifecycleOwner) {
-            super.onDestroy(owner)
-            width = null
-        }
-
-        private suspend fun setSpaces(): Px {
-            try {
-                // wait for the screen to be created
-                surfaceHolderState.value ?: surfaceHolderState.collect { holder ->
-                    if (holder != null) {
-                        throw Exception()
-                    }
-                }
-            } catch (e: Exception) {}
-
-            return withContext(viewModel.main) {
-
-                viewLifecycleOwner.lifecycle.addObserver(this@SpaceWidthSetter)
-
-                val spaceDetailPct = TypedValue()
-
-                // get space resource percentage height for detail screen
-                binding.root.context.resources.getValue(
-                    R.dimen.space_detail_host_height,
-                    spaceDetailPct,
-                    true
-                )
-
-                val detailFragmentHeight = binding.root.measuredHeight.toFloat()
-                val detailFragmentWidth = binding.root.measuredWidth.toFloat()
-
-                // calculate the primary window's screen height
-                val primaryWindowHeight =
-                    (detailFragmentHeight / (1F - spaceDetailPct.float)) +
-                            (requireActivity() as InsetterActivity).statusBarInsetHeight.top
-
-                val spaceTop = primaryWindowHeight * spaceDetailPct.float
-
-                val viewWidth = (spaceTop / 2) + 1 + Dp(4F).toPx(binding.root.context).value
-
-                binding.autoFitSurfaceViewCamera.apply {
-                    layoutParams.width = (detailFragmentWidth + (viewWidth * 2)).toInt()
-                }
-
-                Px(primaryWindowHeight)
-            }
-        }
-    }
-
-    private val spaceWidthSetter = SpaceWidthSetter()
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -263,23 +143,6 @@ internal class CaptureVideoFragment: SideEffectFragment<
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.includeCameraFooter.root)
             .addNavigationBarPadding(binding.includeCameraImagePreview.layoutConstraintCameraImagePreviewFooter)
-
-        binding.autoFitSurfaceViewCamera.holder.addCallback(object : SurfaceHolder.Callback {
-            override fun surfaceDestroyed(holder: SurfaceHolder) {
-                surfaceHolderState.value = null
-            }
-
-            override fun surfaceChanged(
-                holder: SurfaceHolder,
-                format: Int,
-                width: Int,
-                height: Int
-            ) {}
-
-            override fun surfaceCreated(holder: SurfaceHolder) {
-                surfaceHolderState.value = holder
-            }
-        })
 
         if (!hasPermissions(requireContext())) {
             requestPermissionLauncher.launch(PERMISSIONS_REQUIRED)
@@ -319,11 +182,11 @@ internal class CaptureVideoFragment: SideEffectFragment<
                     is CapturePreviewViewState.None -> {}
                     is CapturePreviewViewState.Preview.ImagePreview -> {
                         viewModel.deleteImage(vs.media)
-                        viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                        viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                     }
                     is CapturePreviewViewState.Preview.VideoPreview -> {
                         viewModel.deleteImage(vs.media)
-                        viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                        viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                     }
                 }
             }
@@ -345,6 +208,37 @@ internal class CaptureVideoFragment: SideEffectFragment<
         }
     }
 
+    /**
+     * UpdateUI according to CameraX VideoRecordEvent type:
+     *   - user starts capture.
+     *   - this app disables all UI selections.
+     *   - this app enables capture run-time UI (pause/resume/stop).
+     *   - user controls recording with run-time UI, eventually tap "stop" to end.
+     *   - this app informs CameraX recording to stop with recording.stop() (or recording.close()).
+     *   - CameraX notify this app that the recording is indeed stopped, with the Finalize event.
+     *   - this app starts VideoViewer fragment to view the captured result.
+     */
+    private fun updateUI(event: VideoRecordEvent) {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            binding.apply {
+                when (event) {
+                    is VideoRecordEvent.Start -> {
+                        includeCameraFooter.imageViewCameraFooterShutter.gone
+                        includeCameraFooter.imageViewCameraStop.visible
+                    }
+                    is VideoRecordEvent.Finalize-> {
+                        includeCameraFooter.imageViewCameraStop.gone
+                        includeCameraFooter.imageViewCameraFooterShutter.visible
+                    }
+                    else -> {
+                        return@launch
+                    }
+                }
+            }
+
+        }
+    }
+
     override fun onStop() {
         super.onStop()
         try {
@@ -360,74 +254,76 @@ internal class CaptureVideoFragment: SideEffectFragment<
     @Volatile
     private var camera: CameraDevice? = null
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     private fun startCamera(cameraItem: CameraItem) {
-        lifecycleScope.launch(viewModel.main) {
-            val camera = openCamera(
-                viewModel.cameraManager,
-                cameraItem.cameraId,
-                cameraThreadHolder.getHandler(),
-            ).also {
-                camera = it
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            val cameraProvider = ProcessCameraProvider.getInstance(requireContext()).await()
+
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(cameraItem.lensFacing.toInt())
+                .build()
+
+            val preview = Preview.Builder().setTargetAspectRatio(AspectRatio.RATIO_16_9)
+                .build().apply {
+                    setSurfaceProvider(binding.previewViewCamera.surfaceProvider)
+                }
+
+            // build a recorder, which can:
+            //   - record video/audio to MediaStore(only use here), File, ParcelFileDescriptor
+            //   - be used create recording(s) (the recording performs recording)
+            val recorder = Recorder.Builder().build()
+            videoCapture = VideoCapture.withOutput(recorder)
+
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(
+                    requireParentFragment(),
+                    cameraSelector,
+                    videoCapture,
+                    preview
+                )
+            } catch (exc: Exception) {
+                resetUIandState()
             }
-
-            // TOOD: add Image Format to CameraListItem
-            val size = cameraItem.configMap.getOutputSizes(ImageFormat.JPEG)
-                .maxByOrNull { it.height * it.width }!!
-
-            val imageReader = ImageReader.newInstance(
-                size.width, size.height, ImageFormat.JPEG, IMAGE_BUFFER_SIZE
-            )
-
-            val targets = listOf(binding.autoFitSurfaceViewCamera.holder.surface, imageReader.surface)
-
-            val session = createCaptureSession(
-                camera,
-                targets,
-                cameraThreadHolder.getHandler()
-            )
-
-            val captureRequest = camera.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW).apply {
-                addTarget(binding.autoFitSurfaceViewCamera.holder.surface)
-            }
-
-            session.setRepeatingRequest(captureRequest.build(), null, cameraThreadHolder.getHandler())
 
             binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener { view ->
-
-                view.isEnabled = false
+                view.gone
 
                 lifecycleScope.launch(viewModel.io) {
                     if (activeRecording == null || recordingState is VideoRecordEvent.Finalize) {
-//                    fragmentCameraBinding.captureButton.setImageResource(androidx.camera.video.R.drawable.ic_pause)
-//                    fragmentCameraBinding.stopButton.visibility = View.VISIBLE
-//                    enableUI(false)
+                        binding.includeCameraFooter.imageViewCameraFooterShutter.gone
+                        binding.includeCameraFooter.imageViewCameraStop.visible
+
                         startRecording()
-                    } else {
-                        when (recordingState) {
-                            is VideoRecordEvent.Start -> {
-                                activeRecording?.pause()
-//                            fragmentCameraBinding.stopButton.visibility = View.VISIBLE
-                            }
-                            is VideoRecordEvent.Pause -> {
-                                activeRecording?.resume()
-                            }
-                            is VideoRecordEvent.Resume -> {
-                                activeRecording?.pause()
-                            }
-                            else -> {
-
-                            }
-                        }
                     }
-
-                    delay(200L)
-                    view.post { view.isEnabled = true }
                 }
             }
 
+            binding.includeCameraFooter.imageViewCameraStop.setOnClickListener { view ->
+                view.gone
+                lifecycleScope.launch(viewModel.io) {
+                    if (activeRecording != null && recordingState !is VideoRecordEvent.Finalize) {
+                        activeRecording?.stop()
+                        activeRecording = null
+                        delay(200L)
+                    }
+                }
+            }
             // re-enable button to switch between back/front camera
             binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = true
+        }
+    }
+
+    /**
+     * ResetUI (restart):
+     *    in case binding failed, let's give it another change for re-try. In future cases
+     *    we might fail and user get notified on the status
+     */
+    private fun resetUIandState() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            binding.includeCameraFooter.imageViewCameraFooterShutter.visible
+            binding.includeCameraFooter.imageViewCameraStop.gone
+
+            // TODO: Prompt user of reset
         }
     }
 
@@ -448,71 +344,13 @@ internal class CaptureVideoFragment: SideEffectFragment<
         ).build()
 
         // configure Recorder and Start recording to the mediaStoreOutput.
-        activeRecording =
-            videoCapture.output.prepareRecording(requireActivity(), fileOutputOptions)
+        activeRecording = videoCapture.output.prepareRecording(requireActivity(), fileOutputOptions)
                 .withEventListener(
                     mainThreadExecutor,
                     captureListener
                 )
                 .withAudioEnabled()
                 .start()
-    }
-
-    @SuppressLint("MissingPermission")
-    private suspend fun openCamera(
-        manager: CameraManager,
-        cameraId: String,
-        handler: Handler? = null
-    ): CameraDevice = suspendCancellableCoroutine { cont ->
-        try {
-            camera?.close()
-            camera = null
-        } catch (e: Exception) {}
-        manager.openCamera(
-            cameraId,
-            object : CameraDevice.StateCallback() {
-                override fun onOpened(device: CameraDevice) = cont.resume(device)
-
-                override fun onDisconnected(device: CameraDevice) {}
-
-                override fun onError(device: CameraDevice, error: Int) {
-                    val msg = when(error) {
-                        ERROR_CAMERA_DEVICE -> "Fatal (device)"
-                        ERROR_CAMERA_DISABLED -> "Device policy"
-                        ERROR_CAMERA_IN_USE -> "Camera in use"
-                        ERROR_CAMERA_SERVICE -> "Fatal (service)"
-                        ERROR_MAX_CAMERAS_IN_USE -> "Maximum cameras in use"
-                        else -> "Unknown"
-                    }
-                    val exc = RuntimeException("Camera $cameraId error: ($error) $msg")
-                    if (cont.isActive) cont.resumeWithException(exc)
-                }
-            },
-            handler,
-        )
-    }
-
-    /**
-     * Starts a [CameraCaptureSession] and returns the configured session (as the result of the
-     * suspend coroutine
-     */
-    private suspend fun createCaptureSession(
-        device: CameraDevice,
-        targets: List<Surface>,
-        handler: Handler? = null
-    ): CameraCaptureSession = suspendCoroutine { cont ->
-
-        // Create a capture session using the predefined targets; this also involves defining the
-        // session state callback to be notified of when the session is ready
-        device.createCaptureSession(targets, object: CameraCaptureSession.StateCallback() {
-
-            override fun onConfigured(session: CameraCaptureSession) = cont.resume(session)
-
-            override fun onConfigureFailed(session: CameraCaptureSession) {
-                val exc = RuntimeException("Camera ${device.id} session configuration failed")
-                cont.resumeWithException(exc)
-            }
-        }, handler)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CameraSideEffect) {
@@ -526,6 +364,7 @@ internal class CaptureVideoFragment: SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: CameraViewState) {
 
         binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener(null)
+        binding.includeCameraFooter.imageViewCameraStop.setOnClickListener(null)
 
         @Exhaustive
         when (viewState) {
@@ -537,31 +376,12 @@ internal class CaptureVideoFragment: SideEffectFragment<
                     binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = false
 
                     try {
-                        surfaceHolderState.collect { holder ->
-                            if (holder != null) {
-                                spaceWidthSetter.setCameraSpacessIfNeeded()
-
-                                val previewSize = getPreviewOutputSize(
-                                    binding.autoFitSurfaceViewCamera.display,
-                                    item.characteristics,
-                                    SurfaceHolder::class.java,
-                                )
-
-                                binding.autoFitSurfaceViewCamera.setAspectRatio(
-                                    previewSize.width,
-                                    previewSize.height
-                                )
-
-                                orientationLiveData?.removeObserver(orientationObserver)
-                                orientationLiveData = OrientationLiveData(binding.root.context, item.characteristics).apply {
-                                    observe(viewLifecycleOwner, orientationObserver)
-                                }
-
-                                startCamera(item)
-
-                                throw Exception()
-                            }
+                        orientationLiveData?.removeObserver(orientationObserver)
+                        orientationLiveData = OrientationLiveData(binding.root.context, item.characteristics).apply {
+                            observe(viewLifecycleOwner, orientationObserver)
                         }
+
+                        startCamera(item)
                     } catch (e: Exception) {}
                 } // TODO: handle null case with no camera available view
             }
@@ -578,7 +398,7 @@ internal class CaptureVideoFragment: SideEffectFragment<
                 onViewStateFlowCollect(viewState)
             }
         }
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.io) {
             viewModel.collectImagePreviewViewState { viewState ->
                 binding.includeCameraImagePreview.apply {
                     @Exhaustive
@@ -589,7 +409,7 @@ internal class CaptureVideoFragment: SideEffectFragment<
                                 // TODO: Load Video thumbnail+playback
 //                                imageLoader.load(imageViewCameraImagePreview, viewState.media)
                             } else {
-                                viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                                viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                             }
                         }
                         is CapturePreviewViewState.Preview.ImagePreview -> {
@@ -597,7 +417,7 @@ internal class CaptureVideoFragment: SideEffectFragment<
                                 root.visible
                                 imageLoader.load(imageViewCameraImagePreview, viewState.media)
                             } else {
-                                viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                                viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                             }
                         }
                         is CapturePreviewViewState.None -> {

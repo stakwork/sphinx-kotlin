@@ -43,7 +43,7 @@ internal inline val CameraViewModel.currentCapturePreviewViewState: CapturePrevi
     get() = cameraPreviewViewStateContainer.value
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun CameraViewModel.updateImagePreviewViewState(viewState: CapturePreviewViewState) =
+internal inline fun CameraViewModel.updateMediaPreviewViewState(viewState: CapturePreviewViewState) =
     cameraPreviewViewStateContainer.updateViewState(viewState)
 
 @HiltViewModel
@@ -92,8 +92,7 @@ internal class CameraViewModel @Inject constructor(
                                             CameraResponse.Image(viewState.media)
                                         }
                                         is CapturePreviewViewState.Preview.VideoPreview -> {
-                                            // TODO: Set video response
-                                            CameraResponse.Video(File(viewState.media.path))
+                                            CameraResponse.Video(viewState.media)
                                         }
                                     }
                                 )

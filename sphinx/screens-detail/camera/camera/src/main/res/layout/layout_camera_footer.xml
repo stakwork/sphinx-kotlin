@@ -6,15 +6,39 @@
     android:layout_height="@dimen/camera_footer_height"
     android:background="@color/bodyTransparent">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_camera_footer_shutter"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:src="@drawable/ic_shutter"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_camera_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        >
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_camera_footer_shutter"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_shutter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_camera_stop"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_stop_circle"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_camera_footer_switch"
@@ -24,9 +48,9 @@
         android:textColor="@color/text"
         android:textSize="17sp"
         android:fontFamily="@font/roboto_regular"
-        app:layout_constraintBottom_toBottomOf="@+id/image_view_camera_footer_shutter"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_camera_controls"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/image_view_camera_footer_shutter"
+        app:layout_constraintTop_toTopOf="@+id/layout_constraint_camera_controls"
         tools:text="Take Video"
         />
 
@@ -37,9 +61,9 @@
         android:layout_height="36dp"
         android:layout_marginEnd="@dimen/default_double_layout_margin"
         android:src="@drawable/ic_flip_camera"
-        app:layout_constraintBottom_toBottomOf="@+id/image_view_camera_footer_shutter"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_camera_controls"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/image_view_camera_footer_shutter" />
+        app:layout_constraintTop_toTopOf="@+id/layout_constraint_camera_controls" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

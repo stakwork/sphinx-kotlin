@@ -27,7 +27,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
-import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.camera.R
 import chat.sphinx.camera.databinding.FragmentCameraBinding
 import chat.sphinx.camera.model.CameraItem
@@ -92,7 +91,10 @@ internal class CameraFragment: SideEffectFragment<
         Manifest.permission.RECORD_AUDIO,
     )
 
-    override val binding: FragmentCameraBinding by viewBinding(FragmentCameraBinding::bind)
+    private var _binding: FragmentCameraBinding? = null
+    override val binding: FragmentCameraBinding
+        get() = _binding!!
+
     override val viewModel: CameraViewModel by viewModels()
 
     @Inject
@@ -244,6 +246,14 @@ internal class CameraFragment: SideEffectFragment<
 
     private val spaceWidthSetter = SpaceWidthSetter()
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCameraBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -307,7 +317,7 @@ internal class CameraFragment: SideEffectFragment<
                     is CapturePreviewViewState.None -> {}
                     is CapturePreviewViewState.Preview -> {
                         viewModel.deleteImage(vs.media)
-                        viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                        viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                     }
                 }
             }
@@ -400,7 +410,7 @@ internal class CameraFragment: SideEffectFragment<
                             exif.saveAttributes()
                         }
 
-                        viewModel.updateImagePreviewViewState(
+                        viewModel.updateMediaPreviewViewState(
                             CapturePreviewViewState.Preview.ImagePreview(output)
                         )
                     }
@@ -709,7 +719,7 @@ internal class CameraFragment: SideEffectFragment<
                                 root.visible
                                 imageLoader.load(imageViewCameraImagePreview, viewState.media)
                             } else {
-                                viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                                viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                             }
                         }
                         is CapturePreviewViewState.Preview.VideoPreview -> {
@@ -718,7 +728,7 @@ internal class CameraFragment: SideEffectFragment<
                                 // TODO: Load video thumbnail+video playback?
 //                                imageLoader.load(imageViewCameraImagePreview, viewState.media)//
                             } else {
-                                viewModel.updateImagePreviewViewState(CapturePreviewViewState.None)
+                                viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                             }
                         }
                         is CapturePreviewViewState.None -> {
