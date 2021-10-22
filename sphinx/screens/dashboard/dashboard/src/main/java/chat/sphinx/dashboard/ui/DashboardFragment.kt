@@ -2,10 +2,14 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -25,6 +29,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
+import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
@@ -40,10 +45,7 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
@@ -92,6 +94,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         setupChats()
         setupDashboardHeader()
+        setupSearch()
         setupNavBar()
         setupNavDrawer()
         setupPopups()
@@ -178,6 +181,48 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             header.textViewDashboardHeaderUpgradeApp.setOnClickListener {
                 viewModel.goToAppUpgrade()
+            }
+            header.textViewDashboardHeaderNetwork.setOnClickListener {
+                viewModel.toastIfNetworkConnected()
+            }
+        }
+    }
+
+    private fun setupSearch() {
+        binding.layoutDashboardSearchBar.apply {
+            editTextDashboardSearch.addTextChangedListener { editable ->
+                buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.updateChatListFilter(
+                        if (editable.toString().isNotEmpty()) {
+                            ChatFilter.FilterBy(editable.toString())
+                        } else {
+                            ChatFilter.ClearFilter
+                        }
+                    )
+                }
+            }
+
+            editTextDashboardSearch.setOnEditorActionListener(object: TextView.OnEditorActionListener {
+                override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                    if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                        editTextDashboardSearch.let { editText ->
+                            binding.root.context.inputMethodManager?.let { imm ->
+                                if (imm.isActive(editText)) {
+                                    imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                                    editText.clearFocus()
+                                }
+                            }
+                        }
+                        return true
+                    }
+                    return false
+                }
+            })
+
+            buttonDashboardSearchClear.setOnClickListener {
+                editTextDashboardSearch.setText("")
             }
         }
     }

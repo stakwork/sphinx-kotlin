@@ -1,5 +1,13 @@
 # ChangeLog
 
+# Version 1.0.0-alpha30 (2021-10-22)
+ - Adds ability to send video from Library
+ - Adds ability to search for contacts and chats on Dashboard
+ - Adds ability to search for contacts on Contacts section
+ - Adds ability to see contact details and edit from Contacts section
+ - Adds some Japanese translations
+ - Adds ability to set custom meeting server
+
 # Version 1.0.0-alpha29 (2021-10-14)
  - Adds ability to receive video messages and paid video messages
  - Adds ability to watch for received video messages on full screen view

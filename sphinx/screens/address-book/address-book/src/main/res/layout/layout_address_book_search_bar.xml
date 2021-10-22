@@ -19,7 +19,7 @@
         android:background="@drawable/address_book_search_bar_background">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_dashboard_search"
+            android:id="@+id/image_view_address_book_search"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -29,7 +29,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
-            android:id="@+id/edit_text_dashboard_search"
+            android:id="@+id/edit_text_address_book_search"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -42,10 +42,26 @@
             android:textColor="@color/text"
             android:fontFamily="@font/roboto_regular"
             android:textSize="@dimen/address_book_search_text_size"
+            android:imeOptions="actionDone"
             android:textColorHighlight="@color/primaryBlue"
             android:textColorHint="@color/placeholderText"
+            app:layout_constraintEnd_toEndOf="@+id/button_address_book_search_clear"
+            app:layout_constraintStart_toEndOf="@+id/image_view_address_book_search" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/button_address_book_search_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_cancel"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            android:textColor="@color/placeholderText"
+            android:gravity="center"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/image_view_dashboard_search" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

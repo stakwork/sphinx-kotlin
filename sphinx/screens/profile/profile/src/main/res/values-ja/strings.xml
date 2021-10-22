@@ -34,4 +34,6 @@
     <string name="testing_new_relay_url">新しいRelay URLをテストしています</string>
     <string name="failed_updating_relay_url">新しいURLのテストに失敗しました。既存設定を復元しています。</string>
     <string name="updating_relay_url_succeed">Relay URLを更新しました</string>
+
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
 </resources>

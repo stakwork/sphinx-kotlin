@@ -55,6 +55,7 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
@@ -529,6 +530,7 @@ internal class DashboardViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             delay(25L)
+
             repositoryDashboard.getAllChats.distinctUntilChanged().collect { chats ->
                 collectionLock.withLock {
                     chatsCollectionInitialized = true
@@ -598,7 +600,6 @@ internal class DashboardViewModel @Inject constructor(
                             }
                         }
                     }
-
                     chatViewStateContainer.updateDashboardChats(newList)
                 }
             }
@@ -703,11 +704,11 @@ internal class DashboardViewModel @Inject constructor(
             }
 
             withContext(default) {
-                val currentChats = currentChatViewState.list.toMutableList()
+                val currentChats = currentChatViewState.originalList.toMutableList()
                 val chatContactIds = mutableListOf<ContactId>()
 
                 var updateChatViewState = false
-                for (chat in currentChatViewState.list) {
+                for (chat in currentChatViewState.originalList) {
 
                     val contact: Contact? = when (chat) {
                         is DashboardChat.Active.Conversation -> {
@@ -768,7 +769,7 @@ internal class DashboardViewModel @Inject constructor(
 
                         var updatedContactChat: DashboardChat = DashboardChat.Inactive.Conversation(contact)
 
-                        for (chat in currentChatViewState.list) {
+                        for (chat in currentChatViewState.originalList) {
                             if (chat is DashboardChat.Active.Conversation) {
                                 if (chat.contact.id == contact.id) {
                                     updatedContactChat = DashboardChat.Active.Conversation(
@@ -910,5 +911,21 @@ internal class DashboardViewModel @Inject constructor(
 
     override suspend fun onMotionSceneCompletion(value: Any) {
         // Unused
+    }
+
+    fun toastIfNetworkConnected(){
+        viewModelScope.launch(mainImmediate){
+            submitSideEffect(
+                DashboardSideEffect.Notify(
+                    app.getString(
+                        if (_networkStateFlow.value is Response.Error) {
+                            R.string.dashboard_network_disconnected_node_toast
+                        } else {
+                            R.string.dashboard_network_connected_node_toast
+                        }
+                    )
+                )
+            )
+        }
     }
 }
