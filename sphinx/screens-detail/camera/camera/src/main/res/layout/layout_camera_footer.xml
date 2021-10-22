@@ -10,6 +10,8 @@
         android:id="@+id/layout_constraint_camera_controls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="80dp"
+        android:minHeight="80dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -28,8 +30,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_camera_stop"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:src="@drawable/ic_stop_circle"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -39,19 +41,31 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_camera_footer_prompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text"
+        android:textSize="17sp"
+        android:fontFamily="@font/roboto_regular"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_camera_controls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="Tap for picture, hold for video"
+        />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_camera_footer_switch"
+        android:id="@+id/text_view_camera_footer_cancel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_double_layout_margin"
         android:textColor="@color/text"
         android:textSize="17sp"
         android:fontFamily="@font/roboto_regular"
+        android:text="@string/camera_cancel"
         app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_camera_controls"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/layout_constraint_camera_controls"
-        tools:text="Take Video"
         />
 
     <!-- TODO: import drawable resource -->

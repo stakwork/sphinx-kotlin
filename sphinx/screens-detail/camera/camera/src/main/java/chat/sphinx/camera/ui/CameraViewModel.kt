@@ -225,26 +225,11 @@ internal class CameraViewModel @Inject constructor(
                     // user hit back button, so no file was returned
                     applicationScope.launch(io) {
                         try {
-                            // TODO: Delete media
-//                            vs.media.delete()
+                            vs.media.delete()
                         } catch (e: Exception) {}
                     }
                 }
             }
-        }
-    }
-
-    fun goToCaptureVideoFragment() {
-        viewModelScope.launch(mainImmediate) {
-            cameraNavigator.toCaptureVideoDetailScreen()
-        }
-    }
-
-    fun goToCapturePictureFragment() {
-        viewModelScope.launch(mainImmediate) {
-            cameraNavigator.toCameraDetailScreen(
-                replacingVideoFragment = true
-            )
         }
     }
 }

@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".ui.CameraFragment">
 
-    <com.example.android.camera.utils.AutoFitSurfaceView
-        android:id="@+id/auto_fit_surface_view_camera"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view_camera"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -19,10 +19,10 @@
         android:id="@+id/view_camera_overlay"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/auto_fit_surface_view_camera"
-        app:layout_constraintEnd_toEndOf="@+id/auto_fit_surface_view_camera"
-        app:layout_constraintStart_toStartOf="@+id/auto_fit_surface_view_camera"
-        app:layout_constraintTop_toTopOf="@+id/auto_fit_surface_view_camera" />
+        app:layout_constraintBottom_toBottomOf="@+id/preview_view_camera"
+        app:layout_constraintEnd_toEndOf="@+id/preview_view_camera"
+        app:layout_constraintStart_toStartOf="@+id/preview_view_camera"
+        app:layout_constraintTop_toTopOf="@+id/preview_view_camera" />
 
     <include
         android:id="@+id/include_camera_header"
@@ -37,7 +37,7 @@
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <include
-        android:id="@+id/include_camera_image_preview"
+        android:id="@+id/include_camera_media_preview"
         layout="@layout/layout_camera_media_preview"
         tools:visibility="gone" />
 
