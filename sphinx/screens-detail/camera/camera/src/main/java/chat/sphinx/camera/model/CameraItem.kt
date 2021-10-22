@@ -13,7 +13,7 @@ sealed class LensFacing {
                 CameraCharacteristics.LENS_FACING_BACK
             }
             is Front -> {
-                CameraCharacteristics.LENS_FACING_BACK
+                CameraCharacteristics.LENS_FACING_FRONT
             }
         }
     }
