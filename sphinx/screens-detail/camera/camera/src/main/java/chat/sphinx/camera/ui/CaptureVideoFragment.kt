@@ -321,10 +321,6 @@ internal class CaptureVideoFragment: SideEffectFragment<
                         outputOptions, cameraExecutor, object : ImageCapture.OnImageSavedCallback {
                             override fun onError(exc: ImageCaptureException) {
                                 // TODO: Give user feedback on failure
-                                lifecycleScope.launch(viewModel.io) {
-                                    delay(200L)
-                                }
-
                             }
 
                             override fun onImageSaved(output: ImageCapture.OutputFileResults) {
@@ -469,41 +465,42 @@ internal class CaptureVideoFragment: SideEffectFragment<
         onStopSupervisor.scope.launch(viewModel.io) {
             viewModel.collectImagePreviewViewState { viewState ->
                 binding.includeCameraMediaPreview.apply {
-                    @Exhaustive
-                    when (viewState) {
-                        is CapturePreviewViewState.Preview.VideoPreview -> {
-                            if (viewState.media.exists()) {
-                                root.visible
-                                videoViewCameraVideoPreview.visible
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        @Exhaustive
+                        when (viewState) {
+                            is CapturePreviewViewState.Preview.VideoPreview -> {
+                                if (viewState.media.exists()) {
+                                    root.visible
+                                    videoViewCameraVideoPreview.visible
 
-                                val uri = viewState.media.toUri()
-                                videoViewCameraVideoPreview.setVideoURI(uri)
-                                videoViewCameraVideoPreview.setOnPreparedListener { mediaPlayer ->
-                                    mediaPlayer.start()
+                                    val uri = viewState.media.toUri()
+                                    videoViewCameraVideoPreview.setVideoURI(uri)
+                                    videoViewCameraVideoPreview.setOnPreparedListener { mediaPlayer ->
+                                        mediaPlayer.start()
+                                    }
+                                    videoViewCameraVideoPreview.setOnErrorListener { _, _, _ ->
+                                        return@setOnErrorListener true
+                                    }
+                                } else {
+                                    viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                                 }
-                                videoViewCameraVideoPreview.setOnErrorListener { _, _, _ ->
-                                    return@setOnErrorListener true
-                                }
-                            } else {
-                                viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                             }
-                        }
-                        is CapturePreviewViewState.Preview.ImagePreview -> {
-                            if (viewState.media.exists()) {
-                                lifecycleScope.launch(viewModel.mainImmediate) {
+                            is CapturePreviewViewState.Preview.ImagePreview -> {
+                                if (viewState.media.exists()) {
                                     root.visible
                                     imageViewCameraImagePreview.visible
                                     imageLoader.load(imageViewCameraImagePreview, viewState.media)
+                                } else {
+                                    viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                                 }
-                            } else {
-                                viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
+                            }
+                            is CapturePreviewViewState.None -> {
+                                root.gone
+                                imageViewCameraImagePreview.setImageDrawable(null)
                             }
                         }
-                        is CapturePreviewViewState.None -> {
-                            root.gone
-                            imageViewCameraImagePreview.setImageDrawable(null)
-                        }
                     }
+
                 }
             }
         }
