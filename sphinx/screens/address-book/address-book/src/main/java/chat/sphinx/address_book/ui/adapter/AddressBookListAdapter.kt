@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.address_book.databinding.LayoutAddressBookContactHolderBinding
@@ -43,7 +44,7 @@ internal class AddressBookListAdapter(
         }
 
         override fun getNewListSize(): Int {
-            return oldList.size
+            return newList.size
         }
 
         @Volatile
@@ -154,6 +155,18 @@ internal class AddressBookListAdapter(
 
         private var disposable: Disposable? = null
         private var dContact: Contact? = null
+
+        init {
+            binding.layoutConstraintAddressBookHolder.setOnClickListener {
+                dContact?.let { contact ->
+                    lifecycleOwner.lifecycleScope.launch {
+                        viewModel.addressBookNavigator.toEditContactDetail(
+                            contact.id
+                        )
+                    }
+                }
+            }
+        }
 
         fun bind(position: Int) {
             binding.apply {

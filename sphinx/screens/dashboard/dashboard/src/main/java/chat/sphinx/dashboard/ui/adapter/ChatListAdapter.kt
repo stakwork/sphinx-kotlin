@@ -166,10 +166,8 @@ internal class ChatListAdapter(
                                 recyclerView.scrollToPosition(0)
                             }
                         }
-
                     }
                 }
-
             }
         }
     }

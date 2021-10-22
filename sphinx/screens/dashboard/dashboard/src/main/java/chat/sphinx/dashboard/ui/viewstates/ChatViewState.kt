@@ -12,14 +12,17 @@ import kotlinx.coroutines.withContext
 internal sealed class ChatViewState: ViewState<ChatViewState>() {
 
     abstract val list: List<DashboardChat>
+    abstract val originalList: List<DashboardChat>
 
     class ListMode(
-        override val list: List<DashboardChat>
+        override val list: List<DashboardChat>,
+        override val originalList: List<DashboardChat>
     ): ChatViewState()
 
     class SearchMode(
         val filter: ChatFilter.FilterBy,
-        override val list: List<DashboardChat>
+        override val list: List<DashboardChat>,
+        override val originalList: List<DashboardChat>
     ): ChatViewState()
 }
 
@@ -58,7 +61,7 @@ private inline fun List<DashboardChat>.filterDashboardChats(
 // TODO: Need to preserve the original list when going between list and search modes.
 internal class ChatViewStateContainer(
     private val dispatchers: CoroutineDispatchers,
-): ViewStateContainer<ChatViewState>(ChatViewState.ListMode(emptyList())) {
+): ViewStateContainer<ChatViewState>(ChatViewState.ListMode(emptyList(), emptyList())) {
 
     override fun updateViewState(viewState: ChatViewState) {
         throw IllegalStateException("Must utilize updateDashboardChats method")
@@ -82,18 +85,20 @@ internal class ChatViewStateContainer(
                     dashboardChats.sortedByDescending { it.sortBy }
                 }
             } else {
-                viewStateFlow.value.list
+                viewStateFlow.value.originalList
             }
 
             @Exhaustive
             when (filter) {
                 is ChatFilter.UseCurrent -> {
-
                     @Exhaustive
                     when (val viewState = viewStateFlow.value) {
                         is ChatViewState.ListMode -> {
                             super.updateViewState(
-                                ChatViewState.ListMode(sortedDashboardChats)
+                                ChatViewState.ListMode(
+                                    sortedDashboardChats,
+                                    sortedDashboardChats
+                                )
                             )
                         }
                         is ChatViewState.SearchMode -> {
@@ -103,7 +108,8 @@ internal class ChatViewStateContainer(
                                     withContext(dispatchers.default) {
                                         sortedDashboardChats
                                             .filterDashboardChats(viewState.filter.value)
-                                    }
+                                    },
+                                    sortedDashboardChats
                                 )
                             )
                         }
@@ -112,7 +118,7 @@ internal class ChatViewStateContainer(
                 }
                 is ChatFilter.ClearFilter -> {
                     super.updateViewState(
-                        ChatViewState.ListMode(sortedDashboardChats)
+                        ChatViewState.ListMode(sortedDashboardChats, sortedDashboardChats)
                     )
                 }
                 is ChatFilter.FilterBy -> {
@@ -122,7 +128,8 @@ internal class ChatViewStateContainer(
                             withContext(dispatchers.default) {
                                 sortedDashboardChats
                                     .filterDashboardChats(filter.value)
-                            }
+                            },
+                            sortedDashboardChats
                         )
                     )
                 }
