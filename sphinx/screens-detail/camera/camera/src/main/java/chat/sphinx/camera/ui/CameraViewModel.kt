@@ -191,10 +191,10 @@ internal class CameraViewModel @Inject constructor(
         ViewStateContainer(CapturePreviewViewState.None)
     }
 
-    fun deleteImage(image: File) {
+    fun deleteMedia(media: File) {
         viewModelScope.launch(io) {
-            if (image.isFile) {
-                image.delete()
+            if (media.isFile) {
+                media.delete()
             }
         }
     }

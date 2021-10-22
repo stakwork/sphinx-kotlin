@@ -17,7 +17,7 @@
         android:scaleType="centerInside"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_image_preview_footer"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_media_preview_footer"
         tools:visibility="visible"
         />
 
@@ -28,19 +28,19 @@
         android:scaleType="centerInside"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_image_preview_footer"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_media_preview_footer"
         tools:visibility="visible"
         />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_camera_image_preview_footer"
+        android:id="@+id/layout_constraint_camera_media_preview_footer"
         android:layout_width="match_parent"
         android:layout_height="@dimen/camera_footer_height"
         android:background="@color/body"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_camera_image_preview_retake"
+            android:id="@+id/text_view_camera_media_preview_retake"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_double_layout_margin"
@@ -53,17 +53,17 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_camera_image_preview_use"
+            android:id="@+id/text_view_camera_media_preview_use"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/default_double_layout_margin"
             android:fontFamily="@font/roboto_regular"
-            android:text="@string/camera_use_photo"
             android:textColor="@color/text"
             android:textSize="17sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/camera_use_photo" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="@dimen/camera_footer_height"
     android:background="@color/bodyTransparent">
@@ -48,10 +47,10 @@
         android:textColor="@color/text"
         android:textSize="17sp"
         android:fontFamily="@font/roboto_regular"
+        android:text="@string/camera_shutter_instruction"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_camera_controls"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="Tap for picture, hold for video"
         />
 
     <androidx.appcompat.widget.AppCompatTextView

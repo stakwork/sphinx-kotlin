@@ -4,4 +4,6 @@
     <string name="camera_retake">撮り直す</string>
     <string name="camera_use_photo">この写真を使う</string>
     <string name="camera_cancel">キャンセル</string>
+    <string name="camera_use_video">ビデオを使用する</string>
+    <string name="camera_shutter_instruction">写真をタップし、ビデオを長押しします</string>
 </resources>

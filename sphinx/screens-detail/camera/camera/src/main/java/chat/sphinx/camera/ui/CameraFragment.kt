@@ -69,6 +69,7 @@ internal class CameraFragment: SideEffectFragment<
 
     private lateinit var imageCapture: ImageCapture
     private lateinit var videoCapture: VideoCapture<Recorder>
+
     private var activeRecording: ActiveRecording? = null
     private lateinit var recordingState: VideoRecordEvent
 
@@ -85,17 +86,15 @@ internal class CameraFragment: SideEffectFragment<
         if (event is VideoRecordEvent.Finalize) {
             event.outputResults.outputUri.path?.let {
                 lifecycleScope.launch(viewModel.io) {
-                    val file = File(it)
                     viewModel.updateMediaPreviewViewState(
-                        CapturePreviewViewState.Preview.VideoPreview(file)
+                        CapturePreviewViewState.Preview.VideoPreview(File(it))
                     )
                 }
-
             }
         }
     }
 
-    private val imageCaptureListener = object : ImageCapture.OnImageSavedCallback {
+    private val imageSavedCallback = object : ImageCapture.OnImageSavedCallback {
         override fun onError(exc: ImageCaptureException) {
             // TODO: Give user feedback on failure
         }
@@ -169,7 +168,7 @@ internal class CameraFragment: SideEffectFragment<
 
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.includeCameraFooter.root)
-            .addNavigationBarPadding(binding.includeCameraMediaPreview.layoutConstraintCameraImagePreviewFooter)
+            .addNavigationBarPadding(binding.includeCameraMediaPreview.layoutConstraintCameraMediaPreviewFooter)
 
         if (!hasPermissions(requireContext())) {
             requestPermissionLauncher.launch(PERMISSIONS_REQUIRED)
@@ -203,26 +202,26 @@ internal class CameraFragment: SideEffectFragment<
             imageViewCameraImagePreview.setOnClickListener {
                 viewModel
             }
-            textViewCameraImagePreviewRetake.setOnClickListener {
+            textViewCameraMediaPreviewRetake.setOnClickListener {
                 @Exhaustive
                 when (val vs = viewModel.currentCapturePreviewViewState) {
                     is CapturePreviewViewState.None -> {}
                     is CapturePreviewViewState.Preview.ImagePreview -> {
-                        viewModel.deleteImage(vs.media)
+                        viewModel.deleteMedia(vs.media)
                         viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                     }
                     is CapturePreviewViewState.Preview.VideoPreview -> {
-                        viewModel.deleteImage(vs.media)
+                        viewModel.deleteMedia(vs.media)
                         viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
                     }
                 }
             }
-            textViewCameraImagePreviewUse.setOnClickListener {
+            textViewCameraMediaPreviewUse.setOnClickListener {
                 @Exhaustive
                 when (val vs = viewModel.currentCapturePreviewViewState) {
                     is CapturePreviewViewState.None -> {}
                     is CapturePreviewViewState.Preview -> {
-                        textViewCameraImagePreviewRetake.isEnabled = false
+                        textViewCameraMediaPreviewRetake.isEnabled = false
                         viewModel.processSuccessfulResponse(vs)
                     }
                 }
@@ -324,15 +323,15 @@ internal class CameraFragment: SideEffectFragment<
                     imageCapture.takePicture(
                         outputOptions,
                         cameraExecutor,
-                        imageCaptureListener
+                        imageSavedCallback
                     )
                 }
 
             }
             binding.includeCameraFooter.imageViewCameraFooterShutter.setOnLongClickListener { view ->
-                view.gone
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    view.gone
 
-                lifecycleScope.launch(viewModel.io) {
                     if (activeRecording == null || recordingState is VideoRecordEvent.Finalize) {
                         binding.includeCameraFooter.imageViewCameraFooterShutter.gone
                         binding.includeCameraFooter.imageViewCameraStop.visible
@@ -465,6 +464,7 @@ internal class CameraFragment: SideEffectFragment<
                                     root.visible
                                     videoViewCameraVideoPreview.visible
 
+                                    textViewCameraMediaPreviewUse.text = getString(R.string.camera_use_video)
                                     val uri = viewState.media.toUri()
                                     videoViewCameraVideoPreview.setVideoURI(uri)
                                     videoViewCameraVideoPreview.setOnPreparedListener { mediaPlayer ->
@@ -481,6 +481,7 @@ internal class CameraFragment: SideEffectFragment<
                                 if (viewState.media.exists()) {
                                     root.visible
                                     imageViewCameraImagePreview.visible
+                                    textViewCameraMediaPreviewUse.text = getString(R.string.camera_use_photo)
                                     imageLoader.load(imageViewCameraImagePreview, viewState.media)
                                 } else {
                                     viewModel.updateMediaPreviewViewState(CapturePreviewViewState.None)
