@@ -46,6 +46,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
 import chat.sphinx.chat_common.ui.widgets.SlideToCancelImageView
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
 import chat.sphinx.chat_common.util.AudioRecorderController
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -67,12 +68,14 @@ import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
+import chat.sphinx.wrapper_message_media.isVideo
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -137,8 +140,8 @@ abstract class ChatFragment<
         )
     }
 
-    override val contentChooserContract: ActivityResultLauncher<String> =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    override val contentChooserContract: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             viewModel.handleActivityResultUri(uri)
         }
 
@@ -326,7 +329,7 @@ abstract class ChatFragment<
                             sendMessageBuilder.setAttachmentInfo(null)
                         }
                         is AttachmentSendViewState.Preview -> {
-                            if (attachmentViewState.type.isImage) {
+                            if (attachmentViewState.type.isImage || attachmentViewState.type.isVideo) {
                                 attachmentViewState.file?.let { nnFile ->
                                     sendMessageBuilder.setAttachmentInfo(
                                         AttachmentInfo(
@@ -424,8 +427,11 @@ abstract class ChatFragment<
 
             editTextChatFooter.onCommitContentListener = viewModel.onIMEContent
             editTextChatFooter.addTextChangedListener { editable ->
-                textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
-                imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+                //Do not toggle microphone and send icon if on attachment mode
+                if (viewModel.getFooterViewStateFlow().value !is FooterViewState.Attachment) {
+                    textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
+                    imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+                }
             }
         }
 
@@ -1137,58 +1143,66 @@ abstract class ChatFragment<
                             root.gone
                             includePaidTextMessageSendPreview.root.gone
                             imageViewAttachmentSendPreview.setImageDrawable(null)
+                            layoutConstraintVideoPlayButton.gone
                         }
                         is AttachmentSendViewState.Preview -> {
-
-                            textViewAttachmentSendHeaderName.apply {
-                                @Exhaustive
-                                when (viewState.type) {
-                                    is MediaType.Image -> {
-                                        text = getString(R.string.attachment_send_header_image)
+                            @Exhaustive
+                            when (viewState.type) {
+                                is MediaType.Image -> {
+                                    textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_image)
+                                    // will load almost immediately b/c it's a file, so
+                                    // no need to launch separate coroutine.
+                                    viewState.file?.let { nnFile ->
+                                        lifecycleScope.launch(viewModel.mainImmediate) {
+                                            val disposable = imageLoader.load(imageViewAttachmentSendPreview, nnFile)
+                                            attachmentSendViewStateDisposables.add(disposable)
+                                        }.let { job ->
+                                            attachmentSendViewStateJobs.add(job)
+                                        }
                                     }
-                                    is MediaType.Audio -> {
-                                        // TODO: Implement
-                                    }
-                                    is MediaType.Pdf -> {
-                                        // TODO: Implement
-                                    }
-                                    is MediaType.Video -> {
-                                        text = getString(R.string.attachment_send_header_video)
-                                    }
-                                    is MediaType.Text -> {
-                                        text = getString(R.string.attachment_send_header_paid_message)
-                                    }
-                                    is MediaType.Unknown -> {}
                                 }
+                                is MediaType.Audio -> {
+                                    // TODO: Implement
+                                }
+                                is MediaType.Pdf -> {
+                                    // TODO: Implement
+                                }
+                                is MediaType.Video -> {
+                                    textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_video)
+                                    // will load almost immediately b/c it's a file, so
+                                    // no need to launch separate coroutine.
+                                    viewState.file?.let { nnFile ->
+                                        lifecycleScope.launch(viewModel.mainImmediate) {
+                                            layoutConstraintVideoPlayButton.visible
+                                            textViewAttachmentPlayButton.setOnClickListener {
+                                                viewModel.goToFullscreenVideo(
+                                                    messageId = MessageId(-1L),
+                                                    nnFile.absolutePath
+                                                )
+                                            }
+                                            imageViewAttachmentSendPreview.setImageBitmap(
+                                                VideoThumbnailUtil.loadThumbnail(nnFile)
+                                            )
+                                        }.let { job ->
+                                            attachmentSendViewStateJobs.add(job)
+                                        }
+                                    }
+                                }
+                                is MediaType.Text -> {
+                                    textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_paid_message)
+
+                                    includePaidTextMessageSendPreview.apply {
+                                        textViewPaidMessagePreviewText.text = viewState.paidMessage?.first ?: footerBinding.editTextChatFooter.text
+
+                                        textViewPaidMessagePreviewPrice.text =
+                                            (viewState.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
+                                            ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
+
+                                        root.visible
+                                    }
+                                }
+                                is MediaType.Unknown -> {}
                             }
-
-                            if (viewState.type is MediaType.Image) {
-
-                                // will load almost immediately b/c it's a file, so
-                                // no need to launch separate coroutine.
-                                viewState.file?.let { nnFile ->
-                                    lifecycleScope.launch(viewModel.mainImmediate) {
-                                        val disposable = imageLoader.load(imageViewAttachmentSendPreview, nnFile)
-                                        attachmentSendViewStateDisposables.add(disposable)
-                                    }.let { job ->
-                                        attachmentSendViewStateJobs.add(job)
-                                    }
-                                }
-
-                            } else if (viewState.type == MediaType.Text) {
-
-                                includePaidTextMessageSendPreview.apply {
-                                    textViewPaidMessagePreviewText.text = viewState.paidMessage?.first ?: footerBinding.editTextChatFooter.text
-
-                                    textViewPaidMessagePreviewPrice.text =
-                                        (viewState.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
-                                        ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
-
-                                    root.visible
-                                }
-
-                            }
-
                             root.visible
                         }
                         is AttachmentSendViewState.PreviewGiphy -> {

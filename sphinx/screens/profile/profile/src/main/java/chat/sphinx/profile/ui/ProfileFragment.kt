@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
@@ -171,12 +172,29 @@ internal class ProfileFragment: SideEffectFragment<
                     updateOwnerDetails()
                 }
 
+                removeFocusOnEnter(editTextProfileBasicContainerUserName)
+
                 editTextProfileBasicContainerTip.setOnFocusChangeListener { _, hasFocus ->
                     if (hasFocus) {
                         return@setOnFocusChangeListener
                     }
                     updateOwnerDetails()
                 }
+
+                removeFocusOnEnter(editTextProfileBasicContainerTip)
+
+                editTextProfileBasicContainerMeetingServer.setOnFocusChangeListener { _, hasFocus ->
+                    if (hasFocus) {
+                        return@setOnFocusChangeListener
+                    }
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.updateMeetingServer(
+                            editTextProfileBasicContainerMeetingServer.text?.toString()
+                        )
+                    }
+                }
+
+                removeFocusOnEnter(editTextProfileBasicContainerMeetingServer)
 
                 switchProfileBasicContainerPin.setOnCheckedChangeListener { _, _ ->
                     updateOwnerDetails()
@@ -213,23 +231,7 @@ internal class ProfileFragment: SideEffectFragment<
                     }
                 }
 
-                editTextProfileAdvancedContainerServerUrl.setOnEditorActionListener(object:
-                    TextView.OnEditorActionListener {
-                    override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
-                        if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
-                            editTextProfileAdvancedContainerServerUrl.let { editText ->
-                                binding.root.context.inputMethodManager?.let { imm ->
-                                    if (imm.isActive(editText)) {
-                                        imm.hideSoftInputFromWindow(editText.windowToken, 0)
-                                        editText.clearFocus()
-                                    }
-                                }
-                            }
-                            return true
-                        }
-                        return false
-                    }
-                })
+                removeFocusOnEnter(editTextProfileAdvancedContainerServerUrl)
 
                 seekBarProfileAdvancedContainerPinTimeout.setOnSeekBarChangeListener(
                     object : SeekBar.OnSeekBarChangeListener {
@@ -259,8 +261,29 @@ internal class ProfileFragment: SideEffectFragment<
         }
     }
 
+    private fun removeFocusOnEnter(editText: EditText?) {
+        editText?.setOnEditorActionListener(object:
+            TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    editText.let { nnEditText ->
+                        binding.root.context.inputMethodManager?.let { imm ->
+                            if (imm.isActive(nnEditText)) {
+                                imm.hideSoftInputFromWindow(nnEditText.windowToken, 0)
+                                nnEditText.clearFocus()
+                            }
+                        }
+                    }
+                    return true
+                }
+                return false
+            }
+        })
+    }
+
     override fun onStart() {
         super.onStart()
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.getAccountBalance().collect { nodeBalance ->
                 if (nodeBalance == null) return@collect
@@ -278,6 +301,17 @@ internal class ProfileFragment: SideEffectFragment<
                         .includeProfileAdvancedContainerHolder
                         .editTextProfileAdvancedContainerServerUrl
                         .setText(nnRelayUrl)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.meetingServerUrlStateFlow.collect { meetingServerUrl ->
+                meetingServerUrl?.let { nnMeetingServerUrl ->
+                    binding
+                        .includeProfileBasicContainerHolder
+                        .editTextProfileBasicContainerMeetingServer
+                        .setText(nnMeetingServerUrl)
                 }
             }
         }

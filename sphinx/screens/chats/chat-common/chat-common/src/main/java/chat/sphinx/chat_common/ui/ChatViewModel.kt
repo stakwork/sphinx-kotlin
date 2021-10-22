@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui
 
 import android.app.Application
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
@@ -1126,6 +1127,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             AttachmentSendViewState.Preview(null, MediaType.Text, null)
         )
         updateViewState(ChatMenuViewState.Closed)
+        updateFooterViewState(FooterViewState.Attachment)
     }
 
     @JvmSynthetic
@@ -1228,7 +1230,26 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             // TODO: Implement
                         }
                         is MediaType.Video -> {
-                            // TODO: Implement
+                            // TODO: Reduce code duplication
+                            viewModelScope.launch(mainImmediate) {
+                                val newFile: File = mediaCacheHandler.createVideoFile(ext)
+
+                                try {
+                                    mediaCacheHandler.copyTo(stream, newFile)
+                                    updateViewState(ChatMenuViewState.Closed)
+                                    updateFooterViewState(FooterViewState.Attachment)
+                                    attachmentSendStateContainer.updateViewState(
+                                        AttachmentSendViewState.Preview(newFile, mType, null)
+                                    )
+                                } catch (e: Exception) {
+                                    newFile.delete()
+                                    LOG.e(
+                                        TAG,
+                                        "Failed to copy content to new file: ${newFile.path}",
+                                        e
+                                    )
+                                }
+                            }
                         }
 
                         is MediaType.Text,
@@ -1245,7 +1266,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         callMenuHandler.updateViewState(
             MenuBottomViewState.Closed
         )
-        SphinxCallLink.newCallInvite(audioOnly)?.value?.let { newCallLink ->
+
+        val appContext: Context = app.applicationContext
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences("server_urls", Context.MODE_PRIVATE)
+
+        val meetingServerUrl = serverUrlsSharedPreferences.getString(
+            SphinxCallLink.CALL_SERVER_URL_KEY,
+            SphinxCallLink.DEFAULT_CALL_SERVER_URL
+        ) ?: SphinxCallLink.DEFAULT_CALL_SERVER_URL
+
+        SphinxCallLink.newCallInvite(meetingServerUrl, audioOnly)?.value?.let { newCallLink ->
             val messageBuilder = SendMessage.Builder()
             messageBuilder.setText(newCallLink)
             sendMessage(messageBuilder)
@@ -1330,9 +1360,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         navigateToChatDetailScreen()
     }
 
-    fun goToFullscreenVideo(messageId: MessageId) {
+    fun goToFullscreenVideo(
+        messageId: MessageId,
+        videoFilepath: String? = null
+    ) {
         viewModelScope.launch(mainImmediate) {
-            chatNavigator.toFullscreenVideo(messageId)
+            chatNavigator.toFullscreenVideo(
+                messageId,
+                videoFilepath
+            )
         }
     }
 

@@ -58,6 +58,7 @@
                         app:layout_constraintStart_toStartOf="parent"
                         android:textSize="@dimen/default_form_edit_view_text_size"
                         android:inputType="textVisiblePassword|textCapWords"
+                        android:imeOptions="actionDone"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
                         tools:text= "Testing"/>
@@ -296,6 +297,7 @@
                         android:textSize="@dimen/default_form_edit_view_text_size"
                         android:inputType="number"
                         android:digits="0123456789"
+                        android:imeOptions="actionDone"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
                         android:text= "20"
@@ -343,14 +345,12 @@
                         app:layout_constraintTop_toBottomOf="@+id/text_view_profile_basic_container_meeting_server"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
+                        android:imeOptions="actionDone"
                         android:textSize="@dimen/default_form_edit_view_text_size"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
-                        android:inputType="none"
-                        android:focusable="false"
-                        android:cursorVisible="false"
-                        android:clickable="false"
-                        android:text="https://jitsi.sphinx.chat"
+                        android:inputType="textUri"
+                        android:text=""
                         tools:text="https://jitsi.sphinx.chat"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout

@@ -48,12 +48,42 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_attachment_send_preview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_attachment_send_header" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_video_play_button"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@+id/image_view_attachment_send_preview"
+        app:layout_constraintBottom_toBottomOf="@+id/image_view_attachment_send_preview"
+        app:layout_constraintStart_toStartOf="@+id/image_view_attachment_send_preview"
+        app:layout_constraintEnd_toEndOf="@+id/image_view_attachment_send_preview"
+        android:background="@color/selectedMessageBackground"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_play_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="true"
+            android:textColor="@android:color/white"
+            android:text="@string/material_icon_name_play_outline"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="60sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <include
         android:id="@+id/include_paid_text_message_send_preview"

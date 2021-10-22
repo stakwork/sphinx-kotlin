@@ -84,4 +84,7 @@
     <string name="dashboard_connect_retrieve_person_data_error">No se ha podido obtener la información de la persona</string>
     <string name="dashboard_connect_message_empty">El mensaje no puede ser vacío</string>
     <string name="dashboard_connect_generic_error">Ocurrió un error al intentar conectar con el usuario. Por favor volvé a intentarlo más tarde</string>
+
+    <string name="dashboard_network_disconnected_node_toast">Nodo desconectado</string>
+    <string name="dashboard_network_connected_node_toast">Nodo conectado</string>
 </resources>

@@ -84,4 +84,7 @@
     <string name="dashboard_connect_retrieve_person_data_error">ユーザー情報を読み出せませんでした</string>
     <string name="dashboard_connect_message_empty">メッセージの入力は必須です</string>
     <string name="dashboard_connect_generic_error">ユーザーと接続できませんでした。後ほど再度お試しください。</string>
+
+    <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
+    <string name="dashboard_network_connected_node_toast">Connected node</string>
 </resources>

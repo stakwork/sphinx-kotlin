@@ -22,9 +22,9 @@
     <!--  Message type invoices  -->
     <string name="request_expired">リクエストの有効期限が切れています</string>
     <string name="request_expiration">有効期限: %s</string>
-    <string name="invoice_paid_on">Invoice paid on %s</string>
-    <string name="alert_confirm_pay_chat_invoice_title">Confirm Paying Invoice</string>
-    <string name="alert_confirm_pay_chat_invoice_message">Are you sure you want to pay for this invoice?</string>
+    <string name="invoice_paid_on">%sに支払ったインボイス</string>
+    <string name="alert_confirm_pay_chat_invoice_title">インボイスに支払いをする</string>
+    <string name="alert_confirm_pay_chat_invoice_message">インボイスに支払いをしてよいですか？</string>
 
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">添付メッセージ</string>

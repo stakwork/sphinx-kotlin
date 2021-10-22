@@ -1,6 +1,7 @@
 package chat.sphinx.address_book.ui
 
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -18,8 +19,9 @@ import javax.inject.Inject
 @HiltViewModel
 internal class AddressBookViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    var addressBookNavigator: AddressBookNavigator,
     private val contactRepository: ContactRepository,
-): BaseViewModel<AddressBookViewState>(dispatchers, AddressBookViewState.ListMode(listOf()))
+): BaseViewModel<AddressBookViewState>(dispatchers, AddressBookViewState.ListMode(listOf(), listOf()))
 {
     private val addressBookViewStateContainer: AddressBookViewStateContainer by lazy {
         AddressBookViewStateContainer(dispatchers)

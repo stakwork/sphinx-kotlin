@@ -10,15 +10,19 @@ import kotlinx.coroutines.withContext
 import javax.annotation.meta.Exhaustive
 
 internal sealed class AddressBookViewState: ViewState<AddressBookViewState>() {
+
     abstract val list: List<Contact>
+    abstract val originalList: List<Contact>
 
     class ListMode(
-        override val list: List<Contact>
+        override val list: List<Contact>,
+        override val originalList: List<Contact>
     ): AddressBookViewState()
 
     class SearchMode(
         val filter: AddressBookFilter.FilterBy,
-        override val list: List<Contact>
+        override val list: List<Contact>,
+        override val originalList: List<Contact>
     ): AddressBookViewState()
 }
 
@@ -57,7 +61,7 @@ private inline fun List<Contact>.filterAddressBookContacts(
 // TODO: Need to preserve the original list when going between list and search modes.
 internal class AddressBookViewStateContainer(
     private val dispatchers: CoroutineDispatchers,
-): ViewStateContainer<AddressBookViewState>(AddressBookViewState.ListMode(emptyList())) {
+): ViewStateContainer<AddressBookViewState>(AddressBookViewState.ListMode(emptyList(), emptyList())) {
 
     override fun updateViewState(viewState: AddressBookViewState) {
         throw IllegalStateException("Must utilize updateAddressBookContacts method")
@@ -81,7 +85,7 @@ internal class AddressBookViewStateContainer(
                     addressBookContacts.sortedBy { it.alias?.value }
                 }
             } else {
-                viewStateFlow.value.list
+                viewStateFlow.value.originalList
             }
 
             @Exhaustive
@@ -92,7 +96,10 @@ internal class AddressBookViewStateContainer(
                     when (val viewState = viewStateFlow.value) {
                         is AddressBookViewState.ListMode -> {
                             super.updateViewState(
-                                AddressBookViewState.ListMode(sortedAddressBookContacts)
+                                AddressBookViewState.ListMode(
+                                    sortedAddressBookContacts,
+                                    sortedAddressBookContacts
+                                )
                             )
                         }
                         is AddressBookViewState.SearchMode -> {
@@ -102,7 +109,8 @@ internal class AddressBookViewStateContainer(
                                     withContext(dispatchers.default) {
                                         sortedAddressBookContacts
                                             .filterAddressBookContacts(viewState.filter.value)
-                                    }
+                                    },
+                                    sortedAddressBookContacts
                                 )
                             )
                         }
@@ -111,7 +119,10 @@ internal class AddressBookViewStateContainer(
                 }
                 is AddressBookFilter.ClearFilter -> {
                     super.updateViewState(
-                        AddressBookViewState.ListMode(sortedAddressBookContacts)
+                        AddressBookViewState.ListMode(
+                            sortedAddressBookContacts,
+                            sortedAddressBookContacts
+                        )
                     )
                 }
                 is AddressBookFilter.FilterBy -> {
@@ -121,7 +132,8 @@ internal class AddressBookViewStateContainer(
                             withContext(dispatchers.default) {
                                 sortedAddressBookContacts
                                     .filterAddressBookContacts(filter.value)
-                            }
+                            },
+                            sortedAddressBookContacts
                         )
                     )
                 }

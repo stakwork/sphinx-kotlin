@@ -23,6 +23,8 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
     object Attachment: FooterViewState() {
         override val showMenuIcon: Boolean
             get() = false
+        override val showSendIcon: Boolean
+            get() = true
         override val hintTextStringId: Int
             get() = R.string.edit_text_optional_message_hint
     }
