@@ -12,6 +12,11 @@
         <argument
             android:name="argMessageId"
             app:argType="long" />
+        <argument
+            android:name="argVideoFilepath"
+            android:defaultValue="@null"
+            app:nullable="true"
+            app:argType="string" />
     </activity>
 
 </navigation>
