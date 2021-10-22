@@ -57,10 +57,9 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         android:textSize="@dimen/default_form_edit_view_text_size"
-                        android:inputType="textVisiblePassword|textCapWords"
+                        android:inputType="textVisiblePassword"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
-                        android:text= "https://sphinx.relay"
                         tools:text= "https://sphinx.relay"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout

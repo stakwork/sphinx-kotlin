@@ -113,4 +113,10 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
             SphinxToastUtils(true).show(value, R.string.failed_updating_relay_url)
         }
     }
+
+    object InvalidMeetingServerUrl: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.invalid_meeting_server_url)
+        }
+    }
 }

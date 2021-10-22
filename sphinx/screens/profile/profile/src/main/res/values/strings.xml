@@ -34,4 +34,6 @@
     <string name="testing_new_relay_url">Testing new Relay URL…</string>
     <string name="failed_updating_relay_url">New URL test failed, restoring previous setting…</string>
     <string name="updating_relay_url_succeed">Relay URL successfully updated</string>
+
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
 </resources>

@@ -34,4 +34,6 @@
     <string name="testing_new_relay_url">Verificando la nueva URL de Relay…</string>
     <string name="failed_updating_relay_url">La verificación de la nueva URL de Relay ha fallado, restaurando configuración previa…</string>
     <string name="updating_relay_url_succeed">La URL de Relay ha sido actualizada con éxito</string>
+
+    <string name="invalid_meeting_server_url">Url de Meeting Server inválida</string>
 </resources>

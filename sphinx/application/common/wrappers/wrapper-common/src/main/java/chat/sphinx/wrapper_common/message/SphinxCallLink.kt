@@ -20,15 +20,19 @@ value class SphinxCallLink(val value: String) {
     companion object {
         const val REGEX = "https:\\/\\/.*\\/sphinx\\.call\\..*"
 
-        private const val DEFAULT_CALL_SERVER_URL = "https://jitsi.sphinx.chat"
+        const val CALL_SERVER_URL_KEY = "meeting-server-url"
+        const val DEFAULT_CALL_SERVER_URL = "https://jitsi.sphinx.chat"
         private const val CALL_ROOM_NAME = "sphinx.call"
 
         const val AUDIO_ONLY_PARAM = "config.startAudioOnly"
 
-        fun newCallInvite(startAudioOnly: Boolean): SphinxCallLink? {
+        fun newCallInvite(
+            customServerUrl: String?,
+            startAudioOnly: Boolean
+        ): SphinxCallLink? {
             val currentTime = System.currentTimeMillis()
             val audioOnlyParam = if (startAudioOnly) "#${AUDIO_ONLY_PARAM}=true" else ""
-            val linkString = "$DEFAULT_CALL_SERVER_URL/$CALL_ROOM_NAME.$currentTime$audioOnlyParam"
+            val linkString = "${customServerUrl ?: DEFAULT_CALL_SERVER_URL}/$CALL_ROOM_NAME.$currentTime$audioOnlyParam"
 
             return linkString.toSphinxCallLink()
         }
