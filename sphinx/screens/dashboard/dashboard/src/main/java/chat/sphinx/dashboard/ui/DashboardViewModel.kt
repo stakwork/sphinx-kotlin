@@ -55,6 +55,7 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
@@ -910,5 +911,21 @@ internal class DashboardViewModel @Inject constructor(
 
     override suspend fun onMotionSceneCompletion(value: Any) {
         // Unused
+    }
+
+    fun toastIfNetworkConnected(){
+        viewModelScope.launch(mainImmediate){
+            submitSideEffect(
+                DashboardSideEffect.Notify(
+                    app.getString(
+                        if (_networkStateFlow.value is Response.Error) {
+                            R.string.dashboard_network_disconnected_node_toast
+                        } else {
+                            R.string.dashboard_network_connected_node_toast
+                        }
+                    )
+                )
+            )
+        }
     }
 }
