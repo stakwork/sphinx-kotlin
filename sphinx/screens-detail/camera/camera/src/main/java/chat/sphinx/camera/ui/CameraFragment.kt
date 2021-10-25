@@ -416,9 +416,9 @@ internal class CameraFragment: SideEffectFragment<
         if (this::imageCapture.isInitialized) {
             val rotation = when {
                 orientation <= 45 -> Surface.ROTATION_90
-                orientation <= 135 -> Surface.ROTATION_0 // wrong
+                orientation <= 135 -> Surface.ROTATION_0
                 orientation <= 225 -> Surface.ROTATION_270
-                orientation <= 315 -> Surface.ROTATION_180 // wrong
+                orientation <= 315 -> Surface.ROTATION_180
                 else -> Surface.ROTATION_90
             }
             imageCapture.targetRotation = rotation
