@@ -413,7 +413,17 @@ internal class CameraFragment: SideEffectFragment<
     }
 
     private val orientationObserver = Observer<Int> { orientation ->
-
+        if (this::imageCapture.isInitialized) {
+            val rotation = when {
+                orientation <= 45 -> Surface.ROTATION_90
+                orientation <= 135 -> Surface.ROTATION_0 // wrong
+                orientation <= 225 -> Surface.ROTATION_270
+                orientation <= 315 -> Surface.ROTATION_180 // wrong
+                else -> Surface.ROTATION_90
+            }
+            imageCapture.targetRotation = rotation
+            videoCapture.targetRotation = rotation
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: CameraViewState) {
@@ -431,12 +441,12 @@ internal class CameraFragment: SideEffectFragment<
                     binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = false
 
                     try {
+                        startCamera(item)
+
                         orientationLiveData?.removeObserver(orientationObserver)
                         orientationLiveData = OrientationLiveData(binding.root.context, item.characteristics).apply {
                             observe(viewLifecycleOwner, orientationObserver)
                         }
-
-                        startCamera(item)
                     } catch (e: Exception) {}
                 } // TODO: handle null case with no camera available view
             }
