@@ -21,16 +21,26 @@
         tools:visibility="visible"
         />
 
-    <VideoView
-        android:id="@+id/video_view_camera_video_preview"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:scaleType="centerInside"
-        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_camera_media_preview_footer"
         tools:visibility="visible"
-        />
+        >
+        <VideoView
+            android:id="@+id/video_view_camera_video_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="centerInside"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_camera_media_preview_footer"
