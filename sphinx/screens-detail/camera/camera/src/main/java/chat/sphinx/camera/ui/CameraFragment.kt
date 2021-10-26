@@ -473,8 +473,10 @@ internal class CameraFragment: SideEffectFragment<
                                 if (viewState.media.exists()) {
                                     root.visible
                                     videoViewCameraVideoPreview.visible
+                                    imageViewCameraImagePreview.gone
 
                                     textViewCameraMediaPreviewUse.text = getString(R.string.camera_use_video)
+
                                     val uri = viewState.media.toUri()
                                     videoViewCameraVideoPreview.setVideoURI(uri)
                                     videoViewCameraVideoPreview.setOnPreparedListener { mediaPlayer ->
@@ -491,6 +493,8 @@ internal class CameraFragment: SideEffectFragment<
                                 if (viewState.media.exists()) {
                                     root.visible
                                     imageViewCameraImagePreview.visible
+                                    videoViewCameraVideoPreview.gone
+
                                     textViewCameraMediaPreviewUse.text = getString(R.string.camera_use_photo)
                                     imageLoader.load(imageViewCameraImagePreview, viewState.media)
                                 } else {
@@ -500,6 +504,7 @@ internal class CameraFragment: SideEffectFragment<
                             is CapturePreviewViewState.None -> {
                                 root.gone
                                 imageViewCameraImagePreview.setImageDrawable(null)
+                                videoViewCameraVideoPreview.setVideoURI(null)
                             }
                         }
                     }
