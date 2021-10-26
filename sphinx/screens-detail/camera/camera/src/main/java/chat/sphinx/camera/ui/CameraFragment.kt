@@ -70,7 +70,9 @@ internal class CameraFragment: SideEffectFragment<
 
     @Volatile
     private var rotationProvider: RotationProvider? = null
+    private var lastRotation: Int? = null
     private val rotationListener = { rotation: Int  ->
+        lastRotation = rotation
         imageCapture.targetRotation = rotation
         videoCapture.targetRotation = rotation
     }
@@ -291,7 +293,7 @@ internal class CameraFragment: SideEffectFragment<
                 .setTargetAspectRatio(screenAspectRatio())
                 // Set initial target rotation, we will have to call this again if rotation changes
                 // during the lifecycle of this use case
-                .setTargetRotation(binding.previewViewCamera.display.rotation)
+                .setTargetRotation(lastRotation ?: binding.previewViewCamera.display.rotation)
                 .build()
 
             val recorder = Recorder.Builder().build()
