@@ -1029,7 +1029,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             MediaType.Image("${MediaType.IMAGE}/$ext")
                         }
                         is CameraResponse.Video -> {
-                            MediaType.Image("${MediaType.VIDEO}/$ext")
+                            MediaType.Video("${MediaType.VIDEO}/$ext")
                         }
                     }
 
