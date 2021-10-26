@@ -39,7 +39,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_camera_media_preview_retake"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_double_layout_margin"
             android:fontFamily="@font/roboto_regular"
@@ -48,16 +48,33 @@
             android:textSize="17sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintEnd_toStartOf="@+id/image_view_video_preview_play_pause"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_video_preview_play_pause"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_podcast_pause_circle"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible"
+            />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_camera_media_preview_use"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/default_double_layout_margin"
             android:fontFamily="@font/roboto_regular"
+            android:gravity="end"
             android:textColor="@color/text"
             android:textSize="17sp"
+            app:layout_constraintStart_toEndOf="@+id/image_view_video_preview_play_pause"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

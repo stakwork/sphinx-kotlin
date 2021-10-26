@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.*
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
@@ -474,6 +475,7 @@ internal class CameraFragment: SideEffectFragment<
                                     root.visible
                                     videoViewCameraVideoPreview.visible
                                     imageViewCameraImagePreview.gone
+                                    imageViewVideoPreviewPlayPause.gone
 
                                     textViewCameraMediaPreviewUse.text = getString(R.string.camera_use_video)
 
@@ -481,6 +483,40 @@ internal class CameraFragment: SideEffectFragment<
                                     videoViewCameraVideoPreview.setVideoURI(uri)
                                     videoViewCameraVideoPreview.setOnPreparedListener { mediaPlayer ->
                                         mediaPlayer.start()
+                                        imageViewVideoPreviewPlayPause.visible
+                                        imageViewVideoPreviewPlayPause.setImageDrawable(
+                                            AppCompatResources.getDrawable(
+                                                requireContext(),
+                                                R.drawable.ic_podcast_pause_circle
+                                            )
+                                        )
+                                    }
+                                    videoViewCameraVideoPreview.setOnCompletionListener {
+                                        imageViewVideoPreviewPlayPause.setImageDrawable(
+                                            AppCompatResources.getDrawable(
+                                                requireContext(),
+                                                R.drawable.ic_podcast_play_circle
+                                            )
+                                        )
+                                    }
+                                    imageViewVideoPreviewPlayPause.setOnClickListener {
+                                        if (videoViewCameraVideoPreview.isPlaying) {
+                                            videoViewCameraVideoPreview.pause()
+                                            imageViewVideoPreviewPlayPause.setImageDrawable(
+                                                AppCompatResources.getDrawable(
+                                                    requireContext(),
+                                                    R.drawable.ic_podcast_play_circle
+                                                )
+                                            )
+                                        } else {
+                                            videoViewCameraVideoPreview.start()
+                                            imageViewVideoPreviewPlayPause.setImageDrawable(
+                                                AppCompatResources.getDrawable(
+                                                    requireContext(),
+                                                    R.drawable.ic_podcast_pause_circle
+                                                )
+                                            )
+                                        }
                                     }
                                     videoViewCameraVideoPreview.setOnErrorListener { _, _, _ ->
                                         return@setOnErrorListener true
@@ -494,6 +530,7 @@ internal class CameraFragment: SideEffectFragment<
                                     root.visible
                                     imageViewCameraImagePreview.visible
                                     videoViewCameraVideoPreview.gone
+                                    imageViewVideoPreviewPlayPause.gone
 
                                     textViewCameraMediaPreviewUse.text = getString(R.string.camera_use_photo)
                                     imageLoader.load(imageViewCameraImagePreview, viewState.media)
