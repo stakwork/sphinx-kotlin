@@ -14,6 +14,7 @@ import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.*
 import androidx.camera.video.VideoCapture
+import androidx.camera.view.RotationProvider
 import androidx.concurrent.futures.await
 import androidx.core.content.ContextCompat
 import androidx.core.net.toFile
@@ -21,7 +22,6 @@ import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera.R
@@ -33,7 +33,6 @@ import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
-import com.example.android.camera.utils.OrientationLiveData
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -46,6 +45,7 @@ import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 internal class CameraFragment: SideEffectFragment<
@@ -67,6 +67,13 @@ internal class CameraFragment: SideEffectFragment<
         get() = _binding!!
 
     override val viewModel: CameraViewModel by viewModels()
+
+    @Volatile
+    private var rotationProvider: RotationProvider? = null
+    private val rotationListener = { rotation: Int  ->
+        imageCapture.targetRotation = rotation
+        videoCapture.targetRotation = rotation
+    }
 
     private lateinit var imageCapture: ImageCapture
     private lateinit var videoCapture: VideoCapture<Recorder>
@@ -150,9 +157,6 @@ internal class CameraFragment: SideEffectFragment<
         viewModel
     }
 
-    @Volatile
-    private var orientationLiveData: OrientationLiveData? = null
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -180,6 +184,7 @@ internal class CameraFragment: SideEffectFragment<
                 )
             }
         }
+        rotationProvider = RotationProvider(binding.root.context)
 
         binding.includeCameraFooter.imageViewCameraFooterBackFront.setOnClickListener {
             @Exhaustive
@@ -413,20 +418,6 @@ internal class CameraFragment: SideEffectFragment<
         sideEffect.execute(requireActivity())
     }
 
-    private val orientationObserver = Observer<Int> { orientation ->
-        if (this::imageCapture.isInitialized) {
-            val rotation = when {
-                orientation <= 45 -> Surface.ROTATION_90
-                orientation <= 135 -> Surface.ROTATION_0
-                orientation <= 225 -> Surface.ROTATION_270
-                orientation <= 315 -> Surface.ROTATION_180
-                else -> Surface.ROTATION_90
-            }
-            imageCapture.targetRotation = rotation
-            videoCapture.targetRotation = rotation
-        }
-    }
-
     override suspend fun onViewStateFlowCollect(viewState: CameraViewState) {
 
         binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener(null)
@@ -442,12 +433,9 @@ internal class CameraFragment: SideEffectFragment<
                     binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = false
 
                     try {
+                        rotationProvider?.removeListener(rotationListener)
                         startCamera(item)
-
-                        orientationLiveData?.removeObserver(orientationObserver)
-                        orientationLiveData = OrientationLiveData(binding.root.context, item.characteristics).apply {
-                            observe(viewLifecycleOwner, orientationObserver)
-                        }
+                        rotationProvider?.addListener(mainThreadExecutor, rotationListener)
                     } catch (e: Exception) {}
                 } // TODO: handle null case with no camera available view
             }
