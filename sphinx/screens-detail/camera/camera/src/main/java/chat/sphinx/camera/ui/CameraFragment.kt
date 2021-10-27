@@ -24,6 +24,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
+import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.camera.R
 import chat.sphinx.camera.databinding.FragmentCameraBinding
 import chat.sphinx.camera.model.CameraItem
@@ -62,9 +63,7 @@ internal class CameraFragment: SideEffectFragment<
         Manifest.permission.RECORD_AUDIO,
     )
 
-    private var _binding: FragmentCameraBinding? = null
-    override val binding: FragmentCameraBinding
-        get() = _binding!!
+    override val binding: FragmentCameraBinding by viewBinding(FragmentCameraBinding::bind)
 
     override val viewModel: CameraViewModel by viewModels()
 
@@ -160,15 +159,6 @@ internal class CameraFragment: SideEffectFragment<
         viewModel
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentCameraBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -242,34 +232,6 @@ internal class CameraFragment: SideEffectFragment<
         }
     }
 
-    /**
-     * UpdateUI according to CameraX VideoRecordEvent type
-     */
-    private fun updateUI(event: VideoRecordEvent) {
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            binding.apply {
-                when (event) {
-                    is VideoRecordEvent.Start -> {
-                        includeCameraFooter.imageViewCameraFooterShutter.gone
-                        includeCameraFooter.imageViewCameraStop.visible
-                    }
-                    is VideoRecordEvent.Finalize-> {
-                        includeCameraFooter.imageViewCameraStop.gone
-                        includeCameraFooter.imageViewCameraFooterShutter.visible
-                    }
-                    else -> {
-                        return@launch
-                    }
-                }
-            }
-
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-    }
-
     private fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
@@ -310,7 +272,7 @@ internal class CameraFragment: SideEffectFragment<
                     preview
                 )
             } catch (exc: Exception) {
-                resetUIandState()
+                resetUIAndState()
             }
 
             binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener {
@@ -339,12 +301,7 @@ internal class CameraFragment: SideEffectFragment<
             }
             binding.includeCameraFooter.imageViewCameraFooterShutter.setOnLongClickListener { view ->
                 lifecycleScope.launch(viewModel.mainImmediate) {
-                    view.gone
-
                     if (activeRecording == null || recordingState is VideoRecordEvent.Finalize) {
-                        binding.includeCameraFooter.imageViewCameraFooterShutter.gone
-                        binding.includeCameraFooter.imageViewCameraStop.visible
-
                         startRecording()
                     }
                 }
@@ -352,16 +309,19 @@ internal class CameraFragment: SideEffectFragment<
                 return@setOnLongClickListener true
             }
 
-            binding.includeCameraFooter.imageViewCameraStop.setOnClickListener { view ->
-                view.gone
-                lifecycleScope.launch(viewModel.io) {
-                    if (activeRecording != null && recordingState !is VideoRecordEvent.Finalize) {
-                        activeRecording?.stop()
-                        activeRecording = null
-                        delay(200L)
+            binding.includeCameraFooter.imageViewCameraFooterShutter.setOnTouchListener { view, motionEvent ->
+                if (motionEvent.action == MotionEvent.ACTION_UP) {
+                    lifecycleScope.launch(viewModel.io) {
+                        if (activeRecording != null && recordingState !is VideoRecordEvent.Finalize) {
+                            activeRecording?.stop()
+                            activeRecording = null
+                            delay(200L)
+                        }
                     }
                 }
+                return@setOnTouchListener view.onTouchEvent(motionEvent)
             }
+
             // re-enable button to switch between back/front camera
             binding.includeCameraFooter.imageViewCameraFooterBackFront.isEnabled = true
         }
@@ -377,15 +337,40 @@ internal class CameraFragment: SideEffectFragment<
         return AspectRatio.RATIO_16_9
     }
 
+
+    /**
+     * UpdateUI according to CameraX VideoRecordEvent type
+     */
+    private fun updateUI(event: VideoRecordEvent) {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            binding.includeCameraFooter.imageViewCameraFooterShutter.setImageDrawable(
+                AppCompatResources.getDrawable(requireContext(),
+                    when (event) {
+                        is VideoRecordEvent.Start -> {
+                            R.drawable.ic_shutter_recording
+                        }
+                        is VideoRecordEvent.Finalize-> {
+                            R.drawable.ic_shutter
+                        }
+                        else -> {
+                            R.drawable.ic_shutter_recording
+                        }
+                    }
+                )
+            )
+        }
+    }
+
     /**
      * ResetUI (restart):
      *    in case binding failed, let's give it another change for re-try. In future cases
      *    we might fail and user get notified on the status
      */
-    private fun resetUIandState() {
+    private fun resetUIAndState() {
         lifecycleScope.launch(viewModel.mainImmediate) {
-            binding.includeCameraFooter.imageViewCameraFooterShutter.visible
-            binding.includeCameraFooter.imageViewCameraStop.gone
+            binding.includeCameraFooter.imageViewCameraFooterShutter.setImageDrawable(
+                AppCompatResources.getDrawable(requireContext(), R.drawable.ic_shutter)
+            )
 
             // TODO: Prompt user of reset
         }
@@ -422,10 +407,6 @@ internal class CameraFragment: SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: CameraViewState) {
-
-        binding.includeCameraFooter.imageViewCameraFooterShutter.setOnClickListener(null)
-        binding.includeCameraFooter.imageViewCameraStop.setOnClickListener(null)
-
         @Exhaustive
         when (viewState) {
             is CameraViewState.Idle -> {}
@@ -531,7 +512,10 @@ internal class CameraFragment: SideEffectFragment<
                             }
                             is CapturePreviewViewState.None -> {
                                 root.gone
+                                
                                 imageViewCameraImagePreview.setImageDrawable(null)
+
+                                videoViewCameraVideoPreview.stopPlayback()
                                 videoViewCameraVideoPreview.setVideoURI(null)
                             }
                         }
