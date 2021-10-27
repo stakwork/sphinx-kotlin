@@ -71,6 +71,7 @@ internal class CameraFragment: SideEffectFragment<
     @Volatile
     private var rotationProvider: RotationProvider? = null
     private var lastRotation: Int? = null
+    @SuppressLint("RestrictedApi")
     private val rotationListener = { rotation: Int  ->
         lastRotation = rotation
         imageCapture.targetRotation = rotation
@@ -546,15 +547,9 @@ internal class CameraFragment: SideEffectFragment<
 
         // Shut down our background executor
         cameraExecutor.shutdown()
-
-        // Unregister the broadcast receivers and listeners
-//        displayManager.unregisterDisplayListener(displayListener)
     }
 
     companion object {
-        private const val RATIO_4_3_VALUE = 4.0 / 3.0
-        private const val RATIO_16_9_VALUE = 16.0 / 9.0
-
         private const val IMAGE_EXTENSION = "jpg"
         private const val VIDEO_EXTENSION = "mp4"
     }
