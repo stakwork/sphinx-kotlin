@@ -528,7 +528,7 @@ SELECT *
 FROM messageDbo
 WHERE chat_id = :chat_id
 AND type IN (7, 8, 9)
-AND muid IN :muids;
+AND (muid IN :muids OR original_muid IN :muids);
 
 messageGetAllByUUID:
 SELECT *
