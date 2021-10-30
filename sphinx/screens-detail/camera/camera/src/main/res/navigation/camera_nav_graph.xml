@@ -10,5 +10,4 @@
         android:name="chat.sphinx.camera.ui.CameraFragment"
         tools:layout="@layout/fragment_camera" >
     </fragment>
-
 </navigation>

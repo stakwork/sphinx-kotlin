@@ -4,4 +4,6 @@
     <string name="camera_retake">Tomar de nuevo</string>
     <string name="camera_use_photo">Usar foto</string>
     <string name="camera_cancel">Cancelar</string>
+    <string name="camera_use_video">Usar video</string>
+    <string name="camera_shutter_instruction">Toca para foto, mantén presionado para video</string>
 </resources>

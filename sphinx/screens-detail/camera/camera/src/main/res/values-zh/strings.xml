@@ -4,4 +4,6 @@
     <string name="camera_retake">重拍</string>
     <string name="camera_use_photo">用圖片</string>
     <string name="camera_cancel">取消</string>
+    <string name="camera_use_video">使用视频</string>
+    <string name="camera_shutter_instruction">点按图片，按住视频</string>
 </resources>

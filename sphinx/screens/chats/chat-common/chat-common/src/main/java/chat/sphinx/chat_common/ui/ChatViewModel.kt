@@ -1022,12 +1022,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             when (response) {
                 is Response.Error -> {}
                 is Response.Success -> {
-
                     val ext = response.value.value.extension
 
                     val mediaType: MediaType = when (response.value) {
                         is CameraResponse.Image -> {
                             MediaType.Image("${MediaType.IMAGE}/$ext")
+                        }
+                        is CameraResponse.Video -> {
+                            MediaType.Video("${MediaType.VIDEO}/$ext")
                         }
                     }
 
@@ -1165,6 +1167,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     val mediaType: MediaType = when (response.value) {
                         is CameraResponse.Image -> {
                             MediaType.Image("${MediaType.IMAGE}/$ext")
+                        }
+                        is CameraResponse.Video -> {
+                            MediaType.Image("${MediaType.VIDEO}/$ext")
                         }
                     }
 
