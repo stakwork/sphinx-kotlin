@@ -18,7 +18,6 @@ import chat.sphinx.concept_view_model_coordinator.RequestCancelled
 import chat.sphinx.concept_view_model_coordinator.ResponseHolder
 import chat.sphinx.feature_view_model_coordinator.RequestCatcher
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.logger.SphinxLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -32,7 +31,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 
 internal suspend inline fun CameraViewModel.collectImagePreviewViewState(
     crossinline action: suspend (value: CapturePreviewViewState) -> Unit
@@ -43,7 +41,7 @@ internal inline val CameraViewModel.currentCapturePreviewViewState: CapturePrevi
     get() = cameraPreviewViewStateContainer.value
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun CameraViewModel.updateImagePreviewViewState(viewState: CapturePreviewViewState) =
+internal inline fun CameraViewModel.updateMediaPreviewViewState(viewState: CapturePreviewViewState) =
     cameraPreviewViewStateContainer.updateViewState(viewState)
 
 @HiltViewModel
@@ -53,7 +51,6 @@ internal class CameraViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val cameraCoordinator: CameraViewModelCoordinator,
     private val mediaCacheHandler: MediaCacheHandler,
-    private val LOG: SphinxLogger,
 ): SideEffectViewModel<
         FragmentActivity,
         CameraSideEffect,
@@ -88,11 +85,11 @@ internal class CameraViewModel @Inject constructor(
                                     requestHolder,
                                     when (viewState) {
                                         is CapturePreviewViewState.Preview.ImagePreview -> {
-                                            CameraResponse.Image(viewState.value)
+                                            CameraResponse.Image(viewState.media)
                                         }
-//                                        is CapturePreviewViewState.Preview.VideoPreview -> {
-//                                            CameraResponse.Video(viewState.value)
-//                                        }
+                                        is CapturePreviewViewState.Preview.VideoPreview -> {
+                                            CameraResponse.Video(viewState.media)
+                                        }
                                     }
                                 )
                             ),
@@ -190,10 +187,10 @@ internal class CameraViewModel @Inject constructor(
         ViewStateContainer(CapturePreviewViewState.None)
     }
 
-    fun deleteImage(image: File) {
+    fun deleteMedia(media: File) {
         viewModelScope.launch(io) {
-            if (image.isFile) {
-                image.delete()
+            if (media.isFile) {
+                media.delete()
             }
         }
     }
@@ -212,11 +209,19 @@ internal class CameraViewModel @Inject constructor(
             @Exhaustive
             when (val vs = currentCapturePreviewViewState) {
                 is CapturePreviewViewState.None -> {}
-                is CapturePreviewViewState.Preview -> {
+                is CapturePreviewViewState.Preview.ImagePreview -> {
                     // user hit back button, so no file was returned
                     applicationScope.launch(io) {
                         try {
-                            vs.value.delete()
+                            vs.media.delete()
+                        } catch (e: Exception) {}
+                    }
+                }
+                is CapturePreviewViewState.Preview.VideoPreview -> {
+                    // user hit back button, so no file was returned
+                    applicationScope.launch(io) {
+                        try {
+                            vs.media.delete()
                         } catch (e: Exception) {}
                     }
                 }

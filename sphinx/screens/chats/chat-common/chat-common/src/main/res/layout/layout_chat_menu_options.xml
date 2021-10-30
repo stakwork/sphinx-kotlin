@@ -21,8 +21,6 @@
             android:id="@+id/image_view_menu_option_camera_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
-            android:paddingStart="@dimen/option_icon_left_padding"
-            android:paddingEnd="@dimen/option_icon_right_padding"
             android:src="@drawable/ic_camera"
             android:tint="@color/mainBottomIcons"
             app:layout_constraintStart_toStartOf="parent" />
@@ -35,6 +33,7 @@
             android:text="@string/camera_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
+            android:layout_marginStart="@dimen/option_text_left_margin"
             app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_camera_icon" />
 
         <View
@@ -58,8 +57,6 @@
             android:id="@+id/image_view_menu_option_media_library_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
-            android:paddingLeft="@dimen/option_icon_left_padding"
-            android:paddingRight="@dimen/option_icon_right_padding"
             android:src="@drawable/ic_media_library"
             android:tint="@color/mainBottomIcons"
             app:layout_constraintStart_toStartOf="parent" />
@@ -72,6 +69,7 @@
             android:text="@string/library_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
+            android:layout_marginStart="@dimen/option_text_left_margin"
             app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_media_library_icon" />
 
         <View
@@ -96,10 +94,10 @@
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:fontFamily="@font/material_icons_regular"
-            android:gravity="start|center"
+            android:gravity="center"
             android:text="@string/material_icon_name_gif"
             android:textColor="@color/mainBottomIcons"
-            android:textSize="29sp"
+            android:textSize="40sp"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -110,6 +108,7 @@
             android:text="@string/gif_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
+            android:layout_marginStart="@dimen/option_text_left_margin"
             app:layout_constraintStart_toEndOf="@+id/text_view_menu_option_gif_icon" />
 
         <View
@@ -134,10 +133,10 @@
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
             android:fontFamily="@font/material_icons_regular"
-            android:gravity="start|center"
+            android:gravity="center"
             android:text="@string/material_icon_name_file_attachment"
             android:textColor="@color/mainBottomIcons"
-            android:textSize="28sp"
+            android:textSize="32sp"
             app:layout_constraintStart_toStartOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -148,6 +147,7 @@
             android:text="@string/file_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
+            android:layout_marginStart="@dimen/option_text_left_margin"
             app:layout_constraintStart_toEndOf="@+id/text_view_menu_option_file_icon" />
 
         <View
@@ -171,8 +171,6 @@
             android:id="@+id/image_view_menu_option_paid_message_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
-            android:paddingLeft="@dimen/option_icon_left_padding"
-            android:paddingRight="@dimen/option_icon_right_padding"
             android:src="@drawable/ic_paid_message"
             android:tint="@color/mainBottomIcons"
             app:layout_constraintStart_toStartOf="parent" />
@@ -185,6 +183,7 @@
             android:text="@string/paid_message_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
+            android:layout_marginStart="@dimen/option_text_left_margin"
             app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_paid_message_icon" />
 
         <View
@@ -208,8 +207,8 @@
             android:id="@+id/image_view_menu_option_payment_request_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
-            android:paddingLeft="@dimen/option_icon_left_padding"
-            android:paddingRight="@dimen/option_icon_right_padding"
+            android:paddingLeft="@dimen/option_icon_arrow_padding"
+            android:paddingRight="@dimen/option_icon_arrow_padding"
             android:src="@drawable/ic_request"
             android:tint="@color/mainBottomIcons"
             app:layout_constraintStart_toStartOf="parent" />
@@ -222,6 +221,7 @@
             android:text="@string/request_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
+            android:layout_marginStart="@dimen/option_text_left_margin"
             app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_payment_request_icon" />
 
         <View
@@ -245,8 +245,8 @@
             android:id="@+id/image_view_menu_option_payment_send_icon"
             android:layout_width="@dimen/option_icon_width"
             android:layout_height="match_parent"
-            android:paddingLeft="@dimen/option_icon_left_padding"
-            android:paddingRight="@dimen/option_icon_right_padding"
+            android:paddingLeft="@dimen/option_icon_arrow_padding"
+            android:paddingRight="@dimen/option_icon_arrow_padding"
             android:src="@drawable/ic_send"
             android:tint="@color/mainBottomIcons"
             app:layout_constraintStart_toStartOf="parent" />
@@ -259,6 +259,7 @@
             android:text="@string/send_attachment_option"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/option_title_text_size"
+            android:layout_marginStart="@dimen/option_text_left_margin"
             app:layout_constraintStart_toEndOf="@+id/image_view_menu_option_payment_send_icon" />
 
         <View

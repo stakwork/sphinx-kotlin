@@ -3,8 +3,8 @@ package chat.sphinx.camera.navigation
 import androidx.navigation.NavController
 import chat.sphinx.camera.R
 import chat.sphinx.detail_resources.DetailNavOptions
-import io.matthewnelson.android_feature_navigation.R as nav_R
 import io.matthewnelson.concept_navigation.NavigationRequest
+import io.matthewnelson.android_feature_navigation.R as nav_R
 
 internal class ToCameraDetail: NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
@@ -12,7 +12,6 @@ internal class ToCameraDetail: NavigationRequest<NavController>() {
             controller.getBackStackEntry(R.id.navigation_camera_fragment)
             return
         } catch (e: IllegalArgumentException) {}
-
         controller.navigate(
             R.id.camera_nav_graph,
             null,

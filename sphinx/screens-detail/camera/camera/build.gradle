@@ -52,9 +52,11 @@ dependencies {
     implementation deps.androidx.camera.camera2
     implementation deps.androidx.camera.lifecycle
     implementation deps.androidx.camera.view
+    implementation deps.androidx.camera.video
     implementation deps.androidx.camera.extensions
     implementation deps.google.material
 
+    implementation deps.androidx.concurrent.futures
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt

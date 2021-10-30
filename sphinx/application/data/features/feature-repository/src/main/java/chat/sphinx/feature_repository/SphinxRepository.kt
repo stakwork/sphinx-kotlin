@@ -1656,6 +1656,11 @@ abstract class SphinxRepository(
                                                 mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
                                             )
                                         }
+                                        dbo.original_muid?.let { original_muid ->
+                                            purchaseItemsMap[original_muid]?.add(
+                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
+                                            )
+                                        }
                                     }
                                 }
                         }
