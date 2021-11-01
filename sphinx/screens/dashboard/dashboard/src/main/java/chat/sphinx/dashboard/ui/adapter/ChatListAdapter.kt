@@ -16,13 +16,9 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutDashboardChatHolderBinding
-import chat.sphinx.dashboard.ui.DashboardViewModel
+import chat.sphinx.dashboard.ui.ChatListViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
-import chat.sphinx.resources.getRandomHexCode
-import chat.sphinx.resources.setInitialsColor
-import chat.sphinx.resources.setTextColorExt
-import chat.sphinx.resources.setTextFont
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.DateTime
@@ -48,7 +44,7 @@ internal class ChatListAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: DashboardViewModel,
+    private val viewModel: ChatListViewModel,
     private val userColorsHelper: UserColorsHelper
 ): RecyclerView.Adapter<ChatListAdapter.ChatViewHolder>(), DefaultLifecycleObserver {
 

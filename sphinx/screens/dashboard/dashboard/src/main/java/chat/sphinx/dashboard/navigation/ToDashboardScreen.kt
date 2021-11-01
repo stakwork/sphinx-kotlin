@@ -4,7 +4,7 @@ import androidx.annotation.IdRes
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import chat.sphinx.dashboard.R
-import chat.sphinx.dashboard.ui.DashboardFragmentArgs
+import chat.sphinx.dashboard.ui.ChatListFragmentArgs
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 
@@ -20,7 +20,7 @@ class ToDashboardScreen(
                 .build()
         } ?: DefaultNavOptions.defaultAnimsBuilt
 
-        val args = DashboardFragmentArgs.Builder(updateBackgroundLoginTime)
+        val args = ChatListFragmentArgs.Builder(updateBackgroundLoginTime)
         args.argDeepLink = deepLink
 
         controller.navigate(

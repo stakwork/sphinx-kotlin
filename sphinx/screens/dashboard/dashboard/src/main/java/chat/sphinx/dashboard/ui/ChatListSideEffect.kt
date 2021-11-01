@@ -7,12 +7,12 @@ import chat.sphinx.resources.SphinxToastUtils
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.sideeffect.SideEffect
 
-sealed class DashboardSideEffect: SideEffect<Context>() {
+sealed class ChatListSideEffect: SideEffect<Context>() {
 
     class Notify(
         private val msg: String,
         private val notificationLengthLong: Boolean = false
-    ): DashboardSideEffect() {
+    ): ChatListSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils(toastLengthLong = notificationLengthLong).show(value, msg)
         }
@@ -21,7 +21,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
     class AlertConfirmPayInvite(
         private val amount: Long,
         private val callback: () -> Unit
-    ): DashboardSideEffect() {
+    ): ChatListSideEffect() {
         override suspend fun execute(value: Context) {
             val successMessage = value.getString(R.string.alert_confirm_pay_invite_message, amount)
 
@@ -40,7 +40,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
         private val amount: Long,
         private val memo: String = "",
         private val callback: () -> Unit
-    ): DashboardSideEffect() {
+    ): ChatListSideEffect() {
         override suspend fun execute(value: Context) {
             val memo = if (memo.isEmpty()) "-" else memo
             val successMessage = value.getString(R.string.alert_confirm_pay_invoice_message, amount, memo)
@@ -58,7 +58,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
 
     class AlertConfirmDeleteInvite(
         private val callback: () -> Unit
-    ): DashboardSideEffect() {
+    ): ChatListSideEffect() {
         override suspend fun execute(value: Context) {
             val builder = AlertDialog.Builder(value)
             builder.setTitle(value.getString(R.string.alert_confirm_delete_invite_title))

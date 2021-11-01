@@ -6,33 +6,26 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
-import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.dashboard.BuildConfig
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.adapter.DashboardChat
 import chat.sphinx.dashboard.ui.viewstates.*
-import chat.sphinx.dashboard.ui.viewstates.ChatFilter
-import chat.sphinx.dashboard.ui.viewstates.ChatViewState
-import chat.sphinx.dashboard.ui.viewstates.ChatViewStateContainer
-import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -55,7 +48,6 @@ import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
@@ -72,20 +64,20 @@ import javax.inject.Inject
 import kotlin.collections.ArrayList
 
 
-internal suspend inline fun DashboardViewModel.collectChatViewState(
+internal suspend inline fun ChatListViewModel.collectChatViewState(
     crossinline action: suspend (value: ChatViewState) -> Unit
 ): Unit =
     chatViewStateContainer.collect { action(it) }
 
-internal val DashboardViewModel.currentChatViewState: ChatViewState
+internal val ChatListViewModel.currentChatViewState: ChatViewState
     get() = chatViewStateContainer.value
 
-internal suspend inline fun DashboardViewModel.updateChatListFilter(filter: ChatFilter) {
+internal suspend inline fun ChatListViewModel.updateChatListFilter(filter: ChatFilter) {
     chatViewStateContainer.updateDashboardChats(null, filter)
 }
 
 @HiltViewModel
-internal class DashboardViewModel @Inject constructor(
+internal class ChatListViewModel @Inject constructor(
     private val app: Application,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
@@ -116,12 +108,12 @@ internal class DashboardViewModel @Inject constructor(
 ): MotionLayoutViewModel<
         Any,
         Context,
-        DashboardSideEffect,
+        ChatListSideEffect,
         NavDrawerViewState
         >(dispatchers, NavDrawerViewState.Closed)
 {
 
-    private val args: DashboardFragmentArgs by handler.navArgs()
+    private val args: ChatListFragmentArgs by handler.navArgs()
 
     val newVersionAvailable: MutableStateFlow<Boolean> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow<Boolean>(false)
@@ -221,7 +213,7 @@ internal class DashboardViewModel @Inject constructor(
 
                         if (amount != null) {
                             submitSideEffect(
-                                DashboardSideEffect.AlertConfirmPayLightningPaymentRequest(
+                                ChatListSideEffect.AlertConfirmPayLightningPaymentRequest(
                                     amount.value,
                                     bolt11.getMemo()
                                 ) {
@@ -230,7 +222,7 @@ internal class DashboardViewModel @Inject constructor(
                             )
                         } else {
                             submitSideEffect(
-                                DashboardSideEffect.Notify(
+                                ChatListSideEffect.Notify(
                                     app.getString(R.string.payment_request_missing_amount),
                                     true
                                 )
@@ -307,7 +299,7 @@ internal class DashboardViewModel @Inject constructor(
                     )
 
                     submitSideEffect(
-                        DashboardSideEffect.Notify(
+                        ChatListSideEffect.Notify(
                             app.getString(R.string.dashboard_connect_retrieve_person_data_error)
                         )
                     )
@@ -335,7 +327,7 @@ internal class DashboardViewModel @Inject constructor(
 
             if (message.isNullOrEmpty()) {
                 submitSideEffect(
-                    DashboardSideEffect.Notify(
+                    ChatListSideEffect.Notify(
                         app.getString(R.string.dashboard_connect_message_empty)
                     )
                 )
@@ -388,7 +380,7 @@ internal class DashboardViewModel @Inject constructor(
             }
 
             submitSideEffect(
-                DashboardSideEffect.Notify(errorMessage)
+                ChatListSideEffect.Notify(errorMessage)
             )
 
             deepLinkPopupViewStateContainer.updateViewState(
@@ -419,7 +411,7 @@ internal class DashboardViewModel @Inject constructor(
                 when (response) {
                     is Response.Error -> {
                         submitSideEffect(
-                            DashboardSideEffect.Notify(response.cause.message)
+                            ChatListSideEffect.Notify(response.cause.message)
                         )
                     }
                     is Response.Success -> {
@@ -434,7 +426,7 @@ internal class DashboardViewModel @Inject constructor(
 
             } else {
                 submitSideEffect(
-                    DashboardSideEffect.Notify(
+                    ChatListSideEffect.Notify(
                         app.getString(R.string.dashboard_authorize_generic_error)
                     )
                 )
@@ -655,17 +647,17 @@ internal class DashboardViewModel @Inject constructor(
                 when (loadResponse) {
                     is LoadResponse.Loading -> {
                         submitSideEffect(
-                            DashboardSideEffect.Notify(app.getString(R.string.attempting_payment_request), true)
+                            ChatListSideEffect.Notify(app.getString(R.string.attempting_payment_request), true)
                         )
                     }
                     is Response.Error -> {
                         submitSideEffect(
-                            DashboardSideEffect.Notify(app.getString(R.string.failed_to_pay_request), true)
+                            ChatListSideEffect.Notify(app.getString(R.string.failed_to_pay_request), true)
                         )
                     }
                     is Response.Success -> {
                         submitSideEffect(
-                            DashboardSideEffect.Notify(app.getString(R.string.successfully_paid_invoice), true)
+                            ChatListSideEffect.Notify(app.getString(R.string.successfully_paid_invoice), true)
                         )
                     }
                 }
@@ -876,14 +868,14 @@ internal class DashboardViewModel @Inject constructor(
         getAccountBalance().firstOrNull()?.let { balance ->
             if (balance.balance.value < (invite.price?.value ?: 0)) {
                 submitSideEffect(
-                    DashboardSideEffect.Notify(app.getString(R.string.pay_invite_balance_too_low))
+                    ChatListSideEffect.Notify(app.getString(R.string.pay_invite_balance_too_low))
                 )
                 return
             }
         }
 
         submitSideEffect(
-            DashboardSideEffect.AlertConfirmPayInvite(invite.price?.value ?: 0) {
+            ChatListSideEffect.AlertConfirmPayInvite(invite.price?.value ?: 0) {
                 viewModelScope.launch(mainImmediate) {
                     repositoryDashboard.payForInvite(invite)
                 }
@@ -893,7 +885,7 @@ internal class DashboardViewModel @Inject constructor(
 
     suspend fun deleteInvite(invite: Invite) {
         submitSideEffect(
-            DashboardSideEffect.AlertConfirmDeleteInvite() {
+            ChatListSideEffect.AlertConfirmDeleteInvite() {
                 viewModelScope.launch(mainImmediate) {
                     repositoryDashboard.deleteInvite(invite)
                 }
@@ -916,7 +908,7 @@ internal class DashboardViewModel @Inject constructor(
     fun toastIfNetworkConnected(){
         viewModelScope.launch(mainImmediate){
             submitSideEffect(
-                DashboardSideEffect.Notify(
+                ChatListSideEffect.Notify(
                     app.getString(
                         if (_networkStateFlow.value is Response.Error) {
                             R.string.dashboard_network_disconnected_node_toast

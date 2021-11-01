@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/body"
     app:layoutDescription="@xml/motion_scene_dashboard"
-    tools:context=".ui.DashboardFragment">
+    tools:context=".ui.ChatListFragment">
 
     <include
         android:id="@+id/layout_dashboard_header"

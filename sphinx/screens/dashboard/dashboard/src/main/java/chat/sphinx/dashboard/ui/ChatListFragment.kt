@@ -62,12 +62,12 @@ private inline fun FragmentDashboardBinding.searchBarClearFocus() {
 }
 
 @AndroidEntryPoint
-internal class DashboardFragment : MotionLayoutFragment<
+internal class ChatListFragment : MotionLayoutFragment<
         Any,
         Context,
-        DashboardSideEffect,
+        ChatListSideEffect,
         NavDrawerViewState,
-        DashboardViewModel,
+        ChatListViewModel,
         FragmentDashboardBinding
         >(R.layout.fragment_dashboard), SwipeRefreshLayout.OnRefreshListener
 {
@@ -79,7 +79,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var userColorsHelper: UserColorsHelper
 
-    override val viewModel: DashboardViewModel by viewModels()
+    override val viewModel: ChatListViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -558,7 +558,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         return arrayOf(binding.layoutMotionDashboard)
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: DashboardSideEffect) {
+    override suspend fun onSideEffectCollect(sideEffect: ChatListSideEffect) {
         sideEffect.execute(binding.root.context)
     }
 }
