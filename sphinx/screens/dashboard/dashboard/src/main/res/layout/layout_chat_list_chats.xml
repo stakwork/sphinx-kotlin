@@ -15,7 +15,7 @@
             android:id="@+id/recycler_view_chats"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/layout_dashboard_chat_holder" />
+            tools:listitem="@layout/layout_chat_list_chat_holder" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

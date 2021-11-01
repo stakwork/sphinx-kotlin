@@ -58,7 +58,7 @@ import javax.inject.Inject
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun FragmentChatListBinding.searchBarClearFocus() {
-    layoutDashboardSearchBar.editTextDashboardSearch.clearFocus()
+    layoutSearchBar.editTextDashboardSearch.clearFocus()
 }
 
 @AndroidEntryPoint
@@ -132,14 +132,14 @@ internal class ChatListFragment : MotionLayoutFragment<
     }
 
     override fun onRefresh() {
-        binding.layoutDashboardChats.layoutSwipeRefreshChats.isRefreshing = false
+        binding.layoutChatListChats.layoutSwipeRefreshChats.isRefreshing = false
         viewModel.networkRefresh()
     }
 
     private fun setupChats() {
-        binding.layoutDashboardChats.layoutSwipeRefreshChats.setOnRefreshListener(this)
+        binding.layoutChatListChats.layoutSwipeRefreshChats.setOnRefreshListener(this)
 
-        binding.layoutDashboardChats.recyclerViewChats.apply {
+        binding.layoutChatListChats.recyclerViewChats.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             val chatListAdapter = ChatListAdapter(
                 this,
@@ -189,7 +189,7 @@ internal class ChatListFragment : MotionLayoutFragment<
     }
 
     private fun setupSearch() {
-        binding.layoutDashboardSearchBar.apply {
+        binding.layoutSearchBar.apply {
             editTextDashboardSearch.addTextChangedListener { editable ->
                 buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
 
@@ -421,7 +421,7 @@ internal class ChatListFragment : MotionLayoutFragment<
             }
             NavDrawerViewState.Open -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
-                binding.layoutDashboardSearchBar.editTextDashboardSearch.let { editText ->
+                binding.layoutSearchBar.editTextDashboardSearch.let { editText ->
                     binding.root.context.inputMethodManager?.let { imm ->
                         if (imm.isActive(editText)) {
                             imm.hideSoftInputFromWindow(editText.windowToken, 0)

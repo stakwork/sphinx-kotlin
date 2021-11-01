@@ -15,7 +15,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
-import chat.sphinx.dashboard.databinding.LayoutDashboardChatHolderBinding
+import chat.sphinx.dashboard.databinding.LayoutChatListChatHolderBinding
 import chat.sphinx.dashboard.ui.ChatListViewModel
 import chat.sphinx.dashboard.ui.collectChatViewState
 import chat.sphinx.dashboard.ui.currentChatViewState
@@ -173,7 +173,7 @@ internal class ChatListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatListAdapter.ChatViewHolder {
-        val binding = LayoutDashboardChatHolderBinding.inflate(
+        val binding = LayoutChatListChatHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -198,7 +198,7 @@ internal class ChatListAdapter(
     }
 
     inner class ChatViewHolder(
-        private val binding: LayoutDashboardChatHolderBinding
+        private val binding: LayoutChatListChatHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var disposable: Disposable? = null
