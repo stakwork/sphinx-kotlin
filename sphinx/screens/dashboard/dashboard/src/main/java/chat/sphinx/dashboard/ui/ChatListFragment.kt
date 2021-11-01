@@ -26,7 +26,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
-import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
+import chat.sphinx.dashboard.databinding.FragmentChatListBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
 import chat.sphinx.dashboard.ui.viewstates.ChatFilter
@@ -57,7 +57,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("NOTHING_TO_INLINE")
-private inline fun FragmentDashboardBinding.searchBarClearFocus() {
+private inline fun FragmentChatListBinding.searchBarClearFocus() {
     layoutDashboardSearchBar.editTextDashboardSearch.clearFocus()
 }
 
@@ -68,8 +68,8 @@ internal class ChatListFragment : MotionLayoutFragment<
         ChatListSideEffect,
         NavDrawerViewState,
         ChatListViewModel,
-        FragmentDashboardBinding
-        >(R.layout.fragment_dashboard), SwipeRefreshLayout.OnRefreshListener
+        FragmentChatListBinding
+        >(R.layout.fragment_chat_list), SwipeRefreshLayout.OnRefreshListener
 {
     @Inject
     @Suppress("ProtectedInFinal")
@@ -80,7 +80,7 @@ internal class ChatListFragment : MotionLayoutFragment<
     protected lateinit var userColorsHelper: UserColorsHelper
 
     override val viewModel: ChatListViewModel by viewModels()
-    override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
+    override val binding: FragmentChatListBinding by viewBinding(FragmentChatListBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -549,7 +549,7 @@ internal class ChatListFragment : MotionLayoutFragment<
 
     override fun onViewCreatedRestoreMotionScene(
         viewState: NavDrawerViewState,
-        binding: FragmentDashboardBinding
+        binding: FragmentChatListBinding
     ) {
         viewState.restoreMotionScene(binding.layoutMotionDashboard)
     }

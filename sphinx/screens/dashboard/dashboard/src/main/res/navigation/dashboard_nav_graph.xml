@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/navigation_dashboard_fragment"
         android:name="chat.sphinx.dashboard.ui.ChatListFragment"
-        tools:layout="@layout/fragment_dashboard" >
+        tools:layout="@layout/fragment_chat_list" >
 
         <argument
             android:name="updateBackgroundLoginTime"
