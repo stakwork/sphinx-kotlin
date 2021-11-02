@@ -2,14 +2,10 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -25,7 +21,6 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
-import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
@@ -35,10 +30,8 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
-import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
-import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -47,16 +40,10 @@ import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-@Suppress("NOTHING_TO_INLINE")
-private inline fun FragmentDashboardBinding.searchBarClearFocus() {
-    layoutSearchBar.editTextDashboardSearch.clearFocus()
-}
 
 @AndroidEntryPoint
 internal class DashboardFragment : MotionLayoutFragment<
@@ -91,7 +78,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         setupViewPager()
         setupDashboardHeader()
-        setupSearch()
         setupNavBar()
         setupNavDrawer()
         setupPopups()
@@ -111,7 +97,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             if (viewModel.currentViewState is NavDrawerViewState.Open) {
                 viewModel.updateViewState(NavDrawerViewState.Closed)
             } else {
-                binding.searchBarClearFocus()
                 super.handleOnBackPressed()
             }
         }
@@ -135,8 +120,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             activity.supportFragmentManager)
         val viewPager: ViewPager = binding.viewPagerDashboardTabs
         viewPager.adapter = sectionsPagerAdapter
-        val tabs: TabLayout = binding.layoutDashboardHeader.tabLayoutDashboardTabs
-        tabs.setupWithViewPager(viewPager)
     }
 
     private fun setupDashboardHeader() {
@@ -168,45 +151,6 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    private fun setupSearch() {
-        binding.layoutSearchBar.apply {
-            editTextDashboardSearch.addTextChangedListener { editable ->
-                buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
-
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.updateChatListFilter(
-                        if (editable.toString().isNotEmpty()) {
-                            ChatFilter.FilterBy(editable.toString())
-                        } else {
-                            ChatFilter.ClearFilter
-                        }
-                    )
-                }
-            }
-
-            editTextDashboardSearch.setOnEditorActionListener(object: TextView.OnEditorActionListener {
-                override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
-                    if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
-                        editTextDashboardSearch.let { editText ->
-                            binding.root.context.inputMethodManager?.let { imm ->
-                                if (imm.isActive(editText)) {
-                                    imm.hideSoftInputFromWindow(editText.windowToken, 0)
-                                    editText.clearFocus()
-                                }
-                            }
-                        }
-                        return true
-                    }
-                    return false
-                }
-            })
-
-            buttonDashboardSearchClear.setOnClickListener {
-                editTextDashboardSearch.setText("")
-            }
-        }
-    }
-
     private fun setupNavBar() {
         binding.layoutDashboardNavBar.let { navBar ->
 
@@ -214,19 +158,15 @@ internal class DashboardFragment : MotionLayoutFragment<
                 .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
 
             navBar.navBarButtonPaymentReceive.setOnClickListener {
-                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
             }
             navBar.navBarButtonTransactions.setOnClickListener {
-                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toTransactionsDetail() }
             }
             navBar.navBarButtonScanner.setOnClickListener {
-                binding.searchBarClearFocus()
                 viewModel.toScanner()
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
-                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail() }
             }
         }
@@ -388,11 +328,6 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        binding.searchBarClearFocus()
-    }
-
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
         @Exhaustive
         when (viewState) {
@@ -401,15 +336,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
             NavDrawerViewState.Open -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
-                binding.layoutSearchBar.editTextDashboardSearch.let { editText ->
-                    binding.root.context.inputMethodManager?.let { imm ->
-                        if (imm.isActive(editText)) {
-                            imm.hideSoftInputFromWindow(editText.windowToken, 0)
-                            delay(250L)
-                        }
-                    }
-                    binding.searchBarClearFocus()
-                }
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)

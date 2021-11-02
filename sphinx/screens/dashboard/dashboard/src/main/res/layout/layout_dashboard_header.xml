@@ -96,12 +96,4 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout_dashboard_tabs"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/default_header_height"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_header_bar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
 </androidx.constraintlayout.widget.ConstraintLayout>

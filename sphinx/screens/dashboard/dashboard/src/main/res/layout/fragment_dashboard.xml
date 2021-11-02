@@ -16,19 +16,22 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <include
-        android:id="@+id/layout_search_bar"
-        layout="@layout/layout_search_bar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/search_bar_height"
-        app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager_dashboard_tabs"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
-        app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_search_bar"/>
+        app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout_dashboard_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/default_header_height"
+            android:layout_gravity="top"
+            />
+
+    </androidx.viewpager.widget.ViewPager>
 
     <include
         android:id="@+id/layout_dashboard_nav_bar"
