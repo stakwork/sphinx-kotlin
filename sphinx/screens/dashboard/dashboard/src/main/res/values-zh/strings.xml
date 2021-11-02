@@ -87,4 +87,7 @@
 
     <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
     <string name="dashboard_network_connected_node_toast">Connected node</string>
+    <string name="dashboard_feed_tab_name">Feed</string>
+    <string name="dashboard_friends_tab_name">Friends</string>
+    <string name="dashboard_tribes_tab_name">Tribes</string>
 </resources>
