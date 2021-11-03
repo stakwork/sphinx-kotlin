@@ -4,7 +4,6 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_common.ExternalAuthorizeLink
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -20,6 +19,8 @@ interface RepositoryDashboard {
     suspend fun getAccountBalance(): StateFlow<NodeBalance?>
 
     val getAllChats: Flow<List<Chat>>
+    val getAllContactChats: Flow<List<Chat>>
+    val getAllTribeChats: Flow<List<Chat>>
     fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
 
     val accountOwner: StateFlow<Contact?>

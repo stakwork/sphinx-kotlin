@@ -298,6 +298,28 @@ abstract class SphinxRepository(
         }
     }
 
+    override val getAllContactChats: Flow<List<Chat>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().chatGetAllContact()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { chatDboPresenterMapper.mapListFrom(it) }
+            )
+        }
+    }
+
+    override val getAllTribeChats: Flow<List<Chat>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().chatGetAllTribe()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { chatDboPresenterMapper.mapListFrom(it) }
+            )
+        }
+    }
+
     override suspend fun getAllChatsByIds(chatIds: List<ChatId>): List<Chat> {
         return coreDB.getSphinxDatabaseQueries()
             .chatGetAllByIds(chatIds)

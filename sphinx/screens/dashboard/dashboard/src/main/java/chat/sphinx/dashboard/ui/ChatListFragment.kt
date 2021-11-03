@@ -28,6 +28,7 @@ import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_chat.ChatType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -223,16 +224,13 @@ internal class ChatListFragment : MotionLayoutFragment<
     }
 
     companion object {
-        const val TRIBE_CHAT_LIST = 1
-        const val CONTACT_CHAT_LIST = 0
-
         fun newInstance(
             updateBackgroundLoginTime: Boolean = false,
-            chatListType: Int = 0,
+            chatListType: ChatType = ChatType.Conversation,
             deepLink: String? = null,
         ): ChatListFragment {
             return ChatListFragment().apply {
-                val args = ChatListFragmentArgs.Builder(updateBackgroundLoginTime, chatListType)
+                val args = ChatListFragmentArgs.Builder(updateBackgroundLoginTime, chatListType.value)
                 args.argDeepLink = deepLink
 
                 arguments = args.build().toBundle()

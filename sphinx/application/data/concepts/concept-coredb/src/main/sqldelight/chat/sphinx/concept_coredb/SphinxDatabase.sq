@@ -90,6 +90,16 @@ chatGetAll:
 SELECT *
 FROM chatDbo;
 
+chatGetAllContact:
+SELECT *
+FROM chatDbo
+WHERE type = 0; -- ChatType.CONVERSATION
+
+chatGetAllTribe:
+SELECT *
+FROM chatDbo
+WHERE type = 2; -- ChatType.TRIBE
+
 chatGetAllIds:
 SELECT id
 FROM chatDbo;

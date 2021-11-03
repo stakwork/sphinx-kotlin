@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import chat.sphinx.dashboard.R
+import chat.sphinx.wrapper_chat.ChatType
 
 private val TAB_TITLES = arrayOf(
     R.string.dashboard_feed_tab_name,
@@ -23,16 +24,18 @@ class SectionsPagerAdapter(private val context: Context, fm: FragmentManager) :
         return when (position) {
             0 -> {
                 // TODO: Feed Fragment...
-                ChatListFragment.newInstance()
+                ChatListFragment.newInstance(
+                    chatListType = ChatType.Conversation
+                )
             }
             1 -> {
                 ChatListFragment.newInstance(
-                    chatListType = ChatListFragment.CONTACT_CHAT_LIST
+                    chatListType = ChatType.Conversation
                 )
             }
             2 -> {
                 ChatListFragment.newInstance(
-                    chatListType = ChatListFragment.TRIBE_CHAT_LIST
+                    chatListType = ChatType.Tribe
                 )
             }
             else ->  {
