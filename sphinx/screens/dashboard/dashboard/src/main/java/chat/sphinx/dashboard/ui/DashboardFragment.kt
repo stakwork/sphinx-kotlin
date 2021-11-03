@@ -115,11 +115,11 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupViewPager() {
         val activity = requireActivity()
-        val sectionsPagerAdapter = SectionsPagerAdapter(
+        val dashboardFragmentsAdapter = DashboardFragmentsAdapter(
             activity,
             childFragmentManager)
         val viewPager: ViewPager = binding.viewPagerDashboardTabs
-        viewPager.adapter = sectionsPagerAdapter
+        viewPager.adapter = dashboardFragmentsAdapter
         viewPager.currentItem = 1
         viewPager.offscreenPageLimit = 3
     }

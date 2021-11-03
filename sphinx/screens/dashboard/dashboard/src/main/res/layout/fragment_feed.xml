@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_feed"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/profileBG"
+    tools:context=".ui.FeedFragment">
+
+    <include
+        android:id="@+id/layout_search_bar"
+        layout="@layout/layout_search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/search_bar_height"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/text_view_placeholder"
+        android:text="Placeholder"
+        android:textColor="@color/primaryText"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_search_bar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
