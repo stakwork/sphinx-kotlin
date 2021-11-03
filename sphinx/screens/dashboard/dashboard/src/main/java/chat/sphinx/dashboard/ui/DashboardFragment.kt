@@ -117,7 +117,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         val activity = requireActivity()
         val sectionsPagerAdapter = SectionsPagerAdapter(
             activity,
-            activity.supportFragmentManager)
+            childFragmentManager)
         val viewPager: ViewPager = binding.viewPagerDashboardTabs
         viewPager.adapter = sectionsPagerAdapter
     }
