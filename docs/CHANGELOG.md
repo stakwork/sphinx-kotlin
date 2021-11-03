@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha32 (2021-11-03)
+ - Fixes crash on Android 12 (API 31)
+
 # Version 1.0.0-alpha31 (2021-10-30)
  - Adds ability to record and send video from Camera
  - Fixes paid content issue
