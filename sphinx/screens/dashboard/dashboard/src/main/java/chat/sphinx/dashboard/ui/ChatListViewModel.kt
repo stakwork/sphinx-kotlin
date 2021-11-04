@@ -271,10 +271,14 @@ internal class ChatListViewModel @Inject constructor(
     private var chatsCollectionInitialized: Boolean = false
 
     init {
-        viewModelScope.launch(mainImmediate) {
-            repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
-                updateChatListContacts(contacts)
+
+        if (args.argChatListType == ChatType.CONVERSATION) {
+            viewModelScope.launch(mainImmediate) {
+                repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
+                    updateChatListContacts(contacts)
+                }
             }
+
         }
 
         viewModelScope.launch(mainImmediate) {
@@ -366,12 +370,15 @@ internal class ChatListViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch(mainImmediate) {
-            delay(50L)
-            repositoryDashboard.getAllInvites.distinctUntilChanged().collect {
-                updateChatListContacts(_contactsStateFlow.value)
+        if (args.argChatListType == ChatType.CONVERSATION) {
+            viewModelScope.launch(mainImmediate) {
+                delay(50L)
+                repositoryDashboard.getAllInvites.distinctUntilChanged().collect {
+                    updateChatListContacts(_contactsStateFlow.value)
+                }
             }
         }
+
 
         viewModelScope.launch(mainImmediate) {
             val owner = getOwner()
