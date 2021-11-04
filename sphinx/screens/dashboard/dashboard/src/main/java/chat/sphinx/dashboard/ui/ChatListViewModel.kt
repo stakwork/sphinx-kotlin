@@ -4,48 +4,25 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
-import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_version.NetworkQueryVersion
-import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
-import chat.sphinx.concept_service_notification.PushNotificationRegistrar
-import chat.sphinx.concept_socket_io.SocketIOManager
-import chat.sphinx.concept_socket_io.SocketIOState
-import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.dashboard.R
-import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.adapter.DashboardChat
 import chat.sphinx.dashboard.ui.viewstates.*
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
-import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
-import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
-import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.tribe.TribeJoinLink
-import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
@@ -84,12 +61,11 @@ internal class ChatListViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
-): MotionLayoutViewModel<
-        Any,
+): SideEffectViewModel<
         Context,
         ChatListSideEffect,
-        NavDrawerViewState
-        >(dispatchers, NavDrawerViewState.Closed)
+        ChatListViewState
+        >(dispatchers, ChatListViewState.Default)
 {
 
     private val args: ChatListFragmentArgs by handler.navArgs()
@@ -415,9 +391,4 @@ internal class ChatListViewModel @Inject constructor(
             }
         )
     }
-
-    override suspend fun onMotionSceneCompletion(value: Any) {
-        // Unused
-    }
-
 }

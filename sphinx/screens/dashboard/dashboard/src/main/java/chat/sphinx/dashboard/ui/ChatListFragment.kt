@@ -7,16 +7,10 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
@@ -25,17 +19,14 @@ import chat.sphinx.dashboard.databinding.FragmentChatListBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
 import chat.sphinx.dashboard.ui.viewstates.ChatFilter
-import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
+import chat.sphinx.dashboard.ui.viewstates.ChatListViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_chat.ChatType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
-import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_viewmodel.currentViewState
-import io.matthewnelson.android_feature_viewmodel.updateViewState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -45,11 +36,10 @@ private inline fun FragmentChatListBinding.searchBarClearFocus() {
 }
 
 @AndroidEntryPoint
-internal class ChatListFragment : MotionLayoutFragment<
-        Any,
+internal class ChatListFragment : SideEffectFragment<
         Context,
         ChatListSideEffect,
-        NavDrawerViewState,
+        ChatListViewState,
         ChatListViewModel,
         FragmentChatListBinding
         >(R.layout.fragment_chat_list)
@@ -71,31 +61,14 @@ internal class ChatListFragment : MotionLayoutFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
-        findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
-
         setupChats()
         setupSearch()
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
-            if (viewModel.currentViewState is NavDrawerViewState.Open) {
-                viewModel.updateViewState(NavDrawerViewState.Closed)
-            } else {
-                binding.searchBarClearFocus()
-                super.handleOnBackPressed()
-            }
-        }
-    }
-
-    private inner class CloseDrawerOnDestinationChange: NavController.OnDestinationChangedListener {
-        override fun onDestinationChanged(
-            controller: NavController,
-            destination: NavDestination,
-            arguments: Bundle?
-        ) {
-            controller.removeOnDestinationChangedListener(this)
-            viewModel.updateViewState(NavDrawerViewState.Closed)
+            binding.searchBarClearFocus()
+            super.handleOnBackPressed()
         }
     }
 
@@ -170,39 +143,6 @@ internal class ChatListFragment : MotionLayoutFragment<
         binding.searchBarClearFocus()
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
-        @Exhaustive
-        when (viewState) {
-            NavDrawerViewState.Closed -> {
-                binding.layoutMotionDashboard.setTransitionDuration(150)
-            }
-            NavDrawerViewState.Open -> {
-                binding.layoutMotionDashboard.setTransitionDuration(300)
-                binding.layoutSearchBar.editTextDashboardSearch.let { editText ->
-                    binding.root.context.inputMethodManager?.let { imm ->
-                        if (imm.isActive(editText)) {
-                            imm.hideSoftInputFromWindow(editText.windowToken, 0)
-                            delay(250L)
-                        }
-                    }
-                    binding.searchBarClearFocus()
-                }
-            }
-        }
-        viewState.transitionToEndSet(binding.layoutMotionDashboard)
-    }
-
-    override fun onViewCreatedRestoreMotionScene(
-        viewState: NavDrawerViewState,
-        binding: FragmentChatListBinding
-    ) {
-        viewState.restoreMotionScene(binding.layoutMotionDashboard)
-    }
-
-    override fun getMotionLayouts(): Array<MotionLayout> {
-        return arrayOf(binding.layoutMotionDashboard)
-    }
-
     override suspend fun onSideEffectCollect(sideEffect: ChatListSideEffect) {
         sideEffect.execute(binding.root.context)
     }
@@ -220,5 +160,9 @@ internal class ChatListFragment : MotionLayoutFragment<
                 arguments = args.build().toBundle()
             }
         }
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: ChatListViewState) {
+        // TODO("Not yet implemented")
     }
 }
