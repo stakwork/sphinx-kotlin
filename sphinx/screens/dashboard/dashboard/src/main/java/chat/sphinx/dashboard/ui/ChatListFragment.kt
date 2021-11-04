@@ -52,7 +52,7 @@ internal class ChatListFragment : MotionLayoutFragment<
         NavDrawerViewState,
         ChatListViewModel,
         FragmentChatListBinding
-        >(R.layout.fragment_chat_list), SwipeRefreshLayout.OnRefreshListener
+        >(R.layout.fragment_chat_list)
 {
     @Inject
     @Suppress("ProtectedInFinal")
@@ -71,21 +71,10 @@ internal class ChatListFragment : MotionLayoutFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
-        viewModel.networkRefresh()
-
         findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
         setupChats()
         setupSearch()
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        activity?.intent?.dataString?.let { deepLink ->
-            viewModel.handleDeepLink(deepLink)
-            activity?.intent?.data = null
-        }
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
@@ -110,13 +99,8 @@ internal class ChatListFragment : MotionLayoutFragment<
         }
     }
 
-    override fun onRefresh() {
-        binding.layoutChatListChats.layoutSwipeRefreshChats.isRefreshing = false
-        viewModel.networkRefresh()
-    }
 
     private fun setupChats() {
-        binding.layoutChatListChats.layoutSwipeRefreshChats.setOnRefreshListener(this)
 
         binding.layoutChatListChats.recyclerViewChats.apply {
             val linearLayoutManager = LinearLayoutManager(context)

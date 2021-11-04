@@ -17,21 +17,29 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/view_pager_dashboard_tabs"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout_data_reload"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
         app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tab_layout_dashboard_tabs"
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager_dashboard_tabs"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/default_header_height"
-            android:layout_gravity="top"
-            />
+            android:layout_height="match_parent"
+            >
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tab_layout_dashboard_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_header_height"
+                android:layout_gravity="top"
+                />
+        </androidx.viewpager.widget.ViewPager>
 
-    </androidx.viewpager.widget.ViewPager>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+
 
     <include
         android:id="@+id/layout_dashboard_nav_bar"

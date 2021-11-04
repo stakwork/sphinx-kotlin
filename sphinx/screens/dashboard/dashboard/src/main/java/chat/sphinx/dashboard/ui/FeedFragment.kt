@@ -8,7 +8,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
@@ -35,7 +34,7 @@ internal class FeedFragment : SideEffectFragment<
         FeedViewState,
         FeedViewModel,
         FragmentFeedBinding
-        >(R.layout.fragment_feed), SwipeRefreshLayout.OnRefreshListener
+        >(R.layout.fragment_feed)
 {
     override val viewModel: FeedViewModel by viewModels()
     override val binding: FragmentFeedBinding by viewBinding(FragmentFeedBinding::bind)
@@ -111,10 +110,6 @@ internal class FeedFragment : SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: FeedViewState) {
-        // TODO("Not yet implemented")
-    }
-
-    override fun onRefresh() {
         // TODO("Not yet implemented")
     }
 }

@@ -74,32 +74,16 @@ internal suspend inline fun ChatListViewModel.updateChatListFilter(filter: ChatF
 @HiltViewModel
 internal class ChatListViewModel @Inject constructor(
     private val app: Application,
-    private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
 
     private val accountOwner: StateFlow<Contact?>,
 
     val dashboardNavigator: DashboardNavigator,
-    val navBarNavigator: DashboardBottomNavBarNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
 
-    private val buildConfigVersionCode: BuildConfigVersionCode,
     dispatchers: CoroutineDispatchers,
 
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
-    private val contactRepository: ContactRepository,
-    private val chatRepository: ChatRepository,
-
-    private val networkQueryLightning: NetworkQueryLightning,
-    private val networkQueryVersion: NetworkQueryVersion,
-    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
-
-    private val pushNotificationRegistrar: PushNotificationRegistrar,
-
-    private val relayDataHandler: RelayDataHandler,
-
-    private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
-    private val socketIOManager: SocketIOManager,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -109,121 +93,6 @@ internal class ChatListViewModel @Inject constructor(
 {
 
     private val args: ChatListFragmentArgs by handler.navArgs()
-
-    val newVersionAvailable: MutableStateFlow<Boolean> by lazy(LazyThreadSafetyMode.NONE) {
-        MutableStateFlow<Boolean>(false)
-    }
-
-    val currentVersion: MutableStateFlow<String> by lazy(LazyThreadSafetyMode.NONE) {
-        MutableStateFlow("-")
-    }
-
-    init {
-        if (args.updateBackgroundLoginTime) {
-            viewModelScope.launch(default) {
-                backgroundLoginHandler.updateLoginTime()
-            }
-        }
-
-        checkAppVersion()
-        handleDeepLink(args.argDeepLink)
-    }
-
-    fun handleDeepLink(deepLink: String?) {
-        viewModelScope.launch(mainImmediate) {
-            delay(100L)
-
-            deepLink?.toTribeJoinLink()?.let { tribeJoinLink ->
-                handleTribeJoinLink(tribeJoinLink)
-            } ?: deepLink?.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
-                handleExternalAuthorizeLink(externalAuthorizeLink)
-            } ?: deepLink?.toPeopleConnectLink()?.let { peopleConnectLink ->
-                handlePeopleConnectLink(peopleConnectLink)
-            }
-        }
-    }
-
-    private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
-        val chat: Chat? = try {
-            chatRepository.getChatByUUID(
-                ChatUUID(tribeJoinLink.tribeUUID)
-            ).firstOrNull()
-        } catch (e: IllegalArgumentException) {
-            null
-        }
-
-        if (chat != null) {
-            dashboardNavigator.toChatTribe(chat.id)
-        } else {
-            dashboardNavigator.toJoinTribeDetail(tribeJoinLink)
-        }
-    }
-
-    private suspend fun goToContactChat(contact: Contact) {
-        chatRepository.getConversationByContactId(contact.id).firstOrNull()?.let { chat ->
-
-            dashboardNavigator.toChatContact(chat.id, contact.id)
-
-        } ?: dashboardNavigator.toChatContact(null, contact.id)
-    }
-
-    private fun handleExternalAuthorizeLink(link: ExternalAuthorizeLink) {
-        deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.ExternalAuthorizePopup(link)
-        )
-    }
-
-    private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
-        link.publicKey.toLightningNodePubKey()?.let { lightningNodePubKey ->
-            contactRepository.getContactByPubKey(lightningNodePubKey).firstOrNull()?.let { contact ->
-
-                goToContactChat(contact)
-
-            } ?: loadPeopleConnectPopup(link)
-        }
-    }
-
-    private suspend fun loadPeopleConnectPopup(link: PeopleConnectLink) {
-        deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo
-        )
-
-        networkQueryAuthorizeExternal.getPersonInfo(link.host, link.publicKey).collect { loadResponse ->
-            @Exhaustive
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
-
-                is Response.Error -> {
-
-                    deepLinkPopupViewStateContainer.updateViewState(
-                        DeepLinkPopupViewState.PopupDismissed
-                    )
-
-                    submitSideEffect(
-                        ChatListSideEffect.Notify(
-                            app.getString(R.string.dashboard_connect_retrieve_person_data_error)
-                        )
-                    )
-
-                }
-                is Response.Success -> {
-                    deepLinkPopupViewStateContainer.updateViewState(
-                        DeepLinkPopupViewState.PeopleConnectPopup(
-                            loadResponse.value.owner_alias,
-                            loadResponse.value.description ?: app.getString(R.string.dashboard_connect_description_missing),
-                            loadResponse.value.price_to_meet ?: 0,
-                            loadResponse.value.img,
-                            loadResponse.value
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    val deepLinkPopupViewStateContainer: ViewStateContainer<DeepLinkPopupViewState> by lazy {
-        ViewStateContainer(DeepLinkPopupViewState.PopupDismissed)
-    }
 
     val createTribeButtonViewStateContainer: ViewStateContainer<CreateTribeButtonViewState> by lazy {
         ViewStateContainer(CreateTribeButtonViewState.Hidden)
@@ -242,24 +111,6 @@ internal class ChatListViewModel @Inject constructor(
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         repositoryDashboard.getAccountBalance()
-
-    private fun checkAppVersion() {
-        viewModelScope.launch(mainImmediate) {
-            networkQueryVersion.getAppVersions().collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
-                    is Response.Error -> {
-                    }
-                    is Response.Success -> {
-                        newVersionAvailable.value = loadResponse.value.kotlin > buildConfigVersionCode.value.toLong()
-                        currentVersion.value = "VERSION: ${buildConfigVersionCode.value}"
-                    }
-                }
-            }
-        }
-    }
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
         MutableStateFlow(emptyList())
@@ -532,81 +383,6 @@ internal class ChatListViewModel @Inject constructor(
                     chatViewStateContainer.updateDashboardChats(currentChats.toList())
                     repositoryDashboard.updatedContactIds = mutableListOf()
                 }
-            }
-        }
-    }
-
-    private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
-        MutableStateFlow(LoadResponse.Loading)
-    }
-
-    init {
-        viewModelScope.launch(mainImmediate) {
-            socketIOManager.socketIOStateFlow.collect { state ->
-                if (state is SocketIOState.Uninitialized) {
-                    socketIOManager.connect()
-                }
-            }
-        }
-    }
-
-    private var jobNetworkRefresh: Job? = null
-    private var jobPushNotificationRegistration: Job? = null
-    fun networkRefresh() {
-        if (jobNetworkRefresh?.isActive == true) {
-            return
-        }
-
-        jobNetworkRefresh = viewModelScope.launch(mainImmediate) {
-            repositoryDashboard.networkRefreshBalance.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading,
-                    is Response.Error -> {
-                        _networkStateFlow.value = response
-                    }
-                    is Response.Success -> {}
-                }
-            }
-
-            if (_networkStateFlow.value is Response.Error) {
-                jobNetworkRefresh?.cancel()
-            }
-
-            repositoryDashboard.networkRefreshContacts.collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        _networkStateFlow.value = response
-                    }
-                    is Response.Success -> {}
-                }
-            }
-
-            if (_networkStateFlow.value is Response.Error) {
-                jobNetworkRefresh?.cancel()
-            }
-
-            // must occur after contacts have been retrieved such that
-            // an account owner is available, otherwise it just suspends
-            // until it is.
-            if (jobPushNotificationRegistration == null) {
-                jobPushNotificationRegistration = launch(mainImmediate) {
-                    pushNotificationRegistrar.register().let { response ->
-                        @Exhaustive
-                        when (response) {
-                            is Response.Error -> {
-                                // TODO: Handle on the UI
-                            }
-                            is Response.Success -> {}
-                        }
-                    }
-                }
-            }
-
-            repositoryDashboard.networkRefreshMessages.collect { response ->
-                _networkStateFlow.value = response
             }
         }
     }

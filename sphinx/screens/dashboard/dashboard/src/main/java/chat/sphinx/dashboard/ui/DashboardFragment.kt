@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.viewpager.widget.ViewPager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -53,7 +54,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         NavDrawerViewState,
         DashboardViewModel,
         FragmentDashboardBinding
-        >(R.layout.fragment_dashboard)
+        >(R.layout.fragment_dashboard), SwipeRefreshLayout.OnRefreshListener
 {
     @Inject
     @Suppress("ProtectedInFinal")
@@ -92,6 +93,11 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    override fun onRefresh() {
+        binding.swipeRefreshLayoutDataReload.isRefreshing = false
+        viewModel.networkRefresh()
+    }
+
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
             if (viewModel.currentViewState is NavDrawerViewState.Open) {
@@ -114,6 +120,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupViewPager() {
+        binding.swipeRefreshLayoutDataReload.setOnRefreshListener(this)
         val activity = requireActivity()
         val dashboardFragmentsAdapter = DashboardFragmentsAdapter(
             activity,
