@@ -32,8 +32,9 @@
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tab_layout_dashboard_tabs"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/default_header_height"
+                android:layout_height="wrap_content"
                 android:layout_gravity="top"
+                app:tabBackground="@color/headerBG"
                 />
         </androidx.viewpager.widget.ViewPager>
 

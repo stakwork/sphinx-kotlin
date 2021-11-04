@@ -5,8 +5,7 @@
     android:id="@+id/layout_constraint_dashboard_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/headerBG"
-    android:elevation="@dimen/default_elevation">
+    android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_header_bar"
