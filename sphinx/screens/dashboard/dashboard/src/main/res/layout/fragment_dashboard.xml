@@ -35,6 +35,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"
                 app:tabBackground="@color/headerBG"
+                app:tabIndicator="@color/primaryBlue"
+                app:tabTextColor="@color/textInverted"
+                app:tabSelectedTextColor="@color/text"
                 />
         </androidx.viewpager.widget.ViewPager>
 
