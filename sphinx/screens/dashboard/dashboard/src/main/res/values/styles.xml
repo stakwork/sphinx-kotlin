@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DashboardTab">
+        <item name="android:fontFamily">@font/roboto_medium</item>
+        <item name="android:lines">1</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/default_text_size_tab</item>
+    </style>
+
+</resources>

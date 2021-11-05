@@ -2,8 +2,10 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
@@ -23,6 +25,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
+import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -124,11 +127,54 @@ internal class DashboardFragment : MotionLayoutFragment<
         val activity = requireActivity()
         val dashboardFragmentsAdapter = DashboardFragmentsAdapter(
             activity,
-            childFragmentManager)
+            childFragmentManager
+        )
+
         val viewPager: ViewPager = binding.viewPagerDashboardTabs
         viewPager.adapter = dashboardFragmentsAdapter
-        viewPager.currentItem = 1
+        viewPager.currentItem = DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
         viewPager.offscreenPageLimit = 3
+
+        val tabs = binding.tabLayoutDashboardTabs
+
+        val feedTab: View = LayoutInflater.from(this.context)
+            .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+        tabs.getTabAt(DashboardFragmentsAdapter.FEED_TAB_POSITION)?.customView = feedTab
+
+        val feedTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FEED_TAB_POSITION]
+        feedTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(feedTitle)
+
+        val friendsTab: View = LayoutInflater.from(this.context)
+            .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+        tabs.getTabAt(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION)?.customView = friendsTab
+
+        val friendsTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FRIENDS_TAB_POSITION]
+        friendsTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(friendsTitle)
+
+        val tribesTab: View = LayoutInflater.from(this.context)
+            .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+        tabs.getTabAt(DashboardFragmentsAdapter.TRIBES_TAB_POSITION)?.customView = tribesTab
+
+        val tribesTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.TRIBES_TAB_POSITION]
+        tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(tribesTitle)
+
+        viewPager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) { }
+
+            override fun onPageSelected(position: Int) {
+                viewModel.updateTabsState(
+                    feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
+                    friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
+                    tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
+                )
+            }
+
+            override fun onPageScrollStateChanged(state: Int) { }
+        })
     }
 
     private fun setupDashboardHeader() {
@@ -355,6 +401,51 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.tabsViewStateContainer.collect { viewState ->
+                when (viewState) {
+                    is DashboardTabsViewState.Idle -> {}
+
+                    is DashboardTabsViewState.TabsState -> {
+                        val tabs = binding.tabLayoutDashboardTabs
+
+                        val feedTab = tabs.getTabAt(DashboardFragmentsAdapter.FEED_TAB_POSITION)?.customView
+                        val friendsTab = tabs.getTabAt(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION)?.customView
+                        val tribesTab = tabs.getTabAt(DashboardFragmentsAdapter.TRIBES_TAB_POSITION)?.customView
+
+                        feedTab?.findViewById<TextView>(R.id.text_view_tab_title)?.setTextColor(
+                            ContextCompat.getColor(
+                                binding.root.context,
+                                if (viewState.feedActive) R.color.text else R.color.secondaryText
+                            )
+                        )
+
+                        friendsTab?.findViewById<TextView>(R.id.text_view_tab_title)?.setTextColor(
+                            ContextCompat.getColor(
+                                binding.root.context,
+                                if (viewState.friendsActive) R.color.text else R.color.secondaryText
+                            )
+                        )
+
+                        friendsTab?.findViewById<View>(R.id.view_unseen_messages_dot)?.goneIfFalse(
+                            viewState.friendsBadgeVisible
+                        )
+
+                        tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.setTextColor(
+                            ContextCompat.getColor(
+                                binding.root.context,
+                                if (viewState.tribesActive) R.color.text else R.color.secondaryText
+                            )
+                        )
+
+                        tribesTab?.findViewById<View>(R.id.view_unseen_messages_dot)?.goneIfFalse(
+                            viewState.tribesBadgeVisible
+                        )
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deepLinkPopupViewStateContainer.collect { viewState ->

@@ -165,7 +165,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         private var contactCollectionJob: Job? = null
         private var chatCollectionJob: Job? = null
 
-        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow {
 
             contactId?.let { nnContactId ->
                 contactCollectionJob = viewModelScope.launch(mainImmediate) {

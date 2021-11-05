@@ -82,10 +82,10 @@ internal class ChatListViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
-    val accountOwnerStateFlow: StateFlow<Contact?>
+    private val accountOwnerStateFlow: StateFlow<Contact?>
         get() = _accountOwnerStateFlow.asStateFlow()
 
-    suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         repositoryDashboard.getAccountBalance()
 
     private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
@@ -98,14 +98,12 @@ internal class ChatListViewModel @Inject constructor(
     private var chatsCollectionInitialized: Boolean = false
 
     init {
-
         if (args.argChatListType == ChatType.CONVERSATION) {
             viewModelScope.launch(mainImmediate) {
                 repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
                     updateChatListContacts(contacts)
                 }
             }
-
         }
 
         viewModelScope.launch(mainImmediate) {

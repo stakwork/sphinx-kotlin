@@ -24,7 +24,6 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
-import chat.sphinx.dashboard.ui.adapter.DashboardChat
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -33,18 +32,14 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
-import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
-import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -53,15 +48,10 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import io.matthewnelson.concept_views.viewstate.collect
-import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
@@ -433,8 +423,8 @@ internal class DashboardViewModel @Inject constructor(
         ViewStateContainer(CreateTribeButtonViewState.Hidden)
     }
 
-    val chatViewStateContainer: ChatViewStateContainer by lazy {
-        ChatViewStateContainer(dispatchers)
+    val tabsViewStateContainer: ViewStateContainer<DashboardTabsViewState> by lazy {
+        ViewStateContainer(DashboardTabsViewState.Idle)
     }
 
     private val _accountOwnerStateFlow: MutableStateFlow<Contact?> by lazy {
@@ -465,16 +455,25 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private val _contactsStateFlow: MutableStateFlow<List<Contact>> by lazy {
-        MutableStateFlow(emptyList())
-    }
-
-    private val collectionLock = Mutex()
-
-    private var contactsCollectionInitialized: Boolean = false
-    private var chatsCollectionInitialized: Boolean = false
-
     init {
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getUnseenConversationMessagesCount()
+                .collect { unseenConversationMessagesCount ->
+                    updateTabsState(
+                        friendsBadgeVisible = (unseenConversationMessagesCount ?: 0) > 0
+                    )
+                }
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getUnseenTribeMessagesCount()
+                .collect { unseenTribeMessagesCount ->
+                    updateTabsState(
+                        tribesBadgeVisible = (unseenTribeMessagesCount ?: 0) > 0
+                    )
+                }
+        }
+
         viewModelScope.launch(mainImmediate) {
             val owner = getOwner()
 
@@ -486,6 +485,36 @@ internal class DashboardViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    fun updateTabsState(
+        feedActive: Boolean? = null,
+        friendsActive: Boolean? = null,
+        tribesActive: Boolean? = null,
+        friendsBadgeVisible: Boolean? = null,
+        tribesBadgeVisible: Boolean? = null
+    ) {
+        val currentState = tabsViewStateContainer.viewStateFlow.value
+
+        tabsViewStateContainer.updateViewState(
+            if (currentState is DashboardTabsViewState.TabsState) {
+                DashboardTabsViewState.TabsState(
+                    feedActive = feedActive ?: currentState.feedActive,
+                    friendsActive = friendsActive ?: currentState.friendsActive,
+                    tribesActive = tribesActive ?: currentState.tribesActive,
+                    friendsBadgeVisible = friendsBadgeVisible ?: currentState.friendsBadgeVisible,
+                    tribesBadgeVisible = tribesBadgeVisible ?: currentState.tribesBadgeVisible
+                )
+            } else {
+                DashboardTabsViewState.TabsState(
+                    feedActive = feedActive ?: false,
+                    friendsActive = friendsActive ?: true,
+                    tribesActive = tribesActive ?: false,
+                    friendsBadgeVisible = friendsBadgeVisible ?: false,
+                    tribesBadgeVisible = tribesBadgeVisible ?: false
+                )
+            }
+        )
     }
 
     private suspend fun getOwner(): Contact {
