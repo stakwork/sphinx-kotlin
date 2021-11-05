@@ -398,6 +398,54 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getUnseenConversationMessagesCount(): Flow<Long?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect { contact ->
+                    if (contact != null) {
+                        ownerId = contact.id
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, ChatType.Conversation)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .distinctUntilChanged()
+        )
+    }
+
+    override fun getUnseenTribeMessagesCount(): Flow<Long?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect { contact ->
+                    if (contact != null) {
+                        ownerId = contact.id
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, ChatType.Tribe)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .distinctUntilChanged()
+        )
+    }
+
     override fun getPaymentsTotalFor(feedId: Long): Flow<Sat?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries()

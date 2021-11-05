@@ -72,7 +72,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
     <TextView
         android:id="@+id/text_view_placeholder"
-        android:text="Placeholder"
+        android:text="Feed"
         android:textColor="@color/primaryText"
         android:gravity="center"
         android:layout_width="match_parent"

@@ -34,7 +34,7 @@ class NetworkQueryContactImpl(
     private val getContactsFlowNullData: Flow<LoadResponse<GetContactsResponse, ResponseError>> by lazy {
         networkRelayCall.relayGet(
             responseJsonClass = GetContactsRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_CONTACTS,
+            relayEndpoint = "$ENDPOINT_CONTACTS?from_group=false",
             relayData = null,
             useExtendedNetworkCallClient = true,
         )
@@ -48,7 +48,7 @@ class NetworkQueryContactImpl(
         } else {
             networkRelayCall.relayGet(
                 responseJsonClass = GetContactsRelayResponse::class.java,
-                relayEndpoint = ENDPOINT_CONTACTS,
+                relayEndpoint = "$ENDPOINT_CONTACTS?from_group=false",
                 relayData = relayData,
                 useExtendedNetworkCallClient = true,
             )

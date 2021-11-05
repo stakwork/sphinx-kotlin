@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
-
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout_data_reload"
         android:layout_width="match_parent"
@@ -27,23 +26,24 @@
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/view_pager_dashboard_tabs"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
+
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tab_layout_dashboard_tabs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/default_header_height"
                 android:layout_gravity="top"
+                android:background="@color/headerBG"
                 app:tabBackground="@color/headerBG"
-                app:tabIndicator="@color/primaryBlue"
-                app:tabTextColor="@color/textInverted"
+                app:tabIndicatorColor="@color/primaryBlue"
+                app:tabTextColor="@color/secondaryText"
                 app:tabSelectedTextColor="@color/text"
-                />
+                app:tabRippleColor="@null"
+                app:tabTextAppearance="@style/DashboardTab" />
+
         </androidx.viewpager.widget.ViewPager>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-
 
     <include
         android:id="@+id/layout_dashboard_nav_bar"
@@ -51,7 +51,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
-
 
     <View
         android:id="@+id/dashboard_nav_drawer_input_lock"

@@ -608,6 +608,15 @@ WHERE sender != :ownerId
 AND seen = 0
 AND chat_id = ?;
 
+messageGetUnseenIncomingMessageCountByChatType:
+SELECT COUNT(*)
+FROM messageDbo
+LEFT JOIN chatDbo
+    ON chatDbo.id = messageDbo.chat_id
+WHERE messageDbo.sender != :ownerId
+AND messageDbo.seen = 0
+AND chatDbo.type = :chatType;
+
 messageGetAmountSumForMessagesStartingWith:
 SELECT SUM(amount)
 FROM messageDbo
