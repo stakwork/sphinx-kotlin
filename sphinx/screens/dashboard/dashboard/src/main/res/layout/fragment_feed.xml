@@ -22,6 +22,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <HorizontalScrollView
+            android:id="@+id/horizontal_scroll_view_filter_chips"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent">
@@ -69,15 +70,66 @@
                     />
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-    <TextView
-        android:id="@+id/text_view_placeholder"
-        android:text="Feed"
-        android:textColor="@color/primaryText"
-        android:gravity="center"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_search_bar" />
 
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/horizontal_scroll_view_filter_chips"
+            >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_listen_now_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                >
+                <TextView
+                    android:id="@+id/text_view_listen_now_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/default_layout_margin"
+                    android:text="Listen Now >"
+                    android:textSize="@dimen/default_text_size_large_title_3"
+                    android:textColor="@color/text"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    >
+                    <!-- TODO: Add a chevron -->
+
+                </TextView>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_listen_now_episodes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_listen_now_header"
+                    tools:listitem="@layout/layout_feed_listen_episode_holder" />
+
+                <TextView
+                    android:id="@+id/text_view_listen_following_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/default_layout_margin"
+                    android:text="Following >"
+                    android:textSize="@dimen/default_text_size_large_title_3"
+                    android:textColor="@color/text"
+                    app:layout_constraintTop_toBottomOf="@+id/recycler_view_listen_now_episodes"
+                    app:layout_constraintStart_toStartOf="parent"
+                    >
+                    <!-- TODO: Add a chevron -->
+
+                </TextView>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_listen_now_podcasts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_listen_following_header"
+                    tools:listitem="@layout/layout_feed_listen_podcast_holder" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

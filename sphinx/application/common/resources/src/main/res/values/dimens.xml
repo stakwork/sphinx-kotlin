@@ -83,4 +83,7 @@
     <dimen name="default_chip_elevation">16dp</dimen>
     <dimen name="default_chip_text_size">18sp</dimen>
     <dimen name="default_chip_text_padding">12sp</dimen>
+
+    <dimen name="default_feed_image_xy">200dp</dimen>
+    <dimen name="default_radius">14dp</dimen>
 </resources>
