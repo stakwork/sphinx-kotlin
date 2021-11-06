@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:textColor="@color/textInverted"
-        android:textSize="@dimen/default_text_size_sub_headline"
+        android:textSize="@dimen/default_text_size_headline"
         app:layout_constraintTop_toBottomOf="@+id/card_view_image_wrapper"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"

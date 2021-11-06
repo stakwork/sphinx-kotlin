@@ -39,34 +39,34 @@
                     android:id="@+id/chip_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="All"
+                    android:text="@string/all"
                     />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_listen"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Listen"
+                    android:text="@string/listen"
                     />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_watch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Watch"
+                    android:text="@string/watch"
                     />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_read"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Read"
+                    android:text="@string/read"
                     />
                 <com.google.android.material.chip.Chip
                     android:id="@+id/chip_play"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Play"
+                    android:text="@string/play"
                     />
             </com.google.android.material.chip.ChipGroup>
         </HorizontalScrollView>
@@ -88,15 +88,25 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/default_layout_margin"
-                    android:text="Listen Now >"
+                    android:text="@string/listen_now"
                     android:textSize="@dimen/default_text_size_large_title_3"
                     android:textColor="@color/text"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    >
-                    <!-- TODO: Add a chevron -->
+                    />
 
-                </TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:text="@string/material_icon_name_chevron_right_button"
+                    android:textColor="@color/text"
+                    android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+                    app:layout_constraintTop_toTopOf="@+id/text_view_listen_now_header"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_now_header"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_listen_now_header"
+                    />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_listen_now_episodes"
                     android:layout_width="match_parent"
@@ -111,15 +121,24 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/default_layout_margin"
-                    android:text="Following >"
+                    android:text="@string/following"
                     android:textSize="@dimen/default_text_size_large_title_3"
                     android:textColor="@color/text"
                     app:layout_constraintTop_toBottomOf="@+id/recycler_view_listen_now_episodes"
                     app:layout_constraintStart_toStartOf="parent"
-                    >
-                    <!-- TODO: Add a chevron -->
+                    />
 
-                </TextView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:text="@string/material_icon_name_chevron_right_button"
+                    android:textColor="@color/text"
+                    android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+                    app:layout_constraintTop_toTopOf="@+id/text_view_listen_following_header"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_following_header"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_listen_following_header"
+                    />
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_view_listen_now_podcasts"
                     android:layout_width="match_parent"
