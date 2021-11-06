@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="nav_drawer_width">240dp</dimen>
-    <item name="nav_drawer_input_lock_alpha" type="dimen" format="float">.5</item>
+    <item name="nav_drawer_input_lock_alpha" format="float" type="dimen">.5</item>
 
     <!-- Text size -->
     <dimen name="nav_drawer_default_text_size">16sp</dimen>
@@ -47,4 +47,5 @@
     <dimen name="dashboard_connect_popup_price_text_size">12sp</dimen>
     <dimen name="dashboard_connect_popup_description_text_size">14sp</dimen>
     <dimen name="dashboard_connect_popup_form_edit_view_text_size">14sp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>

@@ -11,6 +11,9 @@ import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
+import chat.sphinx.dashboard.ui.adapter.FeedListenEpisodeAdapter
+import chat.sphinx.dashboard.ui.adapter.FeedListenPodcastAdapter
+import chat.sphinx.dashboard.ui.placeholder.PlaceholderContent
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
@@ -46,6 +49,7 @@ internal class FeedFragment : SideEffectFragment<
             .addCallback(viewLifecycleOwner, requireActivity())
 
         setupSearch()
+        setupFeedListenEpisodeRecyclerView()
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
@@ -92,12 +96,21 @@ internal class FeedFragment : SideEffectFragment<
         }
     }
 
+    private fun setupFeedListenEpisodeRecyclerView() {
+        binding.apply {
+            with(recyclerViewListenNowEpisodes) {
+                adapter = FeedListenEpisodeAdapter(PlaceholderContent.ITEMS)
+            }
+            with(recyclerViewListenNowPodcasts) {
+                adapter = FeedListenPodcastAdapter(PlaceholderContent.ITEMS)
+            }
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         binding.searchBarClearFocus()
     }
-
-
 
     override suspend fun onSideEffectCollect(sideEffect: FeedSideEffect) {
         sideEffect.execute(binding.root.context)

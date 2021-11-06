@@ -34,6 +34,7 @@
         android:gravity="center"
         android:textColor="@color/textInverted"
         android:textSize="@dimen/default_text_size_headline"
+        android:lines="1"
         app:layout_constraintTop_toBottomOf="@+id/card_view_image_wrapper"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
@@ -48,10 +49,11 @@
         android:gravity="center"
         android:textColor="@color/text"
         android:textSize="@dimen/default_text_size_headline"
+        android:lines="2"
         app:layout_constraintTop_toBottomOf="@+id/text_view_listen_podcast_name"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="tribe with audio to play"
+        tools:text="tribe with audio to play so that people can hear something something something"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

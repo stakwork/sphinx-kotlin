@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    tools:background="@color/headerBG"
     >
 
     <androidx.cardview.widget.CardView
@@ -25,6 +26,18 @@
             />
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/default_layout_margin"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_play_outline"
+        android:textColor="@color/text"
+        android:textSize="@dimen/default_feed_image_play_text_size"
+        app:layout_constraintBottom_toBottomOf="@+id/card_view_image_wrapper"
+        app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
+        android:elevation="@dimen/default_feed_play_elevation"
+        />
 
     <TextView
         android:id="@+id/text_view_listen_podcast_name"
@@ -33,10 +46,11 @@
         android:gravity="center"
         android:textColor="@color/textInverted"
         android:textSize="@dimen/default_text_size_headline"
+        android:lines="1"
         app:layout_constraintTop_toBottomOf="@+id/card_view_image_wrapper"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
-        tools:text="tribe with audio to play"
+        tools:text="episode with audio to play"
         />
 
     <TextView
@@ -47,10 +61,11 @@
         android:gravity="center"
         android:textColor="@color/text"
         android:textSize="@dimen/default_text_size_headline"
+        android:lines="2"
         app:layout_constraintTop_toBottomOf="@+id/text_view_listen_podcast_name"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="tribe with audio to play"
+        tools:text="episode that a user can play now and so and so forth"
         />
 </androidx.constraintlayout.widget.ConstraintLayout>

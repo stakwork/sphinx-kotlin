@@ -61,8 +61,8 @@ internal class ChatListFragment : SideEffectFragment<
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
             .addCallback(viewLifecycleOwner, requireActivity())
 
-        setupChats()
         setupSearch()
+        setupChats()
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
