@@ -35,6 +35,22 @@ import chat.sphinx.wrapper_contact.DeviceId;
 import chat.sphinx.wrapper_contact.NotificationSound;
 import chat.sphinx.wrapper_contact.Owner;
 import chat.sphinx.wrapper_contact.PrivatePhoto;
+import chat.sphinx.wrapper_feed.FeedAuthor;
+import chat.sphinx.wrapper_feed.FeedContentType;
+import chat.sphinx.wrapper_feed.FeedDescription;
+import chat.sphinx.wrapper_feed.FeedDestinationAddress;
+import chat.sphinx.wrapper_feed.FeedDestinationSplit;
+import chat.sphinx.wrapper_feed.FeedDestinationType;
+import chat.sphinx.wrapper_feed.FeedEnclosureLength;
+import chat.sphinx.wrapper_feed.FeedEnclosureType;
+import chat.sphinx.wrapper_feed.FeedGenerator;
+import chat.sphinx.wrapper_feed.FeedId;
+import chat.sphinx.wrapper_feed.FeedLanguage;
+import chat.sphinx.wrapper_feed.FeedModelSuggested;
+import chat.sphinx.wrapper_feed.FeedModelType;
+import chat.sphinx.wrapper_feed.FeedTitle;
+import chat.sphinx.wrapper_feed.FeedType;
+import chat.sphinx.wrapper_feed.FeedUrl;
 import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
@@ -849,3 +865,231 @@ WHERE id = ?;
 subscriptionDeleteByContactId:
 DELETE FROM subscriptionDbo
 WHERE contact_id = ?;
+
+CREATE TABLE feedDbo(
+    id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
+    feed_type                   INTEGER            AS FeedType NOT NULL,
+    title                       TEXT               AS FeedTitle NOT NULL,
+    description                 TEXT               AS FeedDescription,
+    feed_url                    TEXT               AS FeedUrl NOT NULL,
+    author                      TEXT               AS FeedAuthor,
+    generator                   TEXT               AS FeedGenerator,
+    image_url                   TEXT               AS PhotoUrl,
+    owner_url                   TEXT               AS FeedUrl,
+    link                        TEXT               AS FeedUrl,
+    date_published              INTEGER            AS DateTime,
+    date_updated                INTEGER            AS DateTime,
+    content_type                TEXT               AS FeedContentType,
+    language                    TEXT               AS FeedLanguage,
+    chat_id                     INTEGER            AS ChatId NOT NULL
+);
+
+feedUpsert {
+    UPDATE feedDbo
+    SET feed_type = :feed_type,
+        title = :title,
+        description = :description,
+        feed_url = :feed_url,
+        author = :author,
+        image_url = :image_url,
+        owner_url = :owner_url,
+        link = :link,
+        date_published = :date_published,
+        date_updated = :date_updated,
+        content_type = :content_type,
+        language = :language,
+        chat_id = :chat_id
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO feedDbo(
+        id,
+        feed_type,
+        title,
+        description,
+        feed_url,
+        author,
+        generator,
+        image_url,
+        owner_url,
+        link,
+        date_published,
+        date_updated,
+        content_type,
+        language,
+        chat_id
+    )
+    VALUES (
+        :id,
+        feed_type,
+        :title,
+        :description,
+        :feed_url,
+        :author,
+        :generator,
+        :image_url,
+        :owner_url,
+        :link,
+        :date_published,
+        :date_updated,
+        :content_type,
+        :language,
+        :chat_id
+    );
+}
+
+feedGetAllByChatId:
+SELECT *
+FROM feedDbo
+WHERE chat_id = ?;
+
+feedGetById:
+SELECT *
+FROM feedDbo
+WHERE id = ?;
+
+feedDeleteById:
+DELETE
+FROM feedDbo
+WHERE id = ?;
+
+CREATE TABLE feedItemDbo(
+    id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
+    title                       TEXT               AS FeedTitle NOT NULL,
+    description                 TEXT               AS FeedDescription,
+    date_published              INTEGER            AS DateTime,
+    date_updated                INTEGER            AS DateTime,
+    author                      TEXT               AS FeedAuthor,
+    enclosure_length            INTEGER            AS FeedEnclosureLength,
+    enclosure_url               TEXT               AS FeedUrl,
+    enclosure_type              TEXT               AS FeedEnclosureType,
+    image_url                   TEXT               AS PhotoUrl,
+    thumbnail_url               TEXT               AS PhotoUrl,
+    link                        TEXT               AS FeedUrl
+);
+
+feedItemUpsert {
+    UPDATE feedItemDbo
+    SET title = :title,
+        description = :description,
+        date_published = :date_published,
+        date_updated = :date_updated,
+        author = :author,
+        enclosure_length = :enclosure_length,
+        enclosure_url = :enclosure_url,
+        enclosure_type = :enclosure_type,
+        image_url = :image_url,
+        thumbnail_url = :thumbnail_url,
+        link = :link
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO feedItemDbo(
+        id,
+        title,
+        description,
+        date_published,
+        date_updated,
+        author,
+        enclosure_length,
+        enclosure_url,
+        enclosure_type,
+        image_url,
+        thumbnail_url,
+        link
+    )
+    VALUES (
+        :id,
+        :title,
+        :description,
+        :date_published,
+        :date_updated,
+        :author,
+        :enclosure_length,
+        :enclosure_url,
+        :enclosure_type,
+        :image_url,
+        :thumbnail_url,
+        :link
+    );
+}
+
+feedItemGetById:
+SELECT *
+FROM feedItemDbo
+WHERE id = ?;
+
+feedItemDeleteById:
+DELETE
+FROM feedItemDbo
+WHERE id = ?;
+
+CREATE TABLE feedModelDbo(
+    id                          INTEGER            AS FeedId NOT NULL PRIMARY KEY,
+    type                        TEXT               AS FeedModelType NOT NULL,
+    suggested                   REAL               AS FeedModelSuggested NOT NULL
+);
+
+feedModelUpsert {
+    UPDATE feedModelDbo
+    SET type = :type,
+        suggested = :suggested
+    WHERE id = :id;
+
+    INSERT OR IGNORE INTO feedModelDbo(
+        id,
+        type,
+        suggested
+    )
+    VALUES (
+        :id,
+        :type,
+        :suggested
+    );
+}
+
+feedModelGetById:
+SELECT *
+FROM feedModelDbo
+WHERE id = ?;
+
+feedModelDeleteById:
+DELETE
+FROM feedModelDbo
+WHERE id = ?;
+
+CREATE TABLE feedDestinationDbo(
+    address                     TEXT            AS FeedDestinationAddress NOT NULL,
+    split                       REAL            AS FeedDestinationSplit NOT NULL,
+    type                        TEXT            AS FeedDestinationType NOT NULL,
+    feed_id                     INTEGER         AS FeedId NOT NULL
+);
+
+feedDestinationUpsert {
+    UPDATE feedDestinationDbo
+        SET address = :address,
+            split = :split,
+            type = :type
+        WHERE address = :address
+        AND feed_id = :feed_id;
+
+    INSERT INTO feedDestinationDbo(
+        address,
+        split,
+        type,
+        feed_id
+    )
+    VALUES (
+        :address,
+        :split,
+        :type,
+        :feed_id
+    );
+}
+
+feedDestinationDeleteByFeedId:
+DELETE FROM feedDestinationDbo
+WHERE feed_id = ?;
+
+feedDestinationGetByFeedId:
+SELECT *
+FROM feedDestinationDbo
+WHERE feed_id = ?;

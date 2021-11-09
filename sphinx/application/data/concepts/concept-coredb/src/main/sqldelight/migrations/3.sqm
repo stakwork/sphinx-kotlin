@@ -1,0 +1,65 @@
+import chat.sphinx.wrapper_common.DateTime;
+import chat.sphinx.wrapper_common.PhotoUrl;
+import chat.sphinx.wrapper_common.dashboard.ChatId;
+import chat.sphinx.wrapper_feed.FeedAuthor;
+import chat.sphinx.wrapper_feed.FeedContentType;
+import chat.sphinx.wrapper_feed.FeedDescription;
+import chat.sphinx.wrapper_feed.FeedDestinationAddress;
+import chat.sphinx.wrapper_feed.FeedDestinationSplit;
+import chat.sphinx.wrapper_feed.FeedDestinationType;
+import chat.sphinx.wrapper_feed.FeedEnclosureLength;
+import chat.sphinx.wrapper_feed.FeedEnclosureType;
+import chat.sphinx.wrapper_feed.FeedGenerator;
+import chat.sphinx.wrapper_feed.FeedId;
+import chat.sphinx.wrapper_feed.FeedLanguage;
+import chat.sphinx.wrapper_feed.FeedModelSuggested;
+import chat.sphinx.wrapper_feed.FeedModelType;
+import chat.sphinx.wrapper_feed.FeedTitle;
+import chat.sphinx.wrapper_feed.FeedType;
+import chat.sphinx.wrapper_feed.FeedUrl;
+
+CREATE TABLE feedDbo(
+    id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
+    feed_type                   INTEGER            AS FeedType NOT NULL,
+    title                       TEXT               AS FeedTitle NOT NULL,
+    description                 TEXT               AS FeedDescription,
+    feed_url                    TEXT               AS FeedUrl NOT NULL,
+    author                      TEXT               AS FeedAuthor,
+    generator                   TEXT               AS FeedGenerator,
+    image_url                   TEXT               AS PhotoUrl,
+    owner_url                   TEXT               AS FeedUrl,
+    link                        TEXT               AS FeedUrl,
+    date_published              INTEGER            AS DateTime,
+    date_updated                INTEGER            AS DateTime,
+    content_type                TEXT               AS FeedContentType,
+    language                    TEXT               AS FeedLanguage,
+    chat_id                     INTEGER            AS ChatId NOT NULL
+);
+
+CREATE TABLE feedItemDbo(
+    id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
+    title                       TEXT               AS FeedTitle NOT NULL,
+    description                 TEXT               AS FeedDescription,
+    date_published              INTEGER            AS DateTime,
+    date_updated                INTEGER            AS DateTime,
+    author                      TEXT               AS FeedAuthor,
+    enclosure_length            INTEGER            AS FeedEnclosureLength,
+    enclosure_url               TEXT               AS FeedUrl,
+    enclosure_type              TEXT               AS FeedEnclosureType,
+    image_url                   TEXT               AS PhotoUrl,
+    thumbnail_url               TEXT               AS PhotoUrl,
+    link                        TEXT               AS FeedUrl
+);
+
+CREATE TABLE feedModelDbo(
+    id                          INTEGER            AS FeedId NOT NULL PRIMARY KEY,
+    type                        TEXT               AS FeedModelType NOT NULL,
+    suggested                   REAL               AS FeedModelSuggested NOT NULL
+);
+
+CREATE TABLE feedDestinationDbo(
+    address                     TEXT            AS FeedDestinationAddress NOT NULL,
+    split                       REAL            AS FeedDestinationSplit NOT NULL,
+    type                        TEXT            AS FeedDestinationType NOT NULL,
+    feed_id                     INTEGER         AS FeedId NOT NULL
+);
