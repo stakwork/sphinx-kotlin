@@ -1,3 +1,4 @@
+import chat.sphinx.wrapper_chat.FeedUrl;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.dashboard.ChatId;
@@ -16,7 +17,6 @@ import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
 import chat.sphinx.wrapper_feed.FeedTitle;
 import chat.sphinx.wrapper_feed.FeedType;
-import chat.sphinx.wrapper_feed.FeedUrl;
 
 CREATE TABLE feedDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
@@ -44,11 +44,12 @@ CREATE TABLE feedItemDbo(
     date_updated                INTEGER            AS DateTime,
     author                      TEXT               AS FeedAuthor,
     enclosure_length            INTEGER            AS FeedEnclosureLength,
-    enclosure_url               TEXT               AS FeedUrl,
+    enclosure_url               TEXT               AS FeedUrl NOT NULL,
     enclosure_type              TEXT               AS FeedEnclosureType,
     image_url                   TEXT               AS PhotoUrl,
     thumbnail_url               TEXT               AS PhotoUrl,
-    link                        TEXT               AS FeedUrl
+    link                        TEXT               AS FeedUrl,
+    feed_id                     TEXT               AS FeedId NOT NULL
 );
 
 CREATE TABLE feedModelDbo(

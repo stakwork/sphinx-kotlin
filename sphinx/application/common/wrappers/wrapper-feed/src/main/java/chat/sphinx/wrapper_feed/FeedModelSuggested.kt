@@ -1,5 +1,13 @@
 package chat.sphinx.wrapper_feed
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Double.toFeedModelSuggested(): FeedModelSuggested? =
+    try {
+        FeedModelSuggested(this)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
 @JvmInline
 value class FeedModelSuggested(val value: Double) {
     init {
