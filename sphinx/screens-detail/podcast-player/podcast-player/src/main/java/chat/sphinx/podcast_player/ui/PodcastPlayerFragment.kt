@@ -209,17 +209,19 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private suspend fun showPodcastInfo(podcast: Podcast) {
         binding.apply {
-            textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title
+            textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title.value
 
             if (!dragging) setTimeLabelsAndProgressBar(podcast)
 
-            imageLoader.load(
-                imageViewPodcastImage,
-                podcast.image,
-                ImageLoaderOptions.Builder()
-                    .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                    .build()
-            )
+            podcast.image?.value?.let { podcastImage ->
+                imageLoader.load(
+                    imageViewPodcastImage,
+                    podcastImage,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                        .build()
+                )
+            }
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
@@ -281,7 +283,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private fun loadingEpisode(episode: PodcastEpisode) {
         binding.apply {
-            textViewEpisodeTitleLabel.text = episode.title
+            textViewEpisodeTitleLabel.text = episode.title.value
 
             includeLayoutEpisodeSliderControl.apply {
                 textViewCurrentEpisodeDuration.text = 0.toLong().getTimeString()

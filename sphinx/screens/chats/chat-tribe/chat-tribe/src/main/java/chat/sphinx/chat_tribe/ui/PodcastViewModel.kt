@@ -70,20 +70,22 @@ internal class PodcastViewModel @Inject constructor(
                             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                                 val owner = getOwner()
 
-                                messageRepository.getPaymentsTotalFor(podcastViewState.podcast.id).collect { paymentsTotal ->
-                                    if (paymentsTotal != null) {
-                                        val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
-                                        val label = app.getString(
-                                            if (isMyTribe) {
-                                                R.string.chat_tribe_earned
-                                            } else {
-                                                R.string.chat_tribe_contributed
-                                            }
-                                        )
+                                podcastViewState.podcast.id.value.toLongOrNull()?.let { podcastId ->
+                                    messageRepository.getPaymentsTotalFor(podcastId).collect { paymentsTotal ->
+                                        if (paymentsTotal != null) {
+                                            val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
+                                            val label = app.getString(
+                                                if (isMyTribe) {
+                                                    R.string.chat_tribe_earned
+                                                } else {
+                                                    R.string.chat_tribe_contributed
+                                                }
+                                            )
 
-                                        emit(PodcastContributionsViewState.Contributions(
-                                            label + " ${paymentsTotal.asFormattedString(appendUnit = true)}"
-                                        ))
+                                            emit(PodcastContributionsViewState.Contributions(
+                                                label + " ${paymentsTotal.asFormattedString(appendUnit = true)}"
+                                            ))
+                                        }
                                     }
                                 }
                             }
@@ -144,7 +146,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = false,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     updateViewState(it)
@@ -156,7 +158,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = true,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     updateViewState(it)
@@ -171,7 +173,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = true,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     updateViewState(it)
@@ -181,8 +183,8 @@ internal class PodcastViewModel @Inject constructor(
                 viewModelScope.launch(mainImmediate) {
                     mediaPlayerServiceController.submitAction(
                         UserAction.SetPaymentsDestinations(
-                            args.chatId,
-                            vs.podcast.value.destinations,
+                            chatId = args.chatId,
+                            destinations = vs.podcast.destinations,
                         )
                     )
                 }
@@ -198,7 +200,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = true,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration)
                 )?.let {
                     updateViewState(it)
@@ -231,7 +233,10 @@ internal class PodcastViewModel @Inject constructor(
                             is LoadResponse.Loading -> {}
                             is Response.Error -> {}
                             is Response.Success -> {
-                                val podcast = response.value.toPodcast()
+                                val podcast = response.value.toPodcast(
+                                    args.chatId,
+                                    data.feedUrl
+                                )
 
                                 if (data.metaData != null) {
                                     podcast.setMetaData(data.metaData)
@@ -248,36 +253,40 @@ internal class PodcastViewModel @Inject constructor(
                                     val episode = vs.podcast.getCurrentEpisode()
 
                                     viewModelScope.launch {
-                                        if (episode.playing) {
+                                        episode.id.value.toLongOrNull()?.let { episodeId ->
+                                            if (episode.playing) {
+                                                vs.podcast.didPausePlayingEpisode(episode)
 
-                                            vs.podcast.didPausePlayingEpisode(episode)
+                                                mediaPlayerServiceController.submitAction(
+                                                    UserAction.ServiceAction.Pause(
+                                                        args.chatId,
+                                                        episodeId
+                                                    )
+                                                )
+                                            } else {
+                                                withContext(io) {
+                                                    vs.podcast.didStartPlayingEpisode(
+                                                        episode,
+                                                        vs.podcast.currentTime,
+                                                        ::retrieveEpisodeDuration,
+                                                    )
+                                                }
 
-                                            mediaPlayerServiceController.submitAction(
-                                                UserAction.ServiceAction.Pause(
-                                                    args.chatId,
-                                                    episode.id
-                                                )
-                                            )
-                                        } else {
-                                            withContext(io) {
-                                                vs.podcast.didStartPlayingEpisode(
-                                                    episode,
-                                                    vs.podcast.currentTime,
-                                                    ::retrieveEpisodeDuration,
-                                                )
+                                                vs.podcast.id.value.toLongOrNull()
+                                                    ?.let { podcastId ->
+                                                        mediaPlayerServiceController.submitAction(
+                                                            UserAction.ServiceAction.Play(
+                                                                args.chatId,
+                                                                podcastId,
+                                                                episodeId,
+                                                                episode.enclosureUrl.value,
+                                                                Sat(vs.podcast.satsPerMinute),
+                                                                vs.podcast.speed,
+                                                                vs.podcast.currentTime,
+                                                            )
+                                                        )
+                                                    }
                                             }
-
-                                            mediaPlayerServiceController.submitAction(
-                                                UserAction.ServiceAction.Play(
-                                                    args.chatId,
-                                                    vs.podcast.id,
-                                                    episode.id,
-                                                    episode.enclosureUrl,
-                                                    Sat(vs.podcast.satsPerMinute),
-                                                    vs.podcast.speed,
-                                                    vs.podcast.currentTime,
-                                                )
-                                            )
                                         }
                                     }
                                 }
@@ -300,14 +309,16 @@ internal class PodcastViewModel @Inject constructor(
                                                         vs.podcast
                                                     )
 
-                                                    mediaPlayerServiceController.submitAction(
-                                                        UserAction.SendBoost(
-                                                            args.chatId,
-                                                            vs.podcast.id,
-                                                            metaData,
-                                                            vs.podcast.value.destinations,
+                                                    vs.podcast.id.value.toLongOrNull()?.let { podcastId ->
+                                                        mediaPlayerServiceController.submitAction(
+                                                            UserAction.SendBoost(
+                                                                args.chatId,
+                                                                podcastId,
+                                                                metaData,
+                                                                vs.podcast.destinations ?: arrayListOf(),
+                                                            )
                                                         )
-                                                    )
+                                                    }
                                                 }
                                             }
                                         }
@@ -364,7 +375,7 @@ internal class PodcastViewModel @Inject constructor(
                                     PodcastViewState.PodcastVS.Available(
                                         showLoading = true,
                                         showPlayButton = true,
-                                        title = podcast.getCurrentEpisode().title,
+                                        title = podcast.getCurrentEpisode().title.value,
                                         playingProgress = 0,
                                         clickPlayPause = clickPlayPause,
                                         clickBoost = clickBoost,
@@ -387,7 +398,7 @@ internal class PodcastViewModel @Inject constructor(
                                 PodcastViewState.PodcastVS.Loaded(
                                     showLoading = false,
                                     showPlayButton = !isPlaying,
-                                    title = podcast.getCurrentEpisode().title,
+                                    title = podcast.getCurrentEpisode().title.value,
                                     playingProgress = playingProgress,
                                     clickPlayPause = clickPlayPause,
                                     clickBoost = clickBoost,

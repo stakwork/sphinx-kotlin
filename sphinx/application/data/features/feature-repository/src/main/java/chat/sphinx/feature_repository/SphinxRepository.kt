@@ -515,11 +515,9 @@ abstract class SphinxRepository(
             for (destination in destinations) {
                 destinationsArray.add(
                     PostStreamSatsDestinationDto(
-                        destination.address,
-                        destination.type,
-                        destination.split.toDouble(),
-                        destination.customKey,
-                        destination.customValue
+                        destination.address.value,
+                        destination.type.value,
+                        destination.split.value,
                     )
                 )
             }
@@ -2660,7 +2658,7 @@ abstract class SphinxRepository(
                     val metaData = podcast.getMetaData(tipAmount)
 
                     val message = PodBoost(
-                        FeedId(podcast.id),
+                        podcast.id,
                         metaData.itemId,
                         metaData.timeSeconds,
                         tipAmount

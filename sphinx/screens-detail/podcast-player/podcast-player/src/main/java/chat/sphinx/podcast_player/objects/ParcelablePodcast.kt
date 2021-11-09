@@ -1,17 +1,17 @@
 package chat.sphinx.podcast_player.objects
 
-import android.media.MediaMetadataRetriever
-import android.net.Uri
-import android.os.Build
 import android.os.Parcelable
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
-import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.ItemId
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_chat.FeedUrl
+import chat.sphinx.wrapper_chat.toFeedUrl
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.toChatId
+import chat.sphinx.wrapper_common.time
+import chat.sphinx.wrapper_common.toDateTime
+import chat.sphinx.wrapper_common.toPhotoUrl
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.PodcastEpisode
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlin.math.roundToInt
 
@@ -20,12 +20,16 @@ import kotlin.math.roundToInt
 class ParcelablePodcast(
     val id: Long,
     val title: String,
-    val description: String,
-    val author: String,
-    val image: String,
+    val description: String?,
+    val author: String?,
+    val image: String?,
     val episodeId: Long?,
     val episodeDuration: Long?,
-    val value: ParcelablePodcastValue,
+    val datePublished: Long?,
+    val chatId: Long,
+    val feedUrl: String,
+    val model: ParcelablePodcastModel?,
+    val destinations: List<ParcelablePodcastDestination>,
     val episodes: List<ParcelablePodcastEpisode>,
 ): Parcelable
 
@@ -36,7 +40,27 @@ fun Podcast.toParcelablePodcast(): ParcelablePodcast {
         podcastEpisodes.add(episode.toParcelablePodcastEpisode())
     }
 
-    return ParcelablePodcast(id, title, description, author, image, episodeId, episodeDuration, value.toParcelablePodcastValue(), podcastEpisodes)
+    val podcastDestinations: MutableList<ParcelablePodcastDestination> = ArrayList(destinations.size)
+
+    for (destination in destinations) {
+        podcastDestinations.add(destination.toParcelablePodcastDestination())
+    }
+
+    return ParcelablePodcast(
+        id.value.toLong(),
+        title.value,
+        description?.value,
+        author?.value,
+        image?.value,
+        episodeId,
+        episodeDuration,
+        datePublished?.time,
+        chatId.value,
+        feedUrl.value,
+        model?.toParcelablePodcastModel(),
+        podcastDestinations,
+        podcastEpisodes
+    )
 }
 
 fun ParcelablePodcast.toPodcast(): Podcast {
@@ -46,7 +70,25 @@ fun ParcelablePodcast.toPodcast(): Podcast {
         podcastEpisodes.add(episode.toPodcastEpisode())
     }
 
-    var podcast = Podcast(id, title, description, author, image, value.toPodcastValue(), podcastEpisodes)
+    val podcastDestinations: MutableList<PodcastDestination> = ArrayList(destinations.size)
+
+    for (destination in destinations) {
+        podcastDestinations.add(destination.toPodcastDestination())
+    }
+
+    var podcast = Podcast(
+        id = id.toString().toFeedId() ?: FeedId("null"),
+        title =title.toFeedTitle() ?: FeedTitle("null"),
+        description =description?.toFeedDescription(),
+        author = author?.toFeedAuthor(),
+        image = image?.toPhotoUrl(),
+        datePublished = datePublished?.toDateTime(),
+        chatId = chatId?.toChatId() ?: ChatId(-1),
+        feedUrl = feedUrl?.toFeedUrl() ?: FeedUrl("null")
+    )
+    podcast.model = model?.toPodcastModel()
+    podcast.destinations = podcastDestinations
+    podcast.episodes = podcastEpisodes
     podcast.episodeId = episodeId
     podcast.episodeDuration = episodeDuration
 

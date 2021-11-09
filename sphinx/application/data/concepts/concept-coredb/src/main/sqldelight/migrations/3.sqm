@@ -53,7 +53,7 @@ CREATE TABLE feedItemDbo(
 );
 
 CREATE TABLE feedModelDbo(
-    id                          INTEGER            AS FeedId NOT NULL PRIMARY KEY,
+    id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
     type                        TEXT               AS FeedModelType NOT NULL,
     suggested                   REAL               AS FeedModelSuggested NOT NULL
 );
@@ -62,5 +62,5 @@ CREATE TABLE feedDestinationDbo(
     address                     TEXT            AS FeedDestinationAddress NOT NULL,
     split                       REAL            AS FeedDestinationSplit NOT NULL,
     type                        TEXT            AS FeedDestinationType NOT NULL,
-    feed_id                     INTEGER         AS FeedId NOT NULL
+    feed_id                     TEXT            AS FeedId NOT NULL
 );

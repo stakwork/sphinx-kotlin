@@ -12,6 +12,23 @@ inline fun FeedType.isVideo(): Boolean =
 inline fun FeedType.isNewsletter(): Boolean =
     this is FeedType.Newsletter
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toFeedType(): FeedType =
+    when (this) {
+        FeedType.PODCAST -> {
+            FeedType.Podcast
+        }
+        FeedType.VIDEO -> {
+            FeedType.Video
+        }
+        FeedType.NEWSLETTER -> {
+            FeedType.Newsletter
+        }
+        else -> {
+            FeedType.Unknown(this)
+        }
+    }
+
 sealed class FeedType {
 
     companion object {
@@ -20,7 +37,22 @@ sealed class FeedType {
         const val NEWSLETTER = 2 // SHOW
     }
 
-    object Podcast : FeedType()
-    object Video : FeedType()
-    object Newsletter : FeedType()
+    abstract val value: Int
+
+    object Podcast : FeedType() {
+        override val value: Int
+            get() = PODCAST
+    }
+
+    object Video : FeedType() {
+        override val value: Int
+            get() = VIDEO
+    }
+
+    object Newsletter : FeedType() {
+        override val value: Int
+            get() = NEWSLETTER
+    }
+
+    data class Unknown(override val value: Int) : FeedType()
 }

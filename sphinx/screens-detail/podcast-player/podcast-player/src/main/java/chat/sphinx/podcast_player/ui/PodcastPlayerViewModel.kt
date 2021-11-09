@@ -141,37 +141,47 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     fun playEpisode(episode: PodcastEpisode, startTime: Int) {
-        viewModelScope.launch(mainImmediate) {
-            mediaPlayerServiceController.submitAction(
-                UserAction.ServiceAction.Play(
-                    args.chatId,
-                    podcast.id,
-                    episode.id,
-                    episode.enclosureUrl,
-                    Sat(podcast.satsPerMinute),
-                    podcast.speed,
-                    startTime,
-                )
-            )
+        podcast.id.value.toLongOrNull()?.let { podcastId ->
+            episode.id.value.toLongOrNull()?.let { episodeId ->
+                viewModelScope.launch(mainImmediate) {
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Play(
+                            args.chatId,
+                            podcastId,
+                            episodeId,
+                            episode.enclosureUrl.value,
+                            Sat(podcast.satsPerMinute),
+                            podcast.speed,
+                            startTime,
+                        )
+                    )
 
-            withContext(io) {
-                podcast.didStartPlayingEpisode(episode, startTime, ::retrieveEpisodeDuration)
+                    withContext(io) {
+                        podcast.didStartPlayingEpisode(
+                            episode,
+                            startTime,
+                            ::retrieveEpisodeDuration
+                        )
+                    }
+
+                    viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
+                }
             }
-
-            viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
         }
     }
 
     fun pauseEpisode(episode: PodcastEpisode) {
-        viewModelScope.launch(mainImmediate) {
-            podcast.didPausePlayingEpisode(episode)
+        episode.id.value.toLongOrNull()?.let { episodeId ->
+            viewModelScope.launch(mainImmediate) {
+                podcast.didPausePlayingEpisode(episode)
 
-            mediaPlayerServiceController.submitAction(
-                UserAction.ServiceAction.Pause(
-                    args.chatId,
-                    episode.id
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Pause(
+                        args.chatId,
+                        episodeId
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -205,7 +215,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun setPaymentsDestinations() {
         viewModelScope.launch(mainImmediate) {
-            podcast.value.destinations.let { destinations ->
+            podcast.destinations.let { destinations ->
                 mediaPlayerServiceController.submitAction(
                     UserAction.SetPaymentsDestinations(
                         args.chatId,
@@ -220,21 +230,22 @@ internal class PodcastPlayerViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             getOwner().tipAmount?.let { tipAmount ->
                 podcast.let { nnPodcast ->
+                    nnPodcast.id.value.toLongOrNull()?.let { podcastId ->
+                        if (tipAmount.value > 0) {
+                            val metaData = nnPodcast.getMetaData(tipAmount)
 
-                    if (tipAmount.value > 0) {
-                        val metaData = nnPodcast.getMetaData(tipAmount)
+                            messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
 
-                        messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
-
-                        nnPodcast.value.destinations.let { destinations ->
-                            mediaPlayerServiceController.submitAction(
-                                UserAction.SendBoost(
-                                    args.chatId,
-                                    nnPodcast.id,
-                                    metaData,
-                                    destinations
+                            nnPodcast.destinations.let { destinations ->
+                                mediaPlayerServiceController.submitAction(
+                                    UserAction.SendBoost(
+                                        args.chatId,
+                                        podcastId,
+                                        metaData,
+                                        destinations
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }

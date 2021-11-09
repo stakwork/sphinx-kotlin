@@ -6,6 +6,12 @@ import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
+import chat.sphinx.feature_coredb.adapters.feed.*
+import chat.sphinx.feature_coredb.adapters.feed.FeedAuthorAdapter
+import chat.sphinx.feature_coredb.adapters.feed.FeedDescriptionAdapter
+import chat.sphinx.feature_coredb.adapters.feed.FeedIdAdapter
+import chat.sphinx.feature_coredb.adapters.feed.FeedTitleAdapter
+import chat.sphinx.feature_coredb.adapters.feed.FeedTypeAdapter
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyDecryptedAdapter
@@ -158,6 +164,50 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     updated_atAdapter = DateTimeAdapter.getInstance(),
                     chat_idAdapter = ChatIdAdapter.getInstance(),
                     contact_idAdapter = ContactIdAdapter.getInstance()
+                ),
+                feedDboAdapter = FeedDbo.Adapter(
+                    idAdapter = FeedIdAdapter(),
+                    feed_typeAdapter = FeedTypeAdapter(),
+                    titleAdapter = FeedTitleAdapter(),
+                    descriptionAdapter = FeedDescriptionAdapter(),
+                    feed_urlAdapter = FeedUrlAdapter.getInstance(),
+                    authorAdapter = FeedAuthorAdapter(),
+                    generatorAdapter = FeedGeneratorAdapter(),
+                    image_urlAdapter = PhotoUrlAdapter.getInstance(),
+                    owner_urlAdapter = FeedUrlAdapter.getInstance(),
+                    linkAdapter = FeedUrlAdapter.getInstance(),
+                    date_publishedAdapter = DateTimeAdapter.getInstance(),
+                    date_updatedAdapter = DateTimeAdapter.getInstance(),
+                    content_typeAdapter = FeedContentTypeAdapter(),
+                    languageAdapter = FeedLanguageAdapter(),
+                    chat_idAdapter = ChatIdAdapter.getInstance()
+
+                ),
+                feedItemDboAdapter = FeedItemDbo.Adapter(
+                    idAdapter = FeedIdAdapter(),
+                    titleAdapter = FeedTitleAdapter(),
+                    descriptionAdapter = FeedDescriptionAdapter(),
+                    date_publishedAdapter = DateTimeAdapter.getInstance(),
+                    date_updatedAdapter = DateTimeAdapter.getInstance(),
+                    authorAdapter = FeedAuthorAdapter(),
+                    enclosure_lengthAdapter = FeedEnclosureLengthAdapter(),
+                    enclosure_urlAdapter = FeedUrlAdapter.getInstance(),
+                    enclosure_typeAdapter = FeedEnclosureTypeAdapter(),
+                    image_urlAdapter = PhotoUrlAdapter.getInstance(),
+                    thumbnail_urlAdapter = PhotoUrlAdapter.getInstance(),
+                    linkAdapter = FeedUrlAdapter.getInstance(),
+                    feed_idAdapter = FeedIdAdapter()
+                ),
+                feedModelDboAdapter = FeedModelDbo.Adapter(
+                    idAdapter = FeedIdAdapter(),
+                    typeAdapter = FeedModelTypeAdapter(),
+                    suggestedAdapter = FeedModelSuggestedAdapter()
+                ),
+                feedDestinationDboAdapter = FeedDestinationDbo.Adapter(
+                    addressAdapter = FeedDestinationAddressAdapter(),
+                    splitAdapter = FeedDestinationSplitAdapter(),
+                    typeAdapter = FeedDestinationTypeAdapter(),
+                    feed_idAdapter = FeedIdAdapter()
                 )
             ).sphinxDatabaseQueries
         }

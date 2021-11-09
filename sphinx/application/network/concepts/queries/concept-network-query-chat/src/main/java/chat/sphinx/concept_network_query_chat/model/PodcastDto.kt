@@ -1,6 +1,11 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import chat.sphinx.wrapper_chat.FeedUrl
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.toPhotoUrl
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.JsonClass
 
@@ -13,19 +18,43 @@ data class PodcastDto(
     val image: String,
     val value: PodcastValueDto,
     val episodes: List<PodcastEpisodeDto>,
-) {
+)
 
-    fun isValidPodcast() : Boolean {
-        return episodes.isNotEmpty() && title.isNotEmpty()
-    }
-}
+fun PodcastDto.toPodcast(
+    chatId: ChatId,
+    feedUrl: FeedUrl,
+): Podcast {
 
-fun PodcastDto.toPodcast(): Podcast {
+    val podcastId = id.toString().toFeedId() ?: FeedId("-1")
     val podcastEpisodes: MutableList<PodcastEpisode> = ArrayList(episodes.size)
 
     for (episode in episodes) {
-        podcastEpisodes.add(episode.toPodcastEpisode())
+        podcastEpisodes.add(
+            episode.toPodcastEpisode(podcastId)
+        )
     }
 
-    return Podcast(id, title, description, author, image, value.toPodcastValue(), podcastEpisodes)
+    val podcastDestinations: MutableList<PodcastDestination> = ArrayList(value.destinations.size)
+
+    for (destination in value.destinations) {
+        podcastDestinations.add(
+            destination.toPodcastDestination(podcastId)
+        )
+    }
+
+    var podcast = Podcast(
+        id = podcastId,
+        title = title.toFeedTitle() ?: FeedTitle("null"),
+        description =description.toFeedDescription(),
+        author = author.toFeedAuthor(),
+        image = image.toPhotoUrl(),
+        datePublished = null,
+        chatId = chatId,
+        feedUrl = feedUrl
+    )
+    podcast.model = value.model.toPodcastModel(podcastId)
+    podcast.destinations = podcastDestinations
+    podcast.episodes = podcastEpisodes
+
+    return podcast
 }

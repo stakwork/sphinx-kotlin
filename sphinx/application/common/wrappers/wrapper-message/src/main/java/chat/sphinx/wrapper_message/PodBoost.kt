@@ -2,7 +2,7 @@ package chat.sphinx.wrapper_message
 
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.message.FeedId
+import chat.sphinx.wrapper_feed.FeedId
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -58,7 +58,7 @@ data class PodBoost(
 // "{\"feedID\":226249,\"itemID\":1997782557,\"ts\":1396,\"amount\":100}"
 @JsonClass(generateAdapter = true)
 internal data class PodBoostMoshi(
-    val feedID: Long,
+    val feedID: String,
     val itemID: Long,
     val ts: Int,
     val amount: Long

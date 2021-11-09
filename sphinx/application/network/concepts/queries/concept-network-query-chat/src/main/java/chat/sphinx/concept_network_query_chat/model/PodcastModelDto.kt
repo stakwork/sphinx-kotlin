@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.PodcastModel
 import com.squareup.moshi.JsonClass
 
@@ -9,6 +10,12 @@ data class PodcastModelDto(
     val suggested: Double,
 )
 
-fun PodcastModelDto.toPodcastModel(): PodcastModel {
-    return PodcastModel(this.type, this.suggested)
+fun PodcastModelDto.toPodcastModel(
+    podcastId: FeedId
+): PodcastModel {
+    return PodcastModel(
+        this.type.toFeedModelType() ?: FeedModelType("null"),
+        this.suggested.toFeedModelSuggested() ?: FeedModelSuggested(0.0),
+        podcastId
+    )
 }
