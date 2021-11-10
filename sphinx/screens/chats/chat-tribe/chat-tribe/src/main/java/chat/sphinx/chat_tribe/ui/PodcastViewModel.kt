@@ -8,16 +8,12 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribePodcastData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.toPodcast
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -47,7 +43,7 @@ internal class PodcastViewModel @Inject constructor(
     private val navigator: TribeChatNavigator,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
-    private val networkQueryChat: NetworkQueryChat,
+    private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ) : BaseViewModel<PodcastViewState>(dispatchers, PodcastViewState.NoPodcast),
     MediaPlayerServiceController.MediaServiceListener
@@ -377,6 +373,12 @@ internal class PodcastViewModel @Inject constructor(
             if (vs !is PodcastViewState.PodcastVS) {
                 return@OnClickCallback
             }
+
+            repositoryMedia.updateChatMetaData(
+                args.chatId,
+                vs.podcast.getMetaData(),
+                false
+            )
 
             viewModelScope.launch(mainImmediate) {
                 navigator.toPodcastPlayerScreen(

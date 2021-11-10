@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface RepositoryMedia {
     fun getChatById(chatId: ChatId): Flow<Chat?>
-    fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData)
+    fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData, shouldSync: Boolean = true)
 
     fun downloadMediaIfApplicable(
         message: Message,

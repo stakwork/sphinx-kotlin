@@ -479,20 +479,27 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData) {
+    override fun updateChatMetaData(
+        chatId: ChatId,
+        metaData: ChatMetaData,
+        shouldSync: Boolean
+    ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
             }
 
-            try {
-                networkQueryChat.updateChat(
-                    chatId,
-                    PutChatDto(meta = metaData.toJson(moshi))
-                ).collect {}
-            } catch (e: AssertionError) {}
-            // TODO: Network call to update Relay
+            if (shouldSync) {
+                try {
+                    networkQueryChat.updateChat(
+                        chatId,
+                        PutChatDto(meta = metaData.toJson(moshi))
+                    ).collect {}
+                } catch (e: AssertionError) {}
+                // TODO: Network call to update Relay
+            }
         }
     }
 
