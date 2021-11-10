@@ -12,14 +12,12 @@ import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
-import chat.sphinx.podcast_player.objects.ParcelablePodcast
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
-import chat.sphinx.wrapper_feed.FeedId
 import javax.inject.Inject
 
 internal class TribeChatNavigatorImpl @Inject constructor(
