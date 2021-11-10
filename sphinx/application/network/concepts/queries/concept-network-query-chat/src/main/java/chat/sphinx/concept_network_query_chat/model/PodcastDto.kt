@@ -23,9 +23,15 @@ data class PodcastDto(
 fun PodcastDto.toPodcast(
     chatId: ChatId,
     feedUrl: FeedUrl,
-): Podcast {
+): Podcast? {
 
-    val podcastId = id.toString().toFeedId() ?: FeedId("-1")
+    val podcastId = id.toString().toFeedId()
+    val podcastTitle = title.toFeedTitle()
+
+    if (podcastId == null || podcastTitle == null) {
+        return null
+    }
+
     val podcastEpisodes: MutableList<PodcastEpisode> = ArrayList(episodes.size)
 
     for (episode in episodes) {
@@ -44,7 +50,7 @@ fun PodcastDto.toPodcast(
 
     var podcast = Podcast(
         id = podcastId,
-        title = title.toFeedTitle() ?: FeedTitle("null"),
+        title = podcastTitle,
         description =description.toFeedDescription(),
         author = author.toFeedAuthor(),
         image = image.toPhotoUrl(),

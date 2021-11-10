@@ -920,7 +920,7 @@ feedUpsert {
     )
     VALUES (
         :id,
-        feed_type,
+        :feed_type,
         :title,
         :description,
         :feed_url,
@@ -937,10 +937,12 @@ feedUpsert {
     );
 }
 
-feedGetAllByChatId:
+feedGetByChatId:
 SELECT *
 FROM feedDbo
-WHERE chat_id = ?;
+WHERE chat_id = ?
+ORDER BY id DESC
+LIMIT 1;
 
 feedGetById:
 SELECT *
@@ -1021,6 +1023,11 @@ SELECT *
 FROM feedItemDbo
 WHERE id = ?;
 
+feedItemsGetByFeedId:
+SELECT *
+FROM feedItemDbo
+WHERE feed_id = ?;
+
 feedItemDeleteById:
 DELETE
 FROM feedItemDbo
@@ -1080,7 +1087,7 @@ feedDestinationUpsert {
         WHERE address = :address
         AND feed_id = :feed_id;
 
-    INSERT INTO feedDestinationDbo(
+    INSERT OR IGNORE INTO feedDestinationDbo(
         address,
         split,
         type,
@@ -1098,7 +1105,7 @@ feedDestinationDeleteByFeedId:
 DELETE FROM feedDestinationDbo
 WHERE feed_id = ?;
 
-feedDestinationGetByFeedId:
+feedDestinationsGetByFeedId:
 SELECT *
 FROM feedDestinationDbo
 WHERE feed_id = ?;

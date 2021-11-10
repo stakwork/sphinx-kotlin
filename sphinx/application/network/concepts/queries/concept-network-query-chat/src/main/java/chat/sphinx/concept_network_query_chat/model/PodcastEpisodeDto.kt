@@ -21,7 +21,7 @@ fun PodcastEpisodeDto.toPodcastEpisode(
     podcastId: FeedId
 ): PodcastEpisode {
     return PodcastEpisode(
-        id = id.toString().toFeedId() ?: FeedId("-1"),
+        id = id.toString().toFeedId() ?: FeedId("null"),
         title = title.toFeedTitle() ?: FeedTitle("null"),
         description = description.toFeedDescription(),
         image = image.toPhotoUrl(),

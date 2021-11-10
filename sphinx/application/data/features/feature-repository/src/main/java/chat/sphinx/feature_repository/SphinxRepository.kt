@@ -41,6 +41,10 @@ import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedDboPodcastPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPodcastDestinationPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPodcastEpisodePresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPodcastModelPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
@@ -3104,6 +3108,88 @@ abstract class SphinxRepository(
 
         return podcastData
     }
+
+    private val podcastLock = Mutex()
+    override suspend fun updatePodcastFeed(
+        chatId: ChatId,
+        host: ChatHost,
+        feedUrl: FeedUrl
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        networkQueryChat.getPodcastFeed(host, feedUrl.value).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+                    podcastLock.withLock {
+                        queries.transaction {
+                            upsertPodcast(
+                                response.value,
+                                feedUrl,
+                                chatId,
+                                queries
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private val podcastDboPresenterMapper: FeedDboPodcastPresenterMapper by lazy {
+        FeedDboPodcastPresenterMapper(dispatchers)
+    }
+    private val podcastDestinationDboPresenterMapper: FeedDestinationDboPodcastDestinationPresenterMapper by lazy {
+        FeedDestinationDboPodcastDestinationPresenterMapper(dispatchers)
+    }
+    private val podcastEpisodeDboPresenterMapper: FeedItemDboPodcastEpisodePresenterMapper by lazy {
+        FeedItemDboPodcastEpisodePresenterMapper(dispatchers)
+    }
+    private val podcastModelDboPresenterMapper: FeedModelDboPodcastModelPresenterMapper by lazy {
+        FeedModelDboPodcastModelPresenterMapper(dispatchers)
+    }
+    override fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        queries.feedGetByChatId(chatId)
+            .asFlow()
+            .mapToOneOrNull(io)
+            .map { it?.let { podcastDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+            .collect { value: Podcast? ->
+                value?.let { podcast ->
+
+                    queries.feedModelGetById(podcast.id).executeAsOneOrNull()?.let { feedModelDbo ->
+                        podcast.model = podcastModelDboPresenterMapper.mapFrom(feedModelDbo)
+                    }
+
+                    val episodes = queries.feedItemsGetByFeedId(podcast.id).executeAsList().map {
+                        podcastEpisodeDboPresenterMapper.mapFrom(it)
+                    }
+
+                    val destinations = queries.feedDestinationsGetByFeedId(podcast.id).executeAsList().map {
+                        podcastDestinationDboPresenterMapper.mapFrom(it)
+                    }
+
+                    podcast.episodes = episodes
+                    podcast.destinations = destinations
+
+                    emit(podcast)
+                }
+            }
+    }
+
+//    override fun getActiveSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
+//        emitAll(
+//            coreDB.getSphinxDatabaseQueries().subscriptionGetLastActiveByContactId(contactId)
+//                .asFlow()
+//                .mapToOneOrNull(io)
+//                .map { it?.let { subscriptionDboPresenterMapper.mapFrom(it) } }
+//                .distinctUntilChanged()
+//        )
+//    }
 
     /*
     * Used to hold in memory the chat table's latest message time to reduce disk IO

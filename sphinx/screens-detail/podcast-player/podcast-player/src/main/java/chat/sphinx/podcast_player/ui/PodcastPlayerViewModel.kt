@@ -14,6 +14,7 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.podcast_player.objects.toPodcast
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
@@ -25,8 +26,7 @@ import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -51,7 +51,36 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
-    val podcast: Podcast = args.argPodcast.toPodcast()
+    private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
+        emitAll(chatRepository.getPodcastByChatId(args.chatId))
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000),
+        replay = 1,
+    )
+
+    suspend fun getPodcast(): Podcast? {
+        podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
+            return podcast
+        }
+
+        podcastSharedFlow.firstOrNull()?.let { podcast ->
+            return podcast
+        }
+
+        var podcast: Podcast? = null
+
+        try {
+            podcastSharedFlow.collect {
+                if (it != null) {
+                    podcast = it
+                    throw Exception()
+                }
+            }
+        } catch (e: Exception) {}
+        delay(25L)
+        return podcast
+    }
 
     val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
         ViewStateContainer(BoostAnimationViewState.Idle)
@@ -64,36 +93,69 @@ internal class PodcastPlayerViewModel @Inject constructor(
             }
         }
 
-        @Exhaustive
-        when (serviceState) {
-            is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
-                podcast.playingEpisodeUpdate(serviceState.episodeId, serviceState.currentTime, serviceState.episodeDuration.toLong())
-                viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
-            }
-            is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
-                podcast.pauseEpisodeUpdate()
-                viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
-            }
-            is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-                podcast.endEpisodeUpdate(serviceState.episodeId, ::retrieveEpisodeDuration)
-                viewStateContainer.updateViewState(PodcastPlayerViewState.MediaStateUpdate(podcast, serviceState))
-            }
-            is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
-                setPaymentsDestinations()
-            }
-            is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
-                viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceLoading)
-            }
-            is MediaPlayerServiceState.ServiceInactive -> {
-                podcast.pauseEpisodeUpdate()
-                viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceInactive)
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                @Exhaustive
+                when (serviceState) {
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+                        podcast.playingEpisodeUpdate(
+                            serviceState.episodeId,
+                            serviceState.currentTime,
+                            serviceState.episodeDuration.toLong()
+                        )
+                        viewStateContainer.updateViewState(
+                            PodcastPlayerViewState.MediaStateUpdate(
+                                podcast,
+                                serviceState
+                            )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
+                        podcast.pauseEpisodeUpdate()
+                        viewStateContainer.updateViewState(
+                            PodcastPlayerViewState.MediaStateUpdate(
+                                podcast,
+                                serviceState
+                            )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
+                        podcast.endEpisodeUpdate(
+                            serviceState.episodeId,
+                            ::retrieveEpisodeDuration
+                        )
+                        viewStateContainer.updateViewState(
+                            PodcastPlayerViewState.MediaStateUpdate(
+                                podcast,
+                                serviceState
+                            )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
+                        setPaymentsDestinations()
+                    }
+                    is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
+                        viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceLoading)
+                    }
+                    is MediaPlayerServiceState.ServiceInactive -> {
+                        podcast.pauseEpisodeUpdate()
+                        viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceInactive)
+                    }
+                }
             }
         }
     }
 
     init {
         mediaPlayerServiceController.addListener(this)
-        podcastLoaded()
+
+        viewModelScope.launch(mainImmediate) {
+            podcastSharedFlow.collect { podcast ->
+                podcast?.let { nnPodcast ->
+                    podcastLoaded(nnPodcast)
+                }
+            }
+        }
 
         viewModelScope.launch(mainImmediate) {
             val owner = getOwner()
@@ -107,7 +169,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    private fun podcastLoaded() {
+    private fun podcastLoaded(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat.metaData?.let { metaData ->
@@ -141,30 +203,38 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     fun playEpisode(episode: PodcastEpisode, startTime: Int) {
-        podcast.id.value.toLongOrNull()?.let { podcastId ->
-            episode.id.value.toLongOrNull()?.let { episodeId ->
-                viewModelScope.launch(mainImmediate) {
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Play(
-                            args.chatId,
-                            podcastId,
-                            episodeId,
-                            episode.enclosureUrl.value,
-                            Sat(podcast.satsPerMinute),
-                            podcast.speed,
-                            startTime,
-                        )
-                    )
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                podcast.id.value.toLongOrNull()?.let { podcastId ->
+                    episode.id.value.toLongOrNull()?.let { episodeId ->
+                        viewModelScope.launch(mainImmediate) {
+                            mediaPlayerServiceController.submitAction(
+                                UserAction.ServiceAction.Play(
+                                    args.chatId,
+                                    podcastId,
+                                    episodeId,
+                                    episode.enclosureUrl.value,
+                                    Sat(podcast.satsPerMinute),
+                                    podcast.speed,
+                                    startTime,
+                                )
+                            )
 
-                    withContext(io) {
-                        podcast.didStartPlayingEpisode(
-                            episode,
-                            startTime,
-                            ::retrieveEpisodeDuration
-                        )
+                            withContext(io) {
+                                podcast.didStartPlayingEpisode(
+                                    episode,
+                                    startTime,
+                                    ::retrieveEpisodeDuration
+                                )
+                            }
+
+                            viewStateContainer.updateViewState(
+                                PodcastPlayerViewState.EpisodePlayed(
+                                    podcast
+                                )
+                            )
+                        }
                     }
-
-                    viewStateContainer.updateViewState(PodcastPlayerViewState.EpisodePlayed(podcast))
                 }
             }
         }
@@ -173,55 +243,63 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun pauseEpisode(episode: PodcastEpisode) {
         episode.id.value.toLongOrNull()?.let { episodeId ->
             viewModelScope.launch(mainImmediate) {
-                podcast.didPausePlayingEpisode(episode)
+                getPodcast()?.let { podcast ->
+                    podcast.didPausePlayingEpisode(episode)
 
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Pause(
-                        args.chatId,
-                        episodeId
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Pause(
+                            args.chatId,
+                            episodeId
+                        )
                     )
-                )
+                }
             }
         }
     }
 
     fun seekTo(time: Int) {
         viewModelScope.launch(mainImmediate) {
-            podcast.didSeekTo(time)
+            getPodcast()?.let { podcast ->
+                podcast.didSeekTo(time)
 
-            val metaData = podcast.getMetaData()
+                val metaData = podcast.getMetaData()
 
-            mediaPlayerServiceController.submitAction(
-                UserAction.ServiceAction.Seek(
-                    args.chatId,
-                    metaData
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Seek(
+                        args.chatId,
+                        metaData
+                    )
                 )
-            )
+            }
         }
     }
 
     fun adjustSpeed(speed: Double) {
         viewModelScope.launch(mainImmediate) {
-            podcast.speed = speed
+            getPodcast()?.let { podcast ->
+                podcast.speed = speed
 
-            mediaPlayerServiceController.submitAction(
-                UserAction.AdjustSpeed(
-                    args.chatId,
-                    podcast.getMetaData()
+                mediaPlayerServiceController.submitAction(
+                    UserAction.AdjustSpeed(
+                        args.chatId,
+                        podcast.getMetaData()
+                    )
                 )
-            )
+            }
         }
     }
 
     private fun setPaymentsDestinations() {
         viewModelScope.launch(mainImmediate) {
-            podcast.destinations.let { destinations ->
-                mediaPlayerServiceController.submitAction(
-                    UserAction.SetPaymentsDestinations(
-                        args.chatId,
-                        destinations
+            getPodcast()?.let { podcast ->
+                podcast.destinations.let { destinations ->
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.SetPaymentsDestinations(
+                            args.chatId,
+                            destinations
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -229,22 +307,24 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun sendPodcastBoost() {
         viewModelScope.launch(mainImmediate) {
             getOwner().tipAmount?.let { tipAmount ->
-                podcast.let { nnPodcast ->
-                    nnPodcast.id.value.toLongOrNull()?.let { podcastId ->
-                        if (tipAmount.value > 0) {
-                            val metaData = nnPodcast.getMetaData(tipAmount)
+                getPodcast()?.let { podcast ->
+                    podcast.let { nnPodcast ->
+                        nnPodcast.id.value.toLongOrNull()?.let { podcastId ->
+                            if (tipAmount.value > 0) {
+                                val metaData = nnPodcast.getMetaData(tipAmount)
 
-                            messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
+                                messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
 
-                            nnPodcast.destinations.let { destinations ->
-                                mediaPlayerServiceController.submitAction(
-                                    UserAction.SendBoost(
-                                        args.chatId,
-                                        podcastId,
-                                        metaData,
-                                        destinations
+                                nnPodcast.destinations.let { destinations ->
+                                    mediaPlayerServiceController.submitAction(
+                                        UserAction.SendBoost(
+                                            args.chatId,
+                                            podcastId,
+                                            metaData,
+                                            destinations
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }

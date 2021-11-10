@@ -10,17 +10,17 @@ internal class FeedModelDboPodcastModelPresenterMapper(
 ): ClassMapper<FeedModelDbo, PodcastModel>(dispatchers) {
     override suspend fun mapFrom(value: FeedModelDbo): PodcastModel {
         return PodcastModel(
-            value.type,
-            value.suggested,
-            value.id
+            type = value.type,
+            suggested = value.suggested,
+            podcastId = value.id
         )
     }
 
     override suspend fun mapTo(value: PodcastModel): FeedModelDbo {
         return FeedModelDbo(
-            value.podcastId,
-            value.type,
-            value.suggested
+            id = value.podcastId,
+            type = value.type,
+            suggested = value.suggested
         )
     }
 }

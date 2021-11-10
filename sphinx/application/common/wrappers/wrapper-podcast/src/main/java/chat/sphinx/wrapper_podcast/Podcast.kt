@@ -144,6 +144,12 @@ class Podcast(
         return episodeDuration ?: 0
     }
 
+    fun setInitialEpisodeDuration(duration: Long) {
+        if (episodeDuration == null && duration > 0) {
+            episodeDuration = duration
+        }
+    }
+
     @Throws(ArithmeticException::class)
     fun getPlayingProgress(
         durationRetrieverHandle: (url: String) -> Long

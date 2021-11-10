@@ -22,19 +22,19 @@ internal class FeedItemDboPodcastEpisodePresenterMapper(
 
     override suspend fun mapTo(value: PodcastEpisode): FeedItemDbo {
         return FeedItemDbo(
-            value.id,
-            value.title,
-            value.description,
-            null,
-            null,
-            null,
-            null,
-            value.enclosureUrl,
-            null,
-            value.image,
-            null,
-            value.link,
-            value.podcastId
+            id = value.id,
+            title = value.title,
+            description = value.description,
+            date_published = null,
+            date_updated = null,
+            author = null,
+            enclosure_length = null,
+            enclosure_url = value.enclosureUrl,
+            enclosure_type = null,
+            image_url = value.image,
+            thumbnail_url = null,
+            link = value.link,
+            feed_id = value.podcastId
         )
     }
 }
