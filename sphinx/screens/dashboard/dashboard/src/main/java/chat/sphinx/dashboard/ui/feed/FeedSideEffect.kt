@@ -1,4 +1,4 @@
-package chat.sphinx.dashboard.ui
+package chat.sphinx.dashboard.ui.feed
 
 import android.content.Context
 import io.matthewnelson.concept_views.sideeffect.SideEffect

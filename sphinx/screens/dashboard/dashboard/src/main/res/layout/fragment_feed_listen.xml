@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/headerBG"
+    >
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/text_view_listen_now_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:text="@string/listen_now"
+            android:textSize="@dimen/default_text_size_large_title_3"
+            android:textColor="@color/text"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_chevron_right_button"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+            app:layout_constraintTop_toTopOf="@+id/text_view_listen_now_header"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_now_header"
+            app:layout_constraintStart_toEndOf="@+id/text_view_listen_now_header"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_listen_now_episodes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_listen_now_header"
+            tools:listitem="@layout/layout_feed_listen_episode_holder" />
+
+        <TextView
+            android:id="@+id/text_view_listen_following_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:text="@string/following"
+            android:textSize="@dimen/default_text_size_large_title_3"
+            android:textColor="@color/text"
+            app:layout_constraintTop_toBottomOf="@+id/recycler_view_listen_now_episodes"
+            app:layout_constraintStart_toStartOf="parent"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_chevron_right_button"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+            app:layout_constraintTop_toTopOf="@+id/text_view_listen_following_header"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_following_header"
+            app:layout_constraintStart_toEndOf="@+id/text_view_listen_following_header"
+            />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_listen_now_podcasts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_listen_following_header"
+            tools:listitem="@layout/layout_feed_listen_podcast_holder" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -1,4 +1,4 @@
-package chat.sphinx.dashboard.ui
+package chat.sphinx.dashboard.ui.feed
 
 import android.content.Context
 import android.os.Bundle
@@ -8,12 +8,10 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.viewpager.widget.ViewPager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
-import chat.sphinx.dashboard.ui.adapter.FeedListenEpisodeAdapter
-import chat.sphinx.dashboard.ui.adapter.FeedListenPodcastAdapter
-import chat.sphinx.dashboard.ui.placeholder.PlaceholderContent
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
@@ -49,7 +47,7 @@ internal class FeedFragment : SideEffectFragment<
             .addCallback(viewLifecycleOwner, requireActivity())
 
         setupSearch()
-        setupFeedListenEpisodeRecyclerView()
+        setupFeedViewPager()
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
@@ -96,13 +94,34 @@ internal class FeedFragment : SideEffectFragment<
         }
     }
 
-    private fun setupFeedListenEpisodeRecyclerView() {
+    private fun setupFeedViewPager() {
+        val activity = requireActivity()
+        val feedFragmentsAdapter = FeedFragmentsAdapter(
+            activity,
+            childFragmentManager
+        )
+
         binding.apply {
-            with(recyclerViewListenNowEpisodes) {
-                adapter = FeedListenEpisodeAdapter(PlaceholderContent.ITEMS)
+            val viewPager: ViewPager = viewPagerFeedFragments
+            viewPager.adapter = feedFragmentsAdapter
+
+            viewPager.setOnTouchListener { v, event ->
+                return@setOnTouchListener false
             }
-            with(recyclerViewListenNowPodcasts) {
-                adapter = FeedListenPodcastAdapter(PlaceholderContent.ITEMS)
+
+            chipAll.setOnClickListener {
+                viewPager.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
+            }
+
+            chipListen.setOnClickListener {
+                viewPager.currentItem = FeedFragmentsAdapter.CHIP_LISTEN_POSITION
+            }
+            chipWatch.setOnClickListener {
+                viewPager.currentItem = FeedFragmentsAdapter.CHIP_WATCH_POSITION
+            }
+
+            chipRead.setOnClickListener {
+                viewPager.currentItem = FeedFragmentsAdapter.CHIP_READ_POSITION
             }
         }
     }

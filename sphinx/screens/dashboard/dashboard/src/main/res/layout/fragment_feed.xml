@@ -15,145 +15,62 @@
         android:layout_height="@dimen/search_bar_height"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <HorizontalScrollView
+        android:id="@+id/horizontal_scroll_view_filter_chips"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/layout_search_bar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        >
 
-        <HorizontalScrollView
-            android:id="@+id/horizontal_scroll_view_filter_chips"
-            android:layout_width="match_parent"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_filter"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent">
+            app:singleSelection="true"
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chip_group_filter"
+            app:singleLine="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_all"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:singleSelection="true"
+                android:text="@string/all"
+                />
 
-                app:singleLine="true">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_all"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/all"
-                    />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_listen"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/listen"
-                    />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_watch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/watch"
-                    />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_read"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/read"
-                    />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chip_play"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/play"
-                    />
-            </com.google.android.material.chip.ChipGroup>
-        </HorizontalScrollView>
-
-        <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintTop_toBottomOf="@+id/horizontal_scroll_view_filter_chips"
-            app:layout_constraintBottom_toBottomOf="parent"
-            >
-            <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="match_parent"
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_listen"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                >
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/layout_constraint_listen_now_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                android:text="@string/listen"
+                />
 
-                    >
-                    <TextView
-                        android:id="@+id/text_view_listen_now_header"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/default_layout_margin"
-                        android:text="@string/listen_now"
-                        android:textSize="@dimen/default_text_size_large_title_3"
-                        android:textColor="@color/text"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_watch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/watch"
+                />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/material_icons_regular"
-                        android:text="@string/material_icon_name_chevron_right_button"
-                        android:textColor="@color/text"
-                        android:textSize="@dimen/default_text_size_large_title_chevron_icon"
-                        app:layout_constraintTop_toTopOf="@+id/text_view_listen_now_header"
-                        app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_now_header"
-                        app:layout_constraintStart_toEndOf="@+id/text_view_listen_now_header"
-                        />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_read"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/read"
+                />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chip_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/play"
+                />
+        </com.google.android.material.chip.ChipGroup>
+    </HorizontalScrollView>
 
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view_listen_now_episodes"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        app:layout_constraintTop_toBottomOf="@+id/text_view_listen_now_header"
-                        tools:listitem="@layout/layout_feed_listen_episode_holder" />
-
-                    <TextView
-                        android:id="@+id/text_view_listen_following_header"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="@dimen/default_layout_margin"
-                        android:text="@string/following"
-                        android:textSize="@dimen/default_text_size_large_title_3"
-                        android:textColor="@color/text"
-                        app:layout_constraintTop_toBottomOf="@+id/recycler_view_listen_now_episodes"
-                        app:layout_constraintStart_toStartOf="parent"
-                        />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/material_icons_regular"
-                        android:text="@string/material_icon_name_chevron_right_button"
-                        android:textColor="@color/text"
-                        android:textSize="@dimen/default_text_size_large_title_chevron_icon"
-                        app:layout_constraintTop_toTopOf="@+id/text_view_listen_following_header"
-                        app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_following_header"
-                        app:layout_constraintStart_toEndOf="@+id/text_view_listen_following_header"
-                        />
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recycler_view_listen_now_podcasts"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        app:layout_constraintTop_toBottomOf="@+id/text_view_listen_following_header"
-                        tools:listitem="@layout/layout_feed_listen_podcast_holder" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.appcompat.widget.LinearLayoutCompat>
-        </androidx.core.widget.NestedScrollView>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/view_pager_feed_fragments"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/horizontal_scroll_view_filter_chips"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import chat.sphinx.dashboard.R
+import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.wrapper_chat.ChatType
 
 /**
