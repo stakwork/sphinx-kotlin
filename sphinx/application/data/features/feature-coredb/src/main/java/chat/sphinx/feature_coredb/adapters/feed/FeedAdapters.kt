@@ -113,6 +113,17 @@ internal class FeedLanguageAdapter: ColumnAdapter<FeedLanguage, String> {
     }
 }
 
+internal class FeedItemsCountAdapter: ColumnAdapter<FeedItemsCount, Long> {
+
+    override fun decode(databaseValue: Long): FeedItemsCount {
+        return FeedItemsCount(databaseValue)
+    }
+
+    override fun encode(value: FeedItemsCount): Long {
+        return value.value
+    }
+}
+
 internal class FeedEnclosureLengthAdapter: ColumnAdapter<FeedEnclosureLength, Long> {
 
     override fun decode(databaseValue: Long): FeedEnclosureLength {

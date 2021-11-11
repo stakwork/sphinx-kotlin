@@ -30,6 +30,8 @@ data class Feed(
     val dateUpdated: DateTime?,
     val contentType: FeedContentType?,
     val language: FeedLanguage?,
+    val itemsCount: FeedItemsCount,
+    val currentItemId: FeedId?,
     val chatId: ChatId
 ) {
 

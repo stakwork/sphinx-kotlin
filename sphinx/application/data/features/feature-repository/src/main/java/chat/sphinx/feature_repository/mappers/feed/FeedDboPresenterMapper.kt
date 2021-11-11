@@ -25,6 +25,8 @@ internal class FeedDboPresenterMapper(
             value.date_updated,
             value.content_type,
             value.language,
+            value.items_count,
+            value.current_item_id,
             value.chat_id
         )
     }
@@ -45,6 +47,8 @@ internal class FeedDboPresenterMapper(
             value.dateUpdated,
             value.contentType,
             value.language,
+            value.itemsCount,
+            value.currentItemId,
             value.chatId
         )
     }

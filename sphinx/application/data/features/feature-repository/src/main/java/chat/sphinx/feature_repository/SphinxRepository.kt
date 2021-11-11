@@ -74,10 +74,7 @@ import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_contact.*
-import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedId
-import chat.sphinx.wrapper_feed.FeedItem
-import chat.sphinx.wrapper_feed.FeedType
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -496,6 +493,13 @@ abstract class SphinxRepository(
 
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
+            }
+
+            podcastLock.withLock {
+                queries.feedUpdateCurrentItemId(
+                    metaData.itemId.value.toString().toFeedId(),
+                    chatId
+                )
             }
 
             if (shouldSync) {
@@ -3127,7 +3131,8 @@ abstract class SphinxRepository(
     override suspend fun updatePodcastFeed(
         chatId: ChatId,
         host: ChatHost,
-        feedUrl: FeedUrl
+        feedUrl: FeedUrl,
+        currentEpisodeId: FeedId?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -3143,6 +3148,7 @@ abstract class SphinxRepository(
                                 response.value,
                                 feedUrl,
                                 chatId,
+                                currentEpisodeId,
                                 queries
                             )
                         }

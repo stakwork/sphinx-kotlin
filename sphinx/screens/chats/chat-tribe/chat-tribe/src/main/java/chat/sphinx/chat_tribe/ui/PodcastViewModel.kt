@@ -22,6 +22,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.FeedType
+import chat.sphinx.wrapper_feed.toFeedId
 import chat.sphinx.wrapper_podcast.Podcast
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -231,7 +232,8 @@ internal class PodcastViewModel @Inject constructor(
                     chatRepository.updatePodcastFeed(
                         args.chatId,
                         data.host,
-                        data.feedUrl
+                        data.feedUrl,
+                        data.metaData?.itemId?.value?.toString()?.toFeedId()
                     )
                 }
 

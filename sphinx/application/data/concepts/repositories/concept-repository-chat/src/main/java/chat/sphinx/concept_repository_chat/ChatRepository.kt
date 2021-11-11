@@ -14,8 +14,7 @@ import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedType
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
@@ -59,7 +58,13 @@ interface ChatRepository {
         tribeDto: TribeDto,
     ): Flow<LoadResponse<Any, ResponseError>>
 
-    suspend fun updatePodcastFeed(chatId: ChatId, host: ChatHost, feedUrl: FeedUrl)
+    suspend fun updatePodcastFeed(
+        chatId: ChatId,
+        host: ChatHost,
+        feedUrl: FeedUrl,
+        currentEpisodeId: FeedId?
+    )
+
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
 
     suspend fun updateTribeInfo(chat: Chat): Pair<ChatHost, String>?

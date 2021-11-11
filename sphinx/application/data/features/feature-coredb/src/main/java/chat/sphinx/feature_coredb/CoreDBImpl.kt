@@ -180,6 +180,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     date_updatedAdapter = DateTimeAdapter.getInstance(),
                     content_typeAdapter = FeedContentTypeAdapter(),
                     languageAdapter = FeedLanguageAdapter(),
+                    items_countAdapter = FeedItemsCountAdapter(),
+                    current_item_idAdapter = FeedIdAdapter(),
                     chat_idAdapter = ChatIdAdapter.getInstance()
 
                 ),

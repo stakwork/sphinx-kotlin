@@ -447,6 +447,7 @@ fun TransactionCallbacks.upsertPodcast(
     dto: PodcastDto,
     feedUrl: FeedUrl,
     chatId: ChatId,
+    currentItemId: FeedId?,
     queries: SphinxDatabaseQueries
 ) {
     val feedId = FeedId(dto.id.toString())
@@ -500,6 +501,8 @@ fun TransactionCallbacks.upsertPodcast(
         date_updated = null,
         content_type = null,
         language = null,
+        items_count = dto.episodes.count().toLong().toFeedItemsCount() ?: FeedItemsCount(0),
+        current_item_id = currentItemId,
         chat_id = chatId,
         id = feedId,
         generator = null

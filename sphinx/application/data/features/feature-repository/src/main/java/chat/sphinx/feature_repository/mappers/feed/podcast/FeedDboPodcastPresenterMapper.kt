@@ -39,6 +39,8 @@ internal class FeedDboPodcastPresenterMapper(
             date_updated = null,
             content_type = null,
             language = null,
+            items_count = FeedItemsCount(value.episodes.count().toLong()),
+            current_item_id = value.episodeId.toString().toFeedId(),
             chat_id = value.chatId
         )
     }
