@@ -41,6 +41,8 @@ import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
@@ -49,8 +51,8 @@ import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.subscription.SubscriptionDboPresenterMapper
-import chat.sphinx.feature_repository.model.MessageDboWrapper
-import chat.sphinx.feature_repository.model.MessageMediaDboWrapper
+import chat.sphinx.feature_repository.model.message.MessageDboWrapper
+import chat.sphinx.feature_repository.model.message.MessageMediaDboWrapper
 import chat.sphinx.feature_repository.util.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -72,6 +74,10 @@ import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_contact.*
+import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedId
+import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.FeedType
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -3189,15 +3195,87 @@ abstract class SphinxRepository(
             }
     }
 
-//    override fun getActiveSubscriptionByContactId(contactId: ContactId): Flow<Subscription?> = flow {
-//        emitAll(
-//            coreDB.getSphinxDatabaseQueries().subscriptionGetLastActiveByContactId(contactId)
-//                .asFlow()
-//                .mapToOneOrNull(io)
-//                .map { it?.let { subscriptionDboPresenterMapper.mapFrom(it) } }
-//                .distinctUntilChanged()
-//        )
-//    }
+    private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
+        FeedDboPresenterMapper(dispatchers)
+    }
+    private val feedItemDboPresenterMapper: FeedItemDboPresenterMapper by lazy {
+        FeedItemDboPresenterMapper(dispatchers)
+    }
+    override fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.feedGetAllByFeedType(feedType)
+                .asFlow()
+                .mapToList(io)
+                .map { listFeedDbo ->
+                    withContext(default) {
+
+                        val itemsMap: MutableMap<FeedId, ArrayList<FeedItem>> =
+                            LinkedHashMap(listFeedDbo.size)
+
+                        val chatsMap: MutableMap<ChatId, Chat?> =
+                            LinkedHashMap(listFeedDbo.size)
+
+                        for (dbo in listFeedDbo) {
+                            itemsMap[dbo.id] = ArrayList(0)
+                            chatsMap[dbo.chat_id] = null
+                        }
+
+                        itemsMap.keys.chunked(500).forEach { chunkedIds ->
+                            queries.feedItemsGetByFeedIds(chunkedIds)
+                                .executeAsList()
+                                .let { response ->
+                                    response.forEach { dbo ->
+                                        dbo.feed_id?.let { feedId ->
+                                            itemsMap[feedId]?.add(
+                                                feedItemDboPresenterMapper.mapFrom(dbo)
+                                            )
+                                        }
+                                    }
+                                }
+                        }
+
+                        chatsMap.keys.chunked(500).forEach { chunkedChatIds ->
+                            queries.chatGetAllByIds(chunkedChatIds)
+                                .executeAsList()
+                                .let { response ->
+                                    response.forEach { dbo ->
+                                        dbo.id?.let { chatId ->
+                                            chatsMap[chatId] = chatDboPresenterMapper.mapFrom(dbo)
+                                        }
+                                    }
+                                }
+                        }
+
+                        listFeedDbo.map {
+                            mapFeedDbo(
+                                feedDbo = it,
+                                items = itemsMap[it.id] ?: listOf(),
+                                chat = chatsMap[it.chat_id]
+                            )
+                        }
+                    }
+                }
+        )
+    }
+
+    private suspend fun mapFeedDbo(
+        feedDbo: FeedDbo,
+        items: List<FeedItem>,
+        chat: Chat? = null,
+    ): Feed {
+
+        val feed = feedDboPresenterMapper.mapFrom(feedDbo)
+
+        items.forEach { feedItem ->
+            feedItem.feed = feed
+        }
+
+        feed.items = items
+        feed.chat = chat
+
+        return feed
+    }
 
     /*
     * Used to hold in memory the chat table's latest message time to reduce disk IO

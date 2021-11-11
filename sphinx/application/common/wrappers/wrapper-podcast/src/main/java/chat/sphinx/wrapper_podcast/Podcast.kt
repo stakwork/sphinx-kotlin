@@ -15,7 +15,7 @@ import chat.sphinx.wrapper_feed.FeedTitle
 import kotlin.math.roundToInt
 
 
-class Podcast(
+data class Podcast(
     val id: FeedId,
     val title: FeedTitle,
     val description: FeedDescription?,

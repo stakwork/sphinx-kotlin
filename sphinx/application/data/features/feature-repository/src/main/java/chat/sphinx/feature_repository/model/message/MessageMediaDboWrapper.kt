@@ -1,4 +1,4 @@
-package chat.sphinx.feature_repository.model
+package chat.sphinx.feature_repository.model.message
 
 import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.wrapper_message_media.*

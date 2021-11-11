@@ -4,6 +4,15 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.feed.FeedUrl
 
+inline val FeedItem.isPodcast: Boolean
+    get() = feed?.feedType?.isPodcast() == true
+
+inline val FeedItem.isVideo: Boolean
+    get() = feed?.feedType?.isVideo() == true
+
+inline val FeedItem.isNewsletter: Boolean
+    get() = feed?.feedType?.isNewsletter() == true
+
 data class FeedItem(
     val id: FeedId,
     val title: FeedTitle,
@@ -19,4 +28,8 @@ data class FeedItem(
     val thumbnailUrl: PhotoUrl?,
     val link: FeedUrl?,
     val feedId: FeedId
-)
+) {
+
+    var feed: Feed? = null
+
+}

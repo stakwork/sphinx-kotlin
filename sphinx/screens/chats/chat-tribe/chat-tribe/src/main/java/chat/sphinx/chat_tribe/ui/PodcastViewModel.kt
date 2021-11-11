@@ -14,12 +14,16 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.FeedType
 import chat.sphinx.wrapper_podcast.Podcast
+import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -233,6 +237,7 @@ internal class PodcastViewModel @Inject constructor(
 
                 viewModelScope.launch(mainImmediate) {
                     delay(500L)
+
                     chatRepository.getPodcastByChatId(args.chatId).collect { podcast ->
                         podcast?.let { nnPodcast ->
                             podcastLoaded(

@@ -937,12 +937,23 @@ feedUpsert {
     );
 }
 
+feedGetAll:
+SELECT *
+FROM feedDbo
+ORDER BY id DESC;
+
 feedGetByChatId:
 SELECT *
 FROM feedDbo
 WHERE chat_id = ?
 ORDER BY id DESC
 LIMIT 1;
+
+feedGetAllByFeedType:
+SELECT *
+FROM feedDbo
+WHERE feed_type = ?
+ORDER BY id DESC;
 
 feedGetById:
 SELECT *
@@ -1031,6 +1042,11 @@ feedItemsGetByFeedId:
 SELECT *
 FROM feedItemDbo
 WHERE feed_id = ?;
+
+feedItemsGetByFeedIds:
+SELECT *
+FROM feedItemDbo
+WHERE feed_id IN ?;
 
 feedItemDeleteById:
 DELETE

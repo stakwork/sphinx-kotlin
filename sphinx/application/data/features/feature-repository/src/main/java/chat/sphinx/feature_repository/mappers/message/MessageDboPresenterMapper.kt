@@ -2,7 +2,7 @@ package chat.sphinx.feature_repository.mappers.message
 
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
-import chat.sphinx.feature_repository.model.MessageDboWrapper
+import chat.sphinx.feature_repository.model.message.MessageDboWrapper
 import chat.sphinx.wrapper_message.*
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
