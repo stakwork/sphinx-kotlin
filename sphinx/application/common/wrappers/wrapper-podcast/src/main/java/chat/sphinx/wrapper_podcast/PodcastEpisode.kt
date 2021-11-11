@@ -2,8 +2,8 @@ package chat.sphinx.wrapper_podcast
 
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.FeedDescription
-import chat.sphinx.wrapper_feed.FeedId
 import chat.sphinx.wrapper_feed.FeedTitle
 
 data class PodcastEpisode(

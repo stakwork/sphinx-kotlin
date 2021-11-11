@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.invite.isPaymentPending
 import chat.sphinx.wrapper_common.invite.isProcessingPayment

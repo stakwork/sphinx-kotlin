@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.PodcastDestination
 import com.squareup.moshi.JsonClass

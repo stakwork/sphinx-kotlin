@@ -14,17 +14,12 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
-import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.FeedType
-import chat.sphinx.wrapper_feed.toFeedId
 import chat.sphinx.wrapper_podcast.Podcast
-import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -71,22 +66,20 @@ internal class PodcastViewModel @Inject constructor(
                             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                                 val owner = getOwner()
 
-                                podcastViewState.podcast.id.value.toLongOrNull()?.let { podcastId ->
-                                    messageRepository.getPaymentsTotalFor(podcastId).collect { paymentsTotal ->
-                                        if (paymentsTotal != null) {
-                                            val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
-                                            val label = app.getString(
-                                                if (isMyTribe) {
-                                                    R.string.chat_tribe_earned
-                                                } else {
-                                                    R.string.chat_tribe_contributed
-                                                }
-                                            )
+                                messageRepository.getPaymentsTotalFor(podcastViewState.podcast.id).collect { paymentsTotal ->
+                                    if (paymentsTotal != null) {
+                                        val isMyTribe = chat.isTribeOwnedByAccount(owner.nodePubKey)
+                                        val label = app.getString(
+                                            if (isMyTribe) {
+                                                R.string.chat_tribe_earned
+                                            } else {
+                                                R.string.chat_tribe_contributed
+                                            }
+                                        )
 
-                                            emit(PodcastContributionsViewState.Contributions(
-                                                label + " ${paymentsTotal.asFormattedString(appendUnit = true)}"
-                                            ))
-                                        }
+                                        emit(PodcastContributionsViewState.Contributions(
+                                            label + " ${paymentsTotal.asFormattedString(appendUnit = true)}"
+                                        ))
                                     }
                                 }
                             }
@@ -233,7 +226,7 @@ internal class PodcastViewModel @Inject constructor(
                         args.chatId,
                         data.host,
                         data.feedUrl,
-                        data.metaData?.itemId?.value?.toString()?.toFeedId()
+                        data.metaData?.itemId
                     )
                 }
 
@@ -273,40 +266,35 @@ internal class PodcastViewModel @Inject constructor(
             val episode = vs.podcast.getCurrentEpisode()
 
             viewModelScope.launch {
-                episode.id.value.toLongOrNull()?.let { episodeId ->
-                    if (episode.playing) {
-                        vs.podcast.didPausePlayingEpisode(episode)
+                if (episode.playing) {
+                    vs.podcast.didPausePlayingEpisode(episode)
 
-                        mediaPlayerServiceController.submitAction(
-                            UserAction.ServiceAction.Pause(
-                                args.chatId,
-                                episodeId
-                            )
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Pause(
+                            args.chatId,
+                            episode.id.value
                         )
-                    } else {
-                        withContext(io) {
-                            vs.podcast.didStartPlayingEpisode(
-                                episode,
-                                vs.podcast.currentTime,
-                                ::retrieveEpisodeDuration,
-                            )
-                        }
-
-                        vs.podcast.id.value.toLongOrNull()
-                            ?.let { podcastId ->
-                                mediaPlayerServiceController.submitAction(
-                                    UserAction.ServiceAction.Play(
-                                        args.chatId,
-                                        podcastId,
-                                        episodeId,
-                                        episode.enclosureUrl.value,
-                                        Sat(vs.podcast.satsPerMinute),
-                                        vs.podcast.speed,
-                                        vs.podcast.currentTime,
-                                    )
-                                )
-                            }
+                    )
+                } else {
+                    withContext(io) {
+                        vs.podcast.didStartPlayingEpisode(
+                            episode,
+                            vs.podcast.currentTime,
+                            ::retrieveEpisodeDuration,
+                        )
                     }
+
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Play(
+                            args.chatId,
+                            vs.podcast.id.value,
+                            episode.id.value,
+                            episode.enclosureUrl.value,
+                            Sat(vs.podcast.satsPerMinute),
+                            vs.podcast.speed,
+                            vs.podcast.currentTime,
+                        )
+                    )
                 }
             }
         }
@@ -329,16 +317,14 @@ internal class PodcastViewModel @Inject constructor(
                                 vs.podcast
                             )
 
-                            vs.podcast.id.value.toLongOrNull()?.let { podcastId ->
-                                mediaPlayerServiceController.submitAction(
-                                    UserAction.SendBoost(
-                                        args.chatId,
-                                        podcastId,
-                                        metaData,
-                                        vs.podcast.destinations ?: arrayListOf(),
-                                    )
+                            mediaPlayerServiceController.submitAction(
+                                UserAction.SendBoost(
+                                    args.chatId,
+                                    vs.podcast.id.value,
+                                    metaData,
+                                    vs.podcast.destinations ?: arrayListOf(),
                                 )
-                            }
+                            )
                         }
                     }
                 }

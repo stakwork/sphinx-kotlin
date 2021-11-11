@@ -1,6 +1,6 @@
 package chat.sphinx.wrapper_podcast
 
-import chat.sphinx.wrapper_feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.FeedModelSuggested
 import chat.sphinx.wrapper_feed.FeedModelType
 

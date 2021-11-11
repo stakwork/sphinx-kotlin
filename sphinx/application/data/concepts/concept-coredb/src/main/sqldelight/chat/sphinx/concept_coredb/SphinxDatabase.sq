@@ -619,7 +619,7 @@ messageGetAmountSumForMessagesStartingWith:
 SELECT SUM(amount)
 FROM messageDbo
 WHERE (chat_id IS NULL OR chat_id = 0)
-AND (message_content LIKE :message_content);
+AND (message_content LIKE :message_content1 OR message_content LIKE :message_content2);
 
 messageUpdateSeenByChatId:
 UPDATE messageDbo

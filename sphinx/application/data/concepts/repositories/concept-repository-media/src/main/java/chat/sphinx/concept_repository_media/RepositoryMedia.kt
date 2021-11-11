@@ -19,8 +19,8 @@ interface RepositoryMedia {
     fun streamPodcastPayments(
         chatId: ChatId,
         metaData: ChatMetaData,
-        podcastId: Long,
-        episodeId: Long,
+        podcastId: String,
+        episodeId: String,
         destinations: List<PodcastDestination>
     )
 }

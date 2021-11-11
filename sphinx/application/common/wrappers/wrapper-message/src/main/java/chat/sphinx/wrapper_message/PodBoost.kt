@@ -1,8 +1,7 @@
 package chat.sphinx.wrapper_message
 
-import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedId
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -25,7 +24,7 @@ fun String.toPodBoost(moshi: Moshi): PodBoost =
         ?.let {
             PodBoost(
                 FeedId(it.feedID),
-                ItemId(it.itemID),
+                FeedId(it.itemID),
                 it.ts,
                 Sat(it.amount)
             )
@@ -46,7 +45,7 @@ fun PodBoost.toJson(moshi: Moshi): String =
 
 data class PodBoost(
     val feedId: FeedId,
-    val itemId: ItemId,
+    val itemId: FeedId,
     val timeSeconds: Int,
     val amount: Sat
 ) {
@@ -55,11 +54,11 @@ data class PodBoost(
     }
 }
 
-// "{\"feedID\":226249,\"itemID\":1997782557,\"ts\":1396,\"amount\":100}"
+// "{\"feedID\":\"226249\",\"itemID\":\"1997782557\",\"ts\":1396,\"amount\":100}"
 @JsonClass(generateAdapter = true)
 internal data class PodBoostMoshi(
     val feedID: String,
-    val itemID: Long,
+    val itemID: String,
     val ts: Int,
     val amount: Long
 )

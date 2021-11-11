@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 
 inline val Feed.isPodcast: Boolean
@@ -41,14 +42,14 @@ data class Feed(
 
     var lastItem: FeedItem? = null
         get() {
-            for (item in items) {
-                if (item.id.value.toLongOrNull() == chat?.metaData?.itemId?.value) {
-                    return item
-                }
-            }
-            if (items.count() > 0) {
-                return items.first()
-            }
+//            for (item in items) {
+//                if (item.id.value.toLongOrNull() == chat?.metaData?.itemId?.value) {
+//                    return item
+//                }
+//            }
+//            if (items.count() > 0) {
+//                return items.first()
+//            }
             return null
         }
 }

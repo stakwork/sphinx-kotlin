@@ -66,6 +66,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
@@ -384,10 +385,13 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getPaymentsTotalFor(feedId: Long): Flow<Sat?> = flow {
+    override fun getPaymentsTotalFor(feedId: FeedId): Flow<Sat?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetAmountSumForMessagesStartingWith("{\"feedID\":$feedId%")
+                .messageGetAmountSumForMessagesStartingWith(
+                    "{\"feedID\":${feedId.value.toLongOrNull()}%",
+                    "{\"feedID\":\"${feedId.value}\"%"
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .map { it?.SUM }
@@ -497,7 +501,7 @@ abstract class SphinxRepository(
 
             podcastLock.withLock {
                 queries.feedUpdateCurrentItemId(
-                    metaData.itemId.value.toString().toFeedId(),
+                    metaData.itemId,
                     chatId
                 )
             }
@@ -517,8 +521,8 @@ abstract class SphinxRepository(
     override fun streamPodcastPayments(
         chatId: ChatId,
         metaData: ChatMetaData,
-        podcastId: Long,
-        episodeId: Long,
+        podcastId: String,
+        episodeId: String,
         destinations: List<PodcastDestination>
     ) {
 

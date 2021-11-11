@@ -41,22 +41,6 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         }
     }
 
-    val podcastId: Long = getLongExtra("PODCAST_ID", -1L).let {
-        if (it == -1L) {
-            return null
-        } else {
-            it
-        }
-    }
-
-    val episodeId: Long = getLongExtra("EPISODE_ID", -1L).let {
-        if (it == -1L) {
-            return null
-        } else {
-            it
-        }
-    }
-
     val startTime: Int = getIntExtra("START_TIME", -1).let {
         if (it == -1) {
             return null
@@ -75,8 +59,8 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
 
     return UserAction.ServiceAction.Play(
         chatId,
-        podcastId,
-        episodeId,
+        getStringExtra("PODCAST_ID") ?: return null,
+        getStringExtra("EPISODE_ID") ?: return null,
         getStringExtra("EPISODE_URL") ?: return null,
         getLongExtra("SAT_PER_MINUTE", -1L).toSat() ?: return null,
         speed,

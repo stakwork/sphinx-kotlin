@@ -2,6 +2,7 @@ package chat.sphinx.concept_network_query_chat.model
 
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.Podcast

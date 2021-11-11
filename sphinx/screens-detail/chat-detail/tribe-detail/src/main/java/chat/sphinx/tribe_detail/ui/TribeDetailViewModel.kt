@@ -28,8 +28,10 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -243,6 +245,7 @@ internal class TribeDetailViewModel @Inject constructor(
                         args.chatId,
                         ChatMetaData(
                             nnMetaData.itemId,
+                            nnMetaData.itemId?.value?.toLongOrNull()?.toItemId() ?: ItemId(-1),
                             Sat(sats),
                             nnMetaData.timeSeconds,
                             nnMetaData.speed,

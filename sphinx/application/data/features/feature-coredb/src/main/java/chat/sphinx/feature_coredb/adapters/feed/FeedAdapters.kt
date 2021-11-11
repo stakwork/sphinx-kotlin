@@ -1,5 +1,6 @@
 package chat.sphinx.feature_coredb.adapters.feed
 
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.*
 import com.squareup.sqldelight.ColumnAdapter

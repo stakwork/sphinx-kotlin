@@ -203,54 +203,48 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun playEpisode(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.id.value.toLongOrNull()?.let { podcastId ->
-                    episode.id.value.toLongOrNull()?.let { episodeId ->
-                        viewModelScope.launch(mainImmediate) {
-                            mediaPlayerServiceController.submitAction(
-                                UserAction.ServiceAction.Play(
-                                    args.chatId,
-                                    podcastId,
-                                    episodeId,
-                                    episode.enclosureUrl.value,
-                                    Sat(podcast.satsPerMinute),
-                                    podcast.speed,
-                                    startTime,
-                                )
-                            )
+                viewModelScope.launch(mainImmediate) {
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Play(
+                            args.chatId,
+                            podcast.id.value,
+                            episode.id.value,
+                            episode.enclosureUrl.value,
+                            Sat(podcast.satsPerMinute),
+                            podcast.speed,
+                            startTime,
+                        )
+                    )
 
-                            withContext(io) {
-                                podcast.didStartPlayingEpisode(
-                                    episode,
-                                    startTime,
-                                    ::retrieveEpisodeDuration
-                                )
-                            }
-
-                            viewStateContainer.updateViewState(
-                                PodcastPlayerViewState.EpisodePlayed(
-                                    podcast
-                                )
-                            )
-                        }
+                    withContext(io) {
+                        podcast.didStartPlayingEpisode(
+                            episode,
+                            startTime,
+                            ::retrieveEpisodeDuration
+                        )
                     }
+
+                    viewStateContainer.updateViewState(
+                        PodcastPlayerViewState.EpisodePlayed(
+                            podcast
+                        )
+                    )
                 }
             }
         }
     }
 
     fun pauseEpisode(episode: PodcastEpisode) {
-        episode.id.value.toLongOrNull()?.let { episodeId ->
-            viewModelScope.launch(mainImmediate) {
-                getPodcast()?.let { podcast ->
-                    podcast.didPausePlayingEpisode(episode)
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                podcast.didPausePlayingEpisode(episode)
 
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Pause(
-                            args.chatId,
-                            episodeId
-                        )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Pause(
+                        args.chatId,
+                        episode.id.value
                     )
-                }
+                )
             }
         }
     }
@@ -307,22 +301,20 @@ internal class PodcastPlayerViewModel @Inject constructor(
             getOwner().tipAmount?.let { tipAmount ->
                 getPodcast()?.let { podcast ->
                     podcast.let { nnPodcast ->
-                        nnPodcast.id.value.toLongOrNull()?.let { podcastId ->
-                            if (tipAmount.value > 0) {
-                                val metaData = nnPodcast.getMetaData(tipAmount)
+                        if (tipAmount.value > 0) {
+                            val metaData = nnPodcast.getMetaData(tipAmount)
 
-                                messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
+                            messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
 
-                                nnPodcast.destinations.let { destinations ->
-                                    mediaPlayerServiceController.submitAction(
-                                        UserAction.SendBoost(
-                                            args.chatId,
-                                            podcastId,
-                                            metaData,
-                                            destinations
-                                        )
+                            nnPodcast.destinations.let { destinations ->
+                                mediaPlayerServiceController.submitAction(
+                                    UserAction.SendBoost(
+                                        args.chatId,
+                                        nnPodcast.id.value,
+                                        metaData,
+                                        destinations
                                     )
-                                }
+                                )
                             }
                         }
                     }

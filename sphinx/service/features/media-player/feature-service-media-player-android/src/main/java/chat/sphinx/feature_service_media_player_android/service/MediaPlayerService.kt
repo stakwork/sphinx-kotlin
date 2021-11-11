@@ -23,6 +23,8 @@ import chat.sphinx.logger.e
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.toItemId
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
 import kotlinx.coroutines.*
@@ -234,7 +236,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                             repositoryMedia.updateChatMetaData(
                                 nnData.chatId,
                                 ChatMetaData(
-                                    ItemId(nnData.episodeId),
+                                    FeedId(nnData.episodeId),
+                                    nnData.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
                                     nnData.satsPerMinute,
                                     nnData.currentTimeSeconds,
                                     nnData.speed
@@ -249,7 +252,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                     repositoryMedia.updateChatMetaData(
                         userAction.chatId,
                         ChatMetaData(
-                            ItemId(userAction.episodeId),
+                            FeedId(userAction.episodeId),
+                            userAction.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
                             userAction.satPerMinute,
                             userAction.startTime / 1000,
                             userAction.speed
@@ -284,7 +288,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
         private fun pausePlayer(
             chatId: ChatId,
-            episodeId: Long,
+            episodeId: String,
             abandonAudioFocus: Boolean = false
         ) {
             podData?.let { nnData ->
@@ -319,7 +323,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                         repositoryMedia.updateChatMetaData(
                             chatId,
                             ChatMetaData(
-                                ItemId(nnData.episodeId),
+                                FeedId(nnData.episodeId),
+                                nnData.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
                                 nnData.satsPerMinute,
                                 nnData.currentTimeSeconds,
                                 nnData.speed,
@@ -393,7 +398,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                             repositoryMedia.streamPodcastPayments(
                                 nnData.chatId,
                                 ChatMetaData(
-                                    ItemId(nnData.episodeId),
+                                    FeedId(nnData.episodeId),
+                                    nnData.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
                                     nnData.satsPerMinute,
                                     currentTimeSeconds,
                                     speed,
@@ -461,7 +467,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                 repositoryMedia.updateChatMetaData(
                     data.chatId,
                     ChatMetaData(
-                        ItemId(data.episodeId),
+                        FeedId(data.episodeId),
+                        data.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
                         data.satsPerMinute,
                         data.currentTimeSeconds,
                         data.speed,
