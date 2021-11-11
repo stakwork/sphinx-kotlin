@@ -1,18 +1,13 @@
 package chat.sphinx.dashboard.ui.feed
 
-import android.content.Context
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import chat.sphinx.dashboard.ui.feed.all.FeedAllFragment
 import chat.sphinx.dashboard.ui.feed.listen.FeedListenFragment
 
-/**
- * A [FragmentPagerAdapter] that returns a fragment corresponding to
- * one of the sections/tabs/pages.
- */
-class FeedFragmentsAdapter(private val context: Context, fm: FragmentManager) :
-    FragmentPagerAdapter(fm) {
+class FeedFragmentsAdapter(
+    fragment: Fragment
+) : FragmentStateAdapter(fragment) {
 
     companion object {
         const val CHIP_ALL_POSITION = 0
@@ -21,7 +16,7 @@ class FeedFragmentsAdapter(private val context: Context, fm: FragmentManager) :
         const val CHIP_READ_POSITION = 3
     }
 
-    override fun getItem(position: Int): Fragment {
+    override fun createFragment(position: Int): Fragment {
         return when (position) {
             CHIP_ALL_POSITION -> {
                 FeedAllFragment.newInstance()
@@ -41,11 +36,7 @@ class FeedFragmentsAdapter(private val context: Context, fm: FragmentManager) :
         }
     }
 
-    override fun getPageTitle(position: Int): CharSequence {
-        return ""
-    }
-
-    override fun getCount(): Int {
+    override fun getItemCount(): Int {
         return 5
     }
 }

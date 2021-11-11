@@ -8,7 +8,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
@@ -95,20 +95,15 @@ internal class FeedFragment : SideEffectFragment<
     }
 
     private fun setupFeedViewPager() {
-        val activity = requireActivity()
-        val feedFragmentsAdapter = FeedFragmentsAdapter(
-            activity,
-            childFragmentManager
-        )
-
         binding.apply {
-            val viewPager: ViewPager = viewPagerFeedFragments
+            val feedFragmentsAdapter = FeedFragmentsAdapter(
+                this@FeedFragment
+            )
+
+            val viewPager: ViewPager2 = viewPagerFeedFragments
             viewPager.adapter = feedFragmentsAdapter
 
-            viewPager.setOnTouchListener { v, event ->
-                return@setOnTouchListener false
-            }
-
+            viewPager.isUserInputEnabled = false
             chipAll.setOnClickListener {
                 viewPager.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
             }
