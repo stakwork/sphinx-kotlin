@@ -1,6 +1,7 @@
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.dashboard.ChatId;
+import chat.sphinx.wrapper_common.feed.FeedId;
 import chat.sphinx.wrapper_common.feed.FeedUrl;
 import chat.sphinx.wrapper_feed.FeedAuthor;
 import chat.sphinx.wrapper_feed.FeedContentType;
@@ -11,7 +12,6 @@ import chat.sphinx.wrapper_feed.FeedDestinationType;
 import chat.sphinx.wrapper_feed.FeedEnclosureLength;
 import chat.sphinx.wrapper_feed.FeedEnclosureType;
 import chat.sphinx.wrapper_feed.FeedGenerator;
-import chat.sphinx.wrapper_feed.FeedId;
 import chat.sphinx.wrapper_feed.FeedItemsCount;
 import chat.sphinx.wrapper_feed.FeedLanguage;
 import chat.sphinx.wrapper_feed.FeedModelSuggested;
@@ -66,5 +66,6 @@ CREATE TABLE feedDestinationDbo(
     address                     TEXT            AS FeedDestinationAddress NOT NULL,
     split                       REAL            AS FeedDestinationSplit NOT NULL,
     type                        TEXT            AS FeedDestinationType NOT NULL,
-    feed_id                     TEXT            AS FeedId NOT NULL
+    feed_id                     TEXT            AS FeedId NOT NULL,
+    PRIMARY KEY (feed_id, address)
 );
