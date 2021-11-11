@@ -1,9 +1,8 @@
 package chat.sphinx.dashboard.ui
 
-import android.content.Context
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.wrapper_chat.ChatType
@@ -12,8 +11,9 @@ import chat.sphinx.wrapper_chat.ChatType
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-class DashboardFragmentsAdapter(private val context: Context, fm: FragmentManager) :
-    FragmentPagerAdapter(fm) {
+class DashboardFragmentsAdapter(
+    private val fragment: Fragment
+) : FragmentStateAdapter(fragment) {
 
     companion object {
         const val FEED_TAB_POSITION = 0
@@ -27,17 +27,17 @@ class DashboardFragmentsAdapter(private val context: Context, fm: FragmentManage
         )
     }
 
-    override fun getItem(position: Int): Fragment {
+    override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> {
+            FEED_TAB_POSITION -> {
                 FeedFragment.newInstance()
             }
-            1 -> {
+            FRIENDS_TAB_POSITION -> {
                 ChatListFragment.newInstance(
                     chatListType = ChatType.Conversation
                 )
             }
-            2 -> {
+            TRIBES_TAB_POSITION -> {
                 ChatListFragment.newInstance(
                     chatListType = ChatType.Tribe
                 )
@@ -48,11 +48,11 @@ class DashboardFragmentsAdapter(private val context: Context, fm: FragmentManage
         }
     }
 
-    override fun getPageTitle(position: Int): CharSequence? {
-        return context.resources.getString(TAB_TITLES[position])
+    fun getPageTitle(position: Int): CharSequence? {
+        return fragment.resources.getString(TAB_TITLES[position])
     }
 
-    override fun getCount(): Int {
+    override fun getItemCount(): Int {
         return TAB_TITLES.size
     }
 }

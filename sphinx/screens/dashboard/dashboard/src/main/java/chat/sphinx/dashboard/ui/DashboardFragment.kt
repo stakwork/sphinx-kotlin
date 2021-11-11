@@ -14,7 +14,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.Disposable
@@ -36,6 +36,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
+import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -124,18 +125,43 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupViewPager() {
         binding.swipeRefreshLayoutDataReload.setOnRefreshListener(this)
-        val activity = requireActivity()
+
         val dashboardFragmentsAdapter = DashboardFragmentsAdapter(
-            activity,
-            childFragmentManager
+            this@DashboardFragment
         )
 
-        val viewPager: ViewPager = binding.viewPagerDashboardTabs
+        val viewPager: ViewPager2 = binding.viewPagerDashboardTabs
+
+        viewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) { }
+
+            override fun onPageSelected(position: Int) {
+                viewModel.updateTabsState(
+                    feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
+                    friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
+                    tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
+                )
+            }
+
+            override fun onPageScrollStateChanged(state: Int) { }
+        })
+
         viewPager.adapter = dashboardFragmentsAdapter
-        viewPager.currentItem = DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
-        viewPager.offscreenPageLimit = 3
 
         val tabs = binding.tabLayoutDashboardTabs
+
+        TabLayoutMediator(tabs, viewPager) { tab, position ->
+            tab.text = dashboardFragmentsAdapter.getPageTitle(position)
+        }.attach()
+
+        viewPager.offscreenPageLimit = 3
+        viewPager.post {
+            viewPager.currentItem = DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+        }
 
         val feedTab: View = LayoutInflater.from(this.context)
             .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
@@ -158,23 +184,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         val tribesTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.TRIBES_TAB_POSITION]
         tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(tribesTitle)
 
-        viewPager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener {
-            override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) { }
 
-            override fun onPageSelected(position: Int) {
-                viewModel.updateTabsState(
-                    feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
-                    friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
-                    tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
-                )
-            }
-
-            override fun onPageScrollStateChanged(state: Int) { }
-        })
     }
 
     private fun setupDashboardHeader() {
