@@ -41,10 +41,10 @@ import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedDboPodcastPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPodcastDestinationPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPodcastEpisodePresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPodcastModelPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedModelDboPodcastModelPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
@@ -70,6 +70,7 @@ import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider

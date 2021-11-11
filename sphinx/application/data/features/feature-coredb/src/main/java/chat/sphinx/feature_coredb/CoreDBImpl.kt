@@ -190,6 +190,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     date_publishedAdapter = DateTimeAdapter.getInstance(),
                     date_updatedAdapter = DateTimeAdapter.getInstance(),
                     authorAdapter = FeedAuthorAdapter(),
+                    content_typeAdapter = FeedContentTypeAdapter(),
                     enclosure_lengthAdapter = FeedEnclosureLengthAdapter(),
                     enclosure_urlAdapter = FeedUrlAdapter.getInstance(),
                     enclosure_typeAdapter = FeedEnclosureTypeAdapter(),

@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_chat
+package chat.sphinx.wrapper_common.feed
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toFeedUrl(): FeedUrl? =

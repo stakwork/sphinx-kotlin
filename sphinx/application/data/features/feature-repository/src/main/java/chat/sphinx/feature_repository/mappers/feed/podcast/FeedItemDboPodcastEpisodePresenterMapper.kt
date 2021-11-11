@@ -1,4 +1,4 @@
-package chat.sphinx.feature_repository.mappers.feed
+package chat.sphinx.feature_repository.mappers.feed.podcast
 
 import chat.sphinx.conceptcoredb.FeedItemDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
@@ -28,6 +28,7 @@ internal class FeedItemDboPodcastEpisodePresenterMapper(
             date_published = null,
             date_updated = null,
             author = null,
+            content_type = null,
             enclosure_length = null,
             enclosure_url = value.enclosureUrl,
             enclosure_type = null,

@@ -1,7 +1,7 @@
 package chat.sphinx.wrapper_podcast
 
 import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_chat.FeedUrl
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl

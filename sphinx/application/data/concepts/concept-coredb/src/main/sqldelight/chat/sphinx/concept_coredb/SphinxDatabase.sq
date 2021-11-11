@@ -8,7 +8,6 @@ import chat.sphinx.wrapper_chat.ChatPrivate;
 import chat.sphinx.wrapper_chat.ChatStatus;
 import chat.sphinx.wrapper_chat.ChatType;
 import chat.sphinx.wrapper_chat.ChatUnlisted;
-import chat.sphinx.wrapper_chat.FeedUrl;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.Seen;
@@ -17,6 +16,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId;
 import chat.sphinx.wrapper_common.dashboard.ContactId;
 import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
 import chat.sphinx.wrapper_common.dashboard.InviteId;
+import chat.sphinx.wrapper_common.feed.FeedUrl;
 import chat.sphinx.wrapper_common.invite.InviteStatus;
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
@@ -961,6 +961,7 @@ CREATE TABLE feedItemDbo(
     date_published              INTEGER            AS DateTime,
     date_updated                INTEGER            AS DateTime,
     author                      TEXT               AS FeedAuthor,
+    content_type                TEXT               AS FeedContentType,
     enclosure_length            INTEGER            AS FeedEnclosureLength,
     enclosure_url               TEXT               AS FeedUrl NOT NULL,
     enclosure_type              TEXT               AS FeedEnclosureType,
@@ -977,6 +978,7 @@ feedItemUpsert {
         date_published = :date_published,
         date_updated = :date_updated,
         author = :author,
+        content_type = :content_type,
         enclosure_length = :enclosure_length,
         enclosure_url = :enclosure_url,
         enclosure_type = :enclosure_type,
@@ -993,6 +995,7 @@ feedItemUpsert {
         date_published,
         date_updated,
         author,
+        content_type,
         enclosure_length,
         enclosure_url,
         enclosure_type,
@@ -1008,6 +1011,7 @@ feedItemUpsert {
         :date_published,
         :date_updated,
         :author,
+        :content_type,
         :enclosure_length,
         :enclosure_url,
         :enclosure_type,

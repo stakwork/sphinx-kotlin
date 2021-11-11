@@ -1,4 +1,4 @@
-package chat.sphinx.feature_repository.mappers.feed
+package chat.sphinx.feature_repository.mappers.feed.podcast
 
 import chat.sphinx.conceptcoredb.FeedDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper

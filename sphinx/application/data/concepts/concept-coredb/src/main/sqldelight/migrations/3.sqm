@@ -1,7 +1,7 @@
-import chat.sphinx.wrapper_chat.FeedUrl;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.dashboard.ChatId;
+import chat.sphinx.wrapper_common.feed.FeedUrl;
 import chat.sphinx.wrapper_feed.FeedAuthor;
 import chat.sphinx.wrapper_feed.FeedContentType;
 import chat.sphinx.wrapper_feed.FeedDescription;
@@ -43,6 +43,7 @@ CREATE TABLE feedItemDbo(
     date_published              INTEGER            AS DateTime,
     date_updated                INTEGER            AS DateTime,
     author                      TEXT               AS FeedAuthor,
+    content_type                TEXT               AS FeedContentType,
     enclosure_length            INTEGER            AS FeedEnclosureLength,
     enclosure_url               TEXT               AS FeedUrl NOT NULL,
     enclosure_type              TEXT               AS FeedEnclosureType,

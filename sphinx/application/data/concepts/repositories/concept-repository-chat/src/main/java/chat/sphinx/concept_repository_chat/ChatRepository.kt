@@ -10,7 +10,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_chat.ChatHost
-import chat.sphinx.wrapper_chat.FeedUrl
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId

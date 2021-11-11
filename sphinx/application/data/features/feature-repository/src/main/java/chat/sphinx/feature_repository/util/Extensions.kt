@@ -26,6 +26,8 @@ import chat.sphinx.wrapper_common.subscription.Cron
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
+import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.InviteString
@@ -35,7 +37,6 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.TransactionCallbacks
-import java.io.File
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun BalanceDto.toNodeBalanceOrNull(): NodeBalance? =
@@ -465,6 +466,7 @@ fun TransactionCallbacks.upsertPodcast(
             date_published = null,
             date_updated = null,
             author = dto.author.toFeedAuthor(),
+            content_type = null,
             enclosure_length = null,
             enclosure_url = FeedUrl(episode.enclosureUrl),
             enclosure_type = null,
