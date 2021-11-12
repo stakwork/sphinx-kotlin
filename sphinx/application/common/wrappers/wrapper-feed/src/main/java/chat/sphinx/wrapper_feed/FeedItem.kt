@@ -33,4 +33,22 @@ data class FeedItem(
 
     var feed: Feed? = null
 
+    var imageUrlToShow: PhotoUrl? = null
+        get() {
+            imageUrl?.let {
+                return it
+            }
+            feed?.imageUrlToShow?.let {
+                return it
+            }
+            return null
+        }
+
+    var titleToShow: String = ""
+        get() = title.value.trim()
+
+    var descriptionToShow: String = ""
+        get() {
+            return (description?.value ?: feed?.description?.value ?: "").htmlToPlainText().trim()
+        }
 }

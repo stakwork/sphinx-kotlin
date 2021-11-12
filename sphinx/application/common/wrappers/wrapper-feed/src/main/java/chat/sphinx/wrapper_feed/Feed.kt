@@ -2,6 +2,7 @@ package chat.sphinx.wrapper_feed
 
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.ExternalAuthorizeLink
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -42,14 +43,37 @@ data class Feed(
 
     var lastItem: FeedItem? = null
         get() {
-//            for (item in items) {
-//                if (item.id.value.toLongOrNull() == chat?.metaData?.itemId?.value) {
-//                    return item
-//                }
-//            }
-//            if (items.count() > 0) {
-//                return items.first()
-//            }
+            for (item in items) {
+                if (item.id.value == currentItemId?.value) {
+                    return item
+                }
+            }
+            if (items.count() > 0) {
+                return items.first()
+            }
             return null
         }
+
+    var imageUrlToShow: PhotoUrl? = null
+        get() {
+            imageUrl?.let {
+                return it
+            }
+            chat?.photoUrl?.let {
+                return it
+            }
+            return null
+        }
+
+    var titleToShow: String = ""
+        get() = title.value.trim()
+
+    var descriptionToShow: String = ""
+        get() {
+            return (description?.value ?: "").htmlToPlainText().trim()
+        }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.htmlToPlainText(): String =
+    this.replace(Regex("\\<[^>]*>"),"")
