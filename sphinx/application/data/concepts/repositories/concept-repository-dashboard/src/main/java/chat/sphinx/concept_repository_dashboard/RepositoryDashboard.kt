@@ -40,6 +40,7 @@ interface RepositoryDashboard {
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>
 
     fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>>
+    fun getAllFeeds(): Flow<List<Feed>>
 
     suspend fun authorizeExternal(
         relayUrl: String,

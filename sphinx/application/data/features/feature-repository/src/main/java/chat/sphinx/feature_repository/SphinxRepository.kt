@@ -3289,54 +3289,78 @@ abstract class SphinxRepository(
                 .mapToList(io)
                 .map { listFeedDbo ->
                     withContext(default) {
+                        mapFeedDboList(
+                            listFeedDbo, queries
+                        )
+                    }
+                }
+        )
+    }
 
-                        val itemsMap: MutableMap<FeedId, ArrayList<FeedItem>> =
-                            LinkedHashMap(listFeedDbo.size)
+    override fun getAllFeeds(): Flow<List<Feed>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.feedGetAll()
+                .asFlow()
+                .mapToList(io)
+                .map { listFeedDbo ->
+                    withContext(default) {
+                        mapFeedDboList(
+                            listFeedDbo, queries
+                        )
+                    }
+                }
+        )
+    }
 
-                        val chatsMap: MutableMap<ChatId, Chat?> =
-                            LinkedHashMap(listFeedDbo.size)
+    private suspend fun mapFeedDboList(
+        listFeedDbo: List<FeedDbo>,
+        queries: SphinxDatabaseQueries
+    ) : List<Feed> {
+        val itemsMap: MutableMap<FeedId, ArrayList<FeedItem>> =
+            LinkedHashMap(listFeedDbo.size)
 
-                        for (dbo in listFeedDbo) {
-                            itemsMap[dbo.id] = ArrayList(0)
-                            chatsMap[dbo.chat_id] = null
-                        }
+        val chatsMap: MutableMap<ChatId, Chat?> =
+            LinkedHashMap(listFeedDbo.size)
 
-                        itemsMap.keys.chunked(500).forEach { chunkedIds ->
-                            queries.feedItemsGetByFeedIds(chunkedIds)
-                                .executeAsList()
-                                .let { response ->
-                                    response.forEach { dbo ->
-                                        dbo.feed_id?.let { feedId ->
-                                            itemsMap[feedId]?.add(
-                                                feedItemDboPresenterMapper.mapFrom(dbo)
-                                            )
-                                        }
-                                    }
-                                }
-                        }
+        for (dbo in listFeedDbo) {
+            itemsMap[dbo.id] = ArrayList(0)
+            chatsMap[dbo.chat_id] = null
+        }
 
-                        chatsMap.keys.chunked(500).forEach { chunkedChatIds ->
-                            queries.chatGetAllByIds(chunkedChatIds)
-                                .executeAsList()
-                                .let { response ->
-                                    response.forEach { dbo ->
-                                        dbo.id?.let { chatId ->
-                                            chatsMap[chatId] = chatDboPresenterMapper.mapFrom(dbo)
-                                        }
-                                    }
-                                }
-                        }
-
-                        listFeedDbo.map {
-                            mapFeedDbo(
-                                feedDbo = it,
-                                items = itemsMap[it.id] ?: listOf(),
-                                chat = chatsMap[it.chat_id]
+        itemsMap.keys.chunked(500).forEach { chunkedIds ->
+            queries.feedItemsGetByFeedIds(chunkedIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        dbo.feed_id?.let { feedId ->
+                            itemsMap[feedId]?.add(
+                                feedItemDboPresenterMapper.mapFrom(dbo)
                             )
                         }
                     }
                 }
-        )
+        }
+
+        chatsMap.keys.chunked(500).forEach { chunkedChatIds ->
+            queries.chatGetAllByIds(chunkedChatIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        dbo.id?.let { chatId ->
+                            chatsMap[chatId] = chatDboPresenterMapper.mapFrom(dbo)
+                        }
+                    }
+                }
+        }
+
+        return listFeedDbo.map {
+            mapFeedDbo(
+                feedDbo = it,
+                items = itemsMap[it.id] ?: listOf(),
+                chat = chatsMap[it.chat_id]
+            )
+        }
     }
 
     private suspend fun mapFeedDbo(
