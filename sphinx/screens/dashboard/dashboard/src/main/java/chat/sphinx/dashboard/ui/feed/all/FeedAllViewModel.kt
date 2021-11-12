@@ -8,11 +8,13 @@ import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 
@@ -40,7 +42,19 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun feedSelected(feed: Feed) {
         feed.chat?.id?.let { chatId ->
-            goToPodcastPlayer(chatId)
+            @Exhaustive
+            when (feed.feedType) {
+                is FeedType.Podcast -> {
+                    goToPodcastPlayer(chatId)
+                }
+                is FeedType.Video -> {
+                    //TODO Go to video player
+                }
+                is FeedType.Newsletter -> {
+                    //TODO Go to newsletter articles list
+                }
+                is FeedType.Unknown -> {}
+            }
         }
     }
 
