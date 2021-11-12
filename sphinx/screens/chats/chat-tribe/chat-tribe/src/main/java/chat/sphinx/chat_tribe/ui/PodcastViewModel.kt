@@ -8,21 +8,18 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribePodcastData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.toPodcast
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.podcast_player.objects.toParcelablePodcast
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -30,7 +27,6 @@ import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewState
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -47,7 +43,7 @@ internal class PodcastViewModel @Inject constructor(
     private val navigator: TribeChatNavigator,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
-    private val networkQueryChat: NetworkQueryChat,
+    private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ) : BaseViewModel<PodcastViewState>(dispatchers, PodcastViewState.NoPodcast),
     MediaPlayerServiceController.MediaServiceListener
@@ -144,7 +140,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = false,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     updateViewState(it)
@@ -156,7 +152,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = true,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     updateViewState(it)
@@ -171,7 +167,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = true,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     updateViewState(it)
@@ -181,8 +177,8 @@ internal class PodcastViewModel @Inject constructor(
                 viewModelScope.launch(mainImmediate) {
                     mediaPlayerServiceController.submitAction(
                         UserAction.SetPaymentsDestinations(
-                            args.chatId,
-                            vs.podcast.value.destinations,
+                            chatId = args.chatId,
+                            destinations = vs.podcast.destinations,
                         )
                     )
                 }
@@ -198,7 +194,7 @@ internal class PodcastViewModel @Inject constructor(
                 vs.adjustState(
                     showLoading = false,
                     showPlayButton = true,
-                    title = vs.podcast.getCurrentEpisode().title,
+                    title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration)
                 )?.let {
                     updateViewState(it)
@@ -224,184 +220,205 @@ internal class PodcastViewModel @Inject constructor(
         when (data) {
             is TribePodcastData.Result.NoPodcast -> { /* no-op */}
             is TribePodcastData.Result.TribeData -> {
+
                 viewModelScope.launch(mainImmediate) {
-                    networkQueryChat.getPodcastFeed(data.host, data.feedUrl.value).collect { response ->
-                        @Exhaustive
-                        when (response) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {}
-                            is Response.Success -> {
-                                val podcast = response.value.toPodcast()
+                    chatRepository.updatePodcastFeed(
+                        args.chatId,
+                        data.host,
+                        data.feedUrl,
+                        data.metaData?.itemId
+                    )
+                }
 
-                                if (data.metaData != null) {
-                                    podcast.setMetaData(data.metaData)
-                                }
+                viewModelScope.launch(mainImmediate) {
+                    delay(500L)
 
-                                val clickPlayPause = OnClickCallback {
-
-                                    val vs = currentViewState
-
-                                    if (vs !is PodcastViewState.PodcastVS) {
-                                        return@OnClickCallback
-                                    }
-
-                                    val episode = vs.podcast.getCurrentEpisode()
-
-                                    viewModelScope.launch {
-                                        if (episode.playing) {
-
-                                            vs.podcast.didPausePlayingEpisode(episode)
-
-                                            mediaPlayerServiceController.submitAction(
-                                                UserAction.ServiceAction.Pause(
-                                                    args.chatId,
-                                                    episode.id
-                                                )
-                                            )
-                                        } else {
-                                            withContext(io) {
-                                                vs.podcast.didStartPlayingEpisode(
-                                                    episode,
-                                                    vs.podcast.currentTime,
-                                                    ::retrieveEpisodeDuration,
-                                                )
-                                            }
-
-                                            mediaPlayerServiceController.submitAction(
-                                                UserAction.ServiceAction.Play(
-                                                    args.chatId,
-                                                    vs.podcast.id,
-                                                    episode.id,
-                                                    episode.enclosureUrl,
-                                                    Sat(vs.podcast.satsPerMinute),
-                                                    vs.podcast.speed,
-                                                    vs.podcast.currentTime,
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-
-                                val clickBoost = OnClickCallback {
-                                    viewModelScope.launch(mainImmediate) {
-
-                                        val owner: Contact = getOwner()
-
-                                        owner.tipAmount?.let { tip ->
-                                            if (tip.value > 0) {
-
-                                                val vs = currentViewState
-
-                                                if (vs is PodcastViewState.PodcastVS) {
-                                                    val metaData = vs.podcast.getMetaData(tip)
-
-                                                    messageRepository.sendPodcastBoost(
-                                                        args.chatId,
-                                                        vs.podcast
-                                                    )
-
-                                                    mediaPlayerServiceController.submitAction(
-                                                        UserAction.SendBoost(
-                                                            args.chatId,
-                                                            vs.podcast.id,
-                                                            metaData,
-                                                            vs.podcast.value.destinations,
-                                                        )
-                                                    )
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                }
-
-                                val clickFastForward = OnClickCallback {
-                                    val vs = currentViewState
-
-                                    if (vs !is PodcastViewState.PodcastVS) {
-                                        return@OnClickCallback
-                                    }
-
-                                    viewModelScope.launch(mainImmediate) {
-                                        vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
-
-                                        mediaPlayerServiceController.submitAction(
-                                            UserAction.ServiceAction.Seek(
-                                                args.chatId,
-                                                vs.podcast.getMetaData()
-                                            )
-                                        )
-
-                                        if (!vs.podcast.isPlaying) {
-                                            vs.adjustState(
-                                                showPlayButton = true,
-                                                playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
-                                            )?.let {
-                                                updateViewState(it)
-                                            }
-                                        }
-                                    }
-                                }
-
-                                val clickTitle = OnClickCallback {
-                                    val vs = currentViewState
-
-                                    if (vs !is PodcastViewState.PodcastVS) {
-                                        return@OnClickCallback
-                                    }
-
-                                    viewModelScope.launch(mainImmediate) {
-                                        navigator.toPodcastPlayerScreen(
-                                            args.chatId,
-                                            vs.podcast.toParcelablePodcast(),
-                                        )
-                                    }
-                                }
-
-                                val isPlaying = (currentServiceState is MediaPlayerServiceState.ServiceActive.MediaState.Playing)
-
-                                if (!isPlaying) {
-                                    PodcastViewState.PodcastVS.Available(
-                                        showLoading = true,
-                                        showPlayButton = true,
-                                        title = podcast.getCurrentEpisode().title,
-                                        playingProgress = 0,
-                                        clickPlayPause = clickPlayPause,
-                                        clickBoost = clickBoost,
-                                        clickFastForward = clickFastForward,
-                                        clickTitle = clickTitle,
-                                        podcast
-                                    ).let { initialViewState ->
-                                        updateViewState(initialViewState)
-                                    }
-                                }
-
-                                val currentSS = currentServiceState
-
-                                val playingProgress = if (currentSS is MediaPlayerServiceState.ServiceActive.MediaState.Playing) {
-                                    podcast.getPlayingProgress(currentSS.episodeDuration)
-                                } else {
-                                    withContext(io) { podcast.getPlayingProgress(::retrieveEpisodeDuration) }
-                                }
-
-                                PodcastViewState.PodcastVS.Loaded(
-                                    showLoading = false,
-                                    showPlayButton = !isPlaying,
-                                    title = podcast.getCurrentEpisode().title,
-                                    playingProgress = playingProgress,
-                                    clickPlayPause = clickPlayPause,
-                                    clickBoost = clickBoost,
-                                    clickFastForward = clickFastForward,
-                                    clickTitle = clickTitle,
-                                    podcast
-                                ).let { initialViewState ->
-                                    updateViewState(initialViewState)
-                                }
-                            }
+                    chatRepository.getPodcastByChatId(args.chatId).collect { podcast ->
+                        podcast?.let { nnPodcast ->
+                            podcastLoaded(
+                                nnPodcast,
+                                data
+                            )
                         }
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun podcastLoaded(
+        podcast: Podcast,
+        tribeData: TribePodcastData.Result.TribeData
+    ) {
+
+        if (tribeData.metaData != null) {
+            podcast.setMetaData(tribeData.metaData)
+        }
+
+        val clickPlayPause = OnClickCallback {
+
+            val vs = currentViewState
+
+            if (vs !is PodcastViewState.PodcastVS) {
+                return@OnClickCallback
+            }
+
+            val episode = vs.podcast.getCurrentEpisode()
+
+            viewModelScope.launch {
+                if (episode.playing) {
+                    vs.podcast.didPausePlayingEpisode(episode)
+
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Pause(
+                            args.chatId,
+                            episode.id.value
+                        )
+                    )
+                } else {
+                    withContext(io) {
+                        vs.podcast.didStartPlayingEpisode(
+                            episode,
+                            vs.podcast.currentTime,
+                            ::retrieveEpisodeDuration,
+                        )
+                    }
+
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Play(
+                            args.chatId,
+                            vs.podcast.id.value,
+                            episode.id.value,
+                            episode.enclosureUrl.value,
+                            Sat(vs.podcast.satsPerMinute),
+                            vs.podcast.speed,
+                            vs.podcast.currentTime,
+                        )
+                    )
+                }
+            }
+        }
+
+        val clickBoost = OnClickCallback {
+            viewModelScope.launch(mainImmediate) {
+
+                val owner: Contact = getOwner()
+
+                owner.tipAmount?.let { tip ->
+                    if (tip.value > 0) {
+
+                        val vs = currentViewState
+
+                        if (vs is PodcastViewState.PodcastVS) {
+                            val metaData = vs.podcast.getMetaData(tip)
+
+                            messageRepository.sendPodcastBoost(
+                                args.chatId,
+                                vs.podcast
+                            )
+
+                            mediaPlayerServiceController.submitAction(
+                                UserAction.SendBoost(
+                                    args.chatId,
+                                    vs.podcast.id.value,
+                                    metaData,
+                                    vs.podcast.destinations ?: arrayListOf(),
+                                )
+                            )
+                        }
+                    }
+                }
+
+            }
+        }
+
+        val clickFastForward = OnClickCallback {
+            val vs = currentViewState
+
+            if (vs !is PodcastViewState.PodcastVS) {
+                return@OnClickCallback
+            }
+
+            viewModelScope.launch(mainImmediate) {
+                vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Seek(
+                        args.chatId,
+                        vs.podcast.getMetaData()
+                    )
+                )
+
+                if (!vs.podcast.isPlaying) {
+                    vs.adjustState(
+                        showPlayButton = true,
+                        playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
+                    )?.let {
+                        updateViewState(it)
+                    }
+                }
+            }
+        }
+
+        val clickTitle = OnClickCallback {
+            val vs = currentViewState
+
+            if (vs !is PodcastViewState.PodcastVS) {
+                return@OnClickCallback
+            }
+
+            repositoryMedia.updateChatMetaData(
+                args.chatId,
+                vs.podcast.getMetaData(),
+                false
+            )
+
+            viewModelScope.launch(mainImmediate) {
+                navigator.toPodcastPlayerScreen(
+                    chatId = args.chatId,
+                    currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
+                )
+            }
+        }
+
+        val isPlaying = (currentServiceState is MediaPlayerServiceState.ServiceActive.MediaState.Playing)
+
+        if (!isPlaying) {
+            PodcastViewState.PodcastVS.Available(
+                showLoading = true,
+                showPlayButton = true,
+                title = podcast.getCurrentEpisode().title.value,
+                playingProgress = 0,
+                clickPlayPause = clickPlayPause,
+                clickBoost = clickBoost,
+                clickFastForward = clickFastForward,
+                clickTitle = clickTitle,
+                podcast
+            ).let { initialViewState ->
+                updateViewState(initialViewState)
+            }
+        }
+
+        val currentSS = currentServiceState
+
+        val playingProgress = if (currentSS is MediaPlayerServiceState.ServiceActive.MediaState.Playing) {
+            podcast.getPlayingProgress(currentSS.episodeDuration)
+        } else {
+            withContext(io) { podcast.getPlayingProgress(::retrieveEpisodeDuration) }
+        }
+
+        PodcastViewState.PodcastVS.Ready(
+            showLoading = false,
+            showPlayButton = !isPlaying,
+            title = podcast.getCurrentEpisode().title.value,
+            playingProgress = playingProgress,
+            clickPlayPause = clickPlayPause,
+            clickBoost = clickBoost,
+            clickFastForward = clickFastForward,
+            clickTitle = clickTitle,
+            podcast
+        ).let { initialViewState ->
+            updateViewState(initialViewState)
         }
     }
 

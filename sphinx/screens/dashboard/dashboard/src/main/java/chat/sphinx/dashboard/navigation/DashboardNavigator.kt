@@ -22,4 +22,6 @@ abstract class DashboardNavigator(
         pubKey: LightningNodePubKey,
         routeHint: LightningRouteHint? = null
     )
+
+    abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, currentEpisodeDuration: Long)
 }

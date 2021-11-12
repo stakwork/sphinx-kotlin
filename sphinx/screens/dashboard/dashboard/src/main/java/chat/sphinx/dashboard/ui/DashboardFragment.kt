@@ -2,22 +2,19 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
-import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.viewpager2.widget.ViewPager2
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.Disposable
@@ -27,10 +24,8 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
-import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
-import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
-import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
+import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -39,9 +34,9 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
-import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
+import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -50,22 +45,16 @@ import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@Suppress("NOTHING_TO_INLINE")
-private inline fun FragmentDashboardBinding.searchBarClearFocus() {
-    layoutDashboardSearchBar.editTextDashboardSearch.clearFocus()
-}
-
 @AndroidEntryPoint
 internal class DashboardFragment : MotionLayoutFragment<
         Any,
         Context,
-        DashboardSideEffect,
+        ChatListSideEffect,
         NavDrawerViewState,
         DashboardViewModel,
         FragmentDashboardBinding
@@ -92,9 +81,8 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
-        setupChats()
+        setupViewPager()
         setupDashboardHeader()
-        setupSearch()
         setupNavBar()
         setupNavDrawer()
         setupPopups()
@@ -109,12 +97,16 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    override fun onRefresh() {
+        binding.swipeRefreshLayoutDataReload.isRefreshing = false
+        viewModel.networkRefresh()
+    }
+
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
             if (viewModel.currentViewState is NavDrawerViewState.Open) {
                 viewModel.updateViewState(NavDrawerViewState.Closed)
             } else {
-                binding.searchBarClearFocus()
                 super.handleOnBackPressed()
             }
         }
@@ -131,31 +123,67 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    override fun onRefresh() {
-        binding.layoutDashboardChats.layoutSwipeRefreshChats.isRefreshing = false
-        viewModel.networkRefresh()
-    }
+    private fun setupViewPager() {
+        binding.apply {
+            swipeRefreshLayoutDataReload.setOnRefreshListener(this@DashboardFragment)
 
-    private fun setupChats() {
-        binding.layoutDashboardChats.layoutSwipeRefreshChats.setOnRefreshListener(this)
-
-        binding.layoutDashboardChats.recyclerViewChats.apply {
-            val linearLayoutManager = LinearLayoutManager(context)
-            val chatListAdapter = ChatListAdapter(
-                this,
-                linearLayoutManager,
-                imageLoader,
-                viewLifecycleOwner,
-                onStopSupervisor,
-                viewModel,
-                userColorsHelper
+            val dashboardFragmentsAdapter = DashboardFragmentsAdapter(
+                this@DashboardFragment
             )
 
-            val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, onStopSupervisor, viewModel)
-            this.setHasFixedSize(false)
-            layoutManager = linearLayoutManager
-            adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
-            itemAnimator = null
+            viewPagerDashboardTabs.adapter = dashboardFragmentsAdapter
+            viewPagerDashboardTabs.isUserInputEnabled = false
+
+            val tabs = tabLayoutDashboardTabs
+
+            TabLayoutMediator(tabs, viewPagerDashboardTabs) { tab, position ->
+                tab.text = dashboardFragmentsAdapter.getPageTitle(position)
+            }.attach()
+
+            viewPagerDashboardTabs.offscreenPageLimit = 3
+            
+            viewPagerDashboardTabs.post {
+                viewPagerDashboardTabs.currentItem = viewModel.getCurrentPagePosition()
+
+                viewPagerDashboardTabs.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+                    override fun onPageScrolled(
+                        position: Int,
+                        positionOffset: Float,
+                        positionOffsetPixels: Int
+                    ) { }
+
+                    override fun onPageSelected(position: Int) {
+                        viewModel.updateTabsState(
+                            feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
+                            friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
+                            tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
+                        )
+                    }
+
+                    override fun onPageScrollStateChanged(state: Int) { }
+                })
+            }
+
+            val feedTab: View = LayoutInflater.from(this@DashboardFragment.context)
+                .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+            tabs.getTabAt(DashboardFragmentsAdapter.FEED_TAB_POSITION)?.customView = feedTab
+
+            val feedTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FEED_TAB_POSITION]
+            feedTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(feedTitle)
+
+            val friendsTab: View = LayoutInflater.from(this@DashboardFragment.context)
+                .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+            tabs.getTabAt(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION)?.customView = friendsTab
+
+            val friendsTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FRIENDS_TAB_POSITION]
+            friendsTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(friendsTitle)
+
+            val tribesTab: View = LayoutInflater.from(this@DashboardFragment.context)
+                .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+            tabs.getTabAt(DashboardFragmentsAdapter.TRIBES_TAB_POSITION)?.customView = tribesTab
+
+            val tribesTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.TRIBES_TAB_POSITION]
+            tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(tribesTitle)
         }
     }
 
@@ -188,45 +216,6 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    private fun setupSearch() {
-        binding.layoutDashboardSearchBar.apply {
-            editTextDashboardSearch.addTextChangedListener { editable ->
-                buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
-
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.updateChatListFilter(
-                        if (editable.toString().isNotEmpty()) {
-                            ChatFilter.FilterBy(editable.toString())
-                        } else {
-                            ChatFilter.ClearFilter
-                        }
-                    )
-                }
-            }
-
-            editTextDashboardSearch.setOnEditorActionListener(object: TextView.OnEditorActionListener {
-                override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
-                    if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
-                        editTextDashboardSearch.let { editText ->
-                            binding.root.context.inputMethodManager?.let { imm ->
-                                if (imm.isActive(editText)) {
-                                    imm.hideSoftInputFromWindow(editText.windowToken, 0)
-                                    editText.clearFocus()
-                                }
-                            }
-                        }
-                        return true
-                    }
-                    return false
-                }
-            })
-
-            buttonDashboardSearchClear.setOnClickListener {
-                editTextDashboardSearch.setText("")
-            }
-        }
-    }
-
     private fun setupNavBar() {
         binding.layoutDashboardNavBar.let { navBar ->
 
@@ -234,19 +223,15 @@ internal class DashboardFragment : MotionLayoutFragment<
                 .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
 
             navBar.navBarButtonPaymentReceive.setOnClickListener {
-                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
             }
             navBar.navBarButtonTransactions.setOnClickListener {
-                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toTransactionsDetail() }
             }
             navBar.navBarButtonScanner.setOnClickListener {
-                binding.searchBarClearFocus()
                 viewModel.toScanner()
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
-                binding.searchBarClearFocus()
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail() }
             }
         }
@@ -408,11 +393,6 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        binding.searchBarClearFocus()
-    }
-
     override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
         @Exhaustive
         when (viewState) {
@@ -421,15 +401,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
             NavDrawerViewState.Open -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
-                binding.layoutDashboardSearchBar.editTextDashboardSearch.let { editText ->
-                    binding.root.context.inputMethodManager?.let { imm ->
-                        if (imm.isActive(editText)) {
-                            imm.hideSoftInputFromWindow(editText.windowToken, 0)
-                            delay(250L)
-                        }
-                    }
-                    binding.searchBarClearFocus()
-                }
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
@@ -440,6 +411,51 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.tabsViewStateContainer.collect { viewState ->
+                when (viewState) {
+                    is DashboardTabsViewState.Idle -> {}
+
+                    is DashboardTabsViewState.TabsState -> {
+                        val tabs = binding.tabLayoutDashboardTabs
+
+                        val feedTab = tabs.getTabAt(DashboardFragmentsAdapter.FEED_TAB_POSITION)?.customView
+                        val friendsTab = tabs.getTabAt(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION)?.customView
+                        val tribesTab = tabs.getTabAt(DashboardFragmentsAdapter.TRIBES_TAB_POSITION)?.customView
+
+                        feedTab?.findViewById<TextView>(R.id.text_view_tab_title)?.setTextColor(
+                            ContextCompat.getColor(
+                                binding.root.context,
+                                if (viewState.feedActive) R.color.text else R.color.secondaryText
+                            )
+                        )
+
+                        friendsTab?.findViewById<TextView>(R.id.text_view_tab_title)?.setTextColor(
+                            ContextCompat.getColor(
+                                binding.root.context,
+                                if (viewState.friendsActive) R.color.text else R.color.secondaryText
+                            )
+                        )
+
+                        friendsTab?.findViewById<View>(R.id.view_unseen_messages_dot)?.goneIfFalse(
+                            viewState.friendsBadgeVisible
+                        )
+
+                        tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.setTextColor(
+                            ContextCompat.getColor(
+                                binding.root.context,
+                                if (viewState.tribesActive) R.color.text else R.color.secondaryText
+                            )
+                        )
+
+                        tribesTab?.findViewById<View>(R.id.view_unseen_messages_dot)?.goneIfFalse(
+                            viewState.tribesBadgeVisible
+                        )
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deepLinkPopupViewStateContainer.collect { viewState ->
@@ -558,7 +574,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         return arrayOf(binding.layoutMotionDashboard)
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: DashboardSideEffect) {
+    override suspend fun onSideEffectCollect(sideEffect: ChatListSideEffect) {
         sideEffect.execute(binding.root.context)
     }
 }

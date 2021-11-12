@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha33 (2021-11-12)
+ - Adds tabbed dashboard and new feed section
+
 # Version 1.0.0-alpha32 (2021-11-03)
  - Fixes crash on Android 12 (API 31)
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="DashboardTab">
+        <item name="android:fontFamily">@font/roboto_medium</item>
+        <item name="android:lines">1</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/default_text_size_tab</item>
+    </style>
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar" >
+        <item name="chipStyle">@style/AppTheme.Chip</item>
+    </style>
+
+    <style name="AppTheme.Chip" parent="Widget.MaterialComponents.Chip.Entry">
+        <item name="chipBackgroundColor">@color/background_chip</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipMinHeight">@dimen/dashboard_chip_height</item>
+        <item name="chipSpacingHorizontal">@dimen/dashboard_chip_spacing</item>
+        <item name="chipSpacingVertical">@dimen/dashboard_chip_vertical_spacing</item>
+        <item name="textStartPadding">@dimen/default_chip_text_padding</item>
+        <item name="textEndPadding">@dimen/default_chip_text_padding</item>
+        <item name="android:textSize">@dimen/default_chip_text_size</item>
+        <item name="android:textColor">@color/chip_text_color</item>
+        <item name="android:fontFamily">@font/roboto_bold</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="closeIconVisible">false</item>
+    </style>
+
+</resources>
