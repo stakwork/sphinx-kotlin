@@ -1,11 +1,10 @@
-package chat.sphinx.dashboard.ui.feed.all
+package chat.sphinx.dashboard.ui.feed.watch
 
-import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.dashboard.navigation.DashboardNavigator
-import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
+import chat.sphinx.dashboard.ui.viewstates.FeedReadViewState
+import chat.sphinx.dashboard.ui.viewstates.FeedWatchViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -13,15 +12,15 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-internal class FeedAllViewModel @Inject constructor(
+internal class FeedWatchViewModel @Inject constructor(
     handler: SavedStateHandle,
     val dashboardNavigator: DashboardNavigator,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
-        FeedAllSideEffect,
-        FeedAllViewState
-        >(dispatchers, FeedAllViewState.Default)
+        FeedWatchSideEffect,
+        FeedWatchViewState
+        >(dispatchers, FeedWatchViewState.Idle)
 {
 
 }

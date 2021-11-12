@@ -1,21 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.NoActionBar" >
-        <item name="chipStyle">@style/AppTheme.Chip</item>
-    </style>
-
-    <style name="AppTheme.Chip" parent="Widget.MaterialComponents.Chip.Entry">
-        <item name="chipBackgroundColor">@color/background_chip</item>
-        <item name="chipStrokeWidth">0dp</item>
-        <item name="textStartPadding">@dimen/default_chip_text_padding</item>
-        <item name="textEndPadding">@dimen/default_chip_text_padding</item>
-        <item name="android:textSize">@dimen/default_chip_text_size</item>
-        <item name="android:textColor">@color/textInverted</item>
-        <item name="elevation">@dimen/default_chip_elevation</item>
-        <item name="checkedIconVisible">false</item>
-        <item name="closeIconVisible">false</item>
-    </style>
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar" />
 
     <style name="AppTheme.Fullscreen" parent="AppTheme">
         <item name="android:windowNoTitle">true</item>

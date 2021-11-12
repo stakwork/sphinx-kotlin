@@ -12,7 +12,7 @@
         android:id="@+id/layout_search_bar"
         layout="@layout/layout_search_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/search_bar_height"
+        android:layout_height="@dimen/dashboard_search_bar_height"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <include

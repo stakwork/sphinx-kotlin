@@ -12,6 +12,7 @@ import androidx.viewpager2.widget.ViewPager2
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
+import chat.sphinx.dashboard.ui.DashboardFragmentsAdapter
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
@@ -100,23 +101,33 @@ internal class FeedFragment : SideEffectFragment<
                 this@FeedFragment
             )
 
-            val viewPager: ViewPager2 = viewPagerFeedFragments
-            viewPager.adapter = feedFragmentsAdapter
+            chipAll.isChecked = true
 
-            viewPager.isUserInputEnabled = false
+            viewPagerFeedFragments.adapter = feedFragmentsAdapter
+            viewPagerFeedFragments.isUserInputEnabled = false
+
+            viewPagerFeedFragments.post {
+                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
+            }
+
             chipAll.setOnClickListener {
-                viewPager.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
+                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
             }
 
             chipListen.setOnClickListener {
-                viewPager.currentItem = FeedFragmentsAdapter.CHIP_LISTEN_POSITION
+                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_LISTEN_POSITION
             }
+
             chipWatch.setOnClickListener {
-                viewPager.currentItem = FeedFragmentsAdapter.CHIP_WATCH_POSITION
+                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_WATCH_POSITION
             }
 
             chipRead.setOnClickListener {
-                viewPager.currentItem = FeedFragmentsAdapter.CHIP_READ_POSITION
+                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_READ_POSITION
+            }
+
+            chipPlay.setOnClickListener {
+                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_PLAY_POSITION
             }
         }
     }

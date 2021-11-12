@@ -4,56 +4,59 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    tools:background="@color/headerBG"
-    >
+    tools:background="@color/body">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view_image_wrapper"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_layout_margin"
-        android:elevation="@dimen/default_elevation"
+        android:layout_margin="@dimen/default_half_layout_margin"
         app:cardCornerRadius="@dimen/default_radius"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        >
+        app:layout_constraintEnd_toEndOf="parent">
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_podcast_image"
             android:layout_width="@dimen/default_feed_image_xy"
             android:layout_height="@dimen/default_feed_image_xy"
-            app:srcCompat="@drawable/ic_tribe"
-            />
-    </androidx.cardview.widget.CardView>
+            app:srcCompat="@drawable/ic_podcast_placeholder" />
 
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/text_view_listen_podcast_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/textInverted"
-        android:textSize="@dimen/default_text_size_headline"
+        android:layout_marginVertical="@dimen/default_small_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_tiny_layout_margin"
+        android:gravity="start|center"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/text"
+        android:textSize="@dimen/default_text_size_list_row_headline"
         android:lines="1"
+        android:textAlignment="textStart"
         app:layout_constraintTop_toBottomOf="@+id/card_view_image_wrapper"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
-        tools:text="tribe with audio to play"
-        />
+        tools:text="episode with audio to play" />
 
     <TextView
         android:id="@+id/text_view_listen_podcast_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/default_layout_margin"
-        android:gravity="center"
-        android:textColor="@color/text"
-        android:textSize="@dimen/default_text_size_headline"
+        android:layout_marginVertical="@dimen/default_small_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_tiny_layout_margin"
+        android:gravity="start|center"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/default_text_size_list_row_headline"
         android:lines="2"
+        android:textAlignment="textStart"
         app:layout_constraintTop_toBottomOf="@+id/text_view_listen_podcast_name"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:text="tribe with audio to play so that people can hear something something something"
-        />
+        tools:text="episode that a user can play now and so and so forth" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

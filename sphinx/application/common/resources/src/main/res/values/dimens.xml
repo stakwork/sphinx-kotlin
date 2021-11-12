@@ -81,11 +81,10 @@
     <!-- Recycler View holder -->
     <dimen name="recycler_view_holder_delete_button_width">85dp</dimen>
 
-    <dimen name="default_chip_elevation">16dp</dimen>
-    <dimen name="default_chip_text_size">18sp</dimen>
-    <dimen name="default_chip_text_padding">12sp</dimen>
+    <dimen name="default_chip_text_size">15sp</dimen>
+    <dimen name="default_chip_text_padding">30sp</dimen>
 
-    <dimen name="default_feed_image_xy">200dp</dimen>
+    <dimen name="default_feed_image_xy">160dp</dimen>
     <dimen name="default_feed_play_elevation">16dp</dimen>
     <dimen name="default_feed_image_play_text_size">40sp</dimen>
     <dimen name="default_radius">14dp</dimen>

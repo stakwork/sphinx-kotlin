@@ -124,67 +124,67 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupViewPager() {
-        binding.swipeRefreshLayoutDataReload.setOnRefreshListener(this)
+        binding.apply {
+            swipeRefreshLayoutDataReload.setOnRefreshListener(this@DashboardFragment)
 
-        val dashboardFragmentsAdapter = DashboardFragmentsAdapter(
-            this@DashboardFragment
-        )
+            val dashboardFragmentsAdapter = DashboardFragmentsAdapter(
+                this@DashboardFragment
+            )
 
-        val viewPager: ViewPager2 = binding.viewPagerDashboardTabs
+            viewPagerDashboardTabs.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+                override fun onPageScrolled(
+                    position: Int,
+                    positionOffset: Float,
+                    positionOffsetPixels: Int
+                ) { }
 
-        viewPager.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
-            override fun onPageScrolled(
-                position: Int,
-                positionOffset: Float,
-                positionOffsetPixels: Int
-            ) { }
+                override fun onPageSelected(position: Int) {
+                    viewModel.updateTabsState(
+                        feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
+                        friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
+                        tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
+                    )
+                }
 
-            override fun onPageSelected(position: Int) {
-                viewModel.updateTabsState(
-                    feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
-                    friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
-                    tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
-                )
+                override fun onPageScrollStateChanged(state: Int) { }
+            })
+
+            viewPagerDashboardTabs.adapter = dashboardFragmentsAdapter
+            viewPagerDashboardTabs.isUserInputEnabled = false
+
+            val tabs = tabLayoutDashboardTabs
+
+            TabLayoutMediator(tabs, viewPagerDashboardTabs) { tab, position ->
+                tab.text = dashboardFragmentsAdapter.getPageTitle(position)
+            }.attach()
+
+            viewPagerDashboardTabs.offscreenPageLimit = 3
+
+            viewPagerDashboardTabs.post {
+                viewPagerDashboardTabs.currentItem = DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
             }
 
-            override fun onPageScrollStateChanged(state: Int) { }
-        })
+            val feedTab: View = LayoutInflater.from(this@DashboardFragment.context)
+                .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+            tabs.getTabAt(DashboardFragmentsAdapter.FEED_TAB_POSITION)?.customView = feedTab
 
-        viewPager.adapter = dashboardFragmentsAdapter
+            val feedTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FEED_TAB_POSITION]
+            feedTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(feedTitle)
 
-        val tabs = binding.tabLayoutDashboardTabs
+            val friendsTab: View = LayoutInflater.from(this@DashboardFragment.context)
+                .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+            tabs.getTabAt(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION)?.customView = friendsTab
 
-        TabLayoutMediator(tabs, viewPager) { tab, position ->
-            tab.text = dashboardFragmentsAdapter.getPageTitle(position)
-        }.attach()
+            val friendsTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FRIENDS_TAB_POSITION]
+            friendsTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(friendsTitle)
 
-        viewPager.offscreenPageLimit = 3
-        viewPager.post {
-            viewPager.currentItem = DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+            val tribesTab: View = LayoutInflater.from(this@DashboardFragment.context)
+                .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
+            tabs.getTabAt(DashboardFragmentsAdapter.TRIBES_TAB_POSITION)?.customView = tribesTab
+
+            val tribesTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.TRIBES_TAB_POSITION]
+            tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(tribesTitle)
         }
-
-        val feedTab: View = LayoutInflater.from(this.context)
-            .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
-        tabs.getTabAt(DashboardFragmentsAdapter.FEED_TAB_POSITION)?.customView = feedTab
-
-        val feedTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FEED_TAB_POSITION]
-        feedTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(feedTitle)
-
-        val friendsTab: View = LayoutInflater.from(this.context)
-            .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
-        tabs.getTabAt(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION)?.customView = friendsTab
-
-        val friendsTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.FRIENDS_TAB_POSITION]
-        friendsTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(friendsTitle)
-
-        val tribesTab: View = LayoutInflater.from(this.context)
-            .inflate(R.layout.layout_dashboard_custom_tab, tabs, false)
-        tabs.getTabAt(DashboardFragmentsAdapter.TRIBES_TAB_POSITION)?.customView = tribesTab
-
-        val tribesTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.TRIBES_TAB_POSITION]
-        tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(tribesTitle)
-
-
     }
 
     private fun setupDashboardHeader() {

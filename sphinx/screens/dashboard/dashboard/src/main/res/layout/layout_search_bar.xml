@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_constraint_dashboard_search_bar"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/search_bar_height"
+    android:layout_height="@dimen/dashboard_search_bar_height"
+    android:paddingTop="@dimen/default_half_layout_margin"
     android:background="@color/headerBG"
     android:descendantFocusability="beforeDescendants"
-    android:elevation="@dimen/default_elevation"
     android:focusableInTouchMode="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout

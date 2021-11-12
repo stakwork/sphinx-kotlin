@@ -10,7 +10,7 @@
         android:id="@+id/text_view_placeholder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/all_place_holder"
+        android:text="@string/read_place_holder"
         android:fontFamily="@font/roboto_medium"
         android:textSize="@dimen/dashboard_feed_placeholder_text_size"
         android:textColor="@color/text"
