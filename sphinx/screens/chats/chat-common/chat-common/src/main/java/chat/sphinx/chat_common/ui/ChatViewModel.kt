@@ -271,7 +271,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         owner: Contact
     ): InitialHolderViewState
 
-    protected suspend fun getOwner(): Contact {
+    private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
