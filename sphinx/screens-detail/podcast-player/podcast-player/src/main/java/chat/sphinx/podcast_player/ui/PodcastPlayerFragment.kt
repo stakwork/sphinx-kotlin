@@ -197,6 +197,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             is PodcastPlayerViewState.PodcastLoaded -> {
+                toggleLoadingWheel(true)
                 showPodcastInfo(viewState.podcast)
             }
 
@@ -237,6 +238,8 @@ internal class PodcastPlayerFragment : BaseFragment<
             togglePlayPauseButton(podcast.isPlaying)
 
             if (!dragging) setTimeLabelsAndProgressBar(podcast)
+
+            toggleLoadingWheel(false)
         }
     }
 
@@ -274,8 +277,13 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     private fun toggleLoadingWheel(show: Boolean) {
-        binding.includeLayoutEpisodeSliderControl.apply {
-            progressBarAudioLoading.goneIfFalse(show)
+        binding.apply {
+            includeLayoutEpisodeSliderControl.apply layoutEpisodesSlider@ {
+                this@layoutEpisodesSlider.progressBarAudioLoading.goneIfFalse(show)
+            }
+            includeLayoutEpisodePlaybackControlButtons.apply layoutPlaybackControls@ {
+                this@layoutPlaybackControls.textViewPlayPauseButton.isEnabled = !show
+            }
         }
     }
 
