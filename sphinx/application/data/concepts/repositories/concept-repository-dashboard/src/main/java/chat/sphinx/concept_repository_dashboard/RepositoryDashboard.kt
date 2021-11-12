@@ -9,6 +9,8 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedType
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
@@ -36,6 +38,8 @@ interface RepositoryDashboard {
 
     suspend fun payForInvite(invite: Invite)
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>
+
+    fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>>
 
     suspend fun authorizeExternal(
         relayUrl: String,

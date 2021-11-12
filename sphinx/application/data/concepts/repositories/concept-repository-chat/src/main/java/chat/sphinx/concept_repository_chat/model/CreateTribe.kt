@@ -3,9 +3,9 @@ package chat.sphinx.concept_repository_chat.model
 import chat.sphinx.concept_network_query_chat.model.PostGroupDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.wrapper_chat.AppUrl
-import chat.sphinx.wrapper_chat.FeedUrl
+import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_chat.toAppUrl
-import chat.sphinx.wrapper_chat.toFeedUrl
 import java.io.File
 
 class CreateTribe private constructor(
