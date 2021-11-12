@@ -105,10 +105,7 @@ internal class FeedFragment : SideEffectFragment<
 
             viewPagerFeedFragments.adapter = feedFragmentsAdapter
             viewPagerFeedFragments.isUserInputEnabled = false
-
-            viewPagerFeedFragments.post {
-                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
-            }
+            viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
 
             chipAll.setOnClickListener {
                 viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
