@@ -13,8 +13,8 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Play(
             chatId: ChatId,
-            val podcastId: Long,
-            val episodeId: Long,
+            val podcastId: String,
+            val episodeId: String,
             val episodeUrl: String,
             val satPerMinute: Sat,
             val speed: Double,
@@ -23,7 +23,7 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Pause(
             chatId: ChatId,
-            val episodeId: Long,
+            val episodeId: String,
         ): ServiceAction(chatId)
 
         class Seek(
@@ -45,7 +45,7 @@ sealed class UserAction(val chatId: ChatId) {
 
     class SendBoost(
         chatId: ChatId,
-        val podcastId: Long,
+        val podcastId: String,
         val metaData: ChatMetaData,
         val destinations: List<PodcastDestination>
     ): UserAction(chatId)

@@ -7,16 +7,16 @@ import chat.sphinx.wrapper_podcast.PodcastDestination
 
 internal class PodcastDataHolder private constructor(
     val chatId: ChatId,
-    val podcastId: Long,
-    val episodeId: Long,
+    val podcastId: String,
+    val episodeId: String,
     val mediaPlayer: MediaPlayer,
 ) {
     companion object {
         @JvmSynthetic
         fun instantiate(
             chatId: ChatId,
-            podcastId: Long,
-            episodeId: Long,
+            podcastId: String,
+            episodeId: String,
             satsPerMinute: Sat,
             mediaPlayer: MediaPlayer,
             speed: Double,

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_constraint_chat_footer"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:background="@color/body">
+
+    <include
+        android:id="@+id/layout_button_add_friend"
+        layout="@layout/layout_button_add_friend"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/layout_button_create_tribe"
+        layout="@layout/layout_button_create_tribe"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_button_add_friend"
+        app:layout_constraintStart_toEndOf="@+id/layout_button_add_friend"
+        app:layout_constraintTop_toTopOf="@+id/layout_button_add_friend" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

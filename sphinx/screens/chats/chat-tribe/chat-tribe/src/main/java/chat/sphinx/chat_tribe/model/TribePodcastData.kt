@@ -2,7 +2,7 @@ package chat.sphinx.chat_tribe.model
 
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_chat.FeedUrl
+import chat.sphinx.wrapper_common.feed.FeedUrl
 
 sealed class TribePodcastData {
     object Loading: TribePodcastData()

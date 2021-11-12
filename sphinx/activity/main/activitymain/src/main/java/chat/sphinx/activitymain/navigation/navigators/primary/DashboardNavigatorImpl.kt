@@ -8,6 +8,7 @@ import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
+import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -51,5 +52,9 @@ internal class DashboardNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(
             ToNewContactDetail(pubKey, routeHint, false)
         )
+    }
+
+    override suspend fun toPodcastPlayerScreen(chatId: ChatId, currentEpisodeDuration: Long) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, currentEpisodeDuration))
     }
 }

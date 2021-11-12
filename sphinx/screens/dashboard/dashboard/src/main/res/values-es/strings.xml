@@ -87,4 +87,21 @@
 
     <string name="dashboard_network_disconnected_node_toast">Nodo desconectado</string>
     <string name="dashboard_network_connected_node_toast">Nodo conectado</string>
+    <string name="dashboard_feed_tab_name">Feed</string>
+    <string name="dashboard_friends_tab_name">Amigos</string>
+    <string name="dashboard_tribes_tab_name">Tribus</string>
+
+    <string name="all">Todo</string>
+    <string name="listen">Escuchar</string>
+    <string name="watch">Mirar</string>
+    <string name="read">Leer</string>
+    <string name="play">Jugar</string>
+    <string name="listen_now">Escuchar ahora</string>
+    <string name="following">Siguiendo</string>
+
+    <string name="all_place_holder">No se encontraron resultados</string>
+    <string name="listen_place_holder">No se encontraron resultados para \"Escuchar\"</string>
+    <string name="watch_place_holder">No se encontraron resultados para \"Mirar\"</string>
+    <string name="read_place_holder">No se encontraron resultados para \"Leer\"</string>
+    <string name="play_place_holder">No se encontraron resultados para \"Jugar\"</string>
 </resources>

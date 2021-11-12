@@ -9,6 +9,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -24,7 +25,7 @@ interface MessageRepository {
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getTribeLastMemberRequestByContactId(contactId: ContactId, chatId: ChatId, ): Flow<Message?>
     fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
-    fun getPaymentsTotalFor(feedId: Long): Flow<Sat?>
+    fun getPaymentsTotalFor(feedId: FeedId): Flow<Sat?>
 
     suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
 
