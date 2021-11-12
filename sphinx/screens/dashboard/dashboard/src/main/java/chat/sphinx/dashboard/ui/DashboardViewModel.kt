@@ -517,6 +517,25 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
+    fun getCurrentPagePosition() : Int {
+        val currentState = tabsViewStateContainer.viewStateFlow.value
+        if (currentState is DashboardTabsViewState.TabsState) {
+            return when {
+                currentState.feedActive -> {
+                    DashboardFragmentsAdapter.FEED_TAB_POSITION
+                }
+                currentState.friendsActive -> {
+                    DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+                }
+                currentState.tribesActive -> {
+                    DashboardFragmentsAdapter.TRIBES_TAB_POSITION
+                }
+                else -> DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+            }
+        }
+        return DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+    }
+
     private suspend fun getOwner(): Contact {
         return accountOwner.value.let { contact ->
             if (contact != null) {

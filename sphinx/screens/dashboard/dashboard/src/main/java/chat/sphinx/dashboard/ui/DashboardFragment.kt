@@ -131,24 +131,6 @@ internal class DashboardFragment : MotionLayoutFragment<
                 this@DashboardFragment
             )
 
-            viewPagerDashboardTabs.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
-                override fun onPageScrolled(
-                    position: Int,
-                    positionOffset: Float,
-                    positionOffsetPixels: Int
-                ) { }
-
-                override fun onPageSelected(position: Int) {
-                    viewModel.updateTabsState(
-                        feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
-                        friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
-                        tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
-                    )
-                }
-
-                override fun onPageScrollStateChanged(state: Int) { }
-            })
-
             viewPagerDashboardTabs.adapter = dashboardFragmentsAdapter
             viewPagerDashboardTabs.isUserInputEnabled = false
 
@@ -159,9 +141,27 @@ internal class DashboardFragment : MotionLayoutFragment<
             }.attach()
 
             viewPagerDashboardTabs.offscreenPageLimit = 3
-
+            
             viewPagerDashboardTabs.post {
-                viewPagerDashboardTabs.currentItem = DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+                viewPagerDashboardTabs.currentItem = viewModel.getCurrentPagePosition()
+
+                viewPagerDashboardTabs.registerOnPageChangeCallback(object: ViewPager2.OnPageChangeCallback() {
+                    override fun onPageScrolled(
+                        position: Int,
+                        positionOffset: Float,
+                        positionOffsetPixels: Int
+                    ) { }
+
+                    override fun onPageSelected(position: Int) {
+                        viewModel.updateTabsState(
+                            feedActive = position == DashboardFragmentsAdapter.FEED_TAB_POSITION,
+                            friendsActive = position == DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,
+                            tribesActive = position == DashboardFragmentsAdapter.TRIBES_TAB_POSITION,
+                        )
+                    }
+
+                    override fun onPageScrollStateChanged(state: Int) { }
+                })
             }
 
             val feedTab: View = LayoutInflater.from(this@DashboardFragment.context)
