@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -158,6 +159,16 @@ class FeedListenNowAdapter(
         private var disposable: Disposable? = null
 
         private var episode: FeedItem? = null
+
+        init {
+            binding.layoutConstraintFeedHolder.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    lifecycleOwner.lifecycleScope.launch {
+                        viewModel.episodeItemSelected(nnEpisode)
+                    }
+                }
+            }
+        }
 
         fun bind(position: Int) {
             binding.apply {

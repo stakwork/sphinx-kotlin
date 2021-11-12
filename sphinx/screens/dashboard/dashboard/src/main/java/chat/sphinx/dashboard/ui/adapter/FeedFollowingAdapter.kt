@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -155,6 +156,16 @@ class FeedFollowingAdapter(
         private var disposable: Disposable? = null
 
         private var feed: Feed? = null
+
+        init {
+            binding.layoutConstraintFeedHolder.setOnClickListener {
+                feed?.let { nnFeed ->
+                    lifecycleOwner.lifecycleScope.launch {
+                        viewModel.feedSelected(nnFeed)
+                    }
+                }
+            }
+        }
 
         fun bind(position: Int) {
             binding.apply {

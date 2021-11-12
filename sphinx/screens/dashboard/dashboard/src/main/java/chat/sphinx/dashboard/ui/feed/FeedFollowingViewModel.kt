@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface FeedFollowingViewModel {
     val feedsHolderViewStateFlow: StateFlow<List<Feed>>
+
+    fun feedSelected(feed: Feed)
 }

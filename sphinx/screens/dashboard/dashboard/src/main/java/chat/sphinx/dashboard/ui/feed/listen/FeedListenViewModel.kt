@@ -6,6 +6,7 @@ import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndro
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_feed.FeedType
@@ -13,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,4 +37,24 @@ class FeedListenViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5_000),
         emptyList()
     )
+
+    fun episodeItemSelected(episode: FeedItem) {
+        episode.feed?.chat?.id?.let { chatId ->
+            goToPodcastPlayer(chatId)
+        }
+    }
+
+    override fun feedSelected(feed: Feed) {
+        feed.chat?.id?.let { chatId ->
+            goToPodcastPlayer(chatId)
+        }
+    }
+
+    private fun goToPodcastPlayer(chatId: ChatId) {
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toPodcastPlayerScreen(
+                chatId, 0
+            )
+        }
+    }
 }
