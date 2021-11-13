@@ -19,7 +19,7 @@ class NetworkQuerySaveProfileImpl(
 ): NetworkQuerySaveProfile() {
 
     companion object {
-        private const val ENDPOINT_SAVE_KEY = "/save/%s"
+        private const val ENDPOINT_SAVE_KEY = "https://%s/save/%s"
         private const val ENDPOINT_SAVE_PROFILE = "/profile"
     }
 
