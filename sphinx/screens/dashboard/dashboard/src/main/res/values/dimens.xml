@@ -39,6 +39,17 @@
     <dimen name="dashboard_authorize_popup_authorize_button_text_size">12sp</dimen>
     <dimen name="dashboard_authorize_popup_progress_bar_zy">32dp</dimen>
 
+    <!-- Deep save profile authorize popup -->
+    <dimen name="dashboard_save_profile_popup_width">240dp</dimen>
+    <dimen name="dashboard_save_profile_popup_height">300dp</dimen>
+    <dimen name="dashboard_save_profile_popup_verified_icon_margin_top">40sp</dimen>
+    <dimen name="dashboard_save_profile_popup_verified_icon_text_size">40sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_title_text_size">13sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_name_text_size">14sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_button_height">52dp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_button_text_size">12sp</dimen>
+    <dimen name="dashboard_save_profile_popup_progress_bar_zy">32dp</dimen>
+
     <dimen name="dashboard_connect_popup_width">260dp</dimen>
     <dimen name="dashboard_connect_popup_height">420dp</dimen>
     <dimen name="dashboard_connect_popup_profile_pic_xy">100dp</dimen>

@@ -152,6 +152,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleExternalAuthorizeLink(externalAuthorizeLink)
             } ?: deepLink?.toPeopleConnectLink()?.let { peopleConnectLink ->
                 handlePeopleConnectLink(peopleConnectLink)
+            } ?: deepLink?.toSaveProfileLink()?.let { savePeopleLink ->
+                handleSaveProfileLink(savePeopleLink)
             }
         }
     }
@@ -165,6 +167,7 @@ internal class DashboardViewModel @Inject constructor(
                             return when {
                                 data.isValidTribeJoinLink ||
                                 data.isValidExternalAuthorizeLink ||
+                                        data.isValidSaveProfileLink ||
                                 data.isValidPeopleConnectLink ||
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
@@ -194,6 +197,10 @@ internal class DashboardViewModel @Inject constructor(
                 } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
 
                     handleExternalAuthorizeLink(externalAuthorizeLink)
+
+                } ?: code.toSaveProfileLink()?.let { externalSaveProfileLink ->
+
+                    handleSaveProfileLink(externalSaveProfileLink)
 
                 } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
 
@@ -279,6 +286,12 @@ internal class DashboardViewModel @Inject constructor(
             DeepLinkPopupViewState.ExternalAuthorizePopup(link)
         )
     }
+
+        private fun handleSaveProfileLink(link: SaveProfileLink) {
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.SaveProfilePopup(link)
+            )
+        }
 
     private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
         link.publicKey.toLightningNodePubKey()?.let { lightningNodePubKey ->
@@ -436,6 +449,56 @@ internal class DashboardViewModel @Inject constructor(
                 submitSideEffect(
                     DashboardSideEffect.Notify(
                         app.getString(R.string.dashboard_authorize_generic_error)
+                    )
+                )
+            }
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
+            )
+        }
+    }
+
+
+    fun saveProfile() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        viewModelScope.launch(mainImmediate) {
+
+            if (viewState is DeepLinkPopupViewState.SaveProfilePopup) {
+
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.SaveProfilePopupProcessing
+                )
+
+                val relayUrl: RelayUrl = relayDataHandler.retrieveRelayUrl() ?: return@launch
+
+                val response = repositoryDashboard.saveProfile(
+                    relayUrl.value,
+                    viewState.link.host,
+                    viewState.link.key
+                )
+
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            DashboardSideEffect.Notify(response.cause.message)
+                        )
+                    }
+                    is Response.Success -> {
+                        val i = Intent(Intent.ACTION_VIEW)
+                        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        i.data = Uri.parse(
+                            "https://${viewState.link.host}?key=${viewState.link.key}"
+                        )
+                        app.startActivity(i)
+                    }
+                }
+
+            } else {
+                submitSideEffect(
+                    DashboardSideEffect.Notify(
+                        app.getString(R.string.dashboard_save_profile_generic_error)
                     )
                 )
             }

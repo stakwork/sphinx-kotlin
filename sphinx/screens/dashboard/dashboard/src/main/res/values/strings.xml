@@ -87,4 +87,9 @@
 
     <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
     <string name="dashboard_network_connected_node_toast">Connected node</string>
+
+    <string name="dashboard_save_profile_popup_title">Save Profile</string>
+    <string name="dashboard_save_profile_button">Submit Profile</string>
+    <string name="dashboard_save_profile_generic_error">Could not Save Profile</string>
+
 </resources>

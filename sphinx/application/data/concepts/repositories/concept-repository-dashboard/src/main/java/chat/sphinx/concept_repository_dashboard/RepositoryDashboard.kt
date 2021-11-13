@@ -40,6 +40,12 @@ interface RepositoryDashboard {
         challenge: String
     ): Response<Boolean, ResponseError>
 
+    suspend fun saveProfile(
+        relayUrl: String,
+        host: String,
+        key: String
+    ): Response<Boolean, ResponseError>
+
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>

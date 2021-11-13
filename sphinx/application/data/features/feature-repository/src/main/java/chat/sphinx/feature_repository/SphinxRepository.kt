@@ -23,6 +23,7 @@ import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
+import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -121,6 +122,7 @@ abstract class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+    private val networkQuerySaveProfile: NetworkQuerySaveProfile,
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
@@ -3547,6 +3549,51 @@ abstract class SphinxRepository(
 
         return response ?: Response.Error(ResponseError("Returned before completing"))
     }
+
+    override suspend fun saveProfile(
+        relayUrl: String,
+        host: String,
+        key: String
+    ): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQuerySaveProfile.getProfileByKey(host, key).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+
+                        //val token = loadResponse.value.token
+                        val profileInfo = loadResponse.value.body
+
+                        networkQuerySaveProfile.saveProfile(
+                            profileInfo
+                        ).collect { authorizeResponse ->
+                            when (authorizeResponse) {
+                                is LoadResponse.Loading -> {}
+
+                                is Response.Error -> {
+                                    response = authorizeResponse
+                                }
+
+                                is Response.Success -> {
+                                    response = Response.Success(true)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Returned before completing"))
+    }
+
 
     override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null

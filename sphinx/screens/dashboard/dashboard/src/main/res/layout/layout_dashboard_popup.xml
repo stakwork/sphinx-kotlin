@@ -18,6 +18,12 @@
         android:layout_height="match_parent" />
 
     <include
+        android:id="@+id/layout_dashboard_save_profile_popup"
+        layout="@layout/layout_dashboard_save_profile_popup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <include
         android:id="@+id/layout_dashboard_connect_popup"
         layout="@layout/layout_dashboard_connect_popup"
         android:layout_width="match_parent"

@@ -81,6 +81,8 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-vers
 include ':sphinx:application:network:features:queries:feature-network-query-version'
 include ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external'
 include ':sphinx:application:network:features:queries:feature-network-query-authorize-external'
+include ':sphinx:application:network:concepts:queries:concept-network-query-save-profile'
+include ':sphinx:application:network:features:queries:feature-network-query-save-profile'
 include ':sphinx:application:network:concepts:calls:concept-network-call'
 include ':sphinx:application:network:concepts:calls:concept-network-relay-call'
 include ':sphinx:application:network:features:feature-network-relay-call'

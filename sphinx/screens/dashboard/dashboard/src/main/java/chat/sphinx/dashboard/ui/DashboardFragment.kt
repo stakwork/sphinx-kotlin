@@ -302,6 +302,18 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
+        binding.layoutDashboardPopup.layoutDashboardSaveProfilePopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+
+            buttonSaveProfile.setOnClickListener {
+                viewModel.saveProfile()
+            }
+        }
+
         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
             textViewDashboardPopupClose.setOnClickListener {
                 viewModel.deepLinkPopupViewStateContainer.updateViewState(
@@ -456,6 +468,17 @@ internal class DashboardFragment : MotionLayoutFragment<
                     is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
                     }
+                    is DeepLinkPopupViewState.SaveProfilePopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardSaveProfilePopup.apply {
+                            textViewDashboardPopupSaveProfileName.text = viewState.link.host
+                            layoutConstraintSaveProfilePopup.visible
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.SaveProfilePopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardSaveProfilePopup.progressBarSaveProfile.visible
+                    }
                     is DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo -> {
                         disposable?.dispose()
                         imageJob?.cancel()
@@ -517,6 +540,11 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
                             root.gone
                             progressBarAuthorize.gone
+                        }
+
+                        binding.layoutDashboardPopup.layoutDashboardSaveProfilePopup.apply {
+                            root.gone
+                            progressBarSaveProfile.gone
                         }
 
                         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {

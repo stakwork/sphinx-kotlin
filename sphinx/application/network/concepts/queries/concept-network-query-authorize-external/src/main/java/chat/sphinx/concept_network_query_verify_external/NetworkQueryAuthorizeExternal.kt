@@ -32,4 +32,9 @@ abstract class NetworkQueryAuthorizeExternal {
         host: String,
         publicKey: String
     ): Flow<LoadResponse<PersonInfoDto, ResponseError>>
+
+    abstract fun saveProfile(
+        host: String,
+        key: String
+    ): Flow<LoadResponse<PersonInfoDto, ResponseError>>
 }

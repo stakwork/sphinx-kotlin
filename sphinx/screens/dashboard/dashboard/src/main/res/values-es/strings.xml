@@ -87,4 +87,6 @@
 
     <string name="dashboard_network_disconnected_node_toast">Nodo desconectado</string>
     <string name="dashboard_network_connected_node_toast">Nodo conectado</string>
+
+
 </resources>
