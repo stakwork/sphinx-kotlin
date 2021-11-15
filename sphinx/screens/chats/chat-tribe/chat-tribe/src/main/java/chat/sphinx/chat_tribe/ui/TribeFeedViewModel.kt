@@ -24,12 +24,10 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
-import io.matthewnelson.android_feature_viewmodel.collectViewState
-import io.matthewnelson.android_feature_viewmodel.currentViewState
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -129,7 +127,7 @@ internal class TribeFeedViewModel @Inject constructor(
 
         currentServiceState = serviceState
 
-        val vs = currentViewState
+        val vs = podcastViewStateContainer.value
         if (vs !is PodcastViewState.PodcastVS) {
             return
         }
@@ -265,7 +263,7 @@ internal class TribeFeedViewModel @Inject constructor(
 
         val clickPlayPause = OnClickCallback {
 
-            val vs = currentViewState
+            val vs = podcastViewStateContainer.value
 
             if (vs !is PodcastViewState.PodcastVS) {
                 return@OnClickCallback
@@ -315,7 +313,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 owner.tipAmount?.let { tip ->
                     if (tip.value > 0) {
 
-                        val vs = currentViewState
+                        val vs = podcastViewStateContainer.value
 
                         if (vs is PodcastViewState.PodcastVS) {
                             val metaData = vs.podcast.getMetaData(tip)
@@ -341,7 +339,7 @@ internal class TribeFeedViewModel @Inject constructor(
         }
 
         val clickFastForward = OnClickCallback {
-            val vs = currentViewState
+            val vs = podcastViewStateContainer.value
 
             if (vs !is PodcastViewState.PodcastVS) {
                 return@OnClickCallback
@@ -369,7 +367,7 @@ internal class TribeFeedViewModel @Inject constructor(
         }
 
         val clickTitle = OnClickCallback {
-            val vs = currentViewState
+            val vs = podcastViewStateContainer.value
 
             if (vs !is PodcastViewState.PodcastVS) {
                 return@OnClickCallback
@@ -436,7 +434,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 if (podcastViewState is PodcastViewState.PodcastVS.Available) {
                     chatRepository.getChatById(args.chatId).collect { chat ->
                         chat?.metaData?.let { nnMetaData ->
-                            val vs = currentViewState
+                            val vs = podcastViewStateContainer.value
                             if (vs is PodcastViewState.PodcastVS) {
                                 vs.podcast.satsPerMinute = nnMetaData.satsPerMinute.value
                             }
