@@ -3852,6 +3852,7 @@ abstract class SphinxRepository(
                                 description = body.description,
                                 img = body.img,
                                 tag = body.tag,
+                                price_to_meet = body.price_to_meet,
                                 extras = body.extras
                             )
 

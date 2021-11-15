@@ -10,6 +10,7 @@ data class PersonInfoDto(
     val description: String,
     val img: String,
     val tag: String?,
+    val price_to_meet: Int,
     val extras: Extras,
 )
 
