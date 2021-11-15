@@ -8,6 +8,7 @@ import chat.sphinx.concept_network_query_save_profile.model.SaveProfileInfoDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_save_profile.model.SignBase64RelayResponse
 import chat.sphinx.feature_network_query_save_profile.model.SaveProfileRelayResponse
+import chat.sphinx.feature_network_query_save_profile.model.SaveProfileResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -40,12 +41,12 @@ class NetworkQuerySaveProfileImpl(
     override fun saveProfile(
         data: PersonInfoDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
-    ): Flow<LoadResponse<PersonInfoDto, ResponseError>> =
+    ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.relayPost(
             relayEndpoint = ENDPOINT_SAVE_PROFILE,
             requestBody = data,
             requestBodyJsonClass = PersonInfoDto::class.java,
-            responseJsonClass = SaveProfileRelayResponse::class.java,
+            responseJsonClass = SaveProfileResponse::class.java,
             relayData = relayData
         )
 

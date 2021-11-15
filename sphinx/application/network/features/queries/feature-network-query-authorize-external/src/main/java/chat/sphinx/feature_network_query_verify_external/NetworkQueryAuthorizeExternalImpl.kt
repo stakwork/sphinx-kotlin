@@ -47,27 +47,12 @@ class NetworkQueryAuthorizeExternalImpl(
             relayData = relayData
         )
 
-//
-//    override fun createPeopleProfile(
-//        relayData: Pair<AuthorizationToken, RelayUrl>?
-//    ): Flow<LoadResponse<VerifyExternalDto, ResponseError>> =
-//        networkRelayCall.relayPost(
-//            responseJsonClass = VerifyExternalRelayResponse::class.java,
-//            relayEndpoint = ENDPOINT_CREATE_PEOPLE_PROFILE,
-//            requestBodyJsonClass = Map::class.java,
-//            requestBody = mapOf(Pair("", "")),
-//            relayData = relayData
-//        )
-
     override fun authorizeExternal(
         host: String,
         challenge: String,
         token: String,
         info: VerifyExternalInfoDto,
     ): Flow<LoadResponse<Any, ResponseError>> =
-//        networkRelayCall.get("https://9589-2600-1700-5520-a400-b444-b6b0-7bb7-53ba.ngrok.io",
-//            responseJsonClass = Any::class.java,
-//            )
         networkRelayCall.post(
             url = String.format(
                 ENDPOINT_AUTHORIZE_EXTERNAL,
@@ -92,19 +77,4 @@ class NetworkQueryAuthorizeExternalImpl(
             ),
             responseJsonClass = PersonInfoDto::class.java,
         )
-
-    override fun saveProfile(
-        host: String,
-        key: String
-    ): Flow<LoadResponse<PersonInfoDto, ResponseError>> =
-        networkRelayCall.get(
-            url = String.format(
-                ENDPOINT_SAVE_KEY,
-                host,
-                key
-            ),
-            responseJsonClass = PersonInfoDto::class.java,
-        )
-
-
 }

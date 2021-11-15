@@ -20,5 +20,5 @@ abstract class NetworkQuerySaveProfile {
     abstract fun saveProfile(
         data: PersonInfoDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
-    ): Flow<LoadResponse<PersonInfoDto, ResponseError>>
+    ): Flow<LoadResponse<Any, ResponseError>>
 }

@@ -3569,11 +3569,6 @@ abstract class SphinxRepository(
                     }
 
                     is Response.Success -> {
-
-                        //val token = loadResponse.value.token
-
-                        //val profileInfo = moshi.adapter(PersonInfoDto::class.java).fromJson(loadResponse.value)
-                        LOG.d(loadResponse.value.body, "TEST")
                         val body = moshi.adapter(PersonInfoDto::class.java).fromJson(loadResponse.value.body)
                         if(body != null) {
                             val profileInfo = PersonInfoDto(
