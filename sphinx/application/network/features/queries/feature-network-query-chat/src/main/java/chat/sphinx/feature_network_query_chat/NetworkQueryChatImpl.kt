@@ -2,6 +2,8 @@ package chat.sphinx.feature_network_query_chat
 
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
+import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
+import chat.sphinx.concept_network_query_chat.model.podcast.PodcastDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_chat.model.*
 import chat.sphinx.kotlin_response.LoadResponse
@@ -37,6 +39,7 @@ class NetworkQueryChatImpl(
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
         private const val GET_PODCAST_FEED_URL = "https://%s/podcast?url=%s"
+        private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s"
     }
 
     ///////////
@@ -79,6 +82,15 @@ class NetworkQueryChatImpl(
         networkRelayCall.get(
             url = String.format(GET_PODCAST_FEED_URL, host.value, feedUrl),
             responseJsonClass = PodcastDto::class.java,
+        )
+
+    override fun getFeedContent(
+        host: ChatHost,
+        feedUrl: String
+    ): Flow<LoadResponse<FeedDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(GET_FEED_CONTENT_URL, host.value, feedUrl),
+            responseJsonClass = FeedDto::class.java,
         )
 
     ///////////

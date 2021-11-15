@@ -23,6 +23,7 @@ data class TribeDto(
     val deleted: Any?,
     val app_url: String?,
     val feed_url: String?,
+    val feed_type: Long?,
 ) {
 
     var amount: Long? = null

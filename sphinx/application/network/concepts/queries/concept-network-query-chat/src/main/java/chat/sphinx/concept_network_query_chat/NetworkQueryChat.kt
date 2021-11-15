@@ -1,6 +1,8 @@
 package chat.sphinx.concept_network_query_chat
 
 import chat.sphinx.concept_network_query_chat.model.*
+import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
+import chat.sphinx.concept_network_query_chat.model.podcast.PodcastDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
@@ -25,6 +27,11 @@ abstract class NetworkQueryChat {
         host: ChatHost,
         uuid: ChatUUID
     ): Flow<LoadResponse<TribeDto, ResponseError>>
+
+    abstract fun getFeedContent(
+        host: ChatHost,
+        feedUrl: String
+    ): Flow<LoadResponse<FeedDto, ResponseError>>
 
     abstract fun getPodcastFeed(
         host: ChatHost,

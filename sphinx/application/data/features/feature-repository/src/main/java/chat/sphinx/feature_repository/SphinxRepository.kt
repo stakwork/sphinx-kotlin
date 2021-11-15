@@ -3126,7 +3126,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun updateTribeInfo(chat: Chat): Pair<ChatHost, String>? {
+    override suspend fun updateTribeInfo(chat: Chat): Triple<ChatHost, String, Int>? {
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -3141,7 +3141,7 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
-        var podcastData: Pair<ChatHost, String>? = null
+        var feedData: Triple<ChatHost, String, Int>? = null
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -3188,8 +3188,10 @@ abstract class SphinxRepository(
                             }
 
                             chat.host?.let { host ->
-                                tribeDto.feed_url?.let { feed ->
-                                    podcastData = Pair(host, feed)
+                                tribeDto.feed_url?.let { feedUrl ->
+                                    val feedType = (tribeDto.feed_type ?: 0).toInt()
+
+                                    feedData = Triple(host, feedUrl, feedType)
                                 }
                             }
                         }
@@ -3198,19 +3200,19 @@ abstract class SphinxRepository(
             }
         }
 
-        return podcastData
+        return feedData
     }
 
     private val podcastLock = Mutex()
-    override suspend fun updatePodcastFeed(
+    override suspend fun updateFeedContent(
         chatId: ChatId,
         host: ChatHost,
         feedUrl: FeedUrl,
-        currentEpisodeId: FeedId?
+        currentItemId: FeedId?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        networkQueryChat.getPodcastFeed(host, feedUrl.value).collect { response ->
+        networkQueryChat.getFeedContent(host, feedUrl.value).collect { response ->
             @Exhaustive
             when (response) {
                 is LoadResponse.Loading -> {}
@@ -3218,11 +3220,11 @@ abstract class SphinxRepository(
                 is Response.Success -> {
                     podcastLock.withLock {
                         queries.transaction {
-                            upsertPodcast(
+                            upsertFeed(
                                 response.value,
                                 feedUrl,
                                 chatId,
-                                currentEpisodeId,
+                                currentItemId,
                                 queries
                             )
                         }

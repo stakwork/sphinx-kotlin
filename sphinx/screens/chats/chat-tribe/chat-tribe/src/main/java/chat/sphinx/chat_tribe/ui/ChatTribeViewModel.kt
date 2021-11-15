@@ -9,7 +9,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_tribe.R
-import chat.sphinx.chat_tribe.model.TribePodcastData
+import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
@@ -34,6 +34,7 @@ import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.toFeedType
 import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -162,35 +163,36 @@ internal class ChatTribeViewModel @Inject constructor(
         return super.sendMessage(builder)
     }
 
-    private val _podcastDataStateFlow: MutableStateFlow<TribePodcastData> by lazy {
-        MutableStateFlow(TribePodcastData.Loading)
+    private val _feedDataStateFlow: MutableStateFlow<TribeFeedData> by lazy {
+        MutableStateFlow(TribeFeedData.Loading)
     }
 
-    val podcastDataStateFlow: StateFlow<TribePodcastData>
-        get() = _podcastDataStateFlow.asStateFlow()
+    val feedDataStateFlow: StateFlow<TribeFeedData>
+        get() = _feedDataStateFlow.asStateFlow()
 
 
     init {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
-                chatRepository.updateTribeInfo(chat)?.let { podcastData ->
+                chatRepository.updateTribeInfo(chat)?.let { feedData ->
 
-                    podcastData.second.toFeedUrl()?.let { url ->
-                        _podcastDataStateFlow.value = TribePodcastData.Result.TribeData(
-                            podcastData.first,
+                    feedData.second.toFeedUrl()?.let { url ->
+                        _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
+                            feedData.first,
                             url,
+                            feedData.third.toFeedType(),
                             chat.metaData,
                         )
                     } ?: run {
-                        _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
+                        _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
                     }
                 } ?: run {
-                    _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
+                    _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
                 }
 
             } ?: run {
-                _podcastDataStateFlow.value = TribePodcastData.Result.NoPodcast
+                _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
             }
         }
     }
