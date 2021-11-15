@@ -1,6 +1,9 @@
 package chat.sphinx.create_tribe.ui
 
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.create_tribe.R
+import chat.sphinx.wrapper_feed.FeedType
+import chat.sphinx.wrapper_feed.toFeedType
 import io.matthewnelson.concept_views.viewstate.ViewState
 import java.io.File
 
@@ -26,6 +29,7 @@ internal sealed class CreateTribeViewState: ViewState<CreateTribeViewState>() {
         val hourToStake: String,
         val appUrl: String?,
         val feedUrl: String?,
+        val feedTypeDescriptionRes: Int?,
         val unlisted: Boolean?,
         val private: Any?,
     ): CreateTribeViewState() {
@@ -42,6 +46,7 @@ internal sealed class CreateTribeViewState: ViewState<CreateTribeViewState>() {
                     tribeDto.hourToStake.getStringOrEmpty(),
                     tribeDto.app_url,
                     tribeDto.feed_url,
+                    tribeDto.feed_type?.toFeedTypeDescriptionRes(),
                     tribeDto.unlisted,
                     tribeDto.private,
                 )
@@ -55,4 +60,20 @@ private inline fun Long.getStringOrEmpty(): String {
         return  ""
     }
     return "$this"
+}
+
+@Suppress("NOTHING_TO_INLINE")
+private inline fun Int.toFeedTypeDescriptionRes(): Int? {
+    when (this) {
+        FeedType.Podcast.value -> {
+            return R.string.feed_type_podcast
+        }
+        FeedType.Video.value -> {
+            return R.string.feed_type_video
+        }
+        FeedType.Newsletter.value -> {
+            return R.string.feed_type_newsletter
+        }
+    }
+    return null
 }
