@@ -136,11 +136,11 @@ internal class DashboardViewModel @Inject constructor(
                             return when {
                                 data.isValidTribeJoinLink ||
                                 data.isValidExternalAuthorizeLink ||
-                                        data.isValidSaveProfileLink ||
                                 data.isValidPeopleConnectLink ||
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
-                                data.isValidVirtualNodeAddress ->
+                                data.isValidVirtualNodeAddress ||
+                                data.isValidSaveProfileLink ->
                                 {
                                     Response.Success(Any())
                                 }
@@ -450,7 +450,7 @@ internal class DashboardViewModel @Inject constructor(
                 when (response) {
                     is Response.Error -> {
                         submitSideEffect(
-                            DashboardSideEffect.Notify(response.cause.message)
+                            ChatListSideEffect.Notify(response.cause.message)
                         )
                     }
                     is Response.Success -> {
@@ -465,7 +465,7 @@ internal class DashboardViewModel @Inject constructor(
 
             } else {
                 submitSideEffect(
-                    DashboardSideEffect.Notify(
+                    ChatListSideEffect.Notify(
                         app.getString(R.string.dashboard_save_profile_generic_error)
                     )
                 )
