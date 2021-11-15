@@ -161,6 +161,13 @@ class FeedReadNowAdapter(
         private var newsletterItem: FeedItem? = null
 
         init {
+            val rowWidth = (recyclerView.rootView.measuredWidth.toFloat() * 0.8).toInt()
+
+            if (binding.imageViewItemImage.layoutParams.width != rowWidth) {
+                binding.imageViewItemImage.layoutParams.width = rowWidth
+                binding.imageViewItemImage.requestLayout()
+            }
+
             binding.layoutConstraintFeedHolder.setOnClickListener {
                 newsletterItem?.let { nnNewsLetterItem ->
                     lifecycleOwner.lifecycleScope.launch {

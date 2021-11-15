@@ -12,7 +12,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:background="@color/body">
+        android:background="@color/headerBG">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_item_image"
@@ -27,7 +27,7 @@
             android:id="@+id/text_view_item_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/default_small_layout_margin"
+            android:layout_marginTop="@dimen/default_half_layout_margin"
             android:layout_marginHorizontal="@dimen/default_half_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/text"
@@ -43,7 +43,7 @@
             android:id="@+id/text_view_item_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/default_small_layout_margin"
+            android:layout_marginTop="@dimen/default_small_layout_margin"
             android:layout_marginHorizontal="@dimen/default_half_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/secondaryText"
@@ -71,7 +71,7 @@
                 android:layout_width="@dimen/default_feed_contributor_image_xy"
                 android:layout_height="@dimen/default_feed_contributor_image_xy"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/ic_tribe" />
+                app:srcCompat="@drawable/ic_profile_avatar_circle" />
 
         </androidx.cardview.widget.CardView>
 
