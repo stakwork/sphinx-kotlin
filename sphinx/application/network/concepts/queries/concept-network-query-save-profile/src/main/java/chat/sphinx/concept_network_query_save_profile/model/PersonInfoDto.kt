@@ -11,10 +11,5 @@ data class PersonInfoDto(
     val img: String,
     val tag: String?,
     val price_to_meet: Int,
-    val extras: Extras,
-)
-
-@JsonClass(generateAdapter = true)
-data class Extras(
-    val tribes: List<String>
+    val extras: Any,
 )
