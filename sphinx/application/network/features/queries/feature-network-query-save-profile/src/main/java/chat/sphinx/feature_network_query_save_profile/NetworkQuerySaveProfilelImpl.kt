@@ -26,24 +26,24 @@ class NetworkQuerySaveProfileImpl(
     override fun getProfileByKey(
         host: String,
         key: String
-    ): Flow<LoadResponse<PersonInfoDto, ResponseError>> =
+    ): Flow<LoadResponse<SaveProfileDto, ResponseError>> =
         networkRelayCall.get(
             url = String.format(
                 ENDPOINT_SAVE_KEY,
                 host,
                 key
             ),
-            responseJsonClass = PersonInfoDto::class.java,
+            responseJsonClass = SaveProfileDto::class.java,
         )
 
 
     override fun saveProfile(
-        data: String
+        data: PersonInfoDto
     ): Flow<LoadResponse<PersonInfoDto, ResponseError>> =
         networkRelayCall.relayPost(
             relayEndpoint = ENDPOINT_SAVE_PROFILE,
             requestBody = data,
-            requestBodyJsonClass = String::class.java,
+            requestBodyJsonClass = PersonInfoDto::class.java,
             responseJsonClass = SaveProfileRelayResponse::class.java
         )
 

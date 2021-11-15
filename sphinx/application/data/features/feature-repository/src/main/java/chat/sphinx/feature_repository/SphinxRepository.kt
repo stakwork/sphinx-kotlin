@@ -24,6 +24,7 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.PersonInfoDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -103,6 +104,7 @@ import java.io.File
 import java.io.InputStream
 import java.text.ParseException
 import kotlin.math.absoluteValue
+
 
 abstract class SphinxRepository(
     override val accountOwner: StateFlow<Contact?>,
@@ -3569,20 +3571,35 @@ abstract class SphinxRepository(
                     is Response.Success -> {
 
                         //val token = loadResponse.value.token
-                        val profileInfo = loadResponse.value.body
 
-                        networkQuerySaveProfile.saveProfile(
-                            profileInfo
-                        ).collect { authorizeResponse ->
-                            when (authorizeResponse) {
-                                is LoadResponse.Loading -> {}
+                        //val profileInfo = moshi.adapter(PersonInfoDto::class.java).fromJson(loadResponse.value)
+                        LOG.d(loadResponse.value.body, "TEST")
+                        val body = moshi.adapter(PersonInfoDto::class.java).fromJson(loadResponse.value.body)
+                        if(body != null) {
+                            val profileInfo = PersonInfoDto(
+                                id = body.id,
+                                host = body.host,
+                                owner_alias = body.owner_alias,
+                                description = body.description,
+                                img = body.img,
+                                tag = body.tag,
+                                extras = body.extras
+                            )
 
-                                is Response.Error -> {
-                                    response = authorizeResponse
-                                }
+                            networkQuerySaveProfile.saveProfile(
+                                profileInfo
+                            ).collect { authorizeResponse ->
+                                when (authorizeResponse) {
+                                    is LoadResponse.Loading -> {
+                                    }
 
-                                is Response.Success -> {
-                                    response = Response.Success(true)
+                                    is Response.Error -> {
+                                        response = authorizeResponse
+                                    }
+
+                                    is Response.Success -> {
+                                        response = Response.Success(true)
+                                    }
                                 }
                             }
                         }

@@ -4,8 +4,16 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class PersonInfoDto(
-    val key: String,
-    val body: String,
-    val path: String,
-    val method: String,
+    val id: String,
+    val host: String,
+    val owner_alias: String,
+    val description: String,
+    val img: String,
+    val tag: String?,
+    val extras: Extras,
+)
+
+@JsonClass(generateAdapter = true)
+data class Extras(
+    val tribes: List<String>
 )

@@ -15,9 +15,9 @@ abstract class NetworkQuerySaveProfile {
     abstract fun getProfileByKey(
         host: String,
         key: String
-    ): Flow<LoadResponse<PersonInfoDto, ResponseError>>
+    ): Flow<LoadResponse<SaveProfileDto, ResponseError>>
 
     abstract fun saveProfile(
-        data: String
+        data: PersonInfoDto
     ): Flow<LoadResponse<PersonInfoDto, ResponseError>>
 }
