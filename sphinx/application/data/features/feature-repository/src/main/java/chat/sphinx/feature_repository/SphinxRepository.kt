@@ -3857,13 +3857,13 @@ abstract class SphinxRepository(
 
                             networkQuerySaveProfile.saveProfile(
                                 profileInfo
-                            ).collect { authorizeResponse ->
-                                when (authorizeResponse) {
+                            ).collect { saveProfileResponse ->
+                                when (saveProfileResponse) {
                                     is LoadResponse.Loading -> {
                                     }
 
                                     is Response.Error -> {
-                                        response = authorizeResponse
+                                        response = saveProfileResponse
                                     }
 
                                     is Response.Success -> {
