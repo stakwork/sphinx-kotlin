@@ -2,12 +2,8 @@ package chat.sphinx.feature_network_query_save_profile
 
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_save_profile.model.PersonInfoDto
-import chat.sphinx.concept_network_query_save_profile.model.SignBase64Dto
 import chat.sphinx.concept_network_query_save_profile.model.SaveProfileDto
-import chat.sphinx.concept_network_query_save_profile.model.SaveProfileInfoDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_save_profile.model.SignBase64RelayResponse
-import chat.sphinx.feature_network_query_save_profile.model.SaveProfileRelayResponse
 import chat.sphinx.feature_network_query_save_profile.model.SaveProfileResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
