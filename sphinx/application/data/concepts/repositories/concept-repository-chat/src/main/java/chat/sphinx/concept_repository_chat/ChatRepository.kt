@@ -10,10 +10,14 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
+import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -54,6 +58,15 @@ interface ChatRepository {
     fun joinTribe(
         tribeDto: TribeDto,
     ): Flow<LoadResponse<Any, ResponseError>>
+
+    suspend fun updatePodcastFeed(
+        chatId: ChatId,
+        host: ChatHost,
+        feedUrl: FeedUrl,
+        currentEpisodeId: FeedId?
+    )
+
+    fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
 
     suspend fun updateTribeInfo(chat: Chat): Pair<ChatHost, String>?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>

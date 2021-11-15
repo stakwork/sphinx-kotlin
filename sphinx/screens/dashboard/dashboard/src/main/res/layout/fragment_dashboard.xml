@@ -7,29 +7,43 @@
     android:layout_height="match_parent"
     android:background="@color/body"
     app:layoutDescription="@xml/motion_scene_dashboard"
-    tools:context=".ui.DashboardFragment">
+    tools:context=".ui.ChatListFragment">
 
     <include
         android:id="@+id/layout_dashboard_header"
         layout="@layout/layout_dashboard_header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/default_header_height"
+        android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <include
-        android:id="@+id/layout_dashboard_search_bar"
-        layout="@layout/layout_dashboard_search_bar"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout_dashboard_tabs"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/search_bar_height"
-        app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header" />
+        android:layout_height="@dimen/default_header_height"
+        android:layout_gravity="top"
+        android:background="@color/headerBG"
+        app:tabBackground="@color/headerBG"
+        app:tabIndicatorColor="@color/primaryBlue"
+        app:tabTextColor="@color/secondaryText"
+        app:tabSelectedTextColor="@color/text"
+        app:tabRippleColor="@null"
+        app:tabTextAppearance="@style/DashboardTab"
+        app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header"
+        />
 
-    <include
-        android:id="@+id/layout_dashboard_chats"
-        layout="@layout/layout_dashboard_chats"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_layout_data_reload"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
-        app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_search_bar" />
+        app:layout_constraintTop_toBottomOf="@+id/tab_layout_dashboard_tabs">
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager_dashboard_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <include
         android:id="@+id/layout_dashboard_nav_bar"
@@ -37,7 +51,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
-
 
     <View
         android:id="@+id/dashboard_nav_drawer_input_lock"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="nav_drawer_width">240dp</dimen>
-    <item name="nav_drawer_input_lock_alpha" type="dimen" format="float">.5</item>
+    <item name="nav_drawer_input_lock_alpha" format="float" type="dimen">.5</item>
 
     <!-- Text size -->
     <dimen name="nav_drawer_default_text_size">16sp</dimen>
@@ -24,7 +24,13 @@
 
     <dimen name="nav_bar_button_padding">20dp</dimen>
 
+    <dimen name="dashboard_search_bar_height">58sp</dimen>
     <dimen name="dashboard_header_network_xy">24dp</dimen>
+
+    <dimen name="dashboard_chips_view_height">60dp</dimen>
+    <dimen name="dashboard_chip_height">38dp</dimen>
+    <dimen name="dashboard_chip_vertical_spacing">22dp</dimen>
+    <dimen name="dashboard_chip_spacing">5dp</dimen>
 
     <dimen name="recycler_view_holder_height">90dp</dimen>
 
@@ -58,4 +64,7 @@
     <dimen name="dashboard_connect_popup_price_text_size">12sp</dimen>
     <dimen name="dashboard_connect_popup_description_text_size">14sp</dimen>
     <dimen name="dashboard_connect_popup_form_edit_view_text_size">14sp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="dashboard_feed_placeholder_text_size">20sp</dimen>
 </resources>

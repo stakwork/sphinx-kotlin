@@ -88,8 +88,28 @@
     <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
     <string name="dashboard_network_connected_node_toast">Connected node</string>
 
+
     <string name="dashboard_save_profile_popup_title">Save Profile</string>
     <string name="dashboard_save_profile_button">Submit Profile</string>
     <string name="dashboard_save_profile_generic_error">Could not Save Profile</string>
+
+
+    <string name="dashboard_feed_tab_name">Feed</string>
+    <string name="dashboard_friends_tab_name">Friends</string>
+    <string name="dashboard_tribes_tab_name">Tribes</string>
+
+    <string name="all">All</string>
+    <string name="listen">Listen</string>
+    <string name="watch">Watch</string>
+    <string name="read">Read</string>
+    <string name="play">Play</string>
+    <string name="listen_now">Listen Now</string>
+    <string name="following">Following</string>
+
+    <string name="all_place_holder">No \"Feed\" Results Found</string>
+    <string name="listen_place_holder">No \"Listen\" Results Found</string>
+    <string name="watch_place_holder">No \"Watch\" Results Found</string>
+    <string name="read_place_holder">No \"Read\" Results Found</string>
+    <string name="play_place_holder">No \"Play\" Results Found</string>
 
 </resources>

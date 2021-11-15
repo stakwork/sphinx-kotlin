@@ -22,4 +22,25 @@
 
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_chat_list_fragment"
+        android:name="chat.sphinx.dashboard.ui.ChatListFragment"
+        tools:layout="@layout/fragment_chat_list" >
+
+        <argument
+            android:name="updateBackgroundLoginTime"
+            app:argType="boolean" />
+
+        <argument
+            android:name="argChatListType"
+            app:argType="integer" />
+
+        <argument
+            android:name="arg_deepLink"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+
+    </fragment>
+
 </navigation>

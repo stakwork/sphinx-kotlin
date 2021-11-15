@@ -63,8 +63,8 @@ internal inline fun PodcastViewState.PodcastVS.adjustState(
                 podcast = podcast
             )
         }
-        is PodcastViewState.PodcastVS.Loaded -> {
-            PodcastViewState.PodcastVS.Loaded(
+        is PodcastViewState.PodcastVS.Ready -> {
+            PodcastViewState.PodcastVS.Ready(
                 showLoading = showLoading ?: this.showLoading,
                 showPlayButton = showPlayButton ?: this.showPlayButton,
                 title = title ?: this.title,
@@ -121,7 +121,7 @@ internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
             override val podcast: Podcast,
         ) : PodcastVS()
 
-        data class Loaded(
+        data class Ready(
             override val showLoading: Boolean,
             override val showPlayButton: Boolean,
             override val title: String,

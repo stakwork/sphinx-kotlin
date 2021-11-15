@@ -12,6 +12,7 @@ import android.widget.SeekBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -31,6 +32,7 @@ import chat.sphinx.wrapper_common.util.getTimeString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -55,6 +57,8 @@ internal class PodcastPlayerFragment : BaseFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
+    private val args: PodcastPlayerFragmentArgs by navArgs()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -78,7 +82,12 @@ internal class PodcastPlayerFragment : BaseFragment<
         }
 
         setupEpisodes()
-        addPodcastOnClickListeners(viewModel.podcast)
+
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.getPodcast()?.let { podcast ->
+                addPodcastOnClickListeners(podcast)
+            }
+        }
     }
 
     private fun setupEpisodes() {
@@ -188,6 +197,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             is PodcastPlayerViewState.PodcastLoaded -> {
+                toggleLoadingWheel(true)
                 showPodcastInfo(viewState.podcast)
             }
 
@@ -209,23 +219,27 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private suspend fun showPodcastInfo(podcast: Podcast) {
         binding.apply {
-            textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title
+            textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title.value
 
-            if (!dragging) setTimeLabelsAndProgressBar(podcast)
-
-            imageLoader.load(
-                imageViewPodcastImage,
-                podcast.image,
-                ImageLoaderOptions.Builder()
-                    .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                    .build()
-            )
+            podcast.image?.value?.let { podcastImage ->
+                imageLoader.load(
+                    imageViewPodcastImage,
+                    podcastImage,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                        .build()
+                )
+            }
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
             includeLayoutEpisodePlaybackControlButtons.textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
 
             togglePlayPauseButton(podcast.isPlaying)
+
+            if (!dragging) setTimeLabelsAndProgressBar(podcast)
+
+            toggleLoadingWheel(false)
         }
     }
 
@@ -263,8 +277,13 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     private fun toggleLoadingWheel(show: Boolean) {
-        binding.includeLayoutEpisodeSliderControl.apply {
-            progressBarAudioLoading.goneIfFalse(show)
+        binding.apply {
+            includeLayoutEpisodeSliderControl.apply layoutEpisodesSlider@ {
+                this@layoutEpisodesSlider.progressBarAudioLoading.goneIfFalse(show)
+            }
+            includeLayoutEpisodePlaybackControlButtons.apply layoutPlaybackControls@ {
+                this@layoutPlaybackControls.textViewPlayPauseButton.isEnabled = !show
+            }
         }
     }
 
@@ -281,7 +300,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private fun loadingEpisode(episode: PodcastEpisode) {
         binding.apply {
-            textViewEpisodeTitleLabel.text = episode.title
+            textViewEpisodeTitleLabel.text = episode.title.value
 
             includeLayoutEpisodeSliderControl.apply {
                 textViewCurrentEpisodeDuration.text = 0.toLong().getTimeString()
@@ -309,6 +328,8 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
+        podcast.setInitialEpisodeDuration(args.argEpisodeDuration)
+
         val currentTime = podcast.currentTime.toLong()
 
         val duration = withContext(viewModel.io) {

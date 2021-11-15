@@ -208,16 +208,18 @@ internal class PodcastEpisodesListAdapter(
                 textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
 
                 // Image
-                lifecycleOwner.lifecycleScope.launch(viewModel.dispatchers.mainImmediate) {
-                    disposable = imageLoader.load(
-                        imageViewEpisodeImage,
-                        podcastEpisode.image,
-                        imageLoaderOptions
-                    )
+                podcastEpisode.image?.value?.let { episodeImage ->
+                    lifecycleOwner.lifecycleScope.launch(viewModel.dispatchers.mainImmediate) {
+                        disposable = imageLoader.load(
+                            imageViewEpisodeImage,
+                            episodeImage,
+                            imageLoaderOptions
+                        )
+                    }
                 }
 
                 //Name
-                textViewEpisodeTitle.text = podcastEpisode.title
+                textViewEpisodeTitle.text = podcastEpisode.title.value
 
                 //Download button
                 textViewDownloadEpisodeButton.setTextColor(

@@ -1,25 +1,39 @@
 package chat.sphinx.wrapper_podcast
 
 import chat.sphinx.wrapper_chat.ChatMetaData
+import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.ItemId
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.toItemId
+import chat.sphinx.wrapper_feed.FeedAuthor
+import chat.sphinx.wrapper_feed.FeedDescription
+import chat.sphinx.wrapper_feed.FeedTitle
 import kotlin.math.roundToInt
 
 
-class Podcast(
-    val id: Long,
-    val title: String,
-    val description: String,
-    val author: String,
-    val image: String,
-    val value: PodcastValue,
-    val episodes: List<PodcastEpisode>,
+data class Podcast(
+    val id: FeedId,
+    val title: FeedTitle,
+    val description: FeedDescription?,
+    val author: FeedAuthor?,
+    val image: PhotoUrl?,
+    val datePublished: DateTime?,
+    val chatId: ChatId,
+    val feedUrl: FeedUrl
 ) {
+
+    var model: PodcastModel? = null
+    var destinations: List<PodcastDestination> = arrayListOf()
+    var episodes: List<PodcastEpisode> = arrayListOf()
 
     //MetaData
     @Volatile
-    var episodeId: Long? = null
+    var episodeId: String? = null
 
     @Volatile
     var timeMilliSeconds: Int? = null
@@ -28,7 +42,7 @@ class Podcast(
     var speed: Double = 1.0
 
     @Volatile
-    var satsPerMinute: Long = value.model.suggested.toLong()
+    var satsPerMinute: Long = model?.suggested?.value?.toLong() ?: 0
 
     //Duration
     @Volatile
@@ -74,7 +88,8 @@ class Podcast(
         customAmount: Sat? = null
     ): ChatMetaData =
         ChatMetaData(
-            ItemId(episodeId ?: 0),
+            FeedId(episodeId ?: "null"),
+            episodeId?.toLongOrNull()?.toItemId() ?: ItemId(-1),
             customAmount ?: satsPerMinute.toSat() ?: Sat(0),
             (timeMilliSeconds ?: 0) / 1000,
             speed,
@@ -95,9 +110,9 @@ class Podcast(
         }
     }
 
-    private fun getEpisodeWithId(id: Long): PodcastEpisode? {
+    private fun getEpisodeWithId(id: String): PodcastEpisode? {
         for (episode in episodes) {
-            if (episode.id == id) {
+            if (episode.id.value == id) {
                 return episode
             }
         }
@@ -105,9 +120,9 @@ class Podcast(
         return episodes[0]
     }
 
-    private fun getNextEpisode(id: Long): PodcastEpisode {
+    private fun getNextEpisode(id: String): PodcastEpisode {
         for (i in episodes.indices) {
-            if (episodes[i].id == id && i-1 >= 0) {
+            if (episodes[i].id.value == id && i-1 >= 0) {
                 return episodes[i-1]
             }
         }
@@ -124,11 +139,17 @@ class Podcast(
             }
 
             playingEpisode?.let { episode ->
-                episodeDuration = durationRetrieverHandle(episode.enclosureUrl)
+                episodeDuration = durationRetrieverHandle(episode.enclosureUrl.value)
             }
         }
 
         return episodeDuration ?: 0
+    }
+
+    fun setInitialEpisodeDuration(duration: Long) {
+        if (episodeDuration == null && duration > 0) {
+            episodeDuration = duration
+        }
     }
 
     @Throws(ArithmeticException::class)
@@ -149,16 +170,17 @@ class Podcast(
         time: Int,
         durationRetrieverHandle: (url: String) -> Long
     ) {
-        val didChangeEpisode = this.episodeId != episode.id
+        val episodeId = episode.id.value
+        val didChangeEpisode = this.episodeId != episodeId
 
         if (didChangeEpisode) {
             this.episodeDuration = null
             this.playingEpisode?.playing = false
-            this.playingEpisode = getEpisodeWithId(episode.id)
+            this.playingEpisode = getEpisodeWithId(episodeId)
         }
 
         this.playingEpisode?.playing = true
-        this.episodeId = episode.id
+        this.episodeId = episodeId
         this.timeMilliSeconds = time
 
         getCurrentEpisodeDuration(durationRetrieverHandle)
@@ -168,7 +190,7 @@ class Podcast(
         this.timeMilliSeconds = time
     }
 
-    fun playingEpisodeUpdate(episodeId: Long, time: Int, duration: Long) {
+    fun playingEpisodeUpdate(episodeId: String, time: Int, duration: Long) {
         if (playingEpisode == null) {
             this.episodeId?.let { currentEpisodeId ->
                 this.playingEpisode = getEpisodeWithId(currentEpisodeId)
@@ -177,7 +199,7 @@ class Podcast(
 
         this.episodeDuration = if (duration > 0) duration else this.episodeDuration
 
-        if (episodeId != playingEpisode?.id) {
+        if (episodeId != playingEpisode?.id?.value) {
             this.playingEpisode?.playing = false
 
             this.episodeDuration = null
@@ -187,7 +209,7 @@ class Podcast(
         playingEpisode?.let { nnEpisode ->
             nnEpisode.playing = true
 
-            this.episodeId = nnEpisode.id
+            this.episodeId = nnEpisode.id.value
             this.timeMilliSeconds = time
         }
     }
@@ -199,7 +221,7 @@ class Podcast(
     }
 
     fun endEpisodeUpdate(
-        episodeId: Long,
+        episodeId: String,
         durationRetrieverHandle: (url: String) -> Long
     ) {
         playingEpisode?.let { episode ->
@@ -216,7 +238,7 @@ class Podcast(
         episode.playing = false
 
         this.playingEpisode = nextEpisode
-        this.episodeId = nextEpisode.id
+        this.episodeId = nextEpisode.id.value
         this.episodeDuration = null
 
         this.timeMilliSeconds = 0

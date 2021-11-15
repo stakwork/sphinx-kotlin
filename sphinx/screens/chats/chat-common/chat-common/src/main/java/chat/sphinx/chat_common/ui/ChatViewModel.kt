@@ -165,7 +165,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         private var contactCollectionJob: Job? = null
         private var chatCollectionJob: Job? = null
 
-        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow<ChatHeaderViewState> {
+        override val viewStateFlow: StateFlow<ChatHeaderViewState> = flow {
 
             contactId?.let { nnContactId ->
                 contactCollectionJob = viewModelScope.launch(mainImmediate) {
@@ -271,7 +271,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         owner: Contact
     ): InitialHolderViewState
 
-    protected suspend fun getOwner(): Contact {
+    private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact

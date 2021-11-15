@@ -26,6 +26,7 @@
     <dimen name="default_text_size_tap_target_material_icon">17sp</dimen>
     <dimen name="default_header_text_size">14sp</dimen>
     <dimen name="default_text_size_large_title_3">22sp</dimen>
+    <dimen name="default_text_size_large_title_chevron_icon">26sp</dimen>
     <dimen name="default_text_size_headline">17sp</dimen>
     <dimen name="default_text_size_small_headline">15sp</dimen>
     <dimen name="default_text_size_body">12sp</dimen>
@@ -34,6 +35,7 @@
     <dimen name="default_text_size_list_row_headline">13sp</dimen>
     <dimen name="default_text_size_caption1">10sp</dimen>
     <dimen name="default_text_size_caption2">9sp</dimen>
+    <dimen name="default_text_size_tab">16sp</dimen>
 
     <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
     <dimen name="default_vertical_spacing_action_button_column">6dp</dimen>
@@ -79,4 +81,11 @@
     <!-- Recycler View holder -->
     <dimen name="recycler_view_holder_delete_button_width">85dp</dimen>
 
+    <dimen name="default_chip_text_size">15sp</dimen>
+    <dimen name="default_chip_text_padding">30sp</dimen>
+
+    <dimen name="default_feed_image_xy">160dp</dimen>
+    <dimen name="default_feed_play_elevation">16dp</dimen>
+    <dimen name="default_feed_image_play_text_size">40sp</dimen>
+    <dimen name="default_radius">14dp</dimen>
 </resources>
