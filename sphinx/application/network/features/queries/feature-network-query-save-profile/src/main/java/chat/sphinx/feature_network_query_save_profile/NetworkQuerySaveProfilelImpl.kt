@@ -38,13 +38,15 @@ class NetworkQuerySaveProfileImpl(
 
 
     override fun saveProfile(
-        data: PersonInfoDto
+        data: PersonInfoDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<PersonInfoDto, ResponseError>> =
         networkRelayCall.relayPost(
             relayEndpoint = ENDPOINT_SAVE_PROFILE,
             requestBody = data,
             requestBodyJsonClass = PersonInfoDto::class.java,
-            responseJsonClass = SaveProfileRelayResponse::class.java
+            responseJsonClass = SaveProfileRelayResponse::class.java,
+            relayData = relayData
         )
 
 }
