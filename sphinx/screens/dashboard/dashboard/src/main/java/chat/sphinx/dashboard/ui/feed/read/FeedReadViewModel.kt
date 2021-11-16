@@ -1,9 +1,11 @@
 package chat.sphinx.dashboard.ui.feed.read
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedReadViewState
@@ -14,12 +16,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 @HiltViewModel
 class FeedReadViewModel @Inject constructor(
     handler: SavedStateHandle,
+    private val app: Application,
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     dispatchers: CoroutineDispatchers,
@@ -44,6 +48,11 @@ class FeedReadViewModel @Inject constructor(
     }
 
     fun newsletterItemSelected(episode: FeedItem) {
-        // TODO: Handle the feedItem navigation
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toWebViewDetail(
+                app.getString(R.string.newsletter_article),
+                episode.enclosureUrl
+            )
+        }
     }
 }

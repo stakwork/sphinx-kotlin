@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/web_view_nav_graph"
+    app:startDestination="@+id/navigation_web_view_fragment">
+
+    <fragment
+        android:id="@+id/navigation_web_view_fragment"
+        android:name="chat.sphinx.web_view.ui.WebViewFragment"
+        tools:layout="@layout/fragment_web_view" >
+
+        <argument
+            android:name="argTitle"
+            app:argType="string" />
+
+        <argument
+            android:name="argUrl"
+            app:argType="string" />
+
+        <argument
+            android:name="argFromList"
+            app:argType="boolean" />
+
+    </fragment>
+
+</navigation>

@@ -105,4 +105,6 @@
     <string name="read_place_holder">No se encontraron resultados para \"Leer\"</string>
     <string name="play_place_holder">No se encontraron resultados para \"Jugar\"</string>
     <string name="read_now">Read Now</string>
+
+    <string name="newsletter_article">ARTÍCULO NEWSLETTER</string>
 </resources>

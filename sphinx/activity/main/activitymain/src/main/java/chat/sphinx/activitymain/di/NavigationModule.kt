@@ -47,6 +47,7 @@ import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
+import chat.sphinx.web_view.navigation.WebViewNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -330,5 +331,11 @@ internal object NavigationModule {
         tribeDetailNavigatorImpl: TribeDetailNavigatorImpl
     ): TribeDetailNavigator =
         tribeDetailNavigatorImpl
+
+    @Provides
+    fun provideWebViewNavigator(
+        webViewNavigatorImpl: WebViewNavigatorImpl
+    ): WebViewNavigator =
+        webViewNavigatorImpl
 
 }

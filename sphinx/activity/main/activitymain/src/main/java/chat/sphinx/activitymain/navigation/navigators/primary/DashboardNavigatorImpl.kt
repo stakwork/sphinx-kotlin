@@ -10,8 +10,10 @@ import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
+import chat.sphinx.web_view.navigation.ToWebViewDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -51,6 +53,12 @@ internal class DashboardNavigatorImpl @Inject constructor(
     override suspend fun toAddContactDetail(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         detailDriver.submitNavigationRequest(
             ToNewContactDetail(pubKey, routeHint, false)
+        )
+    }
+
+    override suspend fun toWebViewDetail(title: String, url: FeedUrl) {
+        detailDriver.submitNavigationRequest(
+            ToWebViewDetail(title, url, false)
         )
     }
 
