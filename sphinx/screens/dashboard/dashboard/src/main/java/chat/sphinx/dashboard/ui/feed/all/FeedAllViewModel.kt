@@ -31,8 +31,8 @@ internal class FeedAllViewModel @Inject constructor(
 {
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        repositoryDashboard.getAllFeeds().collect { podcastFeeds ->
-            emit(podcastFeeds.toList())
+        repositoryDashboard.getAllFeeds().collect { feeds ->
+            emit(feeds.toList())
         }
     }.stateIn(
         viewModelScope,
@@ -41,20 +41,18 @@ internal class FeedAllViewModel @Inject constructor(
     )
 
     override fun feedSelected(feed: Feed) {
-        feed.chat?.id?.let { chatId ->
-            @Exhaustive
-            when (feed.feedType) {
-                is FeedType.Podcast -> {
-                    goToPodcastPlayer(chatId)
-                }
-                is FeedType.Video -> {
-                    //TODO Go to video player
-                }
-                is FeedType.Newsletter -> {
-                    //TODO Go to newsletter articles list
-                }
-                is FeedType.Unknown -> {}
+        @Exhaustive
+        when (feed.feedType) {
+            is FeedType.Podcast -> {
+                goToPodcastPlayer(feed.chatId)
             }
+            is FeedType.Video -> {
+                //TODO Go to video player
+            }
+            is FeedType.Newsletter -> {
+                goToNewsletterDetail(feed.chatId)
+            }
+            is FeedType.Unknown -> {}
         }
     }
 
@@ -63,6 +61,12 @@ internal class FeedAllViewModel @Inject constructor(
             dashboardNavigator.toPodcastPlayerScreen(
                 chatId, 0
             )
+        }
+    }
+
+    private fun goToNewsletterDetail(chatId: ChatId) {
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toNewsletterDetail(chatId)
         }
     }
 }

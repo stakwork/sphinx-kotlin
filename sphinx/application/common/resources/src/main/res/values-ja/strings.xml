@@ -97,4 +97,6 @@
 
     <string name="failed_to_approve_member">メンバーを承認できませんでした</string>
     <string name="failed_to_reject_member">メンバーを拒否できませんでした</string>
+
+    <string name="newsletter_article">NEWSLETTER ARTICLE</string>
 </resources>

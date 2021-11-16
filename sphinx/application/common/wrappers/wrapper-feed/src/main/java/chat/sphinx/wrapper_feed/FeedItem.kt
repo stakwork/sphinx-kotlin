@@ -32,6 +32,14 @@ data class FeedItem(
 
     var feed: Feed? = null
 
+    var itemImageUrlToShow: PhotoUrl? = null
+        get() {
+            imageUrl?.let {
+                return it
+            }
+            return null
+        }
+
     var imageUrlToShow: PhotoUrl? = null
         get() {
             imageUrl?.let {

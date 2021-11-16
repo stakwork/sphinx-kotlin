@@ -30,5 +30,6 @@ abstract class DashboardNavigator(
         url: FeedUrl
     )
 
+    abstract suspend fun toNewsletterDetail(chatId: ChatId)
     abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, currentEpisodeDuration: Long)
 }

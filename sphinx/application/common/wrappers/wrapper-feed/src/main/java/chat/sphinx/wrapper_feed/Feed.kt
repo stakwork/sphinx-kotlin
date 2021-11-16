@@ -37,6 +37,10 @@ data class Feed(
 
     var items: List<FeedItem> = listOf()
 
+    var destinations: List<FeedDestination> = listOf()
+
+    var model: FeedModel? = null
+
     var chat: Chat? = null
 
     var lastItem: FeedItem? = null

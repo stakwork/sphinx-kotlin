@@ -22,7 +22,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FeedReadViewModel @Inject constructor(
-    handler: SavedStateHandle,
     private val app: Application,
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
@@ -34,8 +33,8 @@ class FeedReadViewModel @Inject constructor(
         >(dispatchers, FeedReadViewState.Idle), FeedFollowingViewModel
 {
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        repositoryDashboard.getAllFeedsOfType(FeedType.Newsletter).collect { podcastFeeds ->
-            emit(podcastFeeds.toList())
+        repositoryDashboard.getAllFeedsOfType(FeedType.Newsletter).collect { newsletterFeeds ->
+            emit(newsletterFeeds.toList())
         }
     }.stateIn(
         viewModelScope,
@@ -44,7 +43,9 @@ class FeedReadViewModel @Inject constructor(
     )
 
     override fun feedSelected(feed: Feed) {
-        // TODO: Handle feed navigation...
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toNewsletterDetail(feed.chatId)
+        }
     }
 
     fun newsletterItemSelected(episode: FeedItem) {

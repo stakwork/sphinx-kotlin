@@ -98,4 +98,6 @@
 
     <string name="failed_to_approve_member">Failed to approve member</string>
     <string name="failed_to_reject_member">Failed to reject member</string>
+
+    <string name="newsletter_article">NEWSLETTER ARTICLE</string>
 </resources>

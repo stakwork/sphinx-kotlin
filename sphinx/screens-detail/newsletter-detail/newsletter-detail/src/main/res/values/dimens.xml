@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="newsletter_image_xy">110dp</dimen>
+    <dimen name="newsletter_image_corner_rad">12dp</dimen>
+    <dimen name="newsletter_item_image_corner_rad">3dp</dimen>
+    <dimen name="newsletter_list_item_holder_height">130dp</dimen>
+    <dimen name="newsletter_list_items_section_height">50dp</dimen>
+
+    <dimen name="newsletter_title_text_size">17sp</dimen>
+    <dimen name="newsletter_description_text_size">13sp</dimen>
+    <dimen name="newsletter_date_text_size">11sp</dimen>
+    <dimen name="newsletter_items_count_text_size">15sp</dimen>
+</resources>

@@ -12,7 +12,7 @@ internal class FeedDboPresenterMapper(
     override suspend fun mapFrom(value: FeedDbo): Feed {
         return Feed(
             value.id,
-            FeedType.Podcast,
+            value.feed_type,
             value.title,
             value.description,
             value.feed_url,

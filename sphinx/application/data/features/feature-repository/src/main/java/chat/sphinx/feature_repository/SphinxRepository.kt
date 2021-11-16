@@ -42,7 +42,9 @@ import chat.sphinx.conceptcoredb.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
@@ -3281,11 +3283,56 @@ abstract class SphinxRepository(
             }
     }
 
+    override fun getFeedByChatId(chatId: ChatId): Flow<Feed?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        queries.feedGetByChatId(chatId)
+            .asFlow()
+            .mapToOneOrNull(io)
+            .distinctUntilChanged()
+            .collect { value: FeedDbo? ->
+                value?.let { feedDbo ->
+
+                    val model = queries.feedModelGetById(feedDbo.id).executeAsOneOrNull()?.let { feedModelDbo ->
+                        feedModelDboPresenterMapper.mapFrom(feedModelDbo)
+                    }
+
+                    val chat = queries.chatGetById(feedDbo.chat_id).executeAsOneOrNull()?.let { chatDbo ->
+                        chatDboPresenterMapper.mapFrom(chatDbo)
+                    }
+
+                    val items = queries.feedItemsGetByFeedId(feedDbo.id).executeAsList().map {
+                        feedItemDboPresenterMapper.mapFrom(it)
+                    }
+
+                    val destinations = queries.feedDestinationsGetByFeedId(feedDbo.id).executeAsList().map {
+                        feedDestinationDboPresenterMapper.mapFrom(it)
+                    }
+
+                    emit(
+                        mapFeedDbo(
+                            feedDbo,
+                            items,
+                            model,
+                            destinations,
+                            chat
+                        )
+                    )
+                }
+            }
+    }
+
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }
     private val feedItemDboPresenterMapper: FeedItemDboPresenterMapper by lazy {
         FeedItemDboPresenterMapper(dispatchers)
+    }
+    private val feedModelDboPresenterMapper: FeedModelDboPresenterMapper by lazy {
+        FeedModelDboPresenterMapper(dispatchers)
+    }
+    private val feedDestinationDboPresenterMapper: FeedDestinationDboPresenterMapper by lazy {
+        FeedDestinationDboPresenterMapper(dispatchers)
     }
     override fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
@@ -3364,6 +3411,8 @@ abstract class SphinxRepository(
             mapFeedDbo(
                 feedDbo = it,
                 items = itemsMap[it.id] ?: listOf(),
+                model = null,
+                destinations = listOf(),
                 chat = chatsMap[it.chat_id]
             )
         }
@@ -3372,6 +3421,8 @@ abstract class SphinxRepository(
     private suspend fun mapFeedDbo(
         feedDbo: FeedDbo,
         items: List<FeedItem>,
+        model: FeedModel? = null,
+        destinations: List<FeedDestination>,
         chat: Chat? = null,
     ): Feed {
 
@@ -3382,6 +3433,8 @@ abstract class SphinxRepository(
         }
 
         feed.items = items
+        feed.model = model
+        feed.destinations = destinations
         feed.chat = chat
 
         return feed

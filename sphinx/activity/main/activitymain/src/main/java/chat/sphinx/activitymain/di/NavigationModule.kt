@@ -23,6 +23,7 @@ import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
+import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
@@ -337,5 +338,11 @@ internal object NavigationModule {
         webViewNavigatorImpl: WebViewNavigatorImpl
     ): WebViewNavigator =
         webViewNavigatorImpl
+
+    @Provides
+    fun provideNewsletterDetailNavigator(
+        newsletterDetailNavigatorImpl: NewsletterDetailNavigatorImpl
+    ): NewsletterDetailNavigator =
+        newsletterDetailNavigatorImpl
 
 }

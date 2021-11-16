@@ -8,6 +8,7 @@ import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
+import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.web_view.navigation.ToWebViewDetail
@@ -59,6 +60,12 @@ internal class DashboardNavigatorImpl @Inject constructor(
     override suspend fun toWebViewDetail(title: String, url: FeedUrl) {
         detailDriver.submitNavigationRequest(
             ToWebViewDetail(title, url, false)
+        )
+    }
+
+    override suspend fun toNewsletterDetail(chatId: ChatId) {
+        detailDriver.submitNavigationRequest(
+            ToNewsletterDetailScreen(chatId)
         )
     }
 
