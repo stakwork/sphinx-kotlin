@@ -546,13 +546,60 @@
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraint_layout_tribe_feed_content_type_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/create_tribe_edit_text_container_height"
+                        android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                        android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_feed_url_container">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/text_view_tribe_feed_content_type"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/feed_content_type"
+                            android:textColor="@color/secondaryText"
+                            android:fontFamily="@font/roboto_regular"
+                            android:layout_marginTop="@dimen/create_tribe_text_view_margin_top"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            android:textSize="@dimen/default_form_text_view_text_size"
+                            android:singleLine="true" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/text_view_tribe_feed_content_type_value"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text"
+                            android:fontFamily="@font/roboto_regular"
+                            app:backgroundTint="@android:color/transparent"
+                            android:textSize="@dimen/default_form_edit_view_text_size"
+                            android:inputType="textUri"
+                            android:singleLine="true"
+                            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_feed_content_type"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            tools:text="Podcast"/>
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/constraint_layout_tribe_feed_content_type_bottom_border"
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/lightDivider"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="@+id/text_view_tribe_feed_content_type" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_tribe_listing_container"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/create_tribe_edit_text_container_height"
                         android:layout_marginTop="@dimen/default_half_layout_margin"
                         android:layout_marginStart="@dimen/default_form_horizontal_margin"
                         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_feed_url_container">
+                        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_feed_content_type_container">
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_tribe_listing_on_sphinx"

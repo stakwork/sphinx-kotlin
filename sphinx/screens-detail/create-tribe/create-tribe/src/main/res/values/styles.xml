@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="feedTypeMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:itemBackground">@color/sentMsgBG</item>
+        <item name="android:dropDownWidth">50dp</item>
+    </style>
+</resources>

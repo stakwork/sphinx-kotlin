@@ -17,4 +17,5 @@ data class PostGroupDto(
     val private: Boolean? = false,
     val app_url: String? = null,
     val feed_url: String? = null,
+    val feed_type: Long? = 0L,
 )
