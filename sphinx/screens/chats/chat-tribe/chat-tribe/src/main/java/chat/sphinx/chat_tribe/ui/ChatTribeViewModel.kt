@@ -30,11 +30,9 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.toFeedType
 import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -175,18 +173,16 @@ internal class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
-                chatRepository.updateTribeInfo(chat)?.let { feedData ->
+                chatRepository.updateTribeInfo(chat)?.let { tribeData ->
 
-                    feedData.second.toFeedUrl()?.let { url ->
-                        _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
-                            feedData.first,
-                            url,
-                            feedData.third.toFeedType(),
-                            chat.metaData,
-                        )
-                    } ?: run {
-                        _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
-                    }
+                    _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
+                        tribeData.host,
+                        tribeData.feedUrl,
+                        tribeData.chatUUID,
+                        tribeData.feedType,
+                        chat.metaData,
+                    )
+
                 } ?: run {
                     _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
                 }

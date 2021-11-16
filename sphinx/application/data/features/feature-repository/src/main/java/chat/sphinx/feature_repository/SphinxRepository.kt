@@ -66,14 +66,13 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
-import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
-import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
@@ -3126,7 +3125,7 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
-    override suspend fun updateTribeInfo(chat: Chat): Triple<ChatHost, String, Int>? {
+    override suspend fun updateTribeInfo(chat: Chat): TribeData? {
         var owner: Contact? = accountOwner.value
 
         if (owner == null) {
@@ -3141,7 +3140,7 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
-        var feedData: Triple<ChatHost, String, Int>? = null
+        var tribeData: TribeData? = null
 
         chat.host?.let { chatHost ->
             val chatUUID = chat.uuid
@@ -3188,10 +3187,10 @@ abstract class SphinxRepository(
                             }
 
                             chat.host?.let { host ->
-                                tribeDto.feed_url?.let { feedUrl ->
-                                    val feedType = (tribeDto.feed_type ?: 0).toInt()
+                                tribeDto.feed_url?.toFeedUrl()?.let { feedUrl ->
+                                    val feedType = (tribeDto.feed_type ?: 0).toFeedType()
 
-                                    feedData = Triple(host, feedUrl, feedType)
+                                    tribeData = TribeData(host, chat.uuid, feedUrl, feedType)
                                 }
                             }
                         }
@@ -3200,7 +3199,7 @@ abstract class SphinxRepository(
             }
         }
 
-        return feedData
+        return tribeData
     }
 
     private val podcastLock = Mutex()
@@ -3208,11 +3207,16 @@ abstract class SphinxRepository(
         chatId: ChatId,
         host: ChatHost,
         feedUrl: FeedUrl,
+        chatUUID: ChatUUID,
         currentItemId: FeedId?
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        networkQueryChat.getFeedContent(host, feedUrl.value).collect { response ->
+        networkQueryChat.getFeedContent(
+            host,
+            feedUrl,
+            chatUUID
+        ).collect { response ->
             @Exhaustive
             when (response) {
                 is LoadResponse.Loading -> {}

@@ -6,9 +6,8 @@ import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_chat.toAppUrl
-import chat.sphinx.wrapper_feed.FeedContentType
-import chat.sphinx.wrapper_feed.FeedType
-import chat.sphinx.wrapper_feed.toFeedType
+import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.feed.toFeedType
 import java.io.File
 
 class CreateTribe private constructor(

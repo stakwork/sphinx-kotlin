@@ -5,17 +5,21 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.Transformations
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedReadNowRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.read.FeedReadViewModel
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.FeedItem
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -23,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class FeedReadNowAdapter(
+    private val recyclerView: RecyclerView,
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -151,12 +156,19 @@ class FeedReadNowAdapter(
             .build()
     }
 
+    private val thumbnailLoaderOptions: ImageLoaderOptions by lazy {
+        ImageLoaderOptions.Builder()
+            .placeholderResId(R.drawable.ic_podcast_placeholder)
+            .transformation(Transformation.CircleCrop)
+            .build()
+    }
+
     inner class NewsletterItemViewHolder(
         private val binding: LayoutFeedReadNowRowHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
-        private var holderJob: Job? = null
-        private var disposable: Disposable? = null
+        private val holderJobs: ArrayList<Job> = ArrayList(2)
+        private val disposables: ArrayList<Disposable> = ArrayList(2)
 
         private var newsletterItem: FeedItem? = null
 
@@ -184,8 +196,14 @@ class FeedReadNowAdapter(
                     return
                 }
                 this@NewsletterItemViewHolder.newsletterItem = newsletterItem
-                disposable?.dispose()
-                holderJob?.cancel()
+
+                for (job in holderJobs) {
+                    job.cancel()
+                }
+
+                for (disposable in disposables) {
+                    disposable.dispose()
+                }
 
                 newsletterItem.imageUrlToShow?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -194,17 +212,35 @@ class FeedReadNowAdapter(
                             imageUrl.value,
                             imageLoaderOptions
                         ).also {
-                            disposable = it
+                            disposables.add(it)
                         }
                     }.let { job ->
-                        holderJob = job
+                        holderJobs.add(job)
+                    }
+                }
+
+                newsletterItem.thumbnailUrlToShow?.let { thumbnailUrl ->
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        imageLoader.load(
+                            imageViewContributorImage,
+                            thumbnailUrl.value,
+                            thumbnailLoaderOptions
+                        ).also {
+                            disposables.add(it)
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
                     }
                 }
 
                 textViewItemName.text = newsletterItem.titleToShow
                 textViewItemDescription.text = newsletterItem.descriptionToShow
+                textViewEntryTimestamp.text = newsletterItem.datePublished?.hhmmElseDate()
+
+                val hasAuthor = newsletterItem.author != null && newsletterItem.author?.value?.isNotEmpty() == true
                 textViewContributorName.text = newsletterItem.author?.value
-                textViewContributorName.text = newsletterItem.datePublished?.hhmmElseDate()
+                textViewContributorName.goneIfFalse(hasAuthor)
+                textViewDivider.goneIfFalse(hasAuthor)
             }
         }
 

@@ -2,8 +2,7 @@ package chat.sphinx.wrapper_feed
 
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.*
 
 inline val FeedItem.isPodcast: Boolean
     get() = feed?.feedType?.isPodcast() == true
@@ -42,6 +41,14 @@ data class FeedItem(
                 return it
             }
             return null
+        }
+
+    var thumbnailUrlToShow: PhotoUrl? = null
+        get() {
+            thumbnailUrl?.let {
+                return it
+            }
+            return imageUrlToShow
         }
 
     var titleToShow: String = ""

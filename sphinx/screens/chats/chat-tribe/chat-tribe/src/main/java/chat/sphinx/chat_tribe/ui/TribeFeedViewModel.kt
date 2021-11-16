@@ -15,11 +15,12 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.ui.getMediaDuration
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.isPodcast
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -230,6 +231,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         args.chatId,
                         data.host,
                         data.feedUrl,
+                        data.chatUUID,
                         data.metaData?.itemId
                     )
                 }

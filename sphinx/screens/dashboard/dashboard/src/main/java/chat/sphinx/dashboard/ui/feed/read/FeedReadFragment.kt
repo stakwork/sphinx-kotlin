@@ -45,6 +45,7 @@ internal class FeedReadFragment : SideEffectFragment<
     private fun setupReadNowAdapter() {
         binding.recyclerViewReadNow.apply {
             val readNowAdapter = FeedReadNowAdapter(
+                this,
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,

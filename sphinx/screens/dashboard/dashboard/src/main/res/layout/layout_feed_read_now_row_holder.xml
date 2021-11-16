@@ -84,12 +84,12 @@
             android:textSize="@dimen/default_text_size_list_row_headline"
             android:textColor="@color/secondaryText"
             android:lines="1"
+            android:visibility="visible"
             app:layout_constraintStart_toEndOf="@+id/card_view_contributor_image_wrapper"
             app:layout_constraintEnd_toStartOf="@+id/text_view_divider"
             app:layout_constraintTop_toTopOf="@+id/card_view_contributor_image_wrapper"
             app:layout_constraintBottom_toBottomOf="@+id/card_view_contributor_image_wrapper"
-            tools:text="Contributor Name"
-            />
+            tools:text="Contributor Name" />
 
         <TextView
             android:id="@+id/text_view_divider"
@@ -100,11 +100,11 @@
             android:text="@string/material_icon_name_brightness_button"
             android:textSize="@dimen/default_text_divider"
             android:textColor="@color/secondaryText"
+            android:visibility="visible"
             app:layout_constraintStart_toEndOf="@+id/text_view_contributor_name"
             app:layout_constraintEnd_toStartOf="@+id/text_view_entry_timestamp"
             app:layout_constraintTop_toTopOf="@+id/text_view_entry_timestamp"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_entry_timestamp"
-            />
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_entry_timestamp" />
 
         <TextView
             android:id="@+id/text_view_entry_timestamp"
@@ -118,8 +118,8 @@
             app:layout_constraintTop_toTopOf="@+id/card_view_contributor_image_wrapper"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@+id/card_view_contributor_image_wrapper"
-            tools:text="5 days ago"
-            />
+            tools:text="5 days ago" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

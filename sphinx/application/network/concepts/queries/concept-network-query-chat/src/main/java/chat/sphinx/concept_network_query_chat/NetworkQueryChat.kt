@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_chat.ChatMuted
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -30,13 +31,9 @@ abstract class NetworkQueryChat {
 
     abstract fun getFeedContent(
         host: ChatHost,
-        feedUrl: String
+        feedUrl: FeedUrl,
+        chatUUID: ChatUUID,
     ): Flow<LoadResponse<FeedDto, ResponseError>>
-
-    abstract fun getPodcastFeed(
-        host: ChatHost,
-        feedUrl: String
-    ): Flow<LoadResponse<PodcastDto, ResponseError>>
 
     ///////////
     /// PUT ///

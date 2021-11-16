@@ -14,6 +14,7 @@ import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -38,8 +39,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_STREAM_SATS = "/stream"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
-        private const val GET_PODCAST_FEED_URL = "https://%s/podcast?url=%s"
-        private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s"
+        private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s&uuid=%s"
     }
 
     ///////////
@@ -75,21 +75,13 @@ class NetworkQueryChatImpl(
             responseJsonClass = TribeDto::class.java,
         )
 
-    override fun getPodcastFeed(
-        host: ChatHost,
-        feedUrl: String
-    ): Flow<LoadResponse<PodcastDto, ResponseError>> =
-        networkRelayCall.get(
-            url = String.format(GET_PODCAST_FEED_URL, host.value, feedUrl),
-            responseJsonClass = PodcastDto::class.java,
-        )
-
     override fun getFeedContent(
         host: ChatHost,
-        feedUrl: String
+        feedUrl: FeedUrl,
+        chatUUID: ChatUUID,
     ): Flow<LoadResponse<FeedDto, ResponseError>> =
         networkRelayCall.get(
-            url = String.format(GET_FEED_CONTENT_URL, host.value, feedUrl),
+            url = String.format(GET_FEED_CONTENT_URL, host.value, feedUrl.value, chatUUID.value),
             responseJsonClass = FeedDto::class.java,
         )
 

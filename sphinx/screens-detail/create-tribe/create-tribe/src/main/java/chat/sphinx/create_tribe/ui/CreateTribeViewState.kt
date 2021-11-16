@@ -2,8 +2,7 @@ package chat.sphinx.create_tribe.ui
 
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.create_tribe.R
-import chat.sphinx.wrapper_feed.FeedType
-import chat.sphinx.wrapper_feed.toFeedType
+import chat.sphinx.wrapper_common.feed.FeedType
 import io.matthewnelson.concept_views.viewstate.ViewState
 import java.io.File
 

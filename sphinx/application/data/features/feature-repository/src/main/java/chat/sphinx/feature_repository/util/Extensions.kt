@@ -16,7 +16,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
-import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.invite.isPaymentPending
 import chat.sphinx.wrapper_common.invite.isProcessingPayment
@@ -28,8 +28,6 @@ import chat.sphinx.wrapper_common.subscription.Cron
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
-import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.InviteString
@@ -452,6 +450,11 @@ fun TransactionCallbacks.upsertFeed(
     currentItemId: FeedId?,
     queries: SphinxDatabaseQueries
 ) {
+
+    if (feedDto.items.count() == 0) {
+        return
+    }
+
     val feedId = FeedId(feedDto.id)
 
     feedDto.value?.let { feedValueDto ->
@@ -493,7 +496,7 @@ fun TransactionCallbacks.upsertFeed(
     }
 
     queries.feedUpsert(
-        feed_type = FeedType.Podcast,
+        feed_type = feedDto.feedType.toInt().toFeedType(),
         title = FeedTitle(feedDto.title),
         description = feedDto.description?.toFeedDescription(),
         feed_url = feedUrl,
