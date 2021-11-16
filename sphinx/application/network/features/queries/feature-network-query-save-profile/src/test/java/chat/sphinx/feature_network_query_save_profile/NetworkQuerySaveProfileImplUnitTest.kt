@@ -1,6 +1,7 @@
-package chat.sphinx.feature_network_query_verify_external
+package chat.sphinx.feature_network_query_save_profile
 
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_network_query_save_profile.model.PersonInfoDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.exception
@@ -25,7 +26,9 @@ class NetworkQuerySaveProfileImplUnitTest: NetworkQueryTestHelper() {
     fun `verifyExternal returns success`() =
         testDispatcher.runBlockingTest {
             getCredentials()?.let {
-                noSaveProfile.saveProfile().collect { loadResponse ->
+
+                var data = PersonInfoDto(0,"https://sphinx.chat","sampleName","","","", 0,"")
+                nqSaveProfile.saveProfile(data).collect { loadResponse ->
 
                     @Exhaustive
                     when (loadResponse) {
