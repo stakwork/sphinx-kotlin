@@ -199,20 +199,18 @@ internal class JoinTribeViewModel @Inject constructor(
         }
     }
 
-    private fun updateFeedContent(chatId: ChatId) {
+    private suspend fun updateFeedContent(chatId: ChatId) {
         tribeInfo?.let { nnTribeInfo ->
             nnTribeInfo.feed_url?.toFeedUrl()?.let { feedUrl ->
                 nnTribeInfo.uuid?.toChatUUID()?.let { chatUUID ->
                     nnTribeInfo.host?.toChatHost()?.let { chatHost ->
-                        viewModelScope.launch(mainImmediate) {
-                            chatRepository.updateFeedContent(
-                                chatId,
-                                chatHost,
-                                feedUrl,
-                                chatUUID,
-                                null
-                            )
-                        }
+                        chatRepository.updateFeedContent(
+                            chatId,
+                            chatHost,
+                            feedUrl,
+                            chatUUID,
+                            null
+                        )
                     }
                 }
             }
