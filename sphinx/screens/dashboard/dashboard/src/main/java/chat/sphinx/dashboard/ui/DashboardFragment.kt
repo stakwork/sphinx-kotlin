@@ -295,7 +295,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
 
             buttonSaveProfile.setOnClickListener {
-                viewModel.saveProfile()
+                viewModel.savePeopleProfile()
             }
         }
 

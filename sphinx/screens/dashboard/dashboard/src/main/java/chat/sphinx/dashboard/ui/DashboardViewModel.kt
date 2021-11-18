@@ -428,7 +428,7 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    fun saveProfile() {
+    fun savePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
         viewModelScope.launch(mainImmediate) {
@@ -439,10 +439,7 @@ internal class DashboardViewModel @Inject constructor(
                     DeepLinkPopupViewState.SaveProfilePopupProcessing
                 )
 
-                val relayUrl: RelayUrl = relayDataHandler.retrieveRelayUrl() ?: return@launch
-
-                val response = repositoryDashboard.saveProfile(
-                    relayUrl.value,
+                val response = repositoryDashboard.savePeopleProfile(
                     viewState.link.host,
                     viewState.link.key
                 )

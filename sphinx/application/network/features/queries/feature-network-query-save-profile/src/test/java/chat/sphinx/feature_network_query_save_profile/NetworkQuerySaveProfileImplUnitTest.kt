@@ -28,7 +28,7 @@ class NetworkQuerySaveProfileImplUnitTest: NetworkQueryTestHelper() {
             getCredentials()?.let {
 
                 var data = PersonInfoDto(0,"https://sphinx.chat","sampleName","","","", 0,"")
-                nqSaveProfile.saveProfile(data).collect { loadResponse ->
+                nqSaveProfile.savePeopleProfile(data).collect { loadResponse ->
 
                     @Exhaustive
                     when (loadResponse) {
