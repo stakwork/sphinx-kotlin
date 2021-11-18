@@ -24,7 +24,7 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
-import chat.sphinx.concept_network_query_save_profile.model.PersonInfoDto
+import chat.sphinx.concept_network_query_save_profile.model.SavePeopleProfileDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -3860,19 +3860,8 @@ abstract class SphinxRepository(
 //                            }
 //                        }
 
-                        val body = moshi.adapter(PersonInfoDto::class.java).fromJson(loadResponse.value.body)
-                        if(body != null) {
-                            val profileInfo = PersonInfoDto(
-                                id = body.id,
-                                host = body.host,
-                                owner_alias = body.owner_alias,
-                                description = body.description,
-                                img = body.img,
-                                tag = body.tag,
-                                price_to_meet = body.price_to_meet,
-                                extras = body.extras
-                            )
-
+                        val profileInfo = moshi.adapter(SavePeopleProfileDto::class.java).fromJson(loadResponse.value.body)
+                        if(profileInfo != null) {
                             networkQuerySaveProfile.savePeopleProfile(
                                 profileInfo
                             ).collect { saveProfileResponse ->
