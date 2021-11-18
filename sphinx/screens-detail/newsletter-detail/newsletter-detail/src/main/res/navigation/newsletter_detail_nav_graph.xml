@@ -14,6 +14,10 @@
             android:name="argChatId"
             app:argType="long" />
 
+        <argument
+            android:name="argFeedUrl"
+            app:argType="string" />
+
     </fragment>
 
 </navigation>

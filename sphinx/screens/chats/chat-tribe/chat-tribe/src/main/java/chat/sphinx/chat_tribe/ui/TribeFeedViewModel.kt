@@ -384,6 +384,7 @@ internal class TribeFeedViewModel @Inject constructor(
             viewModelScope.launch(mainImmediate) {
                 navigator.toPodcastPlayerScreen(
                     chatId = args.chatId,
+                    feedUrl = vs.podcast.feedUrl,
                     currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
                 )
             }

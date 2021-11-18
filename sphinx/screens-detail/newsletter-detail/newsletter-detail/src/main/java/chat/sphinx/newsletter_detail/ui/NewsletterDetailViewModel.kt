@@ -7,6 +7,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.newsletter_detail.R
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,6 +53,26 @@ internal class NewsletterDetailViewModel @Inject constructor(
                             nnFeed.items
                         )
                     )
+                }
+            }
+        }
+
+        updateFeedContentInBackground()
+    }
+
+    private fun updateFeedContentInBackground() {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chat.host?.let { chatHost ->
+                    args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
+                        chatRepository.updateFeedContent(
+                            chatId = chat.id,
+                            host = chatHost,
+                            feedUrl = feedUrl,
+                            chatUUID = chat.uuid,
+                            currentEpisodeId = null
+                        )
+                    }
                 }
             }
         }

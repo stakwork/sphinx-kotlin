@@ -8,6 +8,7 @@ import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -44,29 +45,29 @@ internal class FeedAllViewModel @Inject constructor(
         @Exhaustive
         when (feed.feedType) {
             is FeedType.Podcast -> {
-                goToPodcastPlayer(feed.chatId)
+                goToPodcastPlayer(feed.chatId, feed.feedUrl)
             }
             is FeedType.Video -> {
                 //TODO Go to video player
             }
             is FeedType.Newsletter -> {
-                goToNewsletterDetail(feed.chatId)
+                goToNewsletterDetail(feed.chatId, feed.feedUrl)
             }
             is FeedType.Unknown -> {}
         }
     }
 
-    private fun goToPodcastPlayer(chatId: ChatId) {
+    private fun goToPodcastPlayer(chatId: ChatId, feedUrl: FeedUrl) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, 0
+                chatId, feedUrl, 0
             )
         }
     }
 
-    private fun goToNewsletterDetail(chatId: ChatId) {
+    private fun goToNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl) {
         viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toNewsletterDetail(chatId)
+            dashboardNavigator.toNewsletterDetail(chatId, feedUrl)
         }
     }
 }

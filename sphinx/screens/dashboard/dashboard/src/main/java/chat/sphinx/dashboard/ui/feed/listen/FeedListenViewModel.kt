@@ -8,6 +8,7 @@ import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,21 +40,23 @@ class FeedListenViewModel @Inject constructor(
     )
 
     fun episodeItemSelected(episode: FeedItem) {
-        episode.feed?.chat?.id?.let { chatId ->
-            goToPodcastPlayer(chatId)
+        episode.feed?.let { feed ->
+            feed.chat?.id?.let { chatId ->
+                goToPodcastPlayer(chatId, feed.feedUrl)
+            }
         }
     }
 
     override fun feedSelected(feed: Feed) {
         feed.chat?.id?.let { chatId ->
-            goToPodcastPlayer(chatId)
+            goToPodcastPlayer(chatId, feed.feedUrl)
         }
     }
 
-    private fun goToPodcastPlayer(chatId: ChatId) {
+    private fun goToPodcastPlayer(chatId: ChatId, feedUrl: FeedUrl) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, 0
+                chatId, feedUrl, 0
             )
         }
     }

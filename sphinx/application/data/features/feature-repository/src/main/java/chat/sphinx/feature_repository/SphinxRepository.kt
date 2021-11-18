@@ -3212,27 +3212,31 @@ abstract class SphinxRepository(
         chatUUID: ChatUUID,
         currentItemId: FeedId?
     ) {
-        val queries = coreDB.getSphinxDatabaseQueries()
+        withContext(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-        networkQueryChat.getFeedContent(
-            host,
-            feedUrl,
-            chatUUID
-        ).collect { response ->
-            @Exhaustive
-            when (response) {
-                is LoadResponse.Loading -> {}
-                is Response.Error -> {}
-                is Response.Success -> {
-                    podcastLock.withLock {
-                        queries.transaction {
-                            upsertFeed(
-                                response.value,
-                                feedUrl,
-                                chatId,
-                                currentItemId,
-                                queries
-                            )
+            networkQueryChat.getFeedContent(
+                host,
+                feedUrl,
+                chatUUID
+            ).collect { response ->
+                @Exhaustive
+                when (response) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+                    }
+                    is Response.Success -> {
+                        podcastLock.withLock {
+                            queries.transaction {
+                                upsertFeed(
+                                    response.value,
+                                    feedUrl,
+                                    chatId,
+                                    currentItemId,
+                                    queries
+                                )
+                            }
                         }
                     }
                 }

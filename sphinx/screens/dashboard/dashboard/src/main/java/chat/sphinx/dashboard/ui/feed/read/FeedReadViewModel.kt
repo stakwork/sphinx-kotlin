@@ -44,7 +44,7 @@ class FeedReadViewModel @Inject constructor(
 
     override fun feedSelected(feed: Feed) {
         viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toNewsletterDetail(feed.chatId)
+            dashboardNavigator.toNewsletterDetail(feed.chatId, feed.feedUrl)
         }
     }
 
