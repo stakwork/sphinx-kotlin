@@ -977,6 +977,14 @@ WHERE chat_id = ?
 ORDER BY id DESC
 LIMIT 1;
 
+feedGetByChatIdAndType:
+SELECT *
+FROM feedDbo
+WHERE chat_id = ?
+AND feed_type = ?
+ORDER BY id DESC
+LIMIT 1;
+
 feedGetAllByFeedType:
 SELECT *
 FROM feedDbo

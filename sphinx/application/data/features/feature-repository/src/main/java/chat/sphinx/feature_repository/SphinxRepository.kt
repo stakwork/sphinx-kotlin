@@ -3259,7 +3259,7 @@ abstract class SphinxRepository(
     override fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        queries.feedGetByChatId(chatId)
+        queries.feedGetByChatIdAndType(chatId, FeedType.Podcast)
             .asFlow()
             .mapToOneOrNull(io)
             .map { it?.let { podcastDboPresenterMapper.mapFrom(it) } }
