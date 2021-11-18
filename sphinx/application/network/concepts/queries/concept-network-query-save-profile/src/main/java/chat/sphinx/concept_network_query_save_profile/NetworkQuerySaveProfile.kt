@@ -10,13 +10,15 @@ import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkQuerySaveProfile {
 
-    abstract fun getProfileByKey(
+    abstract fun getPeopleProfileByKey(
         host: String,
         key: String
     ): Flow<LoadResponse<SaveProfileDto, ResponseError>>
 
-    abstract fun saveProfile(
+    abstract fun savePeopleProfile(
         data: PersonInfoDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<Any, ResponseError>>
+
+//    abstract fun deleteProfile(): Flow<LoadResponse<Any, ResponseError>>
 }

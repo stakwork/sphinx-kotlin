@@ -3826,15 +3826,14 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Returned before completing"))
     }
 
-    override suspend fun saveProfile(
-        relayUrl: String,
+    override suspend fun savePeopleProfile(
         host: String,
         key: String
     ): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
-            networkQuerySaveProfile.getProfileByKey(host, key).collect { loadResponse ->
+            networkQuerySaveProfile.getPeopleProfileByKey(host, key).collect { loadResponse ->
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
 
@@ -3843,6 +3842,24 @@ abstract class SphinxRepository(
                     }
 
                     is Response.Success -> {
+//                        if(loadResponse.value.path === "profile" && loadResponse.value.method === "DELETE"){
+//                            networkQuerySaveProfile.deleteProfile().collect {
+//                                    deleteProfileResponse ->
+//                                when (deleteProfileResponse) {
+//                                    is LoadResponse.Loading -> {
+//                                    }
+//
+//                                    is Response.Error -> {
+//                                        response = deleteProfileResponse
+//                                    }
+//
+//                                    is Response.Success -> {
+//                                        response = Response.Success(true)
+//                                    }
+//                                }
+//                            }
+//                        }
+
                         val body = moshi.adapter(PersonInfoDto::class.java).fromJson(loadResponse.value.body)
                         if(body != null) {
                             val profileInfo = PersonInfoDto(
@@ -3856,7 +3873,7 @@ abstract class SphinxRepository(
                                 extras = body.extras
                             )
 
-                            networkQuerySaveProfile.saveProfile(
+                            networkQuerySaveProfile.savePeopleProfile(
                                 profileInfo
                             ).collect { saveProfileResponse ->
                                 when (saveProfileResponse) {

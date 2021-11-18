@@ -17,10 +17,10 @@ class NetworkQuerySaveProfileImpl(
 
     companion object {
         private const val ENDPOINT_SAVE_KEY = "https://%s/save/%s"
-        private const val ENDPOINT_SAVE_PROFILE = "/profile"
+        private const val ENDPOINT_PROFILE = "/profile"
     }
 
-    override fun getProfileByKey(
+    override fun getPeopleProfileByKey(
         host: String,
         key: String
     ): Flow<LoadResponse<SaveProfileDto, ResponseError>> =
@@ -34,16 +34,23 @@ class NetworkQuerySaveProfileImpl(
         )
 
 
-    override fun saveProfile(
+    override fun savePeopleProfile(
         data: PersonInfoDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.relayPost(
-            relayEndpoint = ENDPOINT_SAVE_PROFILE,
+            relayEndpoint = ENDPOINT_PROFILE,
             requestBody = data,
             requestBodyJsonClass = PersonInfoDto::class.java,
             responseJsonClass = SaveProfileResponse::class.java,
             relayData = relayData
         )
 
+//    override fun deleteProfile(): Flow<LoadResponse<Any, ResponseError>> =
+//        networkRelayCall.relayDelete(
+//            relayEndpoint = ENDPOINT_PROFILE,
+//            requestBodyJsonClass = null,
+//            requestBody = null,
+//            responseJsonClass = SaveProfileResponse::class.java
+//        )
 }

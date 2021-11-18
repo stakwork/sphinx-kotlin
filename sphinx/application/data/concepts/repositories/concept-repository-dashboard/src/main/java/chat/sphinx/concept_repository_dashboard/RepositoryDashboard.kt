@@ -48,8 +48,7 @@ interface RepositoryDashboard {
         challenge: String
     ): Response<Boolean, ResponseError>
 
-    suspend fun saveProfile(
-        relayUrl: String,
+    suspend fun savePeopleProfile(
         host: String,
         key: String
     ): Response<Boolean, ResponseError>
