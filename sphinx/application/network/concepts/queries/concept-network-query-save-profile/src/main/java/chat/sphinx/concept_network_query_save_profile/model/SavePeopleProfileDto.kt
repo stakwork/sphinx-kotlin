@@ -9,7 +9,7 @@ data class SavePeopleProfileDto(
     val owner_alias: String,
     val description: String,
     val img: String,
-    val tag: String?,
+    val tags: List<String>?,
     val price_to_meet: Int,
     val extras: Any,
 )
