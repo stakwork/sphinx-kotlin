@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -48,7 +49,11 @@ internal class FeedAllViewModel @Inject constructor(
                 goToPodcastPlayer(feed.chatId, feed.feedUrl)
             }
             is FeedType.Video -> {
-                //TODO Go to video player
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        FeedAllSideEffect.Notify("Video Not supported yet")
+                    )
+                }
             }
             is FeedType.Newsletter -> {
                 goToNewsletterDetail(feed.chatId, feed.feedUrl)
