@@ -395,6 +395,7 @@ inline fun TransactionCallbacks.deleteChatById(
     queries.chatDeleteById(chatId)
     queries.dashboardDeleteById(chatId)
     latestMessageUpdatedTimeMap?.withLock { it.remove(chatId) }
+    deleteFeedByChatId(chatId, queries)
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -520,4 +521,15 @@ fun TransactionCallbacks.upsertFeed(
         id = feedId,
         generator = feedDto.generator?.toFeedGenerator()
     )
+}
+
+fun TransactionCallbacks.deleteFeedByChatId(
+    chatId: ChatId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.feedGetByChatId(chatId).executeAsOneOrNull()?.let { feedDbo ->  
+        queries.feedItemsDeleteByFeedId(feedDbo.id)
+        queries.feedModelDeleteById(feedDbo.id)
+        queries.feedDestinationDeleteByFeedId(feedDbo.id)
+    }
 }
