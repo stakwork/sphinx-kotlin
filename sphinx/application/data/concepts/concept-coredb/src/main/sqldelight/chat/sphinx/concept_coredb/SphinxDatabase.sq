@@ -1074,12 +1074,14 @@ WHERE id = ?;
 feedItemsGetByFeedId:
 SELECT *
 FROM feedItemDbo
-WHERE feed_id = ?;
+WHERE feed_id = ?
+ORDER BY date_published DESC;
 
 feedItemsGetByFeedIds:
 SELECT *
 FROM feedItemDbo
-WHERE feed_id IN ?;
+WHERE feed_id IN ?
+ORDER BY date_published DESC;
 
 feedItemDeleteById:
 DELETE
