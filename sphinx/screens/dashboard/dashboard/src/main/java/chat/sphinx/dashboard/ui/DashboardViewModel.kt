@@ -10,6 +10,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -75,6 +76,7 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+    private val networkQuerySaveProfile: NetworkQuerySaveProfile,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -256,10 +258,25 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
-        private fun handleSaveProfileLink(link: SaveProfileLink) {
-            deepLinkPopupViewStateContainer.updateViewState(
-                DeepLinkPopupViewState.SaveProfilePopup(link)
-            )
+        private suspend fun handleSaveProfileLink(link: SaveProfileLink) {
+            networkQuerySaveProfile.getPeopleProfileByKey(link.host, link.key).collect { loadResponse ->
+                when(loadResponse){
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        if (loadResponse.value.path === "profile" && loadResponse.value.method === "DELETE") {
+                            deepLinkPopupViewStateContainer.updateViewState(
+                                DeepLinkPopupViewState.DeleteProfilePopup(link)
+                            )
+                        } else {
+                            deepLinkPopupViewStateContainer.updateViewState(
+                                DeepLinkPopupViewState.SaveProfilePopup(link)
+                            )
+                        }
+                    }
+                }
+
+            }
         }
 
     private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
@@ -427,11 +444,12 @@ internal class DashboardViewModel @Inject constructor(
             )
         }
     }
+    fun deletePeopleProfile(){}
 
     fun savePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
-        viewModelScope.launch(mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
 
             if (viewState is DeepLinkPopupViewState.SaveProfilePopup) {
 

@@ -299,6 +299,17 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
+        binding.layoutDashboardPopup.layoutDashboardDeleteProfilePopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+            buttonSaveProfile.setOnClickListener {
+                viewModel.deletePeopleProfile()
+            }
+        }
+
         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
             textViewDashboardPopupClose.setOnClickListener {
                 viewModel.deepLinkPopupViewStateContainer.updateViewState(
@@ -490,6 +501,16 @@ internal class DashboardFragment : MotionLayoutFragment<
                             layoutConstraintSaveProfilePopup.visible
                             root.visible
                         }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.DeleteProfilePopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardSaveProfilePopup.apply {
+                            textViewDashboardPopupSaveProfileName.text = viewState.link.host
+                            layoutConstraintSaveProfilePopup.visible
+                            root.visible
+                            buttonSaveProfile.text = "Delete"
+                        }
+
                         binding.layoutDashboardPopup.root.visible
                     }
                     is DeepLinkPopupViewState.SaveProfilePopupProcessing -> {
