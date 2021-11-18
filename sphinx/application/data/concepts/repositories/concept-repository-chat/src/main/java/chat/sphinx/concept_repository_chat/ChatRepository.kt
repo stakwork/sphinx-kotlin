@@ -57,7 +57,7 @@ interface ChatRepository {
 
     fun joinTribe(
         tribeDto: TribeDto,
-    ): Flow<LoadResponse<Any, ResponseError>>
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
 
     suspend fun updateFeedContent(
         chatId: ChatId,

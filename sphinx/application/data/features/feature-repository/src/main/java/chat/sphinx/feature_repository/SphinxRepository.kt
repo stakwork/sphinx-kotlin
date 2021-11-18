@@ -3063,9 +3063,9 @@ abstract class SphinxRepository(
 
     override fun joinTribe(
         tribeDto: TribeDto
-    ): Flow<LoadResponse<Any, ResponseError>> = flow {
+    ): Flow<LoadResponse<ChatDto, ResponseError>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
-        var response: Response<Any, ResponseError>? = null
+        var response: Response<ChatDto, ResponseError>? = null
         val memeServerHost = MediaHost.DEFAULT
 
         emit(LoadResponse.Loading)
@@ -3117,7 +3117,7 @@ abstract class SphinxRepository(
                             }
                         }
 
-                        response = Response.Success(true)
+                        response = loadResponse
                     }
                 }
             }
