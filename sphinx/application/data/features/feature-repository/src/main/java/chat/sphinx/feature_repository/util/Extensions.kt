@@ -527,9 +527,10 @@ fun TransactionCallbacks.deleteFeedByChatId(
     chatId: ChatId,
     queries: SphinxDatabaseQueries
 ) {
-    queries.feedGetByChatId(chatId).executeAsOneOrNull()?.let { feedDbo ->  
+    queries.feedGetByChatId(chatId).executeAsOneOrNull()?.let { feedDbo ->
         queries.feedItemsDeleteByFeedId(feedDbo.id)
         queries.feedModelDeleteById(feedDbo.id)
         queries.feedDestinationDeleteByFeedId(feedDbo.id)
+        queries.feedDeleteById(feedDbo.id)
     }
 }
