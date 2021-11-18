@@ -106,4 +106,7 @@
     <string name="read_place_holder">No se encontraron resultados para \"Leer\"</string>
     <string name="play_place_holder">No se encontraron resultados para \"Jugar\"</string>
 
+    <string name="dashboard_save_profile_popup_title">Save Profile</string>
+    <string name="dashboard_save_profile_button">Submit Profile</string>
+    <string name="dashboard_save_profile_generic_error">Could not Save Profile</string>
 </resources>

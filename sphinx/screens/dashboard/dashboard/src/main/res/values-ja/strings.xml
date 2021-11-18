@@ -104,4 +104,8 @@
     <string name="watch_place_holder">No \"Watch\" Results Found</string>
     <string name="read_place_holder">No \"Read\" Results Found</string>
     <string name="play_place_holder">No \"Play\" Results Found</string>
+
+    <string name="dashboard_save_profile_popup_title">Save Profile</string>
+    <string name="dashboard_save_profile_button">Submit Profile</string>
+    <string name="dashboard_save_profile_generic_error">Could not Save Profile</string>
 </resources>
