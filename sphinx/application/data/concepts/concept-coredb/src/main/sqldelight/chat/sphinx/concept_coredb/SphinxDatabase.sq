@@ -1088,7 +1088,13 @@ DELETE
 FROM feedItemDbo
 WHERE id = ?;
 
-feedItemDeleteByFeedId:
+feedItemsDeleteOldByFeedId:
+DELETE
+FROM feedItemDbo
+WHERE feed_id = ?
+AND id NOT IN ?;
+
+feedItemsDeleteByFeedId:
 DELETE
 FROM feedItemDbo
 WHERE feed_id = ?;

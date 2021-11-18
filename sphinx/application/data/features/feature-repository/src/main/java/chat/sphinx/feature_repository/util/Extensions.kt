@@ -465,8 +465,12 @@ fun TransactionCallbacks.upsertFeed(
         )
     }
 
+    val itemIds: MutableList<FeedId> = mutableListOf()
+
     for (item in feedDto.items) {
-        val episodeId = FeedId(item.id)
+        val itemId = FeedId(item.id)
+
+        itemIds.add(itemId)
 
         queries.feedItemUpsert(
             title = FeedTitle(item.title),
@@ -482,9 +486,11 @@ fun TransactionCallbacks.upsertFeed(
             thumbnail_url = item.thumbnailUrl?.toPhotoUrl(),
             link = item.link?.toFeedUrl(),
             feed_id = feedId,
-            id = episodeId
+            id = itemId
         )
     }
+
+    queries.feedItemsDeleteOldByFeedId(feedId, itemIds)
 
     for (destination in feedDto.value?.destinations ?: listOf()) {
         queries.feedDestinationUpsert(
