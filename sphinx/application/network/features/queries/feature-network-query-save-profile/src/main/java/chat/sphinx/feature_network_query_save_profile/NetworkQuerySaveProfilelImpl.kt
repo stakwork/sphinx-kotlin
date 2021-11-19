@@ -46,11 +46,11 @@ class NetworkQuerySaveProfileImpl(
             relayData = relayData
         )
 
-//    override fun deleteProfile(): Flow<LoadResponse<Any, ResponseError>> =
-//        networkRelayCall.relayDelete(
-//            relayEndpoint = ENDPOINT_PROFILE,
-//            requestBodyJsonClass = null,
-//            requestBody = null,
-//            responseJsonClass = SaveProfileResponse::class.java
-//        )
+    override fun deletePeopleProfile(): Flow<LoadResponse<Any, ResponseError>> =
+        networkRelayCall.relayDelete(
+            relayEndpoint = ENDPOINT_PROFILE,
+            requestBodyJsonClass = null,
+            requestBody = null,
+            responseJsonClass = SaveProfileResponse::class.java
+        )
 }

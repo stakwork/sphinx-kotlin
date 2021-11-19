@@ -3826,61 +3826,49 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Returned before completing"))
     }
 
+    override suspend fun deletePeopleProfile(): Response<Boolean, ResponseError>{
+        var response: Response<Boolean, ResponseError>? = null
+        applicationScope.launch(mainImmediate) {
+            networkQuerySaveProfile.deletePeopleProfile().collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+                    }
+                    is Response.Success -> {
+                        response = Response.Success(true)
+                    }
+                }
+            }
+        }.join()
+        return response ?: Response.Error(ResponseError("Returned before completing"))
+    }
+
     override suspend fun savePeopleProfile(
-        host: String,
-        key: String
+        body: String
     ): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
-            networkQuerySaveProfile.getPeopleProfileByKey(host, key).collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
+            val profileInfo = moshi.adapter(SavePeopleProfileDto::class.java).fromJson(body)
+            if(profileInfo != null) {
+                networkQuerySaveProfile.savePeopleProfile(
+                    profileInfo
+                ).collect { saveProfileResponse ->
+                    when (saveProfileResponse) {
+                        is LoadResponse.Loading -> {
+                        }
 
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
+                        is Response.Error -> {
+                            response = saveProfileResponse
+                        }
 
-                    is Response.Success -> {
-//                        if(loadResponse.value.path === "profile" && loadResponse.value.method === "DELETE"){
-//                            networkQuerySaveProfile.deleteProfile().collect {
-//                                    deleteProfileResponse ->
-//                                when (deleteProfileResponse) {
-//                                    is LoadResponse.Loading -> {
-//                                    }
-//
-//                                    is Response.Error -> {
-//                                        response = deleteProfileResponse
-//                                    }
-//
-//                                    is Response.Success -> {
-//                                        response = Response.Success(true)
-//                                    }
-//                                }
-//                            }
-//                        }
-
-                        val profileInfo = moshi.adapter(SavePeopleProfileDto::class.java).fromJson(loadResponse.value.body)
-                        if(profileInfo != null) {
-                            networkQuerySaveProfile.savePeopleProfile(
-                                profileInfo
-                            ).collect { saveProfileResponse ->
-                                when (saveProfileResponse) {
-                                    is LoadResponse.Loading -> {
-                                    }
-
-                                    is Response.Error -> {
-                                        response = saveProfileResponse
-                                    }
-
-                                    is Response.Success -> {
-                                        response = Response.Success(true)
-                                    }
-                                }
-                            }
+                        is Response.Success -> {
+                            response = Response.Success(true)
                         }
                     }
                 }
+
             }
         }.join()
 

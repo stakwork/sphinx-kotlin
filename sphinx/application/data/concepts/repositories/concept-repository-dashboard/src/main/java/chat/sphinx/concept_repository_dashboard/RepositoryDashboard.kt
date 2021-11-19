@@ -49,9 +49,10 @@ interface RepositoryDashboard {
     ): Response<Boolean, ResponseError>
 
     suspend fun savePeopleProfile(
-        host: String,
-        key: String
+        body: String
     ): Response<Boolean, ResponseError>
+
+    suspend fun deletePeopleProfile(): Response<Any, ResponseError>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>

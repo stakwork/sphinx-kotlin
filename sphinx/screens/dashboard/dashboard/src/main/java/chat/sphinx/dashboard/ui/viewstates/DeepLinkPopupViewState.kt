@@ -22,7 +22,8 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     ): DeepLinkPopupViewState()
 
     class SaveProfilePopup(
-        val link: SaveProfileLink
+        val link: SaveProfileLink,
+        val body: String
     ): DeepLinkPopupViewState()
 
     class DeleteProfilePopup(

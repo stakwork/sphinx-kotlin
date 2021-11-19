@@ -258,6 +258,7 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
+    private var getSaveProfileResponse: String? = null
         private suspend fun handleSaveProfileLink(link: SaveProfileLink) {
             networkQuerySaveProfile.getPeopleProfileByKey(link.host, link.key).collect { loadResponse ->
                 when(loadResponse){
@@ -269,8 +270,11 @@ internal class DashboardViewModel @Inject constructor(
                                 DeepLinkPopupViewState.DeleteProfilePopup(link)
                             )
                         } else {
+                            getSaveProfileResponse = loadResponse.value.body
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.SaveProfilePopup(link)
+                                DeepLinkPopupViewState.SaveProfilePopup(link,
+                                    getSaveProfileResponse!!
+                                )
                             )
                         }
                     }
@@ -444,22 +448,25 @@ internal class DashboardViewModel @Inject constructor(
             )
         }
     }
-    fun deletePeopleProfile(){}
+    fun deletePeopleProfile(){
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.deletePeopleProfile()
+        }
+    }
 
     fun savePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
             viewModelScope.launch(mainImmediate) {
 
-            if (viewState is DeepLinkPopupViewState.SaveProfilePopup) {
+            if (viewState is DeepLinkPopupViewState.SaveProfilePopup && getSaveProfileResponse != null) {
 
                 deepLinkPopupViewStateContainer.updateViewState(
                     DeepLinkPopupViewState.SaveProfilePopupProcessing
                 )
 
                 val response = repositoryDashboard.savePeopleProfile(
-                    viewState.link.host,
-                    viewState.link.key
+                    getSaveProfileResponse!!
                 )
 
                 when (response) {

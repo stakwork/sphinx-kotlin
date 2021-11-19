@@ -20,5 +20,5 @@ abstract class NetworkQuerySaveProfile {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<Any, ResponseError>>
 
-//    abstract fun deleteProfile(): Flow<LoadResponse<Any, ResponseError>>
+    abstract fun deletePeopleProfile(): Flow<LoadResponse<Any, ResponseError>>
 }
