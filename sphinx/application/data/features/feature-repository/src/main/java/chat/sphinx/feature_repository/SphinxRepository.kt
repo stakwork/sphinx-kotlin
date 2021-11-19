@@ -24,7 +24,7 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
-import chat.sphinx.concept_network_query_save_profile.model.SavePeopleProfileDto
+import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -3850,10 +3850,9 @@ abstract class SphinxRepository(
         var response: Response<Boolean, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
-            val profileInfo = moshi.adapter(SavePeopleProfileDto::class.java).fromJson(body)
-            if(profileInfo != null) {
+            moshi.adapter(PeopleProfileDto::class.java).fromJson(body)?.let { profile ->
                 networkQuerySaveProfile.savePeopleProfile(
-                    profileInfo
+                    profile
                 ).collect { saveProfileResponse ->
                     when (saveProfileResponse) {
                         is LoadResponse.Loading -> {

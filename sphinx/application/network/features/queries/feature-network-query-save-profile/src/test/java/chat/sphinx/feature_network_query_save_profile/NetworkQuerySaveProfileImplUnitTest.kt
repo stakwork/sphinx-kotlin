@@ -1,7 +1,7 @@
 package chat.sphinx.feature_network_query_save_profile
 
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_network_query_save_profile.model.SavePeopleProfileDto
+import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.exception
@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert
 import org.junit.Test
-
-import org.junit.Assert.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -27,7 +25,7 @@ class NetworkQuerySaveProfileImplUnitTest: NetworkQueryTestHelper() {
         testDispatcher.runBlockingTest {
             getCredentials()?.let {
 
-                var data = SavePeopleProfileDto(0,"https://sphinx.chat","sampleName","","","", 0,"")
+                var data = PeopleProfileDto(0,"https://sphinx.chat","sampleName","","", listOf(), 0,"")
                 nqSaveProfile.savePeopleProfile(data).collect { loadResponse ->
 
                     @Exhaustive

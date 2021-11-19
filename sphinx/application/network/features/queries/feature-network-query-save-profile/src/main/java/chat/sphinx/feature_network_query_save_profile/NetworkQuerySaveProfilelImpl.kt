@@ -1,7 +1,7 @@
 package chat.sphinx.feature_network_query_save_profile
 
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
-import chat.sphinx.concept_network_query_save_profile.model.SavePeopleProfileDto
+import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.SaveProfileDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_save_profile.model.SaveProfileResponse
@@ -35,13 +35,13 @@ class NetworkQuerySaveProfileImpl(
 
 
     override fun savePeopleProfile(
-        data: SavePeopleProfileDto,
+        profile: PeopleProfileDto,
         relayData: Pair<AuthorizationToken, RelayUrl>?
     ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.relayPost(
             relayEndpoint = ENDPOINT_PROFILE,
-            requestBody = data,
-            requestBodyJsonClass = SavePeopleProfileDto::class.java,
+            requestBody = profile,
+            requestBodyJsonClass = PeopleProfileDto::class.java,
             responseJsonClass = SaveProfileResponse::class.java,
             relayData = relayData
         )

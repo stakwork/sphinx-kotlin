@@ -1,6 +1,6 @@
 package chat.sphinx.concept_network_query_save_profile
 
-import chat.sphinx.concept_network_query_save_profile.model.SavePeopleProfileDto
+import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.SaveProfileDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -16,7 +16,7 @@ abstract class NetworkQuerySaveProfile {
     ): Flow<LoadResponse<SaveProfileDto, ResponseError>>
 
     abstract fun savePeopleProfile(
-        data: SavePeopleProfileDto,
+        profile: PeopleProfileDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<Any, ResponseError>>
 
