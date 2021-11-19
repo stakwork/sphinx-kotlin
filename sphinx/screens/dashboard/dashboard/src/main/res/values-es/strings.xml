@@ -88,6 +88,15 @@
     <string name="dashboard_network_disconnected_node_toast">Nodo desconectado</string>
     <string name="dashboard_network_connected_node_toast">Nodo conectado</string>
 
+    <string name="dashboard_save_profile_popup_title">Guardar Perfil de:</string>
+    <string name="dashboard_delete_profile_popup_title">Eliminar Perfil de:</string>
+    <string name="dashboard_save_profile_button">GUARDAR</string>
+    <string name="dashboard_delete_profile_button">ELIMINAR</string>
+    <string name="dashboard_save_profile_generic_error">No se pudo salvar el Perfil</string>
+    <string name="dashboard_save_profile_success">Perfil salvado con éxito</string>
+    <string name="dashboard_delete_profile_generic_error">No se pudo eliminar el Perfil</string>
+    <string name="dashboard_delete_profile_success">Perfil eliminado con éxito</string>
+
     <string name="dashboard_feed_tab_name">Feed</string>
     <string name="dashboard_friends_tab_name">Amigos</string>
     <string name="dashboard_tribes_tab_name">Tribus</string>
@@ -105,8 +114,4 @@
     <string name="watch_place_holder">No se encontraron resultados para \"Mirar\"</string>
     <string name="read_place_holder">No se encontraron resultados para \"Leer\"</string>
     <string name="play_place_holder">No se encontraron resultados para \"Jugar\"</string>
-
-    <string name="dashboard_save_profile_popup_title">Save Profile</string>
-    <string name="dashboard_save_profile_button">Submit Profile</string>
-    <string name="dashboard_save_profile_generic_error">Could not Save Profile</string>
 </resources>

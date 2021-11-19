@@ -52,7 +52,7 @@ interface RepositoryDashboard {
         body: String
     ): Response<Boolean, ResponseError>
 
-    suspend fun deletePeopleProfile(): Response<Any, ResponseError>
+    suspend fun deletePeopleProfile(): Response<Boolean, ResponseError>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>

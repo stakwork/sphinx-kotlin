@@ -3828,6 +3828,7 @@ abstract class SphinxRepository(
 
     override suspend fun deletePeopleProfile(): Response<Boolean, ResponseError>{
         var response: Response<Boolean, ResponseError>? = null
+
         applicationScope.launch(mainImmediate) {
             networkQuerySaveProfile.deletePeopleProfile().collect { loadResponse ->
                 when (loadResponse) {
@@ -3841,7 +3842,8 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
-        return response ?: Response.Error(ResponseError("Returned before completing"))
+
+        return response ?: Response.Error(ResponseError("Profile delete failed"))
     }
 
     override suspend fun savePeopleProfile(
@@ -3867,11 +3869,10 @@ abstract class SphinxRepository(
                         }
                     }
                 }
-
             }
         }.join()
 
-        return response ?: Response.Error(ResponseError("Returned before completing"))
+        return response ?: Response.Error(ResponseError("Profile save failed"))
     }
 
 

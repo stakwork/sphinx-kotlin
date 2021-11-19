@@ -11,6 +11,9 @@ import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
+import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
+import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -258,30 +261,51 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
-    private var getSaveProfileResponse: String? = null
-        private suspend fun handleSaveProfileLink(link: SaveProfileLink) {
-            networkQuerySaveProfile.getPeopleProfileByKey(link.host, link.key).collect { loadResponse ->
-                when(loadResponse){
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {}
-                    is Response.Success -> {
-                        if (loadResponse.value.path === "profile" && loadResponse.value.method === "DELETE") {
+    private suspend fun handleSaveProfileLink(link: SaveProfileLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.LoadingPeopleProfilePopup
+        )
+
+        networkQuerySaveProfile.getPeopleProfileByKey(
+            link.host,
+            link.key
+        ).collect { loadResponse ->
+
+            when(loadResponse){
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    deepLinkPopupViewStateContainer.updateViewState(
+                        DeepLinkPopupViewState.PopupDismissed
+                    )
+
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_save_profile_generic_error)
+                        )
+                    )
+                }
+
+                is Response.Success -> {
+                    if (loadResponse.value.isProfilePath()) {
+                        if (loadResponse.value.isDeleteMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.DeleteProfilePopup(link)
+                                DeepLinkPopupViewState.DeletePeopleProfilePopup(link)
                             )
-                        } else {
-                            getSaveProfileResponse = loadResponse.value.body
+                        } else if (loadResponse.value.isSaveMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.SaveProfilePopup(link,
-                                    getSaveProfileResponse!!
+                                DeepLinkPopupViewState.SavePeopleProfilePopup(
+                                    link,
+                                    loadResponse.value.body
                                 )
                             )
                         }
                     }
                 }
-
             }
+
         }
+    }
 
     private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
         link.publicKey.toLightningNodePubKey()?.let { lightningNodePubKey ->
@@ -448,55 +472,70 @@ internal class DashboardViewModel @Inject constructor(
             )
         }
     }
-    fun deletePeopleProfile(){
+
+    suspend fun deletePeopleProfile(){
         viewModelScope.launch(mainImmediate) {
-            repositoryDashboard.deletePeopleProfile()
-        }
+            when (repositoryDashboard.deletePeopleProfile()) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_delete_profile_generic_error)
+                        )
+                    )
+                }
+                is Response.Success -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_delete_profile_success)
+                        )
+                    )
+                }
+            }
+        }.join()
+
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.PopupDismissed
+        )
     }
 
-    fun savePeopleProfile() {
+    suspend fun savePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
-            viewModelScope.launch(mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
 
-            if (viewState is DeepLinkPopupViewState.SaveProfilePopup && getSaveProfileResponse != null) {
+            if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
 
                 deepLinkPopupViewStateContainer.updateViewState(
                     DeepLinkPopupViewState.SaveProfilePopupProcessing
                 )
 
                 val response = repositoryDashboard.savePeopleProfile(
-                    getSaveProfileResponse!!
+                    viewState.body
                 )
 
                 when (response) {
                     is Response.Error -> {
                         submitSideEffect(
-                            ChatListSideEffect.Notify(response.cause.message)
+                            ChatListSideEffect.Notify(
+                                app.getString(R.string.dashboard_save_profile_generic_error)
+                            )
                         )
                     }
                     is Response.Success -> {
-                        val i = Intent(Intent.ACTION_VIEW)
-                        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        i.data = Uri.parse(
-                            "https://${viewState.link.host}?key=${viewState.link.key}"
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(
+                                app.getString(R.string.dashboard_save_profile_success)
+                            )
                         )
-                        app.startActivity(i)
                     }
                 }
 
-            } else {
-                submitSideEffect(
-                    ChatListSideEffect.Notify(
-                        app.getString(R.string.dashboard_save_profile_generic_error)
-                    )
-                )
             }
+        }.join()
 
-            deepLinkPopupViewStateContainer.updateViewState(
-                DeepLinkPopupViewState.PopupDismissed
-            )
-        }
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.PopupDismissed
+        )
     }
 
     val deepLinkPopupViewStateContainer: ViewStateContainer<DeepLinkPopupViewState> by lazy {
