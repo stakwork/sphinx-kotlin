@@ -8,6 +8,10 @@ inline fun String.toFeedUrl(): FeedUrl? =
         null
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.isYoutubeVideo(): Boolean =
+    false
+
 @JvmInline
 value class FeedUrl(val value: String) {
     init {

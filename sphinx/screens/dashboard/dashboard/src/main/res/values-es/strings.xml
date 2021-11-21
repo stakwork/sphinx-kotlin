@@ -104,4 +104,5 @@
     <string name="watch_place_holder">No se encontraron resultados para \"Mirar\"</string>
     <string name="read_place_holder">No se encontraron resultados para \"Leer\"</string>
     <string name="play_place_holder">No se encontraron resultados para \"Jugar\"</string>
+    <string name="watch_now">Watch Now</string>
 </resources>

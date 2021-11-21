@@ -15,7 +15,7 @@ inline val FeedItem.isNewsletter: Boolean
     get() = feed?.feedType?.isNewsletter() == true
 
 data class FeedItem(
-    val id: FeedId,
+    val id: FeedId, // TODO: Should this be FeedItemId?
     val title: FeedTitle,
     val description: FeedDescription?,
     val datePublished: DateTime?,
