@@ -25,6 +25,7 @@
     <include app:graph="@navigation/on_board_picture_nav_graph" />
     <include app:graph="@navigation/on_board_ready_nav_graph" />
     <include app:graph="@navigation/profile_nav_graph" />
+    <include app:graph="@navigation/video_screen_nav_graph" />
 
     <fragment
         android:id="@+id/navigation_splash_fragment"

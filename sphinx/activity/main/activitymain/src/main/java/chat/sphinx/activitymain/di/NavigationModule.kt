@@ -23,11 +23,11 @@ import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
-import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
 import chat.sphinx.onboard_connected.navigation.OnBoardConnectedNavigator
 import chat.sphinx.onboard_connecting.navigation.OnBoardConnectingNavigator
+import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard_desktop.navigation.OnBoardDesktopNavigator
 import chat.sphinx.onboard_lightning.navigation.OnBoardLightningNavigator
 import chat.sphinx.onboard_name.navigation.OnBoardNameNavigator
@@ -47,6 +47,7 @@ import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -331,4 +332,9 @@ internal object NavigationModule {
     ): TribeDetailNavigator =
         tribeDetailNavigatorImpl
 
+    @Provides
+    fun provideVideoScreenNavigator(
+        videoScreenNavigatorImpl: VideoScreenNavigatorImpl
+    ): VideoScreenNavigator =
+        videoScreenNavigatorImpl
 }

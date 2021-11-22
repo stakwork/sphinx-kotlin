@@ -57,7 +57,10 @@ class FeedWatchViewModel @Inject constructor(
 
     private fun goToVideoPlayer(feedId: FeedId, feedItemId: FeedId? = null) {
         viewModelScope.launch(mainImmediate) {
-            // TODO: Go to video player...
+            dashboardNavigator.toVideoScreen(
+                feedId = feedId,
+                feedItemId = feedItemId
+            )
         }
     }
 }

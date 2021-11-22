@@ -67,13 +67,13 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
-import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.Invite
@@ -4527,5 +4527,29 @@ abstract class SphinxRepository(
         }
 
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
+    }
+
+    override fun getAllFeedItemsFromFeedId(feedId: FeedId): Flow<List<FeedItem>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.feedItemsGetByFeedId(feedId)
+                .asFlow()
+                .mapToList()
+                .map { feedItemsDbo ->
+                    feedItemsDbo.map { feedItemDbo ->
+                        feedItemDboPresenterMapper.mapFrom(feedItemDbo)
+                    }
+                }
+        )
+    }
+
+    override fun getFeedByFeedId(feedId: FeedId): Flow<Feed?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().feedGetById(feedId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { feedDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 }

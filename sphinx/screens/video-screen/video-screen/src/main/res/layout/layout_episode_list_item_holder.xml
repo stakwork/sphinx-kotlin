@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_episode_list_item_holder"
+    android:background="@color/headerBG"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/episode_list_item_holder_height"
+    >
+
+
+    <!--  Show a play arrow if the podcast is playing -->
+    <TextView
+        android:id="@+id/text_view_play_arrow_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_play_button"
+        android:textColor="@color/receivedIcon"
+        android:textSize="25sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/image_view_episode_image"
+        tools:visibility="visible" />
+
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_episode_image"
+        android:layout_width="@dimen/episode_list_item_cover_image_width"
+        android:layout_height="@dimen/episode_list_item_cover_image_height"
+        android:scaleType="centerCrop"
+        android:layout_marginLeft="@dimen/default_double_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/paid_image_blurred_placeholder" />
+
+    <TextView
+        android:id="@+id/text_view_episode_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/text"
+        android:maxLines="2"
+        app:layout_constraintTop_toTopOf="@+id/image_view_episode_image"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_episode_published_date"
+        app:layout_constraintEnd_toStartOf="@id/text_view_download_episode_button"
+        app:layout_constraintStart_toEndOf="@id/image_view_episode_image"
+        tools:text="Who Will Build the Roads?" />
+
+    <TextView
+        android:id="@+id/text_view_episode_published_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginBottom="@dimen/default_half_layout_margin"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/secondaryText"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/text_view_download_episode_button"
+        app:layout_constraintStart_toEndOf="@id/image_view_episode_image"
+        tools:text="5 days ago" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_episode_download"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/episode_list_item_download_button_xy"
+        android:layout_height="@dimen/episode_list_item_download_button_xy"
+        android:gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_download_episode_button"
+        android:layout_width="@dimen/episode_list_item_download_button_xy"
+        android:layout_height="@dimen/episode_list_item_download_button_xy"
+        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
+        android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_cloud_download"
+        android:textColor="@color/text"
+        android:clickable="true"
+        android:alpha="0.3"
+        android:enabled="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/text_view_episode_title"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/divider_bottom"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="@dimen/episode_list_item_divider_margin_x"
+        android:background="@color/receivedMsgBG"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

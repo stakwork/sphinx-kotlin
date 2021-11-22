@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.navigation
 import androidx.navigation.NavController
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -24,4 +25,6 @@ abstract class DashboardNavigator(
     )
 
     abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, currentEpisodeDuration: Long)
+
+    abstract suspend fun toVideoScreen(feedId: FeedId, feedItemId: FeedId?)
 }
