@@ -3,6 +3,7 @@ package chat.sphinx.video_screen.ui
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -17,9 +18,14 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.*
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.sql.Date
@@ -51,6 +57,7 @@ internal class VideoScreenFragment: BaseFragment<
         setupInsetterPadding()
         setupVideoFeedDetail()
         setupVideoEpisodeListAdapter()
+        setupCurrentVideoEpisode()
     }
 
     private fun setupInsetterPadding() {
@@ -145,6 +152,84 @@ internal class VideoScreenFragment: BaseFragment<
         }
     }
 
+    private fun setupCurrentVideoEpisode() {
+        binding.apply {
+            includeLayoutCurrentVideoDetail.root.goneIfTrue(viewModel.args.argFeedItemId == null)
+            includeLayoutVideoFeedDetails.root.goneIfFalse(viewModel.args.argFeedItemId == null)
+
+            viewModel.args.argFeedItemId?.let {
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//                    val videoEpisode = viewModel.videoItemSharedFlow.lastOrNull()
+                    val videoEpisode = if (viewModel.args.argFeedItemId == "feedItemId") {
+                        FeedItem(
+                            FeedId("feedItemId"),
+                            FeedTitle("Something we see a lot"),
+                            FeedDescription("Describing the things we see"),
+                            DateTime(Date.valueOf("2021-09-22")),
+                            DateTime(Date.valueOf("2021-09-22")),
+                            FeedAuthor("Kgothatso"),
+                            null,
+                            null,
+                            FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
+                            null,
+                            PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+                            PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+                            FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
+                            FeedId("feedId"),
+                        )
+                    } else {
+                        FeedItem(
+                            FeedId("jNQXAC9IVRw"),
+                            FeedTitle("Youtube we see a lot"),
+                            FeedDescription("Describing the things we see"),
+                            DateTime(Date.valueOf("2021-09-22")),
+                            DateTime(Date.valueOf("2021-09-22")),
+                            FeedAuthor("Youtube Channel"),
+                            null,
+                            null,
+                            FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+                            null,
+                            PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+                            PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+                            FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+                            FeedId("youtubeFeedId"),
+                        )
+                    }
+                    includeLayoutCurrentVideoDetail.apply {
+                        textViewContributorName.text = videoEpisode.author?.value
+                        textViewCurrentVideoDescription.text = videoEpisode.descriptionToShow
+                        textViewCurrentVideoTitle.text = videoEpisode.titleToShow
+                        textViewCurrentVideoPublishedDate.text = videoEpisode.datePublished?.hhmmElseDate()
+                        // textViewCurrentVideoViewCount
+                        if (!videoEpisode.enclosureUrl.value.contains("youtube")) { // Use proper check here...
+                            videoViewVideoPlayer.visible
+                            webViewYoutubeVideoPlayer.gone
+
+                            videoViewVideoPlayer.setOnPreparedListener {
+                                it.start()
+                            }
+                            videoViewVideoPlayer.setVideoURI(
+                                videoEpisode.enclosureUrl.value.toUri()
+                            )
+                        } else {
+                            videoViewVideoPlayer.gone
+                            webViewYoutubeVideoPlayer.visible
+                            webViewYoutubeVideoPlayer.settings.apply {
+                                javaScriptEnabled = true
+                            }
+                            webViewYoutubeVideoPlayer.loadData(
+                                "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/${videoEpisode.id.value}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
+                                "text/html",
+                                "utf-8"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+
+    }
     override suspend fun onViewStateFlowCollect(viewState: VideoScreenViewState) {
         //TODO implement view state collector
     }

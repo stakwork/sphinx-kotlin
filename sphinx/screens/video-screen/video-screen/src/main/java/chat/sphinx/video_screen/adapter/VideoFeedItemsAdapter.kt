@@ -26,9 +26,7 @@ import chat.sphinx.wrapper_feed.FeedTitle
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.sql.Date
 
 internal class VideoFeedItemsAdapter (
@@ -97,77 +95,72 @@ internal class VideoFeedItemsAdapter (
 
     }
 
-    private val videoEpisodes = ArrayList<FeedItem>(listOf())
+//    private val videoEpisodes = ArrayList<FeedItem>(listOf())
+    private val videoEpisodes = mutableListOf(
+    // Normal Video
+    FeedItem(
+        FeedId("feedItemId"),
+        FeedTitle("Something we see a lot"),
+        FeedDescription("Describing the things we see"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        FeedAuthor("Kgothatso"),
+        null,
+        null,
+        FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
+        null,
+        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+        FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
+        FeedId("feedId"),
+    ),
+    // Youtube Video
+    FeedItem(
+        FeedId("feedYoutubeItemId"),
+        FeedTitle("Youtube we see a lot"),
+        FeedDescription("Describing the things we see"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        FeedAuthor("Youtube Channel"),
+        null,
+        null,
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        null,
+        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedId("youtubeFeedId"),
+    )
+)
 
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-
-        onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
-            viewModel.feedItemsHolderViewStateFlow.collect { list ->
-
-                val episodesList = mutableListOf(
-                    // Normal Video
-                    FeedItem(
-                        FeedId("feedItemId"),
-                        FeedTitle("Something we see a lot"),
-                        FeedDescription("Describing the things we see"),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        FeedAuthor("Kgothatso"),
-                        null,
-                        null,
-                        FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
-                        null,
-                        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
-                        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
-                        FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
-                        FeedId("feedId"),
-                    ),
-                    // Youtube Video
-                    FeedItem(
-                        FeedId("feedYoutubeItemId"),
-                        FeedTitle("Youtube we see a lot"),
-                        FeedDescription("Describing the things we see"),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        FeedAuthor("Youtube Channel"),
-                        null,
-                        null,
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        null,
-                        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
-                        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        FeedId("youtubeFeedId"),
-                    )
-                )
-
-                list.forEach { feedItem ->
-                    episodesList.add(feedItem)
-                }
-
-                if (videoEpisodes.isEmpty()) {
-                    videoEpisodes.addAll(episodesList)
-
-                    this@VideoFeedItemsAdapter.notifyDataSetChanged()
-                } else {
-
-                    val diff = Diff(videoEpisodes, episodesList)
-
-                    withContext(viewModelDispatcher.default) {
-                        DiffUtil.calculateDiff(diff)
-                    }.let { result ->
-
-                        if (!diff.sameList) {
-                            videoEpisodes.clear()
-                            videoEpisodes.addAll(episodesList)
-                            result.dispatchUpdatesTo(this@VideoFeedItemsAdapter)
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    override fun onStart(owner: LifecycleOwner) {
+//        super.onStart(owner)
+//
+//        onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
+//            viewModel.feedItemsHolderViewStateFlow.collect { list ->
+//
+//                if (videoEpisodes.isEmpty()) {
+//                    videoEpisodes.addAll(list)
+//
+//                    this@VideoFeedItemsAdapter.notifyDataSetChanged()
+//                } else {
+//
+//                    val diff = Diff(videoEpisodes, list)
+//
+//                    withContext(viewModelDispatcher.default) {
+//                        DiffUtil.calculateDiff(diff)
+//                    }.let { result ->
+//
+//                        if (!diff.sameList) {
+//                            videoEpisodes.clear()
+//                            videoEpisodes.addAll(list)
+//                            result.dispatchUpdatesTo(this@VideoFeedItemsAdapter)
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     override fun getItemCount(): Int {
         return videoEpisodes.size

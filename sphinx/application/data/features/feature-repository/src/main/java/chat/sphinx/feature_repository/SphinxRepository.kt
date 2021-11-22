@@ -4552,4 +4552,14 @@ abstract class SphinxRepository(
                 .distinctUntilChanged()
         )
     }
+    
+    override fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().feedItemGetById(feedItemId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { feedItemDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
 }

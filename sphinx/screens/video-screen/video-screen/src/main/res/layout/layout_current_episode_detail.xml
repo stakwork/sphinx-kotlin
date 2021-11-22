@@ -9,13 +9,27 @@
     tools:visibility="visible"
     >
 
-
-    <VideoView
-        android:id="@+id/video_view_video_player"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_video_player"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         app:layout_constraintTop_toTopOf="parent"
-        />
+        >
+        <VideoView
+            android:id="@+id/video_view_video_player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <WebView
+            android:id="@+id/web_view_youtube_video_player"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <TextView
         android:id="@+id/text_view_current_video_title"
         android:layout_width="match_parent"
@@ -25,7 +39,7 @@
         android:textColor="@color/text"
         android:maxLines="2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/video_view_video_player"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_video_player"
         tools:text="Who Will Road the Builds?"
         />
 

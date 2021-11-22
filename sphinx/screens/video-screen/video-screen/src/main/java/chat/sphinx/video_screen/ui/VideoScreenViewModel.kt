@@ -32,6 +32,18 @@ internal class VideoScreenViewModel @Inject constructor(
         replay = 1,
     )
 
+    val videoItemSharedFlow: SharedFlow<FeedItem?> = flow {
+        if (args.argFeedItemId != null) {
+            emitAll(repositoryMedia.getFeedItemById(FeedId(args.argFeedItemId!!)))
+        } else {
+            emit(null)
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000),
+        replay = 1,
+    )
+
     val feedItemsHolderViewStateFlow: StateFlow<List<FeedItem>> = flow {
         repositoryMedia.getAllFeedItemsFromFeedId(FeedId(args.argFeedId)).collect { feedItems ->
             emit(feedItems.toList())

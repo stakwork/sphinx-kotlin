@@ -29,4 +29,6 @@ interface RepositoryMedia {
 
     fun getAllFeedItemsFromFeedId(feedId: FeedId): Flow<List<FeedItem>>
     fun getFeedByFeedId(feedId: FeedId): Flow<Feed?>
+
+    fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 }
