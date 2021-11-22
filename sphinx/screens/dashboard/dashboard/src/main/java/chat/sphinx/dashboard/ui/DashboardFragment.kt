@@ -296,20 +296,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             buttonSaveProfile.setOnClickListener {
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.savePeopleProfile()
-                }
-            }
-        }
-
-        binding.layoutDashboardPopup.layoutDashboardDeleteProfilePopup.apply {
-            textViewDashboardPopupClose.setOnClickListener {
-                viewModel.deepLinkPopupViewStateContainer.updateViewState(
-                    DeepLinkPopupViewState.PopupDismissed
-                )
-            }
-            buttonSaveProfile.setOnClickListener {
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.deletePeopleProfile()
+                    viewModel.updatePeopleProfile()
                 }
             }
         }

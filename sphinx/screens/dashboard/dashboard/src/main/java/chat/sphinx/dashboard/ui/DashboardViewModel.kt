@@ -473,7 +473,17 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    suspend fun deletePeopleProfile(){
+    suspend fun updatePeopleProfile() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
+            savePeopleProfile()
+        } else if (viewState is DeepLinkPopupViewState.DeletePeopleProfilePopup) {
+            deletePeopleProfile()
+        }
+    }
+
+    private suspend fun deletePeopleProfile(){
         viewModelScope.launch(mainImmediate) {
             when (repositoryDashboard.deletePeopleProfile()) {
                 is Response.Error -> {
@@ -498,7 +508,7 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
-    suspend fun savePeopleProfile() {
+    private suspend fun savePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
         viewModelScope.launch(mainImmediate) {
