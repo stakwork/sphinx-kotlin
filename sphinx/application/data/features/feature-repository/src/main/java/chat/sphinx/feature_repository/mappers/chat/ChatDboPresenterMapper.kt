@@ -39,6 +39,7 @@ internal class ChatDboPresenterMapper(
             myAlias = value.my_alias,
             pendingContactIds = value.pending_contact_ids,
             latestMessageId = value.latest_message_id,
+            contentSeenAt = value.content_seen_at,
         )
     }
 
@@ -66,6 +67,7 @@ internal class ChatDboPresenterMapper(
             my_alias = value.myAlias,
             pending_contact_ids = value.pendingContactIds,
             latest_message_id = value.latestMessageId,
+            content_seen_at = value.contentSeenAt
         )
     }
 }

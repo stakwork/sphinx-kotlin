@@ -7,6 +7,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
@@ -46,7 +47,7 @@ internal class FeedAllViewModel @Inject constructor(
         @Exhaustive
         when (feed.feedType) {
             is FeedType.Podcast -> {
-                goToPodcastPlayer(feed.chatId, feed.feedUrl)
+                goToPodcastPlayer(feed.chatId, feed.id, feed.feedUrl)
             }
             is FeedType.Video -> {
                 viewModelScope.launch(mainImmediate) {
@@ -62,10 +63,14 @@ internal class FeedAllViewModel @Inject constructor(
         }
     }
 
-    private fun goToPodcastPlayer(chatId: ChatId, feedUrl: FeedUrl) {
+    private fun goToPodcastPlayer(
+        chatId: ChatId,
+        feedId: FeedId,
+        feedUrl: FeedUrl
+    ) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, feedUrl, 0
+                chatId, feedId, feedUrl, 0
             )
         }
     }

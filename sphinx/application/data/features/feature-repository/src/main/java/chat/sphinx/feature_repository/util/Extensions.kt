@@ -449,6 +449,7 @@ fun TransactionCallbacks.upsertFeed(
     feedUrl: FeedUrl,
     chatId: ChatId,
     currentItemId: FeedId?,
+    subscribed: Subscribed,
     queries: SphinxDatabaseQueries
 ) {
 
@@ -518,8 +519,9 @@ fun TransactionCallbacks.upsertFeed(
         items_count = FeedItemsCount(feedDto.items.count().toLong()),
         current_item_id = currentItemId,
         chat_id = chatId,
+        subscribed = subscribed,
         id = feedId,
-        generator = feedDto.generator?.toFeedGenerator()
+        generator = feedDto.generator?.toFeedGenerator(),
     )
 }
 

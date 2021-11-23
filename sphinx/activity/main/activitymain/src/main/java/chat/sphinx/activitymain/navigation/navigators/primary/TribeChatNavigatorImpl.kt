@@ -15,6 +15,7 @@ import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
@@ -35,8 +36,8 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPaymentReceiveDetail(contactId, chatId))
     }
 
-    override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedUrl: FeedUrl, currentEpisodeDuration: Long) {
-        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedUrl, currentEpisodeDuration))
+    override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, currentEpisodeDuration: Long) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration))
     }
 
     override suspend fun toTribeDetailScreen(chatId: ChatId) {

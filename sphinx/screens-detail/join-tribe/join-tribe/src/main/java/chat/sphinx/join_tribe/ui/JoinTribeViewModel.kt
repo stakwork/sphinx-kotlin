@@ -27,6 +27,7 @@ import chat.sphinx.wrapper_common.chat.toChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.feed.toFeedUrl
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.toContactAlias
@@ -209,6 +210,7 @@ internal class JoinTribeViewModel @Inject constructor(
                             chatHost,
                             feedUrl,
                             chatUUID,
+                            true.toSubscribed(),
                             null
                         )
                     }

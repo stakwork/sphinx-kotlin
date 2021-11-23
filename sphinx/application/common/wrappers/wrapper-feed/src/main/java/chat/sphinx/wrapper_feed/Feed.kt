@@ -32,8 +32,13 @@ data class Feed(
     val language: FeedLanguage?,
     val itemsCount: FeedItemsCount,
     val currentItemId: FeedId?,
-    val chatId: ChatId
+    val chatId: ChatId,
+    val subscribed: Subscribed,
 ) {
+
+    companion object {
+        const val TRIBES_DEFAULT_SERVER_URL = "https://tribes.sphinx.chat"
+    }
 
     var items: List<FeedItem> = listOf()
 

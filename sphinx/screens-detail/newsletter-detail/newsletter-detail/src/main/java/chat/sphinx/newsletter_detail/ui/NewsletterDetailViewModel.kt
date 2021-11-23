@@ -8,6 +8,7 @@ import chat.sphinx.newsletter_detail.R
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.toFeedUrl
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -70,6 +71,7 @@ internal class NewsletterDetailViewModel @Inject constructor(
                             host = chatHost,
                             feedUrl = feedUrl,
                             chatUUID = chat.uuid,
+                            true.toSubscribed(),
                             currentEpisodeId = null
                         )
                     }

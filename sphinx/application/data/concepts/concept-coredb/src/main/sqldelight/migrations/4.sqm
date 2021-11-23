@@ -1,0 +1,6 @@
+import chat.sphinx.wrapper_common.DateTime;
+import chat.sphinx.wrapper_common.feed.Subscribed;
+
+
+ALTER TABLE feedDbo ADD COLUMN subscribed INTEGER AS Subscribed NOT NULL DEFAULT 1;
+ALTER TABLE chatDbo ADD COLUMN content_seen_at INTEGER AS DateTime;

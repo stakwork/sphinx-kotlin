@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toItemId
@@ -24,7 +25,8 @@ data class Podcast(
     val image: PhotoUrl?,
     val datePublished: DateTime?,
     val chatId: ChatId,
-    val feedUrl: FeedUrl
+    val feedUrl: FeedUrl,
+    val subscribed: Subscribed
 ) {
 
     var model: PodcastModel? = null

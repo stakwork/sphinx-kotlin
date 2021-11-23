@@ -17,8 +17,9 @@ import chat.sphinx.wrapper_common.dashboard.ContactId;
 import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
 import chat.sphinx.wrapper_common.dashboard.InviteId;
 import chat.sphinx.wrapper_common.feed.FeedId;
-import chat.sphinx.wrapper_common.feed.FeedUrl;
 import chat.sphinx.wrapper_common.feed.FeedType;
+import chat.sphinx.wrapper_common.feed.FeedUrl;
+import chat.sphinx.wrapper_common.feed.Subscribed;
 import chat.sphinx.wrapper_common.invite.InviteStatus;
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
@@ -90,7 +91,8 @@ CREATE TABLE chatDbo(
     my_photo_url                TEXT            AS PhotoUrl,
     my_alias                    TEXT            AS ChatAlias,
     pending_contact_ids         TEXT            AS List<ContactId>,
-    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL,
+    content_seen_at             INTEGER         AS DateTime
 );
 
 chatUpdateLatestMessage:
@@ -903,7 +905,8 @@ CREATE TABLE feedDbo(
     language                    TEXT               AS FeedLanguage,
     items_count                 INTEGER            AS FeedItemsCount DEFAULT 0 NOT NULL,
     current_item_id             TEXT               AS FeedId,
-    chat_id                     INTEGER            AS ChatId NOT NULL
+    chat_id                     INTEGER            AS ChatId NOT NULL,
+    subscribed                  INTEGER            AS Subscribed NOT NULL DEFAULT 1
 );
 
 feedUpsert {
@@ -922,7 +925,8 @@ feedUpsert {
         language = :language,
         items_count = :items_count,
         current_item_id = :current_item_id,
-        chat_id = :chat_id
+        chat_id = :chat_id,
+        subscribed = :subscribed
     WHERE id = :id;
 
     INSERT OR IGNORE INTO feedDbo(
@@ -968,6 +972,7 @@ feedUpsert {
 feedGetAll:
 SELECT *
 FROM feedDbo
+WHERE subscribed = 1
 ORDER BY id DESC;
 
 feedGetByChatId:
@@ -989,6 +994,7 @@ feedGetAllByFeedType:
 SELECT *
 FROM feedDbo
 WHERE feed_type = ?
+AND subscribed = 1
 ORDER BY id DESC;
 
 feedGetById:

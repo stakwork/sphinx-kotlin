@@ -18,6 +18,7 @@ import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
@@ -232,6 +233,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         data.host,
                         data.feedUrl,
                         data.chatUUID,
+                        true.toSubscribed(),
                         data.metaData?.itemId
                     )
                 }
@@ -384,6 +386,7 @@ internal class TribeFeedViewModel @Inject constructor(
             viewModelScope.launch(mainImmediate) {
                 navigator.toPodcastPlayerScreen(
                     chatId = args.chatId,
+                    feedId = vs.podcast.id,
                     feedUrl = vs.podcast.feedUrl,
                     currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
                 )

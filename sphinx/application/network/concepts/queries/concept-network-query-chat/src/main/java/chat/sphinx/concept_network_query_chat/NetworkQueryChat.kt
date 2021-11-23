@@ -32,7 +32,7 @@ abstract class NetworkQueryChat {
     abstract fun getFeedContent(
         host: ChatHost,
         feedUrl: FeedUrl,
-        chatUUID: ChatUUID,
+        chatUUID: ChatUUID?,
     ): Flow<LoadResponse<FeedDto, ResponseError>>
 
     ///////////
