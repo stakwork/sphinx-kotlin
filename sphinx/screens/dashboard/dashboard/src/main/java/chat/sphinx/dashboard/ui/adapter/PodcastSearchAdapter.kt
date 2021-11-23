@@ -159,9 +159,7 @@ class PodcastSearchAdapter(
         init {
             binding.layoutConstraintSearchResultsHolder.setOnClickListener {
                 searchResult?.let { nnSearchResult ->
-                    lifecycleOwner.lifecycleScope.launch {
-//                        viewModel.feedSelected(nnFeed)
-                    }
+                    viewModel.podcastSearchResultSelected(nnSearchResult)
                 }
             }
         }

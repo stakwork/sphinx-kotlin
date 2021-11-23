@@ -37,7 +37,7 @@ data class Feed(
 ) {
 
     companion object {
-        const val TRIBES_DEFAULT_SERVER_URL = "https://tribes.sphinx.chat"
+        const val TRIBES_DEFAULT_SERVER_URL = "tribes.sphinx.chat"
     }
 
     var items: List<FeedItem> = listOf()

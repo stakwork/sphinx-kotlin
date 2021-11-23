@@ -70,6 +70,7 @@ interface ChatRepository {
     )
 
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
+    fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
     fun getPodcastById(feedId: FeedId): Flow<Podcast?>
 

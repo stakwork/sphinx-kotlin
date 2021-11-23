@@ -7,6 +7,7 @@ data class PodcastSearchResultDto(
     val id: String,
     val feedType: Long,
     val title: String,
+    val url: String,
     val description: String,
     val author: String,
     val generator: String,

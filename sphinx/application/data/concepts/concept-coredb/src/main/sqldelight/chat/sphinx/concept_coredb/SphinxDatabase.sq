@@ -946,7 +946,8 @@ feedUpsert {
         language,
         items_count,
         current_item_id,
-        chat_id
+        chat_id,
+        subscribed
     )
     VALUES (
         :id,
@@ -965,7 +966,8 @@ feedUpsert {
         :language,
         :items_count,
         :current_item_id,
-        :chat_id
+        :chat_id,
+        :subscribed
     );
 }
 

@@ -62,9 +62,9 @@
 
     <TextView
         android:id="@+id/text_view_podcast_add"
-        android:layout_width="0dp"
+        android:layout_width="@dimen/feed_podcast_search_subscribe_text_view_width"
         android:layout_height="match_parent"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_half_layout_margin"
         android:fontFamily="@font/material_icons_regular"
         android:textColor="@color/text"
         android:textSize="@dimen/default_text_size_tap_target_material_icon"
