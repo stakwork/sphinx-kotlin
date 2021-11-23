@@ -290,7 +290,10 @@ internal class DashboardViewModel @Inject constructor(
                     if (loadResponse.value.isProfilePath()) {
                         if (loadResponse.value.isDeleteMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.DeletePeopleProfilePopup(link)
+                                DeepLinkPopupViewState.DeletePeopleProfilePopup(
+                                    link,
+                                    loadResponse.value.body
+                                )
                             )
                         } else if (loadResponse.value.isSaveMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
@@ -476,16 +479,20 @@ internal class DashboardViewModel @Inject constructor(
     suspend fun updatePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.SaveProfilePopupProcessing
+        )
+
         if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
-            savePeopleProfile()
+            savePeopleProfile(viewState.body)
         } else if (viewState is DeepLinkPopupViewState.DeletePeopleProfilePopup) {
-            deletePeopleProfile()
+            deletePeopleProfile(viewState.body)
         }
     }
 
-    private suspend fun deletePeopleProfile(){
+    private suspend fun deletePeopleProfile(body: String){
         viewModelScope.launch(mainImmediate) {
-            when (repositoryDashboard.deletePeopleProfile()) {
+            when (repositoryDashboard.deletePeopleProfile(body)) {
                 is Response.Error -> {
                     submitSideEffect(
                         ChatListSideEffect.Notify(
@@ -508,38 +515,27 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
-    private suspend fun savePeopleProfile() {
-        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
-
+    private suspend fun savePeopleProfile(body: String) {
         viewModelScope.launch(mainImmediate) {
+            val response = repositoryDashboard.savePeopleProfile(
+                body
+            )
 
-            if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
-
-                deepLinkPopupViewStateContainer.updateViewState(
-                    DeepLinkPopupViewState.SaveProfilePopupProcessing
-                )
-
-                val response = repositoryDashboard.savePeopleProfile(
-                    viewState.body
-                )
-
-                when (response) {
-                    is Response.Error -> {
-                        submitSideEffect(
-                            ChatListSideEffect.Notify(
-                                app.getString(R.string.dashboard_save_profile_generic_error)
-                            )
+            when (response) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_save_profile_generic_error)
                         )
-                    }
-                    is Response.Success -> {
-                        submitSideEffect(
-                            ChatListSideEffect.Notify(
-                                app.getString(R.string.dashboard_save_profile_success)
-                            )
-                        )
-                    }
+                    )
                 }
-
+                is Response.Success -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_save_profile_success)
+                        )
+                    )
+                }
             }
         }.join()
 

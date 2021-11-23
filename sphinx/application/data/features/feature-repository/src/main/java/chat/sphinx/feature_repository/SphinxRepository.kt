@@ -24,6 +24,7 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
@@ -3826,18 +3827,24 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Returned before completing"))
     }
 
-    override suspend fun deletePeopleProfile(): Response<Boolean, ResponseError>{
+    override suspend fun deletePeopleProfile(
+        body: String
+    ): Response<Boolean, ResponseError>{
         var response: Response<Boolean, ResponseError>? = null
 
         applicationScope.launch(mainImmediate) {
-            networkQuerySaveProfile.deletePeopleProfile().collect { loadResponse ->
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
-                    is Response.Error -> {
-                    }
-                    is Response.Success -> {
-                        response = Response.Success(true)
+            moshi.adapter(DeletePeopleProfileDto::class.java).fromJson(body)?.let { deletePeopleProfileDto ->
+                networkQuerySaveProfile.deletePeopleProfile(
+                    deletePeopleProfileDto
+                ).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {
+                        }
+                        is Response.Error -> {
+                        }
+                        is Response.Success -> {
+                            response = Response.Success(true)
+                        }
                     }
                 }
             }

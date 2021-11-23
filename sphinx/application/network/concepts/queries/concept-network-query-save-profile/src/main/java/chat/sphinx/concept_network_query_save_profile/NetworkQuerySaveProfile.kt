@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_save_profile
 
+import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.GetPeopleProfileDto
 import chat.sphinx.kotlin_response.LoadResponse
@@ -20,5 +21,8 @@ abstract class NetworkQuerySaveProfile {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<Any, ResponseError>>
 
-    abstract fun deletePeopleProfile(): Flow<LoadResponse<Any, ResponseError>>
+    abstract fun deletePeopleProfile(
+        deletePeopleProfileDto: DeletePeopleProfileDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
 }

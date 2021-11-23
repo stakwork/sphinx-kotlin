@@ -1,6 +1,7 @@
 package chat.sphinx.feature_network_query_save_profile
 
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.GetPeopleProfileDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -46,11 +47,16 @@ class NetworkQuerySaveProfileImpl(
             relayData = relayData
         )
 
-    override fun deletePeopleProfile(): Flow<LoadResponse<Any, ResponseError>> =
+    override fun deletePeopleProfile(
+        deletePeopleProfileDto: DeletePeopleProfileDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.relayDelete(
             relayEndpoint = ENDPOINT_PROFILE,
-            requestBodyJsonClass = null,
-            requestBody = null,
-            responseJsonClass = SaveProfileResponse::class.java
+            requestBody = deletePeopleProfileDto,
+            requestBodyJsonClass = DeletePeopleProfileDto::class.java,
+            responseJsonClass = SaveProfileResponse::class.java,
+            relayData = relayData,
+            additionalHeaders = mapOf("Content-Type" to "application/json;charset=utf-8")
         )
 }
