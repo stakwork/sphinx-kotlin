@@ -34,6 +34,12 @@
 
     <dimen name="recycler_view_holder_height">90dp</dimen>
 
+    <!-- Podcast search -->
+    <dimen name="feed_podcast_search_progress_bar_xy">32dp</dimen>
+    <dimen name="feed_podcast_search_results_row_height">92dp</dimen>
+    <dimen name="feed_podcast_search_results_image_radius">8dp</dimen>
+    <dimen name="feed_podcast_search_results_image_xy">72dp</dimen>
+
     <!-- Deep link authorize popup -->
     <dimen name="dashboard_authorize_popup_width">240dp</dimen>
     <dimen name="dashboard_authorize_popup_height">300dp</dimen>

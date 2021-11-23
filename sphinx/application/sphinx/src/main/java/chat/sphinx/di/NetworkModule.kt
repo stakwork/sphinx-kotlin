@@ -13,6 +13,7 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
@@ -28,6 +29,7 @@ import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_meme_server.NetworkQueryMemeServerImpl
 import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
+import chat.sphinx.feature_network_query_podcast_search.NetworkQueryPodcastSearchImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_network_query_verify_external.NetworkQueryAuthorizeExternalImpl
 import chat.sphinx.feature_network_query_version.NetworkQueryVersionImpl
@@ -336,4 +338,17 @@ object NetworkModule {
         networkQueryVerifyExternalImpl: NetworkQueryAuthorizeExternalImpl
     ): NetworkQueryAuthorizeExternal =
         networkQueryVerifyExternalImpl
+
+    @Provides
+    @Singleton
+    fun provideNetworkQueryPodcastSearchImpl(
+        networkRelayCall: NetworkRelayCall
+    ): NetworkQueryPodcastSearchImpl =
+        NetworkQueryPodcastSearchImpl(networkRelayCall)
+
+    @Provides
+    fun provideNetworkQueryPodcastSearch(
+        networkQueryPodcastSearchImpl: NetworkQueryPodcastSearchImpl
+    ): NetworkQueryPodcastSearch =
+        networkQueryPodcastSearchImpl
 }

@@ -4,5 +4,5 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class ChatListViewState: ViewState<ChatListViewState>() {
 
-    object Default: ChatListViewState()
+    object Idle: ChatListViewState()
 }

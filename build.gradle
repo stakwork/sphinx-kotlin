@@ -4,6 +4,8 @@ buildscript {
     apply from: rootProject.file('kotlin-android/gradle/dependencies.gradle')
     ext {
         versions.kotlin = '1.5.31'
+        versions.kotlin = '1.5.31'
+        versions.kotlin = '1.5.31'
     }
 
     repositories {

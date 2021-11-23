@@ -29,7 +29,7 @@ internal class FeedAllViewModel @Inject constructor(
         Context,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.Default), FeedFollowingViewModel
+        >(dispatchers, FeedAllViewState.Idle), FeedFollowingViewModel
 {
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {

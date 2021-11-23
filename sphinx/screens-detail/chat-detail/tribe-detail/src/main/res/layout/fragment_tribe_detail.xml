@@ -104,7 +104,7 @@
                     android:gravity="center"
                     android:text="more_vert"
                     android:fontFamily="@font/material_icons_regular"
-                    android:textSize="@dimen/default_text_size_large_title_3"
+                    android:textSize="@dimen/default_text_size_large_title"
                     android:textColor="@color/secondaryText" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

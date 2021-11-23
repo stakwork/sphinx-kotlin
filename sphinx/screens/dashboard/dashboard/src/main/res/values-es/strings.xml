@@ -105,4 +105,8 @@
     <string name="read_place_holder">No se encontraron resultados para \"Leer\"</string>
     <string name="play_place_holder">No se encontraron resultados para \"Jugar\"</string>
     <string name="read_now">Read Now</string>
+
+    <string name="podcast_search_placeholder_1">Buscá entre</string>
+    <string name="podcast_search_placeholder_2">4 000 000 podcasts</string>
+    <string name="podcast_search_placeholder_3">en el Podcast Index</string>
 </resources>

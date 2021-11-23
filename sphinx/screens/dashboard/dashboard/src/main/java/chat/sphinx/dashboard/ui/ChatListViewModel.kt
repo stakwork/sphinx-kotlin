@@ -65,7 +65,7 @@ internal class ChatListViewModel @Inject constructor(
         Context,
         ChatListSideEffect,
         ChatListViewState
-        >(dispatchers, ChatListViewState.Default)
+        >(dispatchers, ChatListViewState.Idle)
 {
 
     private val args: ChatListFragmentArgs by handler.navArgs()

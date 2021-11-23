@@ -27,7 +27,7 @@ class FeedListenViewModel @Inject constructor(
         Context,
         FeedListenSideEffect,
         FeedListenViewState
-        >(dispatchers, FeedListenViewState.Default), FeedFollowingViewModel
+        >(dispatchers, FeedListenViewState.Idle), FeedFollowingViewModel
 {
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         repositoryDashboard.getAllFeedsOfType(FeedType.Podcast).collect { podcastFeeds ->
