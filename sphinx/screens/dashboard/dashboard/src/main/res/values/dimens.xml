@@ -41,6 +41,7 @@
     <dimen name="feed_podcast_search_results_image_xy">72dp</dimen>
     <dimen name="feed_podcast_search_subscribe_text_view_width">50dp</dimen>
     <dimen name="feed_podcast_search_result_progress_bar_xy">30dp</dimen>
+    <dimen name="feed_podcast_search_results_header_height">48dp</dimen>
 
     <!-- Deep link authorize popup -->
     <dimen name="dashboard_authorize_popup_width">240dp</dimen>

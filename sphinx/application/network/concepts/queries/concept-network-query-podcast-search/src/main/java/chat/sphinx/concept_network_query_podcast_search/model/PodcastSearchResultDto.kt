@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_podcast_search.model
 
+import chat.sphinx.wrapper_podcast.PodcastSearchResult
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -19,3 +20,23 @@ data class PodcastSearchResultDto(
     val contentType: String,
     val language: String,
 )
+
+inline fun PodcastSearchResultDto.toPodcastSearchResult() : PodcastSearchResult {
+     return PodcastSearchResult(
+         id,
+         feedType,
+         title,
+         url,
+         description,
+         author,
+         generator,
+         imageUrl,
+         ownerUrl,
+         link,
+         datePublished,
+         dateUpdated,
+         contentType,
+         language,
+         null
+     )
+}

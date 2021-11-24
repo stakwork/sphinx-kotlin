@@ -18,6 +18,7 @@ import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_message_media.MediaType
+import chat.sphinx.wrapper_podcast.PodcastSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -36,7 +37,6 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val chatRepository: ChatRepository,
-    private val networkQueryPodcastSearch: NetworkQueryPodcastSearch,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -68,24 +68,17 @@ class FeedViewModel @Inject constructor(
         )
         
         viewModelScope.launch(mainImmediate) {
-            networkQueryPodcastSearch.searchPodcasts(searchTerm).collect { loadResponse ->
-                @Exhaustive
-                when (loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        updateViewState(
-                            FeedViewState.SearchPlaceHolder
+            chatRepository.searchPodcastBy(searchTerm).collect { searchResults ->
+                if (searchResults.isEmpty()) {
+                    updateViewState(
+                        FeedViewState.SearchPlaceHolder
+                    )
+                } else {
+                    updateViewState(
+                        FeedViewState.SearchResults(
+                            searchResults
                         )
-                    }
-                    is Response.Success -> {
-                        if (loadResponse.value.isNotEmpty()) {
-                            updateViewState(
-                                FeedViewState.SearchResults(
-                                    loadResponse.value
-                                )
-                            )
-                        }
-                    }
+                    )
                 }
             }
         }.also {
@@ -105,7 +98,7 @@ class FeedViewModel @Inject constructor(
 
     private var searchResultSelectedJob: Job? = null
     fun podcastSearchResultSelected(
-        searchResult: PodcastSearchResultDto,
+        searchResult: PodcastSearchResult,
         callback: () -> Unit
     ) {
         if (searchResultSelectedJob?.isActive == true) {

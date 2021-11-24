@@ -18,6 +18,8 @@ import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
+import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
+import chat.sphinx.concept_network_query_podcast_search.model.toPodcastSearchResult
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
@@ -45,7 +47,9 @@ import chat.sphinx.feature_repository.mappers.feed.FeedDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.*
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastSearchResultPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.FeedModelDboPodcastModelPresenterMapper
@@ -87,6 +91,8 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
+import chat.sphinx.wrapper_podcast.PodcastSearchResult
+import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
@@ -132,6 +138,7 @@ abstract class SphinxRepository(
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySubscription: NetworkQuerySubscription,
+    private val networkQueryPodcastSearch: NetworkQueryPodcastSearch,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     protected val LOG: SphinxLogger,
@@ -3523,6 +3530,66 @@ abstract class SphinxRepository(
         feed.chat = chat
 
         return feed
+    }
+
+    private val podcastSearchResultDboPresenterMapper: FeedDboPodcastSearchResultPresenterMapper by lazy {
+        FeedDboPodcastSearchResultPresenterMapper(dispatchers)
+    }
+    override fun searchPodcastBy(searchTerm: String): Flow<List<PodcastSearchResultRow>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        var results: MutableList<PodcastSearchResultRow> = mutableListOf()
+
+        networkQueryPodcastSearch.searchPodcasts(searchTerm).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    results = mutableListOf()
+                }
+                is Response.Success -> {
+
+                    val subscribedItems = queries
+                        .feedGetAllByTitle("%${searchTerm.lowercase().trim()}%")
+                        .executeAsList()
+                        .map { it?.let { podcastSearchResultDboPresenterMapper.mapFrom(it) } }
+
+                    if (subscribedItems.count() > 0) {
+                        results.add(
+                            PodcastSearchResultRow(null, "FOLLOWING", false)
+                        )
+
+                        subscribedItems.forEachIndexed { index, item ->
+                            results.add(
+                                PodcastSearchResultRow(
+                                    item,
+                                    null,
+                                    (index == subscribedItems.count() - 1)
+                                )
+                            )
+                        }
+                    }
+
+                    if (response.value.count() > 0) {
+                        results.add(
+                            PodcastSearchResultRow(null, "DIRECTORY", false)
+                        )
+
+                        response.value.forEachIndexed { index, item ->
+                            results.add(
+                                PodcastSearchResultRow(
+                                    item.toPodcastSearchResult(),
+                                    null,
+                                    (index == response.value.count() - 1)
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        emit(results)
     }
 
     override suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed) {

@@ -1004,6 +1004,12 @@ SELECT *
 FROM feedDbo
 WHERE id = ?;
 
+feedGetAllByTitle:
+SELECT *
+FROM feedDbo
+WHERE subscribed = 1
+AND (title LIKE :title);
+
 feedUpdateCurrentItemId:
 UPDATE feedDbo
 SET current_item_id = :item_id

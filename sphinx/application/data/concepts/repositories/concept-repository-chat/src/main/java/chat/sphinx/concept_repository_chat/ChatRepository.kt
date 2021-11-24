@@ -19,6 +19,7 @@ import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -73,6 +74,7 @@ interface ChatRepository {
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
     fun getPodcastById(feedId: FeedId): Flow<Podcast?>
+    fun searchPodcastBy(searchTerm: String): Flow<List<PodcastSearchResultRow>>
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 

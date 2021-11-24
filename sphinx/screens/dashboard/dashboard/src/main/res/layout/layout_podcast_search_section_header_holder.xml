@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_search_results_holder"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/feed_podcast_search_results_header_height"
+    android:background="@color/headerBG">
+
+    <TextView
+        android:id="@+id/text_view_section_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:fontFamily="@font/montserrat_bold"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/default_text_size_sub_headline"
+        android:maxLines="1"
+        android:textAlignment="textStart"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Following" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

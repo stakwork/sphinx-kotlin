@@ -10,6 +10,7 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -132,6 +133,7 @@ object RepositoryModule {
         networkQueryInvite: NetworkQueryInvite,
         networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
         networkQuerySubscription: NetworkQuerySubscription,
+        networkQueryPodcastSearch: NetworkQueryPodcastSearch,
         socketIOManager: SocketIOManager,
         rsa: RSA,
         sphinxLogger: SphinxLogger,
@@ -155,6 +157,7 @@ object RepositoryModule {
             networkQueryInvite,
             networkQueryAuthorizeExternal,
             networkQuerySubscription,
+            networkQueryPodcastSearch,
             rsa,
             socketIOManager,
             sphinxLogger,
