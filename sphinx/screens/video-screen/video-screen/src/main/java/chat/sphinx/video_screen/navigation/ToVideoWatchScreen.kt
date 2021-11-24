@@ -2,23 +2,21 @@ package chat.sphinx.video_screen.navigation
 
 import androidx.navigation.NavController
 import chat.sphinx.video_screen.R
-import chat.sphinx.video_screen.ui.VideoScreenFragmentArgs
+import chat.sphinx.video_screen.ui.watch.VideoFeedWatchScreenFragmentArgs
 import chat.sphinx.wrapper_common.feed.FeedId
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 
-class ToVideoScreen(
-    val feedId: FeedId,
-    val feedItemId: FeedId? = null
+class ToVideoWatchScreen(
+    val feedItemId: FeedId
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
-        val builder = VideoScreenFragmentArgs.Builder(
-            feedId.value
+        val builder = VideoFeedWatchScreenFragmentArgs.Builder(
+            feedItemId.value
         )
-        builder.argFeedItemId = feedItemId?.value
 
         controller.navigate(
-            R.id.video_screen_nav_graph,
+            R.id.video_watch_nav_graph,
             builder.build().toBundle(),
             DefaultNavOptions.defaultAnimsBuilt
         )

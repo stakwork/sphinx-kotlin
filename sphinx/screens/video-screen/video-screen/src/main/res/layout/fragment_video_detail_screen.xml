@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/headerBG"
-    tools:context=".ui.VideoScreenFragment">
+    tools:context=".ui.detail.VideoFeedDetailScreenFragment">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -18,38 +18,20 @@
             android:id="@+id/constraint_layout_scroll_view_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraint_layout_detail_content"
+            <include
+                android:id="@+id/include_layout_video_feed_details"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <include
-                    android:id="@+id/include_layout_current_video_detail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    layout="@layout/layout_current_episode_detail"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:visibility="gone"
-                    />
-
-                <include
-                    android:id="@+id/include_layout_video_feed_details"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    layout="@layout/layout_video_feed_detail"
-                    app:layout_constraintTop_toTopOf="parent"
-                    />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
+                layout="@layout/layout_video_feed_detail"
+                app:layout_constraintTop_toTopOf="parent"
+                />
             <!-- Episodes List Layout -->
             <include
                 android:id="@+id/include_layout_video_episodes_list"
                 layout="@layout/layout_video_episodes_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/constraint_layout_detail_content"
+                app:layout_constraintTop_toBottomOf="@+id/include_layout_video_feed_details"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 />

@@ -44,21 +44,27 @@ class FeedWatchViewModel @Inject constructor(
 
     fun episodeItemSelected(episode: FeedItem) {
         goToVideoPlayer(
-            feedId = episode.feedId,
             feedItemId = episode.id
         )
     }
 
     override fun feedSelected(feed: Feed) {
-        goToVideoPlayer(
+        goToVideoFeed(
             feedId = feed.id
         )
     }
 
-    private fun goToVideoPlayer(feedId: FeedId, feedItemId: FeedId? = null) {
+    private fun goToVideoFeed(feedId: FeedId) {
         viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toVideoScreen(
-                feedId = feedId,
+            dashboardNavigator.toVideoFeedScreen(
+                feedId = feedId
+            )
+        }
+    }
+
+    private fun goToVideoPlayer(feedItemId: FeedId) {
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toVideoWatchScreen(
                 feedItemId = feedItemId
             )
         }

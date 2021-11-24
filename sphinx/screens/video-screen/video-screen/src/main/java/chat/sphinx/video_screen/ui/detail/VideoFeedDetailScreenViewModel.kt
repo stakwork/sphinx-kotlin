@@ -1,8 +1,9 @@
-package chat.sphinx.video_screen.ui
+package chat.sphinx.video_screen.ui.detail
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.video_screen.ui.VideoFeedViewModel
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
@@ -14,17 +15,17 @@ import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 @HiltViewModel
-internal class VideoScreenViewModel @Inject constructor(
+internal class VideoFeedDetailScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
     repositoryMedia: RepositoryMedia
 ): BaseViewModel<
-        VideoScreenViewState
-        >(dispatchers, VideoScreenViewState.Idle)
+        VideoFeedDetailScreenViewState
+        >(dispatchers, VideoFeedDetailScreenViewState.Idle), VideoFeedViewModel
 {
-    val args: VideoScreenFragmentArgs by savedStateHandle.navArgs()
+    val args: VideoFeedDetailScreenFragmentArgs by savedStateHandle.navArgs()
 
-    val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
+    override val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
         emitAll(repositoryMedia.getFeedByFeedId(FeedId(args.argFeedId)))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
@@ -32,19 +33,7 @@ internal class VideoScreenViewModel @Inject constructor(
         replay = 1,
     )
 
-    val videoItemSharedFlow: SharedFlow<FeedItem?> = flow {
-        if (args.argFeedItemId != null) {
-            emitAll(repositoryMedia.getFeedItemById(FeedId(args.argFeedItemId!!)))
-        } else {
-            emit(null)
-        }
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000),
-        replay = 1,
-    )
-
-    val feedItemsHolderViewStateFlow: StateFlow<List<FeedItem>> = flow {
+    override val feedItemsHolderViewStateFlow: StateFlow<List<FeedItem>> = flow {
         repositoryMedia.getAllFeedItemsFromFeedId(FeedId(args.argFeedId)).collect { feedItems ->
             emit(feedItems.toList())
         }
@@ -53,8 +42,4 @@ internal class VideoScreenViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(5_000),
         emptyList()
     )
-
-    fun episodeSelected(videoEpisode: FeedItem) {
-        // TODO: Show video episode detail...
-    }
 }

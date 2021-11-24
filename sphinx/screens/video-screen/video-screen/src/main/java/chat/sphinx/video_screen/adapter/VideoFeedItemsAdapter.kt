@@ -13,27 +13,20 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.databinding.LayoutEpisodeListItemHolderBinding
-import chat.sphinx.video_screen.ui.VideoScreenViewModel
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.video_screen.ui.Placeholder
+import chat.sphinx.video_screen.ui.VideoFeedViewModel
 import chat.sphinx.wrapper_common.hhmmElseDate
-import chat.sphinx.wrapper_feed.FeedAuthor
-import chat.sphinx.wrapper_feed.FeedDescription
 import chat.sphinx.wrapper_feed.FeedItem
-import chat.sphinx.wrapper_feed.FeedTitle
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.sql.Date
 
 internal class VideoFeedItemsAdapter (
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: VideoScreenViewModel,
+    private val viewModel: VideoFeedViewModel,
     private val viewModelDispatcher: CoroutineDispatchers,
 ): RecyclerView.Adapter<VideoFeedItemsAdapter.VideoEpisodeViewHolder>(), DefaultLifecycleObserver {
 
@@ -97,40 +90,8 @@ internal class VideoFeedItemsAdapter (
 
 //    private val videoEpisodes = ArrayList<FeedItem>(listOf())
     private val videoEpisodes = mutableListOf(
-        // Normal Video
-        FeedItem(
-            FeedId("feedItemId"),
-            FeedTitle("Something we see a lot"),
-            FeedDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-            DateTime(Date.valueOf("2021-09-22")),
-            DateTime(Date.valueOf("2021-09-22")),
-            FeedAuthor("Kgothatso"),
-            null,
-            null,
-            FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
-            null,
-            PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
-            PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
-            FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
-            FeedId("feedId"),
-        ),
-        // Youtube Video
-        FeedItem(
-            FeedId("feedYoutubeItemId"),
-            FeedTitle("Youtube we see a lot"),
-            FeedDescription("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."),
-            DateTime(Date.valueOf("2021-09-22")),
-            DateTime(Date.valueOf("2021-09-22")),
-            FeedAuthor("Youtube Channel"),
-            null,
-            null,
-            FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-            null,
-            PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
-            PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
-            FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-            FeedId("youtubeFeedId"),
-        )
+        Placeholder.remoteVideoFeedItem,
+        Placeholder.youtubeFeedItem
     )
 
 //    override fun onStart(owner: LifecycleOwner) {

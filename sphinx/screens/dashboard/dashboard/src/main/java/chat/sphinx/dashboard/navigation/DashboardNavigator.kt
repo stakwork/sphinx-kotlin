@@ -26,5 +26,7 @@ abstract class DashboardNavigator(
 
     abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, currentEpisodeDuration: Long)
 
-    abstract suspend fun toVideoScreen(feedId: FeedId, feedItemId: FeedId?)
+    abstract suspend fun toVideoFeedScreen(feedId: FeedId)
+
+    abstract suspend fun toVideoWatchScreen(feedItemId: FeedId)
 }

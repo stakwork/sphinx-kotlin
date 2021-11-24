@@ -10,7 +10,8 @@ import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
-import chat.sphinx.video_screen.navigation.ToVideoScreen
+import chat.sphinx.video_screen.navigation.ToVideoFeedDetailScreen
+import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -60,10 +61,17 @@ internal class DashboardNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, currentEpisodeDuration))
     }
 
-    override suspend fun toVideoScreen(feedId: FeedId, feedItemId: FeedId?) {
+    override suspend fun toVideoFeedScreen(feedId: FeedId) {
         navigationDriver.submitNavigationRequest(
-            ToVideoScreen(
-                feedId = feedId,
+            ToVideoFeedDetailScreen(
+                feedId = feedId
+            )
+        )
+    }
+
+    override suspend fun toVideoWatchScreen(feedItemId: FeedId) {
+        navigationDriver.submitNavigationRequest(
+            ToVideoWatchScreen(
                 feedItemId = feedItemId
             )
         )
