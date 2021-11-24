@@ -62,7 +62,7 @@ class FeedViewModel @Inject constructor(
             return
         }
 
-        delay(500L)
+        delay(1000L)
         
         searchPodcastsJob = viewModelScope.launch(mainImmediate) {
             networkQueryPodcastSearch.searchPodcasts(searchTerm).collect { loadResponse ->
@@ -104,6 +104,20 @@ class FeedViewModel @Inject constructor(
 
     private var searchResultSelectedJob: Job? = null
     fun podcastSearchResultSelected(searchResult: PodcastSearchResultDto) {
+        if (searchResultSelectedJob?.isActive == true) {
+            return
+        }
+
+        searchResultSelectedJob = viewModelScope.launch(mainImmediate) {
+            searchResult.id.toFeedId()?.let { feedId ->
+                chatRepository.getFeedById(feedId).collect { feed ->
+                    feed?.let { nnFeed ->
+                        goToPodcastPlayer(nnFeed)
+                    }
+                }
+            }
+        }
+
         viewModelScope.launch(mainImmediate) {
             searchResult.url.toFeedUrl()?.let { feedUrl ->
                 chatRepository.updateFeedContent(
@@ -114,16 +128,6 @@ class FeedViewModel @Inject constructor(
                     false.toSubscribed(),
                     currentEpisodeId = null
                 )
-            }
-        }
-
-        searchResultSelectedJob = viewModelScope.launch(mainImmediate) {
-            searchResult.id.toFeedId()?.let { feedId ->
-                chatRepository.getFeedById(feedId).collect { feed ->
-                    feed?.let { nnFeed ->
-                        goToPodcastPlayer(nnFeed)
-                    }
-                }
             }
         }
     }
