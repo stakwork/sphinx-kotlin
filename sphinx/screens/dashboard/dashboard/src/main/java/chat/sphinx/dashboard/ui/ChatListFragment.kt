@@ -57,21 +57,32 @@ internal class ChatListFragment : SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        BackPressHandler(binding.root.context)
-            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
-            .addCallback(viewLifecycleOwner, requireActivity())
 
         setupSearch()
         setupChats()
     }
 
-    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            binding.searchBarClearFocus()
-            super.handleOnBackPressed()
-        }
+    override fun onResume() {
+        super.onResume()
+
+        BackPressHandler(binding.root.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
     }
 
+    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
+        override fun handleOnBackPressed() {
+            if (
+                parentFragment is DashboardFragment &&
+                (parentFragment as DashboardFragment)?.closeDrawerIfOpen()
+            ) {
+                return
+            } else {
+                binding.searchBarClearFocus()
+                super.handleOnBackPressed()
+            }
+        }
+    }
 
     private fun setupChats() {
 
@@ -132,10 +143,6 @@ internal class ChatListFragment : SideEffectFragment<
                 editTextDashboardSearch.setText("")
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
     }
 
     override fun onPause() {

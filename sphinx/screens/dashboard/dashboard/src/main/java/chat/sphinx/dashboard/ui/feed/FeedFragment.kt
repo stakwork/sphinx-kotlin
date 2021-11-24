@@ -21,6 +21,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_query_podcast_search.model.PodcastSearchResultDto
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
+import chat.sphinx.dashboard.ui.DashboardFragment
 import chat.sphinx.dashboard.ui.DashboardFragmentsAdapter
 import chat.sphinx.dashboard.ui.adapter.PodcastSearchAdapter
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
@@ -64,21 +65,36 @@ internal class FeedFragment : SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        BackPressHandler(binding.root.context)
-            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
-            .addCallback(viewLifecycleOwner, requireActivity())
 
         setupSearch()
         setupFeedViewPager()
         showPodcastSearchAdapter()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        BackPressHandler(binding.root.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
+    }
+
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
-            if (viewModel.currentViewState !is FeedViewState.Idle) {
+            if (
+                parentFragment is DashboardFragment &&
+                (parentFragment as DashboardFragment)?.closeDrawerIfOpen()
+            ) {
+                return
+            } else if (
+                viewModel.currentViewState is FeedViewState.SearchResults ||
+                viewModel.currentViewState is FeedViewState.LoadingSearchResults
+            ) {
+                binding.layoutSearchBar.editTextDashboardSearch.setText("")
+            } else if (viewModel.currentViewState is FeedViewState.SearchPlaceHolder) {
                 viewModel.updateViewState(FeedViewState.Idle)
-            } else {
                 binding.searchBarClearFocus()
+            } else {
                 super.handleOnBackPressed()
             }
         }

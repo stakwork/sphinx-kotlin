@@ -73,9 +73,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        BackPressHandler(binding.root.context)
-            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
-            .addCallback(viewLifecycleOwner, requireActivity())
 
         viewModel.networkRefresh()
 
@@ -102,14 +99,12 @@ internal class DashboardFragment : MotionLayoutFragment<
         viewModel.networkRefresh()
     }
 
-    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            if (viewModel.currentViewState is NavDrawerViewState.Open) {
-                viewModel.updateViewState(NavDrawerViewState.Closed)
-            } else {
-                super.handleOnBackPressed()
-            }
+    fun closeDrawerIfOpen(): Boolean {
+        if (viewModel.currentViewState is NavDrawerViewState.Open) {
+            viewModel.updateViewState(NavDrawerViewState.Closed)
+            return true
         }
+        return false
     }
 
     private inner class CloseDrawerOnDestinationChange: NavController.OnDestinationChangedListener {
