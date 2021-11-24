@@ -74,6 +74,20 @@
         android:text="@string/material_icon_name_add"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <ProgressBar
+        android:id="@+id/progress_bar_result_loading"
+        android:layout_width="@dimen/feed_podcast_search_result_progress_bar_xy"
+        android:layout_height="@dimen/feed_podcast_search_result_progress_bar_xy"
+        android:indeterminate="true"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:indeterminateTint="@android:color/white"
+        android:progressBackgroundTint="@android:color/white"
+        android:background="@color/body"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <View
         android:layout_width="0dp"
         android:layout_height="1dp"

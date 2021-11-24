@@ -6,6 +6,7 @@ import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
@@ -16,9 +17,13 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutPodcastSearchRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -71,7 +76,7 @@ class PodcastSearchAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.title                   == new.title                &&
+                    old.id                      == new.id             &&
                     old.title                   == new.title
 
                 if (sameList) {
@@ -159,9 +164,23 @@ class PodcastSearchAdapter(
         init {
             binding.layoutConstraintSearchResultsHolder.setOnClickListener {
                 searchResult?.let { nnSearchResult ->
-                    viewModel.podcastSearchResultSelected(nnSearchResult)
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        searchResultsSelected(nnSearchResult)
+                    }
                 }
             }
+        }
+
+        suspend fun searchResultsSelected(searchResult: PodcastSearchResultDto) {
+            binding.progressBarResultLoading.visible
+            binding.layoutConstraintSearchResultsHolder.isClickable = false
+
+            viewModel.podcastSearchResultSelected(searchResult)
+
+            delay(1000L)
+
+            binding.layoutConstraintSearchResultsHolder.isClickable = true
+            binding.progressBarResultLoading.gone
         }
 
         fun bind(position: Int) {

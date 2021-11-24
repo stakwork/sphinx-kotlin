@@ -62,17 +62,17 @@ class FeedViewModel @Inject constructor(
             return
         }
 
-        delay(1000L)
+        updateViewState(
+            FeedViewState.LoadingSearchResults
+        )
+
+        delay(500L)
         
         searchPodcastsJob = viewModelScope.launch(mainImmediate) {
             networkQueryPodcastSearch.searchPodcasts(searchTerm).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                        updateViewState(
-                            FeedViewState.LoadingSearchResults
-                        )
-                    }
+                    is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         updateViewState(
                             FeedViewState.SearchPlaceHolder
