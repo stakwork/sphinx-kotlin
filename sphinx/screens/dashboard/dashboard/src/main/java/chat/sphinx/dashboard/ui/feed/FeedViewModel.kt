@@ -50,9 +50,7 @@ class FeedViewModel @Inject constructor(
         searchTerm: String,
         searchFieldActive: Boolean
     ) {
-        if (searchPodcastsJob?.isActive == true) {
-            searchPodcastsJob?.cancel()
-        }
+        searchPodcastsJob?.cancel()
 
         if (searchTerm.isEmpty()) {
             updateViewState(
@@ -68,10 +66,8 @@ class FeedViewModel @Inject constructor(
         updateViewState(
             FeedViewState.LoadingSearchResults
         )
-
-        delay(500L)
         
-        searchPodcastsJob = viewModelScope.launch(mainImmediate) {
+        viewModelScope.launch(mainImmediate) {
             networkQueryPodcastSearch.searchPodcasts(searchTerm).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
@@ -92,6 +88,8 @@ class FeedViewModel @Inject constructor(
                     }
                 }
             }
+        }.also {
+            searchPodcastsJob = it
         }
     }
 
