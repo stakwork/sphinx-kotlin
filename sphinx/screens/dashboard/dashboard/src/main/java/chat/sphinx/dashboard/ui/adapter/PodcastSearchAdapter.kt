@@ -164,23 +164,19 @@ class PodcastSearchAdapter(
         init {
             binding.layoutConstraintSearchResultsHolder.setOnClickListener {
                 searchResult?.let { nnSearchResult ->
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        searchResultsSelected(nnSearchResult)
-                    }
+                    searchResultsSelected(nnSearchResult)
                 }
             }
         }
 
-        suspend fun searchResultsSelected(searchResult: PodcastSearchResultDto) {
+        fun searchResultsSelected(searchResult: PodcastSearchResultDto) {
             binding.progressBarResultLoading.visible
             binding.layoutConstraintSearchResultsHolder.isClickable = false
 
-            viewModel.podcastSearchResultSelected(searchResult)
-
-            delay(1000L)
-
-            binding.layoutConstraintSearchResultsHolder.isClickable = true
-            binding.progressBarResultLoading.gone
+            viewModel.podcastSearchResultSelected(searchResult) {
+                binding.layoutConstraintSearchResultsHolder.isClickable = true
+                binding.progressBarResultLoading.gone
+            }
         }
 
         fun bind(position: Int) {

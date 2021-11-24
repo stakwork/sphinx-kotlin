@@ -16,6 +16,8 @@ import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_io_utils.InputStreamProvider
+import chat.sphinx.wrapper_message_media.MediaType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -26,6 +28,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -103,7 +106,10 @@ class FeedViewModel @Inject constructor(
     }
 
     private var searchResultSelectedJob: Job? = null
-    fun podcastSearchResultSelected(searchResult: PodcastSearchResultDto) {
+    fun podcastSearchResultSelected(
+        searchResult: PodcastSearchResultDto,
+        callback: () -> Unit
+    ) {
         if (searchResultSelectedJob?.isActive == true) {
             return
         }
@@ -113,6 +119,7 @@ class FeedViewModel @Inject constructor(
                 chatRepository.getFeedById(feedId).collect { feed ->
                     feed?.let { nnFeed ->
                         goToPodcastPlayer(nnFeed)
+                        callback()
                     }
                 }
             }
