@@ -9,23 +9,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager2.widget.ViewPager2
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_network_query_podcast_search.model.PodcastSearchResultDto
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
 import chat.sphinx.dashboard.ui.DashboardFragment
-import chat.sphinx.dashboard.ui.DashboardFragmentsAdapter
 import chat.sphinx.dashboard.ui.adapter.PodcastSearchAdapter
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
-import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,8 +28,6 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
-import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
-import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 

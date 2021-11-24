@@ -1,6 +1,5 @@
 package chat.sphinx.dashboard.ui.viewstates
 
-import chat.sphinx.concept_network_query_podcast_search.model.PodcastSearchResultDto
 import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
 import io.matthewnelson.concept_views.viewstate.ViewState
 

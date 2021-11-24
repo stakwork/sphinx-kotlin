@@ -36,6 +36,7 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_repository_message.model.SendPaymentRequest
+import chat.sphinx.concept_repository_podcast.PodcastRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -149,6 +150,7 @@ abstract class SphinxRepository(
     SubscriptionRepository,
     RepositoryDashboard,
     RepositoryMedia,
+    PodcastRepository,
     CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener
 {
@@ -3272,75 +3274,6 @@ abstract class SphinxRepository(
         }
     }
 
-    private val podcastDboPresenterMapper: FeedDboPodcastPresenterMapper by lazy {
-        FeedDboPodcastPresenterMapper(dispatchers)
-    }
-    private val podcastDestinationDboPresenterMapper: FeedDestinationDboPodcastDestinationPresenterMapper by lazy {
-        FeedDestinationDboPodcastDestinationPresenterMapper(dispatchers)
-    }
-    private val podcastEpisodeDboPresenterMapper: FeedItemDboPodcastEpisodePresenterMapper by lazy {
-        FeedItemDboPodcastEpisodePresenterMapper(dispatchers)
-    }
-    private val podcastModelDboPresenterMapper: FeedModelDboPodcastModelPresenterMapper by lazy {
-        FeedModelDboPodcastModelPresenterMapper(dispatchers)
-    }
-    override fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
-
-        queries.feedGetByChatIdAndType(chatId, FeedType.Podcast)
-            .asFlow()
-            .mapToOneOrNull(io)
-            .map { it?.let { podcastDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
-            .collect { value: Podcast? ->
-                value?.let { podcast ->
-                    emit(
-                        processPodcast(podcast, queries)
-                    )
-                }
-            }
-    }
-
-    override fun getPodcastById(feedId: FeedId): Flow<Podcast?> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
-
-        queries.feedGetById(feedId)
-            .asFlow()
-            .mapToOneOrNull(io)
-            .map { it?.let { podcastDboPresenterMapper.mapFrom(it) } }
-            .distinctUntilChanged()
-            .collect { value: Podcast? ->
-                value?.let { podcast ->
-                    emit(
-                        processPodcast(podcast, queries)
-                    )
-                }
-            }
-    }
-
-    private suspend fun processPodcast(
-        podcast: Podcast,
-        queries: SphinxDatabaseQueries
-    ): Podcast {
-
-        queries.feedModelGetById(podcast.id).executeAsOneOrNull()?.let { feedModelDbo ->
-            podcast.model = podcastModelDboPresenterMapper.mapFrom(feedModelDbo)
-        }
-
-        val episodes = queries.feedItemsGetByFeedId(podcast.id).executeAsList().map {
-            podcastEpisodeDboPresenterMapper.mapFrom(it)
-        }
-
-        val destinations = queries.feedDestinationsGetByFeedId(podcast.id).executeAsList().map {
-            podcastDestinationDboPresenterMapper.mapFrom(it)
-        }
-
-        podcast.episodes = episodes
-        podcast.destinations = destinations
-
-        return podcast
-    }
-
     override fun getFeedByChatId(chatId: ChatId): Flow<Feed?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -3530,6 +3463,75 @@ abstract class SphinxRepository(
         feed.chat = chat
 
         return feed
+    }
+
+    private val podcastDboPresenterMapper: FeedDboPodcastPresenterMapper by lazy {
+        FeedDboPodcastPresenterMapper(dispatchers)
+    }
+    private val podcastDestinationDboPresenterMapper: FeedDestinationDboPodcastDestinationPresenterMapper by lazy {
+        FeedDestinationDboPodcastDestinationPresenterMapper(dispatchers)
+    }
+    private val podcastEpisodeDboPresenterMapper: FeedItemDboPodcastEpisodePresenterMapper by lazy {
+        FeedItemDboPodcastEpisodePresenterMapper(dispatchers)
+    }
+    private val podcastModelDboPresenterMapper: FeedModelDboPodcastModelPresenterMapper by lazy {
+        FeedModelDboPodcastModelPresenterMapper(dispatchers)
+    }
+    override fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        queries.feedGetByChatIdAndType(chatId, FeedType.Podcast)
+            .asFlow()
+            .mapToOneOrNull(io)
+            .map { it?.let { podcastDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+            .collect { value: Podcast? ->
+                value?.let { podcast ->
+                    emit(
+                        processPodcast(podcast, queries)
+                    )
+                }
+            }
+    }
+
+    override fun getPodcastById(feedId: FeedId): Flow<Podcast?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        queries.feedGetById(feedId)
+            .asFlow()
+            .mapToOneOrNull(io)
+            .map { it?.let { podcastDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+            .collect { value: Podcast? ->
+                value?.let { podcast ->
+                    emit(
+                        processPodcast(podcast, queries)
+                    )
+                }
+            }
+    }
+
+    private suspend fun processPodcast(
+        podcast: Podcast,
+        queries: SphinxDatabaseQueries
+    ): Podcast {
+
+        queries.feedModelGetById(podcast.id).executeAsOneOrNull()?.let { feedModelDbo ->
+            podcast.model = podcastModelDboPresenterMapper.mapFrom(feedModelDbo)
+        }
+
+        val episodes = queries.feedItemsGetByFeedId(podcast.id).executeAsList().map {
+            podcastEpisodeDboPresenterMapper.mapFrom(it)
+        }
+
+        val destinations = queries.feedDestinationsGetByFeedId(podcast.id).executeAsList().map {
+            podcastDestinationDboPresenterMapper.mapFrom(it)
+        }
+
+        podcast.episodes = episodes
+        podcast.destinations = destinations
+
+        return podcast
     }
 
     private val podcastSearchResultDboPresenterMapper: FeedDboPodcastSearchResultPresenterMapper by lazy {

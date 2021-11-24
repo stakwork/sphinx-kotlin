@@ -1,23 +1,17 @@
 package chat.sphinx.dashboard.ui.feed
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
-import chat.sphinx.concept_network_query_podcast_search.model.PodcastSearchResultDto
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_podcast.PodcastRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_io_utils.InputStreamProvider
-import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_podcast.PodcastSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -25,18 +19,15 @@ import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import java.io.File
-import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @HiltViewModel
 class FeedViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val chatRepository: ChatRepository,
+    private val podcastRepository: PodcastRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -68,7 +59,7 @@ class FeedViewModel @Inject constructor(
         )
         
         viewModelScope.launch(mainImmediate) {
-            chatRepository.searchPodcastBy(searchTerm).collect { searchResults ->
+            podcastRepository.searchPodcastBy(searchTerm).collect { searchResults ->
                 if (searchResults.isEmpty()) {
                     updateViewState(
                         FeedViewState.SearchPlaceHolder

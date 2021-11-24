@@ -9,6 +9,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_podcast.PodcastRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -46,6 +47,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
+    private val podcastRepository: PodcastRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ) : BaseViewModel<PodcastPlayerViewState>(
@@ -58,9 +60,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
         if (args.argChatId != ChatId.NULL_CHAT_ID.toLong()) {
-            emitAll(chatRepository.getPodcastByChatId(args.chatId))
+            emitAll(podcastRepository.getPodcastByChatId(args.chatId))
         } else {
-            emitAll(chatRepository.getPodcastById(args.feedId))
+            emitAll(podcastRepository.getPodcastById(args.feedId))
         }
     }.distinctUntilChanged().shareIn(
         viewModelScope,

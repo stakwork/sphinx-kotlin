@@ -11,6 +11,7 @@ import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_podcast.PodcastRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -45,6 +46,7 @@ internal class TribeFeedViewModel @Inject constructor(
     private val navigator: TribeChatNavigator,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
+    private val podcastRepository: PodcastRepository,
     private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle),
@@ -242,7 +244,7 @@ internal class TribeFeedViewModel @Inject constructor(
                     viewModelScope.launch(mainImmediate) {
                         delay(500L)
 
-                        chatRepository.getPodcastByChatId(args.chatId).collect { podcast ->
+                        podcastRepository.getPodcastByChatId(args.chatId).collect { podcast ->
                             podcast?.let { nnPodcast ->
                                 podcastLoaded(
                                     nnPodcast,
