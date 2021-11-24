@@ -3237,11 +3237,22 @@ abstract class SphinxRepository(
                     }
                     is Response.Success -> {
                         podcastLock.withLock {
+                            var cId: ChatId = chatId
+
+                            response.value.id.toFeedId()?.let { feedId ->
+                                queries.feedGetById(feedId).executeAsOneOrNull()?.let { existingFeed ->
+                                    //If feed already exists linked to a chat, do not override with NULL CHAT ID
+                                    if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+                                        cId = existingFeed.chat_id
+                                    }
+                                }
+                            }
+
                             queries.transaction {
                                 upsertFeed(
                                     response.value,
                                     feedUrl,
-                                    chatId,
+                                    cId,
                                     currentItemId,
                                     subscribed,
                                     queries
