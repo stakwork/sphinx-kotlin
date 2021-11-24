@@ -56,6 +56,7 @@
     <string name="material_icon_name_gif">gif</string>
     <string name="material_icon_name_verified_user">verified_user</string>
     <string name="material_icon_name_play_outline">play_circle_outline</string>
+    <string name="material_icon_name_play_circle_filled">play_circle_filled</string>
     <string name="material_icon_name_cancel">cancel</string>
     <string name="material_icon_name_lens" translatable="false">lens</string>
 

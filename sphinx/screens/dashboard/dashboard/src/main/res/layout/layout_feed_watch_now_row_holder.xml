@@ -12,7 +12,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:background="@color/body">
+        android:background="@color/headerBG">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_item_image"
@@ -28,10 +28,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/material_icons_regular"
-            android:textSize="@dimen/default_text_size_large_title_chevron_icon"
-            android:text="@string/material_icon_name_play_button"
-            android:textColor="@color/secondaryText"
-            android:lines="1"
+            android:textSize="@dimen/default_text_size_large_play_overlay_icon"
+            android:text="@string/material_icon_name_play_circle_filled"
+            android:textColor="@color/black"
+            android:alpha="0.5"
             app:layout_constraintStart_toStartOf="@+id/image_view_item_image"
             app:layout_constraintEnd_toEndOf="@+id/image_view_item_image"
             app:layout_constraintTop_toTopOf="@+id/image_view_item_image"
@@ -99,7 +99,7 @@
             android:layout_marginEnd="@dimen/default_small_layout_margin"
             android:fontFamily="@font/material_icons_regular"
             android:text="@string/material_icon_name_lens"
-            android:textSize="@dimen/default_text_size_caption1"
+            android:textSize="@dimen/feed_row_text_point_divider"
             android:textColor="@color/secondaryText"
             app:layout_constraintStart_toEndOf="@+id/text_view_contributor_name"
             app:layout_constraintEnd_toStartOf="@+id/text_view_entry_timestamp"

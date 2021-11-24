@@ -3381,6 +3381,36 @@ abstract class SphinxRepository(
         return feed
     }
 
+    private suspend fun mapFeedItemDboList(
+        listFeedItemDbo: List<FeedItemDbo>,
+        queries: SphinxDatabaseQueries
+    ) : List<FeedItem> {
+        val feedsMap: MutableMap<FeedId, ArrayList<Feed>> =
+            LinkedHashMap(listFeedItemDbo.size)
+
+        for (dbo in listFeedItemDbo) {
+            feedsMap[dbo.feed_id] = ArrayList(0)
+        }
+
+        feedsMap.keys.chunked(500).forEach { chunkedFeedIds ->
+            queries.feedGetAllByIds(chunkedFeedIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        feedsMap[dbo.id]?.add(
+                            feedDboPresenterMapper.mapFrom(dbo)
+                        )
+                    }
+                }
+        }
+
+        return listFeedItemDbo.map {
+            feedItemDboPresenterMapper.mapFrom(it).apply {
+                it.feed_id
+            }
+        }
+    }
+
     /*
     * Used to hold in memory the chat table's latest message time to reduce disk IO
     * and mitigate conflicting updates between SocketIO and networkRefreshMessages
@@ -4536,29 +4566,45 @@ abstract class SphinxRepository(
                 .asFlow()
                 .mapToList()
                 .map { feedItemsDbo ->
-                    feedItemsDbo.map { feedItemDbo ->
-                        feedItemDboPresenterMapper.mapFrom(feedItemDbo)
-                    }
+                    mapFeedItemDboList(feedItemsDbo, queries)
                 }
         )
     }
 
     override fun getFeedByFeedId(feedId: FeedId): Flow<Feed?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
         emitAll(
-            coreDB.getSphinxDatabaseQueries().feedGetById(feedId)
+            queries.feedGetById(feedId)
                 .asFlow()
                 .mapToOneOrNull(io)
-                .map { it?.let { feedDboPresenterMapper.mapFrom(it) } }
+                .map { feedDbo ->
+                    feedDbo?.let {
+                        withContext(default) {
+                            mapFeedDboList(
+                                listOf(feedDbo), queries
+                            ).firstOrNull()
+                        }
+                    }
+                }
                 .distinctUntilChanged()
         )
     }
     
     override fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
         emitAll(
-            coreDB.getSphinxDatabaseQueries().feedItemGetById(feedItemId)
+            queries.feedItemGetById(feedItemId)
                 .asFlow()
                 .mapToOneOrNull(io)
-                .map { it?.let { feedItemDboPresenterMapper.mapFrom(it) } }
+                .map { feedItemDbo ->
+                    feedItemDbo?.let {
+                        withContext(default) {
+                            mapFeedItemDboList(
+                                listOf(feedItemDbo), queries
+                            ).firstOrNull()
+                        }
+                    }
+                }
                 .distinctUntilChanged()
         )
     }

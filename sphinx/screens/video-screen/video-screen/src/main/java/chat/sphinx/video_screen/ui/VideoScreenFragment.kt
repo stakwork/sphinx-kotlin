@@ -68,51 +68,55 @@ internal class VideoScreenFragment: BaseFragment<
         }
     }
 
+    private val youtubeFeed = Feed(
+        FeedId("feedYoutubeItemId"),
+        FeedType.Video,
+        FeedTitle("Youtube we see a lot"),
+        FeedDescription("Describing the things we see"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedAuthor("Youtube Channel"),
+        null,
+        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        null,
+        null,
+        FeedItemsCount(0L),
+        null,
+        ChatId(0L),
+    )
+
+    private val remoteVideoFeed = Feed(
+        FeedId("feedItemId"),
+        FeedType.Video,
+        FeedTitle("Youtube we see a lot"),
+        FeedDescription("Describing the things we see"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedAuthor("Normal Video Feed"),
+        null,
+        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        null,
+        null,
+        FeedItemsCount(0L),
+        null,
+        ChatId(0L),
+    )
+
     private fun setupVideoFeedDetail() {
         binding.includeLayoutVideoFeedDetails.apply {
 
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
 //                val videoFeed = viewModel.videoFeedSharedFlow.last()
                 val videoFeed = if (viewModel.args.argFeedId == "youtubeFeedId") {
-                    Feed(
-                        FeedId("feedYoutubeItemId"),
-                        FeedType.Video,
-                        FeedTitle("Youtube we see a lot"),
-                        FeedDescription("Describing the things we see"),
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        FeedAuthor("Youtube Channel"),
-                        null,
-                        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        null,
-                        null,
-                        FeedItemsCount(0L),
-                        null,
-                        ChatId(0L),
-                    )
+                    youtubeFeed
                 } else {
-                    Feed(
-                        FeedId("feedItemId"),
-                        FeedType.Video,
-                        FeedTitle("Youtube we see a lot"),
-                        FeedDescription("Describing the things we see"),
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        FeedAuthor("Normal Video Feed"),
-                        null,
-                        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        DateTime(Date.valueOf("2021-09-22")),
-                        null,
-                        null,
-                        FeedItemsCount(0L),
-                        null,
-                        ChatId(0L),
-                    )
+                    remoteVideoFeed
                 }
 
                 videoFeed?.let { videoFeed ->
@@ -140,7 +144,7 @@ internal class VideoScreenFragment: BaseFragment<
                 viewModel,
                 viewModel
             )
-            this.setHasFixedSize(false)
+//            this.setHasFixedSize(false)
             adapter = videoFeedItemsAdapter
             itemAnimator = null
         }
@@ -152,8 +156,47 @@ internal class VideoScreenFragment: BaseFragment<
         }
     }
 
+    private val youtubeFeedItem = FeedItem(
+        FeedId("jNQXAC9IVRw"),
+        FeedTitle("Youtube we see a lot"),
+        FeedDescription("Describing the things we see"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        FeedAuthor("Youtube Channel"),
+        null,
+        null,
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        null,
+        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedId("youtubeFeedId"),
+    ).apply {
+        this.feed = youtubeFeed
+    }
+
+    private val remoteVideoFeedItem = FeedItem(
+        FeedId("feedItemId"),
+        FeedTitle("Something we see a lot"),
+        FeedDescription("Describing the things we see"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        FeedAuthor("Kgothatso"),
+        null,
+        null,
+        FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
+        null,
+        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+        FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
+        FeedId("feedId"),
+    ).apply {
+        this.feed = remoteVideoFeed
+    }
+
     private fun setupCurrentVideoEpisode() {
         binding.apply {
+            // TODO: Move this to the viewState updater...
             includeLayoutCurrentVideoDetail.root.goneIfTrue(viewModel.args.argFeedItemId == null)
             includeLayoutVideoFeedDetails.root.goneIfFalse(viewModel.args.argFeedItemId == null)
 
@@ -161,39 +204,9 @@ internal class VideoScreenFragment: BaseFragment<
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
 //                    val videoEpisode = viewModel.videoItemSharedFlow.lastOrNull()
                     val videoEpisode = if (viewModel.args.argFeedItemId == "feedItemId") {
-                        FeedItem(
-                            FeedId("feedItemId"),
-                            FeedTitle("Something we see a lot"),
-                            FeedDescription("Describing the things we see"),
-                            DateTime(Date.valueOf("2021-09-22")),
-                            DateTime(Date.valueOf("2021-09-22")),
-                            FeedAuthor("Kgothatso"),
-                            null,
-                            null,
-                            FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
-                            null,
-                            PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
-                            PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
-                            FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
-                            FeedId("feedId"),
-                        )
+                        remoteVideoFeedItem
                     } else {
-                        FeedItem(
-                            FeedId("jNQXAC9IVRw"),
-                            FeedTitle("Youtube we see a lot"),
-                            FeedDescription("Describing the things we see"),
-                            DateTime(Date.valueOf("2021-09-22")),
-                            DateTime(Date.valueOf("2021-09-22")),
-                            FeedAuthor("Youtube Channel"),
-                            null,
-                            null,
-                            FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                            null,
-                            PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
-                            PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
-                            FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
-                            FeedId("youtubeFeedId"),
-                        )
+                        youtubeFeedItem
                     }
                     includeLayoutCurrentVideoDetail.apply {
                         textViewContributorName.text = videoEpisode.author?.value
@@ -201,6 +214,12 @@ internal class VideoScreenFragment: BaseFragment<
                         textViewCurrentVideoTitle.text = videoEpisode.titleToShow
                         textViewCurrentVideoPublishedDate.text = videoEpisode.datePublished?.hhmmElseDate()
                         // textViewCurrentVideoViewCount
+                        videoEpisode.feed?.imageUrlToShow?.let {
+                            imageLoader.load(
+                                imageView = imageViewContributorImage,
+                                it.value
+                            )
+                        }
                         if (!videoEpisode.enclosureUrl.value.contains("youtube")) { // Use proper check here...
                             videoViewVideoPlayer.visible
                             webViewYoutubeVideoPlayer.gone

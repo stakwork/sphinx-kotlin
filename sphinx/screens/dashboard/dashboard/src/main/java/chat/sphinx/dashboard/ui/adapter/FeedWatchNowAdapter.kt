@@ -16,13 +16,11 @@ import chat.sphinx.dashboard.databinding.LayoutFeedWatchNowRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.watch.FeedWatchViewModel
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.hhmmElseDate
-import chat.sphinx.wrapper_feed.FeedAuthor
-import chat.sphinx.wrapper_feed.FeedDescription
-import chat.sphinx.wrapper_feed.FeedItem
-import chat.sphinx.wrapper_feed.FeedTitle
+import chat.sphinx.wrapper_feed.*
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -99,6 +97,46 @@ class FeedWatchNowAdapter(
 
     private val videoItems = ArrayList<FeedItem>(listOf())
 
+    private val youtubeFeed = Feed(
+        FeedId("feedYoutubeItemId"),
+        FeedType.Video,
+        FeedTitle("Youtube we see a lot"),
+        FeedDescription("Describing the things we see"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedAuthor("Youtube Channel"),
+        null,
+        PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        null,
+        null,
+        FeedItemsCount(0L),
+        null,
+        ChatId(0L),
+    )
+
+    private val remoteVideoFeed = Feed(
+        FeedId("feedItemId"),
+        FeedType.Video,
+        FeedTitle("Youtube we see a lot"),
+        FeedDescription("Describing the things we see"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedAuthor("Normal Video Feed"),
+        null,
+        PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
+        DateTime(Date.valueOf("2021-09-22")),
+        DateTime(Date.valueOf("2021-09-22")),
+        null,
+        null,
+        FeedItemsCount(0L),
+        null,
+        ChatId(0L),
+    )
+
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
 
@@ -122,7 +160,9 @@ class FeedWatchNowAdapter(
                         PhotoUrl("https://pbs.twimg.com/media/FEvdQm5XoAAcXgw?format=jpg&name=small"),
                         FeedUrl("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_1MB.mp4"),
                         FeedId("feedId"),
-                    ),
+                    ).apply {
+                            this.feed = remoteVideoFeed
+                    },
                     // Youtube Video
                     FeedItem(
                         FeedId("feedYoutubeItemId"),
@@ -139,7 +179,9 @@ class FeedWatchNowAdapter(
                         PhotoUrl("https://cdn.mos.cms.futurecdn.net/8gzcr6RpGStvZFA2qRt4v6.jpg"),
                         FeedUrl("https://www.youtube.com/watch?v=JfVOs4VSpmA"),
                         FeedId("youtubeFeedId"),
-                    )
+                    ).apply {
+                        this.feed = youtubeFeed
+                    }
                 )
 
                 list.forEach { feed ->
@@ -234,6 +276,24 @@ class FeedWatchNowAdapter(
                         }
                     }.let { job ->
                         holderJob = job
+                    }
+                }
+
+                videoItem.feed?.imageUrlToShow?.let { imageUrl ->
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        imageLoader.load(
+                            imageViewContributorImage,
+                            imageUrl.value,
+                            ImageLoaderOptions.Builder()
+                                .placeholderResId(R.drawable.ic_tribe)
+                                .build()
+                        ).also {
+                            // TODO: disposable array
+//                            disposable = it
+                        }
+                    }.let { job ->
+                        // TODO: holderJob array
+//                        holderJob = job
                     }
                 }
 

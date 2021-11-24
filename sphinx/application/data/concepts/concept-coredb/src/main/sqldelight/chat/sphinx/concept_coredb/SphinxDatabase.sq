@@ -983,6 +983,11 @@ FROM feedDbo
 WHERE feed_type = ?
 ORDER BY id DESC;
 
+feedGetAllByIds:
+SELECT *
+FROM feedDbo
+WHERE id IN ?;
+
 feedGetById:
 SELECT *
 FROM feedDbo

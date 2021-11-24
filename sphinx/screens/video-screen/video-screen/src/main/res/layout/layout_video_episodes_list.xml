@@ -55,7 +55,6 @@
         android:layout_height="wrap_content"
         android:background="@color/headerBG"
         app:layout_constraintTop_toBottomOf="@+id/episodes_header"
-        app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/layout_episode_list_item_holder" />
 
 
