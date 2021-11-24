@@ -1009,6 +1009,11 @@ UPDATE feedDbo
 SET current_item_id = :item_id
 WHERE chat_id = ?;
 
+feedUpdateSubscribe:
+UPDATE feedDbo
+SET subscribed = :subscribed
+WHERE id = ?;
+
 feedDeleteById:
 DELETE
 FROM feedDbo

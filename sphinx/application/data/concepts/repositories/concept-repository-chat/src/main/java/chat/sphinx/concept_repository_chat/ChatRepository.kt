@@ -74,6 +74,8 @@ interface ChatRepository {
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
     fun getPodcastById(feedId: FeedId): Flow<Podcast?>
 
+    suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
+
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>

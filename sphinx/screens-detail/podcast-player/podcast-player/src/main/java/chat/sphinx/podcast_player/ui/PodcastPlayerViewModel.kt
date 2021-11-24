@@ -223,6 +223,15 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
+    fun toggleSubscribeState(podcast: Podcast) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.toggleFeedSubscribeState(
+                podcast.id,
+                podcast.subscribed
+            )
+        }
+    }
+
     fun playEpisodeFromList(episode: PodcastEpisode, startTime: Int) {
         viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))

@@ -3525,6 +3525,15 @@ abstract class SphinxRepository(
         return feed
     }
 
+    override suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        queries.feedUpdateSubscribe(
+            if (currentSubscribeState.isTrue()) Subscribed.False else Subscribed.True,
+            feedId
+        )
+    }
+
     /*
     * Used to hold in memory the chat table's latest message time to reduce disk IO
     * and mitigate conflicting updates between SocketIO and networkRefreshMessages

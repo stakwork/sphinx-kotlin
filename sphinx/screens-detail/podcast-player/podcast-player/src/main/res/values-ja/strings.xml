@@ -2,4 +2,6 @@
 <resources>
     <string name="label_text_episodes_list_header">エピソード</string>
     <string name="boost_sent">投げ銭しました</string>
+    <string name="subscribe">SUBSCRIBE</string>
+    <string name="unsubscribe">UNSUBSCRIBE</string>
 </resources>
