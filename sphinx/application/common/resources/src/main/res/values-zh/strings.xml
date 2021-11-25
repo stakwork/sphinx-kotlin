@@ -96,4 +96,6 @@
 
     <string name="failed_to_approve_member">接受會員失敗</string>
     <string name="failed_to_reject_member">拒絕會員失敗</string>
+
+    <string name="newsletter_article">NEWSLETTER ARTICLE</string>
 </resources>

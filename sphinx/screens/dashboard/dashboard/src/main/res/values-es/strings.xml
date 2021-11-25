@@ -98,11 +98,12 @@
     <string name="play">Jugar</string>
     <string name="listen_now">Escuchar ahora</string>
     <string name="following">Siguiendo</string>
+    <string name="read_now">Read Now</string>
+    <string name="watch_now">Watch Now</string>
 
     <string name="all_place_holder">No se encontraron resultados</string>
     <string name="listen_place_holder">No se encontraron resultados para \"Escuchar\"</string>
     <string name="watch_place_holder">No se encontraron resultados para \"Mirar\"</string>
     <string name="read_place_holder">No se encontraron resultados para \"Leer\"</string>
     <string name="play_place_holder">No se encontraron resultados para \"Jugar\"</string>
-    <string name="watch_now">Watch Now</string>
 </resources>

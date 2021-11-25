@@ -2,6 +2,7 @@ package chat.sphinx.feature_repository.mappers.feed.podcast
 
 import chat.sphinx.conceptcoredb.FeedDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.Podcast

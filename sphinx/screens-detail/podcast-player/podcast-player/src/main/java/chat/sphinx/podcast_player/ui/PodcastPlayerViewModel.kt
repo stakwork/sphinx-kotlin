@@ -14,6 +14,7 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_podcast.Podcast
@@ -21,6 +22,7 @@ import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -164,6 +166,26 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     owner.tipAmount
                 )
             )
+        }
+
+        updateFeedContentInBackground()
+    }
+
+    private fun updateFeedContentInBackground() {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
+                chat.host?.let { chatHost ->
+                    args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
+                        chatRepository.updateFeedContent(
+                            chatId = chat.id,
+                            host = chatHost,
+                            feedUrl = feedUrl,
+                            chatUUID = chat.uuid,
+                            currentEpisodeId = null
+                        )
+                    }
+                }
+            }
         }
     }
 

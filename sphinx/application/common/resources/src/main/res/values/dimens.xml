@@ -37,6 +37,7 @@
     <dimen name="default_text_size_caption2">9sp</dimen>
     <dimen name="default_text_size_tab">16sp</dimen>
     <dimen name="default_text_size_large_play_overlay_icon">60sp</dimen>
+    <dimen name="default_text_divider">8sp</dimen>
 
     <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
     <dimen name="default_vertical_spacing_action_button_column">6dp</dimen>
@@ -93,4 +94,8 @@
     <dimen name="default_feed_watch_image_width">260dp</dimen>
     <dimen name="default_feed_watch_image_height">160dp</dimen>
     <dimen name="default_feed_watch_channel_image_xy">30dp</dimen>
+
+    <dimen name="default_feed_read_image_width">260dp</dimen>
+    <dimen name="default_feed_read_image_height">160dp</dimen>
+    <dimen name="default_feed_contributor_image_xy">30dp</dimen>
 </resources>

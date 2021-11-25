@@ -1,14 +1,14 @@
 package chat.sphinx.wrapper_podcast
 
 import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_feed.FeedAuthor
 import chat.sphinx.wrapper_feed.FeedDescription
@@ -156,8 +156,12 @@ data class Podcast(
     fun getPlayingProgress(
         durationRetrieverHandle: (url: String) -> Long
     ): Int {
-        val progress = (currentTime.toLong() * 100) / getCurrentEpisodeDuration(durationRetrieverHandle)
-        return progress.toInt()
+        val currentEpisodeDuration = getCurrentEpisodeDuration(durationRetrieverHandle)
+        if (currentEpisodeDuration > 0) {
+            val progress = (currentTime.toLong() * 100) / currentEpisodeDuration
+            return progress.toInt()
+        }
+        return 0
     }
 
     fun getPlayingProgress(duration: Int): Int {

@@ -1,0 +1,50 @@
+plugins {
+    id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    buildFeatures.viewBinding = true
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    implementation project(path: ':android:features:android-feature-screens')
+
+    // Sphinx
+    api project(path: ':sphinx:activity:insetter-activity')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-feed')
+
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:application:common:logger')
+
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
+    kapt kaptDeps.google.hilt
+}

@@ -1,8 +1,9 @@
 package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
+import chat.sphinx.concept_network_query_chat.model.podcast.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_invite.model.InviteDto
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
@@ -15,7 +16,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
-import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.invite.isPaymentPending
 import chat.sphinx.wrapper_common.invite.isProcessingPayment
@@ -27,8 +28,6 @@ import chat.sphinx.wrapper_common.subscription.Cron
 import chat.sphinx.wrapper_common.subscription.EndNumber
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
-import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.InviteString
@@ -396,6 +395,7 @@ inline fun TransactionCallbacks.deleteChatById(
     queries.chatDeleteById(chatId)
     queries.dashboardDeleteById(chatId)
     latestMessageUpdatedTimeMap?.withLock { it.remove(chatId) }
+    deleteFeedByChatId(chatId, queries)
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -444,43 +444,56 @@ inline fun TransactionCallbacks.deleteSubscriptionById(
     queries.subscriptionDeleteById(subscriptionId)
 }
 
-fun TransactionCallbacks.upsertPodcast(
-    dto: PodcastDto,
+fun TransactionCallbacks.upsertFeed(
+    feedDto: FeedDto,
     feedUrl: FeedUrl,
     chatId: ChatId,
     currentItemId: FeedId?,
     queries: SphinxDatabaseQueries
 ) {
-    val feedId = FeedId(dto.id.toString())
 
-    queries.feedModelUpsert(
-        type = FeedModelType(dto.value.model.type),
-        suggested = FeedModelSuggested(dto.value.model.suggested),
-        id = feedId
-    )
+    if (feedDto.items.count() == 0) {
+        return
+    }
 
-    for (episode in dto.episodes) {
-        val episodeId = FeedId(episode.id.toString())
+    val feedId = FeedId(feedDto.id)
 
-        queries.feedItemUpsert(
-            title = FeedTitle(episode.title),
-            description = episode.description.toFeedDescription(),
-            date_published = null,
-            date_updated = null,
-            author = dto.author.toFeedAuthor(),
-            content_type = null,
-            enclosure_length = null,
-            enclosure_url = FeedUrl(episode.enclosureUrl),
-            enclosure_type = null,
-            image_url = episode.image.toPhotoUrl(),
-            thumbnail_url = episode.image.toPhotoUrl(),
-            link = episode.link.toFeedUrl(),
-            feed_id = feedId,
-            id = episodeId
+    feedDto.value?.let { feedValueDto ->
+        queries.feedModelUpsert(
+            type = FeedModelType(feedValueDto.model.type),
+            suggested = FeedModelSuggested(feedValueDto.model.suggested),
+            id = feedId
         )
     }
 
-    for (destination in dto.value.destinations) {
+    val itemIds: MutableList<FeedId> = mutableListOf()
+
+    for (item in feedDto.items) {
+        val itemId = FeedId(item.id)
+
+        itemIds.add(itemId)
+
+        queries.feedItemUpsert(
+            title = FeedTitle(item.title),
+            description = item.description?.toFeedDescription(),
+            date_published = item.datePublished?.secondsToDateTime(),
+            date_updated = item.dateUpdated?.secondsToDateTime(),
+            author = item.author?.toFeedAuthor(),
+            content_type = item.contentType?.toFeedContentType(),
+            enclosure_length = item.enclosureLength?.toFeedEnclosureLength(),
+            enclosure_url = FeedUrl(item.enclosureUrl),
+            enclosure_type = item.enclosureType?.toFeedEnclosureType(),
+            image_url = item.imageUrl?.toPhotoUrl(),
+            thumbnail_url = item.thumbnailUrl?.toPhotoUrl(),
+            link = item.link?.toFeedUrl(),
+            feed_id = feedId,
+            id = itemId
+        )
+    }
+
+    queries.feedItemsDeleteOldByFeedId(feedId, itemIds)
+
+    for (destination in feedDto.value?.destinations ?: listOf()) {
         queries.feedDestinationUpsert(
             address = FeedDestinationAddress(destination.address),
             split = FeedDestinationSplit(destination.split.toDouble()),
@@ -490,22 +503,34 @@ fun TransactionCallbacks.upsertPodcast(
     }
 
     queries.feedUpsert(
-        feed_type = FeedType.Podcast,
-        title = FeedTitle(dto.title),
-        description = dto.description.toFeedDescription(),
+        feed_type = feedDto.feedType.toInt().toFeedType(),
+        title = FeedTitle(feedDto.title),
+        description = feedDto.description?.toFeedDescription(),
         feed_url = feedUrl,
-        author = dto.author.toFeedAuthor(),
-        image_url = dto.image.toPhotoUrl(),
-        owner_url = null,
-        link = null,
-        date_published = null,
-        date_updated = null,
-        content_type = null,
-        language = null,
-        items_count = dto.episodes.count().toLong().toFeedItemsCount() ?: FeedItemsCount(0),
+        author = feedDto.author?.toFeedAuthor(),
+        image_url = feedDto.imageUrl?.toPhotoUrl(),
+        owner_url = feedDto.ownerUrl?.toFeedUrl(),
+        link = feedDto.link?.toFeedUrl(),
+        date_published = feedDto.datePublished?.secondsToDateTime(),
+        date_updated = feedDto.dateUpdated?.secondsToDateTime(),
+        content_type = feedDto.contentType?.toFeedContentType(),
+        language = feedDto.language?.toFeedLanguage(),
+        items_count = FeedItemsCount(feedDto.items.count().toLong()),
         current_item_id = currentItemId,
         chat_id = chatId,
         id = feedId,
-        generator = null
+        generator = feedDto.generator?.toFeedGenerator()
     )
+}
+
+fun TransactionCallbacks.deleteFeedByChatId(
+    chatId: ChatId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.feedGetByChatId(chatId).executeAsOneOrNull()?.let { feedDbo ->
+        queries.feedItemsDeleteByFeedId(feedDbo.id)
+        queries.feedModelDeleteById(feedDbo.id)
+        queries.feedDestinationDeleteByFeedId(feedDbo.id)
+        queries.feedDeleteById(feedDbo.id)
+    }
 }

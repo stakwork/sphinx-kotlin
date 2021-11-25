@@ -96,4 +96,6 @@
     <!-- Tribe Member error messages -->
     <string name="failed_to_approve_member">No se ha podido aprobar la solicitud</string>
     <string name="failed_to_reject_member">No se ha podido denegar la solicitud</string>
+
+    <string name="newsletter_article">ARTÍCULO NEWSLETTER</string>
 </resources>

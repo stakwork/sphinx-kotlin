@@ -26,6 +26,7 @@ include ':sphinx:application:common:wrappers:wrapper-relay'
 include ':sphinx:application:common:wrappers:wrapper-rsa'
 include ':sphinx:application:common:wrappers:wrapper-subscription'
 include ':sphinx:application:common:wrappers:wrapper-view'
+include ':sphinx:application:common:wrappers:wrapper-feed'
 
 include ':sphinx:application:data:concepts:crypto:concept-crypto-rsa'
 include ':sphinx:application:data:features:crypto:feature-crypto-rsa'
@@ -151,6 +152,7 @@ include ':sphinx:screens-detail:subscription:subscription'
 include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 include ':sphinx:screens-detail:tribe-members-list:tribe-members-list'
+include ':sphinx:screens-detail:web-view:web-view'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'
@@ -287,4 +289,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:application:common:wrappers:wrapper-feed'
+include ':sphinx:screens-detail:newsletter-detail:newsletter-detail'

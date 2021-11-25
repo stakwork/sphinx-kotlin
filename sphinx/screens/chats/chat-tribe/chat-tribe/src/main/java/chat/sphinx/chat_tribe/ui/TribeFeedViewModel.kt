@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.R
-import chat.sphinx.chat_tribe.model.TribePodcastData
+import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -15,7 +15,9 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.ui.getMediaDuration
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
@@ -23,11 +25,10 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
-import io.matthewnelson.android_feature_viewmodel.collectViewState
-import io.matthewnelson.android_feature_viewmodel.currentViewState
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -35,7 +36,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-internal class PodcastViewModel @Inject constructor(
+internal class TribeFeedViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
     private val app: Application,
@@ -45,7 +46,7 @@ internal class PodcastViewModel @Inject constructor(
     private val messageRepository: MessageRepository,
     private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
-) : BaseViewModel<PodcastViewState>(dispatchers, PodcastViewState.NoPodcast),
+) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle),
     MediaPlayerServiceController.MediaServiceListener
 {
     private val args: ChatTribeFragmentArgs by handle.navArgs()
@@ -54,10 +55,14 @@ internal class PodcastViewModel @Inject constructor(
         ViewStateContainer(BoostAnimationViewState.Idle)
     }
 
+    val podcastViewStateContainer: ViewStateContainer<PodcastViewState> by lazy {
+        ViewStateContainer(PodcastViewState.NoPodcast)
+    }
+
     private inner class PodcastContributionsViewStateContainer: ViewStateContainer<PodcastContributionsViewState>(PodcastContributionsViewState.None) {
         override val viewStateFlow: StateFlow<PodcastContributionsViewState> =
             flow {
-                collectViewState { podcastViewState ->
+                podcastViewStateContainer.collect { podcastViewState ->
                     when (podcastViewState) {
                         is PodcastViewState.NoPodcast -> {
                             emit(PodcastContributionsViewState.None)
@@ -110,7 +115,7 @@ internal class PodcastViewModel @Inject constructor(
             )
         }
 
-        mediaPlayerServiceController.addListener(this@PodcastViewModel)
+        mediaPlayerServiceController.addListener(this@TribeFeedViewModel)
     }
 
     private var currentServiceState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceInactive
@@ -123,7 +128,7 @@ internal class PodcastViewModel @Inject constructor(
 
         currentServiceState = serviceState
 
-        val vs = currentViewState
+        val vs = podcastViewStateContainer.value
         if (vs !is PodcastViewState.PodcastVS) {
             return
         }
@@ -143,7 +148,7 @@ internal class PodcastViewModel @Inject constructor(
                     title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
-                    updateViewState(it)
+                    podcastViewStateContainer.updateViewState(it)
                 }
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
@@ -155,7 +160,7 @@ internal class PodcastViewModel @Inject constructor(
                     title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
-                    updateViewState(it)
+                    podcastViewStateContainer.updateViewState(it)
                 }
             }
             is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
@@ -170,7 +175,7 @@ internal class PodcastViewModel @Inject constructor(
                     title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
-                    updateViewState(it)
+                    podcastViewStateContainer.updateViewState(it)
                 }
             }
             is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
@@ -185,7 +190,7 @@ internal class PodcastViewModel @Inject constructor(
             }
             is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
                 vs.adjustState(showLoading = true)?.let {
-                    updateViewState(it)
+                    podcastViewStateContainer.updateViewState(it)
                 }
             }
             is MediaPlayerServiceState.ServiceInactive -> {
@@ -197,7 +202,7 @@ internal class PodcastViewModel @Inject constructor(
                     title = vs.podcast.getCurrentEpisode().title.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration)
                 )?.let {
-                    updateViewState(it)
+                    podcastViewStateContainer.updateViewState(it)
                 }
             }
         }
@@ -209,7 +214,7 @@ internal class PodcastViewModel @Inject constructor(
 
     @Volatile
     private var initialized: Boolean = false
-    fun init(data: TribePodcastData.Result) {
+    fun init(data: TribeFeedData.Result) {
         if (initialized) {
             return
         } else {
@@ -218,27 +223,30 @@ internal class PodcastViewModel @Inject constructor(
 
         @Exhaustive
         when (data) {
-            is TribePodcastData.Result.NoPodcast -> { /* no-op */}
-            is TribePodcastData.Result.TribeData -> {
+            is TribeFeedData.Result.NoFeed -> { /* no-op */}
+            is TribeFeedData.Result.FeedData -> {
 
                 viewModelScope.launch(mainImmediate) {
-                    chatRepository.updatePodcastFeed(
+                    chatRepository.updateFeedContent(
                         args.chatId,
                         data.host,
                         data.feedUrl,
+                        data.chatUUID,
                         data.metaData?.itemId
                     )
                 }
 
-                viewModelScope.launch(mainImmediate) {
-                    delay(500L)
+                if (data.feedType.isPodcast()) {
+                    viewModelScope.launch(mainImmediate) {
+                        delay(500L)
 
-                    chatRepository.getPodcastByChatId(args.chatId).collect { podcast ->
-                        podcast?.let { nnPodcast ->
-                            podcastLoaded(
-                                nnPodcast,
-                                data
-                            )
+                        chatRepository.getPodcastByChatId(args.chatId).collect { podcast ->
+                            podcast?.let { nnPodcast ->
+                                podcastLoaded(
+                                    nnPodcast,
+                                    data
+                                )
+                            }
                         }
                     }
                 }
@@ -248,16 +256,16 @@ internal class PodcastViewModel @Inject constructor(
 
     private suspend fun podcastLoaded(
         podcast: Podcast,
-        tribeData: TribePodcastData.Result.TribeData
+        feedData: TribeFeedData.Result.FeedData
     ) {
 
-        if (tribeData.metaData != null) {
-            podcast.setMetaData(tribeData.metaData)
+        if (feedData.metaData != null) {
+            podcast.setMetaData(feedData.metaData)
         }
 
         val clickPlayPause = OnClickCallback {
 
-            val vs = currentViewState
+            val vs = podcastViewStateContainer.value
 
             if (vs !is PodcastViewState.PodcastVS) {
                 return@OnClickCallback
@@ -307,7 +315,7 @@ internal class PodcastViewModel @Inject constructor(
                 owner.tipAmount?.let { tip ->
                     if (tip.value > 0) {
 
-                        val vs = currentViewState
+                        val vs = podcastViewStateContainer.value
 
                         if (vs is PodcastViewState.PodcastVS) {
                             val metaData = vs.podcast.getMetaData(tip)
@@ -333,7 +341,7 @@ internal class PodcastViewModel @Inject constructor(
         }
 
         val clickFastForward = OnClickCallback {
-            val vs = currentViewState
+            val vs = podcastViewStateContainer.value
 
             if (vs !is PodcastViewState.PodcastVS) {
                 return@OnClickCallback
@@ -354,14 +362,14 @@ internal class PodcastViewModel @Inject constructor(
                         showPlayButton = true,
                         playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                     )?.let {
-                        updateViewState(it)
+                        podcastViewStateContainer.updateViewState(it)
                     }
                 }
             }
         }
 
         val clickTitle = OnClickCallback {
-            val vs = currentViewState
+            val vs = podcastViewStateContainer.value
 
             if (vs !is PodcastViewState.PodcastVS) {
                 return@OnClickCallback
@@ -376,6 +384,7 @@ internal class PodcastViewModel @Inject constructor(
             viewModelScope.launch(mainImmediate) {
                 navigator.toPodcastPlayerScreen(
                     chatId = args.chatId,
+                    feedUrl = vs.podcast.feedUrl,
                     currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
                 )
             }
@@ -395,7 +404,7 @@ internal class PodcastViewModel @Inject constructor(
                 clickTitle = clickTitle,
                 podcast
             ).let { initialViewState ->
-                updateViewState(initialViewState)
+                podcastViewStateContainer.updateViewState(initialViewState)
             }
         }
 
@@ -418,17 +427,17 @@ internal class PodcastViewModel @Inject constructor(
             clickTitle = clickTitle,
             podcast
         ).let { initialViewState ->
-            updateViewState(initialViewState)
+            podcastViewStateContainer.updateViewState(initialViewState)
         }
     }
 
     val satsPerMinuteStateFlow: StateFlow<Boolean> =
         flow {
-            collectViewState { viewState ->
-                if (viewState is PodcastViewState.PodcastVS.Available) {
+            podcastViewStateContainer.collect { podcastViewState ->
+                if (podcastViewState is PodcastViewState.PodcastVS.Available) {
                     chatRepository.getChatById(args.chatId).collect { chat ->
                         chat?.metaData?.let { nnMetaData ->
-                            val vs = currentViewState
+                            val vs = podcastViewStateContainer.value
                             if (vs is PodcastViewState.PodcastVS) {
                                 vs.podcast.satsPerMinute = nnMetaData.satsPerMinute.value
                             }
