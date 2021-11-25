@@ -5,8 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.video_player_controller.VideoPlayerController
-import chat.sphinx.video_screen.ui.Placeholder
 import chat.sphinx.video_screen.ui.VideoFeedViewModel
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -123,12 +123,7 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     )
 
     val videoItemSharedFlow: SharedFlow<FeedItem?> = flow {
-//        emitAll(repositoryMedia.getFeedItemById(FeedId(args.argFeedItemId)))
-        if (args.argFeedItemId == "feedItemId") {
-            emit(Placeholder.remoteVideoFeedItem)
-        } else {
-            emit(Placeholder.youtubeFeedItem)
-        }
+        emitAll(repositoryMedia.getFeedItemById(FeedId(args.argFeedItemId)))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),

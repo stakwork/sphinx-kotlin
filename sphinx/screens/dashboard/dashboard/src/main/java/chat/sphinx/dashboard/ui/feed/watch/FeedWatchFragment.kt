@@ -14,6 +14,7 @@ import chat.sphinx.dashboard.ui.adapter.FeedWatchNowAdapter
 import chat.sphinx.dashboard.ui.viewstates.FeedWatchViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -99,8 +100,8 @@ internal class FeedWatchFragment : SideEffectFragment<
 
     private fun toggleElements(contentAvailable: Boolean) {
         binding.apply {
-//            scrollViewContent.goneIfFalse(contentAvailable)
-//            textViewPlaceholder.goneIfFalse(!contentAvailable)
+            scrollViewContent.goneIfFalse(contentAvailable)
+            textViewPlaceholder.goneIfFalse(!contentAvailable)
         }
     }
 }

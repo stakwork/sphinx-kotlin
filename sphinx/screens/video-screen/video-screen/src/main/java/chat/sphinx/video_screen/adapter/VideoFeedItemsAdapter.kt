@@ -13,14 +13,15 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.databinding.LayoutEpisodeListItemHolderBinding
-import chat.sphinx.video_screen.ui.Placeholder
 import chat.sphinx.video_screen.ui.VideoFeedViewModel
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class VideoFeedItemsAdapter (
     private val imageLoader: ImageLoader<ImageView>,
@@ -88,40 +89,36 @@ internal class VideoFeedItemsAdapter (
 
     }
 
-//    private val videoEpisodes = ArrayList<FeedItem>(listOf())
-    private val videoEpisodes = mutableListOf(
-        Placeholder.remoteVideoFeedItem,
-        Placeholder.youtubeFeedItem
-    )
+    private val videoEpisodes = ArrayList<FeedItem>(listOf())
 
-//    override fun onStart(owner: LifecycleOwner) {
-//        super.onStart(owner)
-//
-//        onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
-//            viewModel.feedItemsHolderViewStateFlow.collect { list ->
-//
-//                if (videoEpisodes.isEmpty()) {
-//                    videoEpisodes.addAll(list)
-//
-//                    this@VideoFeedItemsAdapter.notifyDataSetChanged()
-//                } else {
-//
-//                    val diff = Diff(videoEpisodes, list)
-//
-//                    withContext(viewModelDispatcher.default) {
-//                        DiffUtil.calculateDiff(diff)
-//                    }.let { result ->
-//
-//                        if (!diff.sameList) {
-//                            videoEpisodes.clear()
-//                            videoEpisodes.addAll(list)
-//                            result.dispatchUpdatesTo(this@VideoFeedItemsAdapter)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+
+        onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
+            viewModel.feedItemsHolderViewStateFlow.collect { list ->
+                if (videoEpisodes.isEmpty()) {
+                    videoEpisodes.addAll(list)
+
+                    this@VideoFeedItemsAdapter.notifyDataSetChanged()
+                } else {
+
+                    val diff = Diff(videoEpisodes, list)
+
+                    withContext(viewModelDispatcher.default) {
+                        DiffUtil.calculateDiff(diff)
+                    }.let { result ->
+
+                        if (!diff.sameList) {
+                            videoEpisodes.clear()
+                            videoEpisodes.addAll(list)
+                            result.dispatchUpdatesTo(this@VideoFeedItemsAdapter)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     override fun getItemCount(): Int {
         return videoEpisodes.size

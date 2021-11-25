@@ -12,10 +12,10 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
 import chat.sphinx.video_screen.databinding.FragmentVideoDetailScreenBinding
-import chat.sphinx.video_screen.ui.Placeholder
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -59,12 +59,7 @@ internal class VideoFeedDetailScreenFragment: BaseFragment<
         binding.includeLayoutVideoFeedDetails.apply {
 
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                val videoFeed = viewModel.videoFeedSharedFlow.last()
-                val videoFeed = if (viewModel.args.argFeedId == "youtubeFeedId") {
-                    Placeholder.youtubeFeed
-                } else {
-                    Placeholder.remoteVideoFeed
-                }
+                val videoFeed = viewModel.videoFeedSharedFlow.firstOrNull()
 
                 videoFeed?.let { videoFeed ->
                     textViewCurrentVideoDescription.text = videoFeed.descriptionToShow
