@@ -8,11 +8,11 @@ import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
+import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.video_screen.navigation.ToVideoFeedDetailScreen
 import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
-import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.web_view.navigation.ToWebViewDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId

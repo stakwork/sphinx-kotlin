@@ -17,8 +17,6 @@ import chat.sphinx.newsletter_detail.ui.adapter.NewsletterItemsFooterAdapter
 import chat.sphinx.newsletter_detail.ui.adapter.NewsletterItemsListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
