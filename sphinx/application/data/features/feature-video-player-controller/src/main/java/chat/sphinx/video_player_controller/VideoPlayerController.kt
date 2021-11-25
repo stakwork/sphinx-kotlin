@@ -1,10 +1,9 @@
-package chat.sphinx.chat_common.util
+package chat.sphinx.video_player_controller
 
+import android.net.Uri
 import android.widget.VideoView
-import androidx.core.net.toUri
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
-import java.io.File
 
 class VideoPlayerController(
     val viewModelScope: CoroutineScope,
@@ -21,7 +20,7 @@ class VideoPlayerController(
         this.videoView = videoView
     }
 
-    fun initializeVideo(videoFile: File) {
+    fun initializeVideo(videoUri: Uri) {
         videoView?.apply {
             setOnCompletionListener {
                 completePlaybackCallback()
@@ -35,7 +34,7 @@ class VideoPlayerController(
                 play()
             }
 
-            setVideoURI(videoFile.toUri())
+            setVideoURI(videoUri)
         }
     }
 
@@ -57,6 +56,10 @@ class VideoPlayerController(
         } else {
             play()
         }
+    }
+
+    fun seekTo(progress: Int) {
+        videoView?.seekTo(progress*1000)
     }
 
     fun clear() {

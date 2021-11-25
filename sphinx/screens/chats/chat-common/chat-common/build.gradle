@@ -70,6 +70,7 @@ dependencies {
     api deps.androidx.recyclerView
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:data:features:feature-video-player-controller')
     kapt kaptDeps.google.hilt
 
     implementation deps.square.okio

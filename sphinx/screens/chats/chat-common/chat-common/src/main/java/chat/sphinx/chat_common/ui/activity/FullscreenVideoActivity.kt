@@ -5,14 +5,13 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.*
 import android.widget.RelativeLayout
-import android.view.OrientationEventListener
 import androidx.activity.viewModels
-import androidx.core.view.isVisible
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.ActivityFullscreenVideoBinding
-import chat.sphinx.chat_common.ui.viewstate.messageholder.toTimestamp
+import chat.sphinx.resources.toTimestamp
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible

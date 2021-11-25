@@ -280,13 +280,6 @@ internal fun  LayoutMessageHolderBinding.setView(
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun Long.toTimestamp(): String {
-    val minutes = this / 1000 / 60
-    val seconds = this / 1000 % 60
-
-    return "${"%02d".format(minutes)}:${"%02d".format(seconds)}"
-}
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
