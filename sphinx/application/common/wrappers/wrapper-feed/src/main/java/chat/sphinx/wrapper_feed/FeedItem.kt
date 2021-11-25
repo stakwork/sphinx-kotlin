@@ -45,9 +45,6 @@ data class FeedItem(
             imageUrl?.let {
                 return it
             }
-            feed?.imageUrlToShow?.let {
-                return it
-            }
             return null
         }
 
@@ -56,7 +53,7 @@ data class FeedItem(
             thumbnailUrl?.let {
                 return it
             }
-            return imageUrlToShow
+            return null
         }
 
     var titleToShow: String = ""

@@ -7,7 +7,6 @@ import chat.sphinx.wrapper_feed.FeedTitle
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed class NewsletterDetailViewState: ViewState<NewsletterDetailViewState>() {
-
     object Idle: NewsletterDetailViewState()
 
     class FeedLoaded(

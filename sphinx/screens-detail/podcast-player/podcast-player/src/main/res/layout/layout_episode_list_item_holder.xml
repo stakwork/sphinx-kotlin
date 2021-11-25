@@ -8,7 +8,6 @@
     android:layout_height="@dimen/episode_list_item_holder_height"
     >
 
-
     <!--  Show a play arrow if the podcast is playing -->
     <TextView
         android:id="@+id/text_view_play_arrow_indicator"

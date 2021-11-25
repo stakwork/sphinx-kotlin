@@ -16,7 +16,6 @@ import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.web_view.navigation.ToWebViewDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
@@ -76,18 +75,18 @@ internal class DashboardNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedUrl, currentEpisodeDuration))
     }
 
-    override suspend fun toVideoFeedScreen(feedId: FeedId) {
-        navigationDriver.submitNavigationRequest(
+    override suspend fun toVideoFeedScreen(chatId: ChatId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
             ToVideoFeedDetailScreen(
-                feedId = feedId
+                chatId, feedUrl
             )
         )
     }
 
-    override suspend fun toVideoWatchScreen(feedItemId: FeedId) {
-        navigationDriver.submitNavigationRequest(
+    override suspend fun toVideoWatchScreen(chatId: ChatId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
             ToVideoWatchScreen(
-                feedItemId = feedItemId
+                chatId, feedUrl
             )
         )
     }

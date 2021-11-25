@@ -3,7 +3,6 @@ package chat.sphinx.dashboard.navigation
 import androidx.navigation.NavController
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
@@ -26,9 +25,9 @@ abstract class DashboardNavigator(
         routeHint: LightningRouteHint? = null
     )
 
-    abstract suspend fun toVideoFeedScreen(feedId: FeedId)
+    abstract suspend fun toVideoFeedScreen(chatId: ChatId, feedUrl: FeedUrl)
 
-    abstract suspend fun toVideoWatchScreen(feedItemId: FeedId)
+    abstract suspend fun toVideoWatchScreen(chatId: ChatId, feedUrl: FeedUrl)
 
     abstract suspend fun toWebViewDetail(title: String, url: FeedUrl)
 

@@ -6,8 +6,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/default_small_layout_margin"
-    app:cardCornerRadius="@dimen/default_radius"
-    >
+    app:cardCornerRadius="@dimen/default_radius">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
@@ -30,21 +29,18 @@
             android:fontFamily="@font/material_icons_regular"
             android:textSize="@dimen/default_text_size_large_play_overlay_icon"
             android:text="@string/material_icon_name_play_circle_filled"
-            android:textColor="@color/black"
+            android:textColor="@android:color/white"
             android:alpha="0.5"
             app:layout_constraintStart_toStartOf="@+id/image_view_item_image"
             app:layout_constraintEnd_toEndOf="@+id/image_view_item_image"
             app:layout_constraintTop_toTopOf="@+id/image_view_item_image"
-            app:layout_constraintBottom_toBottomOf="@+id/image_view_item_image"
-
-            />
-
+            app:layout_constraintBottom_toBottomOf="@+id/image_view_item_image" />
 
         <TextView
             android:id="@+id/text_view_item_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/default_small_layout_margin"
+            android:layout_marginTop="@dimen/default_half_layout_margin"
             android:layout_marginHorizontal="@dimen/default_half_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/text"
@@ -64,15 +60,14 @@
             app:cardCornerRadius="@dimen/default_feed_image_xy"
             app:layout_constraintTop_toBottomOf="@+id/text_view_item_name"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            >
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_contributor_image"
                 android:layout_width="@dimen/default_feed_watch_channel_image_xy"
                 android:layout_height="@dimen/default_feed_watch_channel_image_xy"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/ic_tribe" />
+                app:srcCompat="@drawable/ic_profile_avatar_circle" />
 
         </androidx.cardview.widget.CardView>
 
@@ -89,8 +84,7 @@
             app:layout_constraintEnd_toStartOf="@+id/text_view_divider"
             app:layout_constraintTop_toTopOf="@+id/card_view_contributor_image_wrapper"
             app:layout_constraintBottom_toBottomOf="@+id/card_view_contributor_image_wrapper"
-            tools:text="Contributor Name"
-            />
+            tools:text="Contributor Name" />
 
         <TextView
             android:id="@+id/text_view_divider"
@@ -104,8 +98,7 @@
             app:layout_constraintStart_toEndOf="@+id/text_view_contributor_name"
             app:layout_constraintEnd_toStartOf="@+id/text_view_entry_timestamp"
             app:layout_constraintTop_toTopOf="@+id/text_view_entry_timestamp"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_entry_timestamp"
-            />
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_entry_timestamp" />
 
         <TextView
             android:id="@+id/text_view_entry_timestamp"
@@ -119,7 +112,8 @@
             app:layout_constraintTop_toTopOf="@+id/card_view_contributor_image_wrapper"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="@+id/card_view_contributor_image_wrapper"
-            tools:text="5 days ago"
-            />
+            tools:text="5 days ago" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.cardview.widget.CardView>

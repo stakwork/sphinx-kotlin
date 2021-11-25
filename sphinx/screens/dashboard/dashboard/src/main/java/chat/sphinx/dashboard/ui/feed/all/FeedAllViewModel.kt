@@ -49,11 +49,7 @@ internal class FeedAllViewModel @Inject constructor(
                 goToPodcastPlayer(feed.chatId, feed.feedUrl)
             }
             is FeedType.Video -> {
-                viewModelScope.launch(mainImmediate) {
-                    submitSideEffect(
-                        FeedAllSideEffect.Notify("Video Not supported yet")
-                    )
-                }
+                goToVideoPlayer(feed.chatId, feed.feedUrl)
             }
             is FeedType.Newsletter -> {
                 goToNewsletterDetail(feed.chatId, feed.feedUrl)
@@ -73,6 +69,12 @@ internal class FeedAllViewModel @Inject constructor(
     private fun goToNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toNewsletterDetail(chatId, feedUrl)
+        }
+    }
+
+    private fun goToVideoPlayer(chatId: ChatId, feedUrl: FeedUrl) {
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toVideoWatchScreen(chatId, feedUrl)
         }
     }
 }

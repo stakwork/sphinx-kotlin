@@ -38,6 +38,7 @@
     <dimen name="default_text_size_tab">16sp</dimen>
     <dimen name="default_text_size_large_play_overlay_icon">60sp</dimen>
     <dimen name="default_text_divider">8sp</dimen>
+    <dimen name="default_small_text_divider">6sp</dimen>
 
     <dimen name="default_inner_spacing_list_item_title">10dp</dimen>
     <dimen name="default_vertical_spacing_action_button_column">6dp</dimen>

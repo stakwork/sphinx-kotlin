@@ -1,13 +1,11 @@
 package chat.sphinx.dashboard.ui.feed.watch
 
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedWatchViewState
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
@@ -21,7 +19,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FeedWatchViewModel @Inject constructor(
-    handler: SavedStateHandle,
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     dispatchers: CoroutineDispatchers,
@@ -42,30 +39,30 @@ class FeedWatchViewModel @Inject constructor(
         emptyList()
     )
 
-    fun episodeItemSelected(episode: FeedItem) {
-        goToVideoPlayer(
-            feedItemId = episode.id
-        )
-    }
-
-    override fun feedSelected(feed: Feed) {
-        goToVideoFeed(
-            feedId = feed.id
-        )
-    }
-
-    private fun goToVideoFeed(feedId: FeedId) {
-        viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toVideoFeedScreen(
-                feedId = feedId
-            )
+    fun videoItemSelected(video: FeedItem) {
+        video.feed?.let { feed ->
+            goToVideoPlayer(feed)
         }
     }
 
-    private fun goToVideoPlayer(feedItemId: FeedId) {
+    override fun feedSelected(feed: Feed) {
+        goToVideoPlayer(feed)
+    }
+
+//    private fun goToVideoFeed(feed: Feed) {
+//        viewModelScope.launch(mainImmediate) {
+//            dashboardNavigator.toVideoFeedScreen(
+//                feed.chat?.id ?: feed.chatId,
+//                feed.feedUrl
+//            )
+//        }
+//    }
+
+    private fun goToVideoPlayer(feed: Feed) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toVideoWatchScreen(
-                feedItemId = feedItemId
+                feed.chat?.id ?: feed.chatId,
+                feed.feedUrl
             )
         }
     }

@@ -8,6 +8,10 @@ inline fun String.toFeedId(): FeedId? =
         null
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun FeedId.youtubeVideoId(): String =
+    value.replace("yt:video:","")
+
 @JvmInline
 value class FeedId(val value: String) {
     init {

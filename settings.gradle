@@ -125,7 +125,6 @@ include ':sphinx:screens:onboard:onboard-resources'
 include ':sphinx:screens:profile:profile'
 include ':sphinx:screens:splash:splash'
 include ':sphinx:screens:onboard:key-restore'
-include ':sphinx:screens:video-screen:video-screen'
 
 // Screens-Detail
 include ':sphinx:screens-detail:add-friend:add-friend'
@@ -153,6 +152,7 @@ include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 include ':sphinx:screens-detail:tribe-members-list:tribe-members-list'
 include ':sphinx:screens-detail:web-view:web-view'
+include ':sphinx:screens-detail:video-screen:video-screen'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'
