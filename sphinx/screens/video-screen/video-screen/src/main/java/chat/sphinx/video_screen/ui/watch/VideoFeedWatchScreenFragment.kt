@@ -55,7 +55,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
         val activity = (requireActivity() as InsetterActivity)
         binding.apply {
 
-            activity.addStatusBarPadding(constraintLayoutScrollViewContent)
+            constraintLayoutScrollViewContent?.let { activity.addStatusBarPadding(it) }
         }
     }
 
@@ -127,9 +127,8 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 }
             }
         }
-
-
     }
+
     override suspend fun onViewStateFlowCollect(viewState: VideoFeedWatchScreenViewState) {
         //TODO implement view state collector
     }
