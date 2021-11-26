@@ -209,7 +209,8 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                 webViewYoutubeVideoPlayer.gone
 
                                 viewModel.initializeVideo(
-                                    viewState.url.value.toUri()
+                                    viewState.url.value.toUri(),
+                                    viewState.duration?.value?.toInt()
                                 )
                             }
                         }

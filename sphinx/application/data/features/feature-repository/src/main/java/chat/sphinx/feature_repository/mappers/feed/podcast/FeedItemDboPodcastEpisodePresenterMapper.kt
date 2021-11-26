@@ -32,6 +32,7 @@ internal class FeedItemDboPodcastEpisodePresenterMapper(
             enclosure_length = null,
             enclosure_url = value.enclosureUrl,
             enclosure_type = null,
+            duration = null,
             image_url = value.image,
             thumbnail_url = null,
             link = value.link,

@@ -223,3 +223,14 @@ internal class SubscribedAdapter private constructor(): ColumnAdapter<Subscribed
         return value.value.toLong()
     }
 }
+
+internal class FeedItemDurationAdapter: ColumnAdapter<FeedItemDuration, Long> {
+
+    override fun decode(databaseValue: Long): FeedItemDuration {
+        return FeedItemDuration(databaseValue)
+    }
+
+    override fun encode(value: FeedItemDuration): Long {
+        return value.value
+    }
+}

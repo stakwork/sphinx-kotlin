@@ -54,7 +54,8 @@ internal open class VideoFeedScreenViewModel(
                                     video.title,
                                     video.description,
                                     video.enclosureUrl,
-                                    video.dateUpdated
+                                    video.dateUpdated,
+                                    video.duration
                                 )
                             )
                         }
@@ -92,7 +93,8 @@ internal open class VideoFeedScreenViewModel(
                 video.title,
                 video.description,
                 video.enclosureUrl,
-                video.dateUpdated
+                video.dateUpdated,
+                video.duration
             )
         )
     }
