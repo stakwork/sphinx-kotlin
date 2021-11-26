@@ -1,6 +1,5 @@
-package chat.sphinx.concept_network_query_chat.model
+package chat.sphinx.concept_network_query_chat.model.podcast
 
-import chat.sphinx.wrapper_podcast.PodcastDestination
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)

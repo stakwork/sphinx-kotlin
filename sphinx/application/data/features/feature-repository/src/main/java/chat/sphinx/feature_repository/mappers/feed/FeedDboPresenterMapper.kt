@@ -3,7 +3,7 @@ package chat.sphinx.feature_repository.mappers.feed
 import chat.sphinx.conceptcoredb.FeedDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedType
+import chat.sphinx.wrapper_common.feed.FeedType
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 
 internal class FeedDboPresenterMapper(
@@ -12,7 +12,7 @@ internal class FeedDboPresenterMapper(
     override suspend fun mapFrom(value: FeedDbo): Feed {
         return Feed(
             value.id,
-            FeedType.Podcast,
+            value.feed_type,
             value.title,
             value.description,
             value.feed_url,

@@ -1,7 +1,6 @@
 package chat.sphinx.concept_repository_chat
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.kotlin_response.LoadResponse
@@ -10,12 +9,13 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
 import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_chat.TribeData
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
@@ -57,18 +57,20 @@ interface ChatRepository {
 
     fun joinTribe(
         tribeDto: TribeDto,
-    ): Flow<LoadResponse<Any, ResponseError>>
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
 
-    suspend fun updatePodcastFeed(
+    suspend fun updateFeedContent(
         chatId: ChatId,
         host: ChatHost,
         feedUrl: FeedUrl,
+        chatUUID: ChatUUID,
         currentEpisodeId: FeedId?
     )
 
+    fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
 
-    suspend fun updateTribeInfo(chat: Chat): Pair<ChatHost, String>?
+    suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>

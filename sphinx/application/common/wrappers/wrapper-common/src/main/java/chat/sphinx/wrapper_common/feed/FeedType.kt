@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_feed
+package chat.sphinx.wrapper_common.feed
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun FeedType.isPodcast(): Boolean =

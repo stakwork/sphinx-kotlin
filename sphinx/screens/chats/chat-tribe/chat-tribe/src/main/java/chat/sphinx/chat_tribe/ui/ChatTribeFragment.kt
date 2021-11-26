@@ -14,7 +14,7 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.chat_tribe.model.TribePodcastData
+import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -30,6 +30,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -75,7 +76,7 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.recyclerViewMessages
 
     override val viewModel: ChatTribeViewModel by viewModels()
-    private val podcastViewModel: PodcastViewModel by viewModels()
+    private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -94,12 +95,12 @@ internal class ChatTribeFragment: ChatFragment<
 
         lifecycleScope.launch(viewModel.mainImmediate) {
             try {
-                viewModel.podcastDataStateFlow.collect { data ->
+                viewModel.feedDataStateFlow.collect { data ->
                     @Exhaustive
                     when (data) {
-                        is TribePodcastData.Loading -> {}
-                        is TribePodcastData.Result -> {
-                            podcastViewModel.init(data)
+                        is TribeFeedData.Loading -> {}
+                        is TribeFeedData.Result -> {
+                            tribeFeedViewModel.init(data)
                             throw Exception()
                         }
                     }
@@ -109,7 +110,7 @@ internal class ChatTribeFragment: ChatFragment<
 
         podcastPlayerBinding.apply {
             textViewBoostPodcastButton.setOnClickListener {
-                podcastViewModel.currentViewState.clickBoost?.let {
+                tribeFeedViewModel.podcastViewStateContainer.value.clickBoost?.let {
                     it.invoke()
                     boostAnimationBinding.apply {
                         root.visible
@@ -118,13 +119,13 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
             textViewForward30Button.setOnClickListener {
-                podcastViewModel.currentViewState.clickFastForward?.invoke()
+                tribeFeedViewModel.podcastViewStateContainer.value.clickFastForward?.invoke()
             }
             textViewPlayPauseButton.setOnClickListener {
-                podcastViewModel.currentViewState.clickPlayPause?.invoke()
+                tribeFeedViewModel.podcastViewStateContainer.value.clickPlayPause?.invoke()
             }
             textViewEpisodeTitle.setOnClickListener {
-                podcastViewModel.currentViewState.clickTitle?.invoke()
+                tribeFeedViewModel.podcastViewStateContainer.value.clickTitle?.invoke()
             }
         }
 
@@ -149,7 +150,7 @@ internal class ChatTribeFragment: ChatFragment<
         super.subscribeToViewStateFlow()
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            podcastViewModel.boostAnimationViewStateContainer.collect { viewState ->
+            tribeFeedViewModel.boostAnimationViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
                     is BoostAnimationViewState.Idle -> {}
@@ -178,13 +179,13 @@ internal class ChatTribeFragment: ChatFragment<
         // TODO: Remove hackery (utilized now to update podcast object's sats per minute
         //  value if it's changed from tribe detail screen)
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            podcastViewModel.satsPerMinuteStateFlow.collect {
+            tribeFeedViewModel.satsPerMinuteStateFlow.collect {
                 /* no-op */
             }
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            podcastViewModel.collectViewState { viewState ->
+            tribeFeedViewModel.podcastViewStateContainer.collect { viewState ->
                 podcastPlayerBinding.apply {
                     when (viewState) {
                         is PodcastViewState.NoPodcast -> {
@@ -221,7 +222,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            podcastViewModel.contributionsViewStateContainer.collect { viewState ->
+            tribeFeedViewModel.contributionsViewStateContainer.collect { viewState ->
                 headerBinding.apply {
 
                     @Exhaustive

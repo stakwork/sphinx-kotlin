@@ -40,6 +40,7 @@
     <string name="material_icon_name_cloud_download">cloud_download</string>
     <string name="material_icon_name_play_button">play_arrow</string>
     <string name="material_icon_name_chevron_right_button" translatable="false">chevron_right</string>
+    <string name="material_icon_name_brightness_button" translatable="false">brightness_1</string>
     <string name="material_icon_name_pause_button">pause</string>
     <string name="material_icon_name_volume_up">volume_up</string>
     <string name="material_icon_name_video_camera">videocam</string>
@@ -97,4 +98,6 @@
 
     <string name="failed_to_approve_member">Failed to approve member</string>
     <string name="failed_to_reject_member">Failed to reject member</string>
+
+    <string name="newsletter_article">NEWSLETTER ARTICLE</string>
 </resources>

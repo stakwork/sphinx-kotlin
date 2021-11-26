@@ -6,6 +6,8 @@ import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_chat.toAppUrl
+import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.feed.toFeedType
 import java.io.File
 
 class CreateTribe private constructor(
@@ -23,6 +25,7 @@ class CreateTribe private constructor(
     val private: Boolean?,
     val appUrl: AppUrl?,
     val feedUrl: FeedUrl?,
+    val feedType: FeedType?,
 ) {
 
     class Builder(
@@ -51,10 +54,19 @@ class CreateTribe private constructor(
         private var private: Boolean? = false
         private var appUrl: AppUrl? = null
         private var feedUrl: FeedUrl? = null
+        private var feedType: FeedType? = null
 
         @get:Synchronized
         val hasRequiredFields: Boolean
-            get() = !name.isNullOrEmpty() && !description.isNullOrEmpty()
+            get() {
+                val requiredFieldsFilled = !name.isNullOrEmpty() && !description.isNullOrEmpty()
+
+                if (feedUrl != null) {
+                    return (feedType != null) && requiredFieldsFilled
+                }
+
+                return requiredFieldsFilled
+            }
 
         @Synchronized
         fun setName(name: String?): Builder {
@@ -155,6 +167,12 @@ class CreateTribe private constructor(
         }
 
         @Synchronized
+        fun setFeedType(feedType: Int?): Builder {
+            this.feedType = feedType?.toFeedType()
+            return this
+        }
+
+        @Synchronized
         fun load(tribeDto: TribeDto) {
             name = tribeDto.name
             imgUrl = tribeDto.img
@@ -169,6 +187,7 @@ class CreateTribe private constructor(
             escrowMillis = tribeDto.escrow_millis
             appUrl = tribeDto.app_url?.toAppUrl()
             feedUrl = tribeDto.feed_url?.toFeedUrl()
+            feedType = tribeDto.feed_type?.toFeedType()
             unlisted = tribeDto.unlisted
         }
 
@@ -193,7 +212,8 @@ class CreateTribe private constructor(
                     unlisted = unlisted,
                     private = private,
                     appUrl = appUrl,
-                    feedUrl = feedUrl
+                    feedUrl = feedUrl,
+                    feedType = feedType
                 )
             }
     }
@@ -212,7 +232,8 @@ class CreateTribe private constructor(
             unlisted = unlisted,
             private = private,
             app_url = appUrl?.value,
-            feed_url = feedUrl?.value
+            feed_url = feedUrl?.value,
+            feed_type = feedType?.value?.toLong()
         )
     }
 }

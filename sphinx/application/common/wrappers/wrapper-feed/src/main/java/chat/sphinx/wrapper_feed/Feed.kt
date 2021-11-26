@@ -2,11 +2,9 @@ package chat.sphinx.wrapper_feed
 
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.ExternalAuthorizeLink
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.*
 
 inline val Feed.isPodcast: Boolean
     get() = feedType.isPodcast()
@@ -38,6 +36,10 @@ data class Feed(
 ) {
 
     var items: List<FeedItem> = listOf()
+
+    var destinations: List<FeedDestination> = listOf()
+
+    var model: FeedModel? = null
 
     var chat: Chat? = null
 

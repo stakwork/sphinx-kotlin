@@ -13,8 +13,8 @@ inline fun Long.toItemId(): ItemId? =
 @JvmInline
 value class ItemId(val value: Long) {
     init {
-        require(value >= 0) {
-            "MetaDataId must be greater than or equal to 0"
+        require(value >= -1) {
+            "MetaDataId must be greater than or equal to -1"
         }
     }
 }
