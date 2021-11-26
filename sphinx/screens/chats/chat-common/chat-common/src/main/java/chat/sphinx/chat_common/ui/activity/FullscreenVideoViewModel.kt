@@ -2,10 +2,11 @@ package chat.sphinx.chat_common.ui.activity
 
 import android.app.Application
 import android.content.Context
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.chat_common.util.VideoPlayerController
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.video_player_controller.VideoPlayerController
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.retrieveTextToShow
@@ -156,7 +157,7 @@ internal class FullscreenVideoViewModel @Inject constructor(
                 )
             }
             getVideoFile()?.let { videoFile ->
-                videoPlayerController.initializeVideo(videoFile)
+                videoPlayerController.initializeVideo(videoFile.toUri())
             }
         }
     }

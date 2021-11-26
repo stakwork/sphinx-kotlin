@@ -130,7 +130,6 @@ internal class NewsletterItemsListAdapter(
                                     recyclerView.scrollToPosition(0)
                                 }
                             }
-
                         }
                     }
                 }

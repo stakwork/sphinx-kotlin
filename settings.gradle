@@ -154,6 +154,7 @@ include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 include ':sphinx:screens-detail:tribe-members-list:tribe-members-list'
 include ':sphinx:screens-detail:web-view:web-view'
+include ':sphinx:screens-detail:video-screen:video-screen'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'
@@ -291,3 +292,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
 include ':sphinx:screens-detail:newsletter-detail:newsletter-detail'
+include ':sphinx:activity:features:video-player-controller'

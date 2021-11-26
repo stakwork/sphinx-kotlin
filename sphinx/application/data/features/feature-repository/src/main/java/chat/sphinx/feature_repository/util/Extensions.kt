@@ -456,12 +456,15 @@ fun TransactionCallbacks.upsertFeed(
         return
     }
 
-    queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
-        if (feedDbo.feed_url.value != feedUrl.value) {
-            deleteFeedById(
-                feedDbo.id,
-                queries
-            )
+    if (chatId.value != ChatId.NULL_CHAT_ID.toLong()) {
+        //Deleting old feed associated with chat
+        queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
+            if (feedDbo.feed_url.value != feedUrl.value) {
+                deleteFeedById(
+                    feedDbo.id,
+                    queries
+                )
+            }
         }
     }
 
@@ -531,6 +534,7 @@ fun TransactionCallbacks.upsertFeed(
         generator = feedDto.generator?.toFeedGenerator()
     )
 }
+
 
 fun TransactionCallbacks.deleteFeedsByChatId(
     chatId: ChatId,

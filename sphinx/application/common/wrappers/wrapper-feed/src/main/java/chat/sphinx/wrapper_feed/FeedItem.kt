@@ -14,7 +14,7 @@ inline val FeedItem.isNewsletter: Boolean
     get() = feed?.feedType?.isNewsletter() == true
 
 data class FeedItem(
-    val id: FeedId,
+    val id: FeedId, // TODO: Should this be FeedItemId?
     val title: FeedTitle,
     val description: FeedDescription?,
     val datePublished: DateTime?,
@@ -45,9 +45,6 @@ data class FeedItem(
             imageUrl?.let {
                 return it
             }
-            feed?.imageUrlToShow?.let {
-                return it
-            }
             return null
         }
 
@@ -56,7 +53,7 @@ data class FeedItem(
             thumbnailUrl?.let {
                 return it
             }
-            return imageUrlToShow
+            return null
         }
 
     var titleToShow: String = ""

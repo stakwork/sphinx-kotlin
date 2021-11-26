@@ -3449,6 +3449,36 @@ abstract class SphinxRepository(
         return feed
     }
 
+    private suspend fun mapFeedItemDboList(
+        listFeedItemDbo: List<FeedItemDbo>,
+        queries: SphinxDatabaseQueries
+    ) : List<FeedItem> {
+        val feedsMap: MutableMap<FeedId, ArrayList<Feed>> =
+            LinkedHashMap(listFeedItemDbo.size)
+
+        for (dbo in listFeedItemDbo) {
+            feedsMap[dbo.feed_id] = ArrayList(0)
+        }
+
+        feedsMap.keys.chunked(500).forEach { chunkedFeedIds ->
+            queries.feedGetAllByIds(chunkedFeedIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        feedsMap[dbo.id]?.add(
+                            feedDboPresenterMapper.mapFrom(dbo)
+                        )
+                    }
+                }
+        }
+
+        return listFeedItemDbo.map {
+            feedItemDboPresenterMapper.mapFrom(it).apply {
+                it.feed_id
+            }
+        }
+    }
+
     /*
     * Used to hold in memory the chat table's latest message time to reduce disk IO
     * and mitigate conflicting updates between SocketIO and networkRefreshMessages

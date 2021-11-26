@@ -108,11 +108,12 @@
     <string name="play">Play</string>
     <string name="listen_now">Listen Now</string>
     <string name="following">Following</string>
+    <string name="read_now">Read Now</string>
+    <string name="watch_now">Watch Now</string>
 
     <string name="all_place_holder">No \"Feed\" Results Found</string>
     <string name="listen_place_holder">No \"Listen\" Results Found</string>
     <string name="watch_place_holder">No \"Watch\" Results Found</string>
     <string name="read_place_holder">No \"Read\" Results Found</string>
     <string name="play_place_holder">No \"Play\" Results Found</string>
-    <string name="read_now">Read Now</string>
 </resources>

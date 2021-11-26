@@ -25,11 +25,13 @@ abstract class DashboardNavigator(
         routeHint: LightningRouteHint? = null
     )
 
-    abstract suspend fun toWebViewDetail(
-        title: String,
-        url: FeedUrl
-    )
+    abstract suspend fun toVideoFeedScreen(chatId: ChatId, feedUrl: FeedUrl)
+
+    abstract suspend fun toVideoWatchScreen(chatId: ChatId, feedUrl: FeedUrl)
+
+    abstract suspend fun toWebViewDetail(title: String, url: FeedUrl)
 
     abstract suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl)
+
     abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, feedUrl: FeedUrl, currentEpisodeDuration: Long)
 }

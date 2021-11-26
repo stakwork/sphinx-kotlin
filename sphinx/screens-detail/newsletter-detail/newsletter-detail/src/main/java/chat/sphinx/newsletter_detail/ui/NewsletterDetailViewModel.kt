@@ -86,5 +86,4 @@ internal class NewsletterDetailViewModel @Inject constructor(
             )
         }
     }
-
 }
