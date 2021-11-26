@@ -10,6 +10,10 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
+import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
+import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -75,6 +79,7 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+    private val networkQuerySaveProfile: NetworkQuerySaveProfile,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -121,6 +126,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleExternalAuthorizeLink(externalAuthorizeLink)
             } ?: deepLink?.toPeopleConnectLink()?.let { peopleConnectLink ->
                 handlePeopleConnectLink(peopleConnectLink)
+            } ?: deepLink?.toSaveProfileLink()?.let { savePeopleLink ->
+                handleSaveProfileLink(savePeopleLink)
             }
         }
     }
@@ -137,7 +144,8 @@ internal class DashboardViewModel @Inject constructor(
                                 data.isValidPeopleConnectLink ||
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
-                                data.isValidVirtualNodeAddress ->
+                                data.isValidVirtualNodeAddress ||
+                                data.isValidSaveProfileLink ->
                                 {
                                     Response.Success(Any())
                                 }
@@ -163,6 +171,10 @@ internal class DashboardViewModel @Inject constructor(
                 } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
 
                     handleExternalAuthorizeLink(externalAuthorizeLink)
+
+                } ?: code.toSaveProfileLink()?.let { externalSaveProfileLink ->
+
+                    handleSaveProfileLink(externalSaveProfileLink)
 
                 } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
 
@@ -247,6 +259,55 @@ internal class DashboardViewModel @Inject constructor(
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.ExternalAuthorizePopup(link)
         )
+    }
+
+    private suspend fun handleSaveProfileLink(link: SaveProfileLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.LoadingPeopleProfilePopup
+        )
+
+        networkQuerySaveProfile.getPeopleProfileByKey(
+            link.host,
+            link.key
+        ).collect { loadResponse ->
+
+            when(loadResponse){
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    deepLinkPopupViewStateContainer.updateViewState(
+                        DeepLinkPopupViewState.PopupDismissed
+                    )
+
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_save_profile_generic_error)
+                        )
+                    )
+                }
+
+                is Response.Success -> {
+                    if (loadResponse.value.isProfilePath()) {
+                        if (loadResponse.value.isDeleteMethod()) {
+                            deepLinkPopupViewStateContainer.updateViewState(
+                                DeepLinkPopupViewState.DeletePeopleProfilePopup(
+                                    link,
+                                    loadResponse.value.body
+                                )
+                            )
+                        } else if (loadResponse.value.isSaveMethod()) {
+                            deepLinkPopupViewStateContainer.updateViewState(
+                                DeepLinkPopupViewState.SavePeopleProfilePopup(
+                                    link,
+                                    loadResponse.value.body
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
@@ -413,6 +474,74 @@ internal class DashboardViewModel @Inject constructor(
                 DeepLinkPopupViewState.PopupDismissed
             )
         }
+    }
+
+    suspend fun updatePeopleProfile() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.SaveProfilePopupProcessing
+        )
+
+        if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
+            savePeopleProfile(viewState.body)
+        } else if (viewState is DeepLinkPopupViewState.DeletePeopleProfilePopup) {
+            deletePeopleProfile(viewState.body)
+        }
+    }
+
+    private suspend fun deletePeopleProfile(body: String){
+        viewModelScope.launch(mainImmediate) {
+            when (repositoryDashboard.deletePeopleProfile(body)) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_delete_profile_generic_error)
+                        )
+                    )
+                }
+                is Response.Success -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_delete_profile_success)
+                        )
+                    )
+                }
+            }
+        }.join()
+
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.PopupDismissed
+        )
+    }
+
+    private suspend fun savePeopleProfile(body: String) {
+        viewModelScope.launch(mainImmediate) {
+            val response = repositoryDashboard.savePeopleProfile(
+                body
+            )
+
+            when (response) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_save_profile_generic_error)
+                        )
+                    )
+                }
+                is Response.Success -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_save_profile_success)
+                        )
+                    )
+                }
+            }
+        }.join()
+
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.PopupDismissed
+        )
     }
 
     val deepLinkPopupViewStateContainer: ViewStateContainer<DeepLinkPopupViewState> by lazy {
