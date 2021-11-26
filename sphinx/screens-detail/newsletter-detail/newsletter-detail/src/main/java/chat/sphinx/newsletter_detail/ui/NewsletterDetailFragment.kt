@@ -11,14 +11,12 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.newsletter_detail.R
 import chat.sphinx.newsletter_detail.databinding.FragmentNewsletterDetailBinding
 import chat.sphinx.newsletter_detail.ui.adapter.NewsletterItemsFooterAdapter
 import chat.sphinx.newsletter_detail.ui.adapter.NewsletterItemsListAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
-import io.matthewnelson.android_feature_screens.util.gone
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject

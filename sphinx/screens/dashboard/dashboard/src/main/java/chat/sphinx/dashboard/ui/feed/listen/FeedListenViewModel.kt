@@ -42,16 +42,20 @@ class FeedListenViewModel @Inject constructor(
 
     fun episodeItemSelected(episode: FeedItem) {
         episode.feed?.let { feed ->
-            feed.chat?.id?.let { chatId ->
-                goToPodcastPlayer(chatId, feed.id, feed.feedUrl)
-            }
+            goToPodcastPlayer(
+                feed.chat?.id ?: feed.chatId,
+                feed.id,
+                feed.feedUrl
+            )
         }
     }
 
     override fun feedSelected(feed: Feed) {
-        feed.chat?.id?.let { chatId ->
-            goToPodcastPlayer(chatId, feed.id, feed.feedUrl)
-        }
+        goToPodcastPlayer(
+            feed.chat?.id ?: feed.chatId,
+            feed.id,
+            feed.feedUrl
+        )
     }
 
     private fun goToPodcastPlayer(

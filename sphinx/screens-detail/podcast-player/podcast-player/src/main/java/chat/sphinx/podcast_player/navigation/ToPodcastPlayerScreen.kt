@@ -17,8 +17,8 @@ class ToPodcastPlayerScreen(
     private val currentEpisodeDuration: Long,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
-    override fun navigate(controller: NavController) {
 
+    override fun navigate(controller: NavController) {
         controller.navigate(
             R.id.podcast_player_nav_graph,
             PodcastPlayerFragmentArgs.Builder(

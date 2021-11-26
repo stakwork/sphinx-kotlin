@@ -984,6 +984,12 @@ WHERE chat_id = ?
 ORDER BY id DESC
 LIMIT 1;
 
+feedGetAllByChatId:
+SELECT *
+FROM feedDbo
+WHERE chat_id = ?
+ORDER BY id DESC;
+
 feedGetByChatIdAndType:
 SELECT *
 FROM feedDbo
@@ -998,6 +1004,11 @@ FROM feedDbo
 WHERE feed_type = ?
 AND subscribed = 1
 ORDER BY id DESC;
+
+feedGetAllByIds:
+SELECT *
+FROM feedDbo
+WHERE id IN ?;
 
 feedGetById:
 SELECT *

@@ -1,13 +1,14 @@
-package chat.sphinx.chat_common.util
+package chat.sphinx.video_player_controller
 
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.os.Build
 import android.widget.VideoView
-import androidx.core.net.toUri
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
-import java.io.File
 
 class VideoPlayerController(
-    val viewModelScope: CoroutineScope,
+    private val viewModelScope: CoroutineScope,
     private val updateIsPlaying: (Boolean) -> Unit,
     private val updateMetaDataCallback: (Int, Int, Int) -> Unit,
     private val updateCurrentTimeCallback: (Int) -> Unit,
@@ -21,21 +22,27 @@ class VideoPlayerController(
         this.videoView = videoView
     }
 
-    fun initializeVideo(videoFile: File) {
+    suspend fun initializeVideo(videoUri: Uri) {
+        var duration:Long? = null
+
+        withContext(io) {
+            duration = videoUri.getMediaDuration()
+        }
+
         videoView?.apply {
             setOnCompletionListener {
                 completePlaybackCallback()
             }
             setOnPreparedListener {
                 updateMetaDataCallback(
-                    it.duration,
+                    duration?.toInt() ?: it.duration,
                     it.videoWidth,
                     it.videoHeight
                 )
                 play()
             }
 
-            setVideoURI(videoFile.toUri())
+            setVideoURI(videoUri)
         }
     }
 
@@ -43,6 +50,10 @@ class VideoPlayerController(
         videoView?.start()
         startDispatchStateJob()
         updateIsPlaying(true)
+    }
+
+    fun seekTo(progress: Int) {
+        videoView?.seekTo(progress*1000)
     }
 
     fun pause() {
@@ -83,5 +94,21 @@ class VideoPlayerController(
                 }
             }
         }
+    }
+}
+
+fun Uri.getMediaDuration(): Long {
+    val retriever = MediaMetadataRetriever()
+    return try {
+        if (Build.VERSION.SDK_INT >= 14) {
+            retriever.setDataSource(this.toString(), HashMap<String, String>())
+        } else {
+            retriever.setDataSource(this.toString())
+        }
+        val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        retriever.release()
+        duration?.toLongOrNull() ?: 0
+    } catch (exception: Exception) {
+        0
     }
 }

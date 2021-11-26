@@ -83,6 +83,8 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-vers
 include ':sphinx:application:network:features:queries:feature-network-query-version'
 include ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external'
 include ':sphinx:application:network:features:queries:feature-network-query-authorize-external'
+include ':sphinx:application:network:concepts:queries:concept-network-query-save-profile'
+include ':sphinx:application:network:features:queries:feature-network-query-save-profile'
 include ':sphinx:application:network:concepts:calls:concept-network-call'
 include ':sphinx:application:network:concepts:calls:concept-network-relay-call'
 include ':sphinx:application:network:features:feature-network-relay-call'
@@ -101,6 +103,7 @@ include ':sphinx:activity:concepts:concept-user-colors-helper'
 include ':sphinx:activity:features:user-colors-helper'
 include ':sphinx:activity:concepts:concept-view-model-coordinator'
 include ':sphinx:activity:features:feature-view-model-coordinator'
+include ':sphinx:activity:features:video-player-controller'
 
 // Screens
 include ':sphinx:screens:add-sats:add-sats'
@@ -156,6 +159,7 @@ include ':sphinx:screens-detail:transactions:transactions'
 include ':sphinx:screens-detail:tribe-members-list:tribe-members-list'
 include ':sphinx:screens-detail:web-view:web-view'
 include ':sphinx:screens-detail:newsletter-detail:newsletter-detail'
+include ':sphinx:screens-detail:video-screen:video-screen'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'

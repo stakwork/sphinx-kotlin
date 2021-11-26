@@ -13,6 +13,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
+import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
@@ -133,6 +134,7 @@ object RepositoryModule {
         networkQueryMessage: NetworkQueryMessage,
         networkQueryInvite: NetworkQueryInvite,
         networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+        networkQuerySaveProfile: NetworkQuerySaveProfile,
         networkQuerySubscription: NetworkQuerySubscription,
         networkQueryPodcastSearch: NetworkQueryPodcastSearch,
         socketIOManager: SocketIOManager,
@@ -157,6 +159,7 @@ object RepositoryModule {
             networkQueryMessage,
             networkQueryInvite,
             networkQueryAuthorizeExternal,
+            networkQuerySaveProfile,
             networkQuerySubscription,
             networkQueryPodcastSearch,
             rsa,

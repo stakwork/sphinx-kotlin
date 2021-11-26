@@ -395,7 +395,7 @@ inline fun TransactionCallbacks.deleteChatById(
     queries.chatDeleteById(chatId)
     queries.dashboardDeleteById(chatId)
     latestMessageUpdatedTimeMap?.withLock { it.remove(chatId) }
-    deleteFeedByChatId(chatId, queries)
+    deleteFeedsByChatId(chatId, queries)
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -455,6 +455,18 @@ fun TransactionCallbacks.upsertFeed(
 
     if (feedDto.items.count() == 0) {
         return
+    }
+
+    if (chatId.value != ChatId.NULL_CHAT_ID.toLong()) {
+        //Deleting old feed associated with chat
+        queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
+            if (feedDbo.feed_url.value != feedUrl.value) {
+                deleteFeedById(
+                    feedDbo.id,
+                    queries
+                )
+            }
+        }
     }
 
     val feedId = FeedId(feedDto.id)
@@ -525,11 +537,24 @@ fun TransactionCallbacks.upsertFeed(
     )
 }
 
-fun TransactionCallbacks.deleteFeedByChatId(
+
+fun TransactionCallbacks.deleteFeedsByChatId(
     chatId: ChatId,
     queries: SphinxDatabaseQueries
 ) {
-    queries.feedGetByChatId(chatId).executeAsOneOrNull()?.let { feedDbo ->
+    queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
+        queries.feedItemsDeleteByFeedId(feedDbo.id)
+        queries.feedModelDeleteById(feedDbo.id)
+        queries.feedDestinationDeleteByFeedId(feedDbo.id)
+        queries.feedDeleteById(feedDbo.id)
+    }
+}
+
+fun TransactionCallbacks.deleteFeedById(
+    feedId: FeedId,
+    queries: SphinxDatabaseQueries
+) {
+    queries.feedGetById(feedId).executeAsOneOrNull()?.let { feedDbo ->
         queries.feedItemsDeleteByFeedId(feedDbo.id)
         queries.feedModelDeleteById(feedDbo.id)
         queries.feedDestinationDeleteByFeedId(feedDbo.id)

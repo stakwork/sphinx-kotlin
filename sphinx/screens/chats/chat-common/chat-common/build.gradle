@@ -41,6 +41,8 @@ dependencies {
     api project(path: ':sphinx:activity:insetter-activity')
     api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
 
+    implementation project(path: ':sphinx:activity:features:video-player-controller')
+
     api project(path: ':sphinx:application:common:menus:menu-bottom')
 
     api project(path: ':sphinx:application:common:logger')
