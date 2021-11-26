@@ -2,7 +2,7 @@ package chat.sphinx.video_screen.ui
 
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
+import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedUrl
@@ -29,8 +29,8 @@ internal open class VideoFeedScreenViewModel(
         replay = 1,
     )
 
-    open val playingVideoStateContainer: ViewStateContainer<PlayingVideoViewState> by lazy {
-        ViewStateContainer(PlayingVideoViewState.Idle)
+    open val selectedVideoStateContainer: ViewStateContainer<SelectedVideoViewState> by lazy {
+        ViewStateContainer(SelectedVideoViewState.Idle)
     }
 
     protected fun subscribeToViewStateFlow() {
@@ -45,10 +45,10 @@ internal open class VideoFeedScreenViewModel(
                         )
                     )
 
-                    if (playingVideoStateContainer.value is PlayingVideoViewState.Idle) {
+                    if (selectedVideoStateContainer.value is SelectedVideoViewState.Idle) {
                         nnFeed.items.firstOrNull()?.let { video ->
-                            playingVideoStateContainer.updateViewState(
-                                PlayingVideoViewState.PlayingVideo(
+                            selectedVideoStateContainer.updateViewState(
+                                SelectedVideoViewState.VideoSelected(
                                     video.id,
                                     video.title,
                                     video.description,
@@ -84,8 +84,8 @@ internal open class VideoFeedScreenViewModel(
     }
 
     fun videoItemSelected(video: FeedItem) {
-        playingVideoStateContainer.updateViewState(
-            PlayingVideoViewState.PlayingVideo(
+        selectedVideoStateContainer.updateViewState(
+            SelectedVideoViewState.VideoSelected(
                 video.id,
                 video.title,
                 video.description,

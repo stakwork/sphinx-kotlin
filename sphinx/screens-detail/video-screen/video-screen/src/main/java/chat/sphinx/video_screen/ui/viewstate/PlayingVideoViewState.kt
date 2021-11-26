@@ -1,21 +1,77 @@
 package chat.sphinx.video_screen.ui.viewstate
 
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_feed.FeedDescription
-import chat.sphinx.wrapper_feed.FeedTitle
 import io.matthewnelson.concept_views.viewstate.ViewState
 
-internal sealed class PlayingVideoViewState: ViewState<PlayingVideoViewState>() {
+internal sealed class PlayingVideoViewState(
+    val duration: Int,
+    val currentTime: Int,
+    val videoDimensions: Pair<Int, Int>,
+    val isPlaying: Boolean
+): ViewState<PlayingVideoViewState>() {
+    object Idle : PlayingVideoViewState(
+        0,
+        0,
+        Pair(0,0),
+        false
+    )
 
-    object Idle: PlayingVideoViewState()
+    class MetaDataLoaded(
+        duration: Int,
+        currentTime: Int,
+        videoDimensions: Pair<Int, Int>,
+        isPlaying: Boolean
+    ): PlayingVideoViewState(
+        duration,
+        currentTime,
+        videoDimensions,
+        isPlaying
+    )
 
-    class PlayingVideo(
-        val id: FeedId,
-        val title: FeedTitle,
-        val description: FeedDescription?,
-        val url: FeedUrl,
-        val date: DateTime?,
-    ): PlayingVideoViewState()
+    class CurrentTimeUpdate(
+        duration: Int,
+        currentTime: Int,
+        videoDimensions: Pair<Int, Int>,
+        isPlaying: Boolean
+    ): PlayingVideoViewState(
+        duration,
+        currentTime,
+        videoDimensions,
+        isPlaying
+    )
+
+    class PausePlayback(
+        duration: Int,
+        currentTime: Int,
+        videoDimensions: Pair<Int, Int>,
+        isPlaying: Boolean
+    ): PlayingVideoViewState(
+        duration,
+        currentTime,
+        videoDimensions,
+        isPlaying
+    )
+
+    class ContinuePlayback(
+        duration: Int,
+        currentTime: Int,
+        videoDimensions: Pair<Int, Int>,
+        isPlaying: Boolean
+    ): PlayingVideoViewState(
+        duration,
+        currentTime,
+        videoDimensions,
+        isPlaying
+    )
+
+    class CompletePlayback(
+        duration: Int,
+        currentTime: Int,
+        videoDimensions: Pair<Int, Int>,
+        isPlaying: Boolean
+    ): PlayingVideoViewState(
+        duration,
+        currentTime,
+        videoDimensions,
+        isPlaying
+    )
 }
