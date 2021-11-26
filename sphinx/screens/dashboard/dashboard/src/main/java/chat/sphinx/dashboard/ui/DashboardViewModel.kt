@@ -537,7 +537,7 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun getOwner(): Contact {
-        return accountOwner.value.let { contact ->
+        val owner = accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
             } else {
@@ -556,6 +556,9 @@ internal class DashboardViewModel @Inject constructor(
                 resolvedOwner!!
             }
         }
+        _accountOwnerStateFlow.value = owner
+
+        return owner
     }
 
     private fun payLightningPaymentRequest(lightningPaymentRequest: LightningPaymentRequest) {
