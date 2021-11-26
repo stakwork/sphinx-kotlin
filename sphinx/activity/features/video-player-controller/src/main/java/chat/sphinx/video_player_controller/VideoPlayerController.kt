@@ -22,20 +22,17 @@ class VideoPlayerController(
         this.videoView = videoView
     }
 
-    suspend fun initializeVideo(videoUri: Uri) {
-        var duration:Long? = null
-
-        withContext(io) {
-            duration = videoUri.getMediaDuration()
-        }
-
+    fun initializeVideo(
+        videoUri: Uri,
+        videoDuration: Int? = null
+    ) {
         videoView?.apply {
             setOnCompletionListener {
                 completePlaybackCallback()
             }
             setOnPreparedListener {
                 updateMetaDataCallback(
-                    duration?.toInt() ?: it.duration,
+                    videoDuration ?: it.duration,
                     it.videoWidth,
                     it.videoHeight
                 )
@@ -53,7 +50,7 @@ class VideoPlayerController(
     }
 
     fun seekTo(progress: Int) {
-        videoView?.seekTo(progress*1000)
+        videoView?.seekTo(progress)
     }
 
     fun pause() {

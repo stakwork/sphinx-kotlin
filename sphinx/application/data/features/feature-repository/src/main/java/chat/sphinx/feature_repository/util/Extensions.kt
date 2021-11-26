@@ -496,6 +496,7 @@ fun TransactionCallbacks.upsertFeed(
             enclosure_length = item.enclosureLength?.toFeedEnclosureLength(),
             enclosure_url = FeedUrl(item.enclosureUrl),
             enclosure_type = item.enclosureType?.toFeedEnclosureType(),
+            duration = item.duration?.toFeedItemDuration(),
             image_url = item.imageUrl?.toPhotoUrl(),
             thumbnail_url = item.thumbnailUrl?.toPhotoUrl(),
             link = item.link?.toFeedUrl(),

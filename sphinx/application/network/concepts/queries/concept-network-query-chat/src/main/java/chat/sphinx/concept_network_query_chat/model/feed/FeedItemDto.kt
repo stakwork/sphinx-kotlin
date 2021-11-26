@@ -14,6 +14,7 @@ data class FeedItemDto(
     val enclosureUrl: String,
     val enclosureType: String?,
     val enclosureLength: Long?,
+    val duration: Long?,
     val imageUrl: String?,
     val thumbnailUrl: String?,
     val link: String?

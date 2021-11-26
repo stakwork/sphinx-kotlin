@@ -109,8 +109,16 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
         )
     }
 
-    fun initializeVideo(videoUri: Uri) {
-        viewModelScope.launch(mainImmediate) {
+    fun initializeVideo(
+        videoUri: Uri,
+        videoDuration: Int?
+    ) {
+        if (videoDuration != null && videoDuration > 0) {
+            videoPlayerController.initializeVideo(
+                videoUri,
+                videoDuration * 1000
+            )
+        } else {
             videoPlayerController.initializeVideo(videoUri)
         }
     }

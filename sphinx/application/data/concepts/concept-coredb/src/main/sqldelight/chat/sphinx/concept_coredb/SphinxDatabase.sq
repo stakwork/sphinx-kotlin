@@ -48,6 +48,7 @@ import chat.sphinx.wrapper_feed.FeedDestinationType;
 import chat.sphinx.wrapper_feed.FeedEnclosureLength;
 import chat.sphinx.wrapper_feed.FeedEnclosureType;
 import chat.sphinx.wrapper_feed.FeedGenerator;
+import chat.sphinx.wrapper_feed.FeedItemDuration;
 import chat.sphinx.wrapper_feed.FeedItemsCount;
 import chat.sphinx.wrapper_feed.FeedLanguage;
 import chat.sphinx.wrapper_feed.FeedModelSuggested;
@@ -1047,6 +1048,7 @@ CREATE TABLE feedItemDbo(
     enclosure_length            INTEGER            AS FeedEnclosureLength,
     enclosure_url               TEXT               AS FeedUrl NOT NULL,
     enclosure_type              TEXT               AS FeedEnclosureType,
+    duration                    INTEGER            AS FeedItemDuration,
     image_url                   TEXT               AS PhotoUrl,
     thumbnail_url               TEXT               AS PhotoUrl,
     link                        TEXT               AS FeedUrl,
@@ -1064,6 +1066,7 @@ feedItemUpsert {
         enclosure_length = :enclosure_length,
         enclosure_url = :enclosure_url,
         enclosure_type = :enclosure_type,
+        duration = :duration,
         image_url = :image_url,
         thumbnail_url = :thumbnail_url,
         link = :link,
@@ -1081,6 +1084,7 @@ feedItemUpsert {
         enclosure_length,
         enclosure_url,
         enclosure_type,
+        duration,
         image_url,
         thumbnail_url,
         link,
@@ -1097,6 +1101,7 @@ feedItemUpsert {
         :enclosure_length,
         :enclosure_url,
         :enclosure_type,
+        :duration,
         :image_url,
         :thumbnail_url,
         :link,
