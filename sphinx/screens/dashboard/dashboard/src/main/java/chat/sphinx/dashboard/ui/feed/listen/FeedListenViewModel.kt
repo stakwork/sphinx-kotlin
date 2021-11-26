@@ -7,6 +7,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
@@ -27,7 +28,7 @@ class FeedListenViewModel @Inject constructor(
         Context,
         FeedListenSideEffect,
         FeedListenViewState
-        >(dispatchers, FeedListenViewState.Default), FeedFollowingViewModel
+        >(dispatchers, FeedListenViewState.Idle), FeedFollowingViewModel
 {
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         repositoryDashboard.getAllFeedsOfType(FeedType.Podcast).collect { podcastFeeds ->
@@ -41,22 +42,30 @@ class FeedListenViewModel @Inject constructor(
 
     fun episodeItemSelected(episode: FeedItem) {
         episode.feed?.let { feed ->
-            feed.chat?.id?.let { chatId ->
-                goToPodcastPlayer(chatId, feed.feedUrl)
-            }
+            goToPodcastPlayer(
+                feed.chat?.id ?: feed.chatId,
+                feed.id,
+                feed.feedUrl
+            )
         }
     }
 
     override fun feedSelected(feed: Feed) {
-        feed.chat?.id?.let { chatId ->
-            goToPodcastPlayer(chatId, feed.feedUrl)
-        }
+        goToPodcastPlayer(
+            feed.chat?.id ?: feed.chatId,
+            feed.id,
+            feed.feedUrl
+        )
     }
 
-    private fun goToPodcastPlayer(chatId: ChatId, feedUrl: FeedUrl) {
+    private fun goToPodcastPlayer(
+        chatId: ChatId,
+        feedId: FeedId,
+        feedUrl: FeedUrl
+    ) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, feedUrl, 0
+                chatId, feedId, feedUrl, 0
             )
         }
     }

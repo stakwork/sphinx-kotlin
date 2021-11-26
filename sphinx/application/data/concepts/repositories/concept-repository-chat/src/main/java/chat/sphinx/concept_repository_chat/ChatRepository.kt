@@ -15,9 +15,11 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -63,12 +65,15 @@ interface ChatRepository {
         chatId: ChatId,
         host: ChatHost,
         feedUrl: FeedUrl,
-        chatUUID: ChatUUID,
+        chatUUID: ChatUUID?,
+        subscribed: Subscribed,
         currentEpisodeId: FeedId?
     )
 
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
-    fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
+    fun getFeedById(feedId: FeedId): Flow<Feed?>
+
+    suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>

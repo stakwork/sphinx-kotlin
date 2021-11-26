@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.navigation
 import androidx.navigation.NavController
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
@@ -33,5 +34,5 @@ abstract class DashboardNavigator(
 
     abstract suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl)
 
-    abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, feedUrl: FeedUrl, currentEpisodeDuration: Long)
+    abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, currentEpisodeDuration: Long)
 }

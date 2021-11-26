@@ -6,6 +6,7 @@ import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -75,6 +76,7 @@ internal open class VideoFeedScreenViewModel(
                             host = chatHost,
                             feedUrl = feedUrl,
                             chatUUID = chat.uuid,
+                            true.toSubscribed(),
                             currentEpisodeId = null
                         )
                     }

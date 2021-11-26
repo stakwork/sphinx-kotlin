@@ -13,6 +13,9 @@
             android:name="argChatId"
             app:argType="long" />
         <argument
+            android:name="argFeedId"
+            app:argType="string" />
+        <argument
             android:name="argFeedUrl"
             app:argType="string" />
         <argument

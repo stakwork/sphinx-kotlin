@@ -84,6 +84,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     my_aliasAdapter = ChatAliasAdapter(),
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
                     latest_message_idAdapter = MessageIdAdapter.getInstance(),
+                    content_seen_atAdapter = DateTimeAdapter.getInstance()
                 ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),
@@ -182,8 +183,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     languageAdapter = FeedLanguageAdapter(),
                     items_countAdapter = FeedItemsCountAdapter(),
                     current_item_idAdapter = FeedIdAdapter(),
-                    chat_idAdapter = ChatIdAdapter.getInstance()
-
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    subscribedAdapter = SubscribedAdapter.getInstance()
                 ),
                 feedItemDboAdapter = FeedItemDbo.Adapter(
                     idAdapter = FeedIdAdapter(),

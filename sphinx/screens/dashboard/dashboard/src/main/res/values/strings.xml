@@ -117,4 +117,7 @@
     <string name="read_place_holder">No \"Read\" Results Found</string>
     <string name="play_place_holder">No \"Play\" Results Found</string>
 
+    <string name="podcast_search_placeholder_1">Search over</string>
+    <string name="podcast_search_placeholder_2">4 000 000 podcasts</string>
+    <string name="podcast_search_placeholder_3">on the Podcast Index</string>
 </resources>

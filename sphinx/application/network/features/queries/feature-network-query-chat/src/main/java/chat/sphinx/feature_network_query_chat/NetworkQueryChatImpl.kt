@@ -39,7 +39,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_STREAM_SATS = "/stream"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
-        private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s&uuid=%s"
+        private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s"
     }
 
     ///////////
@@ -78,12 +78,17 @@ class NetworkQueryChatImpl(
     override fun getFeedContent(
         host: ChatHost,
         feedUrl: FeedUrl,
-        chatUUID: ChatUUID,
+        chatUUID: ChatUUID?,
     ): Flow<LoadResponse<FeedDto, ResponseError>> =
         networkRelayCall.get(
-            url = String.format(GET_FEED_CONTENT_URL, host.value, feedUrl.value, chatUUID.value),
+            url = if (chatUUID != null) {
+                "${String.format(GET_FEED_CONTENT_URL, host.value, feedUrl.value)}&uuid=${chatUUID.value}"
+            } else {
+                String.format(GET_FEED_CONTENT_URL, host.value, feedUrl.value)
+            },
             responseJsonClass = FeedDto::class.java,
         )
+
 
     ///////////
     /// PUT ///

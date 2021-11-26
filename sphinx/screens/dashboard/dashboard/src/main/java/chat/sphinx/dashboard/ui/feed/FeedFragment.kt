@@ -5,24 +5,31 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.viewpager2.widget.ViewPager2
+import androidx.recyclerview.widget.LinearLayoutManager
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
-import chat.sphinx.dashboard.ui.DashboardFragmentsAdapter
+import chat.sphinx.dashboard.ui.DashboardFragment
+import chat.sphinx.dashboard.ui.adapter.PodcastSearchAdapter
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun FragmentFeedBinding.searchBarClearFocus() {
@@ -38,25 +45,46 @@ internal class FeedFragment : SideEffectFragment<
         FragmentFeedBinding
         >(R.layout.fragment_feed)
 {
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
+
     override val viewModel: FeedViewModel by viewModels()
     override val binding: FragmentFeedBinding by viewBinding(FragmentFeedBinding::bind)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        BackPressHandler(binding.root.context)
-            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
-            .addCallback(viewLifecycleOwner, requireActivity())
 
         setupSearch()
         setupFeedViewPager()
+        showPodcastSearchAdapter()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        BackPressHandler(binding.root.context)
+            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
+            .addCallback(viewLifecycleOwner, requireActivity())
     }
 
     private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
         override fun handleOnBackPressed() {
-            if (viewModel.currentViewState !is FeedViewState.Default) {
-                viewModel.updateViewState(FeedViewState.Default)
-            } else {
+            if (
+                parentFragment is DashboardFragment &&
+                (parentFragment as DashboardFragment)?.closeDrawerIfOpen()
+            ) {
+                return
+            } else if (
+                viewModel.currentViewState is FeedViewState.SearchResults ||
+                viewModel.currentViewState is FeedViewState.LoadingSearchResults
+            ) {
+                binding.layoutSearchBar.editTextDashboardSearch.setText("")
+            } else if (viewModel.currentViewState is FeedViewState.SearchPlaceHolder) {
+                viewModel.updateViewState(FeedViewState.Idle)
                 binding.searchBarClearFocus()
+            } else {
                 super.handleOnBackPressed()
             }
         }
@@ -68,8 +96,15 @@ internal class FeedFragment : SideEffectFragment<
                 buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    // TODO: update viewmodel...
+                    viewModel.searchPodcastBy(
+                        editable.toString(),
+                        editTextDashboardSearch.hasFocus()
+                    )
                 }
+            }
+
+            editTextDashboardSearch.setOnFocusChangeListener { _, hasFocus ->
+                viewModel.toggleSearchState(hasFocus)
             }
 
             editTextDashboardSearch.setOnEditorActionListener(object: TextView.OnEditorActionListener {
@@ -129,6 +164,21 @@ internal class FeedFragment : SideEffectFragment<
         }
     }
 
+    private fun showPodcastSearchAdapter() {
+        val searchResultsAdapter = PodcastSearchAdapter(
+            imageLoader,
+            viewLifecycleOwner,
+            onStopSupervisor,
+            viewModel
+        )
+
+        binding.layoutPodcastSearch.recyclerViewPodcastSearchResults.apply {
+            this.setHasFixedSize(false)
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = searchResultsAdapter
+        }
+    }
+
     override fun onPause() {
         super.onPause()
         binding.searchBarClearFocus()
@@ -145,6 +195,31 @@ internal class FeedFragment : SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: FeedViewState) {
-        // TODO("Not yet implemented")
+        binding.layoutPodcastSearch.apply {
+            @Exhaustive
+            when (viewState) {
+                is FeedViewState.Idle -> {
+                    root.gone
+                }
+                is FeedViewState.SearchPlaceHolder -> {
+                    root.visible
+                    layoutConstraintPodcastSearchPlaceholder.visible
+                    layoutConstraintLoadingSearchSesults.gone
+                    recyclerViewPodcastSearchResults.gone
+                }
+                is FeedViewState.LoadingSearchResults -> {
+                    root.visible
+                    layoutConstraintPodcastSearchPlaceholder.gone
+                    layoutConstraintLoadingSearchSesults.visible
+                    recyclerViewPodcastSearchResults.gone
+                }
+                is FeedViewState.SearchResults -> {
+                    root.visible
+                    layoutConstraintPodcastSearchPlaceholder.gone
+                    layoutConstraintLoadingSearchSesults.gone
+                    recyclerViewPodcastSearchResults.visible
+                }
+            }
+        }
     }
 }

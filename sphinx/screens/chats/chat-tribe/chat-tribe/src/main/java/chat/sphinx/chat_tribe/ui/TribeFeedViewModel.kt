@@ -11,6 +11,7 @@ import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_podcast.PodcastRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -18,6 +19,7 @@ import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
@@ -44,6 +46,7 @@ internal class TribeFeedViewModel @Inject constructor(
     private val navigator: TribeChatNavigator,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
+    private val podcastRepository: PodcastRepository,
     private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle),
@@ -232,6 +235,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         data.host,
                         data.feedUrl,
                         data.chatUUID,
+                        true.toSubscribed(),
                         data.metaData?.itemId
                     )
                 }
@@ -240,7 +244,7 @@ internal class TribeFeedViewModel @Inject constructor(
                     viewModelScope.launch(mainImmediate) {
                         delay(500L)
 
-                        chatRepository.getPodcastByChatId(args.chatId).collect { podcast ->
+                        podcastRepository.getPodcastByChatId(args.chatId).collect { podcast ->
                             podcast?.let { nnPodcast ->
                                 podcastLoaded(
                                     nnPodcast,
@@ -384,6 +388,7 @@ internal class TribeFeedViewModel @Inject constructor(
             viewModelScope.launch(mainImmediate) {
                 navigator.toPodcastPlayerScreen(
                     chatId = args.chatId,
+                    feedId = vs.podcast.id,
                     feedUrl = vs.podcast.feedUrl,
                     currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
                 )

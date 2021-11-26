@@ -1,0 +1,12 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    api project(path: ':sphinx:application:common:kotlin-response')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-podcast')
+
+    implementation deps.kotlin.coroutinesCore
+}

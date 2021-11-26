@@ -52,6 +52,7 @@ include ':sphinx:application:data:concepts:repositories:concept-repository-light
 include ':sphinx:application:data:concepts:repositories:concept-repository-media'
 include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:concepts:repositories:concept-repository-subscription'
+include ':sphinx:application:data:concepts:repositories:concept-repository-podcast'
 include ':sphinx:application:data:features:feature-repository'
 include ':sphinx:application:data:features:feature-repository-android'
 
@@ -91,6 +92,8 @@ include ':sphinx:application:network:concepts:concept-socket-io'
 include ':sphinx:application:network:features:feature-socket-io'
 include ':sphinx:application:network:concepts:tor:concept-network-tor'
 include ':sphinx:application:network:features:tor:feature-network-tor'
+include ':sphinx:application:network:concepts:queries:concept-network-query-podcast-search'
+include ':sphinx:application:network:features:queries:feature-network-query-podcast-search'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
@@ -100,6 +103,7 @@ include ':sphinx:activity:concepts:concept-user-colors-helper'
 include ':sphinx:activity:features:user-colors-helper'
 include ':sphinx:activity:concepts:concept-view-model-coordinator'
 include ':sphinx:activity:features:feature-view-model-coordinator'
+include ':sphinx:activity:features:video-player-controller'
 
 // Screens
 include ':sphinx:screens:add-sats:add-sats'
@@ -154,6 +158,7 @@ include ':sphinx:screens-detail:support-ticket:support-ticket'
 include ':sphinx:screens-detail:transactions:transactions'
 include ':sphinx:screens-detail:tribe-members-list:tribe-members-list'
 include ':sphinx:screens-detail:web-view:web-view'
+include ':sphinx:screens-detail:newsletter-detail:newsletter-detail'
 include ':sphinx:screens-detail:video-screen:video-screen'
 
 // Service
@@ -291,5 +296,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:screens-detail:newsletter-detail:newsletter-detail'
-include ':sphinx:activity:features:video-player-controller'

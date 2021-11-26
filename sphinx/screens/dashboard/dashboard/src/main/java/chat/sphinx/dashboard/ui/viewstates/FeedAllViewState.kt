@@ -4,5 +4,5 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class FeedAllViewState: ViewState<FeedAllViewState>() {
 
-    object Default: FeedAllViewState()
+    object Idle: FeedAllViewState()
 }
