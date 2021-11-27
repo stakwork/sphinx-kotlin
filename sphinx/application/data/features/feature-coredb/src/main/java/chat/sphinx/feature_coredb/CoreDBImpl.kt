@@ -12,6 +12,7 @@ import chat.sphinx.feature_coredb.adapters.feed.FeedDescriptionAdapter
 import chat.sphinx.feature_coredb.adapters.feed.FeedIdAdapter
 import chat.sphinx.feature_coredb.adapters.feed.FeedTitleAdapter
 import chat.sphinx.feature_coredb.adapters.feed.FeedTypeAdapter
+import chat.sphinx.feature_coredb.adapters.feed.FeedItemDurationAdapter
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyDecryptedAdapter
@@ -84,6 +85,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     my_aliasAdapter = ChatAliasAdapter(),
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
                     latest_message_idAdapter = MessageIdAdapter.getInstance(),
+                    content_seen_atAdapter = DateTimeAdapter.getInstance()
                 ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),
@@ -182,8 +184,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     languageAdapter = FeedLanguageAdapter(),
                     items_countAdapter = FeedItemsCountAdapter(),
                     current_item_idAdapter = FeedIdAdapter(),
-                    chat_idAdapter = ChatIdAdapter.getInstance()
-
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    subscribedAdapter = SubscribedAdapter.getInstance()
                 ),
                 feedItemDboAdapter = FeedItemDbo.Adapter(
                     idAdapter = FeedIdAdapter(),
@@ -199,7 +201,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     image_urlAdapter = PhotoUrlAdapter.getInstance(),
                     thumbnail_urlAdapter = PhotoUrlAdapter.getInstance(),
                     linkAdapter = FeedUrlAdapter.getInstance(),
-                    feed_idAdapter = FeedIdAdapter()
+                    feed_idAdapter = FeedIdAdapter(),
+                    durationAdapter = FeedItemDurationAdapter()
                 ),
                 feedModelDboAdapter = FeedModelDbo.Adapter(
                     idAdapter = FeedIdAdapter(),

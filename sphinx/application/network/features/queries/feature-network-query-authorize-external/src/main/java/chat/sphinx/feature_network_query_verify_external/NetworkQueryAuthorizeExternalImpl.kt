@@ -76,6 +76,4 @@ class NetworkQueryAuthorizeExternalImpl(
             ),
             responseJsonClass = PersonInfoDto::class.java,
         )
-
-
 }

@@ -10,14 +10,17 @@ import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
+import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_podcast.PodcastRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
@@ -131,7 +134,9 @@ object RepositoryModule {
         networkQueryMessage: NetworkQueryMessage,
         networkQueryInvite: NetworkQueryInvite,
         networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+        networkQuerySaveProfile: NetworkQuerySaveProfile,
         networkQuerySubscription: NetworkQuerySubscription,
+        networkQueryPodcastSearch: NetworkQueryPodcastSearch,
         socketIOManager: SocketIOManager,
         rsa: RSA,
         sphinxLogger: SphinxLogger,
@@ -154,7 +159,9 @@ object RepositoryModule {
             networkQueryMessage,
             networkQueryInvite,
             networkQueryAuthorizeExternal,
+            networkQuerySaveProfile,
             networkQuerySubscription,
+            networkQueryPodcastSearch,
             rsa,
             socketIOManager,
             sphinxLogger,
@@ -188,6 +195,12 @@ object RepositoryModule {
     fun provideSubscriptionRepository(
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): SubscriptionRepository =
+        sphinxRepositoryAndroid
+
+    @Provides
+    fun providePodcastRepository(
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
+    ): PodcastRepository =
         sphinxRepositoryAndroid
 
     @Provides

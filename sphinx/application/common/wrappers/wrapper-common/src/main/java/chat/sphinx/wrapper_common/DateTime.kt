@@ -24,6 +24,10 @@ inline fun String.toDateTimeWithFormat(format: SimpleDateFormat): DateTime =
 inline fun Long.toDateTime(): DateTime =
     DateTime(Date(this))
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.secondsToDateTime(): DateTime =
+    DateTime(Date(this * 1000))
+
 /**
  * Returns:
  *  - `hh:mm AM or PM` if [this] is after 00:00:00.000 for today's date,

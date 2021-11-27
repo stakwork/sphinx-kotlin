@@ -34,6 +34,15 @@
 
     <dimen name="recycler_view_holder_height">90dp</dimen>
 
+    <!-- Podcast search -->
+    <dimen name="feed_podcast_search_progress_bar_xy">32dp</dimen>
+    <dimen name="feed_podcast_search_results_row_height">92dp</dimen>
+    <dimen name="feed_podcast_search_results_image_radius">8dp</dimen>
+    <dimen name="feed_podcast_search_results_image_xy">72dp</dimen>
+    <dimen name="feed_podcast_search_subscribe_text_view_width">50dp</dimen>
+    <dimen name="feed_podcast_search_result_progress_bar_xy">30dp</dimen>
+    <dimen name="feed_podcast_search_results_header_height">48dp</dimen>
+
     <!-- Deep link authorize popup -->
     <dimen name="dashboard_authorize_popup_width">240dp</dimen>
     <dimen name="dashboard_authorize_popup_height">300dp</dimen>
@@ -44,6 +53,17 @@
     <dimen name="dashboard_authorize_popup_authorize_button_height">52dp</dimen>
     <dimen name="dashboard_authorize_popup_authorize_button_text_size">12sp</dimen>
     <dimen name="dashboard_authorize_popup_progress_bar_zy">32dp</dimen>
+
+    <!-- Deep save profile authorize popup -->
+    <dimen name="dashboard_save_profile_popup_width">240dp</dimen>
+    <dimen name="dashboard_save_profile_popup_height">300dp</dimen>
+    <dimen name="dashboard_save_profile_popup_verified_icon_margin_top">40sp</dimen>
+    <dimen name="dashboard_save_profile_popup_verified_icon_text_size">40sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_title_text_size">13sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_name_text_size">14sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_button_height">52dp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_button_text_size">12sp</dimen>
+    <dimen name="dashboard_save_profile_popup_progress_bar_zy">32dp</dimen>
 
     <dimen name="dashboard_connect_popup_width">260dp</dimen>
     <dimen name="dashboard_connect_popup_height">420dp</dimen>
@@ -56,4 +76,5 @@
     <dimen name="text_margin">16dp</dimen>
 
     <dimen name="dashboard_feed_placeholder_text_size">20sp</dimen>
+    <dimen name="feed_row_text_point_divider">4sp</dimen>
 </resources>

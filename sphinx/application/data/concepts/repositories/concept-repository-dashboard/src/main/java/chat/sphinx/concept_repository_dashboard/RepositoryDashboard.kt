@@ -8,9 +8,9 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedType
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
@@ -46,6 +46,14 @@ interface RepositoryDashboard {
         relayUrl: String,
         host: String,
         challenge: String
+    ): Response<Boolean, ResponseError>
+
+    suspend fun savePeopleProfile(
+        body: String
+    ): Response<Boolean, ResponseError>
+
+    suspend fun deletePeopleProfile(
+        body: String
     ): Response<Boolean, ResponseError>
 
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>

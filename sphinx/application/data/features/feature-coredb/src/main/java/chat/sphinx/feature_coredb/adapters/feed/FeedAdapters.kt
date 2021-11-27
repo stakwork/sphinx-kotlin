@@ -1,7 +1,6 @@
 package chat.sphinx.feature_coredb.adapters.feed
 
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_feed.*
 import com.squareup.sqldelight.ColumnAdapter
 
@@ -198,6 +197,38 @@ internal class FeedDestinationTypeAdapter: ColumnAdapter<FeedDestinationType, St
     }
 
     override fun encode(value: FeedDestinationType): String {
+        return value.value
+    }
+}
+
+internal class SubscribedAdapter private constructor(): ColumnAdapter<Subscribed, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: SubscribedAdapter? = null
+        fun getInstance(): SubscribedAdapter =
+            instance ?: synchronized(this) {
+                instance ?: SubscribedAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: Long): Subscribed {
+        return databaseValue.toInt().toSubscribed()
+    }
+
+    override fun encode(value: Subscribed): Long {
+        return value.value.toLong()
+    }
+}
+
+internal class FeedItemDurationAdapter: ColumnAdapter<FeedItemDuration, Long> {
+
+    override fun decode(databaseValue: Long): FeedItemDuration {
+        return FeedItemDuration(databaseValue)
+    }
+
+    override fun encode(value: FeedItemDuration): Long {
         return value.value
     }
 }

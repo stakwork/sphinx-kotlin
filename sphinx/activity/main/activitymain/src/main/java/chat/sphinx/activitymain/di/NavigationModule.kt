@@ -23,6 +23,7 @@ import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
+import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
@@ -47,6 +48,8 @@ import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
+import chat.sphinx.web_view.navigation.WebViewNavigator
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -330,5 +333,23 @@ internal object NavigationModule {
         tribeDetailNavigatorImpl: TribeDetailNavigatorImpl
     ): TribeDetailNavigator =
         tribeDetailNavigatorImpl
+
+    @Provides
+    fun provideVideoScreenNavigator(
+        videoScreenNavigatorImpl: VideoScreenNavigatorImpl
+    ): VideoScreenNavigator =
+        videoScreenNavigatorImpl
+
+    @Provides
+    fun provideWebViewNavigator(
+        webViewNavigatorImpl: WebViewNavigatorImpl
+    ): WebViewNavigator =
+        webViewNavigatorImpl
+
+    @Provides
+    fun provideNewsletterDetailNavigator(
+        newsletterDetailNavigatorImpl: NewsletterDetailNavigatorImpl
+    ): NewsletterDetailNavigator =
+        newsletterDetailNavigatorImpl
 
 }

@@ -26,6 +26,8 @@ import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getTimeString
@@ -181,6 +183,10 @@ internal class PodcastPlayerFragment : BaseFragment<
                     }
                 }
             }
+
+            textViewSubscribeButton.setOnClickListener {
+                viewModel.toggleSubscribeState(podcast)
+            }
         }
     }
 
@@ -219,6 +225,16 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private suspend fun showPodcastInfo(podcast: Podcast) {
         binding.apply {
+
+            val notLinkedToChat = podcast.chatId.value == ChatId.NULL_CHAT_ID.toLong()
+            textViewSubscribeButton.goneIfFalse(notLinkedToChat)
+
+            textViewSubscribeButton.text = if (podcast.subscribed.isTrue()) {
+                getString(R.string.unsubscribe)
+            } else {
+                getString(R.string.subscribe)
+            }
+
             textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title.value
 
             podcast.image?.value?.let { podcastImage ->

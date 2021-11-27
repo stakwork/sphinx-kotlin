@@ -3,12 +3,11 @@ package chat.sphinx.dashboard.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -16,10 +15,9 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
-import chat.sphinx.dashboard.ui.feed.listen.FeedListenViewModel
-import chat.sphinx.dashboard.ui.placeholder.PlaceholderContent.PlaceholderItem
+import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
@@ -142,10 +140,38 @@ class FeedFollowingAdapter(
         holder.bind(position)
     }
 
-    private val imageLoaderOptions: ImageLoaderOptions by lazy {
+    private val imagePodcastLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_podcast_placeholder)
             .build()
+    }
+
+    private val imageVideoLoaderOptions: ImageLoaderOptions by lazy {
+        ImageLoaderOptions.Builder()
+            .placeholderResId(R.drawable.ic_video_placeholder)
+            .build()
+    }
+
+    private val imageNewsletterLoaderOptions: ImageLoaderOptions by lazy {
+        ImageLoaderOptions.Builder()
+            .placeholderResId(R.drawable.ic_newsletter_placeholder)
+            .build()
+    }
+
+    private fun getImageLoaderOptions(feed: Feed): ImageLoaderOptions {
+        when (feed.feedType) {
+            is FeedType.Podcast -> {
+                return imagePodcastLoaderOptions
+            }
+            is FeedType.Video -> {
+                return imageVideoLoaderOptions
+            }
+            is FeedType.Newsletter -> {
+                return imageNewsletterLoaderOptions
+            }
+            else -> {}
+        }
+        return imagePodcastLoaderOptions
     }
 
     inner class FeedViewHolder(
@@ -182,13 +208,17 @@ class FeedFollowingAdapter(
                         imageLoader.load(
                             imageViewItemImage,
                             imageUrl.value,
-                            imageLoaderOptions
+                            getImageLoaderOptions(f)
                         ).also {
                             disposable = it
                         }
                     }.let { job ->
                         holderJob = job
                     }
+                } ?: run {
+                    imageViewItemImage.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
+                    )
                 }
 
                 textViewItemName.text = f.titleToShow
@@ -206,3 +236,19 @@ class FeedFollowingAdapter(
         lifecycleOwner.lifecycle.addObserver(this)
     }
 }
+
+inline fun Feed.getPlaceHolderImageRes(): Int =
+    when (feedType) {
+        is FeedType.Podcast -> {
+            R.drawable.ic_podcast_placeholder
+        }
+        is FeedType.Video -> {
+            R.drawable.ic_video_placeholder
+        }
+        is FeedType.Newsletter -> {
+            R.drawable.ic_newsletter_placeholder
+        }
+        else -> {
+            R.drawable.ic_podcast_placeholder
+        }
+    }

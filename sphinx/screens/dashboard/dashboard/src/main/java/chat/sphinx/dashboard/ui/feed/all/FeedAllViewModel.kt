@@ -7,10 +7,13 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -27,12 +30,12 @@ internal class FeedAllViewModel @Inject constructor(
         Context,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.Default), FeedFollowingViewModel
+        >(dispatchers, FeedAllViewState.Idle), FeedFollowingViewModel
 {
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        repositoryDashboard.getAllFeeds().collect { podcastFeeds ->
-            emit(podcastFeeds.toList())
+        repositoryDashboard.getAllFeeds().collect { feeds ->
+            emit(feeds.toList())
         }
     }.stateIn(
         viewModelScope,
@@ -41,28 +44,42 @@ internal class FeedAllViewModel @Inject constructor(
     )
 
     override fun feedSelected(feed: Feed) {
-        feed.chat?.id?.let { chatId ->
-            @Exhaustive
-            when (feed.feedType) {
-                is FeedType.Podcast -> {
-                    goToPodcastPlayer(chatId)
-                }
-                is FeedType.Video -> {
-                    //TODO Go to video player
-                }
-                is FeedType.Newsletter -> {
-                    //TODO Go to newsletter articles list
-                }
-                is FeedType.Unknown -> {}
+        @Exhaustive
+        when (feed.feedType) {
+            is FeedType.Podcast -> {
+                goToPodcastPlayer(feed.chatId, feed.id, feed.feedUrl)
             }
+            is FeedType.Video -> {
+                goToVideoPlayer(feed.chatId, feed.feedUrl)
+            }
+            is FeedType.Newsletter -> {
+                goToNewsletterDetail(feed.chatId, feed.feedUrl)
+            }
+            is FeedType.Unknown -> {}
         }
     }
 
-    private fun goToPodcastPlayer(chatId: ChatId) {
+    private fun goToPodcastPlayer(
+        chatId: ChatId,
+        feedId: FeedId,
+        feedUrl: FeedUrl
+    ) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, 0
+                chatId, feedId, feedUrl, 0
             )
+        }
+    }
+
+    private fun goToNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl) {
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toNewsletterDetail(chatId, feedUrl)
+        }
+    }
+
+    private fun goToVideoPlayer(chatId: ChatId, feedUrl: FeedUrl) {
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toVideoWatchScreen(chatId, feedUrl)
         }
     }
 }

@@ -75,4 +75,5 @@ data class Chat(
     val myAlias: ChatAlias?,
     val pendingContactIds: List<ContactId>?,
     val latestMessageId: MessageId?,
+    val contentSeenAt: DateTime?,
 )

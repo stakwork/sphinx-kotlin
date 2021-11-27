@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_newsletter_detail_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/headerBG"
+    tools:context=".ui.NewsletterDetailFragment">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_detail_screen_close"
+        android:layout_width="@dimen/default_header_navigation_xy"
+        android:layout_height="@dimen/default_header_navigation_xy"
+        android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_close"
+        android:textColor="@color/primaryRed"
+        android:textSize="@dimen/default_text_size_back_arrow"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_newsletter_info"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_newsletter_image"
+            android:layout_width="@dimen/newsletter_image_xy"
+            android:layout_height="@dimen/newsletter_image_xy"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardElevation="0dp"
+            app:cardCornerRadius="@dimen/newsletter_image_corner_rad">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_newsletter_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_newsletter_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:fontFamily="@font/roboto_medium"
+            android:textSize="@dimen/newsletter_title_text_size"
+            android:textColor="@color/text"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/card_view_newsletter_image"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_newsletter_description"
+            tools:text="Text"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_newsletter_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/newsletter_description_text_size"
+            android:textColor="@color/secondaryText"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:gravity="center"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_newsletter_title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Text"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_items_count"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/newsletter_list_items_section_height"
+        android:background="@color/body"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_newsletter_info">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_newsletter_items_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:fontFamily="@font/montserrat_regular"
+            android:textSize="@dimen/newsletter_items_count_text_size"
+            android:textColor="@color/text"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:gravity="center"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="10"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_newsletter_articles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxLines="3"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/newsletter_items_count_text_size"
+            android:textColor="@color/secondaryText"
+            android:layout_marginHorizontal="@dimen/default_tiny_layout_margin"
+            android:gravity="center"
+            app:layout_constraintStart_toEndOf="@+id/text_view_newsletter_items_count"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_newsletter_items_count"
+            android:text="@string/articles"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_newsletter_items"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_items_count"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

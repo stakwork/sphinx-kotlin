@@ -9,18 +9,23 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_repository_podcast.PodcastRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -32,6 +37,9 @@ import javax.inject.Inject
 internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
     get() = ChatId(argChatId)
 
+internal inline val PodcastPlayerFragmentArgs.feedId: FeedId
+    get() = FeedId(argFeedId)
+
 @HiltViewModel
 internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
@@ -39,6 +47,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
+    private val podcastRepository: PodcastRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ) : BaseViewModel<PodcastPlayerViewState>(
@@ -50,7 +59,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
-        emitAll(chatRepository.getPodcastByChatId(args.chatId))
+        if (args.argChatId != ChatId.NULL_CHAT_ID.toLong()) {
+            emitAll(podcastRepository.getPodcastByChatId(args.chatId))
+        } else {
+            emitAll(podcastRepository.getPodcastById(args.feedId))
+        }
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -165,6 +178,28 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 )
             )
         }
+
+        updateFeedContentInBackground()
+    }
+
+    private fun updateFeedContentInBackground() {
+        viewModelScope.launch(mainImmediate) {
+            val chat = chatRepository.getChatById(args.chatId).firstOrNull()
+            val podcast = getPodcast()
+            val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
+            val subscribed = (chat != null || (podcast?.subscribed?.isTrue() == true))
+
+            args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
+                chatRepository.updateFeedContent(
+                    chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = chatHost,
+                    feedUrl = feedUrl,
+                    chatUUID = chat?.uuid,
+                    subscribed.toSubscribed(),
+                    currentEpisodeId = null
+                )
+            }
+        }
     }
 
     private fun podcastLoaded(podcast: Podcast) {
@@ -188,6 +223,15 @@ internal class PodcastPlayerViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         mediaPlayerServiceController.removeListener(this)
+    }
+
+    fun toggleSubscribeState(podcast: Podcast) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.toggleFeedSubscribeState(
+                podcast.id,
+                podcast.subscribed
+            )
+        }
     }
 
     fun playEpisodeFromList(episode: PodcastEpisode, startTime: Int) {

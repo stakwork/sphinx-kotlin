@@ -21,7 +21,13 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_chat.toChatHost
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.chat.toChatUUID
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.toChatId
+import chat.sphinx.wrapper_common.feed.toFeedUrl
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.toContactAlias
@@ -178,13 +184,37 @@ internal class JoinTribeViewModel @Inject constructor(
                     LoadResponse.Loading ->
                         updateViewState(JoinTribeViewState.JoiningTribe)
                     is Response.Error -> {
-                        submitSideEffect(JoinTribeSideEffect.Notify.ErrorJoining)
+                        submitSideEffect(
+                            JoinTribeSideEffect.Notify.ErrorJoining
+                        )
                         updateViewState(JoinTribeViewState.ErrorJoiningTribe)
                     }
-                    is Response.Success ->
+                    is Response.Success -> {
+                        updateFeedContent(
+                            ChatId(loadResponse.value.id)
+                        )
                         updateViewState(JoinTribeViewState.TribeJoined)
+                    }
                 }
+            }
+        }
+    }
 
+    private suspend fun updateFeedContent(chatId: ChatId) {
+        tribeInfo?.let { nnTribeInfo ->
+            nnTribeInfo.feed_url?.toFeedUrl()?.let { feedUrl ->
+                nnTribeInfo.uuid?.toChatUUID()?.let { chatUUID ->
+                    nnTribeInfo.host?.toChatHost()?.let { chatHost ->
+                        chatRepository.updateFeedContent(
+                            chatId,
+                            chatHost,
+                            feedUrl,
+                            chatUUID,
+                            true.toSubscribed(),
+                            null
+                        )
+                    }
+                }
             }
         }
     }

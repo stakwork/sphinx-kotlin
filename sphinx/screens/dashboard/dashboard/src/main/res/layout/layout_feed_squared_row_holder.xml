@@ -22,7 +22,7 @@
             android:layout_width="@dimen/default_feed_image_xy"
             android:layout_height="@dimen/default_feed_image_xy"
             android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_podcast_placeholder" />
+            tools:srcCompat="@drawable/ic_podcast_placeholder" />
 
     </androidx.cardview.widget.CardView>
 
@@ -30,7 +30,7 @@
         android:id="@+id/text_view_item_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="@dimen/default_small_layout_margin"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
         android:layout_marginHorizontal="@dimen/default_tiny_layout_margin"
         android:fontFamily="@font/roboto_regular"
         android:textColor="@color/text"

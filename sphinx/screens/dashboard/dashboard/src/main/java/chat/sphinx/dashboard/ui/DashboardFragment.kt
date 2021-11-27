@@ -73,9 +73,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        BackPressHandler(binding.root.context)
-            .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
-            .addCallback(viewLifecycleOwner, requireActivity())
 
         viewModel.networkRefresh()
 
@@ -102,14 +99,12 @@ internal class DashboardFragment : MotionLayoutFragment<
         viewModel.networkRefresh()
     }
 
-    private inner class BackPressHandler(context: Context): CloseAppOnBackPress(context) {
-        override fun handleOnBackPressed() {
-            if (viewModel.currentViewState is NavDrawerViewState.Open) {
-                viewModel.updateViewState(NavDrawerViewState.Closed)
-            } else {
-                super.handleOnBackPressed()
-            }
+    fun closeDrawerIfOpen(): Boolean {
+        if (viewModel.currentViewState is NavDrawerViewState.Open) {
+            viewModel.updateViewState(NavDrawerViewState.Closed)
+            return true
         }
+        return false
     }
 
     private inner class CloseDrawerOnDestinationChange: NavController.OnDestinationChangedListener {
@@ -284,6 +279,20 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             buttonAuthorize.setOnClickListener {
                 viewModel.authorizeExternal()
+            }
+        }
+
+        binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+
+            buttonSaveProfile.setOnClickListener {
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.updatePeopleProfile()
+                }
             }
         }
 
@@ -472,6 +481,39 @@ internal class DashboardFragment : MotionLayoutFragment<
                     is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
                     }
+                    is DeepLinkPopupViewState.LoadingPeopleProfilePopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
+                            layoutConstraintLoadingProfile.visible
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.SavePeopleProfilePopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
+                            layoutConstraintLoadingProfile.gone
+
+                            textViewDashboardPopupPeopleProfileHost.text = viewState.link.host
+
+                            textViewDashboardPopupPeopleProfileTitle.text = getString(R.string.dashboard_save_profile_popup_title)
+                            buttonSaveProfile.text = getString(R.string.dashboard_save_profile_button)
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.DeletePeopleProfilePopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
+                            layoutConstraintLoadingProfile.gone
+
+                            textViewDashboardPopupPeopleProfileHost.text = viewState.link.host
+
+                            textViewDashboardPopupPeopleProfileTitle.text = getString(R.string.dashboard_delete_profile_popup_title)
+                            buttonSaveProfile.text = getString(R.string.dashboard_delete_profile_button)
+                        }
+
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.SaveProfilePopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.progressBarSaveProfile.visible
+                    }
                     is DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo -> {
                         disposable?.dispose()
                         imageJob?.cancel()
@@ -533,6 +575,11 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
                             root.gone
                             progressBarAuthorize.gone
+                        }
+
+                        binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
+                            root.gone
+                            progressBarSaveProfile.gone
                         }
 
                         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {

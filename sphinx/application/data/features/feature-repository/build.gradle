@@ -25,6 +25,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-subscription')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-podcast')
 
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
@@ -34,6 +35,8 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-podcast-search')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-save-profile')
 
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

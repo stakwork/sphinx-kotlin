@@ -55,7 +55,10 @@
     <string name="material_icon_name_gif">gif</string>
     <string name="material_icon_name_verified_user">verified_user</string>
     <string name="material_icon_name_play_outline">play_circle_outline</string>
+    <string name="material_icon_name_play_circle_filled">play_circle_filled</string>
     <string name="material_icon_name_cancel">cancel</string>
+    <string name="material_icon_name_add">add</string>
+    <string name="material_icon_name_lens">lens</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>
@@ -97,4 +100,6 @@
 
     <string name="failed_to_approve_member">メンバーを承認できませんでした</string>
     <string name="failed_to_reject_member">メンバーを拒否できませんでした</string>
+
+    <string name="newsletter_article">NEWSLETTER ARTICLE</string>
 </resources>

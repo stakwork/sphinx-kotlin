@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_dashboard_search_bar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="gone"
+    android:background="@color/body"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_podcast_search_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_big_layout_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_podcast_search"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/ic_podcast_search_place_holder"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_podcast_search_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_light"
+                android:textSize="@dimen/default_text_size_large_title"
+                android:textColor="@color/secondaryText"
+                android:text="@string/podcast_search_placeholder_1"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_podcast_search"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_podcast_search_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_bold"
+                android:textSize="@dimen/default_text_size_large_title"
+                android:textColor="@color/secondaryText"
+                android:text="@string/podcast_search_placeholder_2"
+                android:layout_marginTop="@dimen/default_medium_layout_margin"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_podcast_search_1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_podcast_search_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_light"
+                android:textSize="@dimen/default_text_size_large_title"
+                android:textColor="@color/secondaryText"
+                android:text="@string/podcast_search_placeholder_3"
+                android:layout_marginTop="@dimen/default_medium_layout_margin"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_podcast_search_2"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_podcast_search_results"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_loading_search_sesults"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/body"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progress_bar_attachment_fullscreen"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="@dimen/feed_podcast_search_progress_bar_xy"
+            android:layout_height="@dimen/feed_podcast_search_progress_bar_xy"
+            android:indeterminate="true"
+            android:indeterminateTint="@android:color/white"
+            android:visibility="visible"
+            android:layout_marginTop="@dimen/default_big_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

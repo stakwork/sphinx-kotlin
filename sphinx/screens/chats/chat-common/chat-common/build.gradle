@@ -41,6 +41,8 @@ dependencies {
     api project(path: ':sphinx:activity:insetter-activity')
     api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
 
+    implementation project(path: ':sphinx:activity:features:video-player-controller')
+
     api project(path: ':sphinx:application:common:menus:menu-bottom')
 
     api project(path: ':sphinx:application:common:logger')
@@ -55,6 +57,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-podcast')
 
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
 

@@ -2,6 +2,7 @@ package chat.sphinx.feature_repository.mappers.feed.podcast
 
 import chat.sphinx.conceptcoredb.FeedDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.Podcast
@@ -20,7 +21,8 @@ internal class FeedDboPodcastPresenterMapper(
             image = value.image_url,
             datePublished = value.date_published,
             chatId = value.chat_id,
-            feedUrl = value.feed_url
+            feedUrl = value.feed_url,
+            subscribed = value.subscribed
         )
     }
 
@@ -42,7 +44,8 @@ internal class FeedDboPodcastPresenterMapper(
             language = null,
             items_count = FeedItemsCount(value.episodes.count().toLong()),
             current_item_id = value.episodeId?.toFeedId(),
-            chat_id = value.chatId
+            chat_id = value.chatId,
+            subscribed = value.subscribed
         )
     }
 }

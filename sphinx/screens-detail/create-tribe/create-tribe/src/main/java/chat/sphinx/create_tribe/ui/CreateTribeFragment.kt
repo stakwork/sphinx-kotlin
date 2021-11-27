@@ -2,9 +2,12 @@ package chat.sphinx.create_tribe.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.view.ContextThemeWrapper
+import android.view.MenuItem
 import android.view.View
 import android.webkit.URLUtil
 import android.widget.ImageView
+import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
@@ -19,6 +22,7 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
+import chat.sphinx.wrapper_common.feed.FeedType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -173,7 +177,14 @@ internal class CreateTribeFragment: SideEffectFragment<
             }
             editTextTribeFeedUrl.addTextChangedListener {
                 viewModel.createTribeBuilder.setFeedUrl(it.toString())
+
+                updateCreateButtonState()
             }
+
+            textViewTribeFeedContentTypeValue.setOnClickListener {
+                showFeedContentTypePopup()
+            }
+
             switchTribeListingOnSphinx.setOnCheckedChangeListener { _, isChecked ->
                 viewModel.createTribeBuilder.setUnlisted(!isChecked)
             }
@@ -184,6 +195,39 @@ internal class CreateTribeFragment: SideEffectFragment<
             buttonCreateTribe.setOnClickListener {
                 viewModel.saveTribe()
             }
+        }
+    }
+
+    private fun showFeedContentTypePopup() {
+        binding.apply {
+            if (editTextTribeFeedUrl.text?.isEmpty() == true) {
+                return
+            }
+
+            val wrapper: Context = ContextThemeWrapper(context, R.style.feedTypeMenu)
+            val popup = PopupMenu(wrapper, textViewTribeFeedContentTypeValue)
+            popup.inflate(R.menu.feed_type_menu)
+
+            popup.setOnMenuItemClickListener { item: MenuItem? ->
+                when (item!!.itemId) {
+                    R.id.podcast -> {
+                        textViewTribeFeedContentTypeValue.text = getString(R.string.feed_type_podcast)
+                        viewModel.createTribeBuilder.setFeedType(FeedType.Podcast.value)
+                    }
+                    R.id.video -> {
+                        textViewTribeFeedContentTypeValue.text = getString(R.string.feed_type_video)
+                        viewModel.createTribeBuilder.setFeedType(FeedType.Video.value)
+                    }
+                    R.id.newsletter -> {
+                        textViewTribeFeedContentTypeValue.text = getString(R.string.feed_type_newsletter)
+                        viewModel.createTribeBuilder.setFeedType(FeedType.Newsletter.value)
+                    }
+                }
+                updateCreateButtonState()
+
+                true
+            }
+            popup.show()
         }
     }
 
@@ -277,6 +321,13 @@ internal class CreateTribeFragment: SideEffectFragment<
 
                 binding.editTextTribeAppUrl.setText(viewState.appUrl ?: "")
                 binding.editTextTribeFeedUrl.setText(viewState.feedUrl ?: "")
+
+                viewState.feedTypeDescriptionRes?.let { feedTypeDescriptionResource ->
+                    binding.textViewTribeFeedContentTypeValue.text = getString(
+                        feedTypeDescriptionResource
+                    )
+                }
+
                 binding.switchTribeListingOnSphinx.isChecked = viewState.unlisted == false
             }
         }

@@ -3,6 +3,7 @@ import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.dashboard.ChatId;
 import chat.sphinx.wrapper_common.feed.FeedId;
 import chat.sphinx.wrapper_common.feed.FeedUrl;
+import chat.sphinx.wrapper_common.feed.FeedType;
 import chat.sphinx.wrapper_feed.FeedAuthor;
 import chat.sphinx.wrapper_feed.FeedContentType;
 import chat.sphinx.wrapper_feed.FeedDescription;
@@ -17,7 +18,6 @@ import chat.sphinx.wrapper_feed.FeedLanguage;
 import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
 import chat.sphinx.wrapper_feed.FeedTitle;
-import chat.sphinx.wrapper_feed.FeedType;
 
 CREATE TABLE feedDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,

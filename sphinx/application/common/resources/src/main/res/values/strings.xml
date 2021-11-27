@@ -40,6 +40,7 @@
     <string name="material_icon_name_cloud_download">cloud_download</string>
     <string name="material_icon_name_play_button">play_arrow</string>
     <string name="material_icon_name_chevron_right_button" translatable="false">chevron_right</string>
+    <string name="material_icon_name_brightness_button" translatable="false">brightness_1</string>
     <string name="material_icon_name_pause_button">pause</string>
     <string name="material_icon_name_volume_up">volume_up</string>
     <string name="material_icon_name_video_camera">videocam</string>
@@ -56,7 +57,10 @@
     <string name="material_icon_name_gif">gif</string>
     <string name="material_icon_name_verified_user">verified_user</string>
     <string name="material_icon_name_play_outline">play_circle_outline</string>
+    <string name="material_icon_name_play_circle_filled">play_circle_filled</string>
     <string name="material_icon_name_cancel">cancel</string>
+    <string name="material_icon_name_add">add</string>
+    <string name="material_icon_name_lens">lens</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete">delete</string>
@@ -97,4 +101,6 @@
 
     <string name="failed_to_approve_member">Failed to approve member</string>
     <string name="failed_to_reject_member">Failed to reject member</string>
+
+    <string name="newsletter_article">NEWSLETTER ARTICLE</string>
 </resources>

@@ -17,7 +17,9 @@ import chat.sphinx.wrapper_common.dashboard.ContactId;
 import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
 import chat.sphinx.wrapper_common.dashboard.InviteId;
 import chat.sphinx.wrapper_common.feed.FeedId;
+import chat.sphinx.wrapper_common.feed.FeedType;
 import chat.sphinx.wrapper_common.feed.FeedUrl;
+import chat.sphinx.wrapper_common.feed.Subscribed;
 import chat.sphinx.wrapper_common.invite.InviteStatus;
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias;
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey;
@@ -46,12 +48,12 @@ import chat.sphinx.wrapper_feed.FeedDestinationType;
 import chat.sphinx.wrapper_feed.FeedEnclosureLength;
 import chat.sphinx.wrapper_feed.FeedEnclosureType;
 import chat.sphinx.wrapper_feed.FeedGenerator;
+import chat.sphinx.wrapper_feed.FeedItemDuration;
 import chat.sphinx.wrapper_feed.FeedItemsCount;
 import chat.sphinx.wrapper_feed.FeedLanguage;
 import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
 import chat.sphinx.wrapper_feed.FeedTitle;
-import chat.sphinx.wrapper_feed.FeedType;
 import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
@@ -90,7 +92,8 @@ CREATE TABLE chatDbo(
     my_photo_url                TEXT            AS PhotoUrl,
     my_alias                    TEXT            AS ChatAlias,
     pending_contact_ids         TEXT            AS List<ContactId>,
-    latest_message_id           INTEGER         AS MessageId DEFAULT NULL
+    latest_message_id           INTEGER         AS MessageId DEFAULT NULL,
+    content_seen_at             INTEGER         AS DateTime
 );
 
 chatUpdateLatestMessage:
@@ -903,7 +906,8 @@ CREATE TABLE feedDbo(
     language                    TEXT               AS FeedLanguage,
     items_count                 INTEGER            AS FeedItemsCount DEFAULT 0 NOT NULL,
     current_item_id             TEXT               AS FeedId,
-    chat_id                     INTEGER            AS ChatId NOT NULL
+    chat_id                     INTEGER            AS ChatId NOT NULL,
+    subscribed                  INTEGER            AS Subscribed NOT NULL DEFAULT 1
 );
 
 feedUpsert {
@@ -922,7 +926,8 @@ feedUpsert {
         language = :language,
         items_count = :items_count,
         current_item_id = :current_item_id,
-        chat_id = :chat_id
+        chat_id = :chat_id,
+        subscribed = :subscribed
     WHERE id = :id;
 
     INSERT OR IGNORE INTO feedDbo(
@@ -942,7 +947,8 @@ feedUpsert {
         language,
         items_count,
         current_item_id,
-        chat_id
+        chat_id,
+        subscribed
     )
     VALUES (
         :id,
@@ -961,13 +967,15 @@ feedUpsert {
         :language,
         :items_count,
         :current_item_id,
-        :chat_id
+        :chat_id,
+        :subscribed
     );
 }
 
 feedGetAll:
 SELECT *
 FROM feedDbo
+WHERE subscribed = 1
 ORDER BY id DESC;
 
 feedGetByChatId:
@@ -977,21 +985,52 @@ WHERE chat_id = ?
 ORDER BY id DESC
 LIMIT 1;
 
+feedGetAllByChatId:
+SELECT *
+FROM feedDbo
+WHERE chat_id = ?
+ORDER BY id DESC;
+
+feedGetByChatIdAndType:
+SELECT *
+FROM feedDbo
+WHERE chat_id = ?
+AND feed_type = ?
+ORDER BY id DESC
+LIMIT 1;
+
 feedGetAllByFeedType:
 SELECT *
 FROM feedDbo
 WHERE feed_type = ?
+AND subscribed = 1
 ORDER BY id DESC;
+
+feedGetAllByIds:
+SELECT *
+FROM feedDbo
+WHERE id IN ?;
 
 feedGetById:
 SELECT *
 FROM feedDbo
 WHERE id = ?;
 
+feedGetAllByTitle:
+SELECT *
+FROM feedDbo
+WHERE subscribed = 1
+AND (title LIKE :title);
+
 feedUpdateCurrentItemId:
 UPDATE feedDbo
 SET current_item_id = :item_id
 WHERE chat_id = ?;
+
+feedUpdateSubscribe:
+UPDATE feedDbo
+SET subscribed = :subscribed
+WHERE id = ?;
 
 feedDeleteById:
 DELETE
@@ -1012,7 +1051,8 @@ CREATE TABLE feedItemDbo(
     image_url                   TEXT               AS PhotoUrl,
     thumbnail_url               TEXT               AS PhotoUrl,
     link                        TEXT               AS FeedUrl,
-    feed_id                     TEXT               AS FeedId NOT NULL
+    feed_id                     TEXT               AS FeedId NOT NULL,
+    duration                    INTEGER            AS FeedItemDuration
 );
 
 feedItemUpsert {
@@ -1029,7 +1069,8 @@ feedItemUpsert {
         image_url = :image_url,
         thumbnail_url = :thumbnail_url,
         link = :link,
-        feed_id = :feed_id
+        feed_id = :feed_id,
+        duration = :duration
     WHERE id = :id;
 
     INSERT OR IGNORE INTO feedItemDbo(
@@ -1046,7 +1087,8 @@ feedItemUpsert {
         image_url,
         thumbnail_url,
         link,
-        feed_id
+        feed_id,
+        duration
     )
     VALUES (
         :id,
@@ -1062,7 +1104,8 @@ feedItemUpsert {
         :image_url,
         :thumbnail_url,
         :link,
-        :feed_id
+        :feed_id,
+        :duration
     );
 }
 
@@ -1074,19 +1117,27 @@ WHERE id = ?;
 feedItemsGetByFeedId:
 SELECT *
 FROM feedItemDbo
-WHERE feed_id = ?;
+WHERE feed_id = ?
+ORDER BY date_published DESC;
 
 feedItemsGetByFeedIds:
 SELECT *
 FROM feedItemDbo
-WHERE feed_id IN ?;
+WHERE feed_id IN ?
+ORDER BY date_published DESC;
 
 feedItemDeleteById:
 DELETE
 FROM feedItemDbo
 WHERE id = ?;
 
-feedItemDeleteByFeedId:
+feedItemsDeleteOldByFeedId:
+DELETE
+FROM feedItemDbo
+WHERE feed_id = ?
+AND id NOT IN ?;
+
+feedItemsDeleteByFeedId:
 DELETE
 FROM feedItemDbo
 WHERE feed_id = ?;

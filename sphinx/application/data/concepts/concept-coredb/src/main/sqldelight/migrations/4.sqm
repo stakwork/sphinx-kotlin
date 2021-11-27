@@ -1,0 +1,8 @@
+import chat.sphinx.wrapper_common.DateTime;
+import chat.sphinx.wrapper_common.feed.Subscribed;
+import chat.sphinx.wrapper_feed.FeedItemDuration;
+
+
+ALTER TABLE feedDbo ADD COLUMN subscribed INTEGER AS Subscribed NOT NULL DEFAULT 1;
+ALTER TABLE feedItemDbo ADD COLUMN duration INTEGER AS FeedItemDuration;
+ALTER TABLE chatDbo ADD COLUMN content_seen_at INTEGER AS DateTime;

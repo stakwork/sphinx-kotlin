@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha34 (2021-11-27)
+ - Adds newsletter content on feed
+ - Adds video content on feed
+ - Adds podcast search
+ - Adds people site integration for tor accounts
+
 # Version 1.0.0-alpha33 (2021-11-12)
  - Adds tabbed dashboard and new feed section
 
