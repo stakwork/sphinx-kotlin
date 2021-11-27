@@ -1048,11 +1048,11 @@ CREATE TABLE feedItemDbo(
     enclosure_length            INTEGER            AS FeedEnclosureLength,
     enclosure_url               TEXT               AS FeedUrl NOT NULL,
     enclosure_type              TEXT               AS FeedEnclosureType,
-    duration                    INTEGER            AS FeedItemDuration,
     image_url                   TEXT               AS PhotoUrl,
     thumbnail_url               TEXT               AS PhotoUrl,
     link                        TEXT               AS FeedUrl,
-    feed_id                     TEXT               AS FeedId NOT NULL
+    feed_id                     TEXT               AS FeedId NOT NULL,
+    duration                    INTEGER            AS FeedItemDuration
 );
 
 feedItemUpsert {
@@ -1066,11 +1066,11 @@ feedItemUpsert {
         enclosure_length = :enclosure_length,
         enclosure_url = :enclosure_url,
         enclosure_type = :enclosure_type,
-        duration = :duration,
         image_url = :image_url,
         thumbnail_url = :thumbnail_url,
         link = :link,
-        feed_id = :feed_id
+        feed_id = :feed_id,
+        duration = :duration
     WHERE id = :id;
 
     INSERT OR IGNORE INTO feedItemDbo(
@@ -1084,11 +1084,11 @@ feedItemUpsert {
         enclosure_length,
         enclosure_url,
         enclosure_type,
-        duration,
         image_url,
         thumbnail_url,
         link,
-        feed_id
+        feed_id,
+        duration
     )
     VALUES (
         :id,
@@ -1101,11 +1101,11 @@ feedItemUpsert {
         :enclosure_length,
         :enclosure_url,
         :enclosure_type,
-        :duration,
         :image_url,
         :thumbnail_url,
         :link,
-        :feed_id
+        :feed_id,
+        :duration
     );
 }
 

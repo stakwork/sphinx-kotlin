@@ -12,6 +12,7 @@ import chat.sphinx.feature_coredb.adapters.feed.FeedDescriptionAdapter
 import chat.sphinx.feature_coredb.adapters.feed.FeedIdAdapter
 import chat.sphinx.feature_coredb.adapters.feed.FeedTitleAdapter
 import chat.sphinx.feature_coredb.adapters.feed.FeedTypeAdapter
+import chat.sphinx.feature_coredb.adapters.feed.FeedItemDurationAdapter
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyDecryptedAdapter
@@ -21,7 +22,6 @@ import chat.sphinx.feature_coredb.adapters.message.*
 import chat.sphinx.feature_coredb.adapters.subscription.CronAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.EndNumberAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.SubscriptionCountAdapter
-import chat.sphinx.wrapper_feed.FeedItemDuration
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
@@ -198,11 +198,11 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     enclosure_lengthAdapter = FeedEnclosureLengthAdapter(),
                     enclosure_urlAdapter = FeedUrlAdapter.getInstance(),
                     enclosure_typeAdapter = FeedEnclosureTypeAdapter(),
-                    durationAdapter = FeedItemDurationAdapter(),
                     image_urlAdapter = PhotoUrlAdapter.getInstance(),
                     thumbnail_urlAdapter = PhotoUrlAdapter.getInstance(),
                     linkAdapter = FeedUrlAdapter.getInstance(),
-                    feed_idAdapter = FeedIdAdapter()
+                    feed_idAdapter = FeedIdAdapter(),
+                    durationAdapter = FeedItemDurationAdapter()
                 ),
                 feedModelDboAdapter = FeedModelDbo.Adapter(
                     idAdapter = FeedIdAdapter(),
