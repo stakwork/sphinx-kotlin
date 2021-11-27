@@ -24,11 +24,11 @@ data class FeedItem(
     val enclosureLength: FeedEnclosureLength?,
     val enclosureUrl: FeedUrl,
     val enclosureType: FeedEnclosureType?,
-    val duration: FeedItemDuration?,
     val imageUrl: PhotoUrl?,
     val thumbnailUrl: PhotoUrl?,
     val link: FeedUrl?,
-    val feedId: FeedId
+    val feedId: FeedId,
+    val duration: FeedItemDuration?
 ) {
 
     var feed: Feed? = null

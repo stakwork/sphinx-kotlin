@@ -20,11 +20,11 @@ internal class FeedItemDboPresenterMapper(
             value.enclosure_length,
             value.enclosure_url,
             value.enclosure_type,
-            value.duration,
             value.image_url,
             value.thumbnail_url,
             value.link,
-            value.feed_id
+            value.feed_id,
+            value.duration
         )
     }
 
@@ -40,11 +40,11 @@ internal class FeedItemDboPresenterMapper(
             value.enclosureLength,
             value.enclosureUrl,
             value.enclosureType,
-            value.duration,
             value.imageUrl,
             value.thumbnailUrl,
             value.link,
-            value.feedId
+            value.feedId,
+            value.duration
         )
     }
 }
