@@ -1,7 +1,8 @@
-package chat.sphinx.chat_common.ui.activity
+package chat.sphinx.video_fullscreen.ui.activity
 
 import android.app.Application
 import android.content.Context
+import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -135,8 +136,8 @@ internal class FullscreenVideoViewModel @Inject constructor(
         return message
     }
 
-    private suspend fun getVideoFile(): File? {
-        return videoFile ?: getMessage()?.messageMedia?.localFile
+    private suspend fun getVideoUri(): Uri? {
+        return videoFile?.toUri() ?: getMessage()?.messageMedia?.localFile?.toUri()
     }
 
     private suspend fun getVideoTitle(): String? {
@@ -156,8 +157,8 @@ internal class FullscreenVideoViewModel @Inject constructor(
                     )
                 )
             }
-            getVideoFile()?.let { videoFile ->
-                videoPlayerController.initializeVideo(videoFile.toUri())
+            getVideoUri()?.let { videoUri ->
+                videoPlayerController.initializeVideo(videoUri)
             }
         }
     }

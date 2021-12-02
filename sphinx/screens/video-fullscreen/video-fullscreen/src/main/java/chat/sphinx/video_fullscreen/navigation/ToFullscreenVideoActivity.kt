@@ -1,9 +1,9 @@
-package chat.sphinx.chat_common.navigation
+package chat.sphinx.video_fullscreen.navigation
 
 import androidx.navigation.NavController
-import chat.sphinx.chat_common.R
-import chat.sphinx.chat_common.ui.activity.FullscreenVideoActivityArgs
 import chat.sphinx.detail_resources.DetailNavOptions
+import chat.sphinx.video_fullscreen.R
+import chat.sphinx.video_fullscreen.ui.activity.FullscreenVideoActivityArgs
 import chat.sphinx.wrapper_common.message.MessageId
 import io.matthewnelson.concept_navigation.NavigationRequest
 

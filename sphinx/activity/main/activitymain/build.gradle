@@ -59,6 +59,7 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-desktop')
     api project(path: ':sphinx:screens:profile:profile')
     api project(path: ':sphinx:screens:splash:splash')
+    api project(path: ':sphinx:screens:video-fullscreen:video-fullscreen')
 
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     api project(path: ':sphinx:screens-detail:add-friend:add-friend')

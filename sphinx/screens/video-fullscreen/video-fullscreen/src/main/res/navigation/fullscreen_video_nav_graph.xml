@@ -7,7 +7,7 @@
 
     <activity
         android:id="@+id/navigation_fullscreen_activity"
-        android:name="chat.sphinx.chat_common.ui.activity.FullscreenVideoActivity"
+        android:name="chat.sphinx.video_fullscreen.ui.activity.FullscreenVideoActivity"
         tools:layout="@layout/activity_fullscreen_video" >
         <argument
             android:name="argMessageId"

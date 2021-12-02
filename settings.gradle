@@ -131,6 +131,7 @@ include ':sphinx:screens:onboard:onboard-resources'
 include ':sphinx:screens:profile:profile'
 include ':sphinx:screens:splash:splash'
 include ':sphinx:screens:onboard:key-restore'
+include ':sphinx:screens:video-fullscreen:video-fullscreen'
 
 // Screens-Detail
 include ':sphinx:screens-detail:add-friend:add-friend'
