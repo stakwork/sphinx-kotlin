@@ -6,9 +6,12 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.retrieveTextToShow
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,6 +31,7 @@ internal class FullscreenVideoViewModel @Inject constructor(
     val app: Application,
     handle: SavedStateHandle,
     messageRepository: MessageRepository,
+    repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -37,6 +41,7 @@ internal class FullscreenVideoViewModel @Inject constructor(
 
     private val args: FullscreenVideoActivityArgs by handle.navArgs()
     private val messageId = MessageId(args.argMessageId)
+    private val feedItemId = args.argFeedItemId?.let { FeedId(it) }
     private val videoFile = args.argVideoFilepath?.let {
         File(it)
     }
@@ -136,12 +141,50 @@ internal class FullscreenVideoViewModel @Inject constructor(
         return message
     }
 
+    private val feedItemSharedFlow: SharedFlow<FeedItem?> = flow {
+//        emitAll(repositoryMedia.getMessageById(feedItemId))
+        emit(null)
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000),
+        replay = 1,
+    )
+
+    private suspend fun getFeedItem(): FeedItem? {
+        return feedItemId?.let {
+
+            feedItemSharedFlow.replayCache.firstOrNull()?.let { feedItem ->
+                return feedItem
+            }
+
+            feedItemSharedFlow.firstOrNull()?.let { message ->
+                return message
+            }
+
+            var feedItem: FeedItem? = null
+
+            try {
+                feedItemSharedFlow.collect {
+                    if (it != null) {
+                        feedItem = it
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+
+            feedItem
+        }
+    }
+
     private suspend fun getVideoUri(): Uri? {
-        return videoFile?.toUri() ?: getMessage()?.messageMedia?.localFile?.toUri()
+        return getFeedItem()?.enclosureUrl?.value?.toUri()
+            ?: videoFile?.toUri()
+            ?: getMessage()?.messageMedia?.localFile?.toUri()
     }
 
     private suspend fun getVideoTitle(): String? {
-        return videoFile?.name ?: getMessage()?.retrieveTextToShow()
+        return getFeedItem()?.titleToShow ?: videoFile?.name ?: getMessage()?.retrieveTextToShow()
     }
 
     fun initializeVideo() {
