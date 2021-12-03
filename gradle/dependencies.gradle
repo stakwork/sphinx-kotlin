@@ -21,7 +21,7 @@ ext.versions = [
     'navigation': '2.3.5',
     'okhttp': '4.9.1',
     'sqlDelight': '1.5.0',
-    'toplAndroid': '2.1.1',
+    'toplAndroid': '2.1.2',
 ]
 
 /**
