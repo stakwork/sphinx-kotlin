@@ -89,6 +89,27 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_loading_video"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:background="@color/selectedMessageBackground">
+
+            <ProgressBar
+                android:id="@+id/progress_bar_upload_profile_picture"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                style="?android:attr/progressBarStyle"
+                android:indeterminateTint="@android:color/white"
+                android:indeterminate="true"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView

@@ -202,9 +202,8 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                     YOUTUBE_WEB_VIEW_MIME_TYPE,
                                     YOUTUBE_WEB_VIEW_ENCODING
                                 )
-
                             } else {
-
+                                layoutConstraintLoadingVideo?.visible
                                 layoutConstraintVideoViewContainer.visible
                                 webViewYoutubeVideoPlayer.gone
 
@@ -221,31 +220,35 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.playingVideoStateContainer.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is PlayingVideoViewState.Idle -> {}
+                binding.includeLayoutVideoPlayer.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is PlayingVideoViewState.Idle -> { }
 
-                    is PlayingVideoViewState.MetaDataLoaded -> {
-                        binding.includeLayoutVideoPlayer.seekBarCurrentProgress.max = viewState.duration
-                        binding.includeLayoutVideoPlayer.textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
-                        //                optimizeVideoSize()
-                    }
-                    is PlayingVideoViewState.CurrentTimeUpdate -> {
-                        if (!dragging) {
-                            binding.includeLayoutVideoPlayer.seekBarCurrentProgress.progress = viewState.currentTime
-                            binding.includeLayoutVideoPlayer.textViewCurrentTime.text = (viewState.duration - viewState.currentTime).toLong().toTimestamp()
+                        is PlayingVideoViewState.MetaDataLoaded -> {
+                            layoutConstraintLoadingVideo?.gone
+
+                            seekBarCurrentProgress.max = viewState.duration
+                            textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
+                            //                optimizeVideoSize()
                         }
-                    }
-                    is PlayingVideoViewState.ContinuePlayback -> {
-                        binding.includeLayoutVideoPlayer.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_pause_button)
-                    }
-                    is PlayingVideoViewState.PausePlayback -> {
-                        binding.includeLayoutVideoPlayer.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
-                    }
-                    is PlayingVideoViewState.CompletePlayback -> {
-                        binding.includeLayoutVideoPlayer.seekBarCurrentProgress.progress = 0
-                        binding.includeLayoutVideoPlayer.textViewCurrentTime.text = 0L.toTimestamp()
-                        binding.includeLayoutVideoPlayer.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
+                        is PlayingVideoViewState.CurrentTimeUpdate -> {
+                            if (!dragging) {
+                                seekBarCurrentProgress.progress = viewState.currentTime
+                                textViewCurrentTime.text = (viewState.duration - viewState.currentTime).toLong().toTimestamp()
+                            }
+                        }
+                        is PlayingVideoViewState.ContinuePlayback -> {
+                            textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_pause_button)
+                        }
+                        is PlayingVideoViewState.PausePlayback -> {
+                            textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
+                        }
+                        is PlayingVideoViewState.CompletePlayback -> {
+                            seekBarCurrentProgress.progress = 0
+                            textViewCurrentTime.text = 0L.toTimestamp()
+                            textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
+                        }
                     }
                 }
             }

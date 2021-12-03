@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -48,11 +49,12 @@ class FeedReadViewModel @Inject constructor(
         }
     }
 
-    fun newsletterItemSelected(episode: FeedItem) {
+    fun newsletterItemSelected(item: FeedItem) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toWebViewDetail(
+                item?.feed?.chat?.id ?: item?.feed?.chatId,
                 app.getString(R.string.newsletter_article),
-                episode.enclosureUrl
+                item.enclosureUrl
             )
         }
     }

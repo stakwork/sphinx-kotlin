@@ -55,7 +55,15 @@ sealed class DashboardChat {
         open val owner: Contact? = null
 
         override val sortBy: Long
-            get() = message?.date?.time ?: chat.createdAt.time
+            get() {
+                val lastContentSeenDate = chat.contentSeenAt?.time
+                val lastMessageActionDate = message?.date?.time ?: chat.createdAt.time
+
+                if (lastContentSeenDate != null && lastContentSeenDate > lastMessageActionDate) {
+                    return lastContentSeenDate
+                }
+                return lastMessageActionDate
+            }
 
         override fun getDisplayTime(today00: DateTime): String {
             return message?.date?.chatTimeFormat(today00) ?: ""

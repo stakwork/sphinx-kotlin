@@ -180,6 +180,10 @@ internal abstract class MediaPlayerService: SphinxService() {
                 }
                 is UserAction.ServiceAction.Play -> {
 
+                    serviceLifecycleScope.launch {
+                        repositoryMedia.updateChatContentSeenAt(userAction.chatId)
+                    }
+
                     podData?.let { nnData ->
                         if (nnData.chatId != userAction.chatId) {
                             //Podcast has changed. Payments Destinations needs to be set again

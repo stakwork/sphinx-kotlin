@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha35 (2021-12-03)
+ - Fixes crash on Android 12 (API 31) for tor accounts
+ - Improves feed items order
+ - Add loading wheel while loading videos  
+
 # Version 1.0.0-alpha34 (2021-11-27)
  - Adds newsletter content on feed
  - Adds video content on feed

@@ -1,6 +1,7 @@
 package chat.sphinx.newsletter_detail.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
@@ -12,7 +13,7 @@ abstract class NewsletterDetailNavigator(
 
     abstract suspend fun closeDetailScreen()
 
-    abstract suspend fun toWebViewDetail(title: String, url: FeedUrl)
+    abstract suspend fun toWebViewDetail(chatId: ChatId?, title: String, url: FeedUrl)
 
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())

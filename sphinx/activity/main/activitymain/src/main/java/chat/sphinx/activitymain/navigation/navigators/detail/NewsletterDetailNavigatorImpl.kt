@@ -3,6 +3,7 @@ package chat.sphinx.activitymain.navigation.navigators.detail
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.web_view.navigation.ToWebViewDetail
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import javax.inject.Inject
 
@@ -14,9 +15,9 @@ internal class NewsletterDetailNavigatorImpl @Inject constructor(
         (navigationDriver as DetailNavigationDriver).closeDetailScreen()
     }
 
-    override suspend fun toWebViewDetail(title: String, url: FeedUrl) {
+    override suspend fun toWebViewDetail(chatId: ChatId?, title: String, url: FeedUrl) {
         detailDriver.submitNavigationRequest(
-            ToWebViewDetail(title, url, true)
+            ToWebViewDetail(chatId, title, url, true)
         )
     }
 }
