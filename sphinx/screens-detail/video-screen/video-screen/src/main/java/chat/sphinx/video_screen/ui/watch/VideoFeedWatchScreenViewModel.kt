@@ -37,6 +37,12 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
 
     init {
         subscribeToViewStateFlow()
+
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.updateChatContentSeenAt(
+                getArgChatId()
+            )
+        }
     }
 
     open val playingVideoStateContainer: ViewStateContainer<PlayingVideoViewState> by lazy {
