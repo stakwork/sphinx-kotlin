@@ -23,6 +23,7 @@ import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
 import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import chat.sphinx.wrapper_common.hhmmElseDate
@@ -61,9 +62,6 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     private val mHideRunnable = Runnable { toggleRemoteVideoControllers() }
 
     companion object {
-        const val YOUTUBE_WEB_VIEW_MIME_TYPE = "text/html"
-        const val YOUTUBE_WEB_VIEW_ENCODING = "utf-8"
-
         private const val AUTO_HIDE_DELAY_MILLIS = 3000
     }
 
@@ -198,11 +196,10 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                 }
 
                                 webViewYoutubeVideoPlayer.loadData(
-                                    "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/${viewState.id.youtubeVideoId()}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
-                                    YOUTUBE_WEB_VIEW_MIME_TYPE,
-                                    YOUTUBE_WEB_VIEW_ENCODING
+                                    String.format(FeedUrl.YOUTUBE_WEB_VIEW_IFRAME_PATTERN, viewState.id.youtubeVideoId()),
+                                    FeedUrl.YOUTUBE_WEB_VIEW_MIME_TYPE,
+                                    FeedUrl.YOUTUBE_WEB_VIEW_ENCODING
                                 )
-
                             } else {
 
                                 layoutConstraintVideoViewContainer.visible

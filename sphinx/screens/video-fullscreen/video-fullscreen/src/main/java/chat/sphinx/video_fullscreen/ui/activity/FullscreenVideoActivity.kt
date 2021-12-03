@@ -12,6 +12,8 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.resources.toTimestamp
 import chat.sphinx.video_fullscreen.R
 import chat.sphinx.video_fullscreen.databinding.ActivityFullscreenVideoBinding
+import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -51,9 +53,6 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
 
         binding.apply {
             videoViewContent.setOnClickListener {
-                toggle()
-            }
-            root.setOnClickListener {
                 toggle()
             }
             viewModel.videoPlayerController.setVideo(binding.videoViewContent)
@@ -175,6 +174,26 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
 
     private fun onViewStateFlowCollect(viewState: FullscreenVideoViewState) {
         when (viewState) {
+            is FullscreenVideoViewState.YoutubeVideo -> {
+                binding.apply {
+                    videoViewContent.gone
+                    layoutConstraintBottomControls.gone
+
+                    webViewYoutubeVideoPlayer.visible
+
+                    webViewYoutubeVideoPlayer.settings.apply {
+                        javaScriptEnabled = true
+                    }
+
+                    viewState.youtubeFeedId?.let { youtubeFeedId ->
+                        webViewYoutubeVideoPlayer.loadData(
+                            String.format(FeedUrl.YOUTUBE_WEB_VIEW_IFRAME_PATTERN, youtubeFeedId.youtubeVideoId()),
+                            FeedUrl.YOUTUBE_WEB_VIEW_MIME_TYPE,
+                            FeedUrl.YOUTUBE_WEB_VIEW_ENCODING
+                        )
+                    }
+                }
+            }
             is FullscreenVideoViewState.VideoMessage -> {
                 binding.textViewVideoMessageText.text = viewState.name
                 binding.layoutConstraintTitle.visible

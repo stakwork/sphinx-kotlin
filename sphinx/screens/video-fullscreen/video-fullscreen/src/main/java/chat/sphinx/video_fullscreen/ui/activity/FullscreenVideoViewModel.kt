@@ -6,10 +6,10 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_message.Message
@@ -31,7 +31,6 @@ internal class FullscreenVideoViewModel @Inject constructor(
     val app: Application,
     handle: SavedStateHandle,
     messageRepository: MessageRepository,
-    repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -183,26 +182,51 @@ internal class FullscreenVideoViewModel @Inject constructor(
             ?: getMessage()?.messageMedia?.localFile?.toUri()
     }
 
+    private suspend fun getYoutubeId(): FeedId? {
+        val feedItem = getFeedItem()
+
+        return if (feedItem?.enclosureUrl?.isYoutubeVideo() == true) {
+            feedItem.id
+        } else {
+            null
+        }
+    }
+
     private suspend fun getVideoTitle(): String? {
         return getFeedItem()?.titleToShow ?: videoFile?.name ?: getMessage()?.retrieveTextToShow()
     }
 
     fun initializeVideo() {
         viewModelScope.launch(mainImmediate) {
-            getVideoTitle()?.let { title ->
+            val youtubeId = getYoutubeId()
+            if (youtubeId != null) {
                 updateViewState(
-                    FullscreenVideoViewState.VideoMessage(
-                        title,
+                    FullscreenVideoViewState.YoutubeVideo(
+                        "",
                         currentViewState.duration,
                         currentViewState.videoDimensions,
                         currentViewState.currentTime,
-                        currentViewState.isPlaying
+                        currentViewState.isPlaying,
+                        youtubeId
                     )
                 )
+            } else {
+                getVideoTitle()?.let { title ->
+                    updateViewState(
+                        FullscreenVideoViewState.VideoMessage(
+                            title,
+                            currentViewState.duration,
+                            currentViewState.videoDimensions,
+                            currentViewState.currentTime,
+                            currentViewState.isPlaying
+                        )
+                    )
+                }
+                getVideoUri()?.let { videoUri ->
+                    videoPlayerController.initializeVideo(videoUri)
+                }
             }
-            getVideoUri()?.let { videoUri ->
-                videoPlayerController.initializeVideo(videoUri)
-            }
+
         }
     }
 

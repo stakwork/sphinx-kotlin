@@ -10,6 +10,9 @@ inline val FeedItem.isPodcast: Boolean
 inline val FeedItem.isVideo: Boolean
     get() = feed?.feedType?.isVideo() == true
 
+inline val FeedItem.isYoutubeVideo: Boolean
+    get() = feed?.feedType?.isVideo() == true && enclosureUrl.isYoutubeVideo()
+
 inline val FeedItem.isNewsletter: Boolean
     get() = feed?.feedType?.isNewsletter() == true
 

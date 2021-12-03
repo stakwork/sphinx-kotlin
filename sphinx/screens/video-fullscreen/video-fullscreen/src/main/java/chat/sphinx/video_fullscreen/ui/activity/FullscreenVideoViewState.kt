@@ -1,5 +1,6 @@
 package chat.sphinx.video_fullscreen.ui.activity
 
+import chat.sphinx.wrapper_common.feed.FeedId
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 internal sealed  class FullscreenVideoViewState(
@@ -7,7 +8,8 @@ internal sealed  class FullscreenVideoViewState(
     val duration: Int,
     val videoDimensions: Pair<Int, Int>,
     val currentTime: Int,
-    val isPlaying: Boolean
+    val isPlaying: Boolean,
+    val youtubeFeedId: FeedId? = null
 ) : ViewState<FullscreenVideoViewState>() {
     object Idle : FullscreenVideoViewState(
         "",
@@ -15,6 +17,22 @@ internal sealed  class FullscreenVideoViewState(
         Pair(0,0),
         0,
         false
+    )
+
+    class YoutubeVideo(
+        name: String,
+        duration: Int,
+        videoDimensions: Pair<Int, Int>,
+        currentTime: Int,
+        isPlaying: Boolean,
+        youtubeFeedId: FeedId
+    ): FullscreenVideoViewState(
+        name,
+        duration,
+        videoDimensions,
+        currentTime,
+        isPlaying,
+        youtubeFeedId
     )
 
     class VideoMessage(
