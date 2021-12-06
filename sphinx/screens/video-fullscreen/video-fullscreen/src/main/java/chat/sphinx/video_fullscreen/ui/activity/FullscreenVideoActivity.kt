@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.*
 import android.widget.RelativeLayout
+import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
@@ -36,6 +37,8 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     private val viewModel: FullscreenVideoViewModel by viewModels()
     private val binding: ActivityFullscreenVideoBinding by viewBinding(ActivityFullscreenVideoBinding::bind)
 
+    private var dragging: Boolean = false
+
     private val mHideHandler = Handler()
     private val mHideRunnable = Runnable { toggle() }
 
@@ -61,7 +64,29 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                 viewModel.videoPlayerController.togglePlayPause()
             }
 
-            seekBarCurrentProgress.setOnTouchListener { _, _ -> true }
+            seekBarCurrentProgress.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+
+                    override fun onProgressChanged(
+                        seekBar: SeekBar,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+                        if (fromUser) {
+                            textViewCurrentTime.text = progress.toLong().toTimestamp()
+                        }
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar) {
+                        dragging = true
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar) {
+                        viewModel.videoPlayerController.seekTo(seekBar.progress)
+                        dragging = false
+                    }
+                }
+            )
 
             orientationListener =  object : OrientationEventListener(this@FullscreenVideoActivity) {
                 override fun onOrientationChanged(orientation: Int) {
@@ -205,8 +230,10 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                 optimizeVideoSize()
             }
             is FullscreenVideoViewState.CurrentTimeUpdate -> {
-                binding.seekBarCurrentProgress.progress = viewState.currentTime
-                binding.textViewCurrentTime.text = viewState.currentTime.toLong().toTimestamp()
+                if (!dragging) {
+                    binding.seekBarCurrentProgress.progress = viewState.currentTime
+                    binding.textViewCurrentTime.text = viewState.currentTime.toLong().toTimestamp()
+                }
             }
             is FullscreenVideoViewState.ContinuePlayback -> {
                 binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_pause_button)

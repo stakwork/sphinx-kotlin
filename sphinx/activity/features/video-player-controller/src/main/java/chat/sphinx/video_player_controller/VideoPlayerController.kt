@@ -24,17 +24,21 @@ class VideoPlayerController(
 
     fun initializeVideo(
         videoUri: Uri,
-        videoDuration: Int? = null
+        videoDuration: Int? = null,
+        videoCurrentPosition: Int? = null
     ) {
         videoView?.apply {
             setOnCompletionListener {
                 completePlaybackCallback()
             }
-            setOnPreparedListener {
+            setOnPreparedListener { mediaPlayer ->
+                videoCurrentPosition?.let {
+                    seekTo(it)
+                }
                 updateMetaDataCallback(
-                    videoDuration ?: it.duration,
-                    it.videoWidth,
-                    it.videoHeight
+                    videoDuration ?: mediaPlayer.duration,
+                    mediaPlayer.videoWidth,
+                    mediaPlayer.videoHeight
                 )
                 play()
             }

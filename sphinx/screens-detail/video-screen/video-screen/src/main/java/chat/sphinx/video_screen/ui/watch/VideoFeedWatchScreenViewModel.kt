@@ -146,12 +146,14 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
         return args.feedUrl
     }
 
+    @Synchronized
     fun goToFullscreenVideo() {
         viewModelScope.launch(mainImmediate) {
             videoScreenNavigator.toFullscreenVideoActivity(
                 messageId = MessageId(-1L),
                 videoFilepath = null,
                 feedUrl = args.feedUrl?.let { FeedUrl(it.value) },
+                currentTime = playingVideoStateContainer.viewStateFlow.value.currentTime.toLong()
             )
         }
     }

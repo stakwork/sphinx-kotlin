@@ -153,7 +153,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 when(rotation) {
                     Surface.ROTATION_90,
                     Surface.ROTATION_180 -> {
-                        goFullscreen()
+                        viewModel.goToFullscreenVideo()
                     }
                     Surface.ROTATION_0,
                     Surface.ROTATION_270 -> {
@@ -172,11 +172,6 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     override fun onStop() {
         super.onStop()
         orientationListener.disable()
-    }
-
-    @Synchronized
-    fun goFullscreen() {
-        viewModel.goToFullscreenVideo()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: VideoFeedScreenViewState) {
