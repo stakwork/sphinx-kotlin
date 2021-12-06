@@ -6,10 +6,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.message.MessageId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -27,6 +29,7 @@ internal inline val VideoFeedWatchScreenFragmentArgs.feedUrl: FeedUrl?
 internal class VideoFeedWatchScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
+    private val videoScreenNavigator: VideoScreenNavigator,
     private val chatRepository: ChatRepository,
 ): VideoFeedScreenViewModel(
     dispatchers,
@@ -141,5 +144,15 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
 
     override fun getArgFeedUrl(): FeedUrl? {
         return args.feedUrl
+    }
+
+    fun goToFullscreenVideo() {
+        viewModelScope.launch(mainImmediate) {
+            videoScreenNavigator.toFullscreenVideoActivity(
+                messageId = MessageId(-1L),
+                videoFilepath = null,
+                feedUrl = args.feedUrl?.let { FeedUrl(it.value) },
+            )
+        }
     }
 }

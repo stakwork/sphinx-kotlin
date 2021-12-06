@@ -3,6 +3,8 @@ package chat.sphinx.video_screen.ui.watch
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.OrientationEventListener
+import android.view.Surface
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -43,6 +45,8 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
         FragmentVideoWatchScreenBinding
         >(R.layout.fragment_video_watch_screen)
 {
+    private lateinit var orientationListener: OrientationEventListener
+
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
@@ -63,6 +67,12 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
     companion object {
         private const val AUTO_HIDE_DELAY_MILLIS = 3000
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setupOrientationListener()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -94,7 +104,6 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
     private fun setupVideoPlayer() {
         binding.includeLayoutVideoPlayer.apply {
-
             viewModel.setVideoView(videoViewVideoPlayer)
 
             videoViewVideoPlayer.setOnClickListener {
@@ -129,6 +138,45 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 }
             )
         }
+    }
+
+    private fun setupOrientationListener() {
+        orientationListener =  object : OrientationEventListener(requireContext()) {
+            override fun onOrientationChanged(orientation: Int) {
+                val rotation = when {
+                    orientation <= 45 -> Surface.ROTATION_0
+                    orientation <= 135 -> Surface.ROTATION_90
+                    orientation <= 225 -> Surface.ROTATION_180
+                    orientation <= 315 -> Surface.ROTATION_270
+                    else -> Surface.ROTATION_0
+                }
+                when(rotation) {
+                    Surface.ROTATION_90,
+                    Surface.ROTATION_180 -> {
+                        goFullscreen()
+                    }
+                    Surface.ROTATION_0,
+                    Surface.ROTATION_270 -> {
+                        // Do nothing...
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        orientationListener.enable()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        orientationListener.disable()
+    }
+
+    @Synchronized
+    fun goFullscreen() {
+        viewModel.goToFullscreenVideo()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: VideoFeedScreenViewState) {
