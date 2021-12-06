@@ -20,14 +20,14 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
 import chat.sphinx.concept_network_query_podcast_search.model.toPodcastSearchResult
+import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
+import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
-import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
-import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -52,11 +52,6 @@ import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMa
 import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.*
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastSearchResultPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedModelDboPodcastModelPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
@@ -95,7 +90,6 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
-import chat.sphinx.wrapper_podcast.PodcastSearchResult
 import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -4973,5 +4967,15 @@ abstract class SphinxRepository(
         }
 
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
+    }
+
+    override fun getFeedItemByFeedUrl(feedUrl: FeedUrl): Flow<FeedItem?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().feedItemGetByFeedUrl(feedUrl)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { feedItemDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
     }
 }

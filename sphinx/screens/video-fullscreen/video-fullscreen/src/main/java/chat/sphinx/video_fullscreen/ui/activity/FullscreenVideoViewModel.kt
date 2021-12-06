@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -32,6 +33,7 @@ internal class FullscreenVideoViewModel @Inject constructor(
     val app: Application,
     handle: SavedStateHandle,
     messageRepository: MessageRepository,
+    repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -142,8 +144,9 @@ internal class FullscreenVideoViewModel @Inject constructor(
     }
 
     private val feedItemSharedFlow: SharedFlow<FeedItem?> = flow {
-//        emitAll(repositoryMedia.getFeedItemByFeedUrl(feedUrl))
-        emit(null)
+        if (feedUrl != null) {
+            emitAll(repositoryMedia.getFeedItemByFeedUrl(feedUrl))
+        }
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),

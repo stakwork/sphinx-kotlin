@@ -1126,6 +1126,12 @@ FROM feedItemDbo
 WHERE feed_id IN ?
 ORDER BY date_published DESC;
 
+feedItemGetByFeedUrl:
+SELECT *
+FROM feedItemDbo
+WHERE enclosure_url = ?
+LIMIT 1;
+
 feedItemDeleteById:
 DELETE
 FROM feedItemDbo
