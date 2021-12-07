@@ -58,4 +58,5 @@ data class Contact(
     val tipAmount: Sat?,
     val inviteId: InviteId?,
     val inviteStatus: InviteStatus?,
+    val blocked: Blocked,
 )

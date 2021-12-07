@@ -1,7 +1,9 @@
 package chat.sphinx.feature_coredb.adapters.contact
 
+import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.sqldelight.ColumnAdapter
@@ -101,6 +103,27 @@ internal class PrivatePhotoAdapter: ColumnAdapter<PrivatePhoto, Long> {
     }
 
     override fun encode(value: PrivatePhoto): Long {
+        return value.value.toLong()
+    }
+}
+
+internal class BlockedAdapter private constructor(): ColumnAdapter<Blocked, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: BlockedAdapter? = null
+        fun getInstance(): BlockedAdapter =
+            instance ?: synchronized(this) {
+                instance ?: BlockedAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: Long): Blocked {
+        return databaseValue.toInt().toBlocked()
+    }
+
+    override fun encode(value: Blocked): Long {
         return value.value.toLong()
     }
 }

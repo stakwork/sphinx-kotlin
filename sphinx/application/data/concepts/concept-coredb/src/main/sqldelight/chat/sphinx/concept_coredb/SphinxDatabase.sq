@@ -33,6 +33,7 @@ import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
 import chat.sphinx.wrapper_common.subscription.SubscriptionId;
+import chat.sphinx.wrapper_contact.Blocked;
 import chat.sphinx.wrapper_contact.ContactAlias;
 import chat.sphinx.wrapper_contact.ContactStatus;
 import chat.sphinx.wrapper_contact.DeviceId;
@@ -55,6 +56,7 @@ import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
 import chat.sphinx.wrapper_feed.FeedTitle;
 import chat.sphinx.wrapper_invite.InviteString;
+import chat.sphinx.wrapper_message.Flagged;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
@@ -258,7 +260,8 @@ CREATE TABLE contactDbo(
     notification_sound          TEXT            AS NotificationSound,
     tip_amount                  INTEGER         AS Sat,
     invite_id                   INTEGER         AS InviteId,
-    invite_status               INTEGER         AS InviteStatus
+    invite_status               INTEGER         AS InviteStatus,
+    blocked                     INTEGER         AS Blocked NOT NULL DEFAULT 0
 );
 
 contactGetAllIds:
@@ -359,6 +362,11 @@ WHERE invite_id = ?;
 contactUpdatePhotoUrl:
 UPDATE contactDbo
 SET photo_url = :photo_url
+WHERE id = ?;
+
+contactUpdateBlocked:
+UPDATE contactDbo
+SET blocked = :blocked
 WHERE id = ?;
 
 contactDeleteById:
@@ -547,7 +555,8 @@ CREATE TABLE messageDbo(
     sender_pic                  TEXT            AS PhotoUrl,
     original_muid               TEXT            AS MessageMUID,
     reply_uuid                  TEXT            AS ReplyUUID,
-    muid                        TEXT            AS MessageMUID
+    muid                        TEXT            AS MessageMUID,
+    flagged                     INTEGER         AS Flagged NOT NULL DEFAULT 0
 );
 
 messageGetAllReactionsByUUID:
@@ -667,6 +676,11 @@ messageUpdateInvoiceAsPaidByPaymentHash:
 UPDATE messageDbo
 SET status = 1
 WHERE type = 2 AND payment_hash = ?;
+
+messageUpdateFlagged:
+UPDATE messageDbo
+SET flagged = :flagged
+WHERE id = ?;
 
 -- If the message exists in the DB, it will update all fields _except_
 -- for message_content_decrypted as to not overwrite it.
