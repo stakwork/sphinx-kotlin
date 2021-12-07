@@ -2516,24 +2516,19 @@ abstract class SphinxRepository(
             getContactByPubKey(supportContactPubKey).firstOrNull()?.let { supportContact ->
                 val messageSender = getContactById(message.sender).firstOrNull()
 
-                var flagMessageContent = """
-                    Message Flagged
-                    - Message: ${message.uuid?.value ?: "Empty Message UUID"}
-                    - Sender: ${messageSender?.nodePubKey?.value ?: "Empty Sender"}
-                    """.trimIndent()
+                var flagMessageContent = "Message Flagged\n- Message: ${message.uuid?.value ?: "Empty Message UUID"}\n- Sender: ${messageSender?.nodePubKey?.value ?: "Empty Sender"}"
 
                 if (chat.isTribe()) {
-                    flagMessageContent += "\n- Tribe: ${chat.uuid}"
+                    flagMessageContent += "\n- Tribe: ${chat.uuid.value}"
                 }
 
                 val messageBuilder = SendMessage.Builder()
-                messageBuilder.setText(flagMessageContent)
-                messageBuilder.setContactId(supportContact.id)
+                messageBuilder.setText(flagMessageContent.trimIndent())
 
-                messageSender?.let { sender ->
-                    getConversationByContactId(supportContact.id).firstOrNull()?.let { supportContactChat ->
-                        messageBuilder.setChatId(supportContactChat.id)
-                    }
+                messageBuilder.setContactId(supportContact.id)
+                
+                getConversationByContactId(supportContact.id).firstOrNull()?.let { supportContactChat ->
+                    messageBuilder.setChatId(supportContactChat.id)
                 }
 
                 sendMessage(
