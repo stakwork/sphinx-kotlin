@@ -112,7 +112,7 @@ internal fun  LayoutMessageHolderBinding.setView(
         setInvoiceExpirationHeader(viewState.invoiceExpirationHeader)
 
         setBubbleBackground(viewState, recyclerViewWidth)
-        setDeletedMessageLayout(viewState.deletedMessage)
+        setDeletedOrFlaggedMessageLayout(viewState.deletedOrFlaggedMessage)
         setInvoicePaymentLayout(viewState.invoicePayment)
         setInvoiceDottedLinesLayout(viewState)
         setGroupActionIndicatorLayout(viewState.groupActionIndicator)
@@ -662,24 +662,32 @@ internal inline fun LayoutMessageHolderBinding.setInvoiceExpirationHeader(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setDeletedMessageLayout(
-    deletedMessage: LayoutState.DeletedMessage?
+internal inline fun LayoutMessageHolderBinding.setDeletedOrFlaggedMessageLayout(
+    deletedOrFlaggedMessage: LayoutState.DeletedOrFlaggedMessage?
 ) {
     includeDeletedMessage.apply {
-        if (deletedMessage == null) {
+        if (deletedOrFlaggedMessage == null) {
             root.gone
         } else {
             root.visible
 
-            val gravity = if (deletedMessage.gravityStart) {
+            val gravity = if (deletedOrFlaggedMessage.gravityStart) {
                 Gravity.START
             } else {
                 Gravity.END
             }
 
-            textViewDeletedMessageTimestamp.text = deletedMessage.timestamp
+            textViewDeletedMessageTimestamp.text = deletedOrFlaggedMessage.timestamp
             textViewDeletedMessageTimestamp.gravity = gravity
             textViewDeleteMessageLabel.gravity = gravity
+
+            textViewDeleteMessageLabel.text = root.context.getString(
+                if (deletedOrFlaggedMessage.deleted) {
+                    R.string.deleted_message_label_text
+                } else {
+                    R.string.flagged_message_label_text
+                }
+            )
         }
     }
 }

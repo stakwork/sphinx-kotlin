@@ -11,6 +11,7 @@
 
     <string name="unsupported_message_type_placeholder_text">%1$s: Not supported yet</string>
     <string name="deleted_message_label_text">This message has been deleted</string>
+    <string name="flagged_message_label_text">This message has been flagged</string>
     <string name="join_call_header_label_text">Join call by…</string>
 
     <string name="failed_message">Failed Message</string>
@@ -93,6 +94,7 @@
     <string name="selected_message_menu_item_reply">Reply</string>
     <string name="selected_message_menu_item_save_file">Save File</string>
     <string name="selected_message_menu_item_resend">Resend</string>
+    <string name="selected_message_menu_item_flag">Flag</string>
 
     <!-- Notify -->
     <string name="notify_boost_failure">Boost payment failed</string>

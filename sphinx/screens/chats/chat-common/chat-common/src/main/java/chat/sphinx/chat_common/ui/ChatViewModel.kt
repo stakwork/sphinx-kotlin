@@ -383,6 +383,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         openReceivedPaidInvoicesCount > 0
                     )
 
+                    val isDeleted = message.status.isDeleted()
+
                     if (
                         (sent && !message.isPaidInvoice) ||
                         (!sent && message.isPaidInvoice)
@@ -393,7 +395,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 message,
                                 chat,
                                 background =  when {
-                                    message.status.isDeleted() -> {
+                                    isDeleted -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
                                     }
                                     message.type.isInvoicePayment() -> {
@@ -445,15 +447,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             )
                         )
                     } else {
-
-                        val isDeleted = message.status.isDeleted()
-
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
                                 chat,
                                 background = when {
                                     isDeleted -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
+                                    message.isFlagged -> {
                                         BubbleBackground.Gone(setSpacingEqual = false)
                                     }
                                     message.type.isInvoicePayment() -> {
@@ -1011,6 +1013,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
             messageRepository.resendMessage(message, chat)
+        }
+    }
+
+    fun flagMessage(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            messageRepository.flagMessage(message, chat)
         }
     }
 

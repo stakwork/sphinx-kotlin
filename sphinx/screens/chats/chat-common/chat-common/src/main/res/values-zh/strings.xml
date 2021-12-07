@@ -11,6 +11,7 @@
 
     <string name="unsupported_message_type_placeholder_text">%1$s: 向未使用</string>
     <string name="deleted_message_label_text">訊息已刪除</string>
+    <string name="flagged_message_label_text">This message has been flagged</string>
     <string name="join_call_header_label_text">加入通話…</string>
 
     <string name="failed_message">傳送訊息 失敗</string>
@@ -93,6 +94,7 @@
     <string name="selected_message_menu_item_reply">回應</string>
     <string name="selected_message_menu_item_save_file">存檔</string>
     <string name="selected_message_menu_item_resend">重新發送</string>
+    <string name="selected_message_menu_item_flag">Flag</string>
 
     <!-- Notify -->
     <string name="notify_boost_failure">Boost 支付失敗</string>

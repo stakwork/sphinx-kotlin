@@ -2496,6 +2496,53 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun flagMessage(message: Message, chat: Chat) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            messageLock.withLock {
+                withContext(io) {
+                    queries.messageUpdateFlagged(
+                        true.toFlagged(),
+                        message.id
+                    )
+                }
+            }
+
+            val supportContactPubKey = LightningNodePubKey(
+                "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f"
+            )
+
+            getContactByPubKey(supportContactPubKey).firstOrNull()?.let { supportContact ->
+                val messageSender = getContactById(message.sender).firstOrNull()
+
+                var flagMessageContent = """
+                    Message Flagged
+                    - Message: ${message.uuid?.value ?: "Empty Message UUID"}
+                    - Sender: ${messageSender?.nodePubKey?.value ?: "Empty Sender"}
+                    """.trimIndent()
+
+                if (chat.isTribe()) {
+                    flagMessageContent += "\n- Tribe: ${chat.uuid}"
+                }
+
+                val messageBuilder = SendMessage.Builder()
+                messageBuilder.setText(flagMessageContent)
+                messageBuilder.setContactId(supportContact.id)
+
+                messageSender?.let { sender ->
+                    getConversationByContactId(supportContact.id).firstOrNull()?.let { supportContactChat ->
+                        messageBuilder.setChatId(supportContactChat.id)
+                    }
+                }
+
+                sendMessage(
+                    messageBuilder.build().first
+                )
+            }
+        }
+    }
+
     override suspend fun deleteMessage(message: Message): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> = Response.Success(true)
 
