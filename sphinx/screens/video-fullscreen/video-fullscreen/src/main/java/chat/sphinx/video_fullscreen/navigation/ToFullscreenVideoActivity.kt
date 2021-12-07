@@ -12,7 +12,7 @@ class ToFullscreenVideoActivity(
     private val messageId: MessageId,
     private val videoFilepath: String?,
     private val feedUrl: FeedUrl? = null,
-    private val currentTime: Long = 0L
+    private val currentTime: Int = 0
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
         val options = DetailNavOptions.default

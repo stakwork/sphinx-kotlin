@@ -153,7 +153,7 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
                 messageId = MessageId(-1L),
                 videoFilepath = null,
                 feedUrl = args.feedUrl?.let { FeedUrl(it.value) },
-                currentTime = playingVideoStateContainer.viewStateFlow.value.currentTime.toLong()
+                currentTime = playingVideoStateContainer.viewStateFlow.value.currentTime
             )
         }
     }

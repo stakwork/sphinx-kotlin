@@ -227,7 +227,10 @@ internal class FullscreenVideoViewModel @Inject constructor(
                     )
                 }
                 getVideoUri()?.let { videoUri ->
-                    videoPlayerController.initializeVideo(videoUri)
+                    videoPlayerController.initializeVideo(
+                        videoUri = videoUri,
+                        videoCurrentPosition = args.argCurrentTime
+                    )
                 }
             }
 

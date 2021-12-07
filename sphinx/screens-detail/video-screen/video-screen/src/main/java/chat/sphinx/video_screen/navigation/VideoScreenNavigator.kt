@@ -21,7 +21,7 @@ abstract class VideoScreenNavigator(
         messageId: MessageId,
         videoFilepath: String?,
         feedUrl: FeedUrl? = null,
-        currentTime: Long = 0L
+        currentTime: Int = 0
     ) {
         navigationDriver.submitNavigationRequest(
             ToFullscreenVideoActivity(

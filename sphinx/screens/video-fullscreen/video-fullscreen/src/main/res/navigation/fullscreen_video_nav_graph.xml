@@ -14,7 +14,7 @@
             app:argType="long" />
         <argument
             android:name="argCurrentTime"
-            app:argType="long" />
+            app:argType="integer" />
         <argument
             android:name="argFeedUrl"
             android:defaultValue="@null"
