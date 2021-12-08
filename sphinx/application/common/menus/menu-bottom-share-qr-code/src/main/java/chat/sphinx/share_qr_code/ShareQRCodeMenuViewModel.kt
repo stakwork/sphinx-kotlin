@@ -10,7 +10,7 @@ interface ShareQRCodeMenuViewModel {
     val dispatchers: CoroutineDispatchers
 
     fun shareCodeThroughTextIntent(): Intent
-    fun shareCodeThroughImageIntent(): Intent
+    fun shareCodeThroughImageIntent(): Intent?
 }
 
 class ShareQRCodeMenuHandler {

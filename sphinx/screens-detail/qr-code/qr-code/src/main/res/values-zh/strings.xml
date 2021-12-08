@@ -4,4 +4,6 @@
     <string name="copy">複製</string>
     <string name="paid">已支付</string>
     <string name="qr_code_notify_copied">%s 複製上貼版</string>
+    <string name="share_qr_code_as_image_plus_text">Share QR Code as Image+Text</string>
+    <string name="share_qr_code_as_text">Share QR Code as Text</string>
 </resources>

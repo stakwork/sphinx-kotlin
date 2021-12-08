@@ -37,7 +37,9 @@ class BottomMenuShareQRCode(
                 text = R.string.bottom_menu_share_qr_code_option_save_and_share_image,
                 textColor = R.color.primaryBlueFontColor,
                 onClick = {
-                    binding.root.context.startActivity(shareQRCodeMenuViewModel.shareCodeThroughImageIntent())
+                    shareQRCodeMenuViewModel.shareCodeThroughImageIntent()?.let {
+                        binding.root.context.startActivity(it)
+                    }
                 }
             )
         )
