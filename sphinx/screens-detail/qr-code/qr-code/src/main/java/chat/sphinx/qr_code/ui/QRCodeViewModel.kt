@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.lifecycle.SavedStateHandle
@@ -132,5 +133,20 @@ internal class QRCodeViewModel @Inject constructor(
         super.onCleared()
 
         socketIOManager.removeListener(this)
+    }
+
+    fun shareCodeThroughTextIntent(): Intent {
+       return Intent(Intent.ACTION_SEND).apply {
+           type = "text/plain"
+           putExtra(Intent.EXTRA_TEXT, currentViewState.qrText)
+       }
+    }
+
+    fun shareCodeThroughImageIntent(): Intent {
+        return Intent(Intent.ACTION_SEND).apply {
+            // TODO: Save image and share
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, currentViewState.qrText)
+        }
     }
 }

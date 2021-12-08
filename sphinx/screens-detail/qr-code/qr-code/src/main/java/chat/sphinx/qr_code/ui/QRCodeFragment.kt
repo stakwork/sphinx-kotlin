@@ -40,23 +40,28 @@ internal class QRCodeFragment: SideEffectFragment<
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.layoutConstraintQrCodeFragment)
 
-        binding.includeQrCodeHeader.apply {
-            textViewDetailScreenClose.setOnClickListener {
+        binding.apply {
+            includeQrCodeHeader.textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
             }
 
-            textViewDetailScreenHeaderNavBack.setOnClickListener {
+            includeQrCodeHeader.textViewDetailScreenHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }
             }
+
+            buttonQrCodeCopy.setOnClickListener {
+                viewModel.copyCodeToClipboard()
+            }
+
+            buttonQrCodeShare.setOnClickListener {
+                startActivity(viewModel.shareCodeThroughTextIntent())
+            }
         }
 
-        binding.buttonQrCodeCopy.setOnClickListener {
-            viewModel.copyCodeToClipboard()
-        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: QRCodeViewState) {
