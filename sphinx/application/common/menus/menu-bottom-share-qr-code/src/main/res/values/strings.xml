@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_share_qr_code_header_text">Share QR Code Options</string>
+    <!-- Menu -->
+    <string name="bottom_menu_share_qr_code_option_share_text">Share Text</string>
+    <string name="bottom_menu_share_qr_code_option_save_and_share_image">Save and Share Image</string>
+</resources>

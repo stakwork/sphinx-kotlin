@@ -9,8 +9,10 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.databinding.FragmentQrCodeBinding
+import chat.sphinx.share_qr_code.BottomMenuShareQRCode
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -28,6 +30,13 @@ internal class QRCodeFragment: SideEffectFragment<
 {
     override val binding: FragmentQrCodeBinding by viewBinding(FragmentQrCodeBinding::bind)
     override val viewModel: QRCodeViewModel by viewModels()
+
+    private val bottomMenuShareQRCode: BottomMenuShareQRCode by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenuShareQRCode(
+            onStopSupervisor,
+            viewModel
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +67,9 @@ internal class QRCodeFragment: SideEffectFragment<
             }
 
             buttonQrCodeShare.setOnClickListener {
-                startActivity(viewModel.shareCodeThroughTextIntent())
+                viewModel.shareQRCodeMenuHandler.viewStateContainer.updateViewState(
+                    MenuBottomViewState.Open
+                )
             }
         }
 
@@ -90,6 +101,11 @@ internal class QRCodeFragment: SideEffectFragment<
                 }
             }
             layoutConstraintInvoicePaid.goneIfFalse(viewState.paid)
+
+            bottomMenuShareQRCode.initialize(
+                includeLayoutMenuBottomShareQrCode,
+                viewLifecycleOwner
+            )
         }
     }
 

@@ -46,5 +46,6 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:common:menus:menu-bottom-share-qr-code')
     kapt kaptDeps.google.hilt
 }

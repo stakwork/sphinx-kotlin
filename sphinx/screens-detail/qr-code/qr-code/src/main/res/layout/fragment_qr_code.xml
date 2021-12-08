@@ -144,4 +144,9 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    xx<include
+        android:id="@+id/include_layout_menu_bottom_share_qr_code"
+        layout="@layout/layout_menu_bottom"
+        tools:visibility="gone" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

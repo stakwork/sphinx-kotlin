@@ -14,6 +14,8 @@ import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
+import chat.sphinx.share_qr_code.ShareQRCodeMenuHandler
+import chat.sphinx.share_qr_code.ShareQRCodeMenuViewModel
 import chat.sphinx.wrapper_common.util.isValidBech32
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
@@ -50,8 +52,13 @@ internal class QRCodeViewModel @Inject constructor(
                 )
             },
         ),
-    SphinxSocketIOMessageListener
+    SphinxSocketIOMessageListener,
+    ShareQRCodeMenuViewModel
 {
+
+    override val shareQRCodeMenuHandler: ShareQRCodeMenuHandler by lazy {
+        ShareQRCodeMenuHandler()
+    }
 
     companion object {
         private const val BITMAP_XY = 512
@@ -135,14 +142,14 @@ internal class QRCodeViewModel @Inject constructor(
         socketIOManager.removeListener(this)
     }
 
-    fun shareCodeThroughTextIntent(): Intent {
+    override fun shareCodeThroughTextIntent(): Intent {
        return Intent(Intent.ACTION_SEND).apply {
            type = "text/plain"
            putExtra(Intent.EXTRA_TEXT, currentViewState.qrText)
        }
     }
 
-    fun shareCodeThroughImageIntent(): Intent {
+    override fun shareCodeThroughImageIntent(): Intent {
         return Intent(Intent.ACTION_SEND).apply {
             // TODO: Save image and share
             type = "text/plain"
