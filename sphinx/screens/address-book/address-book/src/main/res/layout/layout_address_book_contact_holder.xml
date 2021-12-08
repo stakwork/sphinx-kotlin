@@ -9,6 +9,7 @@
     tools:ignore="RtlSymmetry">
 
     <com.chauthai.swipereveallayout.SwipeRevealLayout
+        android:id="@+id/swipe_reveal_layout_contact"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:mode="same_level"
@@ -27,6 +28,7 @@
                     android:id="@+id/layout_constraint_block_button_container"
                     android:layout_width="@dimen/recycler_view_holder_height"
                     android:layout_height="match_parent"
+                    android:clickable="true"
                     app:layout_constraintStart_toStartOf="parent"
                     android:background="@color/sphinxOrange">
 
@@ -59,6 +61,8 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_delete_button_container"
+                    android:clickable="true"
                     android:layout_width="@dimen/recycler_view_holder_height"
                     android:layout_height="match_parent"
                     app:layout_constraintStart_toEndOf="@+id/layout_constraint_block_button_container"
@@ -157,7 +161,7 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/image_view_blocked_contac_icon"
+                    android:id="@+id/image_view_blocked_contact_icon"
                     android:layout_width="@dimen/address_book_contact_holder_button_icon_xy"
                     android:layout_height="@dimen/address_book_contact_holder_button_icon_xy"
                     android:src="@drawable/ic_block"

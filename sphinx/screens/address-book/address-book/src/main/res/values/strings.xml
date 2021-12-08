@@ -6,4 +6,5 @@
     <string name="add_friend">Add Friend</string>
     <string name="delete_contact">Delete</string>
     <string name="block_contact">Block</string>
+    <string name="unblock_contact">Unblock</string>
 </resources>

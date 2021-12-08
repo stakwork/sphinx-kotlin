@@ -1297,7 +1297,7 @@ abstract class SphinxRepository(
         return response
     }
 
-    suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError> {
+    override suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError> = Response.Success(!contact.isBlocked())
 
         applicationScope.launch(mainImmediate) {

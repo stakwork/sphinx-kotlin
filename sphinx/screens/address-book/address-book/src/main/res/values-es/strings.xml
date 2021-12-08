@@ -6,4 +6,5 @@
     <string name="add_friend">Nuevo Amigo</string>
     <string name="delete_contact">Borrar</string>
     <string name="block_contact">Bloquear</string>
+    <string name="unblock_contact">Desbloquear</string>
 </resources>

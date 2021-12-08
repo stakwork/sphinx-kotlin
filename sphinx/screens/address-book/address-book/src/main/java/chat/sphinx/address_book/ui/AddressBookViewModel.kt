@@ -35,14 +35,16 @@ internal class AddressBookViewModel @Inject constructor(
         addressBookViewStateContainer.updateAddressBookContacts(null, filter)
     }
 
-    fun deleteContact(deletedContact: Contact) {
+    fun deleteContact(contact: Contact) {
         viewModelScope.launch(mainImmediate) {
-            contactRepository.deleteContactById(deletedContact.id)
+            contactRepository.deleteContactById(contact.id)
         }
     }
 
-    fun blockContact(deletedContact: Contact) {
-        Log.d("TAG", "BLOCKED CONTACT")
+    fun blockContact(contact: Contact) {
+        viewModelScope.launch(mainImmediate) {
+            contactRepository.toggleContactBlocked(contact)
+        }
     }
 
     init {
