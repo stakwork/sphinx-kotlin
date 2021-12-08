@@ -434,7 +434,8 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getUnseenConversationMessagesCount(): Flow<Long?> = flow {
+    override fun getUnseenActiveConversationMessagesCount(): Flow<Long?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
         var ownerId: ContactId? = accountOwner.value?.id
 
         if (ownerId == null) {
@@ -450,9 +451,11 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
+        val blockedContactIds = queries.contactGetBlocked().executeAsList().map { it.id }
+
         emitAll(
-            coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, ChatType.Conversation)
+            queries
+                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, blockedContactIds, ChatType.Conversation)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -477,7 +480,7 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, ChatType.Tribe)
+                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, listOf(), ChatType.Tribe)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -694,6 +697,17 @@ abstract class SphinxRepository(
         flow {
             emitAll(
                 coreDB.getSphinxDatabaseQueries().contactGetAll()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { contactDboPresenterMapper.mapListFrom(it) }
+            )
+        }
+    }
+
+    override val getAllNotBlockedContacts: Flow<List<Contact>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().contactGetNotBlocked()
                     .asFlow()
                     .mapToList(io)
                     .map { contactDboPresenterMapper.mapListFrom(it) }

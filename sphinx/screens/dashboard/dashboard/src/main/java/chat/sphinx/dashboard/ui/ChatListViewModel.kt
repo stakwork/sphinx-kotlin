@@ -10,9 +10,11 @@ import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.adapter.DashboardChat
 import chat.sphinx.dashboard.ui.viewstates.*
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.*
@@ -47,6 +49,9 @@ internal val ChatListViewModel.currentChatViewState: ChatViewState
 internal suspend inline fun ChatListViewModel.updateChatListFilter(filter: ChatFilter) {
     chatViewStateContainer.updateDashboardChats(null, filter)
 }
+
+internal inline val ChatListFragmentArgs.isChatListTypeConversation: Boolean
+    get() = argChatListType == ChatType.CONVERSATION
 
 @HiltViewModel
 internal class ChatListViewModel @Inject constructor(
@@ -98,9 +103,9 @@ internal class ChatListViewModel @Inject constructor(
     private var chatsCollectionInitialized: Boolean = false
 
     init {
-        if (args.argChatListType == ChatType.CONVERSATION) {
+        if (args.isChatListTypeConversation) {
             viewModelScope.launch(mainImmediate) {
-                repositoryDashboard.getAllContacts.distinctUntilChanged().collect { contacts ->
+                repositoryDashboard.getAllNotBlockedContacts.distinctUntilChanged().collect { contacts ->
                     updateChatListContacts(contacts)
                 }
             }
@@ -109,7 +114,7 @@ internal class ChatListViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             delay(25L)
 
-            val allChats = when (args.argChatListType) {
+            var allChats = when (args.argChatListType) {
                 ChatType.CONVERSATION -> {
                     repositoryDashboard.getAllContactChats.distinctUntilChanged()
                 }
@@ -139,16 +144,18 @@ internal class ChatListViewModel @Inject constructor(
                                 val contact: Contact = repositoryDashboard.getContactById(contactId)
                                     .firstOrNull() ?: continue
 
-                                contactsAdded.add(contactId)
+                                if (!contact.isBlocked()) {
+                                    contactsAdded.add(contactId)
 
-                                newList.add(
-                                    DashboardChat.Active.Conversation(
-                                        chat,
-                                        message,
-                                        contact,
-                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id),
+                                    newList.add(
+                                        DashboardChat.Active.Conversation(
+                                            chat,
+                                            message,
+                                            contact,
+                                            repositoryDashboard.getUnseenMessagesByChatId(chat.id),
+                                        )
                                     )
-                                )
+                                }
                             } else {
                                 newList.add(
                                     DashboardChat.Active.GroupOrTribe(
@@ -195,7 +202,7 @@ internal class ChatListViewModel @Inject constructor(
             }
         }
 
-        if (args.argChatListType == ChatType.CONVERSATION) {
+        if (args.isChatListTypeConversation) {
             viewModelScope.launch(mainImmediate) {
                 delay(50L)
                 repositoryDashboard.getAllInvites.distinctUntilChanged().collect {
@@ -315,6 +322,7 @@ internal class ChatListViewModel @Inject constructor(
                 }
 
                 for (contact in _contactsStateFlow.value) {
+                    //Contact added
                     if (!chatContactIds.contains(contact.id)) {
                         updateChatViewState = true
 
@@ -346,6 +354,22 @@ internal class ChatListViewModel @Inject constructor(
                                         chat.unseenMessageFlow
                                     )
                                 }
+                            }
+                        }
+
+                        if (updatedContactChat is DashboardChat.Inactive.Conversation) {
+                            //Contact unblocked
+                            repositoryDashboard.getConversationByContactId(contact.id).firstOrNull()?.let { contactChat ->
+                                val message: Message? = contactChat.latestMessageId?.let {
+                                    repositoryDashboard.getMessageById(it).firstOrNull()
+                                }
+
+                                updatedContactChat = DashboardChat.Active.Conversation(
+                                    contactChat,
+                                    message,
+                                    contact,
+                                    repositoryDashboard.getUnseenMessagesByChatId(contactChat.id)
+                                )
                             }
                         }
 
