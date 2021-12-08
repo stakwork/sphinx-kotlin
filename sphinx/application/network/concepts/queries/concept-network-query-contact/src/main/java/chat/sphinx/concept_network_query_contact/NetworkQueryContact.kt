@@ -1,9 +1,11 @@
 package chat.sphinx.concept_network_query_contact
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.contact.Blocked
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -32,6 +34,12 @@ abstract class NetworkQueryContact {
     abstract fun updateContact(
         contactId: ContactId,
         putContactDto: PutContactDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ContactDto, ResponseError>>
+
+    abstract fun toggleBlockedContact(
+        contactId: ContactId,
+        blocked: Blocked,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ContactDto, ResponseError>>
 

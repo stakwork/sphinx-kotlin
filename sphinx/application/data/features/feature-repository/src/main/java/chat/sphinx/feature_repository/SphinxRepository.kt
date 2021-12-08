@@ -72,6 +72,8 @@ import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -95,7 +97,6 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
-import chat.sphinx.wrapper_podcast.PodcastSearchResult
 import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -1290,6 +1291,50 @@ abstract class SphinxRepository(
                 response = Response.Error(
                     ResponseError("Failed to update Profile Picture", e)
                 )
+            }
+        }.join()
+
+        return response
+    }
+
+    suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(!contact.isBlocked())
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val currentBlockedValue = contact.blocked
+
+            contactLock.withLock {
+                withContext(io) {
+                    queries.contactUpdateBlocked(
+                        if (currentBlockedValue.isTrue()) Blocked.False else Blocked.True,
+                        contact.id
+                    )
+                }
+            }
+
+            networkQueryContact.toggleBlockedContact(
+                contact.id,
+                contact.blocked
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+
+                        contactLock.withLock {
+                            withContext(io) {
+                                queries.contactUpdateBlocked(
+                                    currentBlockedValue,
+                                    contact.id
+                                )
+                            }
+                        }
+                    }
+
+                    is Response.Success -> {}
+                }
             }
         }.join()
 
@@ -2526,7 +2571,7 @@ abstract class SphinxRepository(
                 messageBuilder.setText(flagMessageContent.trimIndent())
 
                 messageBuilder.setContactId(supportContact.id)
-                
+
                 getConversationByContactId(supportContact.id).firstOrNull()?.let { supportContactChat ->
                     messageBuilder.setChatId(supportContactChat.id)
                 }
@@ -3143,7 +3188,7 @@ abstract class SphinxRepository(
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
+        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted())
 
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()

@@ -13,6 +13,7 @@ import chat.sphinx.conceptcoredb.SphinxDatabaseQueries
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.contact.toBlocked
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -238,6 +239,7 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.tip_amount?.toSat(),
         dto.invite?.id?.let { InviteId(it) },
         dto.invite?.status?.toInviteStatus(),
+        dto.blockedActual.toBlocked(),
         contactId,
         isOwner,
         createdAt,
