@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_contact
+package chat.sphinx.wrapper_common.contact
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Blocked.isTrue(): Boolean =

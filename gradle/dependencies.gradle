@@ -129,6 +129,9 @@ ext.deps = [
     ],
     lottie: [
             sdk: "com.airbnb.android:lottie:4.0.0"
+    ],
+    swipeRevealLayout: [
+            sdk: "com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1"
     ]
 ]
 

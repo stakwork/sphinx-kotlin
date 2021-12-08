@@ -1,9 +1,9 @@
 package chat.sphinx.feature_coredb.adapters.contact
 
-import chat.sphinx.wrapper_common.Seen
+import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.toBlocked
 import chat.sphinx.wrapper_common.lightning.LightningNodeAlias
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
-import chat.sphinx.wrapper_common.toSeen
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.sqldelight.ColumnAdapter

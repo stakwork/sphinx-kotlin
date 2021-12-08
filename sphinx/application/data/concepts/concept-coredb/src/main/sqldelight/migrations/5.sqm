@@ -1,4 +1,4 @@
-import chat.sphinx.wrapper_contact.Blocked;
+import chat.sphinx.wrapper_common.contact.Blocked;
 import chat.sphinx.wrapper_message.Flagged;
 
 

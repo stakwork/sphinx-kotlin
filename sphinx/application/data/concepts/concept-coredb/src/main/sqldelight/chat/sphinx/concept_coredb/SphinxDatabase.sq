@@ -33,7 +33,7 @@ import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
 import chat.sphinx.wrapper_common.subscription.SubscriptionId;
-import chat.sphinx.wrapper_contact.Blocked;
+import chat.sphinx.wrapper_common.contact.Blocked;
 import chat.sphinx.wrapper_contact.ContactAlias;
 import chat.sphinx.wrapper_contact.ContactStatus;
 import chat.sphinx.wrapper_contact.DeviceId;
@@ -311,7 +311,8 @@ contactUpsert {
         notification_sound = :notification_sound,
         tip_amount = :tip_amount,
         invite_id = :invite_id,
-        invite_status = :invite_status
+        invite_status = :invite_status,
+        blocked = :blocked
     WHERE id = :id;
 
     INSERT OR IGNORE INTO contactDbo(
@@ -331,7 +332,8 @@ contactUpsert {
         notification_sound,
         tip_amount,
         invite_id,
-        invite_status
+        invite_status,
+        blocked
     )
     VALUES (
         :id,
@@ -350,7 +352,8 @@ contactUpsert {
         :notification_sound,
         :tip_amount,
         :invite_id,
-        :invite_status
+        :invite_status,
+        :blocked
     );
 }
 

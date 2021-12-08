@@ -118,10 +118,13 @@ internal class AddressBookListAdapter(
 
     fun removeAt(position: Int) {
         val contact = addressBookContacts[position]
-
         viewModel.deleteContact(contact)
+//        notifyItemRemoved(position)
+    }
 
-        notifyItemRemoved(position)
+    fun blockAt(position: Int) {
+        val contact = addressBookContacts[position]
+        viewModel.blockContact(contact)
     }
 
     override fun getItemCount(): Int {

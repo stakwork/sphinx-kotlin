@@ -47,6 +47,7 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
     implementation deps.androidx.recyclerView
+    implementation deps.swipeRevealLayout.sdk
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

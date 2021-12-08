@@ -7,20 +7,16 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.address_book.R
 import chat.sphinx.address_book.ui.adapter.AddressBookListAdapter
 import chat.sphinx.address_book.databinding.FragmentAddressBookBinding
-import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.address_book.ui.adapter.AddressBookFooterAdapter
-import chat.sphinx.address_book.ui.adapter.SwipeHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -91,16 +87,6 @@ internal class AddressBookFragment: BaseFragment<
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(addressBookListAdapter, addressBookFooterAdapter)
         }
-
-        context?.let {
-            val itemTouchHelper = ItemTouchHelper(object : SwipeHelper(binding.recyclerViewContacts) {
-                override fun instantiateUnderlayButton(position: Int): List<UnderlayButton> {
-                    return listOf(deleteButton(addressBookListAdapter, position))
-                }
-            })
-
-            itemTouchHelper.attachToRecyclerView(binding.recyclerViewContacts)
-        }
     }
 
     private fun setupSearch() {
@@ -145,21 +131,4 @@ internal class AddressBookFragment: BaseFragment<
     override suspend fun onViewStateFlowCollect(viewState: AddressBookViewState) {
 //        TODO("Not yet implemented")
     }
-
-    private fun deleteButton(addressBookListAdapter: AddressBookListAdapter, position: Int) : SwipeHelper.UnderlayButton {
-        val button = SwipeHelper.UnderlayButton(
-            requireContext(),
-            chat.sphinx.resources.R.color.badgeRed,
-            object : SwipeHelper.UnderlayButtonClickListener {
-            override fun onClick() {
-                addressBookListAdapter.removeAt(position)
-            }
-        })
-        ContextCompat.getDrawable(requireContext(), R.drawable.ic_icon_delete)?.let {
-            button.addIcon(it, requireContext().resources.getDimension(R.dimen.recycler_view_holder_delete_button_width))
-        }
-
-        return button
-    }
-
 }

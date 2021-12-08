@@ -61,6 +61,7 @@
     <string name="material_icon_name_cancel" translatable="false">cancel</string>
     <string name="material_icon_name_add" translatable="false">add</string>
     <string name="material_icon_name_lens" translatable="false">lens</string>
+    <string name="material_icon_name_block" translatable="false">block</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete" translatable="false">delete</string>

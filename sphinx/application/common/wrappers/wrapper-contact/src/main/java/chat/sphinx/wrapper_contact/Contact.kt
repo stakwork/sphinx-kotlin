@@ -2,6 +2,8 @@ package chat.sphinx.wrapper_contact
 
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.invite.InviteStatus
@@ -38,6 +40,10 @@ inline val Contact.avatarUrl: URL?
 inline fun Contact.getColorKey(): String {
     return "contact-${id.value}-color"
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Contact.isBlocked(): Boolean =
+    blocked.isTrue()
 
 data class Contact(
     val id: ContactId,

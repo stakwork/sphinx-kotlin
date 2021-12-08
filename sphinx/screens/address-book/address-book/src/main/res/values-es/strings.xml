@@ -4,4 +4,6 @@
     <string name="search">Buscar</string>
     <string name="add_icon"></string>
     <string name="add_friend">Nuevo Amigo</string>
+    <string name="delete_contact">Borrar</string>
+    <string name="block_contact">Bloquear</string>
 </resources>

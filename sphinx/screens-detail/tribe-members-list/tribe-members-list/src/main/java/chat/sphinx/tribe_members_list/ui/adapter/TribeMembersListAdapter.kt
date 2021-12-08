@@ -201,6 +201,10 @@ internal class TribeMembersListAdapter(
                     }
                 }
             }
+
+            binding.layoutConstraintDeleteMember.setOnClickListener {
+                removeAt(position)
+            }
         }
 
         private fun bindLoader(binding: LayoutTribeMemberHolderBinding) {

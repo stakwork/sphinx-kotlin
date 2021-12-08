@@ -1,8 +1,8 @@
 package chat.sphinx.feature_coredb.adapters.message
 
 import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_contact.Blocked
-import chat.sphinx.wrapper_contact.toBlocked
+import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.toBlocked
 import chat.sphinx.wrapper_message.*
 import com.squareup.sqldelight.ColumnAdapter
 
