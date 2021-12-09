@@ -115,6 +115,9 @@ import okio.base64.encodeBase64
 import java.io.File
 import java.io.InputStream
 import java.text.ParseException
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 import kotlin.math.absoluteValue
 
 
@@ -3138,6 +3141,19 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun updateChatContentSeenAt(chatId: ChatId) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        chatLock.withLock {
+            withContext(io) {
+                queries.chatUpdateContentSeenAt(
+                    DateTime(Date()),
+                    chatId
+                )
+            }
+        }
+    }
+
     override fun joinTribe(
         tribeDto: TribeDto
     ): Flow<LoadResponse<ChatDto, ResponseError>> = flow {
@@ -3414,6 +3430,7 @@ abstract class SphinxRepository(
 
     override fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
+
         emitAll(
             queries.feedGetAllByFeedType(feedType)
                 .asFlow()
@@ -3485,7 +3502,7 @@ abstract class SphinxRepository(
                 }
         }
 
-        return listFeedDbo.map {
+        val list = listFeedDbo.map {
             mapFeedDbo(
                 feedDbo = it,
                 items = itemsMap[it.id] ?: listOf(),
@@ -3494,6 +3511,14 @@ abstract class SphinxRepository(
                 chat = chatsMap[it.chat_id]
             )
         }
+
+        var sortedList: List<Feed>? = null
+
+        withContext(dispatchers.default) {
+            sortedList = list.sortedByDescending { it.chat?.contentSeenAt?.time ?: it.lastItem?.datePublished?.time ?: 0 }
+        }
+
+        return sortedList ?: listOf()
     }
 
     private suspend fun mapFeedDbo(

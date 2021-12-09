@@ -58,6 +58,8 @@ interface ChatRepository {
      * */
     suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError>
 
+    suspend fun updateChatContentSeenAt(chatId: ChatId)
+
     fun joinTribe(
         tribeDto: TribeDto,
     ): Flow<LoadResponse<ChatDto, ResponseError>>

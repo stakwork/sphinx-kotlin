@@ -8,6 +8,8 @@ import chat.sphinx.wrapper_podcast.PodcastDestination
 interface RepositoryMedia {
     fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData, shouldSync: Boolean = true)
 
+    suspend fun updateChatContentSeenAt(chatId: ChatId)
+
     fun downloadMediaIfApplicable(
         message: Message,
         sent: Boolean,

@@ -30,7 +30,7 @@ abstract class DashboardNavigator(
 
     abstract suspend fun toVideoWatchScreen(chatId: ChatId, feedUrl: FeedUrl)
 
-    abstract suspend fun toWebViewDetail(title: String, url: FeedUrl)
+    abstract suspend fun toWebViewDetail(chatId: ChatId?, title: String, url: FeedUrl)
 
     abstract suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl)
 

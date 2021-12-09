@@ -11,6 +11,10 @@
         tools:layout="@layout/fragment_web_view" >
 
         <argument
+            android:name="argChatId"
+            app:argType="long" />
+
+        <argument
             android:name="argTitle"
             app:argType="string" />
 
