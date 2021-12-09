@@ -27,7 +27,6 @@ import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.isYoutubeVideo
-import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import chat.sphinx.wrapper_common.hhmmElseDate
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
@@ -152,11 +151,11 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 }
                 when(rotation) {
                     Surface.ROTATION_90,
-                    Surface.ROTATION_180 -> {
+                    Surface.ROTATION_270 -> {
                         viewModel.goToFullscreenVideo()
                     }
                     Surface.ROTATION_0,
-                    Surface.ROTATION_270 -> {
+                    Surface.ROTATION_180 -> {
                         // Do nothing...
                     }
                 }
