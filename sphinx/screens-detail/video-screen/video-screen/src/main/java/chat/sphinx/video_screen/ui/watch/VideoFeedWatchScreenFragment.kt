@@ -64,8 +64,13 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     private val mHideHandler = Handler(Looper.getMainLooper())
     private val mHideRunnable = Runnable { toggleRemoteVideoControllers() }
 
+    private val mFullscreenHandler = Handler(Looper.getMainLooper())
+    @Volatile
+    private var mFullscreenRunnable: Runnable? = null
+
     companion object {
         private const val AUTO_HIDE_DELAY_MILLIS = 3000
+        private const val FULLSCREEN_DELAY_MILLIS = 1000L
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,11 +157,11 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 when(rotation) {
                     Surface.ROTATION_90,
                     Surface.ROTATION_270 -> {
-                        viewModel.goToFullscreenVideo()
+                        delayedFullscreen()
                     }
                     Surface.ROTATION_0,
                     Surface.ROTATION_180 -> {
-                        // Do nothing...
+                        cancelDelayedFullscreen()
                     }
                 }
             }
@@ -210,6 +215,23 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     private fun delayedHide(delayMillis: Int) {
         mHideHandler.removeCallbacks(mHideRunnable)
         mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
+    }
+
+    @Synchronized
+    private fun delayedFullscreen() {
+        if (mFullscreenRunnable == null) {
+            Runnable { viewModel.goToFullscreenVideo() }.apply {
+                mFullscreenRunnable = this
+                mFullscreenHandler.postDelayed(this, FULLSCREEN_DELAY_MILLIS)
+            }
+        }
+    }
+
+    private fun cancelDelayedFullscreen() {
+        mFullscreenRunnable?.let {
+            mFullscreenHandler.removeCallbacks(it)
+            mFullscreenRunnable = null
+        }
     }
 
     override fun subscribeToViewStateFlow() {
