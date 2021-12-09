@@ -71,8 +71,12 @@ internal class QRCodeFragment: SideEffectFragment<
                     MenuBottomViewState.Open
                 )
             }
-        }
 
+            bottomMenuShareQRCode.initialize(
+                includeLayoutMenuBottomShareQrCode,
+                viewLifecycleOwner
+            )
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: QRCodeViewState) {
@@ -101,11 +105,6 @@ internal class QRCodeFragment: SideEffectFragment<
                 }
             }
             layoutConstraintInvoicePaid.goneIfFalse(viewState.paid)
-
-            bottomMenuShareQRCode.initialize(
-                includeLayoutMenuBottomShareQrCode,
-                viewLifecycleOwner
-            )
         }
     }
 
