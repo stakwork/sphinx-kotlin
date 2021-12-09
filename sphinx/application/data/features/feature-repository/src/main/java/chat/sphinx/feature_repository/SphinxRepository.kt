@@ -3389,6 +3389,16 @@ abstract class SphinxRepository(
             }
     }
 
+    override fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().feedItemGetById(feedItemId)
+                .asFlow()
+                .mapToOneOrNull(io)
+                .map { it?.let { feedItemDboPresenterMapper.mapFrom(it) } }
+                .distinctUntilChanged()
+        )
+    }
+
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }
@@ -4967,15 +4977,5 @@ abstract class SphinxRepository(
         }
 
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
-    }
-
-    override fun getFeedItemByFeedUrl(feedUrl: FeedUrl): Flow<FeedItem?> = flow {
-        emitAll(
-            coreDB.getSphinxDatabaseQueries().feedItemGetByFeedUrl(feedUrl)
-                .asFlow()
-                .mapToOneOrNull(io)
-                .map { it?.let { feedItemDboPresenterMapper.mapFrom(it) } }
-                .distinctUntilChanged()
-        )
     }
 }

@@ -9,6 +9,7 @@ import chat.sphinx.video_player_controller.VideoPlayerController
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
+import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.message.MessageId
@@ -16,6 +17,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -148,13 +150,17 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
 
     @Synchronized
     fun goToFullscreenVideo() {
-        viewModelScope.launch(mainImmediate) {
-            videoScreenNavigator.toFullscreenVideoActivity(
-                messageId = MessageId(-1L),
-                videoFilepath = null,
-                feedUrl = args.feedUrl?.let { FeedUrl(it.value) },
-                currentTime = playingVideoStateContainer.viewStateFlow.value.currentTime
-            )
+        val viewState = selectedVideoStateContainer.value
+
+        if (viewState is SelectedVideoViewState.VideoSelected) {
+            viewModelScope.launch(mainImmediate) {
+                videoScreenNavigator.toFullScreenVideoActivity(
+                    messageId = MessageId(-1L),
+                    videoFilepath = null,
+                    feedId = viewState.id,
+                    currentTime = playingVideoStateContainer.viewStateFlow.value.currentTime
+                )
+            }
         }
     }
 }

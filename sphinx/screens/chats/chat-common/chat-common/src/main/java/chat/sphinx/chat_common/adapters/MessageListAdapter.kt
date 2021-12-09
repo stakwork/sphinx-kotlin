@@ -306,7 +306,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         currentViewState?.message?.let { message ->
                             viewModel.goToFullscreenVideo(message.id)
                         }
-
                     }
                 }
 

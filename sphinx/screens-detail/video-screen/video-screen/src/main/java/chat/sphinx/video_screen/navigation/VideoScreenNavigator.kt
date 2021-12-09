@@ -1,8 +1,8 @@
 package chat.sphinx.video_screen.navigation
 
 import androidx.navigation.NavController
-import chat.sphinx.video_fullscreen.navigation.ToFullscreenVideoActivity
-import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.video_fullscreen.navigation.ToFullScreenVideoActivity
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
@@ -17,17 +17,17 @@ abstract class VideoScreenNavigator(
         navigationDriver.submitNavigationRequest(PopBackStack())
     }
 
-    suspend fun toFullscreenVideoActivity(
+    suspend fun toFullScreenVideoActivity(
         messageId: MessageId,
         videoFilepath: String?,
-        feedUrl: FeedUrl? = null,
+        feedId: FeedId? = null,
         currentTime: Int = 0
     ) {
         navigationDriver.submitNavigationRequest(
-            ToFullscreenVideoActivity(
+            ToFullScreenVideoActivity(
                 messageId,
                 videoFilepath,
-                feedUrl,
+                feedId,
                 currentTime
             )
         )

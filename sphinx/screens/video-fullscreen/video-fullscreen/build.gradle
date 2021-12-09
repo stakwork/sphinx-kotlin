@@ -1,5 +1,4 @@
 plugins {
-    id 'app.cash.exhaustive'
     id 'com.android.library'
     id 'androidx.navigation.safeargs'
     id 'dagger.hilt.android.plugin'
@@ -37,9 +36,6 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
-    implementation project(path: ':sphinx:activity:insetter-activity')
-    implementation project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
-
     implementation project(path: ':sphinx:activity:features:video-player-controller')
 
     implementation project(path: ':sphinx:application:common:logger')
@@ -47,12 +43,11 @@ dependencies {
 
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-common')
 
-    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
 
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
-    implementation deps.androidx.recyclerView
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt

@@ -4,14 +4,15 @@ import androidx.navigation.NavController
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.video_fullscreen.R
 import chat.sphinx.video_fullscreen.ui.activity.FullscreenVideoActivityArgs
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.message.MessageId
 import io.matthewnelson.concept_navigation.NavigationRequest
 
-class ToFullscreenVideoActivity(
+class ToFullScreenVideoActivity(
     private val messageId: MessageId,
     private val videoFilepath: String?,
-    private val feedUrl: FeedUrl? = null,
+    private val feedId: FeedId? = null,
     private val currentTime: Int = 0
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
@@ -25,7 +26,7 @@ class ToFullscreenVideoActivity(
                 messageId.value,
                 currentTime
             )
-                .setArgFeedUrl(feedUrl?.value)
+                .setArgFeedId(feedId?.value)
                 .setArgVideoFilepath(videoFilepath)
                 .build().toBundle(),
             options

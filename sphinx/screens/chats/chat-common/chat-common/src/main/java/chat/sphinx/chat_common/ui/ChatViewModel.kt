@@ -1370,7 +1370,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         videoFilepath: String? = null
     ) {
         viewModelScope.launch(mainImmediate) {
-            chatNavigator.toFullscreenVideo(
+            chatNavigator.toFullScreenVideo(
                 messageId,
                 videoFilepath
             )

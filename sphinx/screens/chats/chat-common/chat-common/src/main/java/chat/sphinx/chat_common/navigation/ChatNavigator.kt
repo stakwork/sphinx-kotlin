@@ -1,7 +1,7 @@
 package chat.sphinx.chat_common.navigation
 
 import androidx.navigation.NavController
-import chat.sphinx.video_fullscreen.navigation.ToFullscreenVideoActivity
+import chat.sphinx.video_fullscreen.navigation.ToFullScreenVideoActivity
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -65,12 +65,12 @@ abstract class ChatNavigator(
     }
 
     @JvmSynthetic
-    internal suspend fun toFullscreenVideo(
+    internal suspend fun toFullScreenVideo(
         messageId: MessageId,
         videoFilepath: String? = null
     ) {
         navigationDriver.submitNavigationRequest(
-            ToFullscreenVideoActivity(
+            ToFullScreenVideoActivity(
                 messageId,
                 videoFilepath
             )

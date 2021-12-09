@@ -334,7 +334,7 @@ internal class TribeFeedViewModel @Inject constructor(
                                     args.chatId,
                                     vs.podcast.id.value,
                                     metaData,
-                                    vs.podcast.destinations ?: arrayListOf(),
+                                    vs.podcast.destinations,
                                 )
                             )
                         }

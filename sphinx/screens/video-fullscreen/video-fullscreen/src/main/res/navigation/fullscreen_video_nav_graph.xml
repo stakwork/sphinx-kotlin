@@ -16,7 +16,7 @@
             android:name="argCurrentTime"
             app:argType="integer" />
         <argument
-            android:name="argFeedUrl"
+            android:name="argFeedId"
             android:defaultValue="@null"
             app:nullable="true"
             app:argType="string" />
