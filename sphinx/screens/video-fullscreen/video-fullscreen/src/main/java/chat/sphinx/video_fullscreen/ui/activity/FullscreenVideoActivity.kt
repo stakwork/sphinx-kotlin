@@ -212,7 +212,7 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
 
                     viewState.youtubeFeedId?.let { youtubeFeedId ->
                         webViewYoutubeVideoPlayer.loadData(
-                            "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/${viewState.id.youtubeVideoId()}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
+                            "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/${youtubeFeedId.youtubeVideoId()}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
                             FeedUrl.YOUTUBE_WEB_VIEW_MIME_TYPE,
                             FeedUrl.YOUTUBE_WEB_VIEW_ENCODING
                         )
