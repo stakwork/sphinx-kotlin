@@ -54,7 +54,7 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
         ViewStateContainer(PlayingVideoViewState.Idle)
     }
 
-    private val videoPlayerController: VideoPlayerController by lazy {
+    val videoPlayerController: VideoPlayerController by lazy {
         VideoPlayerController(
             viewModelScope = viewModelScope,
             updateIsPlaying = { isPlaying ->

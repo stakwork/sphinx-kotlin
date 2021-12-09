@@ -136,7 +136,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                     }
 
                     override fun onStopTrackingTouch(seekBar: SeekBar) {
-                        viewModel.seekTo(seekBar.progress)
+                        viewModel.videoPlayerController.seekTo(seekBar.progress)
                         dragging = false
                     }
                 }
@@ -185,7 +185,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
             is VideoFeedScreenViewState.FeedLoaded -> {
                 binding.apply {
-                    includeLayoutVideoItemsList?.textViewVideosListCount?.text = viewState.items.count().toString()
+                    includeLayoutVideoItemsList.textViewVideosListCount.text = viewState.items.count().toString()
 
                     includeLayoutVideoPlayer.apply {
                         textViewContributorName.text = viewState.title.value
@@ -288,7 +288,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                         is PlayingVideoViewState.Idle -> { }
 
                         is PlayingVideoViewState.MetaDataLoaded -> {
-                            layoutConstraintLoadingVideo?.gone
+                            layoutConstraintLoadingVideo.gone
 
                             seekBarCurrentProgress.max = viewState.duration
                             textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
