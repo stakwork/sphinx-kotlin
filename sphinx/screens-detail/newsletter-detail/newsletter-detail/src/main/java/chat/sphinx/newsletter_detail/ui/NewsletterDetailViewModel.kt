@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.newsletter_detail.R
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -29,13 +30,14 @@ internal class NewsletterDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val chatRepository: ChatRepository,
+    private val feedRepository: FeedRepository,
     val navigator: NewsletterDetailNavigator
 ): BaseViewModel<NewsletterDetailViewState>(dispatchers, NewsletterDetailViewState.Idle)
 {
     private val args: NewsletterDetailFragmentArgs by savedStateHandle.navArgs()
 
     private val newsletterSharedFlow: SharedFlow<Feed?> = flow {
-        emitAll(chatRepository.getFeedByChatId(args.chatId))
+        emitAll(feedRepository.getFeedByChatId(args.chatId))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -66,7 +68,7 @@ internal class NewsletterDetailViewModel @Inject constructor(
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat.host?.let { chatHost ->
                     args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
-                        chatRepository.updateFeedContent(
+                        feedRepository.updateFeedContent(
                             chatId = chat.id,
                             host = chatHost,
                             feedUrl = feedUrl,

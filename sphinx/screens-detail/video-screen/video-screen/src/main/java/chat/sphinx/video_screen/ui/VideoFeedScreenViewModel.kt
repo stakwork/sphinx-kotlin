@@ -2,6 +2,7 @@ package chat.sphinx.video_screen.ui
 
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -20,10 +21,11 @@ import kotlinx.coroutines.launch
 internal open class VideoFeedScreenViewModel(
     dispatchers: CoroutineDispatchers,
     private val chatRepository: ChatRepository,
+    private val feedRepository: FeedRepository,
 ): BaseViewModel<VideoFeedScreenViewState>(dispatchers, VideoFeedScreenViewState.Idle)
 {
     private val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
-        emitAll(chatRepository.getFeedByChatId(getArgChatId()))
+        emitAll(feedRepository.getFeedByChatId(getArgChatId()))
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
@@ -72,7 +74,7 @@ internal open class VideoFeedScreenViewModel(
             chatRepository.getChatById(getArgChatId()).firstOrNull()?.let { chat ->
                 chat.host?.let { chatHost ->
                     getArgFeedUrl()?.let { feedUrl ->
-                        chatRepository.updateFeedContent(
+                        feedRepository.updateFeedContent(
                             chatId = chat.id,
                             host = chatHost,
                             feedUrl = feedUrl,
