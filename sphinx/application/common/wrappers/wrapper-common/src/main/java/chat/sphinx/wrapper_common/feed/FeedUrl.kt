@@ -23,6 +23,5 @@ value class FeedUrl(val value: String) {
     companion object {
         const val YOUTUBE_WEB_VIEW_MIME_TYPE = "text/html"
         const val YOUTUBE_WEB_VIEW_ENCODING = "utf-8"
-        const val YOUTUBE_WEB_VIEW_IFRAME_PATTERN = "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/%s\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>"
     }
 }

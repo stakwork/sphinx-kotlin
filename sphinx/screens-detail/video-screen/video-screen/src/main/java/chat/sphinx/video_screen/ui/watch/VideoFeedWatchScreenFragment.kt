@@ -239,7 +239,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                 }
 
                                 webViewYoutubeVideoPlayer.loadData(
-                                    String.format(FeedUrl.YOUTUBE_WEB_VIEW_IFRAME_PATTERN, viewState.id.youtubeVideoId()),
+                                    "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/%s\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
                                     FeedUrl.YOUTUBE_WEB_VIEW_MIME_TYPE,
                                     FeedUrl.YOUTUBE_WEB_VIEW_ENCODING
                                 )
