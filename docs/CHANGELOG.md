@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha36 (2021-12-10)
+ - Adds ability to block/unblock a contact
+ - Adds ability to flag a message
+ - Adds ability to share QR code
+ - Fixes issues on feed 
+
 # Version 1.0.0-alpha35 (2021-12-03)
  - Fixes crash on Android 12 (API 31) for tor accounts
  - Improves feed items order

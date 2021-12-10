@@ -14,76 +14,78 @@
     <string name="public_key">Public Key</string>
 
     <!--  Number Pad   -->
-    <string name="_1">1</string>
-    <string name="_2">2</string>
-    <string name="_3">3</string>
-    <string name="_4">4</string>
-    <string name="_5">5</string>
-    <string name="_6">6</string>
-    <string name="_7">7</string>
-    <string name="_8">8</string>
-    <string name="_9">9</string>
-    <string name="_0">0</string>
+    <string name="_1" translatable="false">1</string>
+    <string name="_2" translatable="false">2</string>
+    <string name="_3" translatable="false">3</string>
+    <string name="_4" translatable="false">4</string>
+    <string name="_5" translatable="false">5</string>
+    <string name="_6" translatable="false">6</string>
+    <string name="_7" translatable="false">7</string>
+    <string name="_8" translatable="false">8</string>
+    <string name="_9" translatable="false">9</string>
+    <string name="_0" translatable="false">0</string>
 
     <!--  Material Icons   -->
-    <string name="material_icon_name_lock_outline">lock_outline</string>
-    <string name="material_icon_name_lock">lock</string>
-    <string name="material_icon_name_error">error</string>
-    <string name="material_icon_name_bolt">flash_on</string>
-    <string name="material_icon_name_backspace_button">backspace</string>
-    <string name="material_icon_name_call_button">phone</string>
-    <string name="material_icon_name_close">close</string>
-    <string name="material_icon_name_nav_back">arrow_back</string>
-    <string name="material_icon_name_nav_forward">arrow_forward</string>
-    <string name="material_icon_name_file_attachment">insert_drive_file</string>
-    <string name="material_icon_name_file_download">file_download</string>
-    <string name="material_icon_name_cloud_download">cloud_download</string>
-    <string name="material_icon_name_play_button">play_arrow</string>
+    <string name="material_icon_name_lock_outline" translatable="false">lock_outline</string>
+    <string name="material_icon_name_lock" translatable="false">lock</string>
+    <string name="material_icon_name_error" translatable="false">error</string>
+    <string name="material_icon_name_bolt" translatable="false">flash_on</string>
+    <string name="material_icon_name_backspace_button" translatable="false">backspace</string>
+    <string name="material_icon_name_call_button" translatable="false">phone</string>
+    <string name="material_icon_name_close" translatable="false">close</string>
+    <string name="material_icon_name_nav_back" translatable="false">arrow_back</string>
+    <string name="material_icon_name_nav_forward" translatable="false">arrow_forward</string>
+    <string name="material_icon_name_file_attachment" translatable="false">insert_drive_file</string>
+    <string name="material_icon_name_file_download" translatable="false">file_download</string>
+    <string name="material_icon_name_cloud_download" translatable="false">cloud_download</string>
+    <string name="material_icon_name_play_button" translatable="false">play_arrow</string>
     <string name="material_icon_name_chevron_right_button" translatable="false">chevron_right</string>
     <string name="material_icon_name_brightness_button" translatable="false">brightness_1</string>
-    <string name="material_icon_name_pause_button">pause</string>
-    <string name="material_icon_name_volume_up">volume_up</string>
-    <string name="material_icon_name_video_camera">videocam</string>
-    <string name="material_icon_name_microphone">mic</string>
-    <string name="material_icon_name_payment_accepted">check</string>
-    <string name="material_icon_name_payment_denied">error_outline</string>
-    <string name="material_icon_name_message_editor_send">send</string>
-    <string name="material_icon_name_message_editor_attachment">add</string>
-    <string name="material_icon_name_circled_close_button" tools:ignore="ButtonCase">cancel</string>
-    <string name="material_icon_name_help_outline">help_outline</string>
-    <string name="material_icon_name_replay">replay</string>
-    <string name="material_icon_name_key">vpn_key</string>
-    <string name="material_icon_name_dismiss_modal_down">keyboard_arrow_down</string>
-    <string name="material_icon_name_gif">gif</string>
-    <string name="material_icon_name_verified_user">verified_user</string>
-    <string name="material_icon_name_play_outline">play_circle_outline</string>
-    <string name="material_icon_name_play_circle_filled">play_circle_filled</string>
-    <string name="material_icon_name_cancel">cancel</string>
-    <string name="material_icon_name_add">add</string>
-    <string name="material_icon_name_lens">lens</string>
+    <string name="material_icon_name_pause_button" translatable="false">pause</string>
+    <string name="material_icon_name_volume_up" translatable="false">volume_up</string>
+    <string name="material_icon_name_video_camera" translatable="false">videocam</string>
+    <string name="material_icon_name_microphone" translatable="false">mic</string>
+    <string name="material_icon_name_payment_accepted" translatable="false">check</string>
+    <string name="material_icon_name_payment_denied" translatable="false">error_outline</string>
+    <string name="material_icon_name_message_editor_send" translatable="false">send</string>
+    <string name="material_icon_name_message_editor_attachment" translatable="false">add</string>
+    <string name="material_icon_name_circled_close_button" tools:ignore="ButtonCase" translatable="false">cancel</string>
+    <string name="material_icon_name_help_outline" translatable="false">help_outline</string>
+    <string name="material_icon_name_replay" translatable="false">replay</string>
+    <string name="material_icon_name_key" translatable="false">vpn_key</string>
+    <string name="material_icon_name_dismiss_modal_down" translatable="false">keyboard_arrow_down</string>
+    <string name="material_icon_name_gif" translatable="false">gif</string>
+    <string name="material_icon_name_verified_user" translatable="false">verified_user</string>
+    <string name="material_icon_name_play_outline" translatable="false">play_circle_outline</string>
+    <string name="material_icon_name_play_circle_filled" translatable="false">play_circle_filled</string>
+    <string name="material_icon_name_cancel" translatable="false">cancel</string>
+    <string name="material_icon_name_add" translatable="false">add</string>
+    <string name="material_icon_name_lens" translatable="false">lens</string>
+    <string name="material_icon_name_block" translatable="false">block</string>
 
     <!--  Message Action Material Icons  -->
-    <string name="material_icon_name_message_action_delete">delete</string>
-    <string name="material_icon_name_message_action_copy_text">content_copy</string>
-    <string name="material_icon_name_message_action_copy_link">link</string>
-    <string name="material_icon_name_message_action_copy_pubkey">supervisor_account</string>
-    <string name="material_icon_name_message_action_copy_call_link">link</string>
-    <string name="material_icon_name_message_action_reply">reply</string>
-    <string name="material_icon_name_message_action_resend">redo</string>
-    <string name="material_icon_name_message_action_save_file">file_download</string>
+    <string name="material_icon_name_message_action_delete" translatable="false">delete</string>
+    <string name="material_icon_name_message_action_copy_text" translatable="false">content_copy</string>
+    <string name="material_icon_name_message_action_copy_link" translatable="false">link</string>
+    <string name="material_icon_name_message_action_copy_pubkey" translatable="false">supervisor_account</string>
+    <string name="material_icon_name_message_action_copy_call_link" translatable="false">link</string>
+    <string name="material_icon_name_message_action_reply" translatable="false">reply</string>
+    <string name="material_icon_name_message_action_resend" translatable="false">redo</string>
+    <string name="material_icon_name_message_action_save_file" translatable="false">file_download</string>
+    <string name="material_icon_name_message_action_flag" translatable="false">flag</string>
 
     <!--  Invite Status Material Icons  -->
-    <string name="material_icon_name_invite_pending">error</string>
-    <string name="material_icon_name_invite_payment_pending">payment</string>
-    <string name="material_icon_name_invite_payment_sent">sync</string>
-    <string name="material_icon_name_invite_ready">done</string>
-    <string name="material_icon_name_invite_in_progress">sync</string>
-    <string name="material_icon_name_invite_expired">error</string>
-    <string name="material_icon_name_invite_complete">done</string>
+    <string name="material_icon_name_invite_pending" translatable="false">error</string>
+    <string name="material_icon_name_invite_payment_pending" translatable="false">payment</string>
+    <string name="material_icon_name_invite_payment_sent" translatable="false">sync</string>
+    <string name="material_icon_name_invite_ready" translatable="false">done</string>
+    <string name="material_icon_name_invite_in_progress" translatable="false">sync</string>
+    <string name="material_icon_name_invite_expired" translatable="false">error</string>
+    <string name="material_icon_name_invite_complete" translatable="false">done</string>
 
     <!--  Group Action Material Icons  -->
-    <string name="material_icon_name_group_action_accept_join_request">done</string>
-    <string name="material_icon_name_group_action_reject_join_request">close</string>
+    <string name="material_icon_name_group_action_accept_join_request" translatable="false">done</string>
+    <string name="material_icon_name_group_action_reject_join_request" translatable="false">close</string>
 
     <!--  Media Type Labels -->
     <string name="media_type_label_audio">Audio</string>

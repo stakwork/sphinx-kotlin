@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="members_list_holder_block_icon_text_size">23sp</dimen>
+    <dimen name="members_list_holder_button_icon_xy">25dp</dimen>
+    <dimen name="members_list_holder_button_text_size">10sp</dimen>
+    <dimen name="members_list_holder_button_icon_margin">20dp</dimen>
+
     <dimen name="members_list_header_height">30dp</dimen>
     <dimen name="members_list_header_text_size">14sp</dimen>
 

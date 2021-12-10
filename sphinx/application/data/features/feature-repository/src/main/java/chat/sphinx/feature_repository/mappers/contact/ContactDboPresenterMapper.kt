@@ -29,7 +29,8 @@ inline fun ContactDbo.toContact(): Contact =
         notification_sound,
         tip_amount,
         invite_id,
-        invite_status
+        invite_status,
+        blocked
     )
 
 internal class ContactDboPresenterMapper(
@@ -57,7 +58,8 @@ internal class ContactDboPresenterMapper(
             value.notificationSound,
             value.tipAmount,
             value.inviteId,
-            value.inviteStatus
+            value.inviteStatus,
+            value.blocked
         )
     }
 }

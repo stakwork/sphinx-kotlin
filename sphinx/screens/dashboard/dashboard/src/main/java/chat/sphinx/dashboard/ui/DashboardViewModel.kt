@@ -584,16 +584,22 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    init {
-        viewModelScope.launch(mainImmediate) {
-            repositoryDashboard.getUnseenConversationMessagesCount()
+    private var messagesCountJob: Job? = null
+    fun screenInit() {
+        networkRefresh()
+
+        messagesCountJob?.cancel()
+        messagesCountJob = viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getUnseenActiveConversationMessagesCount()
                 .collect { unseenConversationMessagesCount ->
                     updateTabsState(
                         friendsBadgeVisible = (unseenConversationMessagesCount ?: 0) > 0
                     )
                 }
         }
+    }
 
+    init {
         viewModelScope.launch(mainImmediate) {
             repositoryDashboard.getUnseenTribeMessagesCount()
                 .collect { unseenTribeMessagesCount ->

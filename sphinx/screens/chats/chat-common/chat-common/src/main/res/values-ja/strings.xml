@@ -11,6 +11,7 @@
 
     <string name="unsupported_message_type_placeholder_text">%1$s: まだサポートされていません</string>
     <string name="deleted_message_label_text">このメッセージは削除されました</string>
+    <string name="flagged_message_label_text">This message has been flagged</string>
     <string name="join_call_header_label_text">...でコールに参加</string>
 
     <string name="failed_message">送信に失敗したメッセージ</string>
@@ -93,6 +94,7 @@
     <string name="selected_message_menu_item_reply">返信</string>
     <string name="selected_message_menu_item_save_file">ファイルを保存</string>
     <string name="selected_message_menu_item_resend">再送信</string>
+    <string name="selected_message_menu_item_flag">Flag</string>
 
     <!-- Notify -->
     <string name="notify_boost_failure">投げ銭に失敗しました</string>

@@ -15,7 +15,6 @@ data class ContactDto(
     val is_owner: Any?,
     val deleted: Any?,
     val auth_token: String?,
-//    val remote_id: Int?,
     val status: Int?,
     val contact_key: String?,
     val device_id: String?,
@@ -23,10 +22,10 @@ data class ContactDto(
     val updated_at: String,
     val from_group: Any?,
     val notification_sound: String?,
-//    val last_active: String?,
     val tip_amount: Long?,
     val invite: InviteDto?,
     val pending: Any?,
+    val blocked: Any?,
 ) {
     @Transient
     val privatePhotoActual: Boolean =
@@ -64,6 +63,23 @@ data class ContactDto(
             }
             is Double -> {
                 deleted.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+
+    @Transient
+    val blockedActual: Boolean =
+        when (blocked) {
+            is Boolean -> {
+                blocked
+            }
+            is Double -> {
+                blocked.toInt() == 1
+            }
+            is Long -> {
+                blocked == 1
             }
             else -> {
                 false

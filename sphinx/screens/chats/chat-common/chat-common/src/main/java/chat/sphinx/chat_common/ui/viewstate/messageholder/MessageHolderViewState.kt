@@ -32,7 +32,8 @@ inline val Message.shouldAdaptBubbleWidth: Boolean
     get() = type.isMessage() &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
-            !status.isDeleted()
+            !status.isDeleted() &&
+            !flagged.isTrue()
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
@@ -115,10 +116,12 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val deletedMessage: LayoutState.DeletedMessage? by lazy(LazyThreadSafetyMode.NONE) {
-        if (message.status.isDeleted()) {
-            LayoutState.DeletedMessage(
+    val deletedOrFlaggedMessage: LayoutState.DeletedOrFlaggedMessage? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message.status.isDeleted() || message.isFlagged) {
+            LayoutState.DeletedOrFlaggedMessage(
                 gravityStart = this is Received,
+                deleted = message.status.isDeleted(),
+                flagged = message.isFlagged,
                 timestamp = message.date.chatTimeFormat()
             )
         } else {
@@ -459,6 +462,10 @@ internal sealed class MessageHolderViewState(
 
             if (this is Sent || chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
                 list.add(MenuItemState.Delete)
+            }
+
+            if (this is Received) {
+                list.add(MenuItemState.Flag)
             }
 
             if (list.isEmpty()) {

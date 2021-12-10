@@ -3,7 +3,7 @@ package chat.sphinx.dashboard.ui.feed
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
-import chat.sphinx.concept_repository_podcast.PodcastRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.wrapper_chat.ChatHost
@@ -27,7 +27,7 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val chatRepository: ChatRepository,
-    private val podcastRepository: PodcastRepository,
+    private val feedRepository: FeedRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -59,7 +59,7 @@ class FeedViewModel @Inject constructor(
         )
         
         viewModelScope.launch(mainImmediate) {
-            podcastRepository.searchPodcastBy(searchTerm).collect { searchResults ->
+            feedRepository.searchPodcastBy(searchTerm).collect { searchResults ->
                 if (searchResults.isEmpty()) {
                     updateViewState(
                         FeedViewState.SearchPlaceHolder
@@ -98,7 +98,7 @@ class FeedViewModel @Inject constructor(
 
         searchResultSelectedJob = viewModelScope.launch(mainImmediate) {
             searchResult.id.toFeedId()?.let { feedId ->
-                chatRepository.getFeedById(feedId).collect { feed ->
+                feedRepository.getFeedById(feedId).collect { feed ->
                     feed?.let { nnFeed ->
                         goToPodcastPlayer(nnFeed)
                         callback()
@@ -109,7 +109,7 @@ class FeedViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             searchResult.url.toFeedUrl()?.let { feedUrl ->
-                chatRepository.updateFeedContent(
+                feedRepository.updateFeedContent(
                     chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
                     feedUrl = feedUrl,

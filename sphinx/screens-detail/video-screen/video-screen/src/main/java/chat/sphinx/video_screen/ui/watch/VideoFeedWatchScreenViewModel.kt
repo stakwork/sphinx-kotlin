@@ -5,6 +5,7 @@ import android.widget.VideoView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
@@ -28,9 +29,11 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
     private val chatRepository: ChatRepository,
+    feedRepository: FeedRepository,
 ): VideoFeedScreenViewModel(
     dispatchers,
-    chatRepository
+    chatRepository,
+    feedRepository
 )
 {
     private val args: VideoFeedWatchScreenFragmentArgs by savedStateHandle.navArgs()

@@ -74,4 +74,6 @@ interface ContactRepository {
         fileName: String,
         contentLength: Long?
     ): Response<Any, ResponseError>
+
+    suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError>
 }

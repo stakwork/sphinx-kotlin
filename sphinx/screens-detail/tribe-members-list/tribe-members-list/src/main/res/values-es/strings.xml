@@ -4,4 +4,5 @@
     <string name="tribe_members_list_header">MIEMBROS DE LA TRIBU</string>
     <string name="pending_tribe_members_header">MIEMBROS PENDIENTES</string>
     <string name="loading_more">Cargando más...</string>
+    <string name="delete_member">Borrar</string>
 </resources>

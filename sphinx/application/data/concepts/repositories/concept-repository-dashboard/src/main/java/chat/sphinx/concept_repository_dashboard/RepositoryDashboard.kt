@@ -23,12 +23,14 @@ interface RepositoryDashboard {
     val getAllChats: Flow<List<Chat>>
     val getAllContactChats: Flow<List<Chat>>
     val getAllTribeChats: Flow<List<Chat>>
+    fun getConversationByContactId(contactId: ContactId): Flow<Chat?>
+
     fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
-    fun getUnseenConversationMessagesCount(): Flow<Long?>
+    fun getUnseenActiveConversationMessagesCount(): Flow<Long?>
     fun getUnseenTribeMessagesCount(): Flow<Long?>
 
     val accountOwner: StateFlow<Contact?>
-    val getAllContacts: Flow<List<Contact>>
+    val getAllNotBlockedContacts: Flow<List<Contact>>
     val getAllInvites: Flow<List<Invite>>
     fun getContactById(contactId: ContactId): Flow<Contact?>
     var updatedContactIds: MutableList<ContactId>

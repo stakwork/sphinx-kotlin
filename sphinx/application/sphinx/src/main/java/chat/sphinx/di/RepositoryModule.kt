@@ -20,7 +20,7 @@ import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndro
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_podcast.PodcastRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.database.SphinxCoreDBImpl
@@ -198,9 +198,9 @@ object RepositoryModule {
         sphinxRepositoryAndroid
 
     @Provides
-    fun providePodcastRepository(
+    fun provideFeedRepository(
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
-    ): PodcastRepository =
+    ): FeedRepository =
         sphinxRepositoryAndroid
 
     @Provides

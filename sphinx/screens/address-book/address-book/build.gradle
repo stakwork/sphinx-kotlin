@@ -43,9 +43,12 @@ dependencies {
     api project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
 
+    implementation deps.swipeRevealLayout.sdk
+
     implementation deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+
     kapt kaptDeps.google.hilt
 }

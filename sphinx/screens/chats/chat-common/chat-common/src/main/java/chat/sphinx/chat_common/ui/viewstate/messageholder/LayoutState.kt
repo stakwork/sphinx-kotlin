@@ -45,8 +45,10 @@ internal sealed class LayoutState private constructor() {
         val subjectName: String?,
     ): LayoutState()
 
-    data class DeletedMessage(
+    data class DeletedOrFlaggedMessage(
         val gravityStart: Boolean,
+        val deleted: Boolean,
+        val flagged: Boolean,
         val timestamp: String,
     ): LayoutState()
 

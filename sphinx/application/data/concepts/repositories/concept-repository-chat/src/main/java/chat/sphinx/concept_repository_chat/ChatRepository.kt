@@ -63,20 +63,6 @@ interface ChatRepository {
         tribeDto: TribeDto,
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
-    suspend fun updateFeedContent(
-        chatId: ChatId,
-        host: ChatHost,
-        feedUrl: FeedUrl,
-        chatUUID: ChatUUID?,
-        subscribed: Subscribed,
-        currentEpisodeId: FeedId?
-    )
-
-    fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
-    fun getFeedById(feedId: FeedId): Flow<Feed?>
-
-    suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
-
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>

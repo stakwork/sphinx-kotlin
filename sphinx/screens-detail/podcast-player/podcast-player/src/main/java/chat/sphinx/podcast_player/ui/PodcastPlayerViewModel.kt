@@ -9,7 +9,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_podcast.PodcastRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -25,7 +25,6 @@ import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -47,7 +46,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
-    private val podcastRepository: PodcastRepository,
+    private val feedRepository: FeedRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
 ) : BaseViewModel<PodcastPlayerViewState>(
@@ -60,9 +59,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
         if (args.argChatId != ChatId.NULL_CHAT_ID.toLong()) {
-            emitAll(podcastRepository.getPodcastByChatId(args.chatId))
+            emitAll(feedRepository.getPodcastByChatId(args.chatId))
         } else {
-            emitAll(podcastRepository.getPodcastById(args.feedId))
+            emitAll(feedRepository.getPodcastById(args.feedId))
         }
     }.distinctUntilChanged().shareIn(
         viewModelScope,
@@ -190,7 +189,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
             val subscribed = (chat != null || (podcast?.subscribed?.isTrue() == true))
 
             args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
-                chatRepository.updateFeedContent(
+                feedRepository.updateFeedContent(
                     chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     host = chatHost,
                     feedUrl = feedUrl,
@@ -227,7 +226,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun toggleSubscribeState(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.toggleFeedSubscribeState(
+            feedRepository.toggleFeedSubscribeState(
                 podcast.id,
                 podcast.subscribed
             )

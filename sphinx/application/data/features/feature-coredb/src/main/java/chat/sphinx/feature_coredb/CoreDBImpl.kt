@@ -105,6 +105,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     tip_amountAdapter = SatAdapter.getInstance(),
                     invite_idAdapter = InviteIdAdapter.getInstance(),
                     invite_statusAdapter = InviteStatusAdapter.getInstance(),
+                    blockedAdapter = BlockedAdapter.getInstance(),
                 ),
                 inviteDboAdapter = InviteDbo.Adapter(
                     idAdapter = InviteIdAdapter.getInstance(),
@@ -144,7 +145,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     sender_picAdapter = PhotoUrlAdapter.getInstance(),
                     original_muidAdapter = MessageMUIDAdapter(),
                     reply_uuidAdapter = ReplyUUIDAdapter(),
-                    muidAdapter = MessageMUIDAdapter()
+                    muidAdapter = MessageMUIDAdapter(),
+                    flaggedAdapter = FlaggedAdapter.getInstance(),
                 ),
                 messageMediaDboAdapter = MessageMediaDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),

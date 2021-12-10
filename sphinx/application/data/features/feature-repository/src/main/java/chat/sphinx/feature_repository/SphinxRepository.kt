@@ -39,7 +39,7 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_repository_message.model.SendPaymentRequest
-import chat.sphinx.concept_repository_podcast.PodcastRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -72,6 +72,8 @@ import chat.sphinx.logger.w
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
@@ -95,7 +97,6 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
-import chat.sphinx.wrapper_podcast.PodcastSearchResult
 import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -158,7 +159,7 @@ abstract class SphinxRepository(
     SubscriptionRepository,
     RepositoryDashboard,
     RepositoryMedia,
-    PodcastRepository,
+    FeedRepository,
     CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener {
 
@@ -433,7 +434,8 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getUnseenConversationMessagesCount(): Flow<Long?> = flow {
+    override fun getUnseenActiveConversationMessagesCount(): Flow<Long?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
         var ownerId: ContactId? = accountOwner.value?.id
 
         if (ownerId == null) {
@@ -449,9 +451,11 @@ abstract class SphinxRepository(
             delay(25L)
         }
 
+        val blockedContactIds = queries.contactGetBlocked().executeAsList().map { it.id }
+
         emitAll(
-            coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, ChatType.Conversation)
+            queries
+                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, blockedContactIds, ChatType.Conversation)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -476,7 +480,7 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, ChatType.Tribe)
+                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, listOf(), ChatType.Tribe)
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -693,6 +697,17 @@ abstract class SphinxRepository(
         flow {
             emitAll(
                 coreDB.getSphinxDatabaseQueries().contactGetAll()
+                    .asFlow()
+                    .mapToList(io)
+                    .map { contactDboPresenterMapper.mapListFrom(it) }
+            )
+        }
+    }
+
+    override val getAllNotBlockedContacts: Flow<List<Contact>> by lazy {
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().contactGetNotBlocked()
                     .asFlow()
                     .mapToList(io)
                     .map { contactDboPresenterMapper.mapListFrom(it) }
@@ -1290,6 +1305,50 @@ abstract class SphinxRepository(
                 response = Response.Error(
                     ResponseError("Failed to update Profile Picture", e)
                 )
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(!contact.isBlocked())
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val currentBlockedValue = contact.blocked
+
+            contactLock.withLock {
+                withContext(io) {
+                    queries.contactUpdateBlocked(
+                        if (currentBlockedValue.isTrue()) Blocked.False else Blocked.True,
+                        contact.id
+                    )
+                }
+            }
+
+            networkQueryContact.toggleBlockedContact(
+                contact.id,
+                contact.blocked
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+
+                        contactLock.withLock {
+                            withContext(io) {
+                                queries.contactUpdateBlocked(
+                                    currentBlockedValue,
+                                    contact.id
+                                )
+                            }
+                        }
+                    }
+
+                    is Response.Success -> {}
+                }
             }
         }.join()
 
@@ -2496,6 +2555,48 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun flagMessage(message: Message, chat: Chat) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            messageLock.withLock {
+                withContext(io) {
+                    queries.messageUpdateFlagged(
+                        true.toFlagged(),
+                        message.id
+                    )
+                }
+            }
+
+            val supportContactPubKey = LightningNodePubKey(
+                "023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f"
+            )
+
+            getContactByPubKey(supportContactPubKey).firstOrNull()?.let { supportContact ->
+                val messageSender = getContactById(message.sender).firstOrNull()
+
+                var flagMessageContent = "Message Flagged\n- Message: ${message.uuid?.value ?: "Empty Message UUID"}\n- Sender: ${messageSender?.nodePubKey?.value ?: "Empty Sender"}"
+
+                if (chat.isTribe()) {
+                    flagMessageContent += "\n- Tribe: ${chat.uuid.value}"
+                }
+
+                val messageBuilder = SendMessage.Builder()
+                messageBuilder.setText(flagMessageContent.trimIndent())
+
+                messageBuilder.setContactId(supportContact.id)
+
+                getConversationByContactId(supportContact.id).firstOrNull()?.let { supportContactChat ->
+                    messageBuilder.setChatId(supportContactChat.id)
+                }
+
+                sendMessage(
+                    messageBuilder.build().first
+                )
+            }
+        }
+    }
+
     override suspend fun deleteMessage(message: Message): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> = Response.Success(true)
 
@@ -3101,7 +3202,7 @@ abstract class SphinxRepository(
     }
 
     override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted.isTrue())
+        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted())
 
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()

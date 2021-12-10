@@ -1,5 +1,6 @@
 package chat.sphinx.address_book.ui
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -34,9 +35,15 @@ internal class AddressBookViewModel @Inject constructor(
         addressBookViewStateContainer.updateAddressBookContacts(null, filter)
     }
 
-    fun deleteContact(deletedContact: Contact) {
+    fun deleteContact(contact: Contact) {
         viewModelScope.launch(mainImmediate) {
-            contactRepository.deleteContactById(deletedContact.id)
+            contactRepository.deleteContactById(contact.id)
+        }
+    }
+
+    fun blockContact(contact: Contact) {
+        viewModelScope.launch(mainImmediate) {
+            contactRepository.toggleContactBlocked(contact)
         }
     }
 

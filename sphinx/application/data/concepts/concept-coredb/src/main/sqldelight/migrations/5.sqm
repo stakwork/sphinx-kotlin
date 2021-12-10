@@ -1,0 +1,6 @@
+import chat.sphinx.wrapper_common.contact.Blocked;
+import chat.sphinx.wrapper_message.Flagged;
+
+
+ALTER TABLE messageDbo ADD COLUMN flagged INTEGER AS Flagged NOT NULL DEFAULT 0;
+ALTER TABLE contactDbo ADD COLUMN blocked INTEGER AS Blocked NOT NULL DEFAULT 0;
