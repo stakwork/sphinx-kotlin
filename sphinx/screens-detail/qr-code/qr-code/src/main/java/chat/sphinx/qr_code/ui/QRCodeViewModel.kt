@@ -1,11 +1,10 @@
 package chat.sphinx.qr_code.ui
 
 import android.app.Application
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import android.content.*
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.provider.MediaStore
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -13,6 +12,8 @@ import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.navigation.QRCodeNavigator
+import chat.sphinx.share_qr_code.ShareQRCodeMenuHandler
+import chat.sphinx.share_qr_code.ShareQRCodeMenuViewModel
 import chat.sphinx.wrapper_common.util.isValidBech32
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
@@ -23,7 +24,11 @@ import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.launch
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,6 +36,7 @@ internal class QRCodeViewModel @Inject constructor(
     private val app: Application,
     val navigator: QRCodeNavigator,
     private val socketIOManager: SocketIOManager,
+    private val mediaCacheHandler: MediaCacheHandler,
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -49,8 +55,13 @@ internal class QRCodeViewModel @Inject constructor(
                 )
             },
         ),
-    SphinxSocketIOMessageListener
+    SphinxSocketIOMessageListener,
+    ShareQRCodeMenuViewModel
 {
+
+    override val shareQRCodeMenuHandler: ShareQRCodeMenuHandler by lazy {
+        ShareQRCodeMenuHandler()
+    }
 
     companion object {
         private const val BITMAP_XY = 512
@@ -133,4 +144,66 @@ internal class QRCodeViewModel @Inject constructor(
 
         socketIOManager.removeListener(this)
     }
+
+    override fun shareCodeThroughTextIntent(): Intent {
+        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, currentViewState.qrText)
+        }
+
+        return Intent.createChooser(
+            sharingIntent,
+            app.getString(R.string.share_qr_code_as_text)
+        )
+    }
+
+    override fun shareCodeThroughImageIntent(): Intent? {
+        return currentViewState.qrBitmap?.let { qrBitmap ->
+            val contentValues = ContentValues().apply {
+                put(MediaStore.Images.Media.TITLE, currentViewState.qrText)
+                put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            }
+            val mediaStorageUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+            val inputStream = qrBitmap.toInputStream()
+
+            app.contentResolver.insert(mediaStorageUri, contentValues)?.let { savedFileUri ->
+
+                try {
+                    app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
+                        if (savedFileOutputStream != null) {
+                            inputStream.copyTo(savedFileOutputStream, 1024)
+
+                            val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+                                type = "image/jpeg"
+                                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                putExtra(Intent.EXTRA_TEXT, currentViewState.qrText)
+                                putExtra(Intent.EXTRA_STREAM, savedFileUri)
+                            }
+
+                            return Intent.createChooser(
+                                sharingIntent,
+                                app.getString(R.string.share_qr_code_as_image_plus_text)
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+
+                try {
+                    app.contentResolver.delete(savedFileUri, null, null)
+                } catch (fileE: Exception) {
+                }
+            }
+
+            null
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Bitmap.toInputStream(): InputStream {
+    val stream = ByteArrayOutputStream()
+    compress(Bitmap.CompressFormat.JPEG, 100, stream)
+    val imageInByte: ByteArray = stream.toByteArray()
+    return ByteArrayInputStream(imageInByte)
 }
