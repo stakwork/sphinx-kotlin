@@ -1,5 +1,6 @@
 package chat.sphinx.feature_network_query_contact
 
+import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -7,6 +8,9 @@ import chat.sphinx.feature_network_query_contact.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -26,6 +30,10 @@ class NetworkQueryContactImpl(
 
         private const val ENDPOINT_CREATE_INVITE = "/invites"
         private const val HUB_URL = "https://hub.sphinx.chat"
+
+        private const val ENDPOINT_BLOCK_CONTACT = "/%s/%d"
+        private const val BLOCK_CONTACT = "block"
+        private const val UN_BLOCK_CONTACT = "unblock"
     }
 
     ///////////
@@ -80,6 +88,28 @@ class NetworkQueryContactImpl(
             requestBodyJsonClass = PutContactDto::class.java,
             requestBody = putContactDto,
             relayData = relayData,
+        )
+
+    override fun toggleBlockedContact(
+        contactId: ContactId,
+        blocked: Blocked,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ContactDto, ResponseError>> =
+        toggleBlockedContactImpl(
+            endpoint = String.format(ENDPOINT_BLOCK_CONTACT, (if (blocked.isTrue()) UN_BLOCK_CONTACT else BLOCK_CONTACT), contactId.value),
+            relayData = relayData
+        )
+
+    private fun toggleBlockedContactImpl(
+        endpoint: String,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<ContactDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = ContactRelayResponse::class.java,
+            relayEndpoint = endpoint,
+            requestBodyJsonClass = Map::class.java,
+            requestBody = mapOf(Pair("", "")),
+            relayData = relayData
         )
 
     ////////////

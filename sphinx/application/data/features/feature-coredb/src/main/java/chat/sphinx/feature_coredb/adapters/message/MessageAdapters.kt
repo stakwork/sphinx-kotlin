@@ -1,6 +1,8 @@
 package chat.sphinx.feature_coredb.adapters.message
 
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.contact.Blocked
+import chat.sphinx.wrapper_common.contact.toBlocked
 import chat.sphinx.wrapper_message.*
 import com.squareup.sqldelight.ColumnAdapter
 
@@ -90,5 +92,26 @@ internal class ReplyUUIDAdapter: ColumnAdapter<ReplyUUID, String> {
 
     override fun encode(value: ReplyUUID): String {
         return value.value
+    }
+}
+
+internal class FlaggedAdapter private constructor(): ColumnAdapter<Flagged, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: FlaggedAdapter? = null
+        fun getInstance(): FlaggedAdapter =
+            instance ?: synchronized(this) {
+                instance ?: FlaggedAdapter()
+                    .also { instance = it }
+            }
+    }
+
+    override fun decode(databaseValue: Long): Flagged {
+        return databaseValue.toInt().toFlagged()
+    }
+
+    override fun encode(value: Flagged): Long {
+        return value.value.toLong()
     }
 }

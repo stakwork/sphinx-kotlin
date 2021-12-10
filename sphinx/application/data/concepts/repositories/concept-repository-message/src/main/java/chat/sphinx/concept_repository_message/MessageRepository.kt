@@ -44,6 +44,11 @@ interface MessageRepository {
         chat: Chat,
     )
 
+    fun flagMessage(
+        message: Message,
+        chat: Chat,
+    )
+
     fun sendPodcastBoost(
         chatId: ChatId,
         podcast: Podcast

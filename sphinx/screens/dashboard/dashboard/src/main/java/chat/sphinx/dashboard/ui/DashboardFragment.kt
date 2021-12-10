@@ -74,7 +74,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.networkRefresh()
+        viewModel.screenInit()
 
         findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 

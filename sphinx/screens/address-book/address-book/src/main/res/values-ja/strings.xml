@@ -4,4 +4,7 @@
     <string name="search">検索</string>
     <string name="add_icon"></string>
     <string name="add_friend">友だちを追加</string>
+    <string name="delete_contact">Delete</string>
+    <string name="block_contact">Block</string>
+    <string name="unblock_contact">Unblock</string>
 </resources>

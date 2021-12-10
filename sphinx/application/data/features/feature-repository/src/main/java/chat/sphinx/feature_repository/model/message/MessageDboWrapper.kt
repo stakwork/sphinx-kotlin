@@ -51,6 +51,8 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
         get() = messageDbo.original_muid
     override val replyUUID: ReplyUUID?
         get() = messageDbo.reply_uuid
+    override val flagged: Flagged
+        get() = messageDbo.flagged
 
     @Volatile
     @Suppress("PropertyName")

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="address_book_contact_holder_block_icon_text_size">25sp</dimen>
+    <dimen name="address_book_contact_holder_button_icon_xy">25dp</dimen>
+    <dimen name="address_book_contact_holder_button_text_size">10sp</dimen>
+    <dimen name="address_book_contact_holder_button_icon_margin">20dp</dimen>
+
     <dimen name="address_book_contact_holder_text_size">17sp</dimen>
     <dimen name="address_book_search_bar_margin_horizontal">14dp</dimen>
     <dimen name="address_book_search_bar_margin_vertical">6dp</dimen>

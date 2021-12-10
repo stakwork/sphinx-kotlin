@@ -9,6 +9,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.address_book.R
 import chat.sphinx.address_book.databinding.LayoutAddressBookContactHolderBinding
 import chat.sphinx.address_book.ui.AddressBookViewModel
 import chat.sphinx.concept_image_loader.Disposable
@@ -16,10 +17,13 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
-import chat.sphinx.resources.*
+import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.setInitialsColor
+import chat.sphinx.resources.setTextColorExt
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.getColorKey
+import chat.sphinx.wrapper_contact.isBlocked
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -116,14 +120,6 @@ internal class AddressBookListAdapter(
         }
     }
 
-    fun removeAt(position: Int) {
-        val contact = addressBookContacts[position]
-
-        viewModel.deleteContact(contact)
-
-        notifyItemRemoved(position)
-    }
-
     override fun getItemCount(): Int {
         return addressBookContacts.size
     }
@@ -157,12 +153,29 @@ internal class AddressBookListAdapter(
         private var dContact: Contact? = null
 
         init {
-            binding.layoutConstraintAddressBookHolder.setOnClickListener {
-                dContact?.let { contact ->
-                    lifecycleOwner.lifecycleScope.launch {
-                        viewModel.addressBookNavigator.toEditContactDetail(
-                            contact.id
-                        )
+            binding.apply {
+                layoutConstraintContactInfoContainer.setOnClickListener {
+                    dContact?.let { contact ->
+                        lifecycleOwner.lifecycleScope.launch {
+                            viewModel.addressBookNavigator.toEditContactDetail(
+                                contact.id
+                            )
+                        }
+                    }
+                }
+
+                layoutConstraintDeleteButtonContainer.setOnClickListener {
+                    dContact?.let { contact ->
+                        viewModel.deleteContact(contact)
+                        swipeRevealLayoutContact.close(false)
+                        notifyItemRemoved(position)
+                    }
+                }
+
+                layoutConstraintBlockButtonContainer.setOnClickListener {
+                    dContact?.let { contact ->
+                        viewModel.blockContact(contact)
+                        swipeRevealLayoutContact.close(true)
                     }
                 }
             }
@@ -224,6 +237,18 @@ internal class AddressBookListAdapter(
                     textViewAddressBookHolderName.setTextColorExt(R.color.primaryRed)
                     "ERROR: NULL NAME"
                 }
+
+                //Blocked
+                layoutConstraintContactInfoContainer.alpha = if (addressBookContact.isBlocked()) 0.5f else 1.0f
+                imageViewBlockedContactIcon.goneIfFalse(addressBookContact.isBlocked())
+
+                textViewBlockButtonTitle.text = root.context.getString(
+                    if (addressBookContact.isBlocked()) {
+                        R.string.unblock_contact
+                    } else {
+                        R.string.block_contact
+                    }
+                )
             }
         }
     }

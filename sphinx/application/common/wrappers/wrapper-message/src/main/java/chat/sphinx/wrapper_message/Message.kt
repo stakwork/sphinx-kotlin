@@ -209,7 +209,8 @@ inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.shouldAvoidGrouping(): Boolean {
     return status.isPending() || status.isFailed() || status.isDeleted() ||
-            type.isInvoice() || type.isInvoicePayment() || type.isGroupAction()
+            type.isInvoice() || type.isInvoicePayment() || type.isGroupAction() ||
+            flagged.isTrue()
 }
 
 //Message Actions
@@ -264,6 +265,9 @@ inline val Message.isExpiredInvoice: Boolean
 inline val Message.isPaidInvoice: Boolean
     get() = type.isInvoice() && status.isConfirmed()
 
+inline val Message.isFlagged: Boolean
+    get() = flagged.isTrue()
+
 abstract class Message {
     abstract val id: MessageId
     abstract val uuid: MessageUUID?
@@ -283,6 +287,7 @@ abstract class Message {
     abstract val senderPic: PhotoUrl?
     abstract val originalMUID: MessageMUID?
     abstract val replyUUID: ReplyUUID?
+    abstract val flagged: Flagged
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
     abstract val messageDecryptionError: Boolean
@@ -314,6 +319,7 @@ abstract class Message {
                 other.senderPic                     == senderPic                    &&
                 other.originalMUID                  == originalMUID                 &&
                 other.replyUUID                     == replyUUID                    &&
+                other.flagged                       == flagged                      &&
                 other.messageContentDecrypted       == messageContentDecrypted      &&
                 other.messageDecryptionError        == messageDecryptionError       &&
                 other.messageDecryptionException    == messageDecryptionException   &&
@@ -362,6 +368,7 @@ abstract class Message {
         result = _31 * result + senderPic.hashCode()
         result = _31 * result + originalMUID.hashCode()
         result = _31 * result + replyUUID.hashCode()
+        result = _31 * result + flagged.hashCode()
         result = _31 * result + messageContentDecrypted.hashCode()
         result = _31 * result + messageDecryptionError.hashCode()
         result = _31 * result + messageDecryptionException.hashCode()
@@ -380,7 +387,8 @@ abstract class Message {
                 "paymentRequest=$paymentRequest,date=$date,expirationDate=$expirationDate,"     +
                 "messageContent=$messageContent,status=$status,seen=$seen,"                     +
                 "senderAlias=$senderAlias,senderPic=$senderPic,originalMUID=$originalMUID,"     +
-                "replyUUID=$replyUUID,messageContentDecrypted=$messageContentDecrypted,"        +
+                "replyUUID=$replyUUID,flagged=$flagged,"                                        +
+                "messageContentDecrypted=$messageContentDecrypted,"                             +
                 "messageDecryptionError=$messageDecryptionError,"                               +
                 "messageDecryptionException=$messageDecryptionException,"                       +
                 "messageMedia=$messageMedia,podBoost=$podBoost,giphyData=$giphyData,"           +
