@@ -11,12 +11,11 @@ import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_podcast.PodcastRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.ui.getMediaDuration
-import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.feed.toSubscribed
@@ -46,7 +45,7 @@ internal class TribeFeedViewModel @Inject constructor(
     private val navigator: TribeChatNavigator,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
-    private val podcastRepository: PodcastRepository,
+    private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle),
@@ -230,7 +229,7 @@ internal class TribeFeedViewModel @Inject constructor(
             is TribeFeedData.Result.FeedData -> {
 
                 viewModelScope.launch(mainImmediate) {
-                    chatRepository.updateFeedContent(
+                    feedRepository.updateFeedContent(
                         args.chatId,
                         data.host,
                         data.feedUrl,
@@ -244,7 +243,7 @@ internal class TribeFeedViewModel @Inject constructor(
                     viewModelScope.launch(mainImmediate) {
                         delay(500L)
 
-                        podcastRepository.getPodcastByChatId(args.chatId).collect { podcast ->
+                        feedRepository.getPodcastByChatId(args.chatId).collect { podcast ->
                             podcast?.let { nnPodcast ->
                                 podcastLoaded(
                                     nnPodcast,

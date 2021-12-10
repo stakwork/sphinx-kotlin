@@ -53,7 +53,7 @@ include ':sphinx:application:data:concepts:repositories:concept-repository-light
 include ':sphinx:application:data:concepts:repositories:concept-repository-media'
 include ':sphinx:application:data:concepts:repositories:concept-repository-message'
 include ':sphinx:application:data:concepts:repositories:concept-repository-subscription'
-include ':sphinx:application:data:concepts:repositories:concept-repository-podcast'
+include ':sphinx:application:data:concepts:repositories:concept-repository-feed'
 include ':sphinx:application:data:features:feature-repository'
 include ':sphinx:application:data:features:feature-repository-android'
 

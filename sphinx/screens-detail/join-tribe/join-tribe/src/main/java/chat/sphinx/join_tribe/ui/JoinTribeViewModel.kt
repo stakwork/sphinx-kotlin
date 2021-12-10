@@ -13,6 +13,7 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
@@ -53,6 +54,7 @@ internal class JoinTribeViewModel @Inject constructor(
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
+    private val feedRepository: FeedRepository,
     private val networkQueryChat: NetworkQueryChat,
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val mediaCacheHandler: MediaCacheHandler,
@@ -205,7 +207,7 @@ internal class JoinTribeViewModel @Inject constructor(
             nnTribeInfo.feed_url?.toFeedUrl()?.let { feedUrl ->
                 nnTribeInfo.uuid?.toChatUUID()?.let { chatUUID ->
                     nnTribeInfo.host?.toChatHost()?.let { chatHost ->
-                        chatRepository.updateFeedContent(
+                        feedRepository.updateFeedContent(
                             chatId,
                             chatHost,
                             feedUrl,
