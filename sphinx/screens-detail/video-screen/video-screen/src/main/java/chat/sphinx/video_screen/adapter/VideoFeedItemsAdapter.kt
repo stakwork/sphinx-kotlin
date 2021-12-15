@@ -15,8 +15,10 @@ import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.databinding.LayoutVideoListItemHolderBinding
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.FeedItem
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -198,6 +200,18 @@ internal class VideoFeedItemsAdapter (
 
                 textViewVideoTitle.text = f.titleToShow
                 textViewVideoDate.text = f.datePublished?.hhmmElseDate()
+
+                textViewDownloadVideoButton.goneIfTrue(
+                    f.enclosureUrl.isYoutubeVideo() || f.downloaded
+                )
+
+                if (f.downloaded) {
+                    // TODO: Add swipe to delete functionality...
+                } else {
+                    textViewDownloadVideoButton.setOnClickListener {
+                        viewModel.downloadMedia(f)
+                    }
+                }
             }
         }
 

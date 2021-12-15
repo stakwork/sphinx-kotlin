@@ -3,6 +3,7 @@ package chat.sphinx.video_screen.ui
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -21,6 +22,7 @@ import kotlinx.coroutines.launch
 internal open class VideoFeedScreenViewModel(
     dispatchers: CoroutineDispatchers,
     private val chatRepository: ChatRepository,
+    private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
 ): BaseViewModel<VideoFeedScreenViewState>(dispatchers, VideoFeedScreenViewState.Idle)
 {
@@ -107,5 +109,10 @@ internal open class VideoFeedScreenViewModel(
 
     open fun getArgFeedUrl(): FeedUrl? {
         return null
+    }
+
+    fun downloadMedia(feedItem: FeedItem) {
+        // TODO: Add download media viewState...
+        repositoryMedia.downloadMediaIfApplicable(feedItem)
     }
 }

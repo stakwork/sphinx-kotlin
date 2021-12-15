@@ -1,5 +1,6 @@
 package io.matthewnelson.feature_media_cache
 
+import chat.sphinx.wrapper_message_media.MediaType
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.CoroutineScope
@@ -15,7 +16,7 @@ import java.util.*
 class MediaCacheHandlerImpl(
     private val applicationScope: CoroutineScope,
     cacheDir: File,
-    dispatchers: CoroutineDispatchers
+    dispatchers: CoroutineDispatchers,
 ): MediaCacheHandler(), CoroutineDispatchers by dispatchers {
 
     init {
@@ -67,6 +68,75 @@ class MediaCacheHandlerImpl(
     private val paidTextCache: File by lazy {
         File(cacheDir, PAID_TEXT_CACHE_DIR).also {
             it.mkdirs()
+        }
+    }
+
+    override fun createFile(mediaType: MediaType): File? {
+        return when (mediaType) {
+            is MediaType.Audio -> {
+                mediaType.value.split("/").lastOrNull()?.let { fileType ->
+                    when {
+                        fileType.contains("m4a", ignoreCase = true) -> {
+                            createAudioFile("m4a")
+                        }
+                        fileType.contains("mp3", ignoreCase = true) -> {
+                            createAudioFile("mp3")
+                        }
+                        fileType.contains("mp4", ignoreCase = true) -> {
+                            createAudioFile("mp4")
+                        }
+                        fileType.contains("mpeg", ignoreCase = true) -> {
+                            createAudioFile("mpeg")
+                        }
+                        fileType.contains("wav", ignoreCase = true) -> {
+                            createAudioFile("wav")
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+                }
+            }
+            is MediaType.Image -> {
+                // use image loader
+                null
+            }
+            is MediaType.Pdf -> {
+                // TODO: Implement
+                null
+            }
+            is MediaType.Text -> {
+                // TODO: Implement
+                null
+            }
+            is MediaType.Video -> {
+                // TODO: Auto generate file extension (if app doesn't support media we can load via )
+                mediaType.value.split("/").lastOrNull()?.let { fileType ->
+                    when {
+                        fileType.contains("webm", ignoreCase = true) -> {
+                            createVideoFile("webm")
+                        }
+                        fileType.contains("3gpp", ignoreCase = true) -> {
+                            createVideoFile("3gp")
+                        }
+                        fileType.contains("x-matroska", ignoreCase = true) -> {
+                            createVideoFile("mkv")
+                        }
+                        fileType.contains("mp4", ignoreCase = true) -> {
+                            createVideoFile("mp4")
+                        }
+                        fileType.contains("mov", ignoreCase = true) -> {
+                            createVideoFile("mov")
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+                }
+            }
+            is MediaType.Unknown -> {
+                null
+            }
         }
     }
 
