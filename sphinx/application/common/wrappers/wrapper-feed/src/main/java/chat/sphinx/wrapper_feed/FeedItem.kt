@@ -3,6 +3,7 @@ package chat.sphinx.wrapper_feed
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.feed.*
+import java.io.File
 
 inline val FeedItem.isPodcast: Boolean
     get() = feed?.feedType?.isPodcast() == true
@@ -28,7 +29,8 @@ data class FeedItem(
     val thumbnailUrl: PhotoUrl?,
     val link: FeedUrl?,
     val feedId: FeedId,
-    val duration: FeedItemDuration?
+    val duration: FeedItemDuration?,
+    val localFile: File?
 ) {
 
     var feed: Feed? = null
@@ -64,4 +66,7 @@ data class FeedItem(
         get() {
             return (description?.value ?: feed?.description?.value ?: "").htmlToPlainText().trim()
         }
+
+    val downloaded: Boolean
+        get()= localFile != null
 }

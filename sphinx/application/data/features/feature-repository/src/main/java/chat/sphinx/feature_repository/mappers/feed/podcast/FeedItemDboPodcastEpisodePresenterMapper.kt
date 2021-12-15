@@ -16,7 +16,8 @@ internal class FeedItemDboPodcastEpisodePresenterMapper(
             image = value.image_url,
             link = value.link,
             enclosureUrl = value.enclosure_url,
-            podcastId = value.feed_id
+            podcastId = value.feed_id,
+            localFile = value.local_file
         )
     }
 
@@ -36,7 +37,8 @@ internal class FeedItemDboPodcastEpisodePresenterMapper(
             image_url = value.image,
             thumbnail_url = null,
             link = value.link,
-            feed_id = value.podcastId
+            feed_id = value.podcastId,
+            local_file = value.localFile
         )
     }
 }

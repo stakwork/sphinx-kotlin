@@ -70,7 +70,6 @@ data class Podcast(
         for (episode in this.episodes) {
             val episodeCopy = episode.copy()
             episodeCopy.playing = episode.playing
-            episodeCopy.downloaded = episode.downloaded
 
             episodesList.add(episodeCopy)
         }
