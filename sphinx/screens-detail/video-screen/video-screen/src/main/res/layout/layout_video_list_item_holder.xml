@@ -86,12 +86,13 @@
         android:text="@string/material_icon_name_cloud_download"
         android:textColor="@color/text"
         android:clickable="true"
+        android:focusable="true"
         android:alpha="0.3"
-        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/text_view_video_title"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+         />
 
     <View
         android:id="@+id/divider_bottom"

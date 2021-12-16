@@ -12,5 +12,5 @@
     <dimen name="video_list_item_divider_margin_x">30dp</dimen>
     <dimen name="video_list_item_cover_image_width">120dp</dimen>
     <dimen name="video_list_item_cover_image_height">80dp</dimen>
-    <dimen name="video_list_item_download_button_xy">22dp</dimen>
+    <dimen name="video_list_item_download_button_xy">36sp</dimen>
 </resources>

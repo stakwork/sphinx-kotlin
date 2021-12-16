@@ -205,6 +205,7 @@ internal class VideoFeedItemsAdapter (
                     f.enclosureUrl.isYoutubeVideo() || f.downloaded
                 )
 
+
                 if (f.downloaded) {
                     // TODO: Add swipe to delete functionality...
                 } else {

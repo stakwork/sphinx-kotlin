@@ -5017,14 +5017,13 @@ abstract class SphinxRepository(
 
                 //Getting media data from purchase accepted item if is paid content
                 val url = feedItem.enclosureUrl.value
-                val contentType = feedItem.contentType
+                val contentType = feedItem.enclosureType
                 val localFile = feedItem.localFile
 
                 if (
                     contentType != null &&
                     localFile == null
                 ) {
-
                     val streamToFile: File? = mediaCacheHandler.createFile(
                         contentType.value.toMediaType()
                     )
@@ -5035,9 +5034,11 @@ abstract class SphinxRepository(
                             authenticationToken = null,
                             mediaKeyDecrypted = null,
                         )?.let { stream ->
+
                             mediaCacheHandler.copyTo(stream, streamToFile)
                             feedItemLock.withLock {
                                 withContext(io) {
+
                                     queries.transaction {
                                         queries.feedItemUpdateLocalFile(
                                             streamToFile,
