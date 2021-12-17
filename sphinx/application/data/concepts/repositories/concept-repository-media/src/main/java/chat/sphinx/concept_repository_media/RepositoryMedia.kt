@@ -20,6 +20,10 @@ interface RepositoryMedia {
         feedItem: FeedItem
     )
 
+    suspend fun deleteDownloadedMediaIfApplicable(
+        feedItem: FeedItem
+    )
+
     fun streamPodcastPayments(
         chatId: ChatId,
         metaData: ChatMetaData,

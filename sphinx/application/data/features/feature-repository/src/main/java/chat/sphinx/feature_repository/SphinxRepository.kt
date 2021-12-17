@@ -5070,6 +5070,34 @@ abstract class SphinxRepository(
     }
 
 
+    override suspend fun deleteDownloadedMediaIfApplicable(
+        feedItem: FeedItem
+    ) {
+        val feedItemId: FeedId = feedItem.id
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val localFile = feedItem.localFile
+
+        feedItemLock.withLock {
+            withContext(io) {
+                queries.transaction {
+                    queries.feedItemUpdateLocalFile(
+                        null,
+                        feedItemId
+                    )
+                }
+            }
+        }
+
+        localFile?.let {
+            try {
+                it.delete()
+            } catch (e: Exception) {
+
+            }
+        }
+    }
+
     override suspend fun getPaymentTemplates(): Response<List<PaymentTemplate>, ResponseError> {
         var response: Response<List<PaymentTemplate>, ResponseError>? = null
 

@@ -115,4 +115,9 @@ internal open class VideoFeedScreenViewModel(
         // TODO: Add download media viewState...
         repositoryMedia.downloadMediaIfApplicable(feedItem)
     }
+
+    suspend fun deleteDownloadedMedia(feedItem: FeedItem) {
+        // TODO: Add download media viewState...
+        repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)
+    }
 }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.resources.getColor
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.databinding.LayoutVideoListItemHolderBinding
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
@@ -202,13 +203,20 @@ internal class VideoFeedItemsAdapter (
                 textViewVideoDate.text = f.datePublished?.hhmmElseDate()
 
                 textViewDownloadVideoButton.goneIfTrue(
-                    f.enclosureUrl.isYoutubeVideo() || f.downloaded
+                    f.enclosureUrl.isYoutubeVideo()
                 )
 
-
+                swipeRevealLayoutVideoFeedItem.setLockDrag(!f.downloaded)
+                layoutConstraintDeleteButtonContainer.setOnClickListener {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.deleteDownloadedMedia(f)
+                        swipeRevealLayoutVideoFeedItem.close(true)
+                    }
+                }
                 if (f.downloaded) {
-                    // TODO: Add swipe to delete functionality...
+                    textViewDownloadVideoButton.setTextColor(getColor(R.color.greenBorder))
                 } else {
+                    textViewDownloadVideoButton.setTextColor(getColor(R.color.secondaryText))
                     textViewDownloadVideoButton.setOnClickListener {
                         viewModel.downloadMedia(f)
                     }

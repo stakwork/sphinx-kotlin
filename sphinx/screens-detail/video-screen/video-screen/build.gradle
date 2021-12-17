@@ -49,6 +49,8 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
 
+    implementation deps.swipeRevealLayout.sdk
+
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt
