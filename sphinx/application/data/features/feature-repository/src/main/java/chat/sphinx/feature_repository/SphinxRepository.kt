@@ -64,6 +64,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
+import chat.sphinx.notification.SphinxNotificationManager
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -146,6 +147,7 @@ abstract class SphinxRepository(
     private val networkQueryPodcastSearch: NetworkQueryPodcastSearch,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
+    private val sphinxNotificationManager: SphinxNotificationManager,
     protected val LOG: SphinxLogger,
 ) : ChatRepository,
     ContactRepository,
@@ -5013,9 +5015,14 @@ abstract class SphinxRepository(
             }
 
             downloadLock.withLock {
+                sphinxNotificationManager.notify(
+                    notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                    title = "Downloading Item",
+                    message = "Downloading item for local playback",
+                )
+
                 val queries = coreDB.getSphinxDatabaseQueries()
 
-                //Getting media data from purchase accepted item if is paid content
                 val url = feedItem.enclosureUrl.value
                 val contentType = feedItem.enclosureType
                 val localFile = feedItem.localFile
@@ -5034,7 +5041,13 @@ abstract class SphinxRepository(
                             authenticationToken = null,
                             mediaKeyDecrypted = null,
                         )?.let { stream ->
+                            sphinxNotificationManager.notify(
+                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                title = "Completing Download",
+                                message = "Finishing up download of file",
+                            )
                             mediaCacheHandler.copyTo(stream, streamToFile)
+
                             feedItemLock.withLock {
                                 withContext(io) {
 
@@ -5047,11 +5060,32 @@ abstract class SphinxRepository(
                                 }
                             }
 
+                            sphinxNotificationManager.notify(
+                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                title = "Download complete",
+                                message = "item can now be accessed offline",
+                            )
                             // hold downloadLock until table change propagates to UI
                             delay(200L)
 
                         } ?: streamToFile.delete()
                     }
+                } else {
+                    val title = if (localFile != null) {
+                        "Item already downloaded"
+                    } else {
+                        "Failed to initiate download"
+                    }
+                    val message = if (localFile != null) {
+                        "You have already downloaded this item."
+                    } else {
+                        "Failed to initiate download because of missing media type information"
+                    }
+                    sphinxNotificationManager.notify(
+                        notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                        title = title,
+                        message = message,
+                    )
                 }
 
                 // remove lock from map if only subscriber
