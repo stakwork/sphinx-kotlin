@@ -154,6 +154,7 @@
                     android:gravity="center"
                     android:text="@string/material_icon_name_cloud_download"
                     android:textColor="@color/text"
+                    android:textSize="30sp"
                     android:clickable="true"
                     android:focusable="true"
                     app:layout_constraintBottom_toBottomOf="parent"
