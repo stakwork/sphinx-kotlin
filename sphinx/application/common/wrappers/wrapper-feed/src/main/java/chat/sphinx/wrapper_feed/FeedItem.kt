@@ -15,23 +15,23 @@ inline val FeedItem.isNewsletter: Boolean
     get() = feed?.feedType?.isNewsletter() == true
 
 data class FeedItem(
-    val id: FeedId, // TODO: Should this be FeedItemId?
+    override val id: FeedId, // TODO: Should this be FeedItemId?
     val title: FeedTitle,
     val description: FeedDescription?,
     val datePublished: DateTime?,
     val dateUpdated: DateTime?,
     val author: FeedAuthor?,
     val contentType: FeedContentType?,
-    val enclosureLength: FeedEnclosureLength?,
-    val enclosureUrl: FeedUrl,
-    val enclosureType: FeedEnclosureType?,
+    override val enclosureLength: FeedEnclosureLength?,
+    override val enclosureUrl: FeedUrl,
+    override val enclosureType: FeedEnclosureType?,
     val imageUrl: PhotoUrl?,
     val thumbnailUrl: PhotoUrl?,
     val link: FeedUrl?,
     val feedId: FeedId,
     val duration: FeedItemDuration?,
-    val localFile: File?
-) {
+    override val localFile: File?
+): DownloadableFeedItem {
 
     var feed: Feed? = null
 

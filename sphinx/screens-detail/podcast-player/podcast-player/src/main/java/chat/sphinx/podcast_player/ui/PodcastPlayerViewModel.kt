@@ -8,18 +8,23 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.isTrue
+import chat.sphinx.wrapper_common.feed.toFeedUrl
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,6 +51,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
+    private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
@@ -391,6 +397,16 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun retrieveEpisodeDuration(episodeUrl: String): Long {
         val uri = Uri.parse(episodeUrl)
         return uri.getMediaDuration()
+    }
+
+    fun downloadMedia(podcastEpisode: PodcastEpisode) {
+        // TODO: Add download media viewState...
+        repositoryMedia.downloadMediaIfApplicable(podcastEpisode)
+    }
+
+    suspend fun deleteDownloadedMedia(feedItem: FeedItem) {
+        // TODO: Add download media viewState...
+        repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)
     }
 }
 

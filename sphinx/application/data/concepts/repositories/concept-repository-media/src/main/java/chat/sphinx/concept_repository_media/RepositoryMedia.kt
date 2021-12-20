@@ -2,7 +2,7 @@ package chat.sphinx.concept_repository_media
 
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.DownloadableFeedItem
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.PodcastDestination
 
@@ -17,11 +17,11 @@ interface RepositoryMedia {
     )
 
     fun downloadMediaIfApplicable(
-        feedItem: FeedItem
+        feedItem: DownloadableFeedItem
     )
 
     suspend fun deleteDownloadedMediaIfApplicable(
-        feedItem: FeedItem
+        feedItem: DownloadableFeedItem
     )
 
     fun streamPodcastPayments(

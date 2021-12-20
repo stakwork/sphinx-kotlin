@@ -4993,7 +4993,7 @@ abstract class SphinxRepository(
     private val feedItemLock = Mutex()
     private val downloadFeedItemLockMap = SynchronizedMap<FeedId, Pair<Int, Mutex>>()
     override fun downloadMediaIfApplicable(
-        feedItem: FeedItem
+        feedItem: DownloadableFeedItem
     ) {
         applicationScope.launch(mainImmediate) {
             val feedItemId: FeedId = feedItem.id
@@ -5034,7 +5034,6 @@ abstract class SphinxRepository(
                             authenticationToken = null,
                             mediaKeyDecrypted = null,
                         )?.let { stream ->
-
                             mediaCacheHandler.copyTo(stream, streamToFile)
                             feedItemLock.withLock {
                                 withContext(io) {
@@ -5071,7 +5070,7 @@ abstract class SphinxRepository(
 
 
     override suspend fun deleteDownloadedMediaIfApplicable(
-        feedItem: FeedItem
+        feedItem: DownloadableFeedItem
     ) {
         val feedItemId: FeedId = feedItem.id
         val queries = coreDB.getSphinxDatabaseQueries()

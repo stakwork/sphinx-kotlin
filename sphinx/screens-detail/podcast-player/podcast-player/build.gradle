@@ -45,6 +45,7 @@ dependencies {
   implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
   implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
   implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
+  implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
   implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
 
   api project(path: ':sphinx:service:concepts:concept-service-media-player')
@@ -57,6 +58,5 @@ dependencies {
   implementation deps.google.hilt
   implementation deps.square.moshi
   implementation deps.lottie.sdk
-
   kapt kaptDeps.google.hilt
 }

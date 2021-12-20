@@ -222,9 +222,13 @@ internal class PodcastEpisodesListAdapter(
                 //Download button
                 textViewDownloadEpisodeButton.setTextColor(
                     root.context.getColor(
-                        if (podcastEpisode.downloaded) R.color.primaryGreen else android.R.color.white
+                        if (podcastEpisode.downloaded) R.color.primaryGreen else R.color.secondaryText
                     )
                 )
+
+                textViewDownloadEpisodeButton.setOnClickListener {
+                    viewModel.downloadMedia(podcastEpisode)
+                }
             }
         }
     }
