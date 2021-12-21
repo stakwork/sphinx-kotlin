@@ -23,4 +23,7 @@ data class PodcastEpisode(
 
     val downloaded: Boolean
         get()= localFile != null
+
+    val episodeUrl: String
+        get()= localFile?.toString() ?: enclosureUrl.value
 }

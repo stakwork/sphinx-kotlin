@@ -258,7 +258,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                             args.chatId,
                             podcast.id.value,
                             episode.id.value,
-                            episode.enclosureUrl.value,
+                            episode.episodeUrl,
                             Sat(podcast.satsPerMinute),
                             podcast.speed,
                             startTime,
