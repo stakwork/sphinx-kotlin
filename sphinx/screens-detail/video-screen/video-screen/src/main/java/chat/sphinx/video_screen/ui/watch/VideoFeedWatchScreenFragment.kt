@@ -3,6 +3,7 @@ package chat.sphinx.video_screen.ui.watch
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.SeekBar
@@ -177,6 +178,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.selectedVideoStateContainer.collect { viewState ->
+                Log.d("Kgothatso", "View state update: $viewState")
                 @Exhaustive
                 when (viewState) {
                     is SelectedVideoViewState.Idle -> {}
@@ -207,8 +209,14 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                 layoutConstraintVideoViewContainer.visible
                                 webViewYoutubeVideoPlayer.gone
 
+                                val videoUri = if (viewState.localFile != null) {
+                                    viewState.localFile.toUri()
+                                } else {
+                                    viewState.url.value.toUri()
+                                }
+                                
                                 viewModel.initializeVideo(
-                                    viewState.url.value.toUri(),
+                                    videoUri,
                                     viewState.duration?.value?.toInt()
                                 )
                             }

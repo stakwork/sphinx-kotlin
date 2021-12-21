@@ -166,7 +166,7 @@ internal class VideoFeedItemsAdapter (
         private var videoItem: FeedItem? = null
 
         init {
-            binding.root.setOnClickListener {
+            binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
                 videoItem?.let { nnVideoItem ->
                     lifecycleOwner.lifecycleScope.launch {
                         viewModel.videoItemSelected(nnVideoItem)
