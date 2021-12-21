@@ -18,6 +18,7 @@ import chat.sphinx.podcast_player.ui.PodcastPlayerViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
@@ -228,7 +229,13 @@ internal class PodcastEpisodesListAdapter(
 
                 textViewDownloadEpisodeButton.setOnClickListener {
                     viewModel.downloadMedia(podcastEpisode)
+                    notifyItemChanged(position)
                 }
+
+                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id)
+
+                textViewDownloadEpisodeButton.goneIfTrue(isFeedItemDownloadInProgress)
+                progressBarEpisodeDownload.goneIfFalse(isFeedItemDownloadInProgress)
             }
         }
     }

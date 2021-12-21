@@ -4993,26 +4993,35 @@ abstract class SphinxRepository(
     }
 
     private val feedItemLock = Mutex()
-    private val downloadFeedItemLockMap = SynchronizedMap<FeedId, Pair<Int, Mutex>>()
+    val downloadFeedItemLockMap = SynchronizedMap<FeedId, Pair<Int, Mutex>>()
+
+    override fun inProgressDownloadIds(): List<FeedId> {
+        return downloadFeedItemLockMap.withLock { map ->
+            map.keys.toList()
+        }
+    }
+
     override fun downloadMediaIfApplicable(
         feedItem: DownloadableFeedItem
     ) {
-        applicationScope.launch(mainImmediate) {
-            val feedItemId: FeedId = feedItem.id
+        val feedItemId: FeedId = feedItem.id
 
-            val downloadLock: Mutex = downloadFeedItemLockMap.withLock { map ->
-                val localLock: Pair<Int, Mutex>? = map[feedItemId]
+        val downloadLock: Mutex = downloadFeedItemLockMap.withLock { map ->
+            val localLock: Pair<Int, Mutex>? = map[feedItemId]
 
-                if (localLock != null) {
-                    map[feedItemId] = Pair(localLock.first + 1, localLock.second)
-                    localLock.second
-                } else {
-                    Pair(1, Mutex()).let { pair ->
-                        map[feedItemId] = pair
-                        pair.second
-                    }
+            if (localLock != null) {
+                map[feedItemId] = Pair(localLock.first + 1, localLock.second)
+                localLock.second
+            } else {
+                Pair(1, Mutex()).let { pair ->
+                    map[feedItemId] = pair
+                    pair.second
                 }
             }
+        }
+
+        applicationScope.launch(mainImmediate) {
+
 
             downloadLock.withLock {
                 sphinxNotificationManager.notify(

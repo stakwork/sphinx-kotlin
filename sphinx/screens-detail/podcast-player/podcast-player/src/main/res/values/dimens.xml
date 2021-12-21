@@ -11,7 +11,7 @@
     <dimen name="episode_list_item_holder_height">64dp</dimen>
     <dimen name="episode_list_item_divider_margin_x">30dp</dimen>
     <dimen name="episode_list_item_cover_image_xy">40dp</dimen>
-    <dimen name="episode_list_item_download_button_xy">42dp</dimen>
+    <dimen name="episode_list_item_download_button_xy">36dp</dimen>
 
     <dimen name="header_buttons_margin">22dp</dimen>
 

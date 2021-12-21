@@ -408,6 +408,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         // TODO: Add download media viewState...
         repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)
     }
+
+    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
+        return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
+    }
 }
 
 fun Uri.getMediaDuration(): Long {
