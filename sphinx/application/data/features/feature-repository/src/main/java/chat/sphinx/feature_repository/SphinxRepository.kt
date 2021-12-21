@@ -5120,20 +5120,22 @@ abstract class SphinxRepository(
 
         val localFile = feedItem.localFile
 
-        feedItemLock.withLock {
-            withContext(io) {
-                queries.transaction {
-                    queries.feedItemUpdateLocalFile(
-                        null,
-                        feedItemId
-                    )
-                }
-            }
-        }
-
         localFile?.let {
             try {
-                it.delete()
+                if (it.exists()) {
+                    it.delete()
+                }
+
+                feedItemLock.withLock {
+                    withContext(io) {
+                        queries.transaction {
+                            queries.feedItemUpdateLocalFile(
+                                null,
+                                feedItemId
+                            )
+                        }
+                    }
+                }
             } catch (e: Exception) {
 
             }
