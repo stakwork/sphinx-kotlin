@@ -19,6 +19,7 @@ import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.FeedItem
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
@@ -219,8 +220,13 @@ internal class VideoFeedItemsAdapter (
                     textViewDownloadVideoButton.setTextColor(getColor(R.color.secondaryText))
                     textViewDownloadVideoButton.setOnClickListener {
                         viewModel.downloadMedia(f)
+                        notifyItemChanged(position)
                     }
                 }
+                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(f.id) && !f.downloaded
+
+                textViewDownloadVideoButton.goneIfTrue(isFeedItemDownloadInProgress)
+                progressBarVideoDownload.goneIfFalse(isFeedItemDownloadInProgress)
             }
         }
 

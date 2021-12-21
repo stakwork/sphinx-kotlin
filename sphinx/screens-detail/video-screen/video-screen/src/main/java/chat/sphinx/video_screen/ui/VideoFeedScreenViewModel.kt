@@ -7,6 +7,7 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
@@ -121,5 +122,9 @@ internal open class VideoFeedScreenViewModel(
     suspend fun deleteDownloadedMedia(feedItem: FeedItem) {
         // TODO: Add download media viewState...
         repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)
+    }
+
+    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
+        return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
 }

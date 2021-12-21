@@ -232,7 +232,7 @@ internal class PodcastEpisodesListAdapter(
                     notifyItemChanged(position)
                 }
 
-                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id)
+                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id) && !podcastEpisode.downloaded
 
                 textViewDownloadEpisodeButton.goneIfTrue(isFeedItemDownloadInProgress)
                 progressBarEpisodeDownload.goneIfFalse(isFeedItemDownloadInProgress)
