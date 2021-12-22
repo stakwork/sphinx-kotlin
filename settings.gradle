@@ -93,8 +93,8 @@ include ':sphinx:application:network:concepts:concept-socket-io'
 include ':sphinx:application:network:features:feature-socket-io'
 include ':sphinx:application:network:concepts:tor:concept-network-tor'
 include ':sphinx:application:network:features:tor:feature-network-tor'
-include ':sphinx:application:network:concepts:queries:concept-network-query-podcast-search'
-include ':sphinx:application:network:features:queries:feature-network-query-podcast-search'
+include ':sphinx:application:network:concepts:queries:concept-network-query-feed-search'
+include ':sphinx:application:network:features:queries:feature-network-query-feed-search'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'

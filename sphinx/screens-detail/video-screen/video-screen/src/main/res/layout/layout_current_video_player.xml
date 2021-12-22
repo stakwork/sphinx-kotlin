@@ -179,11 +179,30 @@
         app:layout_constraintTop_toBottomOf="@+id/text_view_video_published_date"
         tools:text="This video about setting up layouts on the Android view and all the jazz. This video about setting up layouts on the Android view and all the jazz." />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_subscribe_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:paddingHorizontal="@dimen/default_layout_margin"
+        android:paddingVertical="@dimen/default_small_layout_margin"
+        android:fontFamily="@font/roboto_medium"
+        android:gravity="center"
+        android:text="@string/subscribe"
+        android:textSize="@dimen/default_text_size_headline"
+        android:textColor="@color/textInverted"
+        android:background="@drawable/button_background"
+        android:backgroundTint="@android:color/white"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_view_video_description" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_half_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_video_description">
+        app:layout_constraintTop_toBottomOf="@+id/text_view_subscribe_button">
 
         <View
             android:layout_width="match_parent"
@@ -220,6 +239,7 @@
             android:textSize="@dimen/default_text_size_headline"
             android:maxLines="1"
             app:layout_constraintStart_toEndOf="@+id/card_view_contributor_image_wrapper"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/card_view_contributor_image_wrapper"
             app:layout_constraintBottom_toBottomOf="@+id/card_view_contributor_image_wrapper"
             tools:text="BTC Sessions"/>

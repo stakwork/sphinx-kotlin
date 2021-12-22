@@ -50,7 +50,7 @@ internal class FeedAllViewModel @Inject constructor(
                 goToPodcastPlayer(feed.chatId, feed.id, feed.feedUrl)
             }
             is FeedType.Video -> {
-                goToVideoPlayer(feed.chatId, feed.feedUrl)
+                goToVideoPlayer(feed.chatId, feed.id, feed.feedUrl)
             }
             is FeedType.Newsletter -> {
                 goToNewsletterDetail(feed.chatId, feed.feedUrl)
@@ -77,9 +77,9 @@ internal class FeedAllViewModel @Inject constructor(
         }
     }
 
-    private fun goToVideoPlayer(chatId: ChatId, feedUrl: FeedUrl) {
+    private fun goToVideoPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
         viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toVideoWatchScreen(chatId, feedUrl)
+            dashboardNavigator.toVideoWatchScreen(chatId, feedId, feedUrl)
         }
     }
 }

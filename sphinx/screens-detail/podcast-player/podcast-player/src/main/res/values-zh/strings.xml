@@ -2,6 +2,4 @@
 <resources>
     <string name="label_text_episodes_list_header">劇集</string>
     <string name="boost_sent">已傳送Boost</string>
-    <string name="subscribe">SUBSCRIBE</string>
-    <string name="unsubscribe">UNSUBSCRIBE</string>
 </resources>

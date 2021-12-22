@@ -7,6 +7,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,10 +17,14 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
 import chat.sphinx.dashboard.ui.DashboardFragment
-import chat.sphinx.dashboard.ui.adapter.PodcastSearchAdapter
+import chat.sphinx.dashboard.ui.DashboardFragmentsAdapter
+import chat.sphinx.dashboard.ui.adapter.FeedSearchAdapter
+import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
+import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_common.feed.FeedType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
@@ -28,6 +33,7 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,7 +64,7 @@ internal class FeedFragment : SideEffectFragment<
 
         setupSearch()
         setupFeedViewPager()
-        showPodcastSearchAdapter()
+        showFeedSearchAdapter()
     }
 
     override fun onResume() {
@@ -81,7 +87,11 @@ internal class FeedFragment : SideEffectFragment<
                 viewModel.currentViewState is FeedViewState.LoadingSearchResults
             ) {
                 binding.layoutSearchBar.editTextDashboardSearch.setText("")
-            } else if (viewModel.currentViewState is FeedViewState.SearchPlaceHolder) {
+            } else if (
+                viewModel.currentViewState is FeedViewState.SearchPlaceHolder ||
+                viewModel.currentViewState is FeedViewState.SearchPodcastPlaceHolder ||
+                viewModel.currentViewState is FeedViewState.SearchVideoPlaceHolder
+            ) {
                 viewModel.updateViewState(FeedViewState.Idle)
                 binding.searchBarClearFocus()
             } else {
@@ -90,14 +100,26 @@ internal class FeedFragment : SideEffectFragment<
         }
     }
 
+    private fun getFeedTypeSelected(): FeedType? {
+        binding.apply {
+            if (chipListen.isChecked) {
+                return FeedType.Podcast
+            } else if (chipWatch.isChecked) {
+                return FeedType.Video
+            }
+        }
+        return null
+    }
+
     private fun setupSearch() {
         binding.layoutSearchBar.apply {
             editTextDashboardSearch.addTextChangedListener { editable ->
                 buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.searchPodcastBy(
+                    viewModel.searchFeedsBy(
                         editable.toString(),
+                        getFeedTypeSelected(),
                         editTextDashboardSearch.hasFocus()
                     )
                 }
@@ -143,36 +165,46 @@ internal class FeedFragment : SideEffectFragment<
             viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
 
             chipAll.setOnClickListener {
-                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_ALL_POSITION
+                viewModel.feedChipsViewStateContainer.updateViewState(
+                    FeedChipsViewState.All
+                )
             }
 
             chipListen.setOnClickListener {
-                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_LISTEN_POSITION
+                viewModel.feedChipsViewStateContainer.updateViewState(
+                    FeedChipsViewState.Listen
+                )
             }
 
             chipWatch.setOnClickListener {
-                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_WATCH_POSITION
+                viewModel.feedChipsViewStateContainer.updateViewState(
+                    FeedChipsViewState.Watch
+                )
             }
 
             chipRead.setOnClickListener {
-                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_READ_POSITION
+                viewModel.feedChipsViewStateContainer.updateViewState(
+                    FeedChipsViewState.Read
+                )
             }
 
             chipPlay.setOnClickListener {
-                viewPagerFeedFragments.currentItem = FeedFragmentsAdapter.CHIP_PLAY_POSITION
+                viewModel.feedChipsViewStateContainer.updateViewState(
+                    FeedChipsViewState.Play
+                )
             }
         }
     }
 
-    private fun showPodcastSearchAdapter() {
-        val searchResultsAdapter = PodcastSearchAdapter(
+    private fun showFeedSearchAdapter() {
+        val searchResultsAdapter = FeedSearchAdapter(
             imageLoader,
             viewLifecycleOwner,
             onStopSupervisor,
             viewModel
         )
 
-        binding.layoutPodcastSearch.recyclerViewPodcastSearchResults.apply {
+        binding.layoutFeedSearch.recyclerViewFeedSearchResults.apply {
             this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = searchResultsAdapter
@@ -195,7 +227,7 @@ internal class FeedFragment : SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: FeedViewState) {
-        binding.layoutPodcastSearch.apply {
+        binding.layoutFeedSearch.apply {
             @Exhaustive
             when (viewState) {
                 is FeedViewState.Idle -> {
@@ -203,21 +235,76 @@ internal class FeedFragment : SideEffectFragment<
                 }
                 is FeedViewState.SearchPlaceHolder -> {
                     root.visible
-                    layoutConstraintPodcastSearchPlaceholder.visible
-                    layoutConstraintLoadingSearchSesults.gone
-                    recyclerViewPodcastSearchResults.gone
+                    layoutConstraintFeedSearchVideoPlaceholder.gone
+                    layoutConstraintFeedSearchPodcastPlaceholder.gone
+                    layoutConstraintFeedSearchPlaceholder.visible
+                    layoutConstraintLoadingSearchResults.gone
+                    recyclerViewFeedSearchResults.gone
+                }
+                is FeedViewState.SearchPodcastPlaceHolder -> {
+                    root.visible
+                    layoutConstraintFeedSearchVideoPlaceholder.gone
+                    layoutConstraintFeedSearchPodcastPlaceholder.visible
+                    layoutConstraintFeedSearchPlaceholder.gone
+                    layoutConstraintLoadingSearchResults.gone
+                    recyclerViewFeedSearchResults.gone
+                }
+                is FeedViewState.SearchVideoPlaceHolder -> {
+                    root.visible
+                    layoutConstraintFeedSearchVideoPlaceholder.visible
+                    layoutConstraintFeedSearchPodcastPlaceholder.gone
+                    layoutConstraintFeedSearchPlaceholder.gone
+                    layoutConstraintLoadingSearchResults.gone
+                    recyclerViewFeedSearchResults.gone
                 }
                 is FeedViewState.LoadingSearchResults -> {
                     root.visible
-                    layoutConstraintPodcastSearchPlaceholder.gone
-                    layoutConstraintLoadingSearchSesults.visible
-                    recyclerViewPodcastSearchResults.gone
+                    layoutConstraintFeedSearchVideoPlaceholder.gone
+                    layoutConstraintFeedSearchPodcastPlaceholder.gone
+                    layoutConstraintFeedSearchPlaceholder.gone
+                    layoutConstraintLoadingSearchResults.visible
+                    recyclerViewFeedSearchResults.gone
                 }
                 is FeedViewState.SearchResults -> {
                     root.visible
-                    layoutConstraintPodcastSearchPlaceholder.gone
-                    layoutConstraintLoadingSearchSesults.gone
-                    recyclerViewPodcastSearchResults.visible
+                    layoutConstraintFeedSearchVideoPlaceholder.gone
+                    layoutConstraintFeedSearchPodcastPlaceholder.gone
+                    layoutConstraintFeedSearchPlaceholder.gone
+                    layoutConstraintLoadingSearchResults.gone
+                    recyclerViewFeedSearchResults.visible
+                }
+            }
+        }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            binding.apply {
+                viewModel.feedChipsViewStateContainer.collect { viewState ->
+                    when (viewState) {
+                        is FeedChipsViewState.All -> {
+                            viewPagerFeedFragments.currentItem =
+                                FeedFragmentsAdapter.CHIP_ALL_POSITION
+                        }
+                        is FeedChipsViewState.Listen -> {
+                            viewPagerFeedFragments.currentItem =
+                                FeedFragmentsAdapter.CHIP_LISTEN_POSITION
+                        }
+                        is FeedChipsViewState.Watch -> {
+                            viewPagerFeedFragments.currentItem =
+                                FeedFragmentsAdapter.CHIP_WATCH_POSITION
+                        }
+                        is FeedChipsViewState.Read -> {
+                            viewPagerFeedFragments.currentItem =
+                                FeedFragmentsAdapter.CHIP_READ_POSITION
+                        }
+                        is FeedChipsViewState.Play -> {
+                            viewPagerFeedFragments.currentItem =
+                                FeedFragmentsAdapter.CHIP_PLAY_POSITION
+                        }
+                    }
                 }
             }
         }

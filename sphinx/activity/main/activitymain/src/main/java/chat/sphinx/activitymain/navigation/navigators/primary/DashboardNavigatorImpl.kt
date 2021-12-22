@@ -76,18 +76,18 @@ internal class DashboardNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration))
     }
 
-    override suspend fun toVideoFeedScreen(chatId: ChatId, feedUrl: FeedUrl) {
+    override suspend fun toVideoFeedScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
         detailDriver.submitNavigationRequest(
             ToVideoFeedDetailScreen(
-                chatId, feedUrl
+                chatId, feedId, feedUrl
             )
         )
     }
 
-    override suspend fun toVideoWatchScreen(chatId: ChatId, feedUrl: FeedUrl) {
+    override suspend fun toVideoWatchScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
         detailDriver.submitNavigationRequest(
             ToVideoWatchScreen(
-                chatId, feedUrl
+                chatId, feedId, feedUrl
             )
         )
     }

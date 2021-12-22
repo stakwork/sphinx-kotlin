@@ -11,12 +11,12 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
-import chat.sphinx.dashboard.databinding.LayoutPodcastSearchRowHolderBinding
-import chat.sphinx.dashboard.databinding.LayoutPodcastSearchSectionHeaderHolderBinding
+import chat.sphinx.dashboard.databinding.LayoutFeedSearchRowHolderBinding
+import chat.sphinx.dashboard.databinding.LayoutFeedSearchSectionHeaderHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
-import chat.sphinx.wrapper_podcast.PodcastSearchResult
-import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
+import chat.sphinx.wrapper_podcast.FeedSearchResult
+import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -26,7 +26,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class PodcastSearchAdapter(
+class FeedSearchAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -39,8 +39,8 @@ class PodcastSearchAdapter(
     }
 
     private inner class Diff(
-        private val oldList: List<PodcastSearchResultRow>,
-        private val newList: List<PodcastSearchResultRow>,
+        private val oldList: List<FeedSearchResultRow>,
+        private val newList: List<FeedSearchResultRow>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -60,14 +60,12 @@ class PodcastSearchAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean = when {
-                    old.podcastSearchResult != null && new.podcastSearchResult != null -> {
-                        old.podcastSearchResult?.id == new.podcastSearchResult?.id
-                    }
-                    old.sectionTitle != null && new.sectionTitle != null -> {
-                        old.sectionTitle            == new.sectionTitle
+                    old.feedSearchResult != null && new.feedSearchResult != null -> {
+                        old.feedSearchResult?.id == new.feedSearchResult?.id
                     }
                     else -> {
-                        false
+                        old.isSectionHeader      == new.isSectionHeader &&
+                        old.isFollowingSection   == new.isFollowingSection
                     }
                 }
 
@@ -88,14 +86,12 @@ class PodcastSearchAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean = when {
-                    old.podcastSearchResult != null && new.podcastSearchResult != null -> {
-                        old.podcastSearchResult?.id == new.podcastSearchResult?.id
-                    }
-                    old.sectionTitle != null && new.sectionTitle != null -> {
-                        old.sectionTitle            == new.sectionTitle
+                    old.feedSearchResult != null && new.feedSearchResult != null -> {
+                        old.feedSearchResult?.id == new.feedSearchResult?.id
                     }
                     else -> {
-                        false
+                        old.isSectionHeader      == new.isSectionHeader &&
+                        old.isFollowingSection   == new.isFollowingSection
                     }
                 }
 
@@ -112,7 +108,7 @@ class PodcastSearchAdapter(
 
     }
 
-    private val searchResults = ArrayList<PodcastSearchResultRow>(listOf())
+    private val searchResults = ArrayList<FeedSearchResultRow>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -120,7 +116,7 @@ class PodcastSearchAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                var list: List<PodcastSearchResultRow> = if (viewState is FeedViewState.SearchResults) {
+                var list: List<FeedSearchResultRow> = if (viewState is FeedViewState.SearchResults) {
                     viewState.searchResults
                 } else {
                     listOf()
@@ -128,7 +124,7 @@ class PodcastSearchAdapter(
 
                 if (searchResults.isEmpty()) {
                     searchResults.addAll(list)
-                    this@PodcastSearchAdapter.notifyDataSetChanged()
+                    this@FeedSearchAdapter.notifyDataSetChanged()
                 } else {
 
                     val diff = Diff(searchResults, list)
@@ -140,7 +136,7 @@ class PodcastSearchAdapter(
                         if (!diff.sameList) {
                             searchResults.clear()
                             searchResults.addAll(list)
-                            result.dispatchUpdatesTo(this@PodcastSearchAdapter)
+                            result.dispatchUpdatesTo(this@FeedSearchAdapter)
                         }
                     }
                 }
@@ -153,7 +149,7 @@ class PodcastSearchAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (searchResults.getOrNull(position)?.podcastSearchResult != null) {
+        if (searchResults.getOrNull(position)?.feedSearchResult != null) {
             return CONTENT_VIEW
         }
         return SECTION_VIEW
@@ -161,15 +157,15 @@ class PodcastSearchAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         if (viewType == CONTENT_VIEW) {
-            val binding = LayoutPodcastSearchRowHolderBinding.inflate(
+            val binding = LayoutFeedSearchRowHolderBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
             )
 
-            return PodcastSearchItemViewHolder(binding)
+            return FeedSearchItemViewHolder(binding)
         }
-        val binding = LayoutPodcastSearchSectionHeaderHolderBinding.inflate(
+        val binding = LayoutFeedSearchSectionHeaderHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -182,7 +178,7 @@ class PodcastSearchAdapter(
         if (SECTION_VIEW == getItemViewType(position)) {
             (holder as SectionHeaderViewHolder)?.bind(position)
         } else {
-            (holder as PodcastSearchItemViewHolder)?.bind(position)
+            (holder as FeedSearchItemViewHolder)?.bind(position)
         }
     }
 
@@ -193,19 +189,21 @@ class PodcastSearchAdapter(
     }
 
     inner class SectionHeaderViewHolder(
-        private val binding: LayoutPodcastSearchSectionHeaderHolderBinding
+        private val binding: LayoutFeedSearchSectionHeaderHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var sectionViewTitle: String? = null
 
         fun bind(position: Int) {
             binding.apply {
-                val title: String = searchResults.getOrNull(position)?.sectionTitle ?: let {
-                    sectionViewTitle = null
-                    return
-                }
+                val title: String = root.context.getString(
+                    if (searchResults.getOrNull(position)?.isFollowingSection == true) {
+                        R.string.feed_search_following_section
+                    } else {
+                        R.string.feed_search_directory_section
+                    }
+                )
                 sectionViewTitle = title
-
                 textViewSectionName.text = title
             }
         }
@@ -216,14 +214,14 @@ class PodcastSearchAdapter(
 
     }
 
-    inner class PodcastSearchItemViewHolder(
-        private val binding: LayoutPodcastSearchRowHolderBinding
+    inner class FeedSearchItemViewHolder(
+        private val binding: LayoutFeedSearchRowHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var holderJob: Job? = null
         private var disposable: Disposable? = null
 
-        private var searchResult: PodcastSearchResult? = null
+        private var searchResult: FeedSearchResult? = null
 
         init {
             binding.layoutConstraintSearchResultsHolder.setOnClickListener {
@@ -233,11 +231,11 @@ class PodcastSearchAdapter(
             }
         }
 
-        fun searchResultsSelected(searchResult: PodcastSearchResult) {
+        fun searchResultsSelected(searchResult: FeedSearchResult) {
             binding.progressBarResultLoading.visible
             binding.layoutConstraintSearchResultsHolder.isClickable = false
 
-            viewModel.podcastSearchResultSelected(searchResult) {
+            viewModel.feedSearchResultSelected(searchResult) {
                 binding.layoutConstraintSearchResultsHolder.isClickable = true
                 binding.progressBarResultLoading.gone
             }
@@ -245,10 +243,10 @@ class PodcastSearchAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-                val resultRow: PodcastSearchResultRow = searchResults.getOrNull(position) ?: let {
+                val resultRow: FeedSearchResultRow = searchResults.getOrNull(position) ?: let {
                     return
                 }
-                val result: PodcastSearchResult = resultRow?.podcastSearchResult ?: let {
+                val result: FeedSearchResult = resultRow?.feedSearchResult ?: let {
                     searchResult = null
                     return
                 }
@@ -260,7 +258,7 @@ class PodcastSearchAdapter(
                 result.imageUrl?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
-                            imageViewPodcastImage,
+                            imageViewFeedImage,
                             imageUrl,
                             imageLoaderOptions
                         ).also {
@@ -271,8 +269,10 @@ class PodcastSearchAdapter(
                     }
                 }
 
-                textViewPodcastName.text = result.title
-                textViewPodcastDescription.text = result.description
+                textViewFeedName.text = result.title
+                textViewFeedDescription.text = result.description
+
+                progressBarResultLoading.gone
 
                 viewDivider.goneIfFalse(!resultRow.isLastOnSection)
             }

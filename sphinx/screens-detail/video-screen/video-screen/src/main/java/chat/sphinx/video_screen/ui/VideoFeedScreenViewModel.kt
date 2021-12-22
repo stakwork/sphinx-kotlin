@@ -6,15 +6,19 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_podcast.Podcast
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -25,12 +29,39 @@ internal open class VideoFeedScreenViewModel(
 ): BaseViewModel<VideoFeedScreenViewState>(dispatchers, VideoFeedScreenViewState.Idle)
 {
     private val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
-        emitAll(feedRepository.getFeedByChatId(getArgChatId()))
+        getArgFeedId()?.let { feedId ->
+            emitAll(feedRepository.getFeedById(feedId))
+        } ?: run {
+            emitAll(feedRepository.getFeedByChatId(getArgChatId()))
+        }
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private suspend fun getVideoFeed(): Feed? {
+        videoFeedSharedFlow.replayCache.firstOrNull()?.let { feed ->
+            return feed
+        }
+
+        videoFeedSharedFlow.firstOrNull()?.let { feed ->
+            return feed
+        }
+
+        var feed: Feed? = null
+
+        try {
+            videoFeedSharedFlow.collect {
+                if (it != null) {
+                    feed = it
+                    throw Exception()
+                }
+            }
+        } catch (e: Exception) {}
+        delay(25L)
+        return feed
+    }
 
     open val selectedVideoStateContainer: ViewStateContainer<SelectedVideoViewState> by lazy {
         ViewStateContainer(SelectedVideoViewState.Idle)
@@ -44,6 +75,8 @@ internal open class VideoFeedScreenViewModel(
                         VideoFeedScreenViewState.FeedLoaded(
                             nnFeed.title,
                             nnFeed.imageUrlToShow,
+                            nnFeed.chatId,
+                            nnFeed.subscribed,
                             nnFeed.items
                         )
                     )
@@ -74,12 +107,14 @@ internal open class VideoFeedScreenViewModel(
             chatRepository.getChatById(getArgChatId()).firstOrNull()?.let { chat ->
                 chat.host?.let { chatHost ->
                     getArgFeedUrl()?.let { feedUrl ->
+                        val subscribed = (chat != null || (getVideoFeed()?.subscribed?.isTrue() == true))
+
                         feedRepository.updateFeedContent(
                             chatId = chat.id,
                             host = chatHost,
                             feedUrl = feedUrl,
                             chatUUID = chat.uuid,
-                            true.toSubscribed(),
+                            subscribed.toSubscribed(),
                             currentEpisodeId = null
                         )
                     }
@@ -101,11 +136,26 @@ internal open class VideoFeedScreenViewModel(
         )
     }
 
+    fun toggleSubscribeState() {
+        viewModelScope.launch(mainImmediate) {
+            getVideoFeed()?.let { feed ->
+                feedRepository.toggleFeedSubscribeState(
+                    feed.id,
+                    feed.subscribed
+                )
+            }
+        }
+    }
+
     open fun getArgChatId(): ChatId {
         return ChatId(ChatId.NULL_CHAT_ID.toLong())
     }
 
     open fun getArgFeedUrl(): FeedUrl? {
+        return null
+    }
+
+    open fun getArgFeedId(): FeedId? {
         return null
     }
 }

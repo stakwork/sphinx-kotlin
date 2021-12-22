@@ -8,16 +8,15 @@ import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_feed.*
-import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastSearchResult
+import chat.sphinx.wrapper_podcast.FeedSearchResult
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 
 
-internal class FeedDboPodcastSearchResultPresenterMapper(
+internal class FeedDboFeedSearchResultPresenterMapper(
     dispatchers: CoroutineDispatchers,
-): ClassMapper<FeedDbo, PodcastSearchResult>(dispatchers) {
-    override suspend fun mapFrom(value: FeedDbo): PodcastSearchResult {
-        return PodcastSearchResult(
+): ClassMapper<FeedDbo, FeedSearchResult>(dispatchers) {
+    override suspend fun mapFrom(value: FeedDbo): FeedSearchResult {
+        return FeedSearchResult(
             value.id.value,
             value.feed_type.value.toLong(),
             value.title.value,
@@ -36,7 +35,7 @@ internal class FeedDboPodcastSearchResultPresenterMapper(
         )
     }
 
-    override suspend fun mapTo(value: PodcastSearchResult): FeedDbo {
+    override suspend fun mapTo(value: FeedSearchResult): FeedDbo {
         return FeedDbo(
             id = FeedId(value.id),
             feed_type = FeedType.Podcast,

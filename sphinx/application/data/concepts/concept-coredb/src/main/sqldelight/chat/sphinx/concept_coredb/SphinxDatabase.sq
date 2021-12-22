@@ -1008,6 +1008,11 @@ feedUpsert {
 feedGetAll:
 SELECT *
 FROM feedDbo
+ORDER BY id DESC;
+
+feedGetAllSubscribed:
+SELECT *
+FROM feedDbo
 WHERE subscribed = 1
 ORDER BY id DESC;
 
@@ -1049,11 +1054,21 @@ SELECT *
 FROM feedDbo
 WHERE id = ?;
 
+feedGetByIds:
+SELECT *
+FROM feedDbo
+WHERE id IN ?;
+
 feedGetAllByTitle:
 SELECT *
 FROM feedDbo
-WHERE subscribed = 1
-AND (title LIKE :title);
+WHERE (title LIKE :title);
+
+feedGetAllByTitleAndType:
+SELECT *
+FROM feedDbo
+WHERE (title LIKE :title)
+AND feed_type = :feed_type;
 
 feedUpdateCurrentItemId:
 UPDATE feedDbo

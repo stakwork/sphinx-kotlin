@@ -31,4 +31,9 @@
     <string name="failed_to_reject_member">No se ha podido denegar la solicitud</string>
 
     <string name="newsletter_article">ARTÍCULO NEWSLETTER</string>
+
+    <string name="subscribe">SUSCRIBIRSE</string>
+    <string name="unsubscribe">DESUSCRIBIRSE</string>
+    <string name="feed_search_following_section">SIGUIENDO</string>
+    <string name="feed_search_directory_section">DIRECTORIO</string>
 </resources>
