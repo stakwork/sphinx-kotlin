@@ -69,6 +69,7 @@
                 android:gravity="center"
                 android:text="@string/subscribe"
                 android:textSize="@dimen/default_text_size_headline"
+                android:textAllCaps="true"
                 android:textColor="@color/textInverted"
                 android:background="@drawable/button_background"
                 android:backgroundTint="@android:color/white"
