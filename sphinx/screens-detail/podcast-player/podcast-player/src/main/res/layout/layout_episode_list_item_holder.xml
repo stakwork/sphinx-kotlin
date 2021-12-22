@@ -31,10 +31,10 @@
         android:layout_height="@dimen/episode_list_item_cover_image_xy"
         android:scaleType="centerInside"
         android:layout_marginLeft="@dimen/default_double_layout_margin"
+        android:src="@drawable/ic_podcast_placeholder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/sphinx_white_logo" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/text_view_episode_title"

@@ -206,7 +206,7 @@ internal class PodcastEpisodesListAdapter(
                 textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
 
                 // Image
-                podcastEpisode.image?.value?.let { episodeImage ->
+                podcastEpisode.imageUrlToShow?.value?.let { episodeImage ->
                     lifecycleOwner.lifecycleScope.launch(viewModel.dispatchers.mainImmediate) {
                         disposable = imageLoader.load(
                             imageViewEpisodeImage,

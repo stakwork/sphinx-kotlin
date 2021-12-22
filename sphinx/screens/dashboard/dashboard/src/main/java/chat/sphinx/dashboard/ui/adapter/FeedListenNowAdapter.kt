@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -192,6 +193,10 @@ class FeedListenNowAdapter(
                     }.let { job ->
                         holderJob = job
                     }
+                } ?: run {
+                    imageViewItemImage.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, R.drawable.ic_podcast_placeholder)
+                    )
                 }
 
                 textViewItemName.text = podcastEpisode.titleToShow

@@ -38,7 +38,7 @@ data class FeedItem(
             imageUrl?.let {
                 return it
             }
-            return null
+            return thumbnailUrlToShow
         }
 
     var imageUrlToShow: PhotoUrl? = null

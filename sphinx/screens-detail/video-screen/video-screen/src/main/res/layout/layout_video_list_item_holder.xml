@@ -29,10 +29,10 @@
         android:layout_marginVertical="@dimen/default_half_layout_margin"
         android:scaleType="centerCrop"
         android:layout_marginLeft="@dimen/default_double_layout_margin"
+        android:src="@drawable/ic_video_placeholder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/paid_image_blurred_placeholder" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_video_title"
