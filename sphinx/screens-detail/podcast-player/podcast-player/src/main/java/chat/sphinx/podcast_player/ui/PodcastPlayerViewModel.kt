@@ -24,7 +24,6 @@ import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -400,13 +399,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     fun downloadMedia(podcastEpisode: PodcastEpisode) {
-        // TODO: Add download media viewState...
         repositoryMedia.downloadMediaIfApplicable(podcastEpisode)
     }
 
-    suspend fun deleteDownloadedMedia(feedItem: FeedItem) {
-        // TODO: Add download media viewState...
-        repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)
+    suspend fun deleteDownloadedMedia(podcastEpisode: PodcastEpisode) {
+        repositoryMedia.deleteDownloadedMediaIfApplicable(podcastEpisode)
     }
 
     fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {

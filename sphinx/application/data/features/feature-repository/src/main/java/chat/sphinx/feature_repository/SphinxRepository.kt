@@ -5136,6 +5136,7 @@ abstract class SphinxRepository(
                         }
                     }
                 }
+                delay(200L)
             } catch (e: Exception) {
 
             }

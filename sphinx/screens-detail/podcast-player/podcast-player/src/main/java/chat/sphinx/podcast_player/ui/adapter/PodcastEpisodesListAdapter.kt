@@ -198,6 +198,14 @@ internal class PodcastEpisodesListAdapter(
                 episode = podcastEpisode
                 disposable?.dispose()
 
+                swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
+                layoutConstraintDeleteButtonContainer.setOnClickListener {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.deleteDownloadedMedia(podcastEpisode)
+                        notifyItemChanged(position)
+                        swipeRevealLayoutPodcastFeedItem.close(true)
+                    }
+                }
                 //Playing State
                 layoutConstraintEpisodeListItemHolder.setBackgroundColor(
                     root.context.getColor(

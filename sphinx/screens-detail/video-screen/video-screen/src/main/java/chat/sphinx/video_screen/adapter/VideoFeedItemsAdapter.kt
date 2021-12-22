@@ -211,6 +211,7 @@ internal class VideoFeedItemsAdapter (
                 layoutConstraintDeleteButtonContainer.setOnClickListener {
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         viewModel.deleteDownloadedMedia(f)
+                        notifyItemChanged(position)
                         swipeRevealLayoutVideoFeedItem.close(true)
                     }
                 }
