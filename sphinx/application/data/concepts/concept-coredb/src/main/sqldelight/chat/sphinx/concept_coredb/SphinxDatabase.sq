@@ -947,10 +947,8 @@ feedUpsert {
     UPDATE feedDbo
     SET feed_type = :feed_type,
         title = :title,
-        description = :description,
         feed_url = :feed_url,
         author = :author,
-        image_url = :image_url,
         owner_url = :owner_url,
         link = :link,
         date_published = :date_published,

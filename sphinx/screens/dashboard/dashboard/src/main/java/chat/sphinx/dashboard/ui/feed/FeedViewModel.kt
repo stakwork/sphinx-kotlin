@@ -14,10 +14,8 @@ import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
-import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.isNewsletter
-import chat.sphinx.wrapper_feed.isPodcast
-import chat.sphinx.wrapper_feed.isVideo
+import chat.sphinx.wrapper_common.toPhotoUrl
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -165,8 +163,10 @@ class FeedViewModel @Inject constructor(
                     chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
                     feedUrl = feedUrl,
+                    searchResultDescription = searchResult.description?.toFeedDescription(),
+                    searchResultImageUrl = searchResult.imageUrl?.toPhotoUrl(),
                     chatUUID = null,
-                    false.toSubscribed(),
+                    subscribed = false.toSubscribed(),
                     currentEpisodeId = null
                 )
             }

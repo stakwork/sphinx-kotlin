@@ -194,7 +194,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     host = chatHost,
                     feedUrl = feedUrl,
                     chatUUID = chat?.uuid,
-                    subscribed.toSubscribed(),
+                    subscribed = subscribed.toSubscribed(),
                     currentEpisodeId = null
                 )
             }

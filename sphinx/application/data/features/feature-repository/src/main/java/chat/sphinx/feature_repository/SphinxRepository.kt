@@ -3423,6 +3423,8 @@ abstract class SphinxRepository(
         chatId: ChatId,
         host: ChatHost,
         feedUrl: FeedUrl,
+        searchResultDescription: FeedDescription?,
+        searchResultImageUrl: PhotoUrl?,
         chatUUID: ChatUUID?,
         subscribed: Subscribed,
         currentItemId: FeedId?
@@ -3447,11 +3449,7 @@ abstract class SphinxRepository(
 
                             response.value.id.toFeedId()?.let { feedId ->
                                 queries.feedGetByIds(
-                                    listOf(
-                                        feedId,
-                                        FeedId("yt:channel:${feedId.value}"),
-                                        FeedId("yt:playlist:${feedId.value}")
-                                    )
+                                    feedId.youtubeFeedIds()
                                 ).executeAsOneOrNull()
                                     ?.let { existingFeed ->
                                         //If feed already exists linked to a chat, do not override with NULL CHAT ID
@@ -3465,6 +3463,8 @@ abstract class SphinxRepository(
                                 upsertFeed(
                                     response.value,
                                     feedUrl,
+                                    searchResultDescription,
+                                    searchResultImageUrl,
                                     cId,
                                     currentItemId,
                                     subscribed,
@@ -3501,13 +3501,7 @@ abstract class SphinxRepository(
     override fun getFeedById(feedId: FeedId): Flow<Feed?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val feedIds = listOf(
-            feedId,
-            FeedId("yt:channel:${feedId.value}"),
-            FeedId("yt:playlist:${feedId.value}")
-        )
-
-        queries.feedGetByIds(feedIds)
+        queries.feedGetByIds(feedId.youtubeFeedIds())
             .asFlow()
             .mapToOneOrNull(io)
             .map { it?.let { feedDboPresenterMapper.mapFrom(it) } }

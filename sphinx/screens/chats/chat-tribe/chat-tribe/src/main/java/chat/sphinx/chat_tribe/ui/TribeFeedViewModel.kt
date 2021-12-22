@@ -230,12 +230,12 @@ internal class TribeFeedViewModel @Inject constructor(
 
                 viewModelScope.launch(mainImmediate) {
                     feedRepository.updateFeedContent(
-                        args.chatId,
-                        data.host,
-                        data.feedUrl,
-                        data.chatUUID,
-                        true.toSubscribed(),
-                        data.metaData?.itemId
+                        chatId = args.chatId,
+                        host = data.host,
+                        feedUrl = data.feedUrl,
+                        chatUUID = data.chatUUID,
+                        subscribed = true.toSubscribed(),
+                        currentEpisodeId = data.metaData?.itemId
                     )
                 }
 

@@ -449,6 +449,8 @@ inline fun TransactionCallbacks.deleteSubscriptionById(
 fun TransactionCallbacks.upsertFeed(
     feedDto: FeedDto,
     feedUrl: FeedUrl,
+    searchResultDescription: FeedDescription? = null,
+    searchResultImageUrl: PhotoUrl? = null,
     chatId: ChatId,
     currentItemId: FeedId?,
     subscribed: Subscribed,
@@ -518,13 +520,27 @@ fun TransactionCallbacks.upsertFeed(
         )
     }
 
+    val description = searchResultDescription
+        ?: if (feedDto.description?.toFeedDescription() != null) {
+            feedDto.description?.toFeedDescription()
+        } else {
+            null
+        }
+
+    val imageUrl = searchResultImageUrl
+        ?: if (feedDto.imageUrl?.toPhotoUrl() != null) {
+            feedDto.imageUrl?.toPhotoUrl()
+        } else {
+            null
+        }
+
     queries.feedUpsert(
         feed_type = feedDto.feedType.toInt().toFeedType(),
         title = FeedTitle(feedDto.title),
-        description = feedDto.description?.toFeedDescription(),
+        description = description,
         feed_url = feedUrl,
         author = feedDto.author?.toFeedAuthor(),
-        image_url = feedDto.imageUrl?.toPhotoUrl(),
+        image_url = imageUrl,
         owner_url = feedDto.ownerUrl?.toFeedUrl(),
         link = feedDto.link?.toFeedUrl(),
         date_published = feedDto.datePublished?.secondsToDateTime(),

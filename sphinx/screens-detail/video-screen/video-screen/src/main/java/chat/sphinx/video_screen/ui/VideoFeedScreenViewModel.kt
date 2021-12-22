@@ -114,7 +114,7 @@ internal open class VideoFeedScreenViewModel(
                             host = chatHost,
                             feedUrl = feedUrl,
                             chatUUID = chat.uuid,
-                            subscribed.toSubscribed(),
+                            subscribed = subscribed.toSubscribed(),
                             currentEpisodeId = null
                         )
                     }
