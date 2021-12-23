@@ -94,10 +94,12 @@ class VideoPlayerController(
     }
 }
 
-fun Uri.getMediaDuration(): Long {
+fun Uri.getMediaDuration(
+    isLocalFile: Boolean
+): Long {
     val retriever = MediaMetadataRetriever()
     return try {
-        if (Build.VERSION.SDK_INT >= 14) {
+        if (Build.VERSION.SDK_INT >= 14 && !isLocalFile) {
             retriever.setDataSource(this.toString(), HashMap<String, String>())
         } else {
             retriever.setDataSource(this.toString())

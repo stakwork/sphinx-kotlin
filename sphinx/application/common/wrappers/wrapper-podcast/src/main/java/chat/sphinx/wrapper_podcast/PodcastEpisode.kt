@@ -12,10 +12,10 @@ data class PodcastEpisode(
     val description: FeedDescription?,
     val image: PhotoUrl?,
     val link: FeedUrl?,
+    val podcastId: FeedId,
     override val enclosureUrl: FeedUrl,
     override val enclosureLength: FeedEnclosureLength?,
     override val enclosureType: FeedEnclosureType?,
-    val podcastId: FeedId,
     override val localFile: File?,
 ): DownloadableFeedItem {
 

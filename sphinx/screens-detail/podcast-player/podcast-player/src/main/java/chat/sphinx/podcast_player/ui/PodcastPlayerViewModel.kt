@@ -1,6 +1,8 @@
 package chat.sphinx.podcast_player.ui
 
+import android.content.Context
 import android.media.MediaMetadataRetriever
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.SavedStateHandle
@@ -35,6 +37,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
@@ -393,9 +396,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun retrieveEpisodeDuration(episodeUrl: String): Long {
-        val uri = Uri.parse(episodeUrl)
-        return uri.getMediaDuration()
+    fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
+        localFile?.let {
+            return Uri.fromFile(it).getMediaDuration(true)
+        } ?: run {
+            return Uri.parse(episodeUrl).getMediaDuration(false)
+        }
     }
 
     fun downloadMedia(podcastEpisode: PodcastEpisode) {
@@ -411,10 +417,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 }
 
-fun Uri.getMediaDuration(): Long {
+fun Uri.getMediaDuration(
+    isLocalFile: Boolean
+): Long {
     val retriever = MediaMetadataRetriever()
     return try {
-        if (Build.VERSION.SDK_INT >= 14) {
+        if (Build.VERSION.SDK_INT >= 14 && !isLocalFile) {
             retriever.setDataSource(this.toString(), HashMap<String, String>())
         } else {
             retriever.setDataSource(this.toString())

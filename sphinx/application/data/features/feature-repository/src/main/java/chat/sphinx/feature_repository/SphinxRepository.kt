@@ -4993,7 +4993,7 @@ abstract class SphinxRepository(
     }
 
     private val feedItemLock = Mutex()
-    val downloadFeedItemLockMap = SynchronizedMap<FeedId, Pair<Int, Mutex>>()
+    private val downloadFeedItemLockMap = SynchronizedMap<FeedId, Pair<Int, Mutex>>()
 
     override fun inProgressDownloadIds(): List<FeedId> {
         return downloadFeedItemLockMap.withLock { map ->
@@ -5021,8 +5021,6 @@ abstract class SphinxRepository(
         }
 
         applicationScope.launch(mainImmediate) {
-
-
             downloadLock.withLock {
                 sphinxNotificationManager.notify(
                     notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
@@ -5059,7 +5057,6 @@ abstract class SphinxRepository(
 
                             feedItemLock.withLock {
                                 withContext(io) {
-
                                     queries.transaction {
                                         queries.feedItemUpdateLocalFile(
                                             streamToFile,

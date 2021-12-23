@@ -34,6 +34,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -478,8 +479,11 @@ internal class TribeFeedViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveEpisodeDuration(episodeUrl: String): Long {
-        val uri = Uri.parse(episodeUrl)
-        return uri.getMediaDuration()
+    private fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
+        localFile?.let {
+            return Uri.fromFile(it).getMediaDuration(true)
+        } ?: run {
+            return Uri.parse(episodeUrl).getMediaDuration(false)
+        }
     }
 }
