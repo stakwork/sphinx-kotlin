@@ -3817,11 +3817,12 @@ abstract class SphinxRepository(
         ).collect { response ->
             @Exhaustive
             when (response) {
-                is LoadResponse.Loading -> {
-                }
+                is LoadResponse.Loading -> {}
 
                 is Response.Error -> {
-                    results = mutableListOf()
+                    results.addAll(
+                        getSubscribedItemsBy(searchTerm, feedType)
+                    )
                 }
                 is Response.Success -> {
 
