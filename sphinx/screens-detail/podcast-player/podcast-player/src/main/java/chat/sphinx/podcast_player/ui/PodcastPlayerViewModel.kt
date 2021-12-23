@@ -1,8 +1,6 @@
 package chat.sphinx.podcast_player.ui
 
-import android.content.Context
 import android.media.MediaMetadataRetriever
-import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.SavedStateHandle
@@ -409,7 +407,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     suspend fun deleteDownloadedMedia(podcastEpisode: PodcastEpisode) {
-        repositoryMedia.deleteDownloadedMediaIfApplicable(podcastEpisode)
+        if (repositoryMedia.deleteDownloadedMediaIfApplicable(podcastEpisode)) {
+            podcastEpisode.localFile = null
+        }
     }
 
     fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {

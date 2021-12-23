@@ -26,7 +26,7 @@ interface RepositoryMedia {
 
     suspend fun deleteDownloadedMediaIfApplicable(
         feedItem: DownloadableFeedItem
-    )
+    ): Boolean
 
     fun streamPodcastPayments(
         chatId: ChatId,

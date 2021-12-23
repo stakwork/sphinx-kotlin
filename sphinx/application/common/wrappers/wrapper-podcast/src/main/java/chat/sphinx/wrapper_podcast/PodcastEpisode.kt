@@ -16,7 +16,7 @@ data class PodcastEpisode(
     override val enclosureUrl: FeedUrl,
     override val enclosureLength: FeedEnclosureLength?,
     override val enclosureType: FeedEnclosureType?,
-    override val localFile: File?,
+    override var localFile: File?,
 ): DownloadableFeedItem {
 
     var playing: Boolean = false

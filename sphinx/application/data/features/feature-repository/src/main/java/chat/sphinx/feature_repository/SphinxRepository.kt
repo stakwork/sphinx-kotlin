@@ -5111,7 +5111,7 @@ abstract class SphinxRepository(
 
     override suspend fun deleteDownloadedMediaIfApplicable(
         feedItem: DownloadableFeedItem
-    ) {
+    ): Boolean {
         val feedItemId: FeedId = feedItem.id
         val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -5134,10 +5134,13 @@ abstract class SphinxRepository(
                     }
                 }
                 delay(200L)
+
+                return true
             } catch (e: Exception) {
 
             }
         }
+        return false
     }
 
     override suspend fun getPaymentTemplates(): Response<List<PaymentTemplate>, ResponseError> {
