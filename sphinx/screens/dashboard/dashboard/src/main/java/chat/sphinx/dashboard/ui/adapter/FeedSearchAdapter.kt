@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
@@ -15,6 +16,9 @@ import chat.sphinx.dashboard.databinding.LayoutFeedSearchRowHolderBinding
 import chat.sphinx.dashboard.databinding.LayoutFeedSearchSectionHeaderHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
+import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.feed.toFeedType
+import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import io.matthewnelson.android_feature_screens.util.gone
@@ -267,6 +271,10 @@ class FeedSearchAdapter(
                     }.let { job ->
                         holderJob = job
                     }
+                } ?: run {
+                    imageViewFeedImage.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, result.getPlaceHolderImageRes())
+                    )
                 }
 
                 textViewFeedName.text = result.title
@@ -288,3 +296,19 @@ class FeedSearchAdapter(
         lifecycleOwner.lifecycle.addObserver(this)
     }
 }
+
+inline fun FeedSearchResult.getPlaceHolderImageRes(): Int =
+    when (feedType.toInt().toFeedType()) {
+        is FeedType.Podcast -> {
+            R.drawable.ic_podcast_placeholder
+        }
+        is FeedType.Video -> {
+            R.drawable.ic_video_placeholder
+        }
+        is FeedType.Newsletter -> {
+            R.drawable.ic_newsletter_placeholder
+        }
+        else -> {
+            R.drawable.ic_podcast_placeholder
+        }
+    }

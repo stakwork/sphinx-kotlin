@@ -25,6 +25,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -79,6 +80,8 @@ class FeedViewModel @Inject constructor(
         )
         
         viewModelScope.launch(mainImmediate) {
+            delay(500)
+
             feedRepository.searchFeedsBy(
                 searchTerm,
                 feedType
