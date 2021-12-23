@@ -12,11 +12,11 @@
     <dimen name="video_list_item_divider_margin_x">30dp</dimen>
     <dimen name="video_list_item_cover_image_width">120dp</dimen>
     <dimen name="video_list_item_cover_image_height">80dp</dimen>
-    <dimen name="video_list_item_download_button_xy">42sp</dimen>
+    <dimen name="video_list_item_download_button_xy">25sp</dimen>
 
     <dimen name="recycler_view_holder_height">85dp</dimen>
     <dimen name="recycler_view_holder_end_margin">30dp</dimen>
     <dimen name="recycler_view_header_holder_height">45dp</dimen>
 
-    <dimen name="delete_download_holder_button_icon_xy">25dp</dimen>
+    <dimen name="delete_download_holder_button_icon_xy">20dp</dimen>
 </resources>

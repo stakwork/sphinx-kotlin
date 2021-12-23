@@ -24,38 +24,21 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layout_constraint_delete_button_container"
-                    android:layout_width="@dimen/recycler_view_holder_height"
+                    android:layout_width="@dimen/video_list_item_holder_height"
                     android:layout_height="match_parent"
                     android:clickable="true"
                     android:focusable="true"
                     app:layout_constraintStart_toStartOf="parent"
-                    android:background="@color/primaryRed"
-                    >
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/text_view_delete_button_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/roboto_medium"
-                        android:gravity="center"
-                        android:lines="2"
-                        android:textColor="@android:color/white"
-                        android:layout_marginBottom="@dimen/default_form_scan_icon_bottom_margin"
-                        android:textSize="@dimen/default_text_size_body"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:text="@string/delete_download" />
+                    android:background="@color/badgeRed">
 
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/image_view_delete_button_icon"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
+                        android:layout_width="@dimen/delete_download_holder_button_icon_xy"
+                        android:layout_height="@dimen/delete_download_holder_button_icon_xy"
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_icon_delete"
                         android:tint="@android:color/white"
-                        android:layout_margin="@dimen/default_half_layout_margin"
-                        app:layout_constraintBottom_toTopOf="@+id/text_view_delete_button_title"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -163,7 +146,7 @@
                         android:gravity="center"
                         android:text="@string/material_icon_name_cloud_download"
                         android:textColor="@color/text"
-                        android:textSize="30sp"
+                        android:textSize="20sp"
                         android:clickable="true"
                         android:focusable="true"
                         app:layout_constraintBottom_toBottomOf="parent"
