@@ -19,6 +19,7 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.io.File
 
 internal open class VideoFeedScreenViewModel(
     dispatchers: CoroutineDispatchers,
@@ -114,9 +115,14 @@ internal open class VideoFeedScreenViewModel(
         return null
     }
 
-    fun downloadMedia(feedItem: FeedItem) {
-        // TODO: Add download media viewState...
-        repositoryMedia.downloadMediaIfApplicable(feedItem)
+    fun downloadMedia(
+        feedItem: FeedItem,
+        downloadCompleteCallback: (downloadedFile: File) -> Unit
+    ) {
+        repositoryMedia.downloadMediaIfApplicable(
+            feedItem,
+            downloadCompleteCallback
+        )
     }
 
     suspend fun deleteDownloadedMedia(feedItem: FeedItem) {

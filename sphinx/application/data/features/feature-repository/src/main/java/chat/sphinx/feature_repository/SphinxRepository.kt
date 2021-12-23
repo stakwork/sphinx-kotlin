@@ -5002,7 +5002,8 @@ abstract class SphinxRepository(
     }
 
     override fun downloadMediaIfApplicable(
-        feedItem: DownloadableFeedItem
+        feedItem: DownloadableFeedItem,
+        downloadCompleteCallback: (downloadedFile: File) -> Unit
     ) {
         val feedItemId: FeedId = feedItem.id
 
@@ -5073,7 +5074,7 @@ abstract class SphinxRepository(
                             )
                             // hold downloadLock until table change propagates to UI
                             delay(200L)
-
+                            downloadCompleteCallback.invoke(streamToFile)
                         } ?: streamToFile.delete()
                     }
                 } else {

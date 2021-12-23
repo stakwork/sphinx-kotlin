@@ -220,7 +220,12 @@ internal class VideoFeedItemsAdapter (
                 } else {
                     textViewDownloadVideoButton.setTextColor(getColor(R.color.secondaryText))
                     textViewDownloadVideoButton.setOnClickListener {
-                        viewModel.downloadMedia(f)
+                        viewModel.downloadMedia(f)  { downloadedFile ->
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                f.localFile = downloadedFile
+                                notifyItemChanged(position)
+                            }
+                        }
                         notifyItemChanged(position)
                     }
                 }

@@ -402,8 +402,14 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun downloadMedia(podcastEpisode: PodcastEpisode) {
-        repositoryMedia.downloadMediaIfApplicable(podcastEpisode)
+    fun downloadMedia(
+        podcastEpisode: PodcastEpisode,
+        downloadCompleteCallback: (downloadedFile: File) -> Unit
+    ) {
+        repositoryMedia.downloadMediaIfApplicable(
+            podcastEpisode,
+            downloadCompleteCallback
+        )
     }
 
     suspend fun deleteDownloadedMedia(podcastEpisode: PodcastEpisode) {

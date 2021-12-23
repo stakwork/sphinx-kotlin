@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.DownloadableFeedItem
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.PodcastDestination
+import java.io.File
 
 interface RepositoryMedia {
 
@@ -19,7 +20,8 @@ interface RepositoryMedia {
     )
 
     fun downloadMediaIfApplicable(
-        feedItem: DownloadableFeedItem
+        feedItem: DownloadableFeedItem,
+        downloadCompleteCallback: (downloadedFile: File) -> Unit
     )
 
     fun inProgressDownloadIds(): List<FeedId>

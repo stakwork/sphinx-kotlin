@@ -236,7 +236,12 @@ internal class PodcastEpisodesListAdapter(
                 )
 
                 textViewDownloadEpisodeButton.setOnClickListener {
-                    viewModel.downloadMedia(podcastEpisode)
+                    viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            podcastEpisode.localFile = downloadedFile
+                            notifyItemChanged(position)
+                        }
+                    }
                     notifyItemChanged(position)
                 }
 
