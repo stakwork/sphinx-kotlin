@@ -3444,21 +3444,22 @@ abstract class SphinxRepository(
                     is Response.Error -> {
                     }
                     is Response.Success -> {
-                        podcastLock.withLock {
-                            var cId: ChatId = chatId
+                        
+                        var cId: ChatId = chatId
 
-                            response.value.id.toFeedId()?.let { feedId ->
-                                queries.feedGetByIds(
-                                    feedId.youtubeFeedIds()
-                                ).executeAsOneOrNull()
-                                    ?.let { existingFeed ->
-                                        //If feed already exists linked to a chat, do not override with NULL CHAT ID
-                                        if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-                                            cId = existingFeed.chat_id
-                                        }
+                        response.value.id.toFeedId()?.let { feedId ->
+                            queries.feedGetByIds(
+                                feedId.youtubeFeedIds()
+                            ).executeAsOneOrNull()
+                                ?.let { existingFeed ->
+                                    //If feed already exists linked to a chat, do not override with NULL CHAT ID
+                                    if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+                                        cId = existingFeed.chat_id
                                     }
-                            }
+                                }
+                        }
 
+                        podcastLock.withLock {
                             queries.transaction {
                                 upsertFeed(
                                     response.value,
