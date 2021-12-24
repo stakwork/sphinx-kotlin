@@ -47,10 +47,12 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
+
+    implementation deps.swipeRevealLayout.sdk
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

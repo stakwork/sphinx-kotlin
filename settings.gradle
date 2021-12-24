@@ -44,6 +44,8 @@ include ':sphinx:application:data:features:feature-meme-server'
 include ':sphinx:application:data:concepts:concept-paging'
 include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
+include ':sphinx:application:data:concepts:concept-sphinx-notification-manager'
+include ':sphinx:application:data:features:feature-sphinx-notification-manager'
 
 include ':sphinx:application:data:concepts:repositories:concept-repository-chat'
 include ':sphinx:application:data:concepts:repositories:concept-repository-contact'

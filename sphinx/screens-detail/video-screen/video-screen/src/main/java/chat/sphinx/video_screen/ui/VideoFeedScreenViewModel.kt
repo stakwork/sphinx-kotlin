@@ -3,6 +3,7 @@ package chat.sphinx.video_screen.ui
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -21,10 +22,12 @@ import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.io.File
 
 internal open class VideoFeedScreenViewModel(
     dispatchers: CoroutineDispatchers,
     private val chatRepository: ChatRepository,
+    private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
 ): BaseViewModel<VideoFeedScreenViewState>(dispatchers, VideoFeedScreenViewState.Idle)
 {
@@ -89,6 +92,7 @@ internal open class VideoFeedScreenViewModel(
                                     video.title,
                                     video.description,
                                     video.enclosureUrl,
+                                    video.localFile,
                                     video.dateUpdated,
                                     video.duration
                                 )
@@ -130,6 +134,7 @@ internal open class VideoFeedScreenViewModel(
                 video.title,
                 video.description,
                 video.enclosureUrl,
+                video.localFile,
                 video.dateUpdated,
                 video.duration
             )
@@ -157,5 +162,25 @@ internal open class VideoFeedScreenViewModel(
 
     open fun getArgFeedId(): FeedId? {
         return null
+    }
+
+    fun downloadMedia(
+        feedItem: FeedItem,
+        downloadCompleteCallback: (downloadedFile: File) -> Unit
+    ) {
+        repositoryMedia.downloadMediaIfApplicable(
+            feedItem,
+            downloadCompleteCallback
+        )
+    }
+
+    suspend fun deleteDownloadedMedia(feedItem: FeedItem) {
+        if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
+            feedItem.localFile = null
+        }
+    }
+
+    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
+        return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
 }

@@ -24,7 +24,8 @@ internal class FeedItemDboPresenterMapper(
             value.thumbnail_url,
             value.link,
             value.feed_id,
-            value.duration
+            value.duration,
+            value.local_file
         )
     }
 
@@ -44,7 +45,8 @@ internal class FeedItemDboPresenterMapper(
             value.thumbnailUrl,
             value.link,
             value.feedId,
-            value.duration
+            value.duration,
+            value.localFile
         )
     }
 }

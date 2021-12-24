@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_feed.FeedDescription
 import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_feed.FeedTitle
 import io.matthewnelson.concept_views.viewstate.ViewState
+import java.io.File
 
 internal sealed class SelectedVideoViewState: ViewState<SelectedVideoViewState>() {
 
@@ -17,6 +18,7 @@ internal sealed class SelectedVideoViewState: ViewState<SelectedVideoViewState>(
         val title: FeedTitle,
         val description: FeedDescription?,
         val url: FeedUrl,
+        val localFile: File?,
         val date: DateTime?,
         val duration: FeedItemDuration?
     ): SelectedVideoViewState()

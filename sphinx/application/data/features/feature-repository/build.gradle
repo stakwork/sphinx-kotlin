@@ -18,6 +18,7 @@ dependencies {
 
     api project(path: ':sphinx:application:data:concepts:concept-media-cache')
     api project(path: ':sphinx:application:data:concepts:concept-meme-server')
+    api project(path: ':sphinx:application:data:concepts:concept-sphinx-notification-manager')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard')
@@ -44,6 +45,7 @@ dependencies {
     api deps.kotlin.reflect
     api deps.square.moshi
     api deps.square.sqlDelightCoroutines
+    implementation project(path: ':sphinx:application:data:concepts:concept-sphinx-notification-manager')
 
     testImplementation deps.square.sqlDelightJvm
     testImplementation project(path: ':sphinx:test:test-network-query')

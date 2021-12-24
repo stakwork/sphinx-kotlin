@@ -8,15 +8,19 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.isTrue
+import chat.sphinx.wrapper_common.feed.toFeedUrl
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
@@ -31,6 +35,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
@@ -46,6 +51,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
+    private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
@@ -254,7 +260,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                             args.chatId,
                             podcast.id.value,
                             episode.id.value,
-                            episode.enclosureUrl.value,
+                            episode.episodeUrl,
                             Sat(podcast.satsPerMinute),
                             podcast.speed,
                             startTime,
@@ -390,16 +396,41 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun retrieveEpisodeDuration(episodeUrl: String): Long {
-        val uri = Uri.parse(episodeUrl)
-        return uri.getMediaDuration()
+    fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
+        localFile?.let {
+            return Uri.fromFile(it).getMediaDuration(true)
+        } ?: run {
+            return Uri.parse(episodeUrl).getMediaDuration(false)
+        }
+    }
+
+    fun downloadMedia(
+        podcastEpisode: PodcastEpisode,
+        downloadCompleteCallback: (downloadedFile: File) -> Unit
+    ) {
+        repositoryMedia.downloadMediaIfApplicable(
+            podcastEpisode,
+            downloadCompleteCallback
+        )
+    }
+
+    suspend fun deleteDownloadedMedia(podcastEpisode: PodcastEpisode) {
+        if (repositoryMedia.deleteDownloadedMediaIfApplicable(podcastEpisode)) {
+            podcastEpisode.localFile = null
+        }
+    }
+
+    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
+        return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
 }
 
-fun Uri.getMediaDuration(): Long {
+fun Uri.getMediaDuration(
+    isLocalFile: Boolean
+): Long {
     val retriever = MediaMetadataRetriever()
     return try {
-        if (Build.VERSION.SDK_INT >= 14) {
+        if (Build.VERSION.SDK_INT >= 14 && !isLocalFile) {
             retriever.setDataSource(this.toString(), HashMap<String, String>())
         } else {
             retriever.setDataSource(this.toString())

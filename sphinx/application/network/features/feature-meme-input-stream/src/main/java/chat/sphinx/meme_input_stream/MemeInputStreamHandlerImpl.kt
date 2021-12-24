@@ -1,7 +1,6 @@
 package chat.sphinx.meme_input_stream
 
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
-import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
 import chat.sphinx.wrapper_message_media.MediaKeyDecrypted
@@ -16,7 +15,7 @@ class MemeInputStreamHandlerImpl(
 
     override suspend fun retrieveMediaInputStream(
         url: String,
-        authenticationToken: AuthenticationToken,
+        authenticationToken: AuthenticationToken?,
         mediaKeyDecrypted: MediaKeyDecrypted?
     ): InputStream? {
         return url.toHttpUrlOrNull()?.let { httpUrl ->

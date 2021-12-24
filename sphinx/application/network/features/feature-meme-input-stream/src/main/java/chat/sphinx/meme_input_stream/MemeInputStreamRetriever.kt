@@ -18,7 +18,7 @@ import java.io.InputStream
 
 internal data class MemeInputStreamRetriever(
     val url: HttpUrl,
-    val authenticationToken: AuthenticationToken,
+    val authenticationToken: AuthenticationToken?,
     val mediaKeyDecrypted: MediaKeyDecrypted?
 ) {
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -28,7 +28,10 @@ internal data class MemeInputStreamRetriever(
     ): InputStream? {
         val request = Request.Builder().apply {
             url(url)
-            addHeader(authenticationToken.headerKey, authenticationToken.headerValue)
+            authenticationToken?.let {
+                addHeader(authenticationToken.headerKey, authenticationToken.headerValue)
+            }
+
             mediaKeyDecrypted?.value?.let { key ->
                 val header = CryptoHeader.Decrypt.Builder()
                     .setScheme(CryptoScheme.Decrypt.JNCryptor)
