@@ -207,8 +207,14 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                 layoutConstraintVideoViewContainer.visible
                                 webViewYoutubeVideoPlayer.gone
 
+                                val videoUri = if (viewState.localFile != null) {
+                                    viewState.localFile.toUri()
+                                } else {
+                                    viewState.url.value.toUri()
+                                }
+                                
                                 viewModel.initializeVideo(
-                                    viewState.url.value.toUri(),
+                                    videoUri,
                                     viewState.duration?.value?.toInt()
                                 )
                             }

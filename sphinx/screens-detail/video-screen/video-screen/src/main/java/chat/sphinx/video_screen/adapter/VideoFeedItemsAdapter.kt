@@ -11,12 +11,16 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.resources.getColor
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.databinding.LayoutVideoListItemHolderBinding
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.FeedItem
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -163,7 +167,7 @@ internal class VideoFeedItemsAdapter (
         private var videoItem: FeedItem? = null
 
         init {
-            binding.root.setOnClickListener {
+            binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
                 videoItem?.let { nnVideoItem ->
                     lifecycleOwner.lifecycleScope.launch {
                         viewModel.videoItemSelected(nnVideoItem)
@@ -198,6 +202,37 @@ internal class VideoFeedItemsAdapter (
 
                 textViewVideoTitle.text = f.titleToShow
                 textViewVideoDate.text = f.datePublished?.hhmmElseDate()
+
+                textViewDownloadVideoButton.goneIfTrue(
+                    f.enclosureUrl.isYoutubeVideo()
+                )
+
+                swipeRevealLayoutVideoFeedItem.setLockDrag(!f.downloaded)
+                layoutConstraintDeleteButtonContainer.setOnClickListener {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.deleteDownloadedMedia(f)
+                        notifyItemChanged(position)
+                        swipeRevealLayoutVideoFeedItem.close(true)
+                    }
+                }
+                if (f.downloaded) {
+                    textViewDownloadVideoButton.setTextColor(getColor(R.color.greenBorder))
+                } else {
+                    textViewDownloadVideoButton.setTextColor(getColor(R.color.secondaryText))
+                    textViewDownloadVideoButton.setOnClickListener {
+                        viewModel.downloadMedia(f)  { downloadedFile ->
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                f.localFile = downloadedFile
+                                notifyItemChanged(position)
+                            }
+                        }
+                        notifyItemChanged(position)
+                    }
+                }
+                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(f.id) && !f.downloaded
+
+                textViewDownloadVideoButton.goneIfTrue(isFeedItemDownloadInProgress)
+                progressBarVideoDownload.goneIfFalse(isFeedItemDownloadInProgress)
             }
         }
 

@@ -20,18 +20,19 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
 import chat.sphinx.concept_network_query_podcast_search.model.toPodcastSearchResult
+import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
+import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
-import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
-import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -39,7 +40,6 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_repository_message.model.SendPaymentRequest
-import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_subscription.SubscriptionRepository
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
@@ -52,11 +52,6 @@ import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMa
 import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.*
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastSearchResultPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedModelDboPodcastModelPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
@@ -69,6 +64,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
+import chat.sphinx.notification.SphinxNotificationManager
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -151,6 +147,7 @@ abstract class SphinxRepository(
     private val networkQueryPodcastSearch: NetworkQueryPodcastSearch,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
+    private val sphinxNotificationManager: SphinxNotificationManager,
     protected val LOG: SphinxLogger,
 ) : ChatRepository,
     ContactRepository,
@@ -4902,7 +4899,7 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError(("Failed to delete subscription")))
     }
 
-    private val downloadLockMap = SynchronizedMap<MessageId, Pair<Int, Mutex>>()
+    private val downloadMessageMediaLockMap = SynchronizedMap<MessageId, Pair<Int, Mutex>>()
     override fun downloadMediaIfApplicable(
         message: Message,
         sent: Boolean
@@ -4910,7 +4907,7 @@ abstract class SphinxRepository(
         applicationScope.launch(mainImmediate) {
             val messageId: MessageId = message.id
 
-            val downloadLock: Mutex = downloadLockMap.withLock { map ->
+            val downloadLock: Mutex = downloadMessageMediaLockMap.withLock { map ->
                 val localLock: Pair<Int, Mutex>? = map[messageId]
 
                 if (localLock != null) {
@@ -4943,75 +4940,9 @@ abstract class SphinxRepository(
                     !message.status.isDeleted() &&
                     (!message.isPaidPendingMessage || sent)
                 ) {
-
-                    val streamToFile: File? = when (val mediaType =
-                        message.messageMedia?.mediaType ?: media.mediaType) {
-                        is MediaType.Audio -> {
-                            mediaType.value.split("/").lastOrNull()?.let { fileType ->
-                                when {
-                                    fileType.contains("m4a", ignoreCase = true) -> {
-                                        mediaCacheHandler.createAudioFile("m4a")
-                                    }
-                                    fileType.contains("mp3", ignoreCase = true) -> {
-                                        mediaCacheHandler.createAudioFile("mp3")
-                                    }
-                                    fileType.contains("mp4", ignoreCase = true) -> {
-                                        mediaCacheHandler.createAudioFile("mp4")
-                                    }
-                                    fileType.contains("mpeg", ignoreCase = true) -> {
-                                        mediaCacheHandler.createAudioFile("mpeg")
-                                    }
-                                    fileType.contains("wav", ignoreCase = true) -> {
-                                        mediaCacheHandler.createAudioFile("wav")
-                                    }
-                                    else -> {
-                                        null
-                                    }
-                                }
-                            }
-                        }
-                        is MediaType.Image -> {
-                            // use image loader
-                            null
-                        }
-                        is MediaType.Pdf -> {
-                            // TODO: Implement
-                            null
-                        }
-                        is MediaType.Text -> {
-                            // TODO: Implement
-                            null
-                        }
-                        is MediaType.Video -> {
-                            // TODO: Auto generate file extension (if app doesn't support media we can load via )
-                            mediaType.value.split("/").lastOrNull()?.let { fileType ->
-                                when {
-                                    fileType.contains("webm", ignoreCase = true) -> {
-                                        mediaCacheHandler.createVideoFile("webm")
-                                    }
-                                    fileType.contains("3gpp", ignoreCase = true) -> {
-                                        mediaCacheHandler.createVideoFile("3gp")
-                                    }
-                                    fileType.contains("x-matroska", ignoreCase = true) -> {
-                                        mediaCacheHandler.createVideoFile("mkv")
-                                    }
-                                    fileType.contains("mp4", ignoreCase = true) -> {
-                                        mediaCacheHandler.createVideoFile("mp4")
-                                    }
-                                    fileType.contains("mov", ignoreCase = true) -> {
-                                        mediaCacheHandler.createVideoFile("mov")
-                                    }
-                                    else -> {
-                                        null
-                                    }
-                                }
-                            }
-                        }
-                        is MediaType.Unknown -> {
-                            LOG.w(TAG, "Unknown MediaType for MessageMedia $messageId")
-                            null
-                        }
-                    }
+                    val streamToFile: File? = mediaCacheHandler.createFile(
+                        message.messageMedia?.mediaType ?: media.mediaType
+                    )
 
                     if (streamToFile != null) {
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
@@ -5048,7 +4979,7 @@ abstract class SphinxRepository(
                 }
 
                 // remove lock from map if only subscriber
-                downloadLockMap.withLock { map ->
+                downloadMessageMediaLockMap.withLock { map ->
                     map[messageId]?.let { pair ->
                         if (pair.first <= 1) {
                             map.remove(messageId)
@@ -5059,6 +4990,158 @@ abstract class SphinxRepository(
                 }
             }
         }
+    }
+
+    private val feedItemLock = Mutex()
+    private val downloadFeedItemLockMap = SynchronizedMap<FeedId, Pair<Int, Mutex>>()
+
+    override fun inProgressDownloadIds(): List<FeedId> {
+        return downloadFeedItemLockMap.withLock { map ->
+            map.keys.toList()
+        }
+    }
+
+    override fun downloadMediaIfApplicable(
+        feedItem: DownloadableFeedItem,
+        downloadCompleteCallback: (downloadedFile: File) -> Unit
+    ) {
+        val feedItemId: FeedId = feedItem.id
+
+        val downloadLock: Mutex = downloadFeedItemLockMap.withLock { map ->
+            val localLock: Pair<Int, Mutex>? = map[feedItemId]
+
+            if (localLock != null) {
+                map[feedItemId] = Pair(localLock.first + 1, localLock.second)
+                localLock.second
+            } else {
+                Pair(1, Mutex()).let { pair ->
+                    map[feedItemId] = pair
+                    pair.second
+                }
+            }
+        }
+
+        applicationScope.launch(mainImmediate) {
+            downloadLock.withLock {
+                sphinxNotificationManager.notify(
+                    notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                    title = "Downloading Item",
+                    message = "Downloading item for local playback",
+                )
+
+                val queries = coreDB.getSphinxDatabaseQueries()
+
+                val url = feedItem.enclosureUrl.value
+                val contentType = feedItem.enclosureType
+                val localFile = feedItem.localFile
+
+                if (
+                    contentType != null &&
+                    localFile == null
+                ) {
+                    val streamToFile: File? = mediaCacheHandler.createFile(
+                        contentType.value.toMediaType()
+                    )
+
+                    if (streamToFile != null) {
+                        memeInputStreamHandler.retrieveMediaInputStream(
+                            url,
+                            authenticationToken = null,
+                            mediaKeyDecrypted = null,
+                        )?.let { stream ->
+                            sphinxNotificationManager.notify(
+                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                title = "Completing Download",
+                                message = "Finishing up download of file",
+                            )
+                            mediaCacheHandler.copyTo(stream, streamToFile)
+
+                            feedItemLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        queries.feedItemUpdateLocalFile(
+                                            streamToFile,
+                                            feedItemId
+                                        )
+                                    }
+                                }
+                            }
+
+                            sphinxNotificationManager.notify(
+                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                title = "Download complete",
+                                message = "item can now be accessed offline",
+                            )
+                            // hold downloadLock until table change propagates to UI
+                            delay(200L)
+                            downloadCompleteCallback.invoke(streamToFile)
+                        } ?: streamToFile.delete()
+                    }
+                } else {
+                    val title = if (localFile != null) {
+                        "Item already downloaded"
+                    } else {
+                        "Failed to initiate download"
+                    }
+                    val message = if (localFile != null) {
+                        "You have already downloaded this item."
+                    } else {
+                        "Failed to initiate download because of missing media type information"
+                    }
+                    sphinxNotificationManager.notify(
+                        notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                        title = title,
+                        message = message,
+                    )
+                }
+
+                // remove lock from map if only subscriber
+                downloadFeedItemLockMap.withLock { map ->
+                    map[feedItemId]?.let { pair ->
+                        if (pair.first <= 1) {
+                            map.remove(feedItemId)
+                        } else {
+                            map[feedItemId] = Pair(pair.first - 1, pair.second)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+    override suspend fun deleteDownloadedMediaIfApplicable(
+        feedItem: DownloadableFeedItem
+    ): Boolean {
+        val feedItemId: FeedId = feedItem.id
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val localFile = feedItem.localFile
+
+        localFile?.let {
+            try {
+                if (it.exists()) {
+                    it.delete()
+                }
+
+                feedItemLock.withLock {
+                    withContext(io) {
+                        queries.transaction {
+                            queries.feedItemUpdateLocalFile(
+                                null,
+                                feedItemId
+                            )
+                        }
+                    }
+                }
+                delay(200L)
+
+                return true
+            } catch (e: Exception) {
+
+            }
+        }
+        return false
     }
 
     override suspend fun getPaymentTemplates(): Response<List<PaymentTemplate>, ResponseError> {

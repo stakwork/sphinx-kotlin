@@ -8,7 +8,7 @@ import java.io.InputStream
 abstract class MemeInputStreamHandler {
     abstract suspend fun retrieveMediaInputStream(
         url: String,
-        authenticationToken: AuthenticationToken,
+        authenticationToken: AuthenticationToken?,
         mediaKeyDecrypted: MediaKeyDecrypted?
     ): InputStream?
 }

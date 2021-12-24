@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.Seen;
 import chat.sphinx.wrapper_common.chat.ChatUUID;
+import chat.sphinx.wrapper_common.contact.Blocked;
 import chat.sphinx.wrapper_common.dashboard.ChatId;
 import chat.sphinx.wrapper_common.dashboard.ContactId;
 import chat.sphinx.wrapper_common.dashboard.DashboardItemId;
@@ -33,7 +34,6 @@ import chat.sphinx.wrapper_common.subscription.Cron;
 import chat.sphinx.wrapper_common.subscription.EndNumber;
 import chat.sphinx.wrapper_common.subscription.SubscriptionCount;
 import chat.sphinx.wrapper_common.subscription.SubscriptionId;
-import chat.sphinx.wrapper_common.contact.Blocked;
 import chat.sphinx.wrapper_contact.ContactAlias;
 import chat.sphinx.wrapper_contact.ContactStatus;
 import chat.sphinx.wrapper_contact.DeviceId;
@@ -1085,7 +1085,8 @@ CREATE TABLE feedItemDbo(
     thumbnail_url               TEXT               AS PhotoUrl,
     link                        TEXT               AS FeedUrl,
     feed_id                     TEXT               AS FeedId NOT NULL,
-    duration                    INTEGER            AS FeedItemDuration
+    duration                    INTEGER            AS FeedItemDuration,
+    local_file                  TEXT               AS File
 );
 
 feedItemUpsert {
@@ -1174,6 +1175,11 @@ feedItemsDeleteByFeedId:
 DELETE
 FROM feedItemDbo
 WHERE feed_id = ?;
+
+feedItemUpdateLocalFile:
+UPDATE feedItemDbo
+SET local_file = :local_file
+WHERE id = ?;
 
 CREATE TABLE feedModelDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,

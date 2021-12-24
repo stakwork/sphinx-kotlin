@@ -1,0 +1,4 @@
+import java.io.File;
+
+
+ALTER TABLE feedItemDbo ADD COLUMN local_file TEXT AS File;

@@ -7,12 +7,6 @@ import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
 import chat.sphinx.feature_coredb.adapters.feed.*
-import chat.sphinx.feature_coredb.adapters.feed.FeedAuthorAdapter
-import chat.sphinx.feature_coredb.adapters.feed.FeedDescriptionAdapter
-import chat.sphinx.feature_coredb.adapters.feed.FeedIdAdapter
-import chat.sphinx.feature_coredb.adapters.feed.FeedTitleAdapter
-import chat.sphinx.feature_coredb.adapters.feed.FeedTypeAdapter
-import chat.sphinx.feature_coredb.adapters.feed.FeedItemDurationAdapter
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyDecryptedAdapter
@@ -204,7 +198,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     thumbnail_urlAdapter = PhotoUrlAdapter.getInstance(),
                     linkAdapter = FeedUrlAdapter.getInstance(),
                     feed_idAdapter = FeedIdAdapter(),
-                    durationAdapter = FeedItemDurationAdapter()
+                    durationAdapter = FeedItemDurationAdapter(),
+                    local_fileAdapter = FileAdapter.getInstance(),
                 ),
                 feedModelDboAdapter = FeedModelDbo.Adapter(
                     idAdapter = FeedIdAdapter(),

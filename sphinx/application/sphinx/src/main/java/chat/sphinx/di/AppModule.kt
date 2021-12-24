@@ -8,6 +8,8 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_network_client_cache.NetworkClientCache
 import chat.sphinx.feature_image_loader_android.ImageLoaderAndroid
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.notification.SphinxNotificationManager
+import chat.sphinx.notification.SphinxNotificationManagerImpl
 import chat.sphinx.util.SphinxDispatchers
 import chat.sphinx.util.SphinxLoggerImpl
 import com.squareup.moshi.Moshi
@@ -103,4 +105,14 @@ object AppModule {
             application.cacheDir,
             dispatchers,
         )
+
+    @Provides
+    @Singleton
+    fun provideSphinxNotificationManager(
+        @ApplicationContext appContext: Context,
+        sphinxLogger: SphinxLogger,
+    ): SphinxNotificationManager = SphinxNotificationManagerImpl(
+        appContext,
+        sphinxLogger
+    )
 }
