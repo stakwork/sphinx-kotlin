@@ -1,4 +1,4 @@
-package chat.sphinx.concept_network_query_podcast_search.model
+package chat.sphinx.concept_network_query_feed_search.model
 
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import com.squareup.moshi.JsonClass
