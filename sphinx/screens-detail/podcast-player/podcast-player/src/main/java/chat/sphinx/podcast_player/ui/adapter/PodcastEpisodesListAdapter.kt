@@ -18,6 +18,7 @@ import chat.sphinx.podcast_player.ui.PodcastPlayerViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
@@ -197,6 +198,14 @@ internal class PodcastEpisodesListAdapter(
                 episode = podcastEpisode
                 disposable?.dispose()
 
+                swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
+                layoutConstraintDeleteButtonContainer.setOnClickListener {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.deleteDownloadedMedia(podcastEpisode)
+                        notifyItemChanged(position)
+                        swipeRevealLayoutPodcastFeedItem.close(true)
+                    }
+                }
                 //Playing State
                 layoutConstraintEpisodeListItemHolder.setBackgroundColor(
                     root.context.getColor(
@@ -206,7 +215,7 @@ internal class PodcastEpisodesListAdapter(
                 textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
 
                 // Image
-                podcastEpisode.image?.value?.let { episodeImage ->
+                podcastEpisode.imageUrlToShow?.value?.let { episodeImage ->
                     lifecycleOwner.lifecycleScope.launch(viewModel.dispatchers.mainImmediate) {
                         disposable = imageLoader.load(
                             imageViewEpisodeImage,
@@ -222,9 +231,24 @@ internal class PodcastEpisodesListAdapter(
                 //Download button
                 textViewDownloadEpisodeButton.setTextColor(
                     root.context.getColor(
-                        if (podcastEpisode.downloaded) R.color.primaryGreen else android.R.color.white
+                        if (podcastEpisode.downloaded) R.color.primaryGreen else R.color.secondaryText
                     )
                 )
+
+                textViewDownloadEpisodeButton.setOnClickListener {
+                    viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            podcastEpisode.localFile = downloadedFile
+                            notifyItemChanged(position)
+                        }
+                    }
+                    notifyItemChanged(position)
+                }
+
+                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id) && !podcastEpisode.downloaded
+
+                textViewDownloadEpisodeButton.goneIfTrue(isFeedItemDownloadInProgress)
+                progressBarEpisodeDownload.goneIfFalse(isFeedItemDownloadInProgress)
             }
         }
     }

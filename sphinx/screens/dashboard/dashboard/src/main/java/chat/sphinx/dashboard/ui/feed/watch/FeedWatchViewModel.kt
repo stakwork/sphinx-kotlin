@@ -49,19 +49,11 @@ class FeedWatchViewModel @Inject constructor(
         goToVideoPlayer(feed)
     }
 
-//    private fun goToVideoFeed(feed: Feed) {
-//        viewModelScope.launch(mainImmediate) {
-//            dashboardNavigator.toVideoFeedScreen(
-//                feed.chat?.id ?: feed.chatId,
-//                feed.feedUrl
-//            )
-//        }
-//    }
-
     private fun goToVideoPlayer(feed: Feed) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toVideoWatchScreen(
                 feed.chat?.id ?: feed.chatId,
+                feed.id,
                 feed.feedUrl
             )
         }

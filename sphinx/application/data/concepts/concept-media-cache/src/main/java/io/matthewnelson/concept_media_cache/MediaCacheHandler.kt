@@ -1,9 +1,11 @@
 package io.matthewnelson.concept_media_cache
 
+import chat.sphinx.wrapper_message_media.MediaType
 import java.io.File
 import java.io.InputStream
 
 abstract class MediaCacheHandler {
+    abstract fun createFile(mediaType: MediaType): File?
     abstract fun createAudioFile(extension: String): File
     abstract fun createImageFile(extension: String): File
     abstract fun createVideoFile(extension: String): File

@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha37 (2021-12-24)
+ - Adds ability to search for youtube videos
+ - Adds podcast and video offline mode
+
 # Version 1.0.0-alpha36 (2021-12-10)
  - Adds ability to block/unblock a contact
  - Adds ability to flag a message

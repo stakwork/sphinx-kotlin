@@ -2,6 +2,4 @@
 <resources>
     <string name="label_text_episodes_list_header">Episodios</string>
     <string name="boost_sent">Boost enviado</string>
-    <string name="subscribe">SUSCRIBIRSE</string>
-    <string name="unsubscribe">DESUSCRIBIRSE</string>
 </resources>

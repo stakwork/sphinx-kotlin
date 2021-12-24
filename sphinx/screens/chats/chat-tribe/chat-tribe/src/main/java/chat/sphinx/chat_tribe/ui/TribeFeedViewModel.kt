@@ -9,9 +9,9 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -34,6 +34,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -230,12 +231,12 @@ internal class TribeFeedViewModel @Inject constructor(
 
                 viewModelScope.launch(mainImmediate) {
                     feedRepository.updateFeedContent(
-                        args.chatId,
-                        data.host,
-                        data.feedUrl,
-                        data.chatUUID,
-                        true.toSubscribed(),
-                        data.metaData?.itemId
+                        chatId = args.chatId,
+                        host = data.host,
+                        feedUrl = data.feedUrl,
+                        chatUUID = data.chatUUID,
+                        subscribed = true.toSubscribed(),
+                        currentEpisodeId = data.metaData?.itemId
                     )
                 }
 
@@ -300,7 +301,7 @@ internal class TribeFeedViewModel @Inject constructor(
                             args.chatId,
                             vs.podcast.id.value,
                             episode.id.value,
-                            episode.enclosureUrl.value,
+                            episode.episodeUrl,
                             Sat(vs.podcast.satsPerMinute),
                             vs.podcast.speed,
                             vs.podcast.currentTime,
@@ -478,8 +479,11 @@ internal class TribeFeedViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveEpisodeDuration(episodeUrl: String): Long {
-        val uri = Uri.parse(episodeUrl)
-        return uri.getMediaDuration()
+    private fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
+        localFile?.let {
+            return Uri.fromFile(it).getMediaDuration(true)
+        } ?: run {
+            return Uri.parse(episodeUrl).getMediaDuration(false)
+        }
     }
 }

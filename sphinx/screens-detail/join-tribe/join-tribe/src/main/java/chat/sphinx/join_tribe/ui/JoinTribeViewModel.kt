@@ -208,12 +208,12 @@ internal class JoinTribeViewModel @Inject constructor(
                 nnTribeInfo.uuid?.toChatUUID()?.let { chatUUID ->
                     nnTribeInfo.host?.toChatHost()?.let { chatHost ->
                         feedRepository.updateFeedContent(
-                            chatId,
-                            chatHost,
-                            feedUrl,
-                            chatUUID,
-                            true.toSubscribed(),
-                            null
+                            chatId = chatId,
+                            host = chatHost,
+                            feedUrl = feedUrl,
+                            chatUUID = chatUUID,
+                            subscribed = true.toSubscribed(),
+                            currentEpisodeId = null
                         )
                     }
                 }

@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -213,6 +214,10 @@ class FeedWatchNowAdapter(
                     }.let { job ->
                         holderJobs.add(job)
                     }
+                } ?: run {
+                    imageViewItemImage.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, R.drawable.ic_video_placeholder)
+                    )
                 }
 
                 textViewItemName.text = videoItem.titleToShow
