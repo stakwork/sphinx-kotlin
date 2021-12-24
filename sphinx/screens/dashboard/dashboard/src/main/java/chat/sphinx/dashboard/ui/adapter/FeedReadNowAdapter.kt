@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Transformations
@@ -217,6 +218,10 @@ class FeedReadNowAdapter(
                     }.let { job ->
                         holderJobs.add(job)
                     }
+                } ?: run {
+                    imageViewItemImage.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, R.drawable.ic_newsletter_placeholder)
+                    )
                 }
 
                 newsletterItem.thumbnailUrlToShow?.let { thumbnailUrl ->

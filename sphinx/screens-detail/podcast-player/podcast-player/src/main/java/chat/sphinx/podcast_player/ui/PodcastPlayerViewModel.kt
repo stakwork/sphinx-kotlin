@@ -200,7 +200,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     host = chatHost,
                     feedUrl = feedUrl,
                     chatUUID = chat?.uuid,
-                    subscribed.toSubscribed(),
+                    subscribed = subscribed.toSubscribed(),
                     currentEpisodeId = null
                 )
             }
@@ -230,12 +230,14 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
-    fun toggleSubscribeState(podcast: Podcast) {
+    fun toggleSubscribeState() {
         viewModelScope.launch(mainImmediate) {
-            feedRepository.toggleFeedSubscribeState(
-                podcast.id,
-                podcast.subscribed
-            )
+            getPodcast()?.let { podcast ->
+                feedRepository.toggleFeedSubscribeState(
+                    podcast.id,
+                    podcast.subscribed
+                )
+            }
         }
     }
 

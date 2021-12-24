@@ -12,6 +12,14 @@ inline fun String.toFeedId(): FeedId? =
 inline fun FeedId.youtubeVideoId(): String =
     value.replace("yt:video:","")
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun FeedId.youtubeFeedIds(): List<FeedId> =
+    listOf(
+        this,
+        FeedId("yt:channel:${value}"),
+        FeedId("yt:playlist:${value}")
+    )
+
 @JvmInline
 value class FeedId(val value: String) {
     init {

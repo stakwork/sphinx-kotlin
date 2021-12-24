@@ -21,6 +21,14 @@ data class PodcastEpisode(
 
     var playing: Boolean = false
 
+    var imageUrlToShow: PhotoUrl? = null
+        get() {
+            image?.let {
+                return it
+            }
+            return null
+        }
+
     val downloaded: Boolean
         get()= localFile != null
 

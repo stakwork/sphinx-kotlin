@@ -31,4 +31,9 @@
     <string name="failed_to_reject_member">拒絕會員失敗</string>
 
     <string name="newsletter_article">NEWSLETTER ARTICLE</string>
+
+    <string name="subscribe">SUBSCRIBE</string>
+    <string name="unsubscribe">UNSUBSCRIBE</string>
+    <string name="feed_search_following_section">FOLLOWING</string>
+    <string name="feed_search_directory_section">DIRECTORY</string>
 </resources>

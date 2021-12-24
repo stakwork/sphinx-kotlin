@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_podcast_image"
+            android:id="@+id/image_view_feed_image"
             android:layout_width="@dimen/feed_podcast_search_results_image_xy"
             android:layout_height="@dimen/feed_podcast_search_results_image_xy"
             android:scaleType="centerCrop"
@@ -27,7 +27,7 @@
     </androidx.cardview.widget.CardView>
 
     <TextView
-        android:id="@+id/text_view_podcast_name"
+        android:id="@+id/text_view_feed_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_half_layout_margin"
@@ -38,13 +38,13 @@
         android:maxLines="1"
         android:textAlignment="textStart"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/text_view_podcast_description"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_feed_description"
         app:layout_constraintStart_toEndOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toStartOf="@+id/progress_bar_result_loading"
         tools:text="This is the title of an episode with audio to play" />
 
     <TextView
-        android:id="@+id/text_view_podcast_description"
+        android:id="@+id/text_view_feed_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/default_half_layout_margin"
@@ -55,13 +55,13 @@
         android:maxLines="2"
         android:textAlignment="textStart"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_podcast_name"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_feed_name"
         app:layout_constraintStart_toEndOf="@+id/card_view_image_wrapper"
         app:layout_constraintEnd_toStartOf="@+id/progress_bar_result_loading"
         tools:text="This is the description of an episode" />
 
     <TextView
-        android:id="@+id/text_view_podcast_add"
+        android:id="@+id/text_view_feed_add"
         android:layout_width="@dimen/feed_podcast_search_subscribe_text_view_width"
         android:layout_height="match_parent"
         android:layout_marginHorizontal="@dimen/default_half_layout_margin"
@@ -94,7 +94,7 @@
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:background="@color/lightDivider"
-        app:layout_constraintStart_toStartOf="@+id/text_view_podcast_description"
+        app:layout_constraintStart_toStartOf="@+id/text_view_feed_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
 

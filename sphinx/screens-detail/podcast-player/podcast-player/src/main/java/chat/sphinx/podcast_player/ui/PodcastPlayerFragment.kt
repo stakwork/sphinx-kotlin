@@ -185,7 +185,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
 
             textViewSubscribeButton.setOnClickListener {
-                viewModel.toggleSubscribeState(podcast)
+                viewModel.toggleSubscribeState()
             }
         }
     }

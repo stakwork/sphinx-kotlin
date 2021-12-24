@@ -18,8 +18,8 @@ import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
-import chat.sphinx.concept_network_query_podcast_search.NetworkQueryPodcastSearch
-import chat.sphinx.concept_network_query_podcast_search.model.toPodcastSearchResult
+import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
@@ -52,6 +52,11 @@ import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMa
 import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.*
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboFeedSearchResultPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedModelDboPodcastModelPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
@@ -93,7 +98,7 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
-import chat.sphinx.wrapper_podcast.PodcastSearchResultRow
+import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
@@ -144,7 +149,7 @@ abstract class SphinxRepository(
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
     private val networkQuerySubscription: NetworkQuerySubscription,
-    private val networkQueryPodcastSearch: NetworkQueryPodcastSearch,
+    private val networkQueryFeedSearch: NetworkQueryFeedSearch,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     private val sphinxNotificationManager: SphinxNotificationManager,
@@ -3420,6 +3425,8 @@ abstract class SphinxRepository(
         chatId: ChatId,
         host: ChatHost,
         feedUrl: FeedUrl,
+        searchResultDescription: FeedDescription?,
+        searchResultImageUrl: PhotoUrl?,
         chatUUID: ChatUUID?,
         subscribed: Subscribed,
         currentItemId: FeedId?
@@ -3439,23 +3446,28 @@ abstract class SphinxRepository(
                     is Response.Error -> {
                     }
                     is Response.Success -> {
-                        podcastLock.withLock {
-                            var cId: ChatId = chatId
+                        
+                        var cId: ChatId = chatId
 
-                            response.value.id.toFeedId()?.let { feedId ->
-                                queries.feedGetById(feedId).executeAsOneOrNull()
-                                    ?.let { existingFeed ->
-                                        //If feed already exists linked to a chat, do not override with NULL CHAT ID
-                                        if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-                                            cId = existingFeed.chat_id
-                                        }
+                        response.value.id.toFeedId()?.let { feedId ->
+                            queries.feedGetByIds(
+                                feedId.youtubeFeedIds()
+                            ).executeAsOneOrNull()
+                                ?.let { existingFeed ->
+                                    //If feed already exists linked to a chat, do not override with NULL CHAT ID
+                                    if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+                                        cId = existingFeed.chat_id
                                     }
-                            }
+                                }
+                        }
 
+                        podcastLock.withLock {
                             queries.transaction {
                                 upsertFeed(
                                     response.value,
                                     feedUrl,
+                                    searchResultDescription,
+                                    searchResultImageUrl,
                                     cId,
                                     currentItemId,
                                     subscribed,
@@ -3492,7 +3504,7 @@ abstract class SphinxRepository(
     override fun getFeedById(feedId: FeedId): Flow<Feed?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        queries.feedGetById(feedId)
+        queries.feedGetByIds(feedId.youtubeFeedIds())
             .asFlow()
             .mapToOneOrNull(io)
             .map { it?.let { feedDboPresenterMapper.mapFrom(it) } }
@@ -3542,7 +3554,7 @@ abstract class SphinxRepository(
     override fun getAllFeeds(): Flow<List<Feed>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
         emitAll(
-            queries.feedGetAll()
+            queries.feedGetAllSubscribed()
                 .asFlow()
                 .mapToList(io)
                 .map { listFeedDbo ->
@@ -3740,56 +3752,103 @@ abstract class SphinxRepository(
         return podcast
     }
 
-    private val podcastSearchResultDboPresenterMapper: FeedDboPodcastSearchResultPresenterMapper by lazy {
-        FeedDboPodcastSearchResultPresenterMapper(dispatchers)
+    private val feedSearchResultDboPresenterMapper: FeedDboFeedSearchResultPresenterMapper by lazy {
+        FeedDboFeedSearchResultPresenterMapper(dispatchers)
     }
 
-    override fun searchPodcastBy(searchTerm: String): Flow<List<PodcastSearchResultRow>> = flow {
+    private suspend fun getSubscribedItemsBy(
+        searchTerm: String,
+        feedType: FeedType?
+    ): MutableList<FeedSearchResultRow> {
         val queries = coreDB.getSphinxDatabaseQueries()
-        var results: MutableList<PodcastSearchResultRow> = mutableListOf()
+        var results: MutableList<FeedSearchResultRow> = mutableListOf()
 
-        networkQueryPodcastSearch.searchPodcasts(searchTerm).collect { response ->
+        val subscribedItems = if (feedType == null) {
+            queries
+                .feedGetAllByTitle("%${searchTerm.lowercase().trim()}%")
+                .executeAsList()
+                .map { it?.let { feedSearchResultDboPresenterMapper.mapFrom(it) } }
+        }  else {
+            queries
+                .feedGetAllByTitleAndType("%${searchTerm.lowercase().trim()}%", feedType)
+                .executeAsList()
+                .map { it?.let { feedSearchResultDboPresenterMapper.mapFrom(it) } }
+        }
+
+
+        if (subscribedItems.count() > 0) {
+            results.add(
+                FeedSearchResultRow(
+                    feedSearchResult = null,
+                    isSectionHeader = true,
+                    isFollowingSection = true,
+                    isLastOnSection = false
+                )
+            )
+
+            subscribedItems.forEachIndexed { index, item ->
+                results.add(
+                    FeedSearchResultRow(
+                        item,
+                        isSectionHeader = false,
+                        isFollowingSection = true,
+                        (index == subscribedItems.count() - 1)
+                    )
+                )
+            }
+        }
+
+        return results
+    }
+
+    override fun searchFeedsBy(
+        searchTerm: String,
+        feedType: FeedType?,
+    ): Flow<List<FeedSearchResultRow>> = flow {
+        if (feedType == null) {
+            emit(
+                getSubscribedItemsBy(searchTerm, feedType)
+            )
+            return@flow
+        }
+
+        var results: MutableList<FeedSearchResultRow> = mutableListOf()
+
+        networkQueryFeedSearch.searchFeeds(
+            searchTerm,
+            feedType
+        ).collect { response ->
             @Exhaustive
             when (response) {
-                is LoadResponse.Loading -> {
-                }
+                is LoadResponse.Loading -> {}
 
                 is Response.Error -> {
-                    results = mutableListOf()
+                    results.addAll(
+                        getSubscribedItemsBy(searchTerm, feedType)
+                    )
                 }
                 is Response.Success -> {
 
-                    val subscribedItems = queries
-                        .feedGetAllByTitle("%${searchTerm.lowercase().trim()}%")
-                        .executeAsList()
-                        .map { it?.let { podcastSearchResultDboPresenterMapper.mapFrom(it) } }
-
-                    if (subscribedItems.count() > 0) {
-                        results.add(
-                            PodcastSearchResultRow(null, "FOLLOWING", false)
-                        )
-
-                        subscribedItems.forEachIndexed { index, item ->
-                            results.add(
-                                PodcastSearchResultRow(
-                                    item,
-                                    null,
-                                    (index == subscribedItems.count() - 1)
-                                )
-                            )
-                        }
-                    }
+                    results.addAll(
+                        getSubscribedItemsBy(searchTerm, feedType)
+                    )
 
                     if (response.value.count() > 0) {
                         results.add(
-                            PodcastSearchResultRow(null, "DIRECTORY", false)
+                            FeedSearchResultRow(
+                                feedSearchResult = null,
+                                isSectionHeader = true,
+                                isFollowingSection = false,
+                                isLastOnSection = false
+                            )
                         )
 
                         response.value.forEachIndexed { index, item ->
                             results.add(
-                                PodcastSearchResultRow(
-                                    item.toPodcastSearchResult(),
-                                    null,
+                                FeedSearchResultRow(
+                                    item.toFeedSearchResult(),
+                                    isSectionHeader = false,
+                                    isFollowingSection = false,
                                     (index == response.value.count() - 1)
                                 )
                             )

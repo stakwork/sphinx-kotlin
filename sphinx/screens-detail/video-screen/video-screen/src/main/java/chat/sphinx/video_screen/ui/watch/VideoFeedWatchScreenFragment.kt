@@ -23,12 +23,15 @@ import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
 import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import chat.sphinx.wrapper_common.hhmmElseDate
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
@@ -130,6 +133,10 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                     }
                 }
             )
+
+            textViewSubscribeButton?.setOnClickListener {
+                viewModel.toggleSubscribeState()
+            }
         }
     }
 
@@ -151,6 +158,17 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                 it.value,
                                 imageLoaderOptions
                             )
+                        }
+                    }
+
+                    includeLayoutVideoPlayer.apply {
+                        val notLinkedToChat = viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
+                        textViewSubscribeButton?.goneIfFalse(notLinkedToChat)
+
+                        textViewSubscribeButton?.text = if (viewState.subscribed.isTrue()) {
+                            getString(R.string.unsubscribe)
+                        } else {
+                            getString(R.string.subscribe)
                         }
                     }
                 }
