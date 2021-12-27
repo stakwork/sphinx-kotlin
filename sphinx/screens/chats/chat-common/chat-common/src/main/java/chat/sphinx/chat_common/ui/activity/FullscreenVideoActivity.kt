@@ -2,20 +2,16 @@ package chat.sphinx.chat_common.ui.activity
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
 import android.widget.RelativeLayout
 import android.view.OrientationEventListener
+import android.widget.MediaController
 import androidx.activity.viewModels
-import androidx.core.view.isVisible
 import androidx.appcompat.app.AppCompatActivity
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.ActivityFullscreenVideoBinding
-import chat.sphinx.chat_common.ui.viewstate.messageholder.toTimestamp
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
@@ -35,36 +31,11 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
     private val viewModel: FullscreenVideoViewModel by viewModels()
     private val binding: ActivityFullscreenVideoBinding by viewBinding(ActivityFullscreenVideoBinding::bind)
 
-    private val mHideHandler = Handler()
-    private val mHideRunnable = Runnable { toggle() }
-
-    companion object {
-        /**
-         * If [.AUTO_HIDE] is set, the number of milliseconds to wait after
-         * user interaction before hiding the system UI.
-         */
-        private const val AUTO_HIDE_DELAY_MILLIS = 3000
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_fullscreen_video)
 
         binding.apply {
-            videoViewContent.setOnClickListener {
-                toggle()
-            }
-            root.setOnClickListener {
-                toggle()
-            }
-            viewModel.videoPlayerController.setVideo(binding.videoViewContent)
-
-            textViewPlayPauseButton.setOnClickListener {
-                viewModel.videoPlayerController.togglePlayPause()
-            }
-
-            seekBarCurrentProgress.setOnTouchListener { _, _ -> true }
-
             orientationListener =  object : OrientationEventListener(this@FullscreenVideoActivity) {
                 override fun onOrientationChanged(orientation: Int) {
                     val rotation = when {
@@ -90,7 +61,13 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
                     }
                 }
             }
-            viewModel.initializeVideo()
+
+            val controller = MediaController(root.context)
+            controller.setAnchorView(videoViewContent)
+            controller.setMediaPlayer(videoViewContent)
+            videoViewContent.setMediaController(controller)
+
+            viewModel.initializeVideo(videoViewContent)
         }
     }
 
@@ -119,31 +96,6 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
             }
 
         }
-    }
-
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-
-        delayedHide(1000)
-    }
-
-    private fun toggle() {
-        if (binding.layoutConstraintVideoControls.isVisible) {
-            binding.layoutConstraintVideoControls.gone
-        } else {
-            binding.layoutConstraintVideoControls.visible
-
-            delayedHide(AUTO_HIDE_DELAY_MILLIS)
-        }
-    }
-
-    /**
-     * Schedules a call to hide() in delay milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private fun delayedHide(delayMillis: Int) {
-        mHideHandler.removeCallbacks(mHideRunnable)
-        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 
     override fun onStart() {
@@ -176,30 +128,8 @@ internal class FullscreenVideoActivity : AppCompatActivity() {
 
     private fun onViewStateFlowCollect(viewState: FullscreenVideoViewState) {
         when (viewState) {
-            is FullscreenVideoViewState.VideoMessage -> {
-                binding.textViewVideoMessageText.text = viewState.name
-                binding.layoutConstraintTitle.visible
-            }
             is FullscreenVideoViewState.MetaDataLoaded -> {
-                binding.seekBarCurrentProgress.max = viewState.duration
-                binding.textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
-
                 optimizeVideoSize()
-            }
-            is FullscreenVideoViewState.CurrentTimeUpdate -> {
-                binding.seekBarCurrentProgress.progress = viewState.currentTime
-                binding.textViewCurrentTime.text = viewState.currentTime.toLong().toTimestamp()
-            }
-            is FullscreenVideoViewState.ContinuePlayback -> {
-                binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_pause_button)
-            }
-            is FullscreenVideoViewState.PausePlayback -> {
-                binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
-            }
-            is FullscreenVideoViewState.CompletePlayback -> {
-                binding.seekBarCurrentProgress.progress = 0
-                binding.textViewCurrentTime.text = 0L.toTimestamp()
-                binding.textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
             }
             FullscreenVideoViewState.Idle -> { }
         }
