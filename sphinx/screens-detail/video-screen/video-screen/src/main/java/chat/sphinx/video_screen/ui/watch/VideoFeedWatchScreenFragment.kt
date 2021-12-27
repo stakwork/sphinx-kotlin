@@ -4,16 +4,10 @@ import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.SeekBar
+import android.widget.MediaController
 import androidx.core.net.toUri
-import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,12 +15,11 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.resources.toTimestamp
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
 import chat.sphinx.video_screen.adapter.VideoFeedItemsFooterAdapter
 import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
-import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
+import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -64,16 +57,9 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     override val binding: FragmentVideoWatchScreenBinding by viewBinding(FragmentVideoWatchScreenBinding::bind)
     override val viewModel: VideoFeedWatchScreenViewModel by viewModels()
 
-    private var dragging: Boolean = false
-
-    private val mHideHandler = Handler(Looper.getMainLooper())
-    private val mHideRunnable = Runnable { toggleRemoteVideoControllers() }
-
     companion object {
         const val YOUTUBE_WEB_VIEW_MIME_TYPE = "text/html"
         const val YOUTUBE_WEB_VIEW_ENCODING = "utf-8"
-
-        private const val AUTO_HIDE_DELAY_MILLIS = 3000
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -118,37 +104,10 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
             viewModel.setVideoView(videoViewVideoPlayer)
 
-            videoViewVideoPlayer.setOnClickListener {
-                toggleRemoteVideoControllers()
-            }
-
-            textViewPlayPauseButton.setOnClickListener {
-                viewModel.togglePlayPause()
-            }
-
-            seekBarCurrentProgress.setOnSeekBarChangeListener(
-                object : SeekBar.OnSeekBarChangeListener {
-
-                    override fun onProgressChanged(
-                        seekBar: SeekBar,
-                        progress: Int,
-                        fromUser: Boolean
-                    ) {
-                        if (fromUser) {
-                            textViewCurrentTime.text = progress.toLong().toTimestamp()
-                        }
-                    }
-
-                    override fun onStartTrackingTouch(seekBar: SeekBar) {
-                        dragging = true
-                    }
-
-                    override fun onStopTrackingTouch(seekBar: SeekBar) {
-                        viewModel.seekTo(seekBar.progress)
-                        dragging = false
-                    }
-                }
-            )
+            val controller = MediaController(binding.root.context)
+            controller.setAnchorView(videoViewVideoPlayer)
+            controller.setMediaPlayer(videoViewVideoPlayer)
+            videoViewVideoPlayer.setMediaController(controller)
 
             textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
@@ -190,20 +149,6 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 }
             }
         }
-    }
-
-    private fun toggleRemoteVideoControllers() {
-        if (binding.includeLayoutVideoPlayer.layoutConstraintBottomControls.isVisible) {
-            binding.includeLayoutVideoPlayer.layoutConstraintBottomControls.gone
-        } else {
-            binding.includeLayoutVideoPlayer.layoutConstraintBottomControls.visible
-            delayedHide(AUTO_HIDE_DELAY_MILLIS)
-        }
-    }
-
-    private fun delayedHide(delayMillis: Int) {
-        mHideHandler.removeCallbacks(mHideRunnable)
-        mHideHandler.postDelayed(mHideRunnable, delayMillis.toLong())
     }
 
     override fun subscribeToViewStateFlow() {
@@ -259,35 +204,14 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.playingVideoStateContainer.collect { viewState ->
+            viewModel.loadingVideoStateContainer.collect { viewState ->
                 binding.includeLayoutVideoPlayer.apply {
                     @Exhaustive
                     when (viewState) {
-                        is PlayingVideoViewState.Idle -> { }
+                        is LoadingVideoViewState.Idle -> { }
 
-                        is PlayingVideoViewState.MetaDataLoaded -> {
+                        is LoadingVideoViewState.MetaDataLoaded -> {
                             layoutConstraintLoadingVideo.gone
-
-                            seekBarCurrentProgress.max = viewState.duration
-                            textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
-                            //                optimizeVideoSize()
-                        }
-                        is PlayingVideoViewState.CurrentTimeUpdate -> {
-                            if (!dragging) {
-                                seekBarCurrentProgress.progress = viewState.currentTime
-                                textViewCurrentTime.text = (viewState.duration - viewState.currentTime).toLong().toTimestamp()
-                            }
-                        }
-                        is PlayingVideoViewState.ContinuePlayback -> {
-                            textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_pause_button)
-                        }
-                        is PlayingVideoViewState.PausePlayback -> {
-                            textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
-                        }
-                        is PlayingVideoViewState.CompletePlayback -> {
-                            seekBarCurrentProgress.progress = 0
-                            textViewCurrentTime.text = 0L.toTimestamp()
-                            textViewPlayPauseButton.text = binding.root.context.getString(R.string.material_icon_name_play_button)
                         }
                     }
                 }
