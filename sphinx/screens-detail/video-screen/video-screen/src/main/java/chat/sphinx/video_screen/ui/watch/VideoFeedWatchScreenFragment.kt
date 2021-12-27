@@ -94,7 +94,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     }
 
     private fun setupItems() {
-        binding.includeLayoutVideoItemsList?.let {
+        binding.includeLayoutVideoItemsList.let {
             it.recyclerViewVideoList.apply {
                 val linearLayoutManager = LinearLayoutManager(context)
                 val videoFeedItemsAdapter = VideoFeedItemsAdapter(
@@ -150,7 +150,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 }
             )
 
-            textViewSubscribeButton?.setOnClickListener {
+            textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
             }
         }
@@ -163,7 +163,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
             is VideoFeedScreenViewState.FeedLoaded -> {
                 binding.apply {
-                    includeLayoutVideoItemsList?.textViewVideosListCount?.text = viewState.items.count().toString()
+                    includeLayoutVideoItemsList.textViewVideosListCount.text = viewState.items.count().toString()
 
                     includeLayoutVideoPlayer.apply {
                         textViewContributorName.text = viewState.title.value
@@ -179,9 +179,9 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
                     includeLayoutVideoPlayer.apply {
                         val notLinkedToChat = viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
-                        textViewSubscribeButton?.goneIfFalse(notLinkedToChat)
+                        textViewSubscribeButton.goneIfFalse(notLinkedToChat)
 
-                        textViewSubscribeButton?.text = if (viewState.subscribed.isTrue()) {
+                        textViewSubscribeButton.text = if (viewState.subscribed.isTrue()) {
                             getString(R.string.unsubscribe)
                         } else {
                             getString(R.string.subscribe)
@@ -218,9 +218,9 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                     is SelectedVideoViewState.VideoSelected -> {
                         binding.includeLayoutVideoPlayer.apply {
 
-                            textViewVideoTitle?.text = viewState.title.value
-                            textViewVideoDescription?.text = viewState.description?.value ?: ""
-                            textViewVideoPublishedDate?.text = viewState.date?.hhmmElseDate()
+                            textViewVideoTitle.text = viewState.title.value
+                            textViewVideoDescription.text = viewState.description?.value ?: ""
+                            textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
 
                             if (viewState.url.isYoutubeVideo()) {
 
@@ -237,7 +237,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                                     YOUTUBE_WEB_VIEW_ENCODING
                                 )
                             } else {
-                                layoutConstraintLoadingVideo?.visible
+                                layoutConstraintLoadingVideo.visible
                                 layoutConstraintVideoViewContainer.visible
                                 webViewYoutubeVideoPlayer.gone
 
@@ -266,7 +266,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                         is PlayingVideoViewState.Idle -> { }
 
                         is PlayingVideoViewState.MetaDataLoaded -> {
-                            layoutConstraintLoadingVideo?.gone
+                            layoutConstraintLoadingVideo.gone
 
                             seekBarCurrentProgress.max = viewState.duration
                             textViewCurrentTime.text = viewState.duration.toLong().toTimestamp()
@@ -300,13 +300,13 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
         val currentOrientation = resources.configuration.orientation
 
-        binding.includeLayoutVideoPlayer.layoutConstraintVideoPlayers?.let { videoPlayers ->
+        binding.includeLayoutVideoPlayer.layoutConstraintVideoPlayers.apply {
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                videoPlayers.layoutParams.height = binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+                layoutParams.height = binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
             } else {
-                videoPlayers.layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
+                layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
             }
-            videoPlayers.requestLayout()
+            requestLayout()
         }
     }
 }
