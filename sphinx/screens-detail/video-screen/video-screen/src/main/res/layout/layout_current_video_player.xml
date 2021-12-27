@@ -9,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_video_players"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="@dimen/video_player_height"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout

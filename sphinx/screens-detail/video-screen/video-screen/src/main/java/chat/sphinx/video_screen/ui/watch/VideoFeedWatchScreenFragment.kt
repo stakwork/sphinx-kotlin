@@ -1,9 +1,15 @@
 package chat.sphinx.video_screen.ui.watch
 
+import android.app.Activity
+import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.SeekBar
 import androidx.core.net.toUri
@@ -73,8 +79,18 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val a: Activity? = activity
+        a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+
         setupItems()
         setupVideoPlayer()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        val a: Activity? = activity
+        a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     private fun setupItems() {
@@ -276,6 +292,21 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                     }
                 }
             }
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        val currentOrientation = resources.configuration.orientation
+
+        binding.includeLayoutVideoPlayer.layoutConstraintVideoPlayers?.let { videoPlayers ->
+            if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                videoPlayers.layoutParams.height = binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+            } else {
+                videoPlayers.layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
+            }
+            videoPlayers.requestLayout()
         }
     }
 }
