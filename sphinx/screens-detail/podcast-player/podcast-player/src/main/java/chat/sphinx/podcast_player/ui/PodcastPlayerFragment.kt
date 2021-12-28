@@ -247,7 +247,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 podcast.getLastDownloadedEpisode()
             }
 
-            textViewEpisodeTitleLabel.text = currentEpisode.title.value
+            textViewEpisodeTitleLabel.text = currentEpisode?.title?.value ?: ""
 
             podcast.image?.value?.let { podcastImage ->
                 imageLoader.load(
