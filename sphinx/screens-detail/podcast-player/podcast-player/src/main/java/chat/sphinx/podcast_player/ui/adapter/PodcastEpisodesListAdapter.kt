@@ -7,6 +7,7 @@ import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -31,6 +32,7 @@ internal class PodcastEpisodesListAdapter(
     private val recyclerView: RecyclerView,
     private val layoutManager: LinearLayoutManager,
     private val imageLoader: ImageLoader<ImageView>,
+    private val connectivityHelper: ConnectivityHelper,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: PodcastPlayerViewModel,
@@ -184,7 +186,9 @@ internal class PodcastEpisodesListAdapter(
         init {
             binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
                 episode?.let { podcastEpisode ->
-                    viewModel.playEpisodeFromList(podcastEpisode, 0)
+                    if (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded) {
+                        viewModel.playEpisodeFromList(podcastEpisode, 0)
+                    }
                 }
             }
         }
@@ -197,6 +201,9 @@ internal class PodcastEpisodesListAdapter(
                 }
                 episode = podcastEpisode
                 disposable?.dispose()
+
+                val episodeAvailable = (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded)
+                root.alpha = if (episodeAvailable) 1.0f else 0.5f
 
                 swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
                 layoutConstraintDeleteButtonContainer.setOnClickListener {

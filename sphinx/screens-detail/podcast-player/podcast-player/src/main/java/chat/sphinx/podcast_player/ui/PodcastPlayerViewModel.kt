@@ -60,7 +60,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
     PodcastPlayerViewState.Idle
 ), MediaPlayerServiceController.MediaServiceListener {
 
-
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {

@@ -112,6 +112,16 @@ data class Podcast(
         }
     }
 
+    fun getLastDownloadedEpisode(): PodcastEpisode? {
+        for (episode in episodes) {
+            if (episode.downloaded) {
+                playingEpisode = episode
+                return episode
+            }
+        }
+        return null
+    }
+
     private fun getEpisodeWithId(id: String): PodcastEpisode? {
         for (episode in episodes) {
             if (episode.id.value == id) {
