@@ -130,7 +130,6 @@
                         android:id="@+id/text_view_download_episode_button"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
                         android:fontFamily="@font/material_icons_regular"
                         android:gravity="center"
                         android:text="@string/material_icon_name_cloud_download"
