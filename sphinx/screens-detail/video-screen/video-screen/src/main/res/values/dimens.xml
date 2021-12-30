@@ -3,6 +3,7 @@
     <dimen name="player_details_episode_title_section_height">52dp</dimen>
     <dimen name="player_details_episode_title_margin">32dp</dimen>
     <dimen name="player_slider_control_margin">14dp</dimen>
+    <dimen name="video_player_height">200dp</dimen>
 
     <dimen name="player_details_small_control_button_xy">32dp</dimen>
     <dimen name="player_details_large_control_button_xy">58dp</dimen>

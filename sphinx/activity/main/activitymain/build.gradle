@@ -37,6 +37,7 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
     api project(path: ':sphinx:activity:features:user-colors-helper')
+    api project(path: ':sphinx:activity:features:connectivity-helper')
     api project(path: ':sphinx:activity:hilt-qualifiers')
 
     api project(path: ':sphinx:screens:add-sats:add-sats')

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -34,7 +35,6 @@ import chat.sphinx.wrapper_common.util.getTimeString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -58,6 +58,10 @@ internal class PodcastPlayerFragment : BaseFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var connectivityHelper: ConnectivityHelper
 
     private val args: PodcastPlayerFragmentArgs by navArgs()
 
@@ -99,6 +103,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 this,
                 linearLayoutManager,
                 imageLoader,
+                connectivityHelper,
                 viewLifecycleOwner,
                 onStopSupervisor,
                 viewModel
@@ -235,7 +240,14 @@ internal class PodcastPlayerFragment : BaseFragment<
                 getString(R.string.subscribe)
             }
 
-            textViewEpisodeTitleLabel.text = podcast.getCurrentEpisode().title.value
+            var currentEpisode: PodcastEpisode? = podcast.getCurrentEpisode()
+            currentEpisode = if (connectivityHelper.isNetworkConnected() || currentEpisode?.downloaded == true) {
+                currentEpisode
+            } else {
+                podcast.getLastDownloadedEpisode()
+            }
+
+            textViewEpisodeTitleLabel.text = currentEpisode?.title?.value ?: ""
 
             podcast.image?.value?.let { podcastImage ->
                 imageLoader.load(
@@ -253,7 +265,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             togglePlayPauseButton(podcast.isPlaying)
 
-            if (!dragging) setTimeLabelsAndProgressBar(podcast)
+            if (!dragging && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
 
             toggleLoadingWheel(false)
         }

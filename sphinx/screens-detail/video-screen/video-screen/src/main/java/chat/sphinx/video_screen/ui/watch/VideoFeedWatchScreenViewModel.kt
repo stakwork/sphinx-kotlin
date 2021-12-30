@@ -9,7 +9,7 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.video_player_controller.VideoPlayerController
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
-import chat.sphinx.video_screen.ui.viewstate.PlayingVideoViewState
+import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
@@ -55,72 +55,21 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
         }
     }
 
-    open val playingVideoStateContainer: ViewStateContainer<PlayingVideoViewState> by lazy {
-        ViewStateContainer(PlayingVideoViewState.Idle)
+    open val loadingVideoStateContainer: ViewStateContainer<LoadingVideoViewState> by lazy {
+        ViewStateContainer(LoadingVideoViewState.Idle)
     }
 
     private val videoPlayerController: VideoPlayerController by lazy {
         VideoPlayerController(
             viewModelScope = viewModelScope,
-            updateIsPlaying = { isPlaying ->
-                val currentViewState = playingVideoStateContainer.viewStateFlow.value
-
-                if (isPlaying) {
-                    playingVideoStateContainer.updateViewState(
-                        PlayingVideoViewState.ContinuePlayback(
-                            currentViewState.duration,
-                            currentViewState.currentTime,
-                            currentViewState.videoDimensions,
-                            isPlaying
-                        )
-                    )
-                } else {
-                    playingVideoStateContainer.updateViewState(
-                        PlayingVideoViewState.PausePlayback(
-                            currentViewState.duration,
-                            currentViewState.currentTime,
-                            currentViewState.videoDimensions,
-                            isPlaying
-                        )
-                    )
-                }
-            },
-            updateMetaDataCallback = { duration, videoWidth, videoHeight ->
-                val currentViewState = playingVideoStateContainer.viewStateFlow.value
-
-                playingVideoStateContainer.updateViewState(
-                    PlayingVideoViewState.MetaDataLoaded(
-                        duration,
-                        currentViewState.currentTime,
-                        Pair(videoWidth, videoHeight),
-                        currentViewState.isPlaying
-                    )
+            updateIsPlaying = { },
+            updateMetaDataCallback = { _, _, _ ->
+                loadingVideoStateContainer.updateViewState(
+                    LoadingVideoViewState.MetaDataLoaded
                 )
             },
-            updateCurrentTimeCallback = { currentTime ->
-                val currentViewState = playingVideoStateContainer.viewStateFlow.value
-
-                playingVideoStateContainer.updateViewState(
-                    PlayingVideoViewState.CurrentTimeUpdate(
-                        currentViewState.duration,
-                        currentTime,
-                        currentViewState.videoDimensions,
-                        currentViewState.isPlaying
-                    )
-                )
-            },
-            completePlaybackCallback = {
-                val currentViewState = playingVideoStateContainer.viewStateFlow.value
-
-                playingVideoStateContainer.updateViewState(
-                    PlayingVideoViewState.CompletePlayback(
-                        currentViewState.duration,
-                        currentTime = 0,
-                        currentViewState.videoDimensions,
-                        isPlaying = false
-                    )
-                )
-            },
+            updateCurrentTimeCallback = { },
+            completePlaybackCallback = { },
             dispatchers
         )
     }
@@ -141,14 +90,6 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
 
     fun setVideoView(videoView: VideoView) {
         videoPlayerController.setVideo(videoView)
-    }
-
-    fun togglePlayPause() {
-        videoPlayerController.togglePlayPause()
-    }
-
-    fun seekTo(progress: Int) {
-        videoPlayerController.seekTo(progress)
     }
 
     override fun getArgChatId(): ChatId {

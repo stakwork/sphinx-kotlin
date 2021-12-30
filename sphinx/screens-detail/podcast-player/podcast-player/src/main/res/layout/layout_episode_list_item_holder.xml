@@ -105,8 +105,8 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layout_constraint_download_status_icons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="@dimen/episode_list_item_download_button_container_xy"
+                    android:layout_height="@dimen/episode_list_item_download_button_container_xy"
                     android:layout_marginEnd="@dimen/default_half_layout_margin"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -128,9 +128,8 @@
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/text_view_download_episode_button"
-                        android:layout_width="@dimen/episode_list_item_download_button_xy"
-                        android:layout_height="@dimen/episode_list_item_download_button_xy"
-                        android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:fontFamily="@font/material_icons_regular"
                         android:gravity="center"
                         android:text="@string/material_icon_name_cloud_download"
@@ -142,8 +141,7 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
-                        tools:visibility="gone"
-                        />
+                        tools:visibility="gone" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
