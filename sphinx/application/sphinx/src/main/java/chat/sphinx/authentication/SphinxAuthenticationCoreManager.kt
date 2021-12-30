@@ -46,7 +46,6 @@ class SphinxAuthenticationCoreManager(
     @SuppressLint("SourceLockedOrientationActivity")
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
         super.onActivityCreated(activity, savedInstanceState)
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
         if (applicationServiceTracker.taskIsRemoved) {
             applicationServiceTracker.taskReturned()
