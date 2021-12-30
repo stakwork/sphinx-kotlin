@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha38 (2021-12-30)
+ - Adds landscape support on feed video player
+ - Improves podcast offline mode
+
 # Version 1.0.0-alpha37 (2021-12-24)
  - Adds ability to search for youtube videos
  - Adds podcast and video offline mode
