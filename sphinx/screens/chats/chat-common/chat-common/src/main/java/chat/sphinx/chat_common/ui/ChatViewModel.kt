@@ -178,9 +178,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     contactRepository.getContactById(nnContactId).collect { contact ->
                         val currentState = _viewStateFlow.value
                         if (contact != null && currentState is ChatHeaderViewState.Initialized) {
+
+                            val showLock = if (currentState.showLock) {
+                                currentState.showLock
+                            } else {
+                                contact.rsaPublicKey?.value?.isNotEmpty() == true
+                            }
+
                             _viewStateFlow.value = ChatHeaderViewState.Initialized(
                                 chatHeaderName = contact.alias?.value ?: "",
-                                showLock = currentState.showLock,
+                                showLock = showLock,
                                 isMuted = currentState.isMuted,
                             )
                         }
