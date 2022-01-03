@@ -264,7 +264,7 @@ class FeedSearchAdapter(
                         imageLoader.load(
                             imageViewFeedImage,
                             imageUrl,
-                            imageLoaderOptions
+                            imageLoaderOptions(result)
                         ).also {
                             disposable = it
                         }
