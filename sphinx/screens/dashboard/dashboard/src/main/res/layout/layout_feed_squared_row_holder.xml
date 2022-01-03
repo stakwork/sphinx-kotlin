@@ -22,7 +22,7 @@
             android:layout_width="@dimen/default_feed_image_xy"
             android:layout_height="@dimen/default_feed_image_xy"
             android:scaleType="centerCrop"
-            tools:srcCompat="@drawable/ic_podcast_placeholder" />
+            android:src="@drawable/ic_podcast_placeholder" />
 
     </androidx.cardview.widget.CardView>
 
