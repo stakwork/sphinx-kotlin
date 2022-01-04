@@ -65,6 +65,9 @@ data class Podcast(
     val isPlaying: Boolean
         get() = playingEpisode?.playing ?: false
 
+    val hasDestinations: Boolean
+        get() = destinations.isNotEmpty()
+
     fun getEpisodesListCopy(): ArrayList<PodcastEpisode> {
         var episodesList = ArrayList<PodcastEpisode>()
 
