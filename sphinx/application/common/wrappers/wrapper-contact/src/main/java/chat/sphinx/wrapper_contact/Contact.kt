@@ -45,6 +45,10 @@ inline fun Contact.getColorKey(): String {
 inline fun Contact.isBlocked(): Boolean =
     blocked.isTrue()
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Contact.isEncrypted(): Boolean =
+    rsaPublicKey?.value?.isNotEmpty() == true
+
 data class Contact(
     val id: ContactId,
     val routeHint: LightningRouteHint?,
