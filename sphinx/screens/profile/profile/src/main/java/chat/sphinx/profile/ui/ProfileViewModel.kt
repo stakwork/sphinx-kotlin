@@ -19,8 +19,12 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
+import chat.sphinx.wrapper_common.PreviewsEnabled
+import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.message.toSphinxCallLink
+import chat.sphinx.wrapper_common.toPreviewsEnabled
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -57,7 +61,6 @@ internal class ProfileViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val relayDataHandler: RelayDataHandler,
-
     private val torManager: TorManager,
 ): SideEffectViewModel<
         Context,
@@ -160,6 +163,24 @@ internal class ProfileViewModel @Inject constructor(
 
         withContext(dispatchers.io) {
             serverUrlsSharedPreferences.edit().putString(SphinxCallLink.CALL_SERVER_URL_KEY, url)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                }
+        }
+    }
+
+    suspend fun updateLinkPreviewsEnabled(enabled: Boolean) {
+        _linkPreviewsEnabledStateFlow.value = enabled
+
+        delay(50L)
+
+        val appContext: Context = app.applicationContext
+        val generalSettingsSharedPreferences = appContext.getSharedPreferences(PreviewsEnabled.LINK_PREVIEWS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            generalSettingsSharedPreferences.edit().putBoolean(PreviewsEnabled.LINK_PREVIEWS_ENABLED_KEY, enabled)
                 .let { editor ->
                     if (!editor.commit()) {
                         editor.apply()
@@ -341,6 +362,9 @@ internal class ProfileViewModel @Inject constructor(
     private val _meetingServerUrlStateFlow: MutableStateFlow<String?> by lazy {
         MutableStateFlow(null)
     }
+    private val _linkPreviewsEnabledStateFlow: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(true)
+    }
 
     val relayUrlStateFlow: StateFlow<String?>
         get() = _relayUrlStateFlow.asStateFlow()
@@ -350,6 +374,8 @@ internal class ProfileViewModel @Inject constructor(
         get() = _meetingServerUrlStateFlow.asStateFlow()
     val accountOwnerStateFlow: StateFlow<Contact?>
         get() = contactRepository.accountOwner
+    val linkPreviewsEnabledStateFlow: StateFlow<Boolean>
+        get() = _linkPreviewsEnabledStateFlow.asStateFlow()
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -357,6 +383,7 @@ internal class ProfileViewModel @Inject constructor(
             _pinTimeoutStateFlow.value = backgroundLoginHandler.getTimeOutSetting()
 
             setServerUrls()
+            setLinkPreviewsEnabled()
         }
     }
 
@@ -370,5 +397,17 @@ internal class ProfileViewModel @Inject constructor(
         ) ?: SphinxCallLink.DEFAULT_CALL_SERVER_URL
 
         _meetingServerUrlStateFlow.value = meetingServerUrl
+    }
+
+    private fun setLinkPreviewsEnabled() {
+        val appContext: Context = app.applicationContext
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences(PreviewsEnabled.LINK_PREVIEWS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        val linkPreviewsEnabled = serverUrlsSharedPreferences.getBoolean(
+            PreviewsEnabled.LINK_PREVIEWS_ENABLED_KEY,
+            PreviewsEnabled.True.isTrue()
+        )
+
+        _linkPreviewsEnabledStateFlow.value = linkPreviewsEnabled
     }
 }

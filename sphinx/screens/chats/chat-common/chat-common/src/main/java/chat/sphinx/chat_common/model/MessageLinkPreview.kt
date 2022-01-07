@@ -10,7 +10,10 @@ import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 
 sealed interface MessageLinkPreview {
     companion object {
-        internal fun parse(text: LayoutState.Bubble.ContainerThird.Message?): MessageLinkPreview? {
+        internal fun parse(
+            text: LayoutState.Bubble.ContainerThird.Message?,
+            urlLinkPreviewsEnabled: Boolean
+        ): MessageLinkPreview? {
             if (text == null) {
                 return null
             }
@@ -33,16 +36,18 @@ sealed interface MessageLinkPreview {
                     TribeLink(nnTribeLink)
 
                 } ?: run {
-
-                    when {
-                        group.startsWith("http://") || group.startsWith("https://") -> {
-                            UnspecifiedUrl(group)
-                        }
-                        else -> {
-                            UnspecifiedUrl("https://$group")
+                    if (!urlLinkPreviewsEnabled) {
+                        null
+                    } else {
+                        when {
+                            group.startsWith("http://") || group.startsWith("https://") -> {
+                                UnspecifiedUrl(group)
+                            }
+                            else -> {
+                                UnspecifiedUrl("https://$group")
+                            }
                         }
                     }
-
                 }
 
             } else {
