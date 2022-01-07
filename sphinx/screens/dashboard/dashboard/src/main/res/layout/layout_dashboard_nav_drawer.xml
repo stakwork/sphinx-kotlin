@@ -71,24 +71,24 @@
             app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_text_view_sats_balance"
             app:layout_constraintStart_toEndOf="@+id/nav_drawer_text_view_sats_balance" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/nav_drawer_button_add_sats"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_layout_margin"
-            android:background="@drawable/button_background_white_rad_48"
-            android:backgroundTint="@color/primaryBlue"
-            android:paddingStart="15dp"
-            android:paddingTop="4dp"
-            android:paddingEnd="15dp"
-            android:paddingBottom="4dp"
-            android:text="@string/add_sats"
-            android:textAllCaps="true"
-            android:textColor="@android:color/white"
-            android:textSize="8sp"
-            android:fontFamily="@font/montserrat_regular"
-            app:layout_constraintStart_toStartOf="@+id/nav_drawer_text_view_sats_balance"
-            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_text_view_sats_balance" />
+<!--        <androidx.appcompat.widget.AppCompatTextView-->
+<!--            android:id="@+id/nav_drawer_button_add_sats"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="@dimen/default_layout_margin"-->
+<!--            android:background="@drawable/button_background_white_rad_48"-->
+<!--            android:backgroundTint="@color/primaryBlue"-->
+<!--            android:paddingStart="15dp"-->
+<!--            android:paddingTop="4dp"-->
+<!--            android:paddingEnd="15dp"-->
+<!--            android:paddingBottom="4dp"-->
+<!--            android:text="@string/add_sats"-->
+<!--            android:textAllCaps="true"-->
+<!--            android:textColor="@android:color/white"-->
+<!--            android:textSize="8sp"-->
+<!--            android:fontFamily="@font/montserrat_regular"-->
+<!--            app:layout_constraintStart_toStartOf="@+id/nav_drawer_text_view_sats_balance"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_text_view_sats_balance" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

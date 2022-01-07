@@ -13,11 +13,13 @@ class FeedFragmentsAdapter(
 ) : FragmentStateAdapter(fragment) {
 
     companion object {
+        const val ITEMS_COUNT = 4
+
         const val CHIP_ALL_POSITION = 0
         const val CHIP_LISTEN_POSITION = 1
         const val CHIP_WATCH_POSITION = 2
         const val CHIP_READ_POSITION = 3
-        const val CHIP_PLAY_POSITION = 4
+//        const val CHIP_PLAY_POSITION = 4
     }
 
     override fun createFragment(position: Int): Fragment {
@@ -34,9 +36,9 @@ class FeedFragmentsAdapter(
             CHIP_READ_POSITION -> {
                 FeedReadFragment.newInstance()
             }
-            CHIP_PLAY_POSITION -> {
-                FeedPlayFragment.newInstance()
-            }
+//            CHIP_PLAY_POSITION -> {
+//                FeedPlayFragment.newInstance()
+//            }
             else ->  {
                 FeedAllFragment.newInstance()
             }
@@ -44,6 +46,6 @@ class FeedFragmentsAdapter(
     }
 
     override fun getItemCount(): Int {
-        return 5
+        return ITEMS_COUNT
     }
 }

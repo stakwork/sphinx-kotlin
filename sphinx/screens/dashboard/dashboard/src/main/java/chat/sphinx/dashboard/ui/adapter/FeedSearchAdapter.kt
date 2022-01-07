@@ -186,9 +186,9 @@ class FeedSearchAdapter(
         }
     }
 
-    private val imageLoaderOptions: ImageLoaderOptions by lazy {
-        ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_podcast_placeholder)
+    private fun imageLoaderOptions(result: FeedSearchResult): ImageLoaderOptions {
+        return ImageLoaderOptions.Builder()
+            .placeholderResId(result.getPlaceHolderImageRes())
             .build()
     }
 
@@ -264,7 +264,7 @@ class FeedSearchAdapter(
                         imageLoader.load(
                             imageViewFeedImage,
                             imageUrl,
-                            imageLoaderOptions
+                            imageLoaderOptions(result)
                         ).also {
                             disposable = it
                         }

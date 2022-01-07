@@ -8,5 +8,5 @@ sealed class FeedChipsViewState: ViewState<FeedChipsViewState>() {
     object Listen: FeedChipsViewState()
     object Watch: FeedChipsViewState()
     object Read: FeedChipsViewState()
-    object Play: FeedChipsViewState()
+//    object Play: FeedChipsViewState()
 }

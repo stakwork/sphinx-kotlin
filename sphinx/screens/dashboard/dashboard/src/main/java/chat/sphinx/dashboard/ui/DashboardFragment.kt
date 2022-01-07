@@ -244,9 +244,9 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
 
-            navDrawer.navDrawerButtonAddSats.setOnClickListener {
-                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddSatsScreen() }
-            }
+//            navDrawer.navDrawerButtonAddSats.setOnClickListener {
+//                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddSatsScreen() }
+//            }
             navDrawer.navDrawerButtonContacts.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddressBookScreen() }
             }

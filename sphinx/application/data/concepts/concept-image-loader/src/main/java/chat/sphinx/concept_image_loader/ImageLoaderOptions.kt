@@ -32,6 +32,10 @@ data class ImageLoaderOptions private constructor(
 
         fun placeholderResId(resourceId: Int) = apply {
             this.placeholderResId = resourceId
+
+            if (this.errorResId == null) {
+                this.errorResId = resourceId
+            }
         }
 
         fun addHeader(key: String, value: String) = apply {
