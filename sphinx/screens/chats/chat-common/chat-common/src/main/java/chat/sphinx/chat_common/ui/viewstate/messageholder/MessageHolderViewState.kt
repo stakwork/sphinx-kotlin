@@ -52,6 +52,7 @@ internal sealed class MessageHolderViewState(
     val initialHolder: InitialHolderViewState,
     private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
     private val accountOwner: () -> Contact,
+    private val urlLinkPreviewsEnabled: Boolean,
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
     private val onBindDownloadMedia: () -> Unit,
@@ -403,7 +404,10 @@ internal sealed class MessageHolderViewState(
     }
 
     val messageLinkPreview: MessageLinkPreview? by lazy {
-        MessageLinkPreview.parse(bubbleMessage)
+        MessageLinkPreview.parse(
+            bubbleMessage,
+            urlLinkPreviewsEnabled
+        )
     }
 
     @Volatile
@@ -484,6 +488,7 @@ internal sealed class MessageHolderViewState(
         invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
+        urlLinkPreviewsEnabled: Boolean,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
         onBindDownloadMedia: () -> Unit,
@@ -495,6 +500,7 @@ internal sealed class MessageHolderViewState(
         InitialHolderViewState.None,
         messageSenderInfo,
         accountOwner,
+        urlLinkPreviewsEnabled,
         previewProvider,
         paidTextMessageContentProvider,
         onBindDownloadMedia,
@@ -508,6 +514,7 @@ internal sealed class MessageHolderViewState(
         initialHolder: InitialHolderViewState,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
+        urlLinkPreviewsEnabled: Boolean,
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
         onBindDownloadMedia: () -> Unit,
@@ -519,6 +526,7 @@ internal sealed class MessageHolderViewState(
         initialHolder,
         messageSenderInfo,
         accountOwner,
+        urlLinkPreviewsEnabled,
         previewProvider,
         paidTextMessageContentProvider,
         onBindDownloadMedia,

@@ -238,19 +238,56 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--                android:id="@+id/sound_appearance_form"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="@dimen/profile_sound_appearance_form_height"-->
-<!--                android:background="@color/body"-->
-<!--                android:layout_marginTop="@dimen/profile_form_container_margin_top"-->
-<!--                android:elevation="8dp"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintTop_toBottomOf="@+id/basic_info_form">-->
-<!--                -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_general_settings_form"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/profile_form_field_container_height"
+                android:background="@color/body"
+                android:layout_marginTop="@dimen/profile_form_container_margin_top"
+                android:elevation="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_info_form">
 
-<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_profile_general_settings_link_previews"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/profile_form_field_container_height"
+                    android:layout_marginStart="@dimen/default_form_horizontal_margin"
+                    android:layout_marginEnd="@dimen/default_form_horizontal_margin"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_profile_basic_container_link_preview"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text"
+                        android:fontFamily="@font/roboto_regular"
+                        android:textSize="@dimen/pin_text_view_size"
+                        android:maxLines="2"
+                        android:text="@string/profile_link_previews"
+                        android:layout_marginEnd="@dimen/default_layout_margin"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/switch_profile_basic_container_link_preview"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_profile_basic_container_link_preview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:theme="@style/CustomSwitch"
+                        android:thumb="@drawable/switch_thumb_selector"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/text_view_profile_basic_container_link_preview"
+                        app:track="@drawable/switch_track_selector" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_constraint_profile_basic_container_servers_form"
@@ -261,7 +298,7 @@
                 android:elevation="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_info_form">
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_general_settings_form">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layout_constraint_profile_basic_tip_content"
