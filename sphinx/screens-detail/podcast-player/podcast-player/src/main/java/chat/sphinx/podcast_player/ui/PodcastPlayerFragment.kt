@@ -261,7 +261,11 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
-            includeLayoutEpisodePlaybackControlButtons.textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
+            includeLayoutEpisodePlaybackControlButtons.apply {
+                textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
+                imageViewPodcastBoostButton.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
+                imageViewPodcastBoostButton.isEnabled = podcast.hasDestinations
+            }
 
             togglePlayPauseButton(podcast.isPlaying)
 

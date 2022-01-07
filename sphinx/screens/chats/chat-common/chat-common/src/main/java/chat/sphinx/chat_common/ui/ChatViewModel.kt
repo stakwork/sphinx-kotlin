@@ -61,12 +61,10 @@ import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.wrapper_chat.*
-import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.getMinutesDifferenceWithDateTime
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -180,7 +178,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         if (contact != null && currentState is ChatHeaderViewState.Initialized) {
                             _viewStateFlow.value = ChatHeaderViewState.Initialized(
                                 chatHeaderName = contact.alias?.value ?: "",
-                                showLock = currentState.showLock,
+                                showLock = currentState.showLock || contact.isEncrypted(),
                                 isMuted = currentState.isMuted,
                             )
                         }
@@ -437,6 +435,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     }
                                 },
                                 accountOwner = { owner },
+                                urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
                                 previewProvider = { handleLinkPreview(it) },
                                 paidTextMessageContentProvider = {
                                         messageCallback -> handlePaidTextMessageContent(messageCallback)
@@ -505,6 +504,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     }
                                 },
                                 accountOwner = { owner },
+                                urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
                                 previewProvider = { link -> handleLinkPreview(link) },
                                 paidTextMessageContentProvider = { messageCallback ->
                                     handlePaidTextMessageContent(messageCallback)
@@ -625,24 +625,42 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
                 is UnspecifiedUrl -> {
 
-                    val htmlPreview = linkPreviewHandler.retrieveHtmlPreview(link.url)
+                    if (areUrlLinkPreviewsEnabled()) {
+                        val htmlPreview = linkPreviewHandler.retrieveHtmlPreview(link.url)
 
-                    if (htmlPreview != null) {
-                        preview = LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview(
-                            title = htmlPreview.title,
-                            domainHost = htmlPreview.domainHost,
-                            description = htmlPreview.description,
-                            imageUrl = htmlPreview.imageUrl,
-                            favIconUrl = htmlPreview.favIconUrl,
-                            url = link.url
-                        )
+                        if (htmlPreview != null) {
+                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.HttpUrlPreview(
+                                title = htmlPreview.title,
+                                domainHost = htmlPreview.domainHost,
+                                description = htmlPreview.description,
+                                imageUrl = htmlPreview.imageUrl,
+                                favIconUrl = htmlPreview.favIconUrl,
+                                url = link.url
+                            )
+                        }
                     }
-
                 }
             }
         }.join()
 
         return preview
+    }
+
+    var urlLinkPreviewsEnabled: Boolean? = null
+    private fun areUrlLinkPreviewsEnabled(): Boolean {
+        urlLinkPreviewsEnabled?.let {
+            return it
+        }
+
+        val appContext: Context = app.applicationContext
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences(PreviewsEnabled.LINK_PREVIEWS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        urlLinkPreviewsEnabled = serverUrlsSharedPreferences.getBoolean(
+            PreviewsEnabled.LINK_PREVIEWS_ENABLED_KEY,
+            PreviewsEnabled.True.isTrue()
+        )
+
+        return urlLinkPreviewsEnabled!!
     }
 
     private suspend fun handlePaidTextMessageContent(message: Message): LayoutState.Bubble.ContainerThird.Message? {

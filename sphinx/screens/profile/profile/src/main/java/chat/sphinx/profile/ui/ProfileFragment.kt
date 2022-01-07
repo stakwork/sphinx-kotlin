@@ -217,6 +217,14 @@ internal class ProfileFragment: SideEffectFragment<
                 buttonProfileBasicContainerKeyBackup.setOnClickListener {
                     viewModel.backupKeys()
                 }
+
+                switchProfileBasicContainerLinkPreview.setOnCheckedChangeListener { _, isChecked ->
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.updateLinkPreviewsEnabled(
+                            isChecked
+                        )
+                    }
+                }
             }
 
             includeProfileAdvancedContainerHolder.apply {
@@ -329,6 +337,15 @@ internal class ProfileFragment: SideEffectFragment<
                             }
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.linkPreviewsEnabledStateFlow.collect { enabled ->
+                binding
+                    .includeProfileBasicContainerHolder
+                    .switchProfileBasicContainerLinkPreview
+                    .isChecked = enabled
             }
         }
 

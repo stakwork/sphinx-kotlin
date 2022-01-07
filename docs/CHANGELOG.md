@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha39 (2022-01-07)
+ - Improves feed
+ - Fixes crashes
+ - Adds ability to disable link previews
+
 # Version 1.0.0-alpha38 (2021-12-30)
  - Adds landscape support on feed video player
  - Improves podcast offline mode

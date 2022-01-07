@@ -188,11 +188,11 @@ internal class FeedFragment : SideEffectFragment<
                 )
             }
 
-            chipPlay.setOnClickListener {
-                viewModel.feedChipsViewStateContainer.updateViewState(
-                    FeedChipsViewState.Play
-                )
-            }
+//            chipPlay.setOnClickListener {
+//                viewModel.feedChipsViewStateContainer.updateViewState(
+//                    FeedChipsViewState.Play
+//                )
+//            }
         }
     }
 
@@ -300,10 +300,10 @@ internal class FeedFragment : SideEffectFragment<
                             viewPagerFeedFragments.currentItem =
                                 FeedFragmentsAdapter.CHIP_READ_POSITION
                         }
-                        is FeedChipsViewState.Play -> {
-                            viewPagerFeedFragments.currentItem =
-                                FeedFragmentsAdapter.CHIP_PLAY_POSITION
-                        }
+//                        is FeedChipsViewState.Play -> {
+//                            viewPagerFeedFragments.currentItem =
+//                                FeedFragmentsAdapter.CHIP_PLAY_POSITION
+//                        }
                     }
                 }
             }
