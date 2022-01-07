@@ -180,7 +180,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         if (contact != null && currentState is ChatHeaderViewState.Initialized) {
                             _viewStateFlow.value = ChatHeaderViewState.Initialized(
                                 chatHeaderName = contact.alias?.value ?: "",
-                                showLock = currentState.showLock,
+                                showLock = currentState.showLock || contact.isEncrypted(),
                                 isMuted = currentState.isMuted,
                             )
                         }
