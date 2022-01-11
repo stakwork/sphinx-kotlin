@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.DownloadableFeedItem
+import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.PodcastDestination
 import java.io.File
@@ -30,11 +31,11 @@ interface RepositoryMedia {
         feedItem: DownloadableFeedItem
     ): Boolean
 
-    fun streamPodcastPayments(
+    fun streamFeedPayments(
         chatId: ChatId,
         metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
-        destinations: List<PodcastDestination>
+        destinations: List<FeedDestination>
     )
 }

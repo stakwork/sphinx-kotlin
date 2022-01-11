@@ -12,7 +12,7 @@ inline val MessageContentDecrypted.isGiphy: Boolean
     get() = value.startsWith(GiphyData.MESSAGE_PREFIX)
 
 inline val MessageContentDecrypted.isPodBoost: Boolean
-    get() = value.startsWith(PodBoost.MESSAGE_PREFIX)
+    get() = value.startsWith(FeedBoost.MESSAGE_PREFIX)
 
 @JvmInline
 value class MessageContentDecrypted(val value: String) {

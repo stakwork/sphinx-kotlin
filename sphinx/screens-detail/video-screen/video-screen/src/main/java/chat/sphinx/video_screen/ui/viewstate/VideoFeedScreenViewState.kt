@@ -16,6 +16,7 @@ internal sealed class VideoFeedScreenViewState: ViewState<VideoFeedScreenViewSta
         val imageToShow: PhotoUrl?,
         val chatId: ChatId?,
         val subscribed: Subscribed,
-        val items: List<FeedItem>
+        val items: List<FeedItem>,
+        val hasDestinations: Boolean
     ): VideoFeedScreenViewState()
 }

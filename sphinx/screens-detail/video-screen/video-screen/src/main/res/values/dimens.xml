@@ -5,6 +5,8 @@
     <dimen name="player_slider_control_margin">14dp</dimen>
     <dimen name="video_player_height">200dp</dimen>
 
+    <dimen name="player_details_subscribe_button_margin_top">22dp</dimen>
+
     <dimen name="player_details_small_control_button_xy">32dp</dimen>
     <dimen name="player_details_large_control_button_xy">58dp</dimen>
     <dimen name="player_time_labels_horizontal_margin">18dp</dimen>

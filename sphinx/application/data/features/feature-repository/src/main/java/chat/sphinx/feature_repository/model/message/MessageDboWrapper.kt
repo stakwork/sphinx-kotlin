@@ -80,9 +80,9 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
 
     @Volatile
     @Suppress("PropertyName")
-    var _podBoost: PodBoost? = null
-    override val podBoost: PodBoost?
-        get() = _podBoost
+    var _feedBoost: FeedBoost? = null
+    override val feedBoost: FeedBoost?
+        get() = _feedBoost
 
     @Volatile
     @Suppress("PropertyName")

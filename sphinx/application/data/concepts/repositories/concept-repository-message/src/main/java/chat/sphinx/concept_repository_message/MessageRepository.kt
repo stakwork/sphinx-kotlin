@@ -14,6 +14,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
+import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
@@ -49,10 +50,9 @@ interface MessageRepository {
         chat: Chat,
     )
 
-    fun sendPodcastBoost(
+    fun sendBoost(
         chatId: ChatId,
-        podcast: Podcast,
-        customAmount: Sat? = null
+        boost: FeedBoost
     )
 
     suspend fun deleteMessage(message: Message) : Response<Any, ResponseError>

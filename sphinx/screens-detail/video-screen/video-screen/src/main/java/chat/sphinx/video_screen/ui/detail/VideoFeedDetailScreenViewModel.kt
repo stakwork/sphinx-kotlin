@@ -2,8 +2,10 @@ package chat.sphinx.video_screen.ui.detail
 
 import androidx.lifecycle.SavedStateHandle
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.watch.VideoFeedWatchScreenFragmentArgs
 import chat.sphinx.video_screen.ui.watch.chatId
@@ -33,11 +35,15 @@ internal class VideoFeedDetailScreenViewModel @Inject constructor(
     chatRepository: ChatRepository,
     repositoryMedia: RepositoryMedia,
     feedRepository: FeedRepository,
+    contactRepository: ContactRepository,
+    messageRepository: MessageRepository
 ): VideoFeedScreenViewModel(
     dispatchers,
     chatRepository,
     repositoryMedia,
-    feedRepository
+    feedRepository,
+    contactRepository,
+    messageRepository
 )
 {
     private val args: VideoFeedDetailScreenFragmentArgs by savedStateHandle.navArgs()

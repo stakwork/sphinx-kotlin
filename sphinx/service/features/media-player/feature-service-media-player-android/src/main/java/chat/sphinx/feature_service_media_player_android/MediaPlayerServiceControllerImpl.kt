@@ -86,7 +86,7 @@ internal class MediaPlayerServiceControllerImpl(
                 repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
             }
             is UserAction.SendBoost -> {
-                repositoryMedia.streamPodcastPayments(
+                repositoryMedia.streamFeedPayments(
                     userAction.chatId,
                     userAction.metaData,
                     userAction.podcastId,

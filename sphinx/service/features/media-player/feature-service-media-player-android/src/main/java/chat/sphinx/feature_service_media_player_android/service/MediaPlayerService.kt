@@ -160,7 +160,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                 }
                 is UserAction.SendBoost -> {
                     podData?.let { nnData ->
-                        repositoryMedia.streamPodcastPayments(
+                        repositoryMedia.streamFeedPayments(
                             nnData.chatId,
                             userAction.metaData,
                             nnData.podcastId,
@@ -399,7 +399,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         if (count >= 60.0 * speed) {
 
                             //Chat meta data is updated on relay automatically on stream payments
-                            repositoryMedia.streamPodcastPayments(
+                            repositoryMedia.streamFeedPayments(
                                 nnData.chatId,
                                 ChatMetaData(
                                     FeedId(nnData.episodeId),

@@ -305,7 +305,7 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubblePodcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost? by lazy(LazyThreadSafetyMode.NONE) {
-        message.podBoost?.let { podBoost ->
+        message.feedBoost?.let { podBoost ->
             LayoutState.Bubble.ContainerSecond.PodcastBoost(
                 podBoost.amount,
             )
@@ -432,7 +432,7 @@ internal sealed class MessageHolderViewState(
     val selectionMenuItems: List<MenuItemState>? by lazy(LazyThreadSafetyMode.NONE) {
         if (
             background is BubbleBackground.Gone         ||
-            message.podBoost != null
+            message.feedBoost != null
         ) {
             null
         } else {

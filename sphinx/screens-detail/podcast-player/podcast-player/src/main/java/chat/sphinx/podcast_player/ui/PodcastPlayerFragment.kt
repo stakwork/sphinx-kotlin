@@ -78,6 +78,31 @@ internal class PodcastPlayerFragment : BaseFragment<
                 }
             }
 
+            root.post {
+                val fragmentHeight = root.measuredHeight
+
+
+                includeLayoutPodcastEpisodesList.layoutConstraintPodcastEpisodesList.apply {
+                    kotlin.run {
+                        layoutParams.height = (fragmentHeight.toDouble() * 0.975).toInt()
+                        requestLayout()
+                    }
+                }
+            }
+        }
+
+        setupBoost()
+        setupEpisodes()
+
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.getPodcast()?.let { podcast ->
+                addPodcastOnClickListeners(podcast)
+            }
+        }
+    }
+
+    private fun setupBoost() {
+        binding.apply {
             includeLayoutBoostFireworks.apply {
                 lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
                     override fun onAnimationEnd(animation: Animator?) {
@@ -94,26 +119,6 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             includeLayoutEpisodePlaybackControls.apply {
                 removeFocusOnEnter(editTextCustomBoost)
-            }
-
-            root.post {
-                val fragmentHeight = root.measuredHeight
-
-
-                includeLayoutPodcastEpisodesList.layoutConstraintPodcastEpisodesList.apply {
-                    kotlin.run {
-                        layoutParams.height = (fragmentHeight.toDouble() * 0.975).toInt()
-                        requestLayout()
-                    }
-                }
-            }
-        }
-
-        setupEpisodes()
-
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.getPodcast()?.let { podcast ->
-                addPodcastOnClickListeners(podcast)
             }
         }
     }
@@ -313,7 +318,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             includeLayoutEpisodePlaybackControls.apply {
                 textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
-                imageViewPodcastBoostButton.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
+                layoutConstraintBoostButtonContainer.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
                 imageViewPodcastBoostButton.isEnabled = podcast.hasDestinations
             }
 

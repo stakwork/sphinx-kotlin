@@ -24,6 +24,7 @@ import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -334,7 +335,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private fun setPaymentsDestinations() {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.destinations.let { destinations ->
+                val destinations = podcast.getFeedDestinations()
+
+                if (destinations.isNotEmpty()) {
                     mediaPlayerServiceController.submitAction(
                         UserAction.SetPaymentsDestinations(
                             args.chatId,
@@ -353,13 +356,21 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     if (amount.value > 0) {
                         val metaData = podcast.getMetaData(amount)
 
-                        messageRepository.sendPodcastBoost(
-                            args.chatId,
-                            podcast,
-                            customAmount
+                        val feedBoost = FeedBoost(
+                            podcast.id,
+                            metaData.itemId,
+                            metaData.timeSeconds,
+                            amount
                         )
 
-                        podcast.destinations.let { destinations ->
+                        messageRepository.sendBoost(
+                            args.chatId,
+                            feedBoost
+                        )
+
+                        val destinations = podcast.getFeedDestinations()
+
+                        if (destinations.isNotEmpty()) {
                             mediaPlayerServiceController.submitAction(
                                 UserAction.SendBoost(
                                     args.chatId,

@@ -1,12 +1,17 @@
 package chat.sphinx.video_screen.ui.watch
 
+import android.animation.Animator
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.MediaController
+import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
@@ -14,19 +19,26 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
 import chat.sphinx.video_screen.adapter.VideoFeedItemsFooterAdapter
 import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
+import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import chat.sphinx.wrapper_common.hhmmElseDate
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -68,6 +80,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
+        setupBoost()
         setupItems()
         setupVideoPlayer()
     }
@@ -77,6 +90,22 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
+    private fun setupBoost() {
+        binding.includeLayoutBoostFireworks.apply {
+            lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                override fun onAnimationEnd(animation: Animator?) {
+                    root.gone
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {}
+
+                override fun onAnimationCancel(animation: Animator?) {}
+
+                override fun onAnimationStart(animation: Animator?) {}
+            })
+        }
     }
 
     private fun setupItems() {
@@ -112,7 +141,74 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
             textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
             }
+
+            removeFocusOnEnter(editTextCustomBoost)
+
+            imageViewFeedBoostButton.setOnClickListener {
+                val customAmount = editTextCustomBoost.text.toString().toLong().toSat()
+
+                viewModel.sendBoost(
+                    customAmount
+                )
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    setupBoostAnimation(null, customAmount)
+
+                    binding.includeLayoutBoostFireworks.apply {
+                        root.visible
+
+                        lottieAnimationView.playAnimation()
+                    }
+                }
+            }
         }
+    }
+
+    private suspend fun setupBoostAnimation(
+        photoUrl: PhotoUrl?,
+        amount: Sat?
+    ) {
+        binding.apply {
+            includeLayoutVideoPlayer.editTextCustomBoost.let {
+                it.setText(amount?.asFormattedString())
+            }
+
+            includeLayoutBoostFireworks.apply {
+
+                photoUrl?.let { photoUrl ->
+                    imageLoader.load(
+                        imageViewProfilePicture,
+                        photoUrl.value,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                }
+
+                textViewSatsAmount.text = amount?.asFormattedString()
+            }
+        }
+    }
+
+    private fun removeFocusOnEnter(editText: EditText?) {
+        editText?.setOnEditorActionListener(object:
+            TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    editText.let { nnEditText ->
+                        binding.root.context.inputMethodManager?.let { imm ->
+                            if (imm.isActive(nnEditText)) {
+                                imm.hideSoftInputFromWindow(nnEditText.windowToken, 0)
+                                nnEditText.clearFocus()
+                            }
+                        }
+                    }
+                    return true
+                }
+                return false
+            }
+        })
     }
 
     override suspend fun onViewStateFlowCollect(viewState: VideoFeedScreenViewState) {
@@ -145,6 +241,9 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                         } else {
                             getString(R.string.subscribe)
                         }
+
+                        layoutConstraintBoostButtonContainer.alpha = if (viewState.hasDestinations) 1.0f else 0.3f
+                        imageViewFeedBoostButton.isEnabled = viewState.hasDestinations
                     }
                 }
             }
@@ -153,6 +252,22 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.boostAnimationViewStateContainer.collect { viewState ->
+                @app.cash.exhaustive.Exhaustive
+                when (viewState) {
+                    is BoostAnimationViewState.Idle -> {}
+
+                    is BoostAnimationViewState.BoosAnimationInfo -> {
+                        setupBoostAnimation(
+                            viewState.photoUrl,
+                            viewState.amount
+                        )
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.selectedVideoStateContainer.collect { viewState ->

@@ -97,7 +97,6 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -628,12 +627,12 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun streamPodcastPayments(
+    override fun streamFeedPayments(
         chatId: ChatId,
         metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
-        destinations: List<PodcastDestination>
+        destinations: List<FeedDestination>
     ) {
 
         if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
@@ -2915,49 +2914,21 @@ abstract class SphinxRepository(
         return response
     }
 
-    override fun sendPodcastBoost(
+    override fun sendBoost(
         chatId: ChatId,
-        podcast: Podcast,
-        customAmount: Sat?
+        boost: FeedBoost
     ) {
         applicationScope.launch(mainImmediate) {
-            val owner: Contact? = accountOwner.value
-                ?: let {
-                    var owner: Contact? = null
-                    try {
-                        accountOwner.collect {
-                            if (it != null) {
-                                owner = it
-                                throw Exception()
-                            }
-                        }
-                    } catch (e: Exception) {
-                    }
-                    delay(25L)
-                    owner
-                }
+            val message = boost.toJson(moshi)
 
-            (customAmount ?: owner?.tipAmount)?.let { amount ->
-                if (amount.value > 0) {
-                    val metaData = podcast.getMetaData(amount)
+            val sendMessageBuilder = SendMessage.Builder()
+            sendMessageBuilder.setChatId(chatId)
+            sendMessageBuilder.setText(message)
+            sendMessageBuilder.setIsBoost(true)
 
-                    val message = PodBoost(
-                        podcast.id,
-                        metaData.itemId,
-                        metaData.timeSeconds,
-                        amount
-                    ).toJson(moshi)
-
-                    val sendMessageBuilder = SendMessage.Builder()
-                    sendMessageBuilder.setChatId(chatId)
-                    sendMessageBuilder.setText(message)
-                    sendMessageBuilder.setIsBoost(true)
-
-                    sendMessage(
-                        sendMessageBuilder.build().first
-                    )
-                }
-            }
+            sendMessage(
+                sendMessageBuilder.build().first
+            )
         }
     }
 

@@ -7,7 +7,7 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun String.toPodBoostOrNull(moshi: Moshi): PodBoost? =
+inline fun String.toPodBoostOrNull(moshi: Moshi): FeedBoost? =
     try {
         this.toPodBoost(moshi)
     } catch (e: Exception) {
@@ -18,11 +18,11 @@ inline fun String.toPodBoostOrNull(moshi: Moshi): PodBoost? =
     IllegalArgumentException::class,
     JsonDataException::class
 )
-fun String.toPodBoost(moshi: Moshi): PodBoost =
+fun String.toPodBoost(moshi: Moshi): FeedBoost =
     moshi.adapter(PodBoostMoshi::class.java)
         .fromJson(this)
         ?.let {
-            PodBoost(
+            FeedBoost(
                 FeedId(it.feedID),
                 FeedId(it.itemID),
                 it.ts,
@@ -32,7 +32,7 @@ fun String.toPodBoost(moshi: Moshi): PodBoost =
         ?: throw IllegalArgumentException("Provided Json was invalid")
 
 @Throws(AssertionError::class)
-fun PodBoost.toJson(moshi: Moshi): String =
+fun FeedBoost.toJson(moshi: Moshi): String =
     moshi.adapter(PodBoostMoshi::class.java)
         .toJson(
             PodBoostMoshi(
@@ -43,7 +43,7 @@ fun PodBoost.toJson(moshi: Moshi): String =
             )
         )
 
-data class PodBoost(
+data class FeedBoost(
     val feedId: FeedId,
     val itemId: FeedId,
     val timeSeconds: Int,
