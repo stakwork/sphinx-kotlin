@@ -3496,6 +3496,21 @@ abstract class SphinxRepository(
             }
     }
 
+    override fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        queries.feedItemGetById(feedItemId)
+            .asFlow()
+            .mapToOneOrNull(io)
+            .map { it?.let { feedItemDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+            .collect { value: FeedItem? ->
+                value?.let { feedItem ->
+                    emit(feedItem)
+                }
+            }
+    }
+
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }

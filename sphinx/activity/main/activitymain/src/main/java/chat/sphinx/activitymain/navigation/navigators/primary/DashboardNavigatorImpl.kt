@@ -60,9 +60,15 @@ internal class DashboardNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toWebViewDetail(chatId: ChatId?, title: String, url: FeedUrl) {
+    override suspend fun toWebViewDetail(
+        chatId: ChatId?,
+        title: String,
+        url: FeedUrl,
+        feedId: FeedId?,
+        feedItemId: FeedId?
+    ) {
         detailDriver.submitNavigationRequest(
-            ToWebViewDetail(chatId, title, url, false)
+            ToWebViewDetail(chatId, title, url, feedId, feedItemId, false)
         )
     }
 
