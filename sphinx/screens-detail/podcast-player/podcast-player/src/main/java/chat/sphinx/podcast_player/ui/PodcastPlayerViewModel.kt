@@ -346,26 +346,28 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun sendPodcastBoost() {
+    fun sendPodcastBoost(customAmount: Sat?) {
         viewModelScope.launch(mainImmediate) {
-            getOwner().tipAmount?.let { tipAmount ->
+            (customAmount ?: getOwner().tipAmount)?.let { amount ->
                 getPodcast()?.let { podcast ->
-                    podcast.let { nnPodcast ->
-                        if (tipAmount.value > 0) {
-                            val metaData = nnPodcast.getMetaData(tipAmount)
+                    if (amount.value > 0) {
+                        val metaData = podcast.getMetaData(amount)
 
-                            messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
+                        messageRepository.sendPodcastBoost(
+                            args.chatId,
+                            podcast,
+                            customAmount
+                        )
 
-                            nnPodcast.destinations.let { destinations ->
-                                mediaPlayerServiceController.submitAction(
-                                    UserAction.SendBoost(
-                                        args.chatId,
-                                        nnPodcast.id.value,
-                                        metaData,
-                                        destinations
-                                    )
+                        podcast.destinations.let { destinations ->
+                            mediaPlayerServiceController.submitAction(
+                                UserAction.SendBoost(
+                                    args.chatId,
+                                    podcast.id.value,
+                                    metaData,
+                                    destinations
                                 )
-                            }
+                            )
                         }
                     }
                 }

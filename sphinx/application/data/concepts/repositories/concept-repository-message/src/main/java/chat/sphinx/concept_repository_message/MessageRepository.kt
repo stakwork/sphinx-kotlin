@@ -51,7 +51,8 @@ interface MessageRepository {
 
     fun sendPodcastBoost(
         chatId: ChatId,
-        podcast: Podcast
+        podcast: Podcast,
+        customAmount: Sat? = null
     )
 
     suspend fun deleteMessage(message: Message) : Response<Any, ResponseError>

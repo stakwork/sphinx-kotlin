@@ -2915,7 +2915,11 @@ abstract class SphinxRepository(
         return response
     }
 
-    override fun sendPodcastBoost(chatId: ChatId, podcast: Podcast) {
+    override fun sendPodcastBoost(
+        chatId: ChatId,
+        podcast: Podcast,
+        customAmount: Sat?
+    ) {
         applicationScope.launch(mainImmediate) {
             val owner: Contact? = accountOwner.value
                 ?: let {
@@ -2933,15 +2937,15 @@ abstract class SphinxRepository(
                     owner
                 }
 
-            owner?.tipAmount?.let { tipAmount ->
-                if (tipAmount.value > 0) {
-                    val metaData = podcast.getMetaData(tipAmount)
+            (customAmount ?: owner?.tipAmount)?.let { amount ->
+                if (amount.value > 0) {
+                    val metaData = podcast.getMetaData(amount)
 
                     val message = PodBoost(
                         podcast.id,
                         metaData.itemId,
                         metaData.timeSeconds,
-                        tipAmount
+                        amount
                     ).toJson(moshi)
 
                     val sendMessageBuilder = SendMessage.Builder()
