@@ -10,6 +10,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -38,6 +39,7 @@ import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -49,7 +51,9 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-internal class PodcastPlayerFragment : BaseFragment<
+internal class PodcastPlayerFragment : SideEffectFragment<
+        FragmentActivity,
+        PodcastPlayerSideEffect,
         PodcastPlayerViewState,
         PodcastPlayerViewModel,
         FragmentPodcastPlayerBinding
@@ -497,5 +501,9 @@ internal class PodcastPlayerFragment : BaseFragment<
                 }
             }
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: PodcastPlayerSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

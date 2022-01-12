@@ -1,11 +1,15 @@
 package chat.sphinx.video_screen.ui
 
+import android.app.Application
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
@@ -21,9 +25,12 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_podcast.Podcast
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -35,13 +42,22 @@ import java.io.File
 
 internal open class VideoFeedScreenViewModel(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     private val chatRepository: ChatRepository,
     private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
-): BaseViewModel<VideoFeedScreenViewState>(dispatchers, VideoFeedScreenViewState.Idle)
+    private val lightningRepository: LightningRepository,
+): SideEffectViewModel<
+    FragmentActivity,
+    VideoFeedScreenSideEffect,
+    VideoFeedScreenViewState
+    >(dispatchers, VideoFeedScreenViewState.Idle)
 {
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
+
     private val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
         getArgFeedId()?.let { feedId ->
             emitAll(feedRepository.getFeedById(feedId))
@@ -211,36 +227,54 @@ internal open class VideoFeedScreenViewModel(
         viewModelScope.launch(mainImmediate) {
             getVideoFeed()?.let { videoFeed ->
                 videoFeed.lastItem?.let { currentItem ->
-                    if (amount.value > 0) {
-                        fireworksCallback()
+                    getAccountBalance().firstOrNull()?.let { balance ->
+                        when {
+                            (amount.value > balance.balance.value) -> {
+                                submitSideEffect(
+                                    VideoFeedScreenSideEffect.Notify(
+                                        app.getString(R.string.balance_too_low)
+                                    )
+                                )
+                            }
+                            (amount.value <= 0) -> {
+                                submitSideEffect(
+                                    VideoFeedScreenSideEffect.Notify(
+                                        app.getString(R.string.boost_amount_too_low)
+                                    )
+                                )
+                            }
+                            else -> {
+                                fireworksCallback()
 
-                        val chatId = getArgChatId()
+                                val chatId = getArgChatId()
 
-                        messageRepository.sendBoost(
-                            chatId,
-                            FeedBoost(
-                                feedId = videoFeed.id,
-                                itemId = currentItem.id,
-                                timeSeconds = 0,
-                                amount = amount
-                            )
-                        )
+                                messageRepository.sendBoost(
+                                    chatId,
+                                    FeedBoost(
+                                        feedId = videoFeed.id,
+                                        itemId = currentItem.id,
+                                        timeSeconds = 0,
+                                        amount = amount
+                                    )
+                                )
 
-                        videoFeed.destinations.let { destinations ->
+                                videoFeed.destinations.let { destinations ->
 
-                            repositoryMedia.streamFeedPayments(
-                                chatId,
-                                ChatMetaData(
-                                    itemId = currentItem.id,
-                                    itemLongId = ItemId(-1),
-                                    satsPerMinute = amount,
-                                    timeSeconds = 0,
-                                    speed = 1.0
-                                ),
-                                videoFeed.id.value,
-                                currentItem.id.value,
-                                destinations
-                            )
+                                    repositoryMedia.streamFeedPayments(
+                                        chatId,
+                                        ChatMetaData(
+                                            itemId = currentItem.id,
+                                            itemLongId = ItemId(-1),
+                                            satsPerMinute = amount,
+                                            timeSeconds = 0,
+                                            speed = 1.0
+                                        ),
+                                        videoFeed.id.value,
+                                        currentItem.id.value,
+                                        destinations
+                                    )
+                                }
+                            }
                         }
                     }
                 }

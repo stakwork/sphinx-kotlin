@@ -13,6 +13,7 @@ import android.webkit.WebViewClient
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -30,6 +31,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -37,7 +39,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class WebViewFragment: BaseFragment<
+internal class WebViewFragment: SideEffectFragment<
+        FragmentActivity,
+        WebViewSideEffect,
         WebViewViewState,
         WebViewViewModel,
         FragmentWebViewBinding
@@ -240,5 +244,9 @@ internal class WebViewFragment: BaseFragment<
                 loadWebView(viewState.url)
             }
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: WebViewSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

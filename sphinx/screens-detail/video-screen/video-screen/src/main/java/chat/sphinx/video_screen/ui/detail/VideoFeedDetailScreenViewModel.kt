@@ -1,9 +1,11 @@
 package chat.sphinx.video_screen.ui.detail
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
@@ -31,19 +33,23 @@ internal inline val VideoFeedDetailScreenFragmentArgs.feedId: FeedId?
 @HiltViewModel
 internal class VideoFeedDetailScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    app: Application,
     savedStateHandle: SavedStateHandle,
     chatRepository: ChatRepository,
     repositoryMedia: RepositoryMedia,
     feedRepository: FeedRepository,
     contactRepository: ContactRepository,
-    messageRepository: MessageRepository
+    messageRepository: MessageRepository,
+    lightningRepository: LightningRepository,
 ): VideoFeedScreenViewModel(
     dispatchers,
+    app,
     chatRepository,
     repositoryMedia,
     feedRepository,
     contactRepository,
-    messageRepository
+    messageRepository,
+    lightningRepository
 )
 {
     private val args: VideoFeedDetailScreenFragmentArgs by savedStateHandle.navArgs()

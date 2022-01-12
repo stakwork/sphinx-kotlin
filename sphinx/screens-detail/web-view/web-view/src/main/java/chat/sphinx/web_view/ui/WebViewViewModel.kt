@@ -1,12 +1,16 @@
 package chat.sphinx.web_view.ui
 
+import android.app.Application
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.web_view.R
 import chat.sphinx.web_view.navigation.WebViewNavigator
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
@@ -16,10 +20,13 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
@@ -35,14 +42,22 @@ internal class WebViewViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     dispatchers: CoroutineDispatchers,
     val navigator: WebViewNavigator,
+    private val app: Application,
     private val chatRepository: ChatRepository,
     private val feedRepository: FeedRepository,
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val repositoryMedia: RepositoryMedia,
-): BaseViewModel<WebViewViewState>(dispatchers, WebViewViewState.Idle)
+    private val lightningRepository: LightningRepository,
+): SideEffectViewModel<
+        FragmentActivity,
+        WebViewSideEffect,
+        WebViewViewState>(dispatchers, WebViewViewState.Idle)
 {
     private val args: WebViewFragmentArgs by savedStateHandle.navArgs()
+
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
 
     private val feedItemSharedFlow: SharedFlow<FeedItem?> = flow {
         args.feedItemId?.toFeedId()?.let { feedItemId ->
@@ -168,35 +183,53 @@ internal class WebViewViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             getFeedItem()?.let { feedItem ->
                 getFeed()?.let { feed ->
-                    if (amount.value > 0) {
-                        fireworksCallback()
+                    getAccountBalance().firstOrNull()?.let { balance ->
+                        when {
+                            (amount.value > balance.balance.value) -> {
+                                submitSideEffect(
+                                    WebViewSideEffect.Notify(
+                                        app.getString(R.string.balance_too_low)
+                                    )
+                                )
+                            }
+                            (amount.value <= 0) -> {
+                                submitSideEffect(
+                                    WebViewSideEffect.Notify(
+                                        app.getString(R.string.boost_amount_too_low)
+                                    )
+                                )
+                            }
+                            else -> {
+                                fireworksCallback()
 
-                        val chatId = args.chatId
+                                val chatId = args.chatId
 
-                        messageRepository.sendBoost(
-                            chatId,
-                            FeedBoost(
-                                feedId = feed.id,
-                                itemId = feedItem.id,
-                                timeSeconds =0,
-                                amount = amount
-                            )
-                        )
+                                messageRepository.sendBoost(
+                                    chatId,
+                                    FeedBoost(
+                                        feedId = feed.id,
+                                        itemId = feedItem.id,
+                                        timeSeconds =0,
+                                        amount = amount
+                                    )
+                                )
 
-                        feed.destinations.let { destinations ->
-                            repositoryMedia.streamFeedPayments(
-                                chatId,
-                                ChatMetaData(
-                                    itemId = feedItem.id,
-                                    itemLongId = ItemId(-1),
-                                    satsPerMinute = amount,
-                                    timeSeconds = 0,
-                                    speed = 1.0
-                                ),
-                                feed.id.value,
-                                feedItem.id.value,
-                                destinations
-                            )
+                                feed.destinations.let { destinations ->
+                                    repositoryMedia.streamFeedPayments(
+                                        chatId,
+                                        ChatMetaData(
+                                            itemId = feedItem.id,
+                                            itemLongId = ItemId(-1),
+                                            satsPerMinute = amount,
+                                            timeSeconds = 0,
+                                            speed = 1.0
+                                        ),
+                                        feed.id.value,
+                                        feedItem.id.value,
+                                        destinations
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -15,6 +15,7 @@ import android.widget.ImageView
 import android.widget.MediaController
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -28,6 +29,7 @@ import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
 import chat.sphinx.video_screen.adapter.VideoFeedItemsFooterAdapter
 import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
+import chat.sphinx.video_screen.ui.VideoFeedScreenSideEffect
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
@@ -43,6 +45,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -52,7 +55,9 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class VideoFeedWatchScreenFragment: BaseFragment<
+internal class VideoFeedWatchScreenFragment: SideEffectFragment<
+        FragmentActivity,
+        VideoFeedScreenSideEffect,
         VideoFeedScreenViewState,
         VideoFeedWatchScreenViewModel,
         FragmentVideoWatchScreenBinding
@@ -356,5 +361,9 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
             }
             requestLayout()
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: VideoFeedScreenSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

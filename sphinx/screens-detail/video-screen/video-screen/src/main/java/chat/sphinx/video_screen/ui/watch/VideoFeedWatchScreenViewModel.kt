@@ -1,5 +1,6 @@
 package chat.sphinx.video_screen.ui.watch
 
+import android.app.Application
 import android.net.Uri
 import android.widget.VideoView
 import androidx.lifecycle.SavedStateHandle
@@ -7,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
@@ -35,19 +37,23 @@ internal inline val VideoFeedWatchScreenFragmentArgs.feedId: FeedId?
 @HiltViewModel
 internal class VideoFeedWatchScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    app: Application,
     savedStateHandle: SavedStateHandle,
     chatRepository: ChatRepository,
     repositoryMedia: RepositoryMedia,
     feedRepository: FeedRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
+    lightningRepository: LightningRepository,
 ): VideoFeedScreenViewModel(
     dispatchers,
+    app,
     chatRepository,
     repositoryMedia,
     feedRepository,
     contactRepository,
-    messageRepository
+    messageRepository,
+    lightningRepository
 )
 {
     private val args: VideoFeedWatchScreenFragmentArgs by savedStateHandle.navArgs()
