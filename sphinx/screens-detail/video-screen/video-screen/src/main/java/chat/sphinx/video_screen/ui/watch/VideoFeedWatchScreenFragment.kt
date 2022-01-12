@@ -93,18 +93,42 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
     }
 
     private fun setupBoost() {
-        binding.includeLayoutBoostFireworks.apply {
-            lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
-                override fun onAnimationEnd(animation: Animator?) {
-                    root.gone
+        binding.apply {
+            includeLayoutBoostFireworks.apply {
+                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                    override fun onAnimationEnd(animation: Animator?) {
+                        root.gone
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator?) {}
+
+                    override fun onAnimationCancel(animation: Animator?) {}
+
+                    override fun onAnimationStart(animation: Animator?) {}
+                })
+            }
+
+            includeLayoutVideoPlayer.apply {
+                removeFocusOnEnter(editTextCustomBoost)
+
+                imageViewFeedBoostButton.setOnClickListener {
+                    val customAmount = editTextCustomBoost.text.toString().toLong().toSat()
+
+                    viewModel.sendBoost(
+                        customAmount
+                    )
+
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        setupBoostAnimation(null, customAmount)
+
+                        binding.includeLayoutBoostFireworks.apply {
+                            root.visible
+
+                            lottieAnimationView.playAnimation()
+                        }
+                    }
                 }
-
-                override fun onAnimationRepeat(animation: Animator?) {}
-
-                override fun onAnimationCancel(animation: Animator?) {}
-
-                override fun onAnimationStart(animation: Animator?) {}
-            })
+            }
         }
     }
 
@@ -140,26 +164,6 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
             textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
-            }
-
-            removeFocusOnEnter(editTextCustomBoost)
-
-            imageViewFeedBoostButton.setOnClickListener {
-                val customAmount = editTextCustomBoost.text.toString().toLong().toSat()
-
-                viewModel.sendBoost(
-                    customAmount
-                )
-
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    setupBoostAnimation(null, customAmount)
-
-                    binding.includeLayoutBoostFireworks.apply {
-                        root.visible
-
-                        lottieAnimationView.playAnimation()
-                    }
-                }
             }
         }
     }
@@ -244,6 +248,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
                         layoutConstraintBoostButtonContainer.alpha = if (viewState.hasDestinations) 1.0f else 0.3f
                         imageViewFeedBoostButton.isEnabled = viewState.hasDestinations
+                        editTextCustomBoost.isEnabled = viewState.hasDestinations
                     }
                 }
             }

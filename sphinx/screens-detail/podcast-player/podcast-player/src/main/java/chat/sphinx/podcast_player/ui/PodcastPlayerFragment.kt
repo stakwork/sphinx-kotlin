@@ -93,12 +93,6 @@ internal class PodcastPlayerFragment : BaseFragment<
 
         setupBoost()
         setupEpisodes()
-
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.getPodcast()?.let { podcast ->
-                addPodcastOnClickListeners(podcast)
-            }
-        }
     }
 
     private fun setupBoost() {
@@ -279,7 +273,6 @@ internal class PodcastPlayerFragment : BaseFragment<
                 toggleLoadingWheel(false)
                 showPodcastInfo(viewState.podcast)
             }
-
         }
     }
 
@@ -320,6 +313,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
                 layoutConstraintBoostButtonContainer.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
                 imageViewPodcastBoostButton.isEnabled = podcast.hasDestinations
+                editTextCustomBoost.isEnabled = podcast.hasDestinations
             }
 
             togglePlayPauseButton(podcast.isPlaying)
@@ -327,6 +321,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             if (!dragging && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
 
             toggleLoadingWheel(false)
+            addPodcastOnClickListeners(podcast)
         }
     }
 

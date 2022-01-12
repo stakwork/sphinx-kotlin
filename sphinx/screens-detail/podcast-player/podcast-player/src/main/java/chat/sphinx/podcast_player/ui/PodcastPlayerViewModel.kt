@@ -75,6 +75,28 @@ internal class PodcastPlayerViewModel @Inject constructor(
         replay = 1,
     )
 
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
+    }
+
     suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
             return podcast
@@ -356,54 +378,28 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     if (amount.value > 0) {
                         val metaData = podcast.getMetaData(amount)
 
-                        val feedBoost = FeedBoost(
-                            podcast.id,
-                            metaData.itemId,
-                            metaData.timeSeconds,
-                            amount
-                        )
-
                         messageRepository.sendBoost(
                             args.chatId,
-                            feedBoost
+                            FeedBoost(
+                                feedId = podcast.id,
+                                itemId = metaData.itemId,
+                                timeSeconds = metaData.timeSeconds,
+                                amount = amount
+                            )
                         )
 
-                        val destinations = podcast.getFeedDestinations()
-
-                        if (destinations.isNotEmpty()) {
+                        if (podcast.hasDestinations) {
                             mediaPlayerServiceController.submitAction(
                                 UserAction.SendBoost(
                                     args.chatId,
                                     podcast.id.value,
                                     metaData,
-                                    destinations
+                                    podcast.getFeedDestinations()
                                 )
                             )
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private suspend fun getOwner(): Contact {
-        return contactRepository.accountOwner.value.let { contact ->
-            if (contact != null) {
-                contact
-            } else {
-                var resolvedOwner: Contact? = null
-                try {
-                    contactRepository.accountOwner.collect { ownerContact ->
-                        if (ownerContact != null) {
-                            resolvedOwner = ownerContact
-                            throw Exception()
-                        }
-                    }
-                } catch (e: Exception) {
-                }
-                delay(25L)
-
-                resolvedOwner!!
             }
         }
     }

@@ -167,17 +167,16 @@ internal open class VideoFeedScreenViewModel(
 
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
-            val metaData = ChatMetaData(
-                video.id,
-                ItemId(-1),
-                getOwner()?.tipAmount ?: Sat(0),
-                0,
-                1.0
-            )
 
             repositoryMedia.updateChatMetaData(
                 getArgChatId(),
-                metaData
+                ChatMetaData(
+                    itemId = video.id,
+                    itemLongId = ItemId(-1),
+                    satsPerMinute = getOwner()?.tipAmount ?: Sat(0),
+                    timeSeconds = 0,
+                    speed = 1.0
+                )
             )
 
             selectedVideoStateContainer.updateViewState(
@@ -214,32 +213,27 @@ internal open class VideoFeedScreenViewModel(
 
                             val chatId = getArgChatId()
 
-                            val feedBoost = FeedBoost(
-                                videoFeed.id,
-                                currentItem.id,
-                                0,
-                                amount
-
-                            )
-
                             messageRepository.sendBoost(
                                 chatId,
-                                feedBoost
+                                FeedBoost(
+                                    feedId = videoFeed.id,
+                                    itemId = currentItem.id,
+                                    timeSeconds = 0,
+                                    amount = amount
+                                )
                             )
 
                             videoFeed.destinations.let { destinations ->
 
-                                val metaData = ChatMetaData(
-                                    currentItem.id,
-                                    ItemId(-1),
-                                    amount,
-                                    0,
-                                    1.0
-                                )
-
                                 repositoryMedia.streamFeedPayments(
                                     chatId,
-                                    metaData,
+                                    ChatMetaData(
+                                        itemId = currentItem.id,
+                                        itemLongId = ItemId(-1),
+                                        satsPerMinute = amount,
+                                        timeSeconds = 0,
+                                        speed = 1.0
+                                    ),
                                     videoFeed.id.value,
                                     currentItem.id.value,
                                     destinations

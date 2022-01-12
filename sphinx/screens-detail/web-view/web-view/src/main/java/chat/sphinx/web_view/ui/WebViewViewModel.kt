@@ -20,8 +20,8 @@ import chat.sphinx.wrapper_message.FeedBoost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -56,7 +56,7 @@ internal class WebViewViewModel @Inject constructor(
         replay = 1,
     )
 
-    val feedSharedFlow: SharedFlow<Feed?> = flow {
+    private val feedSharedFlow: SharedFlow<Feed?> = flow {
         args.feedId?.toFeedId()?.let { feedId ->
             emitAll(feedRepository.getFeedById(feedId))
         } ?: run {
@@ -68,10 +68,6 @@ internal class WebViewViewModel @Inject constructor(
         replay = 1,
     )
 
-    val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
-        ViewStateContainer(BoostAnimationViewState.Idle)
-    }
-
     init {
         args.chatId?.let { chatId ->
             viewModelScope.launch(mainImmediate) {
@@ -81,11 +77,17 @@ internal class WebViewViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             val owner = getOwner()
+            val feed = getFeed()
 
-            boostAnimationViewStateContainer.updateViewState(
-                BoostAnimationViewState.BoosAnimationInfo(
-                    owner.photoUrl,
-                    owner.tipAmount
+            updateViewState(
+                WebViewViewState.FeedDataLoaded(
+                    fromArticlesList = args.argFromList,
+                    viewTitle = args.argTitle,
+                    url = args.argUrl,
+                    isFeedUrl = feed != null,
+                    feedHasDestinations = feed?.hasDestinations == true,
+                    ownerPhotoUrl = owner.photoUrl,
+                    boostAmount = owner.tipAmount
                 )
             )
         }
@@ -111,6 +113,29 @@ internal class WebViewViewModel @Inject constructor(
                 resolvedOwner!!
             }
         }
+    }
+
+    private suspend fun getFeed(): Feed? {
+        feedSharedFlow.replayCache.firstOrNull()?.let { feed ->
+            return feed
+        }
+
+        feedSharedFlow.firstOrNull()?.let { feed ->
+            return feed
+        }
+
+        var feed: Feed? = null
+
+        try {
+            feedSharedFlow.collect {
+                if (it != null) {
+                    feed = it
+                    throw Exception()
+                }
+            }
+        } catch (e: Exception) {}
+        delay(25L)
+        return feed
     }
 
     private suspend fun getFeedItem(): FeedItem? {
@@ -140,37 +165,31 @@ internal class WebViewViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             (customAmount ?: getOwner().tipAmount)?.let { amount ->
                 getFeedItem()?.let { feedItem ->
-                    feedRepository.getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    getFeed()?.let { feed ->
                         if (amount.value > 0) {
 
                             val chatId = args.chatId
 
-                            val feedBoost = FeedBoost(
-                                feed.id,
-                                feedItem.id,
-                                0,
-                                amount
-
-                            )
-
                             messageRepository.sendBoost(
                                 chatId,
-                                feedBoost
+                                FeedBoost(
+                                    feedId = feed.id,
+                                    itemId = feedItem.id,
+                                    timeSeconds =0,
+                                    amount = amount
+                                )
                             )
 
                             feed.destinations.let { destinations ->
-
-                                val metaData = ChatMetaData(
-                                    feedItem.id,
-                                    ItemId(-1),
-                                    amount,
-                                    0,
-                                    1.0
-                                )
-
                                 repositoryMedia.streamFeedPayments(
                                     chatId,
-                                    metaData,
+                                    ChatMetaData(
+                                        itemId = feedItem.id,
+                                        itemLongId = ItemId(-1),
+                                        satsPerMinute = amount,
+                                        timeSeconds = 0,
+                                        speed = 1.0
+                                    ),
                                     feed.id.value,
                                     feedItem.id.value,
                                     destinations

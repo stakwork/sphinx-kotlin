@@ -15,7 +15,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -34,8 +33,6 @@ import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.concept_views.viewstate.collect
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -49,8 +46,6 @@ internal class WebViewFragment: BaseFragment<
     override val viewModel: WebViewViewModel by viewModels()
     override val binding: FragmentWebViewBinding by viewBinding(FragmentWebViewBinding::bind)
 
-    private val args: WebViewFragmentArgs by navArgs()
-
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
@@ -58,6 +53,7 @@ internal class WebViewFragment: BaseFragment<
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .transformation(Transformation.CircleCrop)
             .build()
     }
 
@@ -67,15 +63,13 @@ internal class WebViewFragment: BaseFragment<
         binding.apply {
 
             includeWebViewHeader.apply header@ {
-                
-                this@header.textViewDetailScreenHeaderNavBack.goneIfFalse(args.argFromList)
+
                 this@header.textViewDetailScreenHeaderNavBack.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         viewModel.navigator.popBackStack()
                     }
                 }
 
-                this@header.textViewDetailScreenHeaderName.text = args.argTitle
                 this@header.textViewDetailScreenClose.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         viewModel.navigator.closeDetailScreen()
@@ -89,6 +83,32 @@ internal class WebViewFragment: BaseFragment<
             webView.settings.builtInZoomControls = true
 
             removeFocusOnEnter(editTextCustomBoost)
+        }
+
+        setupBoost()
+        setupFragmentLayout()
+    }
+
+    fun setupFragmentLayout() {
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.layoutConstraintWebViewLayout)
+    }
+
+    private fun setupBoost() {
+        binding.apply {
+            includeLayoutBoostFireworks.apply {
+                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                    override fun onAnimationEnd(animation: Animator?) {
+                        root.gone
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator?) {}
+
+                    override fun onAnimationCancel(animation: Animator?) {}
+
+                    override fun onAnimationStart(animation: Animator?) {}
+                })
+            }
 
             imageViewFeedBoostButton.setOnClickListener {
                 val customAmount = editTextCustomBoost.text.toString().toLong().toSat()
@@ -108,44 +128,6 @@ internal class WebViewFragment: BaseFragment<
                 }
             }
         }
-
-        setupBoost()
-        setupFragmentLayout()
-    }
-
-    fun setupFragmentLayout() {
-        (requireActivity() as InsetterActivity)
-            .addNavigationBarPadding(binding.layoutConstraintWebViewLayout)
-    }
-
-    private fun setupBoost() {
-        binding.apply {
-            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                viewModel.feedSharedFlow.collect { feed ->
-                    feed?.let { nnFeed ->
-                        layoutConstraintBoostButtonContainer.visible
-                        layoutConstraintBoostButtonContainer.alpha = if (nnFeed.hasDestinations) 1.0f else 0.3f
-                        imageViewFeedBoostButton.isEnabled = nnFeed.hasDestinations
-                    } ?: run {
-                        layoutConstraintBoostButtonContainer.gone
-                    }
-                }
-            }
-
-            includeLayoutBoostFireworks.apply {
-                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
-                    override fun onAnimationEnd(animation: Animator?) {
-                        root.gone
-                    }
-
-                    override fun onAnimationRepeat(animation: Animator?) {}
-
-                    override fun onAnimationCancel(animation: Animator?) {}
-
-                    override fun onAnimationStart(animation: Animator?) {}
-                })
-            }
-        }
     }
 
     private suspend fun setupBoostAnimation(
@@ -158,15 +140,11 @@ internal class WebViewFragment: BaseFragment<
             }
 
             includeLayoutBoostFireworks.apply {
-
                 photoUrl?.let { photoUrl ->
                     imageLoader.load(
                         imageViewProfilePicture,
                         photoUrl.value,
-                        ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                            .transformation(Transformation.CircleCrop)
-                            .build()
+                        imageLoaderOptions
                     )
                 }
 
@@ -195,13 +173,7 @@ internal class WebViewFragment: BaseFragment<
         })
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        loadWebView()
-    }
-
-    private fun loadWebView() {
+    private fun loadWebView(url: String) {
         binding.apply {
 
             webView.settings.javaScriptEnabled = true
@@ -209,7 +181,7 @@ internal class WebViewFragment: BaseFragment<
             webView.settings.useWideViewPort = true
             webView.settings.builtInZoomControls = true
 
-            webView.loadUrl(args.argUrl)
+            webView.loadUrl(url)
             webView.webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     val url = request?.url.toString()
@@ -235,25 +207,33 @@ internal class WebViewFragment: BaseFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: WebViewViewState) {
-//        TODO("Not yet implemented")
-    }
+        when (viewState) {
+            is WebViewViewState.Idle -> {
+            }
 
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.boostAnimationViewStateContainer.collect { viewState ->
-                when (viewState) {
-                    is BoostAnimationViewState.Idle -> {
+            is WebViewViewState.FeedDataLoaded -> {
+                binding.apply {
+                    includeWebViewHeader.apply {
+                        textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.fromArticlesList)
+                        textViewDetailScreenHeaderName.text = viewState.viewTitle
                     }
 
-                    is BoostAnimationViewState.BoosAnimationInfo -> {
-                        setupBoostAnimation(
-                            viewState.photoUrl,
-                            viewState.amount
-                        )
+                    if (viewState.isFeedUrl) {
+                        layoutConstraintBoostButtonContainer.visible
+                        layoutConstraintBoostButtonContainer.alpha = if (viewState.feedHasDestinations) 1.0f else 0.3f
+                        imageViewFeedBoostButton.isEnabled = viewState.feedHasDestinations
+                        editTextCustomBoost.isEnabled = viewState.feedHasDestinations
+                    } else {
+                        layoutConstraintBoostButtonContainer.gone
                     }
                 }
+
+                setupBoostAnimation(
+                    viewState.ownerPhotoUrl,
+                    viewState.boostAmount
+                )
+
+                loadWebView(viewState.url)
             }
         }
     }
