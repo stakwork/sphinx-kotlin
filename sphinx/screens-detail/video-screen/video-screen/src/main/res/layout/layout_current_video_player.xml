@@ -113,59 +113,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/text_view_video_description" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_boost_button_container"
+    <include
+        android:id="@+id/include_layout_custom_boost"
+        layout="@layout/layout_custom_boost"
         android:layout_width="@dimen/custom_boost_width"
         android:layout_height="@dimen/custom_boost_height"
-        android:background="@drawable/button_background_white_rad_48"
-        android:backgroundTint="@color/primaryGreen"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
         android:layout_marginTop="@dimen/default_layout_margin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_view_video_description">
-
-        <androidx.appcompat.widget.AppCompatEditText
-            android:id="@+id/edit_text_custom_boost"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textColor="@color/text"
-            android:fontFamily="@font/roboto_medium"
-            android:gravity="center|center_vertical"
-            android:textAlignment="center"
-            android:background="@android:color/transparent"
-            android:layout_marginStart="@dimen/default_half_layout_margin"
-            android:layout_marginEnd="@dimen/default_small_layout_margin"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_feed_boost_button"
-            android:textSize="@dimen/custom_boost_text_size"
-            android:inputType="number"
-            android:digits="0123456789"
-            android:imeOptions="actionDone"
-            android:singleLine="true" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_feed_boost_button"
-            android:layout_width="@dimen/player_details_small_control_button_xy"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/custom_boost_margin"
-            android:padding="@dimen/custom_boost_button_padding"
-            android:background="@drawable/button_background_white_rad_48"
-            android:backgroundTint="@android:color/white"
-            android:src="@drawable/ic_boost"
-            android:tint="@color/primaryGreen"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@id/text_view_video_description" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_half_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_boost_button_container">
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_custom_boost">
 
         <View
             android:layout_width="match_parent"

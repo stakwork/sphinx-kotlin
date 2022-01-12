@@ -204,41 +204,43 @@ internal open class VideoFeedScreenViewModel(
         }
     }
 
-    fun sendBoost(customAmount: Sat?) {
+    fun sendBoost(
+        amount: Sat,
+        fireworksCallback: () -> Unit
+    ) {
         viewModelScope.launch(mainImmediate) {
-            (customAmount ?: getOwner().tipAmount)?.let { amount ->
-                getVideoFeed()?.let { videoFeed ->
-                    videoFeed.lastItem?.let { currentItem ->
-                        if (amount.value > 0) {
+            getVideoFeed()?.let { videoFeed ->
+                videoFeed.lastItem?.let { currentItem ->
+                    if (amount.value > 0) {
+                        fireworksCallback()
 
-                            val chatId = getArgChatId()
+                        val chatId = getArgChatId()
 
-                            messageRepository.sendBoost(
-                                chatId,
-                                FeedBoost(
-                                    feedId = videoFeed.id,
-                                    itemId = currentItem.id,
-                                    timeSeconds = 0,
-                                    amount = amount
-                                )
+                        messageRepository.sendBoost(
+                            chatId,
+                            FeedBoost(
+                                feedId = videoFeed.id,
+                                itemId = currentItem.id,
+                                timeSeconds = 0,
+                                amount = amount
                             )
+                        )
 
-                            videoFeed.destinations.let { destinations ->
+                        videoFeed.destinations.let { destinations ->
 
-                                repositoryMedia.streamFeedPayments(
-                                    chatId,
-                                    ChatMetaData(
-                                        itemId = currentItem.id,
-                                        itemLongId = ItemId(-1),
-                                        satsPerMinute = amount,
-                                        timeSeconds = 0,
-                                        speed = 1.0
-                                    ),
-                                    videoFeed.id.value,
-                                    currentItem.id.value,
-                                    destinations
-                                )
-                            }
+                            repositoryMedia.streamFeedPayments(
+                                chatId,
+                                ChatMetaData(
+                                    itemId = currentItem.id,
+                                    itemLongId = ItemId(-1),
+                                    satsPerMinute = amount,
+                                    timeSeconds = 0,
+                                    speed = 1.0
+                                ),
+                                videoFeed.id.value,
+                                currentItem.id.value,
+                                destinations
+                            )
                         }
                     }
                 }

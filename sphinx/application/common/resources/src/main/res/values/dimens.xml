@@ -106,4 +106,5 @@
     <dimen name="custom_boost_text_size">17sp</dimen>
     <dimen name="custom_boost_margin">4dp</dimen>
     <dimen name="custom_boost_button_padding">2dp</dimen>
+    <dimen name="custom_boost_button_xy">32dp</dimen>
 </resources>

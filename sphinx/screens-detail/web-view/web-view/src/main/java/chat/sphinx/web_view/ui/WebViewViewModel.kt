@@ -161,40 +161,42 @@ internal class WebViewViewModel @Inject constructor(
         return feedItem
     }
 
-    fun sendBoost(customAmount: Sat?) {
+    fun sendBoost(
+        amount: Sat,
+        fireworksCallback: () -> Unit
+    ) {
         viewModelScope.launch(mainImmediate) {
-            (customAmount ?: getOwner().tipAmount)?.let { amount ->
-                getFeedItem()?.let { feedItem ->
-                    getFeed()?.let { feed ->
-                        if (amount.value > 0) {
+            getFeedItem()?.let { feedItem ->
+                getFeed()?.let { feed ->
+                    if (amount.value > 0) {
+                        fireworksCallback()
 
-                            val chatId = args.chatId
+                        val chatId = args.chatId
 
-                            messageRepository.sendBoost(
-                                chatId,
-                                FeedBoost(
-                                    feedId = feed.id,
-                                    itemId = feedItem.id,
-                                    timeSeconds =0,
-                                    amount = amount
-                                )
+                        messageRepository.sendBoost(
+                            chatId,
+                            FeedBoost(
+                                feedId = feed.id,
+                                itemId = feedItem.id,
+                                timeSeconds =0,
+                                amount = amount
                             )
+                        )
 
-                            feed.destinations.let { destinations ->
-                                repositoryMedia.streamFeedPayments(
-                                    chatId,
-                                    ChatMetaData(
-                                        itemId = feedItem.id,
-                                        itemLongId = ItemId(-1),
-                                        satsPerMinute = amount,
-                                        timeSeconds = 0,
-                                        speed = 1.0
-                                    ),
-                                    feed.id.value,
-                                    feedItem.id.value,
-                                    destinations
-                                )
-                            }
+                        feed.destinations.let { destinations ->
+                            repositoryMedia.streamFeedPayments(
+                                chatId,
+                                ChatMetaData(
+                                    itemId = feedItem.id,
+                                    itemLongId = ItemId(-1),
+                                    satsPerMinute = amount,
+                                    timeSeconds = 0,
+                                    speed = 1.0
+                                ),
+                                feed.id.value,
+                                feedItem.id.value,
+                                destinations
+                            )
                         }
                     }
                 }

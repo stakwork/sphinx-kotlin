@@ -81,8 +81,6 @@ internal class WebViewFragment: BaseFragment<
             webView.settings.loadWithOverviewMode = true
             webView.settings.useWideViewPort = true
             webView.settings.builtInZoomControls = true
-
-            removeFocusOnEnter(editTextCustomBoost)
         }
 
         setupBoost()
@@ -110,21 +108,25 @@ internal class WebViewFragment: BaseFragment<
                 })
             }
 
-            imageViewFeedBoostButton.setOnClickListener {
-                val customAmount = editTextCustomBoost.text.toString().toLong().toSat()
+            includeLayoutCustomBoost.apply {
+                removeFocusOnEnter(editTextCustomBoost)
 
-                viewModel.sendBoost(
-                    customAmount
-                )
+                imageViewFeedBoostButton.setOnClickListener {
+                    val amount = editTextCustomBoost.text.toString().toLongOrNull()?.toSat() ?: Sat(0)
 
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    setupBoostAnimation(null, customAmount)
+                    viewModel.sendBoost(
+                        amount,
+                        fireworksCallback = {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                setupBoostAnimation(null, amount)
 
-                    binding.includeLayoutBoostFireworks.apply {
-                        root.visible
-
-                        lottieAnimationView.playAnimation()
-                    }
+                                includeLayoutBoostFireworks.apply fireworks@ {
+                                    this@fireworks.root.visible
+                                    this@fireworks.lottieAnimationView.playAnimation()
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -135,8 +137,8 @@ internal class WebViewFragment: BaseFragment<
         amount: Sat?
     ) {
         binding.apply {
-            editTextCustomBoost.let {
-                it.setText(amount?.asFormattedString())
+            includeLayoutCustomBoost.apply {
+                editTextCustomBoost.setText(amount?.asFormattedString())
             }
 
             includeLayoutBoostFireworks.apply {
@@ -218,13 +220,15 @@ internal class WebViewFragment: BaseFragment<
                         textViewDetailScreenHeaderName.text = viewState.viewTitle
                     }
 
-                    if (viewState.isFeedUrl) {
-                        layoutConstraintBoostButtonContainer.visible
-                        layoutConstraintBoostButtonContainer.alpha = if (viewState.feedHasDestinations) 1.0f else 0.3f
-                        imageViewFeedBoostButton.isEnabled = viewState.feedHasDestinations
-                        editTextCustomBoost.isEnabled = viewState.feedHasDestinations
-                    } else {
-                        layoutConstraintBoostButtonContainer.gone
+                    includeLayoutCustomBoost.apply {
+                        if (viewState.isFeedUrl) {
+                            layoutConstraintBoostButtonContainer.visible
+                            layoutConstraintBoostButtonContainer.alpha = if (viewState.feedHasDestinations) 1.0f else 0.3f
+                            imageViewFeedBoostButton.isEnabled = viewState.feedHasDestinations
+                            editTextCustomBoost.isEnabled = viewState.feedHasDestinations
+                        } else {
+                            layoutConstraintBoostButtonContainer.gone
+                        }
                     }
                 }
 

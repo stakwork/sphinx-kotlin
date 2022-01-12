@@ -371,33 +371,36 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun sendPodcastBoost(customAmount: Sat?) {
+    fun sendPodcastBoost(
+        amount: Sat,
+        fireworksCallback: () -> Unit
+    ) {
         viewModelScope.launch(mainImmediate) {
-            (customAmount ?: getOwner().tipAmount)?.let { amount ->
-                getPodcast()?.let { podcast ->
-                    if (amount.value > 0) {
-                        val metaData = podcast.getMetaData(amount)
+            getPodcast()?.let { podcast ->
+                if (amount.value > 0) {
+                    fireworksCallback()
 
-                        messageRepository.sendBoost(
-                            args.chatId,
-                            FeedBoost(
-                                feedId = podcast.id,
-                                itemId = metaData.itemId,
-                                timeSeconds = metaData.timeSeconds,
-                                amount = amount
+                    val metaData = podcast.getMetaData(amount)
+
+                    messageRepository.sendBoost(
+                        args.chatId,
+                        FeedBoost(
+                            feedId = podcast.id,
+                            itemId = metaData.itemId,
+                            timeSeconds = metaData.timeSeconds,
+                            amount = amount
+                        )
+                    )
+
+                    if (podcast.hasDestinations) {
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.SendBoost(
+                                args.chatId,
+                                podcast.id.value,
+                                metaData,
+                                podcast.getFeedDestinations()
                             )
                         )
-
-                        if (podcast.hasDestinations) {
-                            mediaPlayerServiceController.submitAction(
-                                UserAction.SendBoost(
-                                    args.chatId,
-                                    podcast.id.value,
-                                    metaData,
-                                    podcast.getFeedDestinations()
-                                )
-                            )
-                        }
                     }
                 }
             }

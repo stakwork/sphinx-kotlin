@@ -5,6 +5,8 @@ import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -108,25 +110,25 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                 })
             }
 
-            includeLayoutVideoPlayer.apply {
+            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
                 removeFocusOnEnter(editTextCustomBoost)
 
                 imageViewFeedBoostButton.setOnClickListener {
-                    val customAmount = editTextCustomBoost.text.toString().toLong().toSat()
+                    val amount = editTextCustomBoost.text.toString().toLongOrNull()?.toSat() ?: Sat(0)
 
                     viewModel.sendBoost(
-                        customAmount
-                    )
+                        amount,
+                        fireworksCallback = {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                setupBoostAnimation(null, amount)
 
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        setupBoostAnimation(null, customAmount)
-
-                        binding.includeLayoutBoostFireworks.apply {
-                            root.visible
-
-                            lottieAnimationView.playAnimation()
+                                includeLayoutBoostFireworks.apply fireworks@ {
+                                    this@fireworks.root.visible
+                                    this@fireworks.lottieAnimationView.playAnimation()
+                                }
+                            }
                         }
-                    }
+                    )
                 }
             }
         }
@@ -173,8 +175,8 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
         amount: Sat?
     ) {
         binding.apply {
-            includeLayoutVideoPlayer.editTextCustomBoost.let {
-                it.setText(amount?.asFormattedString())
+            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
+                editTextCustomBoost.setText(amount?.asFormattedString())
             }
 
             includeLayoutBoostFireworks.apply {
@@ -246,9 +248,11 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                             getString(R.string.subscribe)
                         }
 
-                        layoutConstraintBoostButtonContainer.alpha = if (viewState.hasDestinations) 1.0f else 0.3f
-                        imageViewFeedBoostButton.isEnabled = viewState.hasDestinations
-                        editTextCustomBoost.isEnabled = viewState.hasDestinations
+                        includeLayoutCustomBoost.apply customBoost@ {
+                            this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (viewState.hasDestinations) 1.0f else 0.3f
+                            this@customBoost.imageViewFeedBoostButton.isEnabled = viewState.hasDestinations
+                            this@customBoost.editTextCustomBoost.isEnabled = viewState.hasDestinations
+                        }
                     }
                 }
             }

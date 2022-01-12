@@ -111,7 +111,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 })
             }
 
-            includeLayoutEpisodePlaybackControls.apply {
+            includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
                 removeFocusOnEnter(editTextCustomBoost)
             }
         }
@@ -219,21 +219,23 @@ internal class PodcastPlayerFragment : BaseFragment<
                     updateViewAfterSeek(podcast)
                 }
 
-                imageViewPodcastBoostButton.setOnClickListener {
-                    val customAmount = editTextCustomBoost.text.toString().toLong().toSat()
+                includeLayoutCustomBoost.apply customBoost@ {
+                    this@customBoost.imageViewFeedBoostButton.setOnClickListener {
+                        val amount = editTextCustomBoost.text.toString().toLongOrNull()?.toSat() ?: Sat(0)
 
-                    viewModel.sendPodcastBoost(
-                        customAmount
-                    )
+                        viewModel.sendPodcastBoost(
+                            amount,
+                            fireworksCallback = {
+                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                    setupBoostAnimation(null, amount)
 
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        setupBoostAnimation(null, customAmount)
-
-                        includeLayoutBoostFireworks.apply {
-                            root.visible
-
-                            lottieAnimationView.playAnimation()
-                        }
+                                    includeLayoutBoostFireworks.apply fireworks@ {
+                                        this@fireworks.root.visible
+                                        this@fireworks.lottieAnimationView.playAnimation()
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -310,10 +312,14 @@ internal class PodcastPlayerFragment : BaseFragment<
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
             includeLayoutEpisodePlaybackControls.apply {
+
                 textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
-                layoutConstraintBoostButtonContainer.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
-                imageViewPodcastBoostButton.isEnabled = podcast.hasDestinations
-                editTextCustomBoost.isEnabled = podcast.hasDestinations
+
+                includeLayoutCustomBoost.apply customBoost@ {
+                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
+                    this@customBoost.imageViewFeedBoostButton.isEnabled = podcast.hasDestinations
+                    this@customBoost.editTextCustomBoost.isEnabled = podcast.hasDestinations
+                }
             }
 
             togglePlayPauseButton(podcast.isPlaying)
@@ -331,8 +337,8 @@ internal class PodcastPlayerFragment : BaseFragment<
     ) {
 
         binding.apply {
-            includeLayoutEpisodePlaybackControls.editTextCustomBoost.let {
-                it.setText(amount?.asFormattedString())
+            includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
+                editTextCustomBoost.setText(amount?.asFormattedString())
             }
 
             includeLayoutBoostFireworks.apply {
