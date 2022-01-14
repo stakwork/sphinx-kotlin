@@ -32,32 +32,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/layout_constraint_dashboard_chat_holder_badge_count"
-                android:layout_width="52dp"
-                android:layout_height="52dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_view_dashboard_chat_holder_badge_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="4dp"
-                    android:paddingRight="4dp"
-                    android:fontFamily="@font/roboto_medium"
-                    android:textSize="10sp"
-                    android:textColor="@android:color/white"
-                    tools:text="990"
-                    android:background="@drawable/chat_initials_circle"
-                    android:backgroundTint="@color/badgeRed"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"/>
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -208,6 +182,13 @@
         android:paddingEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guide5"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent=".5" />
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_chat_holder_notification"
             android:layout_width="wrap_content"
@@ -215,22 +196,21 @@
             android:paddingTop="26dp"
             android:src="@drawable/ic_baseline_notifications_off_24"
             android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_time"
+            app:layout_constraintBottom_toTopOf="@+id/guide5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_chat_holder_time"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center_vertical|end"
-            android:paddingBottom="18dp"
             android:textColor="@color/placeholderText"
             android:textSize="10sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/image_view_chat_holder_notification"
+            android:layout_marginBottom="@dimen/default_small_layout_margin"
+            app:layout_constraintBottom_toTopOf="@+id/guide5"
             tools:ignore="SmallSp"
             tools:text="12:21 PM" />
 
@@ -240,7 +220,8 @@
             android:layout_height="wrap_content"
             android:background="@drawable/background_invite_price_text"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_holder_time"
+            android:layout_marginBottom="@dimen/default_tiny_layout_margin"
+            app:layout_constraintBottom_toTopOf="@+id/guide5"
             app:layout_constraintEnd_toEndOf="parent"
             tools:visibility="visible">
 
@@ -261,6 +242,23 @@
                 tools:text="2 000" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_dashboard_chat_holder_badge_count"
+            android:layout_width="wrap_content"
+            android:minWidth="@dimen/dashboard_badge_count_xy"
+            android:layout_height="@dimen/dashboard_badge_count_xy"
+            android:paddingVertical="@dimen/dashboard_badge_count_padding_vertical"
+            android:paddingHorizontal="@dimen/dashboard_badge_count_padding_horizontal"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="11sp"
+            android:textColor="@android:color/white"
+            tools:text="9999"
+            android:gravity="center"
+            android:background="@drawable/chat_initials_circle"
+            android:backgroundTint="@color/primaryBlue"
+            app:layout_constraintEnd_toEndOf="@+id/text_view_chat_holder_time"
+            app:layout_constraintTop_toBottomOf="@+id/guide5"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
