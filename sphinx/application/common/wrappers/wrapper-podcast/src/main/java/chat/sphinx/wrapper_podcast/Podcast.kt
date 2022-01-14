@@ -13,6 +13,7 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_feed.FeedAuthor
 import chat.sphinx.wrapper_feed.FeedDescription
+import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_feed.FeedTitle
 import java.io.File
 import kotlin.math.roundToInt
@@ -271,5 +272,20 @@ data class Podcast(
 
     fun didPausePlayingEpisode(episode: PodcastEpisode) {
         episode.playing = false
+    }
+
+    fun getFeedDestinations(): List<FeedDestination> {
+        val feedDestinations = mutableListOf<FeedDestination>()
+        destinations.forEach {
+            feedDestinations.add(
+                FeedDestination(
+                    it.address,
+                    it.split,
+                    it.type,
+                    it.podcastId
+                )
+            )
+        }
+        return feedDestinations
     }
 }

@@ -3,6 +3,7 @@ package chat.sphinx.concept_service_media
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastDestination
 
@@ -47,11 +48,11 @@ sealed class UserAction(val chatId: ChatId) {
         chatId: ChatId,
         val podcastId: String,
         val metaData: ChatMetaData,
-        val destinations: List<PodcastDestination>
+        val destinations: List<FeedDestination>
     ): UserAction(chatId)
 
     class SetPaymentsDestinations(
         chatId: ChatId,
-        val destinations: List<PodcastDestination>
+        val destinations: List<FeedDestination>
     ): UserAction(chatId)
 }

@@ -23,6 +23,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_web_view_header" />
+
+    <include
+        android:id="@+id/include_layout_custom_boost"
+        layout="@layout/layout_custom_boost"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/custom_boost_height"
+        android:layout_margin="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/include_web_view_header"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <include
+        android:id="@+id/include_layout_boost_fireworks"
+        layout="@layout/layout_boost_fireworks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
     
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/progress_bar_loading"

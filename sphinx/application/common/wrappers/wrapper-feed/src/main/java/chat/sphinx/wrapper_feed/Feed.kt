@@ -79,6 +79,9 @@ data class Feed(
         get() {
             return (description?.value ?: "").htmlToPlainText().trim()
         }
+
+    val hasDestinations: Boolean
+        get() = destinations.isNotEmpty()
 }
 
 @Suppress("NOTHING_TO_INLINE")

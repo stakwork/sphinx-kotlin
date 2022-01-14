@@ -191,7 +191,7 @@ internal class PaymentSendViewModel @Inject constructor(
                     }
                     else -> {
                         submitSideEffect(
-                            PaymentSideEffect.Notify(app.getString(chat.sphinx.payment_common.R.string.balance_too_low))
+                            PaymentSideEffect.Notify(app.getString(R.string.balance_too_low))
                         )
                     }
                 }

@@ -114,8 +114,8 @@
 
             <!-- Control Buttons Layout -->
             <include
-                android:id="@+id/include_layout_episode_playback_control_buttons"
-                layout="@layout/layout_episode_playback_control_buttons"
+                android:id="@+id/include_layout_episode_playback_controls"
+                layout="@layout/layout_episode_playback_controls"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -131,7 +131,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/include_layout_episode_playback_control_buttons" />
+                app:layout_constraintTop_toBottomOf="@id/include_layout_episode_playback_controls" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

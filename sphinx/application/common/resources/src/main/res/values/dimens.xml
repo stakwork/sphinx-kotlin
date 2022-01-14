@@ -100,4 +100,11 @@
     <dimen name="default_feed_read_image_width">260dp</dimen>
     <dimen name="default_feed_read_image_height">160dp</dimen>
     <dimen name="default_feed_contributor_image_xy">30dp</dimen>
+
+    <dimen name="custom_boost_width">90dp</dimen>
+    <dimen name="custom_boost_height">40dp</dimen>
+    <dimen name="custom_boost_text_size">17sp</dimen>
+    <dimen name="custom_boost_margin">4dp</dimen>
+    <dimen name="custom_boost_button_padding">2dp</dimen>
+    <dimen name="custom_boost_button_xy">32dp</dimen>
 </resources>

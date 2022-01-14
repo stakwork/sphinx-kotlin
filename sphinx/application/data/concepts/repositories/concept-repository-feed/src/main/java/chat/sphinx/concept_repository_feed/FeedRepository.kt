@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedDescription
+import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import kotlinx.coroutines.flow.Flow
@@ -36,6 +37,7 @@ interface FeedRepository {
 
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
     fun getFeedById(feedId: FeedId): Flow<Feed?>
+    fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 }

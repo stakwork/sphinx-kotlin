@@ -1,14 +1,19 @@
 package chat.sphinx.video_screen.ui.watch
 
+import android.app.Application
 import android.net.Uri
 import android.widget.VideoView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
+import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -32,15 +37,23 @@ internal inline val VideoFeedWatchScreenFragmentArgs.feedId: FeedId?
 @HiltViewModel
 internal class VideoFeedWatchScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    app: Application,
     savedStateHandle: SavedStateHandle,
-    private val chatRepository: ChatRepository,
-    private val repositoryMedia: RepositoryMedia,
+    chatRepository: ChatRepository,
+    repositoryMedia: RepositoryMedia,
     feedRepository: FeedRepository,
+    contactRepository: ContactRepository,
+    messageRepository: MessageRepository,
+    lightningRepository: LightningRepository,
 ): VideoFeedScreenViewModel(
     dispatchers,
+    app,
     chatRepository,
     repositoryMedia,
-    feedRepository
+    feedRepository,
+    contactRepository,
+    messageRepository,
+    lightningRepository
 )
 {
     private val args: VideoFeedWatchScreenFragmentArgs by savedStateHandle.navArgs()
@@ -51,6 +64,17 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.updateChatContentSeenAt(
                 getArgChatId()
+            )
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+
+            boostAnimationViewStateContainer.updateViewState(
+                BoostAnimationViewState.BoosAnimationInfo(
+                    owner.photoUrl,
+                    owner.tipAmount
+                )
             )
         }
     }

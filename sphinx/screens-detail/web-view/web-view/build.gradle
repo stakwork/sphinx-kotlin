@@ -38,11 +38,19 @@ dependencies {
     api project(path: ':sphinx:activity:insetter-activity')
     api project(path: ':sphinx:application:common:wrappers:wrapper-common')
 
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-feed')
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
     implementation project(path: ':sphinx:application:common:logger')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation deps.lottie.sdk
     kapt kaptDeps.google.hilt
 }

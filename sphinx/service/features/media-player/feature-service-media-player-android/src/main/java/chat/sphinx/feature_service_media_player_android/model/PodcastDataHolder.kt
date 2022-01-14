@@ -3,6 +3,7 @@ package chat.sphinx.feature_service_media_player_android.model
 import android.media.MediaPlayer
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_podcast.PodcastDestination
 
 internal class PodcastDataHolder private constructor(
@@ -38,7 +39,7 @@ internal class PodcastDataHolder private constructor(
     var satsPerMinute: Sat = Sat(0)
         private set
 
-    var destinations: List<PodcastDestination> = ArrayList(0)
+    var destinations: List<FeedDestination> = ArrayList(0)
         private set
 
     fun setSpeed(speed: Double): Double {
@@ -55,7 +56,7 @@ internal class PodcastDataHolder private constructor(
         return this.satsPerMinute
     }
 
-    fun setDestinations(destinations: List<PodcastDestination>) {
+    fun setDestinations(destinations: List<FeedDestination>) {
         this.destinations = destinations
     }
 

@@ -23,6 +23,16 @@
             app:argType="string" />
 
         <argument
+            android:name="feed_id"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
+            android:name="feed_item_id"
+            app:argType="string"
+            app:nullable="true" />
+
+        <argument
             android:name="argFromList"
             app:argType="boolean" />
 
