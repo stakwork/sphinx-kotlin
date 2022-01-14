@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="loading_progress_bar_xy">50dp</dimen>
+    <dimen name="small_control_button_xy">32dp</dimen>
 </resources>

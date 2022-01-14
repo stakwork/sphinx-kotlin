@@ -762,7 +762,7 @@ internal class DashboardViewModel @Inject constructor(
                 jobNetworkRefresh?.cancel()
             }
 
-            repositoryDashboard.networkRefreshContacts.collect { response ->
+            repositoryDashboard.networkRefreshLatestContacts.collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {}
@@ -804,7 +804,6 @@ internal class DashboardViewModel @Inject constructor(
         val i = Intent(Intent.ACTION_VIEW)
         i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         i.data = Uri.parse("https://github.com/stakwork/sphinx-kotlin/releases")
-//        i.data = Uri.parse("https://play.google.com/store/apps/details?id=chat.sphinx")
         app.startActivity(i)
     }
 

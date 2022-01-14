@@ -4,12 +4,13 @@ import android.animation.Animator
 import android.content.Context
 import android.os.Bundle
 import android.view.ContextThemeWrapper
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
-import android.widget.PopupMenu
-import android.widget.SeekBar
+import android.view.inputmethod.EditorInfo
+import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -26,27 +27,33 @@ import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.util.getTimeString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
 @AndroidEntryPoint
-internal class PodcastPlayerFragment : BaseFragment<
+internal class PodcastPlayerFragment : SideEffectFragment<
+        FragmentActivity,
+        PodcastPlayerSideEffect,
         PodcastPlayerViewState,
         PodcastPlayerViewModel,
         FragmentPodcastPlayerBinding
@@ -78,6 +85,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             root.post {
                 val fragmentHeight = root.measuredHeight
 
+
                 includeLayoutPodcastEpisodesList.layoutConstraintPodcastEpisodesList.apply {
                     kotlin.run {
                         layoutParams.height = (fragmentHeight.toDouble() * 0.975).toInt()
@@ -87,13 +95,50 @@ internal class PodcastPlayerFragment : BaseFragment<
             }
         }
 
+        setupBoost()
         setupEpisodes()
+    }
 
-        lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.getPodcast()?.let { podcast ->
-                addPodcastOnClickListeners(podcast)
+    private fun setupBoost() {
+        binding.apply {
+            includeLayoutBoostFireworks.apply {
+                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                    override fun onAnimationEnd(animation: Animator?) {
+                        root.gone
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator?) {}
+
+                    override fun onAnimationCancel(animation: Animator?) {}
+
+                    override fun onAnimationStart(animation: Animator?) {}
+                })
+            }
+
+            includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
+                removeFocusOnEnter(editTextCustomBoost)
             }
         }
+    }
+
+    private fun removeFocusOnEnter(editText: EditText?) {
+        editText?.setOnEditorActionListener(object:
+            TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    editText.let { nnEditText ->
+                        binding.root.context.inputMethodManager?.let { imm ->
+                            if (imm.isActive(nnEditText)) {
+                                imm.hideSoftInputFromWindow(nnEditText.windowToken, 0)
+                                nnEditText.clearFocus()
+                            }
+                        }
+                    }
+                    return true
+                }
+                return false
+            }
+        })
     }
 
     private fun setupEpisodes() {
@@ -149,7 +194,7 @@ internal class PodcastPlayerFragment : BaseFragment<
                 )
             }
 
-            includeLayoutEpisodePlaybackControlButtons.apply {
+            includeLayoutEpisodePlaybackControls.apply {
                 textViewPlaybackSpeedButton.setOnClickListener {
                     showSpeedPopup()
                 }
@@ -178,13 +223,23 @@ internal class PodcastPlayerFragment : BaseFragment<
                     updateViewAfterSeek(podcast)
                 }
 
-                imageViewPodcastBoostButton.setOnClickListener {
-                    viewModel.sendPodcastBoost()
+                includeLayoutCustomBoost.apply customBoost@ {
+                    this@customBoost.imageViewFeedBoostButton.setOnClickListener {
+                        val amount = editTextCustomBoost.text.toString().toLongOrNull()?.toSat() ?: Sat(0)
 
-                    includeLayoutBoostFireworks.apply {
-                        root.visible
+                        viewModel.sendPodcastBoost(
+                            amount,
+                            fireworksCallback = {
+                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                    setupBoostAnimation(null, amount)
 
-                        lottieAnimationView.playAnimation()
+                                    includeLayoutBoostFireworks.apply fireworks@ {
+                                        this@fireworks.root.visible
+                                        this@fireworks.lottieAnimationView.playAnimation()
+                                    }
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -224,7 +279,6 @@ internal class PodcastPlayerFragment : BaseFragment<
                 toggleLoadingWheel(false)
                 showPodcastInfo(viewState.podcast)
             }
-
         }
     }
 
@@ -261,10 +315,15 @@ internal class PodcastPlayerFragment : BaseFragment<
 
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
-            includeLayoutEpisodePlaybackControlButtons.apply {
+            includeLayoutEpisodePlaybackControls.apply {
+
                 textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
-                imageViewPodcastBoostButton.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
-                imageViewPodcastBoostButton.isEnabled = podcast.hasDestinations
+
+                includeLayoutCustomBoost.apply customBoost@ {
+                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
+                    this@customBoost.imageViewFeedBoostButton.isEnabled = podcast.hasDestinations
+                    this@customBoost.editTextCustomBoost.isEnabled = podcast.hasDestinations
+                }
             }
 
             togglePlayPauseButton(podcast.isPlaying)
@@ -272,6 +331,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             if (!dragging && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
 
             toggleLoadingWheel(false)
+            addPodcastOnClickListeners(podcast)
         }
     }
 
@@ -279,32 +339,27 @@ internal class PodcastPlayerFragment : BaseFragment<
         photoUrl: PhotoUrl?,
         amount: Sat?
     ) {
-        binding.includeLayoutBoostFireworks.apply {
 
-            photoUrl?.let { photoUrl ->
-                imageLoader.load(
-                    imageViewProfilePicture,
-                    photoUrl.value,
-                    ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                        .transformation(Transformation.CircleCrop)
-                        .build()
-                )
+        binding.apply {
+            includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
+                editTextCustomBoost.setText(amount?.asFormattedString())
             }
 
-            textViewSatsAmount.text = amount?.asFormattedString()
+            includeLayoutBoostFireworks.apply {
 
-            lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
-                override fun onAnimationEnd(animation: Animator?) {
-                    root.gone
+                photoUrl?.let { photoUrl ->
+                    imageLoader.load(
+                        imageViewProfilePicture,
+                        photoUrl.value,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
                 }
 
-                override fun onAnimationRepeat(animation: Animator?) {}
-
-                override fun onAnimationCancel(animation: Animator?) {}
-
-                override fun onAnimationStart(animation: Animator?) {}
-            })
+                textViewSatsAmount.text = amount?.asFormattedString()
+            }
         }
     }
 
@@ -313,7 +368,7 @@ internal class PodcastPlayerFragment : BaseFragment<
             includeLayoutEpisodeSliderControl.apply layoutEpisodesSlider@ {
                 this@layoutEpisodesSlider.progressBarAudioLoading.goneIfFalse(show)
             }
-            includeLayoutEpisodePlaybackControlButtons.apply layoutPlaybackControls@ {
+            includeLayoutEpisodePlaybackControls.apply layoutPlaybackControls@ {
                 this@layoutPlaybackControls.textViewPlayPauseButton.isEnabled = !show
             }
         }
@@ -321,7 +376,7 @@ internal class PodcastPlayerFragment : BaseFragment<
 
     private fun togglePlayPauseButton(playing: Boolean) {
         binding.apply {
-            includeLayoutEpisodePlaybackControlButtons.apply {
+            includeLayoutEpisodePlaybackControls.apply {
                 textViewPlayPauseButton.background =
                     ContextCompat.getDrawable(root.context,
                         if (playing) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
@@ -389,7 +444,7 @@ internal class PodcastPlayerFragment : BaseFragment<
     }
 
     private fun showSpeedPopup() {
-        binding.includeLayoutEpisodePlaybackControlButtons.apply {
+        binding.includeLayoutEpisodePlaybackControls.apply {
             val wrapper: Context = ContextThemeWrapper(context, R.style.speedMenu)
             val popup = PopupMenu(wrapper, textViewPlaybackSpeedButton)
             popup.inflate(R.menu.speed_menu)
@@ -446,5 +501,9 @@ internal class PodcastPlayerFragment : BaseFragment<
                 }
             }
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: PodcastPlayerSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

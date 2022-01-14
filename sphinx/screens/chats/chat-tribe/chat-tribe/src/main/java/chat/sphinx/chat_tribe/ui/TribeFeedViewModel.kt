@@ -22,6 +22,7 @@ import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -186,7 +187,7 @@ internal class TribeFeedViewModel @Inject constructor(
                     mediaPlayerServiceController.submitAction(
                         UserAction.SetPaymentsDestinations(
                             chatId = args.chatId,
-                            destinations = vs.podcast.destinations,
+                            destinations = vs.podcast.getFeedDestinations(),
                         )
                     )
                 }
@@ -324,9 +325,16 @@ internal class TribeFeedViewModel @Inject constructor(
                         if (vs is PodcastViewState.PodcastVS) {
                             val metaData = vs.podcast.getMetaData(tip)
 
-                            messageRepository.sendPodcastBoost(
+                            val feedBoost = FeedBoost(
+                                podcast.id,
+                                metaData.itemId,
+                                metaData.timeSeconds,
+                                tip
+                            )
+
+                            messageRepository.sendBoost(
                                 args.chatId,
-                                vs.podcast
+                                feedBoost
                             )
 
                             mediaPlayerServiceController.submitAction(
@@ -334,7 +342,7 @@ internal class TribeFeedViewModel @Inject constructor(
                                     args.chatId,
                                     vs.podcast.id.value,
                                     metaData,
-                                    vs.podcast.destinations ?: arrayListOf(),
+                                    vs.podcast.getFeedDestinations(),
                                 )
                             )
                         }

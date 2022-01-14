@@ -97,7 +97,6 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -171,6 +170,7 @@ abstract class SphinxRepository(
         // PersistentStorage Keys
         const val REPOSITORY_LIGHTNING_BALANCE = "REPOSITORY_LIGHTNING_BALANCE"
         const val REPOSITORY_LAST_SEEN_MESSAGE_DATE = "REPOSITORY_LAST_SEEN_MESSAGE_DATE"
+        const val REPOSITORY_LAST_SEEN_CONTACTS_DATE = "REPOSITORY_LAST_SEEN_CONTACTS_DATE"
         const val REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE =
             "REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE"
 
@@ -539,35 +539,27 @@ abstract class SphinxRepository(
             applicationScope.launch(io + handler) {
                 chatLock.withLock {
 
-                    val chatIdsToRemove = queries.chatGetAllIds()
-                        .executeAsList()
-                        .toMutableSet()
-
                     messageLock.withLock {
 
                         queries.transaction {
                             for (dto in chats) {
-
-                                val contactDto: ContactDto? =
-                                    if (dto.type == ChatType.CONVERSATION) {
-                                        dto.contact_ids.elementAtOrNull(1)?.let { contactId ->
-                                            contacts?.get(ContactId(contactId))
+                                if (dto.deletedActual) {
+                                    LOG.d(TAG, "Removing Chats/Messages for ${ChatId(dto.id)}")
+                                    deleteChatById(ChatId(dto.id), queries, latestMessageUpdatedTimeMap)
+                                } else {
+                                    val contactDto: ContactDto? =
+                                        if (dto.type == ChatType.CONVERSATION) {
+                                            dto.contact_ids.elementAtOrNull(1)?.let { contactId ->
+                                                contacts?.get(ContactId(contactId))
+                                            }
+                                        } else {
+                                            null
                                         }
-                                    } else {
-                                        null
-                                    }
 
-                                upsertChat(dto, moshi, chatSeenMap, queries, contactDto)
+                                    upsertChat(dto, moshi, chatSeenMap, queries, contactDto)
+                                }
 
-                                chatIdsToRemove.remove(ChatId(dto.id))
                             }
-
-                            // remove remaining chat's from DB
-                            for (chatId in chatIdsToRemove) {
-                                LOG.d(TAG, "Removing Chats/Messages for $chatId")
-                                deleteChatById(chatId, queries, latestMessageUpdatedTimeMap)
-                            }
-
                         }
 
                     }
@@ -628,12 +620,12 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun streamPodcastPayments(
+    override fun streamFeedPayments(
         chatId: ChatId,
         metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
-        destinations: List<PodcastDestination>
+        destinations: List<FeedDestination>
     ) {
 
         if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
@@ -839,6 +831,117 @@ abstract class SphinxRepository(
 
                             error?.let {
                                 throw it
+                            }
+
+                            emit(processChatsResponse)
+
+                        } catch (e: ParseException) {
+                            val msg =
+                                "Failed to convert date/time from Relay while processing Contacts"
+                            LOG.e(TAG, msg, e)
+                            emit(Response.Error(ResponseError(msg, e)))
+                        }
+
+                    }
+                    is LoadResponse.Loading -> {
+                        emit(loadResponse)
+                    }
+                }
+            }
+        }
+    }
+
+    private val inviteLock = Mutex()
+    override val networkRefreshLatestContacts: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+        flow {
+
+            val lastSeenContactsDate: String? = authenticationStorage.getString(
+                REPOSITORY_LAST_SEEN_CONTACTS_DATE,
+                null
+            )
+
+            val lastSeenContactsDateResolved: DateTime = lastSeenContactsDate?.toDateTime()
+                ?: DATE_NIXON_SHOCK.toDateTime()
+
+            val now: String = DateTime.nowUTC()
+
+            networkQueryContact.getLatestContacts(
+                lastSeenContactsDateResolved
+            ).collect { loadResponse ->
+
+                @Exhaustive
+                when (loadResponse) {
+                    is Response.Error -> {
+                        emit(loadResponse)
+                    }
+                    is Response.Success -> {
+
+                        val queries = coreDB.getSphinxDatabaseQueries()
+
+                        try {
+                            var error: Throwable? = null
+                            val handler = CoroutineExceptionHandler { _, throwable ->
+                                error = throwable
+                            }
+
+                            var processChatsResponse: Response<Boolean, ResponseError> =
+                                Response.Success(true)
+
+                            applicationScope.launch(io + handler) {
+
+                                val contactsToInsert = loadResponse.value.contacts.filter { dto -> !dto.deletedActual && !dto.fromGroupActual }
+                                val contactMap: MutableMap<ContactId, ContactDto> =
+                                    LinkedHashMap(contactsToInsert.size)
+
+                                chatLock.withLock {
+                                    messageLock.withLock {
+                                        contactLock.withLock {
+                                            queries.transaction {
+                                                for (dto in loadResponse.value.contacts) {
+                                                    if (dto.deletedActual || dto.fromGroupActual) {
+                                                        deleteContactById(ContactId(dto.id), queries)
+                                                    } else {
+                                                        upsertContact(dto, queries)
+                                                        contactMap[ContactId(dto.id)] = dto
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                processChatsResponse = processChatDtos(
+                                    loadResponse.value.chats,
+                                    contactMap,
+                                )
+
+                                inviteLock.withLock {
+                                    queries.transaction {
+                                        for (dto in loadResponse.value.invites) {
+                                            upsertInvite(dto, queries)
+                                        }
+                                    }
+                                }
+
+                                subscriptionLock.withLock {
+                                    queries.transaction {
+                                        for (dto in loadResponse.value.subscriptions) {
+                                            upsertSubscription(dto, queries)
+                                        }
+                                    }
+                                }
+
+                            }.join()
+
+                            error?.let {
+                                throw it
+                            } ?: run {
+                                if (loadResponse.value.contacts.size > 0 || loadResponse.value.chats.size > 0) {
+                                    authenticationStorage.putString(
+                                        REPOSITORY_LAST_SEEN_CONTACTS_DATE,
+                                        now
+                                    )
+                                }
                             }
 
                             emit(processChatsResponse)
@@ -2915,45 +3018,21 @@ abstract class SphinxRepository(
         return response
     }
 
-    override fun sendPodcastBoost(chatId: ChatId, podcast: Podcast) {
+    override fun sendBoost(
+        chatId: ChatId,
+        boost: FeedBoost
+    ) {
         applicationScope.launch(mainImmediate) {
-            val owner: Contact? = accountOwner.value
-                ?: let {
-                    var owner: Contact? = null
-                    try {
-                        accountOwner.collect {
-                            if (it != null) {
-                                owner = it
-                                throw Exception()
-                            }
-                        }
-                    } catch (e: Exception) {
-                    }
-                    delay(25L)
-                    owner
-                }
+            val message = boost.toJson(moshi)
 
-            owner?.tipAmount?.let { tipAmount ->
-                if (tipAmount.value > 0) {
-                    val metaData = podcast.getMetaData(tipAmount)
+            val sendMessageBuilder = SendMessage.Builder()
+            sendMessageBuilder.setChatId(chatId)
+            sendMessageBuilder.setText(message)
+            sendMessageBuilder.setIsBoost(true)
 
-                    val message = PodBoost(
-                        podcast.id,
-                        metaData.itemId,
-                        metaData.timeSeconds,
-                        tipAmount
-                    ).toJson(moshi)
-
-                    val sendMessageBuilder = SendMessage.Builder()
-                    sendMessageBuilder.setChatId(chatId)
-                    sendMessageBuilder.setText(message)
-                    sendMessageBuilder.setIsBoost(true)
-
-                    sendMessage(
-                        sendMessageBuilder.build().first
-                    )
-                }
-            }
+            sendMessage(
+                sendMessageBuilder.build().first
+            )
         }
     }
 
@@ -3517,6 +3596,21 @@ abstract class SphinxRepository(
                             queries
                         )
                     )
+                }
+            }
+    }
+
+    override fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        queries.feedItemGetById(feedItemId)
+            .asFlow()
+            .mapToOneOrNull(io)
+            .map { it?.let { feedItemDboPresenterMapper.mapFrom(it) } }
+            .distinctUntilChanged()
+            .collect { value: FeedItem? ->
+                value?.let { feedItem ->
+                    emit(feedItem)
                 }
             }
     }

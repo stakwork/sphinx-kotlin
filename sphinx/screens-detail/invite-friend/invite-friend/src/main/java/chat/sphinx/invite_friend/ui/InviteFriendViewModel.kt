@@ -73,7 +73,11 @@ internal class InviteFriendViewModel @Inject constructor(
                 return@launch
             }
 
-            val message = welcomeMessage ?: app.getString(R.string.invite_friend_message_hint)
+            val message = if (welcomeMessage?.trim()?.isNotEmpty() == true) {
+                welcomeMessage
+            } else {
+                app.getString(R.string.invite_friend_message_hint)
+            }
 
             contactRepository.createNewInvite(nickname, message).collect { loadResponse ->
                 @Exhaustive

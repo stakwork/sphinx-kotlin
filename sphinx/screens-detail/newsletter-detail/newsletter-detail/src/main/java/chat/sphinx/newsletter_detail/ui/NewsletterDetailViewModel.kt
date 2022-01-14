@@ -87,7 +87,9 @@ internal class NewsletterDetailViewModel @Inject constructor(
             navigator.toWebViewDetail(
                 item?.feed?.chat?.id ?: item?.feed?.chatId,
                 app.getString(R.string.newsletter_article),
-                item.enclosureUrl
+                item.enclosureUrl,
+                item.feedId,
+                item.id
             )
         }
     }

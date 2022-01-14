@@ -372,12 +372,14 @@ internal class ChatListAdapter(
         private fun handleInviteLayouts() {
             dChat?.let { nnDashboardChat ->
                 binding.apply {
+                    textViewChatHolderTime.visible
                     textViewChatHolderMessageIcon.gone
                     layoutConstraintDashboardChatHolderContact.visible
                     layoutConstraintDashboardChatHolderInvite.gone
                     layoutConstraintDashboardChatHolderInvitePrice.gone
 
                     if (nnDashboardChat is DashboardChat.Inactive.Invite) {
+                        textViewChatHolderTime.gone
                         textViewChatHolderMessage.setTextFont(R.font.roboto_bold)
                         textViewChatHolderMessage.setTextColorExt(R.color.text)
 

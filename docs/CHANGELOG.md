@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha40 (2022-01-14)
+ - Adds ability to set custom boost amount
+ - Adds ability to boost video and newsletter
+ - Improves contacts and messages fetching
+
 # Version 1.0.0-alpha39 (2022-01-07)
  - Improves feed
  - Fixes crashes

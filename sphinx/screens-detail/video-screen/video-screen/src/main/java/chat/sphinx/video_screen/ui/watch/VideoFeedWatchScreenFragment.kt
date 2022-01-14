@@ -1,34 +1,51 @@
 package chat.sphinx.video_screen.ui.watch
 
+import android.animation.Animator
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.MediaController
+import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
 import chat.sphinx.video_screen.adapter.VideoFeedItemsFooterAdapter
 import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
+import chat.sphinx.video_screen.ui.VideoFeedScreenSideEffect
+import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import chat.sphinx.wrapper_common.hhmmElseDate
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -38,7 +55,9 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class VideoFeedWatchScreenFragment: BaseFragment<
+internal class VideoFeedWatchScreenFragment: SideEffectFragment<
+        FragmentActivity,
+        VideoFeedScreenSideEffect,
         VideoFeedScreenViewState,
         VideoFeedWatchScreenViewModel,
         FragmentVideoWatchScreenBinding
@@ -68,6 +87,7 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
+        setupBoost()
         setupItems()
         setupVideoPlayer()
     }
@@ -77,6 +97,46 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
+    private fun setupBoost() {
+        binding.apply {
+            includeLayoutBoostFireworks.apply {
+                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                    override fun onAnimationEnd(animation: Animator?) {
+                        root.gone
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator?) {}
+
+                    override fun onAnimationCancel(animation: Animator?) {}
+
+                    override fun onAnimationStart(animation: Animator?) {}
+                })
+            }
+
+            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
+                removeFocusOnEnter(editTextCustomBoost)
+
+                imageViewFeedBoostButton.setOnClickListener {
+                    val amount = editTextCustomBoost.text.toString().toLongOrNull()?.toSat() ?: Sat(0)
+
+                    viewModel.sendBoost(
+                        amount,
+                        fireworksCallback = {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                setupBoostAnimation(null, amount)
+
+                                includeLayoutBoostFireworks.apply fireworks@ {
+                                    this@fireworks.root.visible
+                                    this@fireworks.lottieAnimationView.playAnimation()
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 
     private fun setupItems() {
@@ -115,6 +175,53 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
         }
     }
 
+    private suspend fun setupBoostAnimation(
+        photoUrl: PhotoUrl?,
+        amount: Sat?
+    ) {
+        binding.apply {
+            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
+                editTextCustomBoost.setText(amount?.asFormattedString())
+            }
+
+            includeLayoutBoostFireworks.apply {
+
+                photoUrl?.let { photoUrl ->
+                    imageLoader.load(
+                        imageViewProfilePicture,
+                        photoUrl.value,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                }
+
+                textViewSatsAmount.text = amount?.asFormattedString()
+            }
+        }
+    }
+
+    private fun removeFocusOnEnter(editText: EditText?) {
+        editText?.setOnEditorActionListener(object:
+            TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    editText.let { nnEditText ->
+                        binding.root.context.inputMethodManager?.let { imm ->
+                            if (imm.isActive(nnEditText)) {
+                                imm.hideSoftInputFromWindow(nnEditText.windowToken, 0)
+                                nnEditText.clearFocus()
+                            }
+                        }
+                    }
+                    return true
+                }
+                return false
+            }
+        })
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: VideoFeedScreenViewState) {
         @Exhaustive
         when (viewState) {
@@ -145,6 +252,12 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
                         } else {
                             getString(R.string.subscribe)
                         }
+
+                        includeLayoutCustomBoost.apply customBoost@ {
+                            this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (viewState.hasDestinations) 1.0f else 0.3f
+                            this@customBoost.imageViewFeedBoostButton.isEnabled = viewState.hasDestinations
+                            this@customBoost.editTextCustomBoost.isEnabled = viewState.hasDestinations
+                        }
                     }
                 }
             }
@@ -153,6 +266,22 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.boostAnimationViewStateContainer.collect { viewState ->
+                @app.cash.exhaustive.Exhaustive
+                when (viewState) {
+                    is BoostAnimationViewState.Idle -> {}
+
+                    is BoostAnimationViewState.BoosAnimationInfo -> {
+                        setupBoostAnimation(
+                            viewState.photoUrl,
+                            viewState.amount
+                        )
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.selectedVideoStateContainer.collect { viewState ->
@@ -232,5 +361,9 @@ internal class VideoFeedWatchScreenFragment: BaseFragment<
             }
             requestLayout()
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: VideoFeedScreenSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

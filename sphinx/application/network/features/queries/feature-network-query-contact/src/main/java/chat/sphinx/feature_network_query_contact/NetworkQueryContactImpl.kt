@@ -9,10 +9,12 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.contact.Blocked
 import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
@@ -24,6 +26,7 @@ class NetworkQueryContactImpl(
 
     companion object {
         private const val ENDPOINT_CONTACTS = "/contacts"
+        private const val ENDPOINT_LATEST_CONTACTS = "/latest_contacts"
         private const val ENDPOINT_DELETE_CONTACT = "/contacts/%d"
         private const val ENDPOINT_TRIBE_MEMBERS = "/contacts/%d"
         private const val ENDPOINT_GENERATE_TOKEN = "/contacts/tokens"
@@ -61,6 +64,21 @@ class NetworkQueryContactImpl(
                 useExtendedNetworkCallClient = true,
             )
         }
+
+    override fun getLatestContacts(
+        date: DateTime?,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<GetLatestContactsResponse, ResponseError>> =
+        networkRelayCall.relayGet(
+            responseJsonClass = GetLatestContactsRelayResponse::class.java,
+            relayEndpoint = if (date != null) {
+                "$ENDPOINT_LATEST_CONTACTS?date=${MessagePagination.getFormatPaginationPercentEscaped().format(date?.value)}"
+            } else {
+                ENDPOINT_LATEST_CONTACTS
+            },
+            relayData = relayData,
+            useExtendedNetworkCallClient = true,
+        )
 
     override fun getTribeMembers(
         chatId: ChatId,

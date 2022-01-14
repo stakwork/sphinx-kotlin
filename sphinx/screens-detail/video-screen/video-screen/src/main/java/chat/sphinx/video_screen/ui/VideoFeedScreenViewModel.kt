@@ -1,20 +1,36 @@
 package chat.sphinx.video_screen.ui
 
+import android.app.Application
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.video_screen.R
+import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.wrapper_chat.ChatMetaData
+import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.DashboardItemType
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_podcast.Podcast
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -26,11 +42,22 @@ import java.io.File
 
 internal open class VideoFeedScreenViewModel(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     private val chatRepository: ChatRepository,
     private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
-): BaseViewModel<VideoFeedScreenViewState>(dispatchers, VideoFeedScreenViewState.Idle)
+    private val contactRepository: ContactRepository,
+    private val messageRepository: MessageRepository,
+    private val lightningRepository: LightningRepository,
+): SideEffectViewModel<
+    FragmentActivity,
+    VideoFeedScreenSideEffect,
+    VideoFeedScreenViewState
+    >(dispatchers, VideoFeedScreenViewState.Idle)
 {
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
+
     private val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
         getArgFeedId()?.let { feedId ->
             emitAll(feedRepository.getFeedById(feedId))
@@ -42,6 +69,28 @@ internal open class VideoFeedScreenViewModel(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
+    }
 
     private suspend fun getVideoFeed(): Feed? {
         videoFeedSharedFlow.replayCache.firstOrNull()?.let { feed ->
@@ -70,6 +119,10 @@ internal open class VideoFeedScreenViewModel(
         ViewStateContainer(SelectedVideoViewState.Idle)
     }
 
+    open val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
+        ViewStateContainer(BoostAnimationViewState.Idle)
+    }
+
     protected fun subscribeToViewStateFlow() {
         viewModelScope.launch(mainImmediate) {
             videoFeedSharedFlow.collect { feed ->
@@ -80,7 +133,8 @@ internal open class VideoFeedScreenViewModel(
                             nnFeed.imageUrlToShow,
                             nnFeed.chatId,
                             nnFeed.subscribed,
-                            nnFeed.items
+                            nnFeed.items,
+                            nnFeed.hasDestinations
                         )
                     )
 
@@ -128,17 +182,31 @@ internal open class VideoFeedScreenViewModel(
     }
 
     fun videoItemSelected(video: FeedItem) {
-        selectedVideoStateContainer.updateViewState(
-            SelectedVideoViewState.VideoSelected(
-                video.id,
-                video.title,
-                video.description,
-                video.enclosureUrl,
-                video.localFile,
-                video.dateUpdated,
-                video.duration
+        viewModelScope.launch(mainImmediate) {
+
+            repositoryMedia.updateChatMetaData(
+                getArgChatId(),
+                ChatMetaData(
+                    itemId = video.id,
+                    itemLongId = ItemId(-1),
+                    satsPerMinute = getOwner()?.tipAmount ?: Sat(0),
+                    timeSeconds = 0,
+                    speed = 1.0
+                )
             )
-        )
+
+            selectedVideoStateContainer.updateViewState(
+                SelectedVideoViewState.VideoSelected(
+                    video.id,
+                    video.title,
+                    video.description,
+                    video.enclosureUrl,
+                    video.localFile,
+                    video.dateUpdated,
+                    video.duration
+                )
+            )
+        }
     }
 
     fun toggleSubscribeState() {
@@ -148,6 +216,68 @@ internal open class VideoFeedScreenViewModel(
                     feed.id,
                     feed.subscribed
                 )
+            }
+        }
+    }
+
+    fun sendBoost(
+        amount: Sat,
+        fireworksCallback: () -> Unit
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            getVideoFeed()?.let { videoFeed ->
+                videoFeed.lastItem?.let { currentItem ->
+                    getAccountBalance().firstOrNull()?.let { balance ->
+                        when {
+                            (amount.value > balance.balance.value) -> {
+                                submitSideEffect(
+                                    VideoFeedScreenSideEffect.Notify(
+                                        app.getString(R.string.balance_too_low)
+                                    )
+                                )
+                            }
+                            (amount.value <= 0) -> {
+                                submitSideEffect(
+                                    VideoFeedScreenSideEffect.Notify(
+                                        app.getString(R.string.boost_amount_too_low)
+                                    )
+                                )
+                            }
+                            else -> {
+                                fireworksCallback()
+
+                                val chatId = getArgChatId()
+
+                                messageRepository.sendBoost(
+                                    chatId,
+                                    FeedBoost(
+                                        feedId = videoFeed.id,
+                                        itemId = currentItem.id,
+                                        timeSeconds = 0,
+                                        amount = amount
+                                    )
+                                )
+
+                                videoFeed.destinations.let { destinations ->
+
+                                    repositoryMedia.streamFeedPayments(
+                                        chatId,
+                                        ChatMetaData(
+                                            itemId = currentItem.id,
+                                            itemLongId = ItemId(-1),
+                                            satsPerMinute = amount,
+                                            timeSeconds = 0,
+                                            speed = 1.0
+                                        ),
+                                        videoFeed.id.value,
+                                        currentItem.id.value,
+                                        destinations
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

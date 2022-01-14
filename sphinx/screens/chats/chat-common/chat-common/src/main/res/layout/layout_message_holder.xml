@@ -125,6 +125,7 @@
         android:layout_height="10dp"
         android:layout_marginStart="40dp"
         android:src="@drawable/received_bubble_arrow"
+        android:tint="@android:color/transparent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
         tools:visibility="visible" />
@@ -134,6 +135,7 @@
         android:layout_width="6dp"
         android:layout_height="10dp"
         android:src="@drawable/sent_bubble_arrow"
+        android:tint="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
         tools:visibility="visible" />

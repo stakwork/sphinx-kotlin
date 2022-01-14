@@ -1,19 +1,23 @@
 package chat.sphinx.podcast_player.ui
 
+import android.app.Application
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -24,11 +28,15 @@ import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.delay
@@ -48,19 +56,26 @@ internal inline val PodcastPlayerFragmentArgs.feedId: FeedId
 internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: PodcastPlayerNavigator,
+    private val app: Application,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
     private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
+    private val lightningRepository: LightningRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController
-) : BaseViewModel<PodcastPlayerViewState>(
-    dispatchers,
-    PodcastPlayerViewState.Idle
-), MediaPlayerServiceController.MediaServiceListener {
+) : SideEffectViewModel<
+        FragmentActivity,
+        PodcastPlayerSideEffect,
+        PodcastPlayerViewState,
+        >(dispatchers, PodcastPlayerViewState.Idle)
+, MediaPlayerServiceController.MediaServiceListener {
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
+
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
         if (args.argChatId != ChatId.NULL_CHAT_ID.toLong()) {
@@ -73,6 +88,28 @@ internal class PodcastPlayerViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
+            }
+        }
+    }
 
     suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
@@ -334,7 +371,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private fun setPaymentsDestinations() {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.destinations.let { destinations ->
+                val destinations = podcast.getFeedDestinations()
+
+                if (destinations.isNotEmpty()) {
                     mediaPlayerServiceController.submitAction(
                         UserAction.SetPaymentsDestinations(
                             args.chatId,
@@ -346,51 +385,56 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun sendPodcastBoost() {
+    fun sendPodcastBoost(
+        amount: Sat,
+        fireworksCallback: () -> Unit
+    ) {
         viewModelScope.launch(mainImmediate) {
-            getOwner().tipAmount?.let { tipAmount ->
-                getPodcast()?.let { podcast ->
-                    podcast.let { nnPodcast ->
-                        if (tipAmount.value > 0) {
-                            val metaData = nnPodcast.getMetaData(tipAmount)
+            getPodcast()?.let { podcast ->
+                getAccountBalance().firstOrNull()?.let { balance ->
+                    when {
+                        (amount.value > balance.balance.value) -> {
+                            submitSideEffect(
+                                PodcastPlayerSideEffect.Notify(
+                                    app.getString(R.string.balance_too_low)
+                                )
+                            )
+                        }
+                        (amount.value <= 0) -> {
+                            submitSideEffect(
+                                PodcastPlayerSideEffect.Notify(
+                                    app.getString(R.string.boost_amount_too_low)
+                                )
+                            )
+                        }
+                        else -> {
+                            fireworksCallback()
 
-                            messageRepository.sendPodcastBoost(args.chatId, nnPodcast)
+                            val metaData = podcast.getMetaData(amount)
 
-                            nnPodcast.destinations.let { destinations ->
+                            messageRepository.sendBoost(
+                                args.chatId,
+                                FeedBoost(
+                                    feedId = podcast.id,
+                                    itemId = metaData.itemId,
+                                    timeSeconds = metaData.timeSeconds,
+                                    amount = amount
+                                )
+                            )
+
+                            if (podcast.hasDestinations) {
                                 mediaPlayerServiceController.submitAction(
                                     UserAction.SendBoost(
                                         args.chatId,
-                                        nnPodcast.id.value,
+                                        podcast.id.value,
                                         metaData,
-                                        destinations
+                                        podcast.getFeedDestinations()
                                     )
                                 )
                             }
                         }
                     }
                 }
-            }
-        }
-    }
-
-    private suspend fun getOwner(): Contact {
-        return contactRepository.accountOwner.value.let { contact ->
-            if (contact != null) {
-                contact
-            } else {
-                var resolvedOwner: Contact? = null
-                try {
-                    contactRepository.accountOwner.collect { ownerContact ->
-                        if (ownerContact != null) {
-                            resolvedOwner = ownerContact
-                            throw Exception()
-                        }
-                    }
-                } catch (e: Exception) {
-                }
-                delay(25L)
-
-                resolvedOwner!!
             }
         }
     }

@@ -159,7 +159,7 @@ sealed class DashboardChat {
                     context.getString(R.string.last_message_description_tribe_deleted)
                 }
                 message.type.isBoost() -> {
-                    val amount: String = (message.podBoost?.amount ?: message.amount)
+                    val amount: String = (message.feedBoost?.amount ?: message.amount)
                         .asFormattedString(separator = ',', appendUnit = true)
 
                     context.getString(
@@ -180,8 +180,8 @@ sealed class DashboardChat {
                                     getMessageSender(message, context)
                                 )
                             }
-                            message.podBoost != null -> {
-                                val amount: String = (message.podBoost?.amount ?: message.amount)
+                            message.feedBoost != null -> {
+                                val amount: String = (message.feedBoost?.amount ?: message.amount)
                                     .asFormattedString(separator = ',', appendUnit = true)
 
                                 context.getString(
