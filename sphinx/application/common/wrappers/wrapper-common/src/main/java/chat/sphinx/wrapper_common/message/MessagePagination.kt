@@ -4,18 +4,6 @@ import chat.sphinx.wrapper_common.DateTime
 import java.text.SimpleDateFormat
 import java.util.*
 
-@Suppress("NOTHING_TO_INLINE")
-inline fun MessagePagination.instantiateOrNull(
-    limit: Int,
-    offset: Int,
-    date: DateTime?
-): MessagePagination? =
-    try {
-        MessagePagination.instantiate(limit, offset, date)
-    } catch (e: IllegalArgumentException) {
-        null
-    }
-
 @JvmInline
 value class MessagePagination private constructor(val value: String) {
 

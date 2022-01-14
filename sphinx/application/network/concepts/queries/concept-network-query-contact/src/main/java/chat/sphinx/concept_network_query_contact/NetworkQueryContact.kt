@@ -5,6 +5,7 @@ import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.contact.Blocked
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -20,6 +21,11 @@ abstract class NetworkQueryContact {
     abstract fun getContacts(
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<GetContactsResponse, ResponseError>>
+
+    abstract fun getLatestContacts(
+        date: DateTime?,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<GetLatestContactsResponse, ResponseError>>
 
     abstract fun getTribeMembers(
         chatId: ChatId,
