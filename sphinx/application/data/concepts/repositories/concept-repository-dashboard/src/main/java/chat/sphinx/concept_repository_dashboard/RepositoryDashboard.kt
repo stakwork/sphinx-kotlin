@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
+import chat.sphinx.wrapper_common.dashboard.RestoreProgress
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_contact.Contact
@@ -61,5 +62,7 @@ interface RepositoryDashboard {
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshLatestContacts: Flow<LoadResponse<Boolean, ResponseError>>
-    val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
+    val networkRefreshMessages: Flow<LoadResponse<RestoreProgress, ResponseError>>
+
+    suspend fun didCancelRestore()
 }
