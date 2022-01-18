@@ -37,6 +37,7 @@
     <!-- Restore popup -->
     <dimen name="dashboard_restore_popup_width">240dp</dimen>
     <dimen name="dashboard_restore_popup_height">100dp</dimen>
+    <dimen name="dashboard_restore_progress_bar_height">7dp</dimen>
 
     <!-- Podcast search -->
     <dimen name="feed_podcast_search_progress_bar_xy">32dp</dimen>

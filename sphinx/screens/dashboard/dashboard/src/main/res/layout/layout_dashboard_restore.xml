@@ -6,7 +6,7 @@
     android:visibility="visible"
     android:focusable="true"
     android:clickable="true"
-    android:background="@color/popupBackground"
+    android:background="@color/lightPopupBackground"
     android:elevation="@dimen/default_elevation">
 
     <include

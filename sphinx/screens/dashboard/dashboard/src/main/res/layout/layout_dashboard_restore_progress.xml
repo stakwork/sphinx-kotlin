@@ -7,9 +7,10 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_restore_progress"
-        android:layout_width="@dimen/dashboard_restore_popup_width"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/background_authorize_popup"
+        android:layout_marginHorizontal="@dimen/default_large_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -37,7 +38,7 @@
             android:layout_height="wrap_content"
             android:indeterminate="false"
             android:max="100"
-            android:minHeight="10dp"
+            android:minHeight="@dimen/dashboard_restore_progress_bar_height"
             android:progress="50"
             android:progressDrawable="@drawable/restore_bar_progress"
             android:layout_margin="@dimen/default_layout_margin"

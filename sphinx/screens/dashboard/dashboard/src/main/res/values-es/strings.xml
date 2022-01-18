@@ -129,5 +129,5 @@
     <string name="podcast_search_placeholder_3">en el Podcast Index</string>
 
     <string name="dashboard_restore_progress">Restaurando: %s</string>
-    <string name="dashboard_stop_restore">Terminar restauración</string>
+    <string name="dashboard_stop_restore">Detener restauración</string>
 </resources>

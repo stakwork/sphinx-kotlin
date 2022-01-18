@@ -237,7 +237,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     private fun setupRestorePopup() {
         binding.layoutDashboardRestore.layoutDashboardRestoreProgress.apply {
             buttonStopRestore.setOnClickListener {
-                viewModel.stopRestore()
+                viewModel.cancelRestore()
             }
         }
     }
