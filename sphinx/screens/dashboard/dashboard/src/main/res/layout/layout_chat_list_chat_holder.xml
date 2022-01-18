@@ -191,19 +191,21 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_chat_holder_notification"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:paddingTop="26dp"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
             android:src="@drawable/ic_baseline_notifications_off_24"
+            android:tint="@color/placeholderText"
             android:visibility="invisible"
-            app:layout_constraintBottom_toTopOf="@+id/guide5"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="gone" />
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_holder_time"
+            app:layout_constraintTop_toTopOf="@+id/text_view_chat_holder_time"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_chat_holder_time"
+            tools:visibility="visible" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_chat_holder_time"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center_vertical|end"
@@ -211,6 +213,7 @@
             android:textSize="10sp"
             android:layout_marginBottom="@dimen/default_small_layout_margin"
             app:layout_constraintBottom_toTopOf="@+id/guide5"
+            app:layout_constraintEnd_toEndOf="parent"
             tools:ignore="SmallSp"
             tools:text="12:21 PM" />
 
@@ -223,7 +226,7 @@
             android:layout_marginBottom="@dimen/default_tiny_layout_margin"
             app:layout_constraintBottom_toTopOf="@+id/guide5"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:visibility="visible">
+            tools:visibility="gone">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_dashboard_chat_holder_invite_price"
