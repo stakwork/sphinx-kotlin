@@ -4118,11 +4118,19 @@ abstract class SphinxRepository(
                                                     val id: Long? = dto.chat_id
 
                                                     if (id != null &&
-                                                        chatIds.contains(ChatId(id)) &&
-                                                        !latestMessageMap.containsKey(ChatId(id))) {
+                                                        chatIds.contains(ChatId(id))) {
 
                                                         if (dto.updateChatDboLatestMessage) {
-                                                            latestMessageMap[ChatId(id)] = dto
+                                                            if (!latestMessageMap.containsKey(ChatId(id))) {
+                                                                latestMessageMap[ChatId(id)] = dto
+                                                            } else {
+                                                                val lastMessage = latestMessageMap[ChatId(id)]
+                                                                if (lastMessage == null ||
+                                                                    dto.created_at.toDateTime().time > lastMessage.created_at.toDateTime().time) {
+
+                                                                    latestMessageMap[ChatId(id)] = dto
+                                                                }
+                                                            }
                                                         }
                                                     }
 
