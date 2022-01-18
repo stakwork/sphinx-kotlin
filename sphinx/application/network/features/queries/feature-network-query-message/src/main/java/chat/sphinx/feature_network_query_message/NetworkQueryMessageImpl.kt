@@ -48,7 +48,7 @@ class NetworkQueryMessageImpl(
     ): Flow<LoadResponse<GetMessagesResponse, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetMessagesRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_MSGS + (messagePagination?.value ?: ""),
+            relayEndpoint = ENDPOINT_MSGS + (messagePagination?.value ?: "") + "&order=desc",
             relayData = relayData
         )
 
