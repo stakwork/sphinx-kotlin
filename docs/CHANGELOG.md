@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha40 (2022-01-21)
+ - Adds progress bar during restore
+ - Adds ability to partially restore account
+ - Fixes layout issue on messages bubbles
+ - Fixes layout issues on chats list 
+
 # Version 1.0.0-alpha40 (2022-01-14)
  - Adds ability to set custom boost amount
  - Adds ability to boost video and newsletter
