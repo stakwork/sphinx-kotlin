@@ -108,7 +108,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     notifyDataSetChanged()
                     recyclerView.layoutManager?.scrollToPosition(messages.size)
                 } else {
-
                     withContext(viewModel.dispatchers.default) {
                         DiffUtil.calculateDiff(
                             Diff(messages, list)
