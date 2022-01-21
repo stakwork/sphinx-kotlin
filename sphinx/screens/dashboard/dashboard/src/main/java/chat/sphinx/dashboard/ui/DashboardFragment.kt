@@ -33,6 +33,8 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import com.google.android.material.tabs.TabLayoutMediator
@@ -81,6 +83,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupNavBar()
         setupNavDrawer()
         setupPopups()
+        setupRestorePopup()
     }
 
     override fun onResume() {
@@ -230,6 +233,14 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun setupRestorePopup() {
+        binding.layoutDashboardRestore.layoutDashboardRestoreProgress.apply {
+            buttonStopRestore.setOnClickListener {
+                viewModel.cancelRestore()
+            }
+        }
+    }
+
     private fun setupNavDrawer() {
         binding.dashboardNavDrawerInputLock.setOnClickListener {
             viewModel.updateViewState(NavDrawerViewState.Closed)
@@ -368,6 +379,24 @@ internal class DashboardFragment : MotionLayoutFragment<
                                 )
                             )
                         }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.restoreStateFlow.collect { response ->
+                binding.layoutDashboardRestore.apply {
+                    if (response != null) {
+                        layoutDashboardRestoreProgress.apply {
+                            val progressString = "${response.progress}%"
+
+                            textViewRestoreProgress.text = getString(R.string.dashboard_restore_progress, progressString)
+                            progressBarRestore.progress = response.progress
+                        }
+                        root.visible
+                    } else {
+                        root.gone
                     }
                 }
             }

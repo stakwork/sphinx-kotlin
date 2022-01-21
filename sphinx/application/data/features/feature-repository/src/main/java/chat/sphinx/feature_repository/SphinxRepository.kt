@@ -75,10 +75,7 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.contact.Blocked
 import chat.sphinx.wrapper_common.contact.isTrue
-import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.dashboard.InviteId
-import chat.sphinx.wrapper_common.dashboard.toChatId
+import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
 import chat.sphinx.wrapper_common.lightning.*
@@ -4006,7 +4003,7 @@ abstract class SphinxRepository(
         SynchronizedMap<ChatId, DateTime>()
     }
 
-    override val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+    override val networkRefreshMessages: Flow<LoadResponse<RestoreProgress, ResponseError>> by lazy {
         flow {
             emit(LoadResponse.Loading)
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -4028,6 +4025,8 @@ abstract class SphinxRepository(
             val lastSeenMessageDateResolved: DateTime = lastSeenMessagesDate?.toDateTime()
                 ?: DATE_NIXON_SHOCK.toDateTime()
 
+            val restoring: Boolean = lastSeenMessagesDate == null
+
             val now: String = DateTime.nowUTC()
 
             val supervisor = SupervisorJob(currentCoroutineContext().job)
@@ -4037,6 +4036,9 @@ abstract class SphinxRepository(
 
             val jobList =
                 ArrayList<Job>(MESSAGE_PAGINATION_LIMIT * 2 /* MessageDto fields to potentially decrypt */)
+
+            val latestMessageMap =
+                mutableMapOf<ChatId, MessageDto>()
 
             var offset: Int = page * MESSAGE_PAGINATION_LIMIT
             while (currentCoroutineContext().isActive && offset >= 0) {
@@ -4063,6 +4065,20 @@ abstract class SphinxRepository(
 
                         is Response.Success -> {
                             val newMessages = response.value.new_messages
+                            val messagesTotal = response.value.new_messages_total ?: 0
+
+                            if (restoring && messagesTotal > 0) {
+
+                                val restoreProgress = getRestoreProgress(
+                                    newMessages,
+                                    messagesTotal,
+                                    offset
+                                )
+
+                                emit(
+                                    Response.Success(restoreProgress)
+                                )
+                            }
 
                             if (newMessages.isNotEmpty()) {
 
@@ -4097,22 +4113,28 @@ abstract class SphinxRepository(
                                                             " - ${newMessages.lastOrNull()?.id}"
                                                 )
 
-                                                val latestMessageMap =
-                                                    mutableMapOf<ChatId, MessageDto>()
-
                                                 for (dto in newMessages) {
 
                                                     val id: Long? = dto.chat_id
 
-                                                    if (id != null && chatIds.contains(ChatId(id))) {
-                                                        upsertMessage(dto, queries)
+                                                    if (id != null &&
+                                                        chatIds.contains(ChatId(id))) {
 
                                                         if (dto.updateChatDboLatestMessage) {
-                                                            latestMessageMap[ChatId(id)] = dto
+                                                            if (!latestMessageMap.containsKey(ChatId(id))) {
+                                                                latestMessageMap[ChatId(id)] = dto
+                                                            } else {
+                                                                val lastMessage = latestMessageMap[ChatId(id)]
+                                                                if (lastMessage == null ||
+                                                                    dto.created_at.toDateTime().time > lastMessage.created_at.toDateTime().time) {
+
+                                                                    latestMessageMap[ChatId(id)] = dto
+                                                                }
+                                                            }
                                                         }
-                                                    } else {
-                                                        upsertMessage(dto, queries)
                                                     }
+
+                                                    upsertMessage(dto, queries)
                                                 }
 
                                                 latestMessageUpdatedTimeMap.withLock { map ->
@@ -4188,8 +4210,47 @@ abstract class SphinxRepository(
 
             }.join()
 
-            emit(Response.Success(true))
+            emit(Response.Success(
+                RestoreProgress(
+                    false,
+                    100
+                )
+            ))
         }
+    }
+
+    private fun getRestoreProgress(
+        newMessages: List<MessageDto>,
+        newMessagesTotal: Int,
+        offset: Int
+    ): RestoreProgress {
+
+        val pages: Int = if (newMessagesTotal <= MESSAGE_PAGINATION_LIMIT) {
+            1
+        } else {
+            newMessagesTotal / MESSAGE_PAGINATION_LIMIT
+        }
+
+        val currentPage: Int = offset / MESSAGE_PAGINATION_LIMIT
+        val progress: Int = currentPage * 100 / pages
+
+        return RestoreProgress(
+            true,
+            progress
+        )
+    }
+
+    override suspend fun didCancelRestore() {
+        val now = DateTime.getFormatRelay().format(
+            Date(DateTime.getToday00().time)
+        )
+
+        authenticationStorage.putString(
+            REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+            now
+        )
+
+        authenticationStorage.removeString(REPOSITORY_LAST_SEEN_MESSAGE_RESTORE_PAGE)
     }
 
     @OptIn(UnencryptedDataAccess::class)

@@ -24,6 +24,15 @@
                 app:visibilityMode="ignore" />
         </Constraint>
 
+        <Constraint android:id="@id/layout_dashboard_restore">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet
+                app:applyMotionScene="false"
+                app:visibilityMode="ignore" />
+        </Constraint>
+
         <Constraint android:id="@+id/layout_dashboard_header">
             <Layout
                 android:layout_width="match_parent"
@@ -78,6 +87,12 @@
         app:deriveConstraintsFrom="@+id/motion_scene_dashboard_drawer_closed">
 
         <Constraint android:id="@id/layout_dashboard_popup">
+            <PropertySet
+                app:applyMotionScene="false"
+                app:visibilityMode="ignore" />
+        </Constraint>
+
+        <Constraint android:id="@id/layout_dashboard_restore">
             <PropertySet
                 app:applyMotionScene="false"
                 app:visibilityMode="ignore" />

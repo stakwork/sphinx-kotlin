@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@color/lightPopupBackground"
+    android:elevation="@dimen/default_elevation">
+
+    <include
+        android:id="@+id/layout_dashboard_restore_progress"
+        layout="@layout/layout_dashboard_restore_progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
