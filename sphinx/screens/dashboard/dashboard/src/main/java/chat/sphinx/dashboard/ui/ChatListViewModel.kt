@@ -10,11 +10,9 @@ import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.adapter.DashboardChat
 import chat.sphinx.dashboard.ui.viewstates.*
-import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_common.*
-import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.*
@@ -75,8 +73,8 @@ internal class ChatListViewModel @Inject constructor(
 
     private val args: ChatListFragmentArgs by handler.navArgs()
 
-    val createTribeButtonViewStateContainer: ViewStateContainer<CreateTribeButtonViewState> by lazy {
-        ViewStateContainer(CreateTribeButtonViewState.Hidden)
+    val chatListFooterButtonsViewStateContainer: ViewStateContainer<ChatListFooterButtonsViewState> by lazy {
+        ViewStateContainer(ChatListFooterButtonsViewState.Idle)
     }
 
     val chatViewStateContainer: ChatViewStateContainer by lazy {
@@ -215,12 +213,11 @@ internal class ChatListViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val owner = getOwner()
 
-            createTribeButtonViewStateContainer.updateViewState(
-                if (owner.isOnVirtualNode()) {
-                    CreateTribeButtonViewState.Hidden
-                } else {
-                    CreateTribeButtonViewState.Visible
-                }
+            chatListFooterButtonsViewStateContainer.updateViewState(
+                ChatListFooterButtonsViewState.ButtonsVisibility(
+                    addFriendVisible = args.argChatListType == ChatType.CONVERSATION,
+                    createTribeVisible = args.argChatListType == ChatType.TRIBE && !owner.isOnVirtualNode()
+                )
             )
         }
     }
