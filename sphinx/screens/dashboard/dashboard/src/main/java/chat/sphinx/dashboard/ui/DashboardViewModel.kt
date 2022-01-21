@@ -36,6 +36,7 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.lightning.*
@@ -548,8 +549,8 @@ internal class DashboardViewModel @Inject constructor(
         ViewStateContainer(DeepLinkPopupViewState.PopupDismissed)
     }
 
-    val createTribeButtonViewStateContainer: ViewStateContainer<CreateTribeButtonViewState> by lazy {
-        ViewStateContainer(CreateTribeButtonViewState.Hidden)
+    val chatListFooterButtonsViewStateContainer: ViewStateContainer<ChatListFooterButtonsViewState> by lazy {
+        ViewStateContainer(ChatListFooterButtonsViewState.Idle)
     }
 
     val tabsViewStateContainer: ViewStateContainer<DashboardTabsViewState> by lazy {
@@ -612,12 +613,11 @@ internal class DashboardViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val owner = getOwner()
 
-            createTribeButtonViewStateContainer.updateViewState(
-                if (owner.isOnVirtualNode()) {
-                    CreateTribeButtonViewState.Hidden
-                } else {
-                    CreateTribeButtonViewState.Visible
-                }
+            chatListFooterButtonsViewStateContainer.updateViewState(
+                ChatListFooterButtonsViewState.ButtonsVisibility(
+                    addFriendVisible = true,
+                    createTribeVisible = !owner.isOnVirtualNode()
+                )
             )
         }
     }

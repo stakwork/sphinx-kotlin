@@ -8,8 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.dashboard.databinding.LayoutChatListChatsFooterBinding
 import chat.sphinx.dashboard.ui.ChatListViewModel
-import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
+import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
@@ -54,14 +55,16 @@ internal class ChatListFooterAdapter(
             }
 
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                viewModel.createTribeButtonViewStateContainer.collect { viewState ->
+                viewModel.chatListFooterButtonsViewStateContainer.collect { viewState ->
                     @Exhaustive
                     when (viewState) {
-                        is CreateTribeButtonViewState.Visible -> {
-                            binding.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.visible
-                        }
-                        is CreateTribeButtonViewState.Hidden -> {
+                        is ChatListFooterButtonsViewState.Idle -> {
+                            binding.layoutButtonAddFriend.layoutConstraintButtonAddFriend.gone
                             binding.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.gone
+                        }
+                        is ChatListFooterButtonsViewState.ButtonsVisibility -> {
+                            binding.layoutButtonAddFriend.layoutConstraintButtonAddFriend.goneIfFalse(viewState.addFriendVisible)
+                            binding.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.goneIfFalse(viewState.createTribeVisible)
                         }
                     }
                 }
