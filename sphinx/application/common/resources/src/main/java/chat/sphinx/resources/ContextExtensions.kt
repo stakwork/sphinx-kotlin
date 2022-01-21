@@ -1,6 +1,7 @@
 package chat.sphinx.resources
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.content.res.Resources
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.ColorInt
@@ -80,6 +81,12 @@ inline fun ViewBinding.getString(@StringRes stringRes: Int): String =
 @Throws(Resources.NotFoundException::class)
 inline fun ViewBinding.getColor(@ColorRes colorRes: Int): Int {
     return ContextCompat.getColor(root.context, colorRes)
+}
+
+@Suppress("NOTHING_TO_INLINE")
+@Throws(Resources.NotFoundException::class)
+inline fun ViewBinding.getColorStateList(@ColorRes colorRes: Int): ColorStateList? {
+    return ContextCompat.getColorStateList(root.context, colorRes)
 }
 
 @Suppress("NOTHING_TO_INLINE")

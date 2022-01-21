@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:visibility="visible"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_restore_progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/background_authorize_popup"
+        android:layout_marginHorizontal="@dimen/default_large_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_restore_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:text="..."
+            android:textColor="@color/text"
+            android:textSize="@dimen/dashboard_authorize_popup_authorize_title_text_size"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar_restore"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
+            android:max="100"
+            android:minHeight="@dimen/dashboard_restore_progress_bar_height"
+            android:progress="50"
+            android:progressDrawable="@drawable/restore_bar_progress"
+            android:layout_margin="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_restore_progress"
+            app:layout_constraintBottom_toTopOf="@+id/button_stop_restore"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_stop_restore"
+            style="@style/RoundedBlueButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dashboard_stop_restore"
+            android:textSize="@dimen/dashboard_authorize_popup_authorize_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            android:layout_margin="@dimen/default_layout_margin"
+            app:layout_constraintTop_toBottomOf="@+id/progress_bar_restore"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

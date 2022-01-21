@@ -119,23 +119,21 @@
         app:layout_constraintBottom_toTopOf="@+id/space_message_holder_bottom"
         tools:visibility="visible" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <View
         android:id="@+id/received_bubble_arrow"
         android:layout_width="4dp"
         android:layout_height="10dp"
         android:layout_marginStart="40dp"
-        android:src="@drawable/received_bubble_arrow"
-        android:tint="@android:color/transparent"
+        android:background="@drawable/received_bubble_arrow"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
         tools:visibility="visible" />
 
-    <androidx.appcompat.widget.AppCompatImageView
+    <View
         android:id="@+id/sent_bubble_arrow"
         android:layout_width="6dp"
         android:layout_height="10dp"
-        android:src="@drawable/sent_bubble_arrow"
-        android:tint="@android:color/transparent"
+        android:background="@drawable/sent_bubble_arrow"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/include_message_holder_bubble"
         tools:visibility="visible" />

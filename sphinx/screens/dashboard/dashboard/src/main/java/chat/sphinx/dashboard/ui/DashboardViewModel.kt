@@ -36,8 +36,10 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.dashboard.RestoreProgress
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
@@ -548,8 +550,8 @@ internal class DashboardViewModel @Inject constructor(
         ViewStateContainer(DeepLinkPopupViewState.PopupDismissed)
     }
 
-    val createTribeButtonViewStateContainer: ViewStateContainer<CreateTribeButtonViewState> by lazy {
-        ViewStateContainer(CreateTribeButtonViewState.Hidden)
+    val chatListFooterButtonsViewStateContainer: ViewStateContainer<ChatListFooterButtonsViewState> by lazy {
+        ViewStateContainer(ChatListFooterButtonsViewState.Idle)
     }
 
     val tabsViewStateContainer: ViewStateContainer<DashboardTabsViewState> by lazy {
@@ -612,12 +614,11 @@ internal class DashboardViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val owner = getOwner()
 
-            createTribeButtonViewStateContainer.updateViewState(
-                if (owner.isOnVirtualNode()) {
-                    CreateTribeButtonViewState.Hidden
-                } else {
-                    CreateTribeButtonViewState.Visible
-                }
+            chatListFooterButtonsViewStateContainer.updateViewState(
+                ChatListFooterButtonsViewState.ButtonsVisibility(
+                    addFriendVisible = true,
+                    createTribeVisible = !owner.isOnVirtualNode()
+                )
             )
         }
     }
@@ -726,6 +727,10 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(LoadResponse.Loading)
     }
 
+    private val _restoreStateFlow: MutableStateFlow<RestoreProgress?> by lazy {
+        MutableStateFlow(null)
+    }
+
     init {
         viewModelScope.launch(mainImmediate) {
             socketIOManager.socketIOStateFlow.collect { state ->
@@ -738,6 +743,9 @@ internal class DashboardViewModel @Inject constructor(
 
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
+
+    val restoreStateFlow: StateFlow<RestoreProgress?>
+        get() = _restoreStateFlow.asStateFlow()
 
     private var jobNetworkRefresh: Job? = null
     private var jobPushNotificationRegistration: Job? = null
@@ -795,8 +803,39 @@ internal class DashboardViewModel @Inject constructor(
             }
 
             repositoryDashboard.networkRefreshMessages.collect { response ->
-                _networkStateFlow.value = response
+                @Exhaustive
+                when (response) {
+                    is Response.Success -> {
+                        val restoreProgress = response.value
+
+                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
+                            _restoreStateFlow.value = restoreProgress
+                        } else {
+                            _restoreStateFlow.value = null
+
+                            _networkStateFlow.value = Response.Success(true)
+                        }
+                    }
+                    is Response.Error -> {
+                        _networkStateFlow.value = response
+                    }
+                    is LoadResponse.Loading -> {
+                        _networkStateFlow.value = response
+                    }
+                }
             }
+        }
+    }
+
+    fun cancelRestore() {
+        jobNetworkRefresh?.cancel()
+
+        viewModelScope.launch(mainImmediate) {
+
+            _networkStateFlow.value = Response.Success(true)
+            _restoreStateFlow.value = null
+
+            repositoryDashboard.didCancelRestore()
         }
     }
 

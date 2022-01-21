@@ -24,7 +24,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
-import chat.sphinx.dashboard.ui.viewstates.CreateTribeButtonViewState
+import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
 import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
@@ -34,11 +34,11 @@ import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -83,6 +83,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupNavBar()
         setupNavDrawer()
         setupPopups()
+        setupRestorePopup()
     }
 
     override fun onResume() {
@@ -232,6 +233,14 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun setupRestorePopup() {
+        binding.layoutDashboardRestore.layoutDashboardRestoreProgress.apply {
+            buttonStopRestore.setOnClickListener {
+                viewModel.cancelRestore()
+            }
+        }
+    }
+
     private fun setupNavDrawer() {
         binding.dashboardNavDrawerInputLock.setOnClickListener {
             viewModel.updateViewState(NavDrawerViewState.Closed)
@@ -370,6 +379,24 @@ internal class DashboardFragment : MotionLayoutFragment<
                                 )
                             )
                         }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.restoreStateFlow.collect { response ->
+                binding.layoutDashboardRestore.apply {
+                    if (response != null) {
+                        layoutDashboardRestoreProgress.apply {
+                            val progressString = "${response.progress}%"
+
+                            textViewRestoreProgress.text = getString(R.string.dashboard_restore_progress, progressString)
+                            progressBarRestore.progress = response.progress
+                        }
+                        root.visible
+                    } else {
+                        root.gone
                     }
                 }
             }
@@ -594,15 +621,17 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.createTribeButtonViewStateContainer.collect { viewState ->
+            viewModel.chatListFooterButtonsViewStateContainer.collect { viewState ->
                 binding.layoutDashboardNavDrawer.let { navDrawer ->
                     @Exhaustive
                     when (viewState) {
-                        is CreateTribeButtonViewState.Visible -> {
-                            navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.visible
-                        }
-                        is CreateTribeButtonViewState.Hidden -> {
+                        is ChatListFooterButtonsViewState.Idle -> {
+                            navDrawer.layoutButtonAddFriend.layoutConstraintButtonAddFriend.gone
                             navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.gone
+                        }
+                        is ChatListFooterButtonsViewState.ButtonsVisibility -> {
+                            navDrawer.layoutButtonAddFriend.layoutConstraintButtonAddFriend.goneIfFalse(viewState.addFriendVisible)
+                            navDrawer.layoutButtonCreateTribe.layoutConstraintButtonCreateTribe.goneIfFalse(viewState.createTribeVisible)
                         }
                     }
                 }

@@ -32,8 +32,6 @@ interface MessageRepository {
 
     fun updateMessageContentDecrypted(messageId: MessageId, messageContentDecrypted: MessageContentDecrypted)
 
-    val networkRefreshMessages: Flow<LoadResponse<Boolean, ResponseError>>
-
     suspend fun readMessages(chatId: ChatId)
 
     fun sendMessage(sendMessage: SendMessage?)
