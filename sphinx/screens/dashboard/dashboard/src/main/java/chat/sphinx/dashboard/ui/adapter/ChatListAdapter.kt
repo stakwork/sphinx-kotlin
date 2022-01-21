@@ -410,6 +410,17 @@ internal class ChatListAdapter(
                             if (unseen != null && unseen > 0) {
                                 text = unseen.toString()
                             }
+
+                            if (nnDashboardChat is DashboardChat.Active) {
+                                alpha = if (nnDashboardChat.chat.isMuted()) 0.2f else 1.0f
+                                backgroundTintList = binding.getColorStateList(if (nnDashboardChat.chat.isMuted()) {
+                                        R.color.washedOutReceivedText
+                                    } else {
+                                        R.color.primaryBlue
+                                    }
+                                )
+                            }
+
                             invisibleIfFalse(nnDashboardChat.hasUnseenMessages())
                         }
                     }
