@@ -14,7 +14,7 @@ internal sealed class OnBoardMessageSideEffect: SideEffect<Context>() {
     ): OnBoardMessageSideEffect() {
 
         override suspend fun execute(value: Context) {
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(relayUrl.value)
             builder.setMessage(value.getString(R.string.relay_url_http_message))
             builder.setPositiveButton(R.string.relay_url_http_positive_change_to_https) { _, _ ->

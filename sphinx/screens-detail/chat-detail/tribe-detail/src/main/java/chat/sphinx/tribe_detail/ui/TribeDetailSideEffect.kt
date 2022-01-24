@@ -40,7 +40,7 @@ internal sealed class  TribeDetailSideEffect: SideEffect<Context>()  {
     ): TribeDetailSideEffect() {
 
         override suspend fun execute(value: Context) {
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.alert_confirm_delete_tribe_heading, chat.name?.value ?: ""))
             builder.setMessage(value.getString(R.string.alert_confirm_delete_tribe_message))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
@@ -57,7 +57,7 @@ internal sealed class  TribeDetailSideEffect: SideEffect<Context>()  {
     ): TribeDetailSideEffect() {
 
         override suspend fun execute(value: Context) {
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.alert_confirm_exit_tribe_heading, chat.name?.value ?: ""))
             builder.setMessage(value.getString(R.string.alert_confirm_exit_tribe_message))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }

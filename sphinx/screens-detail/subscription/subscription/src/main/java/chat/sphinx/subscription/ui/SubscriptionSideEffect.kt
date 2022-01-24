@@ -22,7 +22,7 @@ internal sealed class SubscriptionSideEffect: SideEffect<Context>() {
     ): SubscriptionSideEffect() {
 
         override suspend fun execute(value: Context) {
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.delete_subscription))
             builder.setMessage(value.getString(R.string.are_you_sure_you_want_to_delete_subscription))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }

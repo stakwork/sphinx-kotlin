@@ -25,7 +25,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
         override suspend fun execute(value: Context) {
             val successMessage = value.getString(R.string.alert_confirm_pay_invite_message, amount)
 
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.alert_confirm_pay_invite_title))
             builder.setMessage(successMessage)
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
@@ -45,7 +45,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
             val memo = if (memo.isEmpty()) "-" else memo
             val successMessage = value.getString(R.string.alert_confirm_pay_invoice_message, amount, memo)
 
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.alert_confirm_pay_invoice_title))
             builder.setMessage(successMessage)
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
@@ -60,7 +60,7 @@ sealed class DashboardSideEffect: SideEffect<Context>() {
         private val callback: () -> Unit
     ): DashboardSideEffect() {
         override suspend fun execute(value: Context) {
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.alert_confirm_delete_invite_title))
             builder.setMessage(value.getString(R.string.alert_confirm_delete_invite_message))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }

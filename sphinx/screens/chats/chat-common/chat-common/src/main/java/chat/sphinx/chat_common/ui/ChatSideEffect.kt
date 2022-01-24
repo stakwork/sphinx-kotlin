@@ -74,7 +74,7 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         private val callback: () -> Unit
     ): ChatSideEffect() {
         override suspend fun execute(value: ChatSideEffectFragment) {
-            val builder = AlertDialog.Builder(value.chatFragmentContext)
+            val builder = AlertDialog.Builder(value.chatFragmentContext, R.style.AlertDialogTheme)
             builder.setTitle(value.chatFragmentContext.getString(R.string.alert_confirm_pay_attachment_title))
             builder.setMessage(value.chatFragmentContext.getString(R.string.alert_confirm_pay_attachment_message))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
@@ -89,9 +89,39 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         private val callback: () -> Unit
     ): ChatSideEffect() {
         override suspend fun execute(value: ChatSideEffectFragment) {
-            val builder = AlertDialog.Builder(value.chatFragmentContext)
+            val builder = AlertDialog.Builder(value.chatFragmentContext, R.style.AlertDialogTheme)
             builder.setTitle(value.chatFragmentContext.getString(R.string.alert_confirm_pay_chat_invoice_title))
             builder.setMessage(value.chatFragmentContext.getString(R.string.alert_confirm_pay_chat_invoice_message))
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+    }
+    
+    class AlertConfirmFlagMessage(
+        private val callback: () -> Unit
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val builder = AlertDialog.Builder(value.chatFragmentContext, R.style.AlertDialogTheme)
+            builder.setTitle(value.chatFragmentContext.getString(R.string.alert_confirm_flag_message_title))
+            builder.setMessage(value.chatFragmentContext.getString(R.string.alert_confirm_flag_message_message))
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+    }
+
+    class AlertConfirmDeleteMessage(
+        private val callback: () -> Unit
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val builder = AlertDialog.Builder(value.chatFragmentContext, R.style.AlertDialogTheme)
+            builder.setTitle(value.chatFragmentContext.getString(R.string.alert_confirm_delete_message_title))
+            builder.setMessage(value.chatFragmentContext.getString(R.string.alert_confirm_delete_message_message))
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
             builder.setPositiveButton(android.R.string.ok) { _, _ ->
                 callback()
