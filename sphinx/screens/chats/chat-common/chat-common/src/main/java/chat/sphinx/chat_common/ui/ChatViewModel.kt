@@ -789,13 +789,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
      * Remotely and locally Deletes a [Message] through the [MessageRepository]
      */
     open fun deleteMessage(message: Message) {
-        viewModelScope.launch(mainImmediate) {
-            when (messageRepository.deleteMessage(message)) {
-                is Response.Error -> {
-                    submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
+        val sideEffect = ChatSideEffect.AlertConfirmDeleteMessage {
+            viewModelScope.launch(mainImmediate) {
+                when (messageRepository.deleteMessage(message)) {
+                    is Response.Error -> {
+                        submitSideEffect(ChatSideEffect.Notify("Failed to delete Message"))
+                    }
+                    is Response.Success -> {}
                 }
-                is Response.Success -> {}
             }
+        }
+
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(sideEffect)
         }
     }
 
@@ -1035,9 +1041,15 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun flagMessage(message: Message) {
+        val sideEffect = ChatSideEffect.AlertConfirmFlagMessage {
+            viewModelScope.launch(mainImmediate) {
+                val chat = getChat()
+                messageRepository.flagMessage(message, chat)
+            }
+        }
+
         viewModelScope.launch(mainImmediate) {
-            val chat = getChat()
-            messageRepository.flagMessage(message, chat)
+            submitSideEffect(sideEffect)
         }
     }
 

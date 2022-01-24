@@ -100,6 +100,36 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         }
     }
 
+    class AlertConfirmFlagMessage(
+        private val callback: () -> Unit
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val builder = AlertDialog.Builder(value.chatFragmentContext)
+            builder.setTitle(value.chatFragmentContext.getString(R.string.alert_confirm_flag_message_title))
+            builder.setMessage(value.chatFragmentContext.getString(R.string.alert_confirm_flag_message_message))
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+    }
+
+    class AlertConfirmDeleteMessage(
+        private val callback: () -> Unit
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val builder = AlertDialog.Builder(value.chatFragmentContext)
+            builder.setTitle(value.chatFragmentContext.getString(R.string.alert_confirm_delete_message_title))
+            builder.setMessage(value.chatFragmentContext.getString(R.string.alert_confirm_delete_message_message))
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+    }
+
     object ProduceHapticFeedback: ChatSideEffect() {
         override suspend fun execute(value: ChatSideEffectFragment) {
             value.chatFragmentWindow?.decorView?.performHapticFeedback(
