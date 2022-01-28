@@ -1,6 +1,12 @@
 # ChangeLog
 
-# Version 1.0.0-alpha40 (2022-01-21)
+# Version 1.0.0-alpha42 (2022-01-28)
+ - Adds confirmation for message delete and message flag actions
+ - Improves message options menu layout
+ - Improves alerts style
+ - Improves restore logic 
+
+# Version 1.0.0-alpha41 (2022-01-21)
  - Adds progress bar during restore
  - Adds ability to partially restore account
  - Fixes layout issue on messages bubbles

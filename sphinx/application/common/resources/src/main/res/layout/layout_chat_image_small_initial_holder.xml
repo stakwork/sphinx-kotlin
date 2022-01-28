@@ -16,11 +16,12 @@
         android:singleLine="true"
         android:textColor="@android:color/white"
         android:textSize="11sp"
+        android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="TT" />
+        tools:text="tt" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_chat_picture"

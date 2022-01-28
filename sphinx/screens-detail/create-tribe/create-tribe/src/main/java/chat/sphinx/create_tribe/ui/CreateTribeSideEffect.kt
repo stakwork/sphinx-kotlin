@@ -78,7 +78,7 @@ internal sealed class  CreateTribeSideEffect: SideEffect<Context>()  {
         override suspend fun execute(value: Context) {
             val adapter = createTribeBuilder.adapter(value)
 
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setAdapter(adapter, null)
             builder.setOnDismissListener {
                 callback()

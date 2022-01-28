@@ -97,6 +97,12 @@
     <string name="selected_message_menu_item_resend">Reenviar</string>
     <string name="selected_message_menu_item_flag">Reportar</string>
 
+    <string name="alert_confirm_flag_message_title">Confirmar Mensaje reportado</string>
+    <string name="alert_confirm_flag_message_message">¿Estas seguro de que quieres reportar este mensaje? Esta acción no puede revertirse</string>
+
+    <string name="alert_confirm_delete_message_title">Confirmar Mensaje eliminado</string>
+    <string name="alert_confirm_delete_message_message">¿Estas seguro de que quieres eliminar este mensaje? Esta acción no puede revertirse</string>
+
     <!-- Notify -->
     <string name="notify_boost_failure">Pago de Boost falló</string>
     <string name="side_effect_text_copied">Texto copiado al portapapeles</string>
