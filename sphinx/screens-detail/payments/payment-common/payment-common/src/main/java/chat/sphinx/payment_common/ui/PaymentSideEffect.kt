@@ -27,7 +27,7 @@ sealed class PaymentSideEffect: SideEffect<FragmentActivity>() {
         override suspend fun execute(value: FragmentActivity) {
             val successMessage = value.getString(R.string.alert_confirm_payment_send_message, amount, destination)
 
-            val builder = AlertDialog.Builder(value)
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.alert_confirm_payment_send_title))
             builder.setMessage(successMessage)
             builder.setNegativeButton(android.R.string.cancel) { _,_ -> }

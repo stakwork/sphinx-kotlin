@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="lightPurple">#A986F9</color>
+    <color name="alert_dark_grey">#3d3d3d</color>
 
     <color name="body">#151E27</color>
     <color name="bodyTransparent">#40151E27</color>
