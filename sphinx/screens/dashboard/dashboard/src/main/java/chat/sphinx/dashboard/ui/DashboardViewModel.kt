@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.work.*
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -29,6 +30,7 @@ import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
+import chat.sphinx.dashboard.workers.BackgroundRefreshWorker
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -36,7 +38,6 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.RestoreProgress
@@ -57,11 +58,13 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 internal class DashboardViewModel @Inject constructor(
-    private val app: Application,
+    private
+    val app: Application,
     private val backgroundLoginHandler: BackgroundLoginHandler,
     handler: SavedStateHandle,
 
@@ -107,6 +110,10 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow("-")
     }
 
+    private val workManager by lazy {
+        WorkManager.getInstance(app)
+    }
+
     init {
         if (args.updateBackgroundLoginTime) {
             viewModelScope.launch(default) {
@@ -114,8 +121,30 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
+        createPeriodicWorkRequest()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
+    }
+
+    private fun createPeriodicWorkRequest() {
+        val constraints: Constraints = Constraints.Builder().apply {
+            setRequiredNetworkType(NetworkType.CONNECTED)
+        }.build()
+
+        val backgroundRefreshWorker = PeriodicWorkRequest.Builder(
+            BackgroundRefreshWorker::class.java,
+            15,
+            TimeUnit.MINUTES
+        )
+        .setConstraints(constraints)
+        .addTag("backgroundRefreshWorker")
+        .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "periodicBackgroundRefresh",
+            ExistingPeriodicWorkPolicy.KEEP,
+            backgroundRefreshWorker
+        )
     }
 
     fun handleDeepLink(deepLink: String?) {
@@ -588,8 +617,6 @@ internal class DashboardViewModel @Inject constructor(
 
     private var messagesCountJob: Job? = null
     fun screenInit() {
-        networkRefresh()
-
         messagesCountJob?.cancel()
         messagesCountJob = viewModelScope.launch(mainImmediate) {
             repositoryDashboard.getUnseenActiveConversationMessagesCount()
