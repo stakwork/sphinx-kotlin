@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha43 (2022-02-04)
+ - Improves contacts and messages fetch
+ - Adds messages background fetch
+
 # Version 1.0.0-alpha42 (2022-01-28)
  - Adds confirmation for message delete and message flag actions
  - Improves message options menu layout
