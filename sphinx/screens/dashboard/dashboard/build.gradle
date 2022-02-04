@@ -62,6 +62,7 @@ dependencies {
     implementation deps.androidx.recyclerView
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation deps.androidx.workRuntime
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
