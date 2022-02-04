@@ -68,6 +68,7 @@ ext.deps = [
         swipeRefreshLayout: "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
+        workRuntime: "androidx.work:work-runtime-ktx:2.5.0",
     ],
 //    bouncyCastle: "org.bouncycastle:bcprov-jdk15on:1.65",
     chrisbanes: [
