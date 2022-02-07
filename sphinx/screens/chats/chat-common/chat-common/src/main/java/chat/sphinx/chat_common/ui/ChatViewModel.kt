@@ -345,7 +345,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
-        withContext(default) {
+        withContext(io) {
 
             var groupingDate: DateTime? = null
             var openSentPaidInvoicesCount = 0
