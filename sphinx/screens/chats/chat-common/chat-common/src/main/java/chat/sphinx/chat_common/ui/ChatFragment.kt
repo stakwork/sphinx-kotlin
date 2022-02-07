@@ -180,6 +180,8 @@ abstract class ChatFragment<
         setupAttachmentSendPreview(insetterActivity)
         setupAttachmentFullscreen(insetterActivity)
         setupRecyclerView()
+
+        viewModel.screenInit()
     }
 
     private inner class SelectedMessageStateBackPressHandler(

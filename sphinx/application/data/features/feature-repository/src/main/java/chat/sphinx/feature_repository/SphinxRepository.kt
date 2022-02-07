@@ -1913,10 +1913,10 @@ abstract class SphinxRepository(
         return message
     }
 
-    override fun getAllMessagesToShowByChatId(chatId: ChatId): Flow<List<Message>> = flow {
+    override fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
         emitAll(
-            queries.messageGetAllToShowByChatId(chatId)
+            queries.messageGetAllToShowByChatId(chatId, limit)
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->

@@ -333,7 +333,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         return Pair(date, BubbleBackground.First.Isolated)
     }
 
-    internal val messageHolderViewStateFlow: StateFlow<List<MessageHolderViewState>> = flow {
+    private suspend fun getMessageHolderViewStateList(messages: List<Message>) : List<MessageHolderViewState> {
         val chat = getChat()
 
         val chatInfo = getChatInfo()
@@ -343,196 +343,194 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         val owner = getOwner()
 
-        messageRepository.getAllMessagesToShowByChatId(chat.id).distinctUntilChanged().collect { messages ->
-            val newList = ArrayList<MessageHolderViewState>(messages.size)
+        val newList = ArrayList<MessageHolderViewState>(messages.size)
 
-            withContext(default) {
+        withContext(default) {
 
-                var groupingDate: DateTime? = null
-                var openSentPaidInvoicesCount = 0
-                var openReceivedPaidInvoicesCount = 0
+            var groupingDate: DateTime? = null
+            var openSentPaidInvoicesCount = 0
+            var openReceivedPaidInvoicesCount = 0
 
-                for ((index, message) in messages.withIndex()) {
+            for ((index, message) in messages.withIndex()) {
 
-                    val previousMessage: Message? = if (index > 0) messages[index - 1] else null
-                    val nextMessage: Message? = if (index < messages.size - 1) messages[index + 1] else null
+                val previousMessage: Message? = if (index > 0) messages[index - 1] else null
+                val nextMessage: Message? = if (index < messages.size - 1) messages[index + 1] else null
 
-                    val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
-                        message,
-                        previousMessage,
-                        nextMessage,
-                        groupingDate
-                    )
+                val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
+                    message,
+                    previousMessage,
+                    nextMessage,
+                    groupingDate
+                )
 
-                    groupingDate = groupingDateAndBubbleBackground.first
+                groupingDate = groupingDateAndBubbleBackground.first
 
-                    val sent = message.sender == chat.contactIds.firstOrNull()
+                val sent = message.sender == chat.contactIds.firstOrNull()
 
-                    if (message.type.isInvoicePayment()) {
-                        if (sent) {
-                            openReceivedPaidInvoicesCount -= 1
-                        } else {
-                            openSentPaidInvoicesCount -= 1
-                        }
-                    }
-
-                    val invoiceLinesHolderViewState = InvoiceLinesHolderViewState(
-                        openSentPaidInvoicesCount > 0,
-                        openReceivedPaidInvoicesCount > 0
-                    )
-
-                    val isDeleted = message.status.isDeleted()
-
-                    if (
-                        (sent && !message.isPaidInvoice) ||
-                        (!sent && message.isPaidInvoice)
-                    ) {
-
-                        newList.add(
-                            MessageHolderViewState.Sent(
-                                message,
-                                chat,
-                                background =  when {
-                                    isDeleted -> {
-                                        BubbleBackground.Gone(setSpacingEqual = false)
-                                    }
-                                    message.type.isInvoicePayment() -> {
-                                        BubbleBackground.Gone(setSpacingEqual = false)
-                                    }
-                                    message.type.isGroupAction() -> {
-                                        BubbleBackground.Gone(setSpacingEqual = true)
-                                    }
-                                    else -> {
-                                        groupingDateAndBubbleBackground.second
-                                    }
-                                },
-                                invoiceLinesHolderViewState = invoiceLinesHolderViewState,
-                                messageSenderInfo = { messageCallback ->
-                                    when {
-                                        messageCallback.sender == chat.contactIds.firstOrNull() -> {
-                                            val accountOwner = contactRepository.accountOwner.value
-
-                                            Triple(
-                                                accountOwner?.photoUrl,
-                                                accountOwner?.alias,
-                                                accountOwner?.getColorKey() ?: ""
-                                            )
-                                        }
-                                        chat.type.isConversation() -> {
-                                            Triple(
-                                                chatPhotoUrl,
-                                                chatName?.value?.toContactAlias(),
-                                                chatColorKey
-                                            )
-                                        }
-                                        else -> {
-                                            Triple(
-                                                messageCallback.senderPic,
-                                                messageCallback.senderAlias?.value?.toContactAlias(),
-                                                messageCallback.getColorKey()
-                                            )
-                                        }
-                                    }
-                                },
-                                accountOwner = { owner },
-                                urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
-                                previewProvider = { handleLinkPreview(it) },
-                                paidTextMessageContentProvider = {
-                                        messageCallback -> handlePaidTextMessageContent(messageCallback)
-                                 },
-                                onBindDownloadMedia = {
-                                    repositoryMedia.downloadMediaIfApplicable(message, sent)
-                                }
-                            )
-                        )
+                if (message.type.isInvoicePayment()) {
+                    if (sent) {
+                        openReceivedPaidInvoicesCount -= 1
                     } else {
-                        newList.add(
-                            MessageHolderViewState.Received(
-                                message,
-                                chat,
-                                background = when {
-                                    isDeleted -> {
-                                        BubbleBackground.Gone(setSpacingEqual = false)
-                                    }
-                                    message.isFlagged -> {
-                                        BubbleBackground.Gone(setSpacingEqual = false)
-                                    }
-                                    message.type.isInvoicePayment() -> {
-                                        BubbleBackground.Gone(setSpacingEqual = false)
-                                    }
-                                    message.type.isGroupAction() -> {
-                                        BubbleBackground.Gone(setSpacingEqual = true)
-                                    }
-                                    else -> {
-                                        groupingDateAndBubbleBackground.second
-                                    }
-                                },
-                                invoiceLinesHolderViewState = invoiceLinesHolderViewState,
-                                initialHolder = when {
-                                    isDeleted || message.type.isGroupAction() -> {
-                                        InitialHolderViewState.None
-                                    }
-                                    else -> {
-                                        getInitialHolderViewStateForReceivedMessage(message, owner)
-                                    }
-                                },
-                                messageSenderInfo = { messageCallback ->
-                                    when {
-                                        messageCallback.sender == chat.contactIds.firstOrNull() -> {
-                                            val accountOwner = contactRepository.accountOwner.value
-
-                                            Triple(
-                                                accountOwner?.photoUrl,
-                                                accountOwner?.alias,
-                                                accountOwner?.getColorKey() ?: ""
-                                            )
-                                        }
-                                        chat.type.isConversation() -> {
-                                            Triple(
-                                                chatPhotoUrl,
-                                                chatName?.value?.toContactAlias(),
-                                                chatColorKey
-                                            )
-                                        }
-                                        else -> {
-                                            Triple(
-                                                messageCallback.senderPic,
-                                                messageCallback.senderAlias?.value?.toContactAlias(),
-                                                messageCallback.getColorKey()
-                                            )
-                                        }
-                                    }
-                                },
-                                accountOwner = { owner },
-                                urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
-                                previewProvider = { link -> handleLinkPreview(link) },
-                                paidTextMessageContentProvider = { messageCallback ->
-                                    handlePaidTextMessageContent(messageCallback)
-                                 },
-                                onBindDownloadMedia = {
-                                    repositoryMedia.downloadMediaIfApplicable(message, sent)
-                                }
-                            )
-                        )
+                        openSentPaidInvoicesCount -= 1
                     }
+                }
 
-                    if (message.isPaidInvoice) {
-                        if (sent) {
-                            openSentPaidInvoicesCount += 1
-                        } else {
-                            openReceivedPaidInvoicesCount += 1
-                        }
+                val invoiceLinesHolderViewState = InvoiceLinesHolderViewState(
+                    openSentPaidInvoicesCount > 0,
+                    openReceivedPaidInvoicesCount > 0
+                )
+
+                val isDeleted = message.status.isDeleted()
+
+                if (
+                    (sent && !message.isPaidInvoice) ||
+                    (!sent && message.isPaidInvoice)
+                ) {
+
+                    newList.add(
+                        MessageHolderViewState.Sent(
+                            message,
+                            chat,
+                            background =  when {
+                                isDeleted -> {
+                                    BubbleBackground.Gone(setSpacingEqual = false)
+                                }
+                                message.type.isInvoicePayment() -> {
+                                    BubbleBackground.Gone(setSpacingEqual = false)
+                                }
+                                message.type.isGroupAction() -> {
+                                    BubbleBackground.Gone(setSpacingEqual = true)
+                                }
+                                else -> {
+                                    groupingDateAndBubbleBackground.second
+                                }
+                            },
+                            invoiceLinesHolderViewState = invoiceLinesHolderViewState,
+                            messageSenderInfo = { messageCallback ->
+                                when {
+                                    messageCallback.sender == chat.contactIds.firstOrNull() -> {
+                                        val accountOwner = contactRepository.accountOwner.value
+
+                                        Triple(
+                                            accountOwner?.photoUrl,
+                                            accountOwner?.alias,
+                                            accountOwner?.getColorKey() ?: ""
+                                        )
+                                    }
+                                    chat.type.isConversation() -> {
+                                        Triple(
+                                            chatPhotoUrl,
+                                            chatName?.value?.toContactAlias(),
+                                            chatColorKey
+                                        )
+                                    }
+                                    else -> {
+                                        Triple(
+                                            messageCallback.senderPic,
+                                            messageCallback.senderAlias?.value?.toContactAlias(),
+                                            messageCallback.getColorKey()
+                                        )
+                                    }
+                                }
+                            },
+                            accountOwner = { owner },
+                            urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
+                            previewProvider = { handleLinkPreview(it) },
+                            paidTextMessageContentProvider = {
+                                    messageCallback -> handlePaidTextMessageContent(messageCallback)
+                            },
+                            onBindDownloadMedia = {
+                                repositoryMedia.downloadMediaIfApplicable(message, sent)
+                            }
+                        )
+                    )
+                } else {
+                    newList.add(
+                        MessageHolderViewState.Received(
+                            message,
+                            chat,
+                            background = when {
+                                isDeleted -> {
+                                    BubbleBackground.Gone(setSpacingEqual = false)
+                                }
+                                message.isFlagged -> {
+                                    BubbleBackground.Gone(setSpacingEqual = false)
+                                }
+                                message.type.isInvoicePayment() -> {
+                                    BubbleBackground.Gone(setSpacingEqual = false)
+                                }
+                                message.type.isGroupAction() -> {
+                                    BubbleBackground.Gone(setSpacingEqual = true)
+                                }
+                                else -> {
+                                    groupingDateAndBubbleBackground.second
+                                }
+                            },
+                            invoiceLinesHolderViewState = invoiceLinesHolderViewState,
+                            initialHolder = when {
+                                isDeleted || message.type.isGroupAction() -> {
+                                    InitialHolderViewState.None
+                                }
+                                else -> {
+                                    getInitialHolderViewStateForReceivedMessage(message, owner)
+                                }
+                            },
+                            messageSenderInfo = { messageCallback ->
+                                when {
+                                    messageCallback.sender == chat.contactIds.firstOrNull() -> {
+                                        val accountOwner = contactRepository.accountOwner.value
+
+                                        Triple(
+                                            accountOwner?.photoUrl,
+                                            accountOwner?.alias,
+                                            accountOwner?.getColorKey() ?: ""
+                                        )
+                                    }
+                                    chat.type.isConversation() -> {
+                                        Triple(
+                                            chatPhotoUrl,
+                                            chatName?.value?.toContactAlias(),
+                                            chatColorKey
+                                        )
+                                    }
+                                    else -> {
+                                        Triple(
+                                            messageCallback.senderPic,
+                                            messageCallback.senderAlias?.value?.toContactAlias(),
+                                            messageCallback.getColorKey()
+                                        )
+                                    }
+                                }
+                            },
+                            accountOwner = { owner },
+                            urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
+                            previewProvider = { link -> handleLinkPreview(link) },
+                            paidTextMessageContentProvider = { messageCallback ->
+                                handlePaidTextMessageContent(messageCallback)
+                            },
+                            onBindDownloadMedia = {
+                                repositoryMedia.downloadMediaIfApplicable(message, sent)
+                            }
+                        )
+                    )
+                }
+
+                if (message.isPaidInvoice) {
+                    if (sent) {
+                        openSentPaidInvoicesCount += 1
+                    } else {
+                        openReceivedPaidInvoicesCount += 1
                     }
                 }
             }
-
-            emit(newList.toList())
         }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
-    )
+
+        return newList
+    }
+
+    internal val messageHolderViewStateFlow: MutableStateFlow<List<MessageHolderViewState>> by lazy {
+        MutableStateFlow(listOf())
+    }
 
     private suspend fun handleLinkPreview(link: MessageLinkPreview): LayoutState.Bubble.ContainerThird.LinkPreview? {
         var preview: LayoutState.Bubble.ContainerThird.LinkPreview? = null
@@ -716,6 +714,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         val setupViewStateContainerJob = viewModelScope.launch(mainImmediate) {
             viewStateContainer.viewStateFlow.firstOrNull()
         }
+
         viewModelScope.launch(mainImmediate) {
             delay(500)
             // cancel the setup jobs as the view has taken over observation
@@ -724,6 +723,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             setupChatFlowJob.cancel()
             setupHeaderInitialHolderJob.cancel()
             setupViewStateContainerJob.cancel()
+        }
+    }
+
+    fun screenInit() {
+        viewModelScope.launch(mainImmediate) {
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
+                messageHolderViewStateFlow.value =
+                    getMessageHolderViewStateList(messages).toList()
+            }
+
+            delay(1000L)
+
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+                messageHolderViewStateFlow.value =
+                    getMessageHolderViewStateList(messages).toList()
+            }
         }
     }
 
