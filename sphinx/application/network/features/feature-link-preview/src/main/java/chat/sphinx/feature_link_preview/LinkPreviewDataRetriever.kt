@@ -53,21 +53,26 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl): LinkPreviewDataR
         okHttpClient: OkHttpClient
     ): HtmlPreviewData? {
         val request = Request.Builder().url(url).build()
+        var response: Response?
 
-        val response: Response = withContext(dispatchers.io) {
-            try {
-                okHttpClient.newCall(request).execute()
-            } catch (e: Exception) {
-                null
+        withContext(dispatchers.io) {
+            response =
+                try {
+                    okHttpClient.newCall(request).execute()
+                } catch (e: Exception) {
+                    null
+                }
+
+            if (response?.isSuccessful == false) {
+                response?.body?.close()
             }
-        } ?: return null
+        }
 
-        if (!response.isSuccessful) {
-            response.body?.closeQuietly()
+        if (response == null || response?.isSuccessful == false) {
             return null
         }
 
-        return response.body?.source()?.inputStream()?.let { stream ->
+        return response?.body?.source()?.inputStream()?.let { stream ->
 
             try {
                 withContext(dispatchers.default) {
