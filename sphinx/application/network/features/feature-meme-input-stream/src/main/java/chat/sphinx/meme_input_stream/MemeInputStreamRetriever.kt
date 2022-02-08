@@ -42,20 +42,22 @@ internal data class MemeInputStreamRetriever(
             }
         }.build()
 
-        val response: Response = withContext(dispatchers.io) {
-            try {
-                okHttpClient.newCall(request).execute()
-            } catch (e: Exception) {
-                null
-            }
-        } ?: return null
+        var response: Response?
 
-        if (!response.isSuccessful) {
-            response.body?.closeQuietly()
-            return null
+        withContext(dispatchers.io) {
+            response =
+                try {
+                    okHttpClient.newCall(request).execute()
+                } catch (e: Exception) {
+                    null
+                }
+
+            if (response?.isSuccessful == null) {
+                response?.body?.closeQuietly()
+            }
         }
 
-        return response.body?.source()?.inputStream()
+        return response?.body?.source()?.inputStream()
 
     }
 }

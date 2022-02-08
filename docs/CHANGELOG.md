@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha44 (2022-02-08)
+ - Fixes link preview crashes
+ - Fixes crash on Android 12
+
 # Version 1.0.0-alpha43 (2022-02-04)
  - Improves contacts and messages fetch
  - Adds messages background fetch
