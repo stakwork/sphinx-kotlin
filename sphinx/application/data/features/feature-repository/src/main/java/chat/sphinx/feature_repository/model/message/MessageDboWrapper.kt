@@ -86,6 +86,12 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
 
     @Volatile
     @Suppress("PropertyName")
+    var _podcastClip: PodcastClip? = null
+    override val podcastClip: PodcastClip?
+        get() = _podcastClip
+
+    @Volatile
+    @Suppress("PropertyName")
     var _giphyData: GiphyData? = null
     override val giphyData: GiphyData?
         get() = _giphyData

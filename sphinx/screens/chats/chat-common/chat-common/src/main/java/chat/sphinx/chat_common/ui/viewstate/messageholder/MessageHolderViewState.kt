@@ -30,6 +30,7 @@ inline val Message.isCopyLinkAllowed: Boolean
 
 inline val Message.shouldAdaptBubbleWidth: Boolean
     get() = type.isMessage() &&
+            podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
             !status.isDeleted() &&
@@ -269,6 +270,16 @@ internal sealed class MessageHolderViewState(
             } else {
                 null
             }
+        }
+    }
+
+    val bubblePodcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip? by lazy(LazyThreadSafetyMode.NONE) {
+        message.podcastClip?.let { nnPodcastClip ->
+            LayoutState.Bubble.ContainerSecond.PodcastClip(
+                nnPodcastClip.title,
+                nnPodcastClip.url,
+                nnPodcastClip.ts
+            )
         }
     }
 

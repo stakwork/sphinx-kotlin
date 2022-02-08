@@ -147,6 +147,12 @@ internal sealed class LayoutState private constructor() {
                 val html: String
             ): ContainerSecond()
 
+            data class PodcastClip(
+                val episodeTitle: String,
+                val url: String,
+                val ts: Int,
+            ): ContainerSecond()
+
             // FileAttachment
             // Invoice
         }

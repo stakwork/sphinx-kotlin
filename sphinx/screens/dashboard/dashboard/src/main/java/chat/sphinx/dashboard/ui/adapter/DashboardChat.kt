@@ -190,13 +190,15 @@ sealed class DashboardChat {
                                     amount
                                 )
                             }
+                            message.podcastClip != null -> {
+                                "${getMessageSender(message, context)}${message.podcastClip?.text ?: ""}"
+                            }
                             message.isSphinxCallLink -> {
                                 context.getString(
                                     R.string.last_message_description_call_invite,
                                     getMessageSender(message, context)
                                 )
                             }
-                            // TODO: check for clip::
                             else -> {
                                 "${getMessageSender(message, context)}$decrypted"
                             }

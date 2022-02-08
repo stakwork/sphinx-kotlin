@@ -44,6 +44,8 @@
     <dimen name="audio_button_play_pause_text_size">25sp</dimen>
     <dimen name="audio_button_duration_text_size">14sp</dimen>
     <dimen name="video_attachment_play_pause_button_xy">50dp</dimen>
+    <dimen name="podcast_clip_episode_title_text_size">13sp</dimen>
+    <dimen name="podcast_clip_time_text_size">11sp</dimen>
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
     <dimen name="image_holder_boost_reaction_2_margin_start">13dp</dimen>
     <dimen name="image_holder_boost_reaction_3_margin_start">26dp</dimen>
@@ -74,6 +76,7 @@
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
     <dimen name="message_type_video_attachment_height">210dp</dimen>
     <dimen name="message_type_video_button_play_xy">60dp</dimen>
+    <dimen name="message_type_podcast_clip_height">82dp</dimen>
     <dimen name="message_boost_height">26dp</dimen>
     <dimen name="paid_message_details_holder_height">50dp</dimen>
     <dimen name="unsupported_message_type_placeholder_height">50dp</dimen>

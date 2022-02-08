@@ -109,14 +109,24 @@ internal fun  LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
-        setInvoiceExpirationHeader(viewState.invoiceExpirationHeader)
-
-        setBubbleBackground(viewState, recyclerViewWidth)
-        setDeletedOrFlaggedMessageLayout(viewState.deletedOrFlaggedMessage)
-        setInvoicePaymentLayout(viewState.invoicePayment)
-        setInvoiceDottedLinesLayout(viewState)
-        setGroupActionIndicatorLayout(viewState.groupActionIndicator)
-
+        setInvoiceExpirationHeader(
+            viewState.invoiceExpirationHeader
+        )
+        setBubbleBackground(
+            viewState, recyclerViewWidth
+        )
+        setDeletedOrFlaggedMessageLayout(
+            viewState.deletedOrFlaggedMessage
+        )
+        setInvoicePaymentLayout(
+            viewState.invoicePayment
+        )
+        setInvoiceDottedLinesLayout(
+            viewState
+        )
+        setGroupActionIndicatorLayout(
+            viewState.groupActionIndicator
+        )
         if (viewState.background !is BubbleBackground.Gone) {
             setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
@@ -176,11 +186,19 @@ internal fun  LayoutMessageHolderBinding.setView(
                 holderJobs,
                 lifecycleScope
             )
+            setBubblePodcastClip(
+                viewState.bubblePodcastClip
+            )
             setBubbleVideoAttachment(
                 viewState.bubbleVideoAttachment,
             )
-            setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setUnsupportedMessageTypeLayout(
+                viewState.unsupportedMessageType
+            )
+            setBubbleMessageLayout(
+                viewState.bubbleMessage,
+                onSphinxInteractionListener
+            )
             setBubblePaidMessageLayout(
                 dispatchers,
                 holderJobs,
@@ -195,16 +213,28 @@ internal fun  LayoutMessageHolderBinding.setView(
                 lifecycleScope,
                 viewState
             )
-            setBubbleCallInvite(viewState.bubbleCallInvite)
-            setBubbleBotResponse(viewState.bubbleBotResponse)
-            setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-            setBubbleInvoiceLayout(viewState.bubbleInvoice)
-            setBubblePodcastBoost(viewState.bubblePodcastBoost)
+            setBubbleCallInvite(
+                viewState.bubbleCallInvite
+            )
+            setBubbleBotResponse(
+                viewState.bubbleBotResponse
+            )
+            setBubbleDirectPaymentLayout(
+                viewState.bubbleDirectPayment
+            )
+            setBubbleInvoiceLayout(
+                viewState.bubbleInvoice
+            )
+            setBubblePodcastBoost(
+                viewState.bubblePodcastBoost
+            )
             setBubblePaidMessageReceivedDetailsLayout(
                 viewState.bubblePaidMessageReceivedDetails,
                 viewState.background
             )
-            setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+            setBubblePaidMessageSentStatusLayout(
+                viewState.bubblePaidMessageSentStatus
+            )
             setBubbleReactionBoosts(
                 viewState.bubbleReactionBoosts,
                 holderJobs,
@@ -1292,6 +1322,21 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             }
         }
 
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePodcastClip(
+    podcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip?
+) {
+    includeMessageHolderBubble.includeMessageTypePodcastClip.apply {
+        if (podcastClip == null) {
+            root.gone
+        } else {
+            root.visible
+            textViewPodcastEpisodeTitle.text = podcastClip.episodeTitle
+        }
     }
 }
 
