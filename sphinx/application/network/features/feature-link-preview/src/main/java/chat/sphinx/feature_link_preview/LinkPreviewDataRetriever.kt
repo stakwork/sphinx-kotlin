@@ -64,7 +64,7 @@ internal data class HtmlPreviewDataRetriever(val url: HttpUrl): LinkPreviewDataR
                 }
 
             if (response?.isSuccessful == false) {
-                response?.body?.close()
+                response?.body?.closeQuietly()
             }
         }
 
