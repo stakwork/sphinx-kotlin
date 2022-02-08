@@ -54,7 +54,6 @@ ext.deps = [
             hilt: "androidx.hilt:hilt-lifecycle-viewmodel:${versions.hiltJetpack}",
             processLifecycleOwner: "androidx.lifecycle:lifecycle-process:${versions.lifecycle}",
             runtime: "androidx.lifecycle:lifecycle-runtime-ktx:${versions.lifecycle}",
-//            service: "androidx.lifecycle:lifecycle-service:${versions.lifecycle}",
             viewModel: "androidx.lifecycle:lifecycle-viewmodel-ktx:${versions.lifecycle}",
             viewModelSavedState: "androidx.lifecycle:lifecycle-viewmodel-savedstate:${versions.lifecycle}",
         ],
@@ -68,7 +67,6 @@ ext.deps = [
         swipeRefreshLayout: "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
         securityCrypto: "androidx.security:security-crypto:1.1.0-alpha03",
         viewBinding: "androidx.databinding:viewbinding:${versions.androidGradle}",
-        workRuntime: "androidx.work:work-runtime-ktx:2.8.0-alpha01",
     ],
     chrisbanes: [
         insetter: "dev.chrisbanes.insetter:insetter:${versions.insetter}",
