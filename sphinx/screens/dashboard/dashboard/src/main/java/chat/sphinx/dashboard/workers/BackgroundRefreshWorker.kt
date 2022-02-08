@@ -14,11 +14,8 @@ import javax.inject.Inject
 internal class BackgroundRefreshWorker @Inject constructor(
     context: Context,
     workerParameters: WorkerParameters,
+    private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
 ) : CoroutineWorker(context, workerParameters) {
-
-    @Inject
-    @Suppress("ProtectedInFinal")
-    protected lateinit var repositoryDashboard: RepositoryDashboardAndroid<Any>
 
     override suspend fun doWork(): Result {
         return fetchContactsAndNewMessages()
