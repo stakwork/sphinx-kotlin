@@ -7,7 +7,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ServiceInfo
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -153,7 +155,13 @@ internal class MediaPlayerNotification(
 
     init {
         setupNotificationChannel()
-        mediaPlayerService.startForeground(NOTIFICATION_ID, builder.build())
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            mediaPlayerService.startForeground(NOTIFICATION_ID, builder.build(), ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        } else {
+            mediaPlayerService.startForeground(NOTIFICATION_ID, builder.build())
+        }
+
         mediaPlayerService.mediaServiceController.addListener(this)
     }
 
