@@ -1,0 +1,46 @@
+package chat.sphinx.feature_network_query_redeem_badge_token
+
+import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
+import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
+import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.feature_network_query_redeem_badge_token.model.RedeemBadgeTokenResponse
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayUrl
+import kotlinx.coroutines.flow.Flow
+
+class NetworkQueryRedeemBadgeTokenImpl(
+    private val networkRelayCall: NetworkRelayCall,
+): NetworkQueryRedeemBadgeToken() {
+
+    companion object {
+        private const val ENDPOINT_SAVE_KEY = "https://%s/save/%s"
+        private const val ENDPOINT_CLAIM_ON_LIQUID = "/claim_on_liquid"
+    }
+    override fun getRedeemBadgeTokenByKey(
+        host: String,
+        key: String
+    ): Flow<LoadResponse<GetRedeemBadgeTokenDto, ResponseError>> =
+        networkRelayCall.get(
+            url = String.format(
+                ENDPOINT_SAVE_KEY,
+                host,
+                key
+            ),
+            responseJsonClass = GetRedeemBadgeTokenDto::class.java,
+        )
+
+    override fun redeemBadgeToken(
+        data: RedeemBadgeTokenDto,
+        relayData: Pair<AuthorizationToken, RelayUrl>?
+    ): Flow<LoadResponse<Any, ResponseError>> =
+        networkRelayCall.relayPost(
+            relayEndpoint = ENDPOINT_CLAIM_ON_LIQUID,
+            requestBody = data,
+            requestBodyJsonClass = RedeemBadgeTokenDto::class.java,
+            responseJsonClass = RedeemBadgeTokenResponse::class.java,
+            relayData = relayData
+        )
+
+}

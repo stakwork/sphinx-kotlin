@@ -21,8 +21,10 @@ import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
+import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
@@ -144,6 +146,7 @@ abstract class SphinxRepository(
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
+    private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
     private val rsa: RSA,
@@ -4567,6 +4570,36 @@ abstract class SphinxRepository(
 
         return response ?: Response.Error(ResponseError("Profile save failed"))
     }
+
+    override suspend fun redeemBadgeToken(
+        body: String
+    ): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            moshi.adapter(RedeemBadgeTokenDto::class.java).fromJson(body)?.let { profile ->
+                networkQueryRedeemBadgeToken.redeemBadgeToken(
+                    profile
+                ).collect { redeemBadgeTokenResponse ->
+                    when (redeemBadgeTokenResponse) {
+                        is LoadResponse.Loading -> {
+                        }
+
+                        is Response.Error -> {
+                            response = redeemBadgeTokenResponse 
+                        }
+
+                        is Response.Success -> {
+                            response = Response.Success(true)
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Redeem Badge Token failed"))
+    }
+
 
 
     override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {

@@ -59,6 +59,10 @@ interface RepositoryDashboard {
         body: String
     ): Response<Boolean, ResponseError>
 
+    suspend fun redeemBadgeToken(
+        body: String
+    ): Response<Boolean, ResponseError>
+
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshLatestContacts: Flow<LoadResponse<Boolean, ResponseError>>

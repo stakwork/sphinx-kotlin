@@ -15,6 +15,8 @@ import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
 import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
 import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
+import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
+import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -85,6 +87,7 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
+    private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -159,6 +162,8 @@ internal class DashboardViewModel @Inject constructor(
                 handlePeopleConnectLink(peopleConnectLink)
             } ?: deepLink?.toSaveProfileLink()?.let { savePeopleLink ->
                 handleSaveProfileLink(savePeopleLink)
+            }?: deepLink?.toRedeemBadgeTokenLink()?.let { redeemBadgeTokenLink ->
+                handleRedeemBadgeTokenLink(redeemBadgeTokenLink)
             }
         }
     }
@@ -176,7 +181,8 @@ internal class DashboardViewModel @Inject constructor(
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ||
-                                data.isValidSaveProfileLink ->
+                                data.isValidSaveProfileLink ||
+                                data.isValidRedeemBadgeTokenLink  ->
                                 {
                                     Response.Success(Any())
                                 }
@@ -206,6 +212,10 @@ internal class DashboardViewModel @Inject constructor(
                 } ?: code.toSaveProfileLink()?.let { externalSaveProfileLink ->
 
                     handleSaveProfileLink(externalSaveProfileLink)
+
+                } ?: code.toRedeemBadgeTokenLink()?.let { externalRedeemBadgeTokenLink ->
+
+                    handleRedeemBadgeTokenLink(externalRedeemBadgeTokenLink)
 
                 } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
 
@@ -340,6 +350,44 @@ internal class DashboardViewModel @Inject constructor(
 
         }
     }
+
+    private suspend fun handleRedeemBadgeTokenLink(link: RedeemBadgeTokenLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.LoadingRedeemBadgeTokenPopup
+        )
+
+        networkQueryRedeemBadgeToken.getRedeemBadgeTokenByKey(
+            link.host,
+            link.key
+        ).collect { loadResponse ->
+
+            when(loadResponse){
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    deepLinkPopupViewStateContainer.updateViewState(
+                        DeepLinkPopupViewState.PopupDismissed
+                    )
+
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_redeem_badge_token_generic_error)
+                        )
+                    )
+                }
+
+                is Response.Success -> {
+                    deepLinkPopupViewStateContainer.updateViewState(
+                       DeepLinkPopupViewState.RedeemBadgeTokenPopup(
+                          link,
+                          loadResponse.value.body
+                       )
+                    )
+                }
+            }
+        }
+    }
+
 
     private suspend fun handlePeopleConnectLink(link: PeopleConnectLink) {
         link.publicKey.toLightningNodePubKey()?.let { lightningNodePubKey ->
@@ -564,6 +612,41 @@ internal class DashboardViewModel @Inject constructor(
                     submitSideEffect(
                         ChatListSideEffect.Notify(
                             app.getString(R.string.dashboard_save_profile_success)
+                        )
+                    )
+                }
+            }
+        }.join()
+
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.PopupDismissed
+        )
+    }
+
+    suspend fun redeemBadgeToken() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.RedeemBadgeTokenPopupProcessing
+        )
+
+        viewModelScope.launch(mainImmediate) {
+            val response = repositoryDashboard.redeemBadgeToken(
+                viewState.body
+            )
+
+            when (response) {
+                is Response.Error -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_redeem_badge_token_generic_error)
+                        )
+                    )
+                }
+                is Response.Success -> {
+                    submitSideEffect(
+                        ChatListSideEffect.Notify(
+                            app.getString(R.string.dashboard_redeem_badge_token_success)
                         )
                     )
                 }
