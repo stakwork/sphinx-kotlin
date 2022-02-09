@@ -1,6 +1,7 @@
 package chat.sphinx.feature_network_query_redeem_badge_token
 
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
+import chat.sphinx.concept_network_query_redeem_badge_token.model.GetRedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_redeem_badge_token.model.RedeemBadgeTokenResponse

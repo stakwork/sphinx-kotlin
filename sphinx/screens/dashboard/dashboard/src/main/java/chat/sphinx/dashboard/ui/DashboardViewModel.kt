@@ -629,33 +629,35 @@ internal class DashboardViewModel @Inject constructor(
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.RedeemBadgeTokenPopupProcessing
         )
+        if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
 
-        viewModelScope.launch(mainImmediate) {
-            val response = repositoryDashboard.redeemBadgeToken(
-                viewState.body
+            viewModelScope.launch(mainImmediate) {
+                val response = repositoryDashboard.redeemBadgeToken(
+                    viewState.body
+                )
+
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(
+                                app.getString(R.string.dashboard_redeem_badge_token_generic_error)
+                            )
+                        )
+                    }
+                    is Response.Success -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(
+                                app.getString(R.string.dashboard_redeem_badge_token_success)
+                            )
+                        )
+                    }
+                }
+            }.join()
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
             )
-
-            when (response) {
-                is Response.Error -> {
-                    submitSideEffect(
-                        ChatListSideEffect.Notify(
-                            app.getString(R.string.dashboard_redeem_badge_token_generic_error)
-                        )
-                    )
-                }
-                is Response.Success -> {
-                    submitSideEffect(
-                        ChatListSideEffect.Notify(
-                            app.getString(R.string.dashboard_redeem_badge_token_success)
-                        )
-                    )
-                }
-            }
-        }.join()
-
-        deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.PopupDismissed
-        )
+        }
     }
 
     val deepLinkPopupViewStateContainer: ViewStateContainer<DeepLinkPopupViewState> by lazy {

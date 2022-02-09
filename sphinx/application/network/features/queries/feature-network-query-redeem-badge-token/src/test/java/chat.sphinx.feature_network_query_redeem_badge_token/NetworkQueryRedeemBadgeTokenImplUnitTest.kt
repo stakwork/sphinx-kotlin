@@ -27,7 +27,7 @@ class NetworkQueryRedeemBadgeTokenImplUnitTest: NetworkQueryTestHelper() {
         testDispatcher.runBlockingTest {
             getCredentials()?.let {
 
-                var data = RedeemBadgeTokenDto(0,"https://sphinx.chat","sampleName","","","", 0,"")
+                var data = RedeemBadgeTokenDto(0,"https://sphinx.chat","sampleName","","", listOf(),0,"")
                 nqRedeemBadgeToken.redeemBadgeToken(data).collect { loadResponse ->
 
                     @Exhaustive
