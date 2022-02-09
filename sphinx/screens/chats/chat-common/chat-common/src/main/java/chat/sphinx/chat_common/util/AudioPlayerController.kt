@@ -171,7 +171,11 @@ internal class AudioPlayerControllerImpl(
                                 AudioPlayState.Error,
                                 AudioPlayState.Loading -> { /* no-op */ }
                                 AudioPlayState.Paused -> {
-                                    playCurrent()
+                                    if (requestAudioFocus()) {
+                                        playCurrent()
+                                    } else {
+                                        pauseCurrent()
+                                    }
                                 }
                                 AudioPlayState.Playing -> {
                                     pauseCurrent()
