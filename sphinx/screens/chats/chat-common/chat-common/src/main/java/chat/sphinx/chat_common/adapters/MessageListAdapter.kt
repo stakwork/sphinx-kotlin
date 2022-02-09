@@ -210,7 +210,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutMessageHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(14)
+        private val holderJobs: ArrayList<Job> = ArrayList(15)
         private val disposables: ArrayList<Disposable> = ArrayList(4)
         private var currentViewState: MessageHolderViewState? = null
 
@@ -334,6 +334,16 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                     seekBarAttachmentAudio.setOnTouchListener { _, _ -> true }
                 }
+
+                includeMessageTypePodcastClip.apply {
+                    layoutConstraintPlayPauseButton.setOnClickListener {
+                        viewModel.audioPlayerController.togglePlayPause(
+                            currentViewState?.bubblePodcastClip
+                        )
+                    }
+                    seekBarPodcastClip.setOnTouchListener { _, _ -> true }
+                    seekBarPodcastClip.setPadding(0,0,0,0)
+                }
             }
 
             binding.includeMessageTypeGroupActionHolder.let { holder ->
@@ -434,6 +444,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private var audioAttachmentJob: Job? = null
         override fun onStart(owner: LifecycleOwner) {
             super.onStart(owner)
+
             audioAttachmentJob?.let { job ->
                 if (!job.isActive) {
                     observeAudioAttachmentState()
@@ -451,6 +462,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                 .includeMessageTypeAudioAttachment
                                 .setAudioAttachmentLayoutForState(audioState)
                         }
+                    }
+                }
+            }
+
+            currentViewState?.bubblePodcastClip?.let { podcastClip ->
+                audioAttachmentJob?.cancel()
+                audioAttachmentJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.audioPlayerController.getAudioState(podcastClip)?.collect { audioState ->
+                        binding.includeMessageHolderBubble
+                            .includeMessageTypePodcastClip
+                            .setPodcastClipLayoutForState(audioState)
                     }
                 }
             }

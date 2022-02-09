@@ -254,7 +254,10 @@ internal sealed class MessageHolderViewState(
 
                 nnMessageMedia.localFile?.let { nnFile ->
 
-                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(nnFile)
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(
+                        message.id,
+                        nnFile
+                    )
 
                 } ?: run {
                     val pendingPayment = this is Received && message.isPaidPendingMessage
@@ -265,7 +268,10 @@ internal sealed class MessageHolderViewState(
                         onBindDownloadMedia.invoke()
                     }
 
-                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(pendingPayment)
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(
+                        message.id,
+                        pendingPayment
+                    )
                 }
             } else {
                 null
@@ -276,6 +282,7 @@ internal sealed class MessageHolderViewState(
     val bubblePodcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip? by lazy(LazyThreadSafetyMode.NONE) {
         message.podcastClip?.let { nnPodcastClip ->
             LayoutState.Bubble.ContainerSecond.PodcastClip(
+                message.id,
                 nnPodcastClip.title,
                 nnPodcastClip.url,
                 nnPodcastClip.ts

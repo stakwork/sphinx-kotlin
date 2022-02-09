@@ -34,17 +34,15 @@ import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
-import chat.sphinx.wrapper_common.util.getTimeString
+import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -390,8 +388,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             textViewEpisodeTitleLabel.text = episode.title.value
 
             includeLayoutEpisodeSliderControl.apply {
-                textViewCurrentEpisodeDuration.text = 0.toLong().getTimeString()
-                textViewCurrentEpisodeProgress.text = 0.toLong().getTimeString()
+                textViewCurrentEpisodeDuration.text = 0.toLong().getHHMMSSString()
+                textViewCurrentEpisodeProgress.text = 0.toLong().getHHMMSSString()
 
                 seekBarCurrentEpisodeProgress.progress = 0
 
@@ -436,8 +434,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         binding.includeLayoutEpisodeSliderControl.apply {
             val currentT: Double = currentTime?.toDouble() ?: (duration.toDouble() * (progress.toDouble()) / 100)
 
-            textViewCurrentEpisodeDuration.text = duration.getTimeString()
-            textViewCurrentEpisodeProgress.text = currentT.toLong().getTimeString()
+            textViewCurrentEpisodeDuration.text = duration.getHHMMSSString()
+            textViewCurrentEpisodeProgress.text = currentT.toLong().getHHMMSSString()
 
             seekBarCurrentEpisodeProgress.progress = progress
         }

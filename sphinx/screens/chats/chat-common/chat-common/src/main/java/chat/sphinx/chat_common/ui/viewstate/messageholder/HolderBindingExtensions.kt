@@ -15,6 +15,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageTypePodcastClipBinding
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
@@ -38,6 +39,8 @@ import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_common.util.getHHMMSSString
+import chat.sphinx.wrapper_common.util.getHHMMString
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -187,7 +190,11 @@ internal fun  LayoutMessageHolderBinding.setView(
                 lifecycleScope
             )
             setBubblePodcastClip(
-                viewState.bubblePodcastClip
+                viewState.bubblePodcastClip,
+                audioPlayerController,
+                dispatchers,
+                holderJobs,
+                lifecycleScope
             )
             setBubbleVideoAttachment(
                 viewState.bubbleVideoAttachment,
@@ -310,13 +317,6 @@ internal fun  LayoutMessageHolderBinding.setView(
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun Long.toTimestamp(): String {
-    val minutes = this / 1000 / 60
-    val seconds = this / 1000 % 60
-
-    return "${"%02d".format(minutes)}:${"%02d".format(seconds)}"
-}
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
@@ -1294,17 +1294,25 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             }
             is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable -> {
                 root.visible
-                lifecycleScope.launch(dispatchers.mainImmediate) {
+                lifecycleScope.launch(dispatchers.io) {
                     audioPlayerController.getAudioState(audioAttachment)?.value?.let { state ->
-                        setAudioAttachmentLayoutForState(state)
-                    } ?: setAudioAttachmentLayoutForState(
-                        AudioMessageState(
-                            null,
-                            AudioPlayState.Error,
-                            1L,
-                            0L,
-                        )
-                    )
+                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                            setAudioAttachmentLayoutForState(state)
+                        }
+                    } ?: run {
+                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                            setAudioAttachmentLayoutForState(
+                                AudioMessageState(
+                                    audioAttachment.messageId,
+                                    null,
+                                    null,
+                                    AudioPlayState.Error,
+                                    1L,
+                                    0L,
+                                )
+                            )
+                        }
+                    }
                 }.let { job ->
                     holderJobs.add(job)
                 }
@@ -1313,6 +1321,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
                 root.visible
                 setAudioAttachmentLayoutForState(
                     AudioMessageState(
+                        audioAttachment.messageId,
+                        null,
                         null,
                         AudioPlayState.Loading,
                         1L,
@@ -1327,27 +1337,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubblePodcastClip(
-    podcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip?
-) {
-    includeMessageHolderBubble.includeMessageTypePodcastClip.apply {
-        if (podcastClip == null) {
-            root.gone
-        } else {
-            root.visible
-            textViewPodcastEpisodeTitle.text = podcastClip.episodeTitle
-        }
-    }
-}
-
-@MainThread
-@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLayoutForState(
     state: AudioMessageState
 ) {
 
     seekBarAttachmentAudio.progress = state.progress.toInt()
-    textViewAttachmentAudioRemainingDuration.text = state.remainingSeconds.toTimestamp()
+    textViewAttachmentAudioRemainingDuration.text = state.remainingSeconds.getHHMMString()
 
 
     @Exhaustive
@@ -1376,6 +1371,88 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
             textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
             textViewAttachmentPlayPauseButton.visible
 
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePodcastClip(
+    podcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip?,
+    audioPlayerController: AudioPlayerController,
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    lifecycleScope: CoroutineScope,
+) {
+    includeMessageHolderBubble.includeMessageTypePodcastClip.apply {
+        if (podcastClip == null) {
+            root.gone
+        } else {
+            root.visible
+            textViewPodcastEpisodeTitle.text = podcastClip.episodeTitle
+
+            lifecycleScope.launch(dispatchers.io) {
+                audioPlayerController.getAudioState(podcastClip)?.value?.let { state ->
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        setPodcastClipLayoutForState(state)
+                    }
+                } ?: run {
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        setPodcastClipLayoutForState(
+                            AudioMessageState(
+                                podcastClip.messageId,
+                                null,
+                                null,
+                                AudioPlayState.Error,
+                                1L,
+                                0L,
+                            )
+                        )
+                    }
+                }
+            }.let { job ->
+                holderJobs.add(job)
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageTypePodcastClipBinding.setPodcastClipLayoutForState(
+    state: AudioMessageState
+) {
+
+    seekBarPodcastClip.progress = state.progress.toInt()
+
+    textViewPodcastClipCurrentTime.text = state.currentMillis.getHHMMSSString()
+    textViewPodcastClipDuration.text = state.durationMillis.getHHMMSSString()
+
+    @Exhaustive
+    when (state.playState) {
+        AudioPlayState.Error -> {
+            textViewPodcastClipFailure.visible
+            layoutConstraintPlayPauseButton.gone
+            progressBarPodcastClipLoading.gone
+        }
+        AudioPlayState.Loading -> {
+            textViewPodcastClipFailure.gone
+            layoutConstraintPlayPauseButton.gone
+            progressBarPodcastClipLoading.visible
+        }
+        AudioPlayState.Paused -> {
+            textViewPodcastClipFailure.gone
+            progressBarPodcastClipLoading.gone
+
+            textViewPodcastClipPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+            layoutConstraintPlayPauseButton.visible
+        }
+        AudioPlayState.Playing -> {
+            textViewPodcastClipFailure.gone
+            progressBarPodcastClipLoading.gone
+
+            textViewPodcastClipPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+            layoutConstraintPlayPauseButton.visible
         }
     }
 }

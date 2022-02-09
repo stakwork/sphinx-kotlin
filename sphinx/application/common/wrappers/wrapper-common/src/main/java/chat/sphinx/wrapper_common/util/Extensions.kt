@@ -17,7 +17,7 @@ inline fun String.getInitials(charLimit: Int = 2): String {
 
 //DateTime
 @Suppress("NOTHING_TO_INLINE")
-inline fun Long.getTimeString(): String {
+inline fun Long.getHHMMSSString(): String {
     val hours: Int
     val minutes: Int
     var seconds: Int = this.toInt() / 1000
@@ -31,4 +31,12 @@ inline fun Long.getTimeString(): String {
     val secondsString = if (seconds < 10) "0${seconds}" else "$seconds"
 
     return "$hoursString:$minutesString:$secondsString"
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.getHHMMString(): String {
+    val minutes = this / 1000 / 60
+    val seconds = this / 1000 % 60
+
+    return "${"%02d".format(minutes)}:${"%02d".format(seconds)}"
 }

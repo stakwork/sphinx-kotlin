@@ -37,7 +37,6 @@ import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
-import chat.sphinx.chat_common.ui.viewstate.messageholder.toTimestamp
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -69,6 +68,7 @@ import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.util.getHHMMString
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -1108,7 +1108,7 @@ abstract class ChatFragment<
                     textViewChatFooterAttachment.isEnabled = viewState.messagingEnabled
 
                     if (viewState is FooterViewState.RecordingAudioAttachment) {
-                        textViewRecordingTimer.text = viewState.duration.toTimestamp()
+                        textViewRecordingTimer.text = viewState.duration.getHHMMString()
                     } else {
                         layoutConstraintChatFooterActions.translationX = 0f
                     }

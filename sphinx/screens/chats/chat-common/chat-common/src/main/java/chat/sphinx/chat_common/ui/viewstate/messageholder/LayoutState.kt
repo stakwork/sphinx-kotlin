@@ -7,6 +7,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
@@ -119,9 +120,15 @@ internal sealed class LayoutState private constructor() {
 
             sealed class AudioAttachment: ContainerSecond() {
 
-                data class FileAvailable(val file: File): AudioAttachment()
+                data class FileAvailable(
+                    val messageId: MessageId,
+                    val file: File
+                ): AudioAttachment()
 
-                data class FileUnavailable(val showPaidOverlay: Boolean): AudioAttachment()
+                data class FileUnavailable(
+                    val messageId: MessageId,
+                    val showPaidOverlay: Boolean
+                ): AudioAttachment()
             }
 
             data class ImageAttachment(
@@ -148,6 +155,7 @@ internal sealed class LayoutState private constructor() {
             ): ContainerSecond()
 
             data class PodcastClip(
+                val messageId: MessageId,
                 val episodeTitle: String,
                 val url: String,
                 val ts: Int,

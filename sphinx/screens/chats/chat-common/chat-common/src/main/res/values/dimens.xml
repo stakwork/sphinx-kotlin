@@ -44,6 +44,7 @@
     <dimen name="audio_button_play_pause_text_size">25sp</dimen>
     <dimen name="audio_button_duration_text_size">14sp</dimen>
     <dimen name="video_attachment_play_pause_button_xy">50dp</dimen>
+    <dimen name="podcast_clip_button_play_pause_width">60dp</dimen>
     <dimen name="podcast_clip_episode_title_text_size">13sp</dimen>
     <dimen name="podcast_clip_time_text_size">11sp</dimen>
     <dimen name="image_holder_boost_reaction_xy">26dp</dimen>
