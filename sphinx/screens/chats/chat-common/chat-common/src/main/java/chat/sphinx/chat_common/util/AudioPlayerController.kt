@@ -109,7 +109,7 @@ internal class AudioPlayerControllerImpl(
                                     ?.toLongOrNull()
                                     ?: 1000L
                             }
-                        } catch (e: IllegalArgumentException) {
+                        } catch (e: Exception) {
                             LOG.e(TAG, "Failed to create AudioMessageState", e)
                             null
                         }
@@ -374,7 +374,11 @@ internal class AudioPlayerControllerImpl(
                             nnCurrent.second.value.file,
                             nnCurrent.second.value.podcastClip,
                             if (mediaPlayer.isPlaying) {
-                                AudioPlayState.Playing
+                                if (mediaPlayer.currentPosition.toLong() > nnCurrent.second.value.currentMillis) {
+                                    AudioPlayState.Playing
+                                } else {
+                                    AudioPlayState.Loading
+                                }
                             } else {
                                 AudioPlayState.Paused
                             },
