@@ -65,6 +65,7 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -143,7 +144,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
 
-
     val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
         ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
     }
@@ -157,6 +157,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     abstract val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState>
 
     protected abstract suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>?
+
+    abstract suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?)
 
     private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
 
@@ -217,7 +219,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         ChatHeaderViewStateContainer()
     }
 
-    private suspend fun getChat(): Chat {
+    protected suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             return chat
         }
@@ -724,6 +726,14 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             setupChatFlowJob.cancel()
             setupHeaderInitialHolderJob.cancel()
             setupViewStateContainerJob.cancel()
+        }
+
+        audioPlayerController.streamSatsHandler = { messageUUID, podcastClip ->
+            podcastClip?.let { nnPodcastClip ->
+                viewModelScope.launch(io) {
+                    shouldStreamSatsFor(nnPodcastClip, messageUUID)
+                }
+            }
         }
     }
 

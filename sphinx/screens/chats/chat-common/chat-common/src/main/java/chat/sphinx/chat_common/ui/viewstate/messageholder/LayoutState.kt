@@ -8,9 +8,11 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.unit
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.PodcastClip as PodcastClipObject
 import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_message_media.MessageMedia
 import java.io.File
@@ -156,9 +158,8 @@ internal sealed class LayoutState private constructor() {
 
             data class PodcastClip(
                 val messageId: MessageId,
-                val episodeTitle: String,
-                val url: String,
-                val ts: Int,
+                val messageUUID: MessageUUID?,
+                val podcastClip: PodcastClipObject,
             ): ContainerSecond()
 
             // FileAttachment

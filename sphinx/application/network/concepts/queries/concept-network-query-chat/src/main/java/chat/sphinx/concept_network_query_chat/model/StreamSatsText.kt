@@ -11,7 +11,8 @@ fun StreamSatsText.toJson(moshi: Moshi): String =
                 feedID,
                 itemID,
                 ts,
-                speed
+                speed,
+                uuid
             )
         )
 
@@ -21,4 +22,5 @@ data class StreamSatsText(
     val itemID: String,
     val ts: Long,
     val speed: Double,
+    val uuid: String? = null,
 )

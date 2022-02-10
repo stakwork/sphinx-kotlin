@@ -21,6 +21,9 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashSet
 
 // TODO: Remove
 inline val Message.isCopyLinkAllowed: Boolean
@@ -283,9 +286,8 @@ internal sealed class MessageHolderViewState(
         message.podcastClip?.let { nnPodcastClip ->
             LayoutState.Bubble.ContainerSecond.PodcastClip(
                 message.id,
-                nnPodcastClip.title,
-                nnPodcastClip.url,
-                nnPodcastClip.ts
+                message.uuid,
+                nnPodcastClip
             )
         }
     }

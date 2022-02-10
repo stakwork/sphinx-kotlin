@@ -28,9 +28,12 @@ import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.getColorKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -115,6 +118,10 @@ class ChatGroupViewModel @Inject constructor(
 
     override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
+    }
+
+    override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getInitialHolderViewStateForReceivedMessage(

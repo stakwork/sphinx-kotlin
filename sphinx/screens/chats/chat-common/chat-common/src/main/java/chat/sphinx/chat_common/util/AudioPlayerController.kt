@@ -18,6 +18,8 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_message.PodcastClip
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +43,8 @@ internal interface AudioPlayerController {
     fun togglePlayPause(podcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip?)
 
     fun pauseMediaIfPlaying()
+
+    var streamSatsHandler: ((MessageUUID?, PodcastClip?) -> Unit)?
 }
 
 internal class AudioPlayerControllerImpl(
@@ -57,6 +61,8 @@ internal class AudioPlayerControllerImpl(
         private const val TAG = "AudioPlayerControllerImpl"
     }
 
+    override var streamSatsHandler: ((MessageUUID?, PodcastClip?) -> Unit)? = null
+
     private inner class AudioStateCache {
         private val lock = Mutex()
         private val map = mutableMapOf<MessageId, MutableStateFlow<AudioMessageState>>()
@@ -68,13 +74,13 @@ internal class AudioPlayerControllerImpl(
 
         suspend fun getOrCreate(
             messageId: MessageId,
+            messageUUID: MessageUUID?,
             file: File?,
-            url: String?,
-            currentMillis: Long = 0L
+            podcastClip: PodcastClip?,
         ): MutableStateFlow<AudioMessageState>? {
             var response: MutableStateFlow<AudioMessageState>? = null
 
-            if (file == null && url == null) {
+            if (file == null && podcastClip == null) {
                 return null
             }
 
@@ -82,7 +88,7 @@ internal class AudioPlayerControllerImpl(
 
                 lock.withLock {
 
-                    val audioPath = file?.path ?: url ?: ""
+                    val audioPath = file?.path ?: podcastClip?.url ?: ""
 
                     val isLocalFile = file != null
 
@@ -112,11 +118,12 @@ internal class AudioPlayerControllerImpl(
                             val state = MutableStateFlow(
                                 AudioMessageState(
                                     messageId,
+                                    messageUUID,
                                     file,
-                                    url,
+                                    podcastClip,
                                     AudioPlayState.Paused,
                                     durationMillis,
-                                    currentMillis
+                                    ((podcastClip?.ts ?: 0) * 1000).toLong()
                                 )
                             )
 
@@ -140,8 +147,9 @@ internal class AudioPlayerControllerImpl(
                     dispatchStateJob?.cancel()
                     nnCurrent.second.value = AudioMessageState(
                         nnCurrent.second.value.messageId,
+                        nnCurrent.second.value.messageUUID,
                         nnCurrent.second.value.file,
-                        nnCurrent.second.value.url,
+                        nnCurrent.second.value.podcastClip,
                         AudioPlayState.Paused,
                         nnCurrent.second.value.durationMillis,
                         0L,
@@ -158,84 +166,35 @@ internal class AudioPlayerControllerImpl(
         private val publicMethodLock = Mutex()
 
         suspend fun updateMediaState(state: MutableStateFlow<AudioMessageState>) {
-            val audioPath = state.value.file?.path ?: state.value.url
+            publicMethodLock.withLock {
+                currentAudio?.let { nnCurrent ->
+                    if (nnCurrent.first == state.value.messageId) {
 
-            audioPath?.let { nnAudioPath ->
-                // only handle valid state objects (file is not null)
-
-                publicMethodLock.withLock {
-                    currentAudio?.let { nnCurrent ->
-                        if (nnCurrent.first == state.value.messageId) {
-
-                            when (nnCurrent.second.value.playState) {
-                                AudioPlayState.Error,
-                                AudioPlayState.Loading -> { /* no-op */ }
-                                AudioPlayState.Paused -> {
-                                    if (requestAudioFocus()) {
-                                        playCurrent()
-                                    } else {
-                                        pauseCurrent()
-                                    }
-                                }
-                                AudioPlayState.Playing -> {
+                        when (nnCurrent.second.value.playState) {
+                            AudioPlayState.Error,
+                            AudioPlayState.Loading -> { /* no-op */ }
+                            AudioPlayState.Paused -> {
+                                if (requestAudioFocus()) {
+                                    playCurrent()
+                                } else {
                                     pauseCurrent()
                                 }
                             }
-
-                        } else {
-                            pauseCurrent()
-
-                            currentAudio = Pair(state.value.messageId, state)
-
-                            state.value = AudioMessageState(
-                                state.value.messageId,
-                                state.value.file,
-                                state.value.url,
-                                AudioPlayState.Loading,
-                                state.value.durationMillis,
-                                state.value.currentMillis,
-                            )
-
-                            mediaPlayer.apply {
-                                reset()
-                                try {
-                                    if (setMediaPlayerDataSource(state.value)) {
-                                        setOnPreparedListener { mp ->
-                                            mp.setOnPreparedListener(null)
-                                            mp.seekTo(state.value.currentMillis.toInt())
-
-                                            viewModelScope.launch(mainImmediate) {
-                                                if (requestAudioFocus()) {
-                                                    playCurrent()
-                                                } else {
-                                                    pauseCurrent()
-                                                }
-                                            }
-                                        }
-
-                                        prepareAsync()
-                                    }
-                                } catch (e: IllegalStateException) {
-
-                                    state.value = AudioMessageState(
-                                        state.value.messageId,
-                                        state.value.file,
-                                        state.value.url,
-                                        AudioPlayState.Error,
-                                        state.value.durationMillis,
-                                        state.value.currentMillis,
-                                    )
-
-                                }
+                            AudioPlayState.Playing -> {
+                                pauseCurrent()
                             }
                         }
-                    } ?: run {
+
+                    } else {
+                        pauseCurrent()
+
                         currentAudio = Pair(state.value.messageId, state)
 
                         state.value = AudioMessageState(
                             state.value.messageId,
+                            state.value.messageUUID,
                             state.value.file,
-                            state.value.url,
+                            state.value.podcastClip,
                             AudioPlayState.Loading,
                             state.value.durationMillis,
                             state.value.currentMillis,
@@ -264,14 +223,61 @@ internal class AudioPlayerControllerImpl(
 
                                 state.value = AudioMessageState(
                                     state.value.messageId,
+                                    state.value.messageUUID,
                                     state.value.file,
-                                    state.value.url,
+                                    state.value.podcastClip,
                                     AudioPlayState.Error,
                                     state.value.durationMillis,
                                     state.value.currentMillis,
                                 )
 
                             }
+                        }
+                    }
+                } ?: run {
+                    currentAudio = Pair(state.value.messageId, state)
+
+                    state.value = AudioMessageState(
+                        state.value.messageId,
+                        state.value.messageUUID,
+                        state.value.file,
+                        state.value.podcastClip,
+                        AudioPlayState.Loading,
+                        state.value.durationMillis,
+                        state.value.currentMillis,
+                    )
+
+                    mediaPlayer.apply {
+                        reset()
+                        try {
+                            if (setMediaPlayerDataSource(state.value)) {
+                                setOnPreparedListener { mp ->
+                                    mp.setOnPreparedListener(null)
+                                    mp.seekTo(state.value.currentMillis.toInt())
+
+                                    viewModelScope.launch(mainImmediate) {
+                                        if (requestAudioFocus()) {
+                                            playCurrent()
+                                        } else {
+                                            pauseCurrent()
+                                        }
+                                    }
+                                }
+
+                                prepareAsync()
+                            }
+                        } catch (e: IllegalStateException) {
+
+                            state.value = AudioMessageState(
+                                state.value.messageId,
+                                state.value.messageUUID,
+                                state.value.file,
+                                state.value.podcastClip,
+                                AudioPlayState.Error,
+                                state.value.durationMillis,
+                                state.value.currentMillis,
+                            )
+
                         }
                     }
                 }
@@ -284,7 +290,7 @@ internal class AudioPlayerControllerImpl(
                     setDataSource(app.applicationContext, nnFile.toUri())
                     return true
                 }
-                state.url?.let { nnUrl ->
+                state.podcastClip?.url?.let { nnUrl ->
                     setDataSource(nnUrl)
                     return true
                 }
@@ -308,8 +314,9 @@ internal class AudioPlayerControllerImpl(
                         dispatchStateJob?.cancel()
                         nnCurrent.second.value = AudioMessageState(
                             nnCurrent.second.value.messageId,
+                            nnCurrent.second.value.messageUUID,
                             nnCurrent.second.value.file,
-                            nnCurrent.second.value.url,
+                            nnCurrent.second.value.podcastClip,
                             AudioPlayState.Paused,
                             nnCurrent.second.value.durationMillis,
                             mediaPlayer.currentPosition.toLong(),
@@ -345,12 +352,27 @@ internal class AudioPlayerControllerImpl(
             }
 
             dispatchStateJob = viewModelScope.launch(mainImmediate) {
+                var count = 0.0
+
                 while (isActive) {
                     currentAudio?.let { nnCurrent ->
+                        if (count > 60) {
+
+                            streamSatsHandler?.invoke(
+                                nnCurrent.second.value.messageUUID,
+                                nnCurrent.second.value.podcastClip
+                            )
+
+                            count = 0.0
+                        } else {
+                            count += 0.5
+                        }
+
                         nnCurrent.second.value = AudioMessageState(
                             nnCurrent.second.value.messageId,
+                            nnCurrent.second.value.messageUUID,
                             nnCurrent.second.value.file,
-                            nnCurrent.second.value.url,
+                            nnCurrent.second.value.podcastClip,
                             if (mediaPlayer.isPlaying) {
                                 AudioPlayState.Playing
                             } else {
@@ -364,7 +386,7 @@ internal class AudioPlayerControllerImpl(
                     if (!mediaPlayer.isPlaying) {
                         break
                     } else {
-                        delay(250L)
+                        delay(500L)
                     }
                 }
             }
@@ -383,19 +405,20 @@ internal class AudioPlayerControllerImpl(
     ): StateFlow<AudioMessageState>? {
         return audioStateCache.getOrCreate(
             audioAttachment.messageId,
+            null,
             audioAttachment.file,
             null
         )?.asStateFlow()
     }
 
     override suspend fun getAudioState(
-        podcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip
+        podcastClipViewState: LayoutState.Bubble.ContainerSecond.PodcastClip
     ): StateFlow<AudioMessageState>? {
         return audioStateCache.getOrCreate(
-            podcastClip.messageId,
+            podcastClipViewState.messageId,
+            podcastClipViewState.messageUUID,
             null,
-            podcastClip.url,
-            (podcastClip.ts * 1000).toLong()
+            podcastClipViewState.podcastClip
         )?.asStateFlow()
     }
 
@@ -408,33 +431,44 @@ internal class AudioPlayerControllerImpl(
             return
         }
 
-        togglePlayPause(audioAttachment.messageId, audioAttachment.file, null)
+        togglePlayPause(
+            messageId = audioAttachment.messageId,
+            messageUUID = null,
+            file = audioAttachment.file,
+            podcastClip = null
+        )
     }
 
-    override fun togglePlayPause(podcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip?) {
-        if (podcastClip == null) {
+    override fun togglePlayPause(podcastClipViewState: LayoutState.Bubble.ContainerSecond.PodcastClip?) {
+        if (podcastClipViewState == null) {
             return
         }
 
-        if (podcastClip !is LayoutState.Bubble.ContainerSecond.PodcastClip) {
+        if (podcastClipViewState !is LayoutState.Bubble.ContainerSecond.PodcastClip) {
             return
         }
 
-        togglePlayPause(podcastClip.messageId, null, podcastClip.url)
+        togglePlayPause(
+            messageId = podcastClipViewState.messageId,
+            messageUUID = podcastClipViewState.messageUUID,
+            file = null,
+            podcastClip = podcastClipViewState.podcastClip
+        )
     }
 
     private var toggleStateJob: Job? = null
     private fun togglePlayPause(
         messageId: MessageId,
+        messageUUID: MessageUUID?,
         file: File?,
-        url: String?
+        podcastClip: PodcastClip?
     ) {
         if (toggleStateJob?.isActive == true) {
             return
         }
 
         toggleStateJob = viewModelScope.launch(mainImmediate) {
-            val state = audioStateCache.getOrCreate(messageId, file, url) ?: return@launch
+            val state = audioStateCache.getOrCreate(messageId, messageUUID, file, podcastClip) ?: return@launch
             if (state.value.playState !is AudioPlayState.Loading && state.value.playState !is AudioPlayState.Error) {
                 mediaPlayerHolder.updateMediaState(state)
             }

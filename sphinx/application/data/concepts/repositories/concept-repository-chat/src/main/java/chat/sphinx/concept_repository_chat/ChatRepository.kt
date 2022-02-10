@@ -13,6 +13,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
+import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -23,6 +24,7 @@ interface ChatRepository {
     val getAllChats: Flow<List<Chat>>
     fun getChatById(chatId: ChatId): Flow<Chat?>
     fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?>
+    fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
 
     /**
      * Returns a [chat.sphinx.wrapper_chat.ChatType.Conversation] or `null`

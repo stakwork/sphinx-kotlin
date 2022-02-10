@@ -37,6 +37,7 @@ import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_common.util.getHHMMSSString
@@ -1306,6 +1307,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
                                     audioAttachment.messageId,
                                     null,
                                     null,
+                                    null,
                                     AudioPlayState.Error,
                                     1L,
                                     0L,
@@ -1322,6 +1324,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
                 setAudioAttachmentLayoutForState(
                     AudioMessageState(
                         audioAttachment.messageId,
+                        null,
                         null,
                         null,
                         AudioPlayState.Loading,
@@ -1378,21 +1381,21 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePodcastClip(
-    podcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip?,
+    podcastClipViewState: LayoutState.Bubble.ContainerSecond.PodcastClip?,
     audioPlayerController: AudioPlayerController,
     dispatchers: CoroutineDispatchers,
     holderJobs: ArrayList<Job>,
     lifecycleScope: CoroutineScope,
 ) {
     includeMessageHolderBubble.includeMessageTypePodcastClip.apply {
-        if (podcastClip == null) {
+        if (podcastClipViewState == null) {
             root.gone
         } else {
             root.visible
-            textViewPodcastEpisodeTitle.text = podcastClip.episodeTitle
+            textViewPodcastEpisodeTitle.text = podcastClipViewState.podcastClip.title
 
             lifecycleScope.launch(dispatchers.io) {
-                audioPlayerController.getAudioState(podcastClip)?.value?.let { state ->
+                audioPlayerController.getAudioState(podcastClipViewState)?.value?.let { state ->
                     lifecycleScope.launch(dispatchers.mainImmediate) {
                         setPodcastClipLayoutForState(state)
                     }
@@ -1400,9 +1403,10 @@ internal inline fun LayoutMessageHolderBinding.setBubblePodcastClip(
                     lifecycleScope.launch(dispatchers.mainImmediate) {
                         setPodcastClipLayoutForState(
                             AudioMessageState(
-                                podcastClip.messageId,
+                                podcastClipViewState.messageId,
+                                podcastClipViewState.messageUUID,
                                 null,
-                                null,
+                                podcastClipViewState.podcastClip,
                                 AudioPlayState.Error,
                                 1L,
                                 0L,

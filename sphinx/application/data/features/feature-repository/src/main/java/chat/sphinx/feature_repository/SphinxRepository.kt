@@ -622,7 +622,9 @@ abstract class SphinxRepository(
         metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
-        destinations: List<FeedDestination>
+        destinations: List<FeedDestination>,
+        updateMetaData: Boolean,
+        clipMessageUUID: MessageUUID?,
     ) {
 
         if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
@@ -635,6 +637,7 @@ abstract class SphinxRepository(
 
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
             }
@@ -653,13 +656,13 @@ abstract class SphinxRepository(
             }
 
             val streamSatsText =
-                StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed)
+                StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed, clipMessageUUID?.value)
 
             val postStreamSatsDto = PostStreamSatsDto(
                 metaData.satsPerMinute.value,
                 chatId.value,
                 streamSatsText.toJson(moshi),
-                true,
+                updateMetaData,
                 destinationsArray
             )
 

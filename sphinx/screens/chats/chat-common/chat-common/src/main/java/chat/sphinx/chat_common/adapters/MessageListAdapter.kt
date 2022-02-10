@@ -466,10 +466,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
             }
 
-            currentViewState?.bubblePodcastClip?.let { podcastClip ->
+            currentViewState?.bubblePodcastClip?.let { podcastClipViewState ->
                 audioAttachmentJob?.cancel()
                 audioAttachmentJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.audioPlayerController.getAudioState(podcastClip)?.collect { audioState ->
+                    viewModel.audioPlayerController.getAudioState(podcastClipViewState)?.collect { audioState ->
                         binding.includeMessageHolderBubble
                             .includeMessageTypePodcastClip
                             .setPodcastClipLayoutForState(audioState)
