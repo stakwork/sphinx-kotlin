@@ -1,9 +1,7 @@
 package chat.sphinx.wrapper_message
 
-import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -41,7 +39,7 @@ fun PodcastClip.toJson(moshi: Moshi): String =
     moshi.adapter(PodcastClipMoshi::class.java)
         .toJson(
             PodcastClipMoshi(
-                text,
+                text ?: "",
                 title,
                 pubkey.value,
                 url,
@@ -52,7 +50,7 @@ fun PodcastClip.toJson(moshi: Moshi): String =
         )
 
 data class PodcastClip(
-    val text: String,
+    val text: String?,
     val title: String,
     val pubkey: LightningNodePubKey,
     val url: String,
@@ -60,6 +58,7 @@ data class PodcastClip(
     val itemID: FeedId,
     val ts: Int,
 ) {
+
     companion object {
         const val MESSAGE_PREFIX = "clip::"
     }

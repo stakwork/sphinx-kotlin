@@ -2124,11 +2124,21 @@ abstract class SphinxRepository(
         try {
             if (sendMessage.giphyData != null) {
                 return sendMessage.giphyData?.let {
-                    "giphy::${it.toJson(moshi).toByteArray().encodeBase64()}"
+                    "${GiphyData.MESSAGE_PREFIX}${it.toJson(moshi).toByteArray().encodeBase64()}"
                 }
             }
         } catch (e: Exception) {
             LOG.e(TAG, "GiphyData toJson failed: ", e)
+        }
+
+        try {
+            if (sendMessage.podcastClip != null) {
+                return sendMessage.podcastClip?.let {
+                    "${PodcastClip.MESSAGE_PREFIX}${it.toJson(moshi)}"
+                }
+            }
+        } catch (e: Exception) {
+            LOG.e(TAG, "PodcastClip toJson failed: ", e)
         }
 
         return sendMessage.text

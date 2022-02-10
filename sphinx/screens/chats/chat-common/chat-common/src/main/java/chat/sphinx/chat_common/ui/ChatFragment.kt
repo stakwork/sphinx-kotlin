@@ -68,6 +68,7 @@ import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_common.util.getHHMMString
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
@@ -121,7 +122,7 @@ abstract class ChatFragment<
     protected abstract val userColorsHelper: UserColorsHelper
     protected abstract val imageLoader: ImageLoader<ImageView>
 
-    private val sendMessageBuilder = SendMessage.Builder()
+    protected val sendMessageBuilder = SendMessage.Builder()
 
     private val holderJobs: ArrayList<Job> = ArrayList(11)
     private val disposables: ArrayList<Disposable> = ArrayList(4)
@@ -748,10 +749,35 @@ abstract class ChatFragment<
                 when (viewState) {
                     is MessageReplyViewState.ReplyingDismissed -> {
                         sendMessageBuilder.setReplyUUID(null)
+                        sendMessageBuilder.setPodcastClip(null)
+
                         replyingMessageBinding.root.gone
                     }
+                    is MessageReplyViewState.CommentingOnPodcast -> {
+                        sendMessageBuilder.setReplyUUID(null)
+                        sendMessageBuilder.setPodcastClip(viewState.podcastClip)
 
+                        replyingMessageBinding.apply {
+                            imageViewReplyMediaImage.gone
+                            textViewReplyTextOverlay.gone
+
+                            val tsString = (viewState.podcastClip.ts * 1000).toLong().getHHMMSSString()
+
+                            textViewReplySenderLabel.text = viewState.podcastClip.title
+                            textViewReplyMessageLabel.text = "${getString(R.string.share_audio_clip)} $tsString"
+
+                            viewReplyBarLeading.setBackgroundColor(
+                                root.context.getColor(
+                                    R.color.washedOutReceivedText
+                                )
+                            )
+                        }
+
+                        replyingMessageBinding.root.visible
+                    }
                     is MessageReplyViewState.ReplyingToMessage -> {
+                        sendMessageBuilder.setPodcastClip(null)
+
                         val message = viewState.message
 
                         message.uuid?.value?.toReplyUUID().let { uuid ->
@@ -759,21 +785,19 @@ abstract class ChatFragment<
 
                             replyingMessageBinding.apply {
 
-                                textViewReplyMessageLabel.apply {
-                                    textViewReplyMessageLabel.gone
-                                    textViewReplyTextOverlay.gone
+                                textViewReplyMessageLabel.gone
+                                textViewReplyTextOverlay.gone
 
-                                    if (message.isAudioMessage) {
-                                        textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
-                                        textViewReplyMessageLabel.visible
+                                if (message.isAudioMessage) {
+                                    textViewReplyMessageLabel.text = getString(R.string.media_type_label_audio)
+                                    textViewReplyMessageLabel.visible
 
-                                        textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
-                                        textViewReplyTextOverlay.visible
-                                    } else {
-                                        message.retrieveTextToShow()?.let { messageText ->
-                                            textViewReplyMessageLabel.text = messageText
-                                            textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
-                                        }
+                                    textViewReplyTextOverlay.text = getString(R.string.material_icon_name_volume_up)
+                                    textViewReplyTextOverlay.visible
+                                } else {
+                                    message.retrieveTextToShow()?.let { messageText ->
+                                        textViewReplyMessageLabel.text = messageText
+                                        textViewReplyMessageLabel.goneIfFalse(messageText.isNotEmpty())
                                     }
                                 }
 

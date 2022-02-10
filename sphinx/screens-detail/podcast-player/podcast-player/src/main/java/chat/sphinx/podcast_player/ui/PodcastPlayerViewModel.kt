@@ -17,21 +17,31 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.concept_view_model_coordinator.ResponseHolder
+import chat.sphinx.feature_view_model_coordinator.RequestCatcher
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.podcast_player.R
+import chat.sphinx.podcast_player.coordinator.PodcastPlayerViewModelCoordinator
+import chat.sphinx.podcast_player.navigation.BackType
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
+import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
+import chat.sphinx.wrapper_message.PodcastClip
+import chat.sphinx.wrapper_message.toJson
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -39,6 +49,8 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -57,6 +69,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: PodcastPlayerNavigator,
     private val app: Application,
+    private val moshi: Moshi,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
@@ -64,7 +77,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val lightningRepository: LightningRepository,
     savedStateHandle: SavedStateHandle,
-    private val mediaPlayerServiceController: MediaPlayerServiceController
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
+    private val podcastPlayerViewModelCoordinator: PodcastPlayerViewModelCoordinator,
 ) : SideEffectViewModel<
         FragmentActivity,
         PodcastPlayerSideEffect,
@@ -111,7 +125,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    suspend fun getPodcast(): Podcast? {
+    private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
             return podcast
         }
@@ -221,6 +235,55 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
 
         updateFeedContentInBackground()
+    }
+
+    private val requestCatcher = RequestCatcher(
+        viewModelScope,
+        podcastPlayerViewModelCoordinator,
+        mainImmediate
+    )
+
+    private var responseJob: Job? = null
+    fun shouldShareClip() {
+        if (responseJob?.isActive == true) {
+            return
+        }
+
+        responseJob = viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                getOwner().nodePubKey?.let { ownerPubKey ->
+
+                    val podcastClip = PodcastClip(
+                        text = null,
+                        title = podcast.getCurrentEpisode().title.value,
+                        pubkey = ownerPubKey,
+                        url = podcast.getCurrentEpisode().episodeUrl,
+                        feedID = podcast.id,
+                        itemID = podcast.getCurrentEpisode().id,
+                        ts = podcast.currentTime / 1000
+                    )
+
+                    try {
+                        requestCatcher.getCaughtRequestStateFlow().collect { list ->
+                            list.firstOrNull()?.let { requestHolder ->
+
+                                podcastPlayerViewModelCoordinator.submitResponse(
+                                    response = Response.Success(
+                                        ResponseHolder(
+                                            requestHolder,
+                                            PodcastPlayerResponse(
+                                                podcastClip.toJson(moshi)
+                                            )
+                                        )
+                                    ),
+                                    navigateBack = BackType.CloseDetailScreen
+                                )
+                            }
+                        }
+                    } catch (e: Exception) {}
+                }
+            }
+        }
     }
 
     private fun updateFeedContentInBackground() {

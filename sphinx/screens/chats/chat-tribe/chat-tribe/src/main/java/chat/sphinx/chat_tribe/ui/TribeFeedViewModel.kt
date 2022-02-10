@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
-import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -15,15 +14,22 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.podcast_player.ui.getMediaDuration
+import chat.sphinx.podcast_player_view_model_coordinator.request.PodcastPlayerRequest
+import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.feed.toSubscribed
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.FeedBoost
+import chat.sphinx.wrapper_message.PodcastClip
+import chat.sphinx.wrapper_message.toPodcastClipOrNull
 import chat.sphinx.wrapper_podcast.Podcast
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -31,6 +37,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -43,13 +50,14 @@ internal class TribeFeedViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
     private val app: Application,
+    private val moshi: Moshi,
     private val accountOwner: StateFlow<Contact?>,
-    private val navigator: TribeChatNavigator,
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
+    private val podcastPlayerCoordinator: ViewModelCoordinator<PodcastPlayerRequest, PodcastPlayerResponse>,
 ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle),
     MediaPlayerServiceController.MediaServiceListener
 {
@@ -106,6 +114,8 @@ internal class TribeFeedViewModel @Inject constructor(
     val contributionsViewStateContainer: ViewStateContainer<PodcastContributionsViewState> by lazy {
         PodcastContributionsViewStateContainer()
     }
+
+    var shareClipHandler: ((PodcastClip) -> Unit)? = null
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -393,14 +403,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 false
             )
 
-            viewModelScope.launch(mainImmediate) {
-                navigator.toPodcastPlayerScreen(
-                    chatId = args.chatId,
-                    feedId = vs.podcast.id,
-                    feedUrl = vs.podcast.feedUrl,
-                    currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
-                )
-            }
+            requestPodcastPlayer(vs)
         }
 
         val isPlaying = (currentServiceState is MediaPlayerServiceState.ServiceActive.MediaState.Playing)
@@ -441,6 +444,31 @@ internal class TribeFeedViewModel @Inject constructor(
             podcast
         ).let { initialViewState ->
             podcastViewStateContainer.updateViewState(initialViewState)
+        }
+    }
+
+    private var podcastPlayerJob: Job? = null
+    private fun requestPodcastPlayer(
+        vs: PodcastViewState.PodcastVS
+    ) {
+        if (podcastPlayerJob?.isActive == true) {
+            return
+        }
+
+        podcastPlayerJob = viewModelScope.launch(mainImmediate) {
+            val response = podcastPlayerCoordinator.submitRequest(
+                PodcastPlayerRequest(
+                    chatId = args.chatId,
+                    feedId = vs.podcast.id,
+                    feedUrl = vs.podcast.feedUrl,
+                    currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
+                )
+            )
+            if (response is Response.Success) {
+                response.value.value?.toPodcastClipOrNull(moshi)?.let { podcastClip ->
+                    shareClipHandler?.invoke(podcastClip)
+                }
+            }
         }
     }
 

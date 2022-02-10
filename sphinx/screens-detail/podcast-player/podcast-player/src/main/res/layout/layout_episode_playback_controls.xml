@@ -33,8 +33,6 @@
         android:gravity="center"
         android:clickable="true"
         android:focusable="true"
-        android:alpha="0.3"
-        android:enabled="false"
         android:scaleType="fitCenter"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/text_view_replay_15_button"

@@ -50,6 +50,7 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
 
+    implementation deps.square.moshi
     implementation deps.lottie.sdk
 
     kapt kaptDeps.google.hilt

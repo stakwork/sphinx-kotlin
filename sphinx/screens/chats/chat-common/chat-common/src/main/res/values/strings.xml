@@ -54,6 +54,7 @@
     <!-- Replies -->
     <string name="reply_message_media_content_description">Media content of the original message</string>
     <string name="reply_message_close_button_content_description">Close</string>
+    <string name="share_audio_clip">"Share audio clip:"</string>
 
     <!--  Purchase Status Labels: Paid Message Details  -->
     <string name="purchase_status_label_paid_message_details_pending">Pending</string>
@@ -152,6 +153,5 @@
     <string name="slide_to_cancel">&lt;&lt; Slide to cancel</string>
     <string name="recording_permission_granted">Recording permission granted</string>
     <string name="recording_permission_required">Recording permissions required</string>
-
 
 </resources>

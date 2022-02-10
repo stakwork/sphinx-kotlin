@@ -11,6 +11,7 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutPodcastPlayerFooterBinding
@@ -23,12 +24,11 @@ import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_view.Px
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.collectViewState
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
@@ -140,6 +140,12 @@ internal class ChatTribeFragment: ChatFragment<
 
             override fun onAnimationStart(animation: Animator?) {}
         })
+
+        tribeFeedViewModel.shareClipHandler = { podcastClip ->
+            viewModel.messageReplyViewStateContainer.updateViewState(
+                MessageReplyViewState.CommentingOnPodcast(podcastClip)
+            )
+        }
     }
 
     private val progressWidth: Px by lazy {
