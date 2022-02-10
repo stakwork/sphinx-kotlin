@@ -355,12 +355,10 @@ internal class DashboardViewModel @Inject constructor(
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.LoadingRedeemBadgeTokenPopup
         )
-
         networkQueryRedeemBadgeToken.getRedeemBadgeTokenByKey(
             link.host,
             link.key
         ).collect { loadResponse ->
-
             when(loadResponse){
                 is LoadResponse.Loading -> {}
 
@@ -378,10 +376,10 @@ internal class DashboardViewModel @Inject constructor(
 
                 is Response.Success -> {
                     deepLinkPopupViewStateContainer.updateViewState(
-                       DeepLinkPopupViewState.RedeemBadgeTokenPopup(
-                          link,
-                          loadResponse.value.body
-                       )
+                        DeepLinkPopupViewState.RedeemBadgeTokenPopup(
+                            link,
+                            loadResponse.value.body
+                        )
                     )
                 }
             }
@@ -625,11 +623,11 @@ internal class DashboardViewModel @Inject constructor(
 
     suspend fun redeemBadgeToken() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
-
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.RedeemBadgeTokenPopupProcessing
         )
-        if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
+
+        if (viewState is DeepLinkPopupViewState.RedeemBadgeTokenPopup) {
 
             viewModelScope.launch(mainImmediate) {
                 val response = repositoryDashboard.redeemBadgeToken(
