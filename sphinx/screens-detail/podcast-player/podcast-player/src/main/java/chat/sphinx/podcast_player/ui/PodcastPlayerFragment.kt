@@ -315,6 +315,12 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
             includeLayoutEpisodePlaybackControls.apply {
 
+                textViewShareClipButton.apply {
+                    val shareClipEnabled = podcast.hasDestinations && !args.fromFeed
+                    alpha = if (shareClipEnabled) 1.0F else 0.3F
+                    isEnabled = shareClipEnabled
+                }
+
                 textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
 
                 includeLayoutCustomBoost.apply customBoost@ {

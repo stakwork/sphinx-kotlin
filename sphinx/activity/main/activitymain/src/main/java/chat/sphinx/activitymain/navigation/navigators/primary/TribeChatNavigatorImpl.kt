@@ -37,7 +37,7 @@ internal class TribeChatNavigatorImpl @Inject constructor(
     }
 
     override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, currentEpisodeDuration: Long) {
-        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration))
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration, false))
     }
 
     override suspend fun toTribeDetailScreen(chatId: ChatId) {

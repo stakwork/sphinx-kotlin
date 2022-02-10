@@ -12,7 +12,7 @@ internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>(
     object ServiceInactive: PodcastPlayerViewState()
 
     class PodcastLoaded(
-        val podcast: Podcast
+        val podcast: Podcast,
     ): PodcastPlayerViewState()
 
     class LoadingEpisode(

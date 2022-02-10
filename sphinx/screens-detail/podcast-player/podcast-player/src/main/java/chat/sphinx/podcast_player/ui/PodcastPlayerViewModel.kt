@@ -64,6 +64,9 @@ internal inline val PodcastPlayerFragmentArgs.chatId: ChatId
 internal inline val PodcastPlayerFragmentArgs.feedId: FeedId
     get() = FeedId(argFeedId)
 
+internal inline val PodcastPlayerFragmentArgs.fromFeed: Boolean
+    get() = argFromFeed
+
 @HiltViewModel
 internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
@@ -313,7 +316,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     podcast.setMetaData(metaData)
                 }
             }
-            viewStateContainer.updateViewState(PodcastPlayerViewState.PodcastLoaded(podcast))
+
+            viewStateContainer.updateViewState(
+                PodcastPlayerViewState.PodcastLoaded(podcast)
+            )
 
             mediaPlayerServiceController.submitAction(
                 UserAction.AdjustSatsPerMinute(
