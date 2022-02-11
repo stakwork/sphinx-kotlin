@@ -523,7 +523,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
                             textViewDashboardPopupPeopleProfileHost.text = viewState.link.host
 
-                            textViewDashboardPopupPeopleProfileTitle.text = getString(R.string.dashboard_save_profile_popup_title)
+                            textViewDashboardPopupPeopleProfileTitle.text = viewState.title
                             buttonSaveProfile.text = getString(R.string.dashboard_save_profile_button)
                         }
                         binding.layoutDashboardPopup.root.visible

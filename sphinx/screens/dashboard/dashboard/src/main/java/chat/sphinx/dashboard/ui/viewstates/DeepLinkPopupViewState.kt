@@ -26,7 +26,8 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     class ExternalRequestPopup(
         val link: ExternalRequestLink,
         val body: String,
-        val path: String
+        val path: String,
+        val title: String
     ): DeepLinkPopupViewState()
 
     class DeletePeopleProfilePopup(

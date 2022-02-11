@@ -335,7 +335,8 @@ internal class DashboardViewModel @Inject constructor(
                                 DeepLinkPopupViewState.ExternalRequestPopup(
                                     link,
                                     loadResponse.value.body,
-                                    loadResponse.value.path
+                                    loadResponse.value.path,
+                                    app.getString(R.string.dashboard_save_profile_popup_title)
                                 )
                             )
                         }
@@ -345,7 +346,8 @@ internal class DashboardViewModel @Inject constructor(
                                 DeepLinkPopupViewState.ExternalRequestPopup(
                                     link,
                                     loadResponse.value.body,
-                                    loadResponse.value.path
+                                    loadResponse.value.path,
+                                    app.getString(R.string.dashboard_redeem_badge_token_popup_title)
                                 )
                             )
                         }
