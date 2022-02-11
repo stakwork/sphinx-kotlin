@@ -21,6 +21,9 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashSet
 
 // TODO: Remove
 inline val Message.isCopyLinkAllowed: Boolean
@@ -30,6 +33,7 @@ inline val Message.isCopyLinkAllowed: Boolean
 
 inline val Message.shouldAdaptBubbleWidth: Boolean
     get() = type.isMessage() &&
+            podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
             !status.isDeleted() &&
@@ -253,7 +257,10 @@ internal sealed class MessageHolderViewState(
 
                 nnMessageMedia.localFile?.let { nnFile ->
 
-                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(nnFile)
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(
+                        message.id,
+                        nnFile
+                    )
 
                 } ?: run {
                     val pendingPayment = this is Received && message.isPaidPendingMessage
@@ -264,11 +271,24 @@ internal sealed class MessageHolderViewState(
                         onBindDownloadMedia.invoke()
                     }
 
-                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(pendingPayment)
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(
+                        message.id,
+                        pendingPayment
+                    )
                 }
             } else {
                 null
             }
+        }
+    }
+
+    val bubblePodcastClip: LayoutState.Bubble.ContainerSecond.PodcastClip? by lazy(LazyThreadSafetyMode.NONE) {
+        message.podcastClip?.let { nnPodcastClip ->
+            LayoutState.Bubble.ContainerSecond.PodcastClip(
+                message.id,
+                message.uuid,
+                nnPodcastClip
+            )
         }
     }
 

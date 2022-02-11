@@ -36,7 +36,7 @@
         <include
             android:id="@+id/include_message_type_direct_payment"
             layout="@layout/layout_message_type_direct_payment"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <!--  Image Attachment  -->
         <include
@@ -45,7 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/include_message_type_direct_payment"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <!--  File Attachment  -->
         <include
@@ -59,6 +59,11 @@
             layout="@layout/layout_message_type_attachment_audio"
             tools:visibility="gone" />
 
+        <!--  Audio Attachment  -->
+        <include
+            android:id="@+id/include_message_type_podcast_clip"
+            layout="@layout/layout_message_type_podcast_clip"
+            tools:visibility="visible" />
 
         <!--  Video Attachment  -->
         <include
@@ -66,19 +71,17 @@
             layout="@layout/layout_message_type_attachment_video"
             tools:visibility="gone" />
 
-
         <!--  Call Invite  -->
         <include
             android:id="@+id/include_message_type_call_invite"
             layout="@layout/layout_message_type_call_invite"
             tools:visibility="gone" />
 
-
         <!--  Invoice Message  -->
         <include
             android:id="@+id/include_message_type_invoice"
             layout="@layout/layout_message_type_invoice"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <!--  Podcast boost  -->
         <include

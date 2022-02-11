@@ -27,18 +27,24 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.*
+import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -53,7 +59,7 @@ internal class ChatTribeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
     private val tribeChatNavigator: TribeChatNavigator,
-    repositoryMedia: RepositoryMedia,
+    private val repositoryMedia: RepositoryMedia,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -95,6 +101,37 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
+    private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
+        emitAll(chatRepository.getPodcastByChatId(chatId))
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000),
+        replay = 1,
+    )
+
+    private suspend fun getPodcast(): Podcast? {
+        podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
+            return podcast
+        }
+
+        podcastSharedFlow.firstOrNull()?.let { podcast ->
+            return podcast
+        }
+
+        var podcast: Podcast? = null
+
+        try {
+            podcastSharedFlow.collect {
+                if (it != null) {
+                    podcast = it
+                    throw Exception()
+                }
+            }
+        } catch (e: Exception) {}
+        delay(25L)
+        return podcast
+    }
+
     override val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState> = flow {
         chatSharedFlow.collect { chat ->
             chat?.photoUrl?.let {
@@ -120,6 +157,28 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
+    }
+
+    override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
+        getPodcast()?.let { podcast ->
+            val metaData = ChatMetaData(
+                itemId = podcastClip.itemID,
+                itemLongId = ItemId(-1),
+                satsPerMinute = getChat()?.metaData?.satsPerMinute ?: Sat(podcast.satsPerMinute),
+                timeSeconds = podcastClip.ts,
+                speed = 1.0
+            )
+
+            repositoryMedia.streamFeedPayments(
+                chatId,
+                metaData,
+                podcastClip.feedID.value,
+                podcastClip.itemID.value,
+                podcast.getFeedDestinations(podcastClip.pubkey),
+                false,
+                messageUUID
+            )
+        }
     }
 
     override suspend fun getInitialHolderViewStateForReceivedMessage(

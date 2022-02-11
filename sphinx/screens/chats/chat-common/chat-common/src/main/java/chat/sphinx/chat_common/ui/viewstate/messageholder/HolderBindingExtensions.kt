@@ -15,6 +15,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
+import chat.sphinx.chat_common.databinding.LayoutMessageTypePodcastClipBinding
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
@@ -36,8 +37,11 @@ import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_common.util.getHHMMSSString
+import chat.sphinx.wrapper_common.util.getHHMMString
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -109,14 +113,24 @@ internal fun  LayoutMessageHolderBinding.setView(
             lifecycleScope,
             userColorsHelper,
         )
-        setInvoiceExpirationHeader(viewState.invoiceExpirationHeader)
-
-        setBubbleBackground(viewState, recyclerViewWidth)
-        setDeletedOrFlaggedMessageLayout(viewState.deletedOrFlaggedMessage)
-        setInvoicePaymentLayout(viewState.invoicePayment)
-        setInvoiceDottedLinesLayout(viewState)
-        setGroupActionIndicatorLayout(viewState.groupActionIndicator)
-
+        setInvoiceExpirationHeader(
+            viewState.invoiceExpirationHeader
+        )
+        setBubbleBackground(
+            viewState, recyclerViewWidth
+        )
+        setDeletedOrFlaggedMessageLayout(
+            viewState.deletedOrFlaggedMessage
+        )
+        setInvoicePaymentLayout(
+            viewState.invoicePayment
+        )
+        setInvoiceDottedLinesLayout(
+            viewState
+        )
+        setGroupActionIndicatorLayout(
+            viewState.groupActionIndicator
+        )
         if (viewState.background !is BubbleBackground.Gone) {
             setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
@@ -176,11 +190,23 @@ internal fun  LayoutMessageHolderBinding.setView(
                 holderJobs,
                 lifecycleScope
             )
+            setBubblePodcastClip(
+                viewState.bubblePodcastClip,
+                audioPlayerController,
+                dispatchers,
+                holderJobs,
+                lifecycleScope
+            )
             setBubbleVideoAttachment(
                 viewState.bubbleVideoAttachment,
             )
-            setUnsupportedMessageTypeLayout(viewState.unsupportedMessageType)
-            setBubbleMessageLayout(viewState.bubbleMessage, onSphinxInteractionListener)
+            setUnsupportedMessageTypeLayout(
+                viewState.unsupportedMessageType
+            )
+            setBubbleMessageLayout(
+                viewState.bubbleMessage,
+                onSphinxInteractionListener
+            )
             setBubblePaidMessageLayout(
                 dispatchers,
                 holderJobs,
@@ -195,16 +221,28 @@ internal fun  LayoutMessageHolderBinding.setView(
                 lifecycleScope,
                 viewState
             )
-            setBubbleCallInvite(viewState.bubbleCallInvite)
-            setBubbleBotResponse(viewState.bubbleBotResponse)
-            setBubbleDirectPaymentLayout(viewState.bubbleDirectPayment)
-            setBubbleInvoiceLayout(viewState.bubbleInvoice)
-            setBubblePodcastBoost(viewState.bubblePodcastBoost)
+            setBubbleCallInvite(
+                viewState.bubbleCallInvite
+            )
+            setBubbleBotResponse(
+                viewState.bubbleBotResponse
+            )
+            setBubbleDirectPaymentLayout(
+                viewState.bubbleDirectPayment
+            )
+            setBubbleInvoiceLayout(
+                viewState.bubbleInvoice
+            )
+            setBubblePodcastBoost(
+                viewState.bubblePodcastBoost
+            )
             setBubblePaidMessageReceivedDetailsLayout(
                 viewState.bubblePaidMessageReceivedDetails,
                 viewState.background
             )
-            setBubblePaidMessageSentStatusLayout(viewState.bubblePaidMessageSentStatus)
+            setBubblePaidMessageSentStatusLayout(
+                viewState.bubblePaidMessageSentStatus
+            )
             setBubbleReactionBoosts(
                 viewState.bubbleReactionBoosts,
                 holderJobs,
@@ -280,13 +318,6 @@ internal fun  LayoutMessageHolderBinding.setView(
     }
 }
 
-@Suppress("NOTHING_TO_INLINE")
-internal inline fun Long.toTimestamp(): String {
-    val minutes = this / 1000 / 60
-    val seconds = this / 1000 % 60
-
-    return "${"%02d".format(minutes)}:${"%02d".format(seconds)}"
-}
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
@@ -1264,17 +1295,26 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
             }
             is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable -> {
                 root.visible
-                lifecycleScope.launch(dispatchers.mainImmediate) {
+                lifecycleScope.launch(dispatchers.io) {
                     audioPlayerController.getAudioState(audioAttachment)?.value?.let { state ->
-                        setAudioAttachmentLayoutForState(state)
-                    } ?: setAudioAttachmentLayoutForState(
-                        AudioMessageState(
-                            null,
-                            AudioPlayState.Error,
-                            1L,
-                            0L,
-                        )
-                    )
+                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                            setAudioAttachmentLayoutForState(state)
+                        }
+                    } ?: run {
+                        lifecycleScope.launch(dispatchers.mainImmediate) {
+                            setAudioAttachmentLayoutForState(
+                                AudioMessageState(
+                                    audioAttachment.messageId,
+                                    null,
+                                    null,
+                                    null,
+                                    AudioPlayState.Error,
+                                    1L,
+                                    0L,
+                                )
+                            )
+                        }
+                    }
                 }.let { job ->
                     holderJobs.add(job)
                 }
@@ -1283,6 +1323,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleAudioAttachment(
                 root.visible
                 setAudioAttachmentLayoutForState(
                     AudioMessageState(
+                        audioAttachment.messageId,
+                        null,
+                        null,
                         null,
                         AudioPlayState.Loading,
                         1L,
@@ -1302,7 +1345,7 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
 ) {
 
     seekBarAttachmentAudio.progress = state.progress.toInt()
-    textViewAttachmentAudioRemainingDuration.text = state.remainingSeconds.toTimestamp()
+    textViewAttachmentAudioRemainingDuration.text = state.remainingSeconds.getHHMMString()
 
 
     @Exhaustive
@@ -1331,6 +1374,89 @@ internal inline fun LayoutMessageTypeAttachmentAudioBinding.setAudioAttachmentLa
             textViewAttachmentPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
             textViewAttachmentPlayPauseButton.visible
 
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubblePodcastClip(
+    podcastClipViewState: LayoutState.Bubble.ContainerSecond.PodcastClip?,
+    audioPlayerController: AudioPlayerController,
+    dispatchers: CoroutineDispatchers,
+    holderJobs: ArrayList<Job>,
+    lifecycleScope: CoroutineScope,
+) {
+    includeMessageHolderBubble.includeMessageTypePodcastClip.apply {
+        if (podcastClipViewState == null) {
+            root.gone
+        } else {
+            root.visible
+            textViewPodcastEpisodeTitle.text = podcastClipViewState.podcastClip.title
+
+            lifecycleScope.launch(dispatchers.io) {
+                audioPlayerController.getAudioState(podcastClipViewState)?.value?.let { state ->
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        setPodcastClipLayoutForState(state)
+                    }
+                } ?: run {
+                    lifecycleScope.launch(dispatchers.mainImmediate) {
+                        setPodcastClipLayoutForState(
+                            AudioMessageState(
+                                podcastClipViewState.messageId,
+                                podcastClipViewState.messageUUID,
+                                null,
+                                podcastClipViewState.podcastClip,
+                                AudioPlayState.Error,
+                                1L,
+                                0L,
+                            )
+                        )
+                    }
+                }
+            }.let { job ->
+                holderJobs.add(job)
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageTypePodcastClipBinding.setPodcastClipLayoutForState(
+    state: AudioMessageState
+) {
+
+    seekBarPodcastClip.progress = state.progress.toInt()
+
+    textViewPodcastClipCurrentTime.text = state.currentMillis.getHHMMSSString()
+    textViewPodcastClipDuration.text = state.durationMillis.getHHMMSSString()
+
+    @Exhaustive
+    when (state.playState) {
+        AudioPlayState.Error -> {
+            textViewPodcastClipFailure.visible
+            layoutConstraintPlayPauseButton.gone
+            progressBarPodcastClipLoading.gone
+        }
+        AudioPlayState.Loading -> {
+            textViewPodcastClipFailure.gone
+            layoutConstraintPlayPauseButton.gone
+            progressBarPodcastClipLoading.visible
+        }
+        AudioPlayState.Paused -> {
+            textViewPodcastClipFailure.gone
+            progressBarPodcastClipLoading.gone
+
+            textViewPodcastClipPlayPauseButton.text = getString(R.string.material_icon_name_play_button)
+            layoutConstraintPlayPauseButton.visible
+        }
+        AudioPlayState.Playing -> {
+            textViewPodcastClipFailure.gone
+            progressBarPodcastClipLoading.gone
+
+            textViewPodcastClipPlayPauseButton.text = getString(R.string.material_icon_name_pause_button)
+            layoutConstraintPlayPauseButton.visible
         }
     }
 }

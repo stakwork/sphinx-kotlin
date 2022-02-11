@@ -3,6 +3,7 @@ package chat.sphinx.concept_repository_media
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_feed.DownloadableFeedItem
 import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_message.Message
@@ -36,6 +37,8 @@ interface RepositoryMedia {
         metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
-        destinations: List<FeedDestination>
+        destinations: List<FeedDestination>,
+        updateMetaData: Boolean = true,
+        clipUUID: MessageUUID? = null
     )
 }

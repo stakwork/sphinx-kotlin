@@ -20,6 +20,9 @@ inline fun Message.retrieveTextToShow(): String? =
         if (giphyData != null) {
             return giphyData?.text
         }
+        if (podcastClip != null) {
+            return podcastClip?.text
+        }
         if (feedBoost != null) {
             return null
         }
@@ -259,6 +262,9 @@ inline val Message.isVideoMessage: Boolean
 inline val Message.isPodcastBoost: Boolean
     get() = type.isBoost() && feedBoost != null
 
+inline val Message.isPodcastClip: Boolean
+    get() = podcastClip != null
+
 inline val Message.isExpiredInvoice: Boolean
     get() = type.isInvoice() && !status.isConfirmed() && expirationDate != null && expirationDate!!.time < System.currentTimeMillis()
 
@@ -294,6 +300,7 @@ abstract class Message {
     abstract val messageDecryptionException: Exception?
     abstract val messageMedia: MessageMedia?
     abstract val feedBoost: FeedBoost?
+    abstract val podcastClip: PodcastClip?
     abstract val giphyData: GiphyData?
     abstract val reactions: List<Message>?
     abstract val purchaseItems: List<Message>?
@@ -324,7 +331,8 @@ abstract class Message {
                 other.messageDecryptionError        == messageDecryptionError       &&
                 other.messageDecryptionException    == messageDecryptionException   &&
                 other.messageMedia                  == messageMedia                 &&
-                other.feedBoost                      == feedBoost                     &&
+                other.feedBoost                     == feedBoost                    &&
+                other.podcastClip                   == podcastClip                  &&
                 other.giphyData                     == giphyData                    &&
                 other.reactions.let { a ->
                     reactions.let { b ->
@@ -374,6 +382,7 @@ abstract class Message {
         result = _31 * result + messageDecryptionException.hashCode()
         result = _31 * result + messageMedia.hashCode()
         result = _31 * result + feedBoost.hashCode()
+        result = _31 * result + podcastClip.hashCode()
         result = _31 * result + giphyData.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
@@ -391,7 +400,8 @@ abstract class Message {
                 "messageContentDecrypted=$messageContentDecrypted,"                             +
                 "messageDecryptionError=$messageDecryptionError,"                               +
                 "messageDecryptionException=$messageDecryptionException,"                       +
-                "messageMedia=$messageMedia,podBoost=$feedBoost,giphyData=$giphyData,"           +
-                "reactions=$reactions,purchaseItems=$purchaseItems,replyMessage=$replyMessage)"
+                "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
+                "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
+                "replyMessage=$replyMessage)"
     }
 }
