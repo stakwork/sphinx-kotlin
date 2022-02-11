@@ -524,14 +524,14 @@ internal class DashboardFragment : MotionLayoutFragment<
                     is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
                     }
-                    is DeepLinkPopupViewState.LoadingPeopleProfilePopup -> {
+                    is DeepLinkPopupViewState.LoadingExternalRequestPopup -> {
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
                             layoutConstraintLoadingProfile.visible
                             root.visible
                         }
                         binding.layoutDashboardPopup.root.visible
                     }
-                    is DeepLinkPopupViewState.SavePeopleProfilePopup -> {
+                    is DeepLinkPopupViewState.ExternalRequestPopup -> {
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
                             layoutConstraintLoadingProfile.gone
 
@@ -554,7 +554,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
                         binding.layoutDashboardPopup.root.visible
                     }
-                    is DeepLinkPopupViewState.SaveProfilePopupProcessing -> {
+                    is DeepLinkPopupViewState.ExternalRequestPopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.progressBarSaveProfile.visible
                     }
                     is DeepLinkPopupViewState.LoadingRedeemBadgeTokenPopup -> {

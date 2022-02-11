@@ -298,7 +298,7 @@ internal class DashboardViewModel @Inject constructor(
 
     private suspend fun handleExternalRequestLink(link: ExternalRequestLink) {
         deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.LoadingPeopleProfilePopup
+            DeepLinkPopupViewState.LoadingExternalRequestPopup
         )
 
         networkQuerySaveProfile.getExternalRequestByKey(
@@ -332,7 +332,7 @@ internal class DashboardViewModel @Inject constructor(
                             )
                         } else if (loadResponse.value.isSaveMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.SavePeopleProfilePopup(
+                                DeepLinkPopupViewState.ExternalRequestPopup(
                                     link,
                                     loadResponse.value.body,
                                     loadResponse.value.path
@@ -342,7 +342,7 @@ internal class DashboardViewModel @Inject constructor(
                     } else if (loadResponse.value.isClaimOnLiquidPath()){
                         if(loadResponse.value.isSaveMethod()){
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.SavePeopleProfilePopup(
+                                DeepLinkPopupViewState.ExternalRequestPopup(
                                     link,
                                     loadResponse.value.body,
                                     loadResponse.value.path
@@ -526,10 +526,10 @@ internal class DashboardViewModel @Inject constructor(
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
         deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.SaveProfilePopupProcessing
+            DeepLinkPopupViewState.ExternalRequestPopupProcessing
         )
 
-        if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
+        if (viewState is DeepLinkPopupViewState.ExternalRequestPopup) {
             if(viewState.path == "claim_on_liquid"){
                 redeemBadgeToken(viewState.body)
             }else{
