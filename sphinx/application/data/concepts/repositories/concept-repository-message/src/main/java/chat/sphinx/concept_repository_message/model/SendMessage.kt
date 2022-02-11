@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
+import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.ReplyUUID
 import chat.sphinx.wrapper_message_media.isSphinxText
 import java.io.File
@@ -15,6 +16,7 @@ class SendMessage private constructor(
     val replyUUID: ReplyUUID?,
     val text: String?,
     val giphyData: GiphyData?,
+    val podcastClip: PodcastClip?,
     val isBoost: Boolean,
     val messagePrice: Sat?,
     val priceToMeet: Sat?
@@ -27,6 +29,7 @@ class SendMessage private constructor(
         private var replyUUID: ReplyUUID?           = null
         private var text: String?                   = null
         private var giphyData: GiphyData?           = null
+        private var podcastClip: PodcastClip?       = null
         private var isBoost: Boolean                = false
         private var messagePrice: Sat?              = null
         private var priceToMeet: Sat?               = null
@@ -43,6 +46,7 @@ class SendMessage private constructor(
             replyUUID = null
             text = null
             giphyData = null
+            podcastClip = null
             isBoost = false
             messagePrice = null
             priceToMeet = null
@@ -68,7 +72,11 @@ class SendMessage private constructor(
 
             when {
                 (file == null) -> {
-                    if (text.isNullOrEmpty() && giphyData == null) {
+                    if (
+                        text.isNullOrEmpty() &&
+                        giphyData == null &&
+                        podcastClip == null
+                    ) {
                         return Pair(false, ValidationError.EMPTY_CONTENT)
                     }
                 }
@@ -126,6 +134,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setPodcastClip(podcastClip: PodcastClip?): Builder {
+            this.podcastClip = podcastClip
+            return this
+        }
+
+        @Synchronized
         fun setIsBoost(isBoost: Boolean): Builder {
             this.isBoost = isBoost
             return this
@@ -158,6 +172,7 @@ class SendMessage private constructor(
                         replyUUID,
                         text,
                         giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
+                        podcastClip?.let { PodcastClip(text, it.title, it.pubkey, it.url, it.feedID, it.itemID, it.ts) },
                         isBoost,
                         messagePrice,
                         priceToMeet

@@ -54,6 +54,7 @@
     <!-- Replies -->
     <string name="reply_message_media_content_description">Contenido del mensaje original</string>
     <string name="reply_message_close_button_content_description">Cerrar</string>
+    <string name="share_audio_clip">"Compartir clip de audio:"</string>
 
 
     <!--  Purchase Status Labels: Paid Message Details  -->

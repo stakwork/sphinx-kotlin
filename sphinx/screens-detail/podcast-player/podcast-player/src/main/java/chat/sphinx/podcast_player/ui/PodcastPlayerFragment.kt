@@ -27,6 +27,7 @@ import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
+import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -82,7 +83,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
             root.post {
                 val fragmentHeight = root.measuredHeight
-
 
                 includeLayoutPodcastEpisodesList.layoutConstraintPodcastEpisodesList.apply {
                     kotlin.run {
@@ -198,7 +198,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
 
                 textViewShareClipButton.setOnClickListener {
-                    //TODO share clip feature
+                    viewModel.shouldShareClip()
                 }
 
                 textViewReplay15Button.setOnClickListener {
@@ -314,6 +314,12 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             includeLayoutPodcastEpisodesList.textViewEpisodesListCount.text = podcast.episodesCount.toString()
 
             includeLayoutEpisodePlaybackControls.apply {
+
+                textViewShareClipButton.apply {
+                    val shareClipEnabled = podcast.hasDestinations && !args.fromFeed
+                    alpha = if (shareClipEnabled) 1.0F else 0.3F
+                    isEnabled = shareClipEnabled
+                }
 
                 textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
 

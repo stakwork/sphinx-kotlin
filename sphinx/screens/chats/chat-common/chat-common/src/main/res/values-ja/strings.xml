@@ -54,6 +54,7 @@
     <!-- Replies -->
     <string name="reply_message_media_content_description">元のメッセージのメディアコンテンツ</string>
     <string name="reply_message_close_button_content_description">閉じる</string>
+    <string name="share_audio_clip">"Share audio clip:"</string>
 
     <!--  Purchase Status Labels: Paid Message Details  -->
     <string name="purchase_status_label_paid_message_details_pending">承認待ち</string>

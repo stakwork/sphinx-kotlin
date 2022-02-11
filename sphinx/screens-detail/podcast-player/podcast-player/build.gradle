@@ -54,6 +54,9 @@ dependencies {
   api project(path: ':sphinx:application:common:wrappers:wrapper-common')
   api project(path: ':sphinx:application:common:wrappers:wrapper-podcast')
 
+  implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
+  api project(path: ':sphinx:screens-detail:podcast-player:podcast-player-view-model-coordinator')
+
   implementation deps.swipeRevealLayout.sdk
 
   implementation deps.androidx.lifecycle.hilt
