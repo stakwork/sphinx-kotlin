@@ -27,7 +27,8 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     object LoadingRedeemBadgeTokenPopup: DeepLinkPopupViewState()
     class SavePeopleProfilePopup(
         val link: SaveProfileLink,
-        val body: String
+        val body: String,
+        val path: String
     ): DeepLinkPopupViewState()
 
     class DeletePeopleProfilePopup(
@@ -36,7 +37,7 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     ): DeepLinkPopupViewState()
 
     class RedeemBadgeTokenPopup(
-        val link: RedeemBadgeTokenLink,
+        val link: SaveProfileLink,
         val body: String
     ): DeepLinkPopupViewState()
 
