@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkQuerySaveProfile {
 
-    abstract fun getPeopleProfileByKey(
+    abstract fun getExternalRequestByKey(
         host: String,
         key: String
     ): Flow<LoadResponse<GetPeopleProfileDto, ResponseError>>

@@ -88,7 +88,6 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
-    private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -302,7 +301,7 @@ internal class DashboardViewModel @Inject constructor(
             DeepLinkPopupViewState.LoadingPeopleProfilePopup
         )
 
-        networkQuerySaveProfile.getPeopleProfileByKey(
+        networkQuerySaveProfile.getExternalRequestByKey(
             link.host,
             link.key
         ).collect { loadResponse ->

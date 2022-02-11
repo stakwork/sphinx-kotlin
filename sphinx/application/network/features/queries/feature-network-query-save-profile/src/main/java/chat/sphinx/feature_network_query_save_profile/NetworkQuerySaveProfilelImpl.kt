@@ -21,7 +21,7 @@ class NetworkQuerySaveProfileImpl(
         private const val ENDPOINT_PROFILE = "/profile"
     }
 
-    override fun getPeopleProfileByKey(
+    override fun getExternalRequestByKey(
         host: String,
         key: String
     ): Flow<LoadResponse<GetPeopleProfileDto, ResponseError>> =
