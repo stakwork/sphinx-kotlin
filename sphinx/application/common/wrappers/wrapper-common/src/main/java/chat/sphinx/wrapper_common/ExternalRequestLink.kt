@@ -2,18 +2,18 @@ package chat.sphinx.wrapper_common
 
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun String.toSaveProfileLink(): SaveProfileLink? =
+inline fun String.toExternalRequestLink(): ExternalRequestLink? =
     try {
-        SaveProfileLink(this)
+        ExternalRequestLink(this)
     } catch (e: IllegalArgumentException) {
         null
     }
 
-inline val String.isValidSaveProfileLink: Boolean
-    get() = isNotEmpty() && matches("^${SaveProfileLink.REGEX}\$".toRegex())
+inline val String.isValidExternalRequestLink: Boolean
+    get() = isNotEmpty() && matches("^${ExternalRequestLink.REGEX}\$".toRegex())
 
 @JvmInline
-value class SaveProfileLink(val value: String) {
+value class ExternalRequestLink(val value: String) {
 
     companion object {
         const val REGEX = "sphinx\\.chat:\\/\\/\\?action=save&host=.*key=.*"
@@ -22,7 +22,7 @@ value class SaveProfileLink(val value: String) {
     }
 
     init {
-        require(value.isValidSaveProfileLink) {
+        require(value.isValidExternalRequestLink) {
             "Invalid Save Profile Link"
         }
     }

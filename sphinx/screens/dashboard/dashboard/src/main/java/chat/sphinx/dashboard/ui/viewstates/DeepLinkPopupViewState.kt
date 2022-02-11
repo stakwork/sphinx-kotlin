@@ -2,7 +2,7 @@ package chat.sphinx.dashboard.ui.viewstates
 
 import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.wrapper_common.ExternalAuthorizeLink
-import chat.sphinx.wrapper_common.SaveProfileLink
+import chat.sphinx.wrapper_common.ExternalRequestLink
 import chat.sphinx.wrapper_common.RedeemBadgeTokenLink
 import io.matthewnelson.concept_views.viewstate.ViewState
 
@@ -26,18 +26,18 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     object LoadingPeopleProfilePopup: DeepLinkPopupViewState()
     object LoadingRedeemBadgeTokenPopup: DeepLinkPopupViewState()
     class SavePeopleProfilePopup(
-        val link: SaveProfileLink,
+        val link: ExternalRequestLink,
         val body: String,
         val path: String
     ): DeepLinkPopupViewState()
 
     class DeletePeopleProfilePopup(
-        val link: SaveProfileLink,
+        val link: ExternalRequestLink,
         val body: String
     ): DeepLinkPopupViewState()
 
     class RedeemBadgeTokenPopup(
-        val link: SaveProfileLink,
+        val link: ExternalRequestLink,
         val body: String
     ): DeepLinkPopupViewState()
 

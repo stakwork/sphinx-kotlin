@@ -160,8 +160,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleExternalAuthorizeLink(externalAuthorizeLink)
             } ?: deepLink?.toPeopleConnectLink()?.let { peopleConnectLink ->
                 handlePeopleConnectLink(peopleConnectLink)
-            } ?: deepLink?.toSaveProfileLink()?.let { savePeopleLink ->
-                handleSaveProfileLink(savePeopleLink)
+            } ?: deepLink?.toExternalRequestLink()?.let { externalRequestLink ->
+                handleExternalRequestLink(externalRequestLink)
             }
         }
     }
@@ -179,7 +179,7 @@ internal class DashboardViewModel @Inject constructor(
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ||
-                                data.isValidSaveProfileLink ||
+                                data.isValidExternalRequestLink ||
                                 data.isValidRedeemBadgeTokenLink ->
                                 {
                                     Response.Success(Any())
@@ -207,9 +207,9 @@ internal class DashboardViewModel @Inject constructor(
 
                     handleExternalAuthorizeLink(externalAuthorizeLink)
 
-                } ?: code.toSaveProfileLink()?.let { externalSaveProfileLink ->
+                } ?: code.toExternalRequestLink()?.let { externalRequestLink ->
 
-                    handleSaveProfileLink(externalSaveProfileLink)
+                    handleExternalRequestLink(externalRequestLink)
 
                 } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
 
@@ -296,7 +296,7 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
-    private suspend fun handleSaveProfileLink(link: SaveProfileLink) {
+    private suspend fun handleExternalRequestLink(link: ExternalRequestLink) {
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.LoadingPeopleProfilePopup
         )
