@@ -124,7 +124,7 @@
             android:background="@drawable/background_redeem_badge_token_popup">
 
             <ProgressBar
-                android:id="@+id/progress_bar_loading_profile"
+                android:id="@+id/progress_bar_loading_redeem_badge_token"
                 android:layout_width="@dimen/dashboard_redeem_badge_token_popup_progress_bar_zy"
                 android:layout_height="@dimen/dashboard_redeem_badge_token_popup_progress_bar_zy"
                 style="?android:attr/progressBarStyle"
