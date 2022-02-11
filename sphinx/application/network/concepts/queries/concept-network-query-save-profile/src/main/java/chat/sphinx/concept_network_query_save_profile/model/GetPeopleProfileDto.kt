@@ -14,6 +14,10 @@ inline fun GetPeopleProfileDto.isSaveMethod(): Boolean =
 inline fun GetPeopleProfileDto.isDeleteMethod(): Boolean =
     method == "DELETE"
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun GetPeopleProfileDto.isClaimOnLiquidPath(): Boolean =
+    path == "claim_on_liquid"
+
 @JsonClass(generateAdapter = true)
 data class GetPeopleProfileDto(
     val key: String,
