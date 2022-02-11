@@ -92,7 +92,7 @@
     <string name="dashboard_delete_profile_popup_title">Delete Profile from:</string>
     <string name="dashboard_save_profile_button">SAVE</string>
     <string name="dashboard_delete_profile_button">DELETE</string>
-    <string name="dashboard_save_profile_generic_error">Could not Save Profile</string>
+    <string name="dashboard_save_profile_generic_error">Request attempt failed</string>
     <string name="dashboard_save_profile_success">Profile successfully saved</string>
     <string name="dashboard_delete_profile_generic_error">Could not Delete Profile</string>
     <string name="dashboard_delete_profile_success">Profile successfully deleted</string>
