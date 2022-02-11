@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha45 (2022-02-11)
+ - Adds support por podcast clip rows
+ - Adds ability to listen to podcast clips
+ - Adds ability to comment on podcast clips
+ - Improves chat messages loading process
+
 # Version 1.0.0-alpha44 (2022-02-08)
  - Fixes link preview crashes
  - Fixes crash on Android 12
