@@ -6,8 +6,8 @@ import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
 
 abstract class ScannerNavigator(
-    navigationDriver: BaseNavigationDriver<NavController>
-): Navigator<NavController>(navigationDriver) {
+    detailNavigationDriver: BaseNavigationDriver<NavController>
+): Navigator<NavController>(detailNavigationDriver) {
 
     @JvmSynthetic
     internal suspend fun toScannerScreen(

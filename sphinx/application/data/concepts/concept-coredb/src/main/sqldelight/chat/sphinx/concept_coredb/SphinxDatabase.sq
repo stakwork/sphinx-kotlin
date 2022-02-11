@@ -646,7 +646,7 @@ AND (
     (type = 29 AND reply_uuid IS NULL)
 )
 ORDER BY date DESC
-LIMIT 200;
+LIMIT ?;
 
 messageGetUnseenIncomingMessageCountByChatId:
 SELECT COUNT(*)

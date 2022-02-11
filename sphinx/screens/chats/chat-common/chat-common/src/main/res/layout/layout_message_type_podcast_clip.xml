@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/message_type_podcast_clip_height"
+    android:visibility="gone"
+    tools:background="@color/body"
+    tools:visibility="visible">
+
+    <TextView
+        android:id="@+id/text_view_podcast_episode_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="@dimen/podcast_clip_episode_title_text_size"
+        android:textColor="@color/text"
+        android:text=""
+        android:textAlignment="textStart"
+        android:layout_marginLeft="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="This is an episode title example"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_podcast_clip_play_button_group"
+        android:layout_width="@dimen/podcast_clip_button_play_pause_width"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_play_pause_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/semiTransparentWashedOutSentText"
+            android:padding="@dimen/default_small_layout_margin"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_podcast_clip_play_pause_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:fontFamily="@font/material_icons_regular"
+                android:text="@string/material_icon_name_play_button"
+                android:textColor="@color/blueTextAccent"
+                android:textSize="@dimen/audio_button_play_pause_text_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_podcast_clip_failure"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_error"
+            android:textColor="@color/badgeRed"
+            android:textSize="@dimen/audio_button_play_pause_text_size"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/progress_bar_podcast_clip_loading"
+            android:layout_width="@dimen/audio_message_progress_bar_xy"
+            android:layout_height="@dimen/audio_message_progress_bar_xy"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/text"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_podcast_clip_progress"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/layout_constraint_podcast_clip_play_button_group"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/text_view_podcast_clip_current_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/podcast_clip_time_text_size"
+            android:textColor="@color/text"
+            android:text="00:00:00"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <SeekBar
+        android:id="@+id/seek_bar_podcast_clip"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:progressTint="@color/receivedIcon"
+        android:thumbTint="@color/receivedIcon"
+        android:layout_marginHorizontal="@dimen/default_half_layout_margin"
+        android:splitTrack="false"
+        android:thumbOffset="3dp"
+        app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_podcast_clip_progress"
+        app:layout_constraintTop_toTopOf="@+id/layout_constraint_podcast_clip_progress"
+        app:layout_constraintStart_toEndOf="@+id/layout_constraint_podcast_clip_progress"
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_podcast_clip_duration"
+        tools:progress="20" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_podcast_clip_duration"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/text_view_podcast_clip_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:textSize="@dimen/podcast_clip_time_text_size"
+            android:textColor="@color/text"
+            android:text="00:00:00"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/view_divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="@color/lightDivider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

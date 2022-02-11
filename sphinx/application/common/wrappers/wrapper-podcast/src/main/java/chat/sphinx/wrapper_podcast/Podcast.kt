@@ -8,13 +8,11 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toItemId
-import chat.sphinx.wrapper_feed.FeedAuthor
-import chat.sphinx.wrapper_feed.FeedDescription
-import chat.sphinx.wrapper_feed.FeedDestination
-import chat.sphinx.wrapper_feed.FeedTitle
+import chat.sphinx.wrapper_feed.*
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -274,7 +272,9 @@ data class Podcast(
         episode.playing = false
     }
 
-    fun getFeedDestinations(): List<FeedDestination> {
+    fun getFeedDestinations(
+        clipSenderPubKey: LightningNodePubKey? = null,
+    ): List<FeedDestination> {
         val feedDestinations = mutableListOf<FeedDestination>()
         destinations.forEach {
             feedDestinations.add(
@@ -286,6 +286,18 @@ data class Podcast(
                 )
             )
         }
+
+        clipSenderPubKey?.let {
+            feedDestinations.add(
+                FeedDestination(
+                    FeedDestinationAddress(it.value),
+                    FeedDestinationSplit(1.0),
+                    FeedDestinationType("node"),
+                    this.id
+                )
+            )
+        }
+
         return feedDestinations
     }
 }

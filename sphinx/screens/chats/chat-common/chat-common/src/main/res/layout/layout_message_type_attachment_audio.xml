@@ -55,11 +55,12 @@
             android:text="@string/material_icon_name_play_button"
             android:textColor="@color/text"
             android:textSize="@dimen/audio_button_play_pause_text_size"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <ProgressBar
             android:id="@+id/progress_bar_attachment_audio_file_loading"
@@ -67,7 +68,7 @@
             android:layout_height="@dimen/audio_message_progress_bar_xy"
             android:indeterminate="true"
             android:indeterminateTint="@color/text"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

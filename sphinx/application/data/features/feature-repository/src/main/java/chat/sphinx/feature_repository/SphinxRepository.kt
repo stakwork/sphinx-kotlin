@@ -622,7 +622,9 @@ abstract class SphinxRepository(
         metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
-        destinations: List<FeedDestination>
+        destinations: List<FeedDestination>,
+        updateMetaData: Boolean,
+        clipMessageUUID: MessageUUID?,
     ) {
 
         if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
@@ -635,6 +637,7 @@ abstract class SphinxRepository(
 
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
             }
@@ -653,13 +656,13 @@ abstract class SphinxRepository(
             }
 
             val streamSatsText =
-                StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed)
+                StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed, clipMessageUUID?.value)
 
             val postStreamSatsDto = PostStreamSatsDto(
                 metaData.satsPerMinute.value,
                 chatId.value,
                 streamSatsText.toJson(moshi),
-                true,
+                updateMetaData,
                 destinationsArray
             )
 
@@ -1913,10 +1916,10 @@ abstract class SphinxRepository(
         return message
     }
 
-    override fun getAllMessagesToShowByChatId(chatId: ChatId): Flow<List<Message>> = flow {
+    override fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
         emitAll(
-            queries.messageGetAllToShowByChatId(chatId)
+            queries.messageGetAllToShowByChatId(chatId, limit)
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->
@@ -2121,11 +2124,21 @@ abstract class SphinxRepository(
         try {
             if (sendMessage.giphyData != null) {
                 return sendMessage.giphyData?.let {
-                    "giphy::${it.toJson(moshi).toByteArray().encodeBase64()}"
+                    "${GiphyData.MESSAGE_PREFIX}${it.toJson(moshi).toByteArray().encodeBase64()}"
                 }
             }
         } catch (e: Exception) {
             LOG.e(TAG, "GiphyData toJson failed: ", e)
+        }
+
+        try {
+            if (sendMessage.podcastClip != null) {
+                return sendMessage.podcastClip?.let {
+                    "${PodcastClip.MESSAGE_PREFIX}${it.toJson(moshi)}"
+                }
+            }
+        } catch (e: Exception) {
+            LOG.e(TAG, "PodcastClip toJson failed: ", e)
         }
 
         return sendMessage.text
