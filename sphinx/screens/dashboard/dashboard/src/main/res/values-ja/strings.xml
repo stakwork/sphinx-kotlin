@@ -97,6 +97,11 @@
     <string name="dashboard_delete_profile_generic_error">Could not Delete Profile</string>
     <string name="dashboard_delete_profile_success">Profile successfully deleted</string>
 
+    <string name="dashboard_redeem_badge_token_popup_title">Redeem Badge Token from:</string>
+    <string name="dashboard_redeem_badge_token_button">SAVE</string>
+    <string name="dashboard_redeem_badge_token_generic_error">Could not Redeem Badge Token</string>
+    <string name="dashboard_redeem_badge_token_success">Redeemed Badge Token successfully</string>
+
     <string name="dashboard_feed_tab_name">Feed</string>
     <string name="dashboard_friends_tab_name">Friends</string>
     <string name="dashboard_tribes_tab_name">Tribes</string>
