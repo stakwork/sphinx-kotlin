@@ -316,7 +316,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             buttonRedeemBadgeToken.setOnClickListener {
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.redeemBadgeToken()
+                    viewModel.updatePeopleProfile()
                 }
             }
         }
