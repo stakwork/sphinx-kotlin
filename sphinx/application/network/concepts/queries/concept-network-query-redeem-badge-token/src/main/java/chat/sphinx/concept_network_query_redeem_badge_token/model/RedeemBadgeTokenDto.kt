@@ -4,12 +4,9 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class RedeemBadgeTokenDto(
-    val id: Int,
     val host: String,
-    val owner_alias: String,
-    val description: String,
-    val img: String,
-    val tags: List<String>?,
-    val price_to_meet: Int,
-    val extras: Any,
+    val amount: Int,
+    val to: String,
+    val asset: Int,
+    val memo: String
 ) 
