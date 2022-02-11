@@ -12,7 +12,6 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
 
     object ExternalAuthorizePopupProcessing: DeepLinkPopupViewState()
 
-    object RedeemBadgeTokenPopupProcessing: DeepLinkPopupViewState()
     object ExternalRequestPopupProcessing: DeepLinkPopupViewState()
 
 
@@ -24,7 +23,6 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     ): DeepLinkPopupViewState()
 
     object LoadingExternalRequestPopup: DeepLinkPopupViewState()
-    object LoadingRedeemBadgeTokenPopup: DeepLinkPopupViewState()
     class ExternalRequestPopup(
         val link: ExternalRequestLink,
         val body: String,
@@ -32,11 +30,6 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
     ): DeepLinkPopupViewState()
 
     class DeletePeopleProfilePopup(
-        val link: ExternalRequestLink,
-        val body: String
-    ): DeepLinkPopupViewState()
-
-    class RedeemBadgeTokenPopup(
         val link: ExternalRequestLink,
         val body: String
     ): DeepLinkPopupViewState()

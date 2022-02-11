@@ -307,20 +307,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
-        binding.layoutDashboardPopup.layoutDashboardRedeemBadgeTokenPopup.apply {
-            textViewDashboardPopupClose.setOnClickListener {
-                viewModel.deepLinkPopupViewStateContainer.updateViewState(
-                    DeepLinkPopupViewState.PopupDismissed
-                )
-            }
-
-            buttonRedeemBadgeToken.setOnClickListener {
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    viewModel.updatePeopleProfile()
-                }
-            }
-        }
-
         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
             textViewDashboardPopupClose.setOnClickListener {
                 viewModel.deepLinkPopupViewStateContainer.updateViewState(
@@ -557,27 +543,6 @@ internal class DashboardFragment : MotionLayoutFragment<
                     is DeepLinkPopupViewState.ExternalRequestPopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.progressBarSaveProfile.visible
                     }
-                    is DeepLinkPopupViewState.LoadingRedeemBadgeTokenPopup -> {
-                        binding.layoutDashboardPopup.layoutDashboardRedeemBadgeTokenPopup.apply {
-                            layoutConstraintLoadingRedeemBadgeToken.visible
-                            root.visible
-                        }
-                        binding.layoutDashboardPopup.root.visible
-                    }
-                    is DeepLinkPopupViewState.RedeemBadgeTokenPopup -> {
-                        binding.layoutDashboardPopup.layoutDashboardRedeemBadgeTokenPopup.apply {
-                            layoutConstraintLoadingRedeemBadgeToken.gone
-
-                            textViewDashboardPopupRedeemBadgeTokenHost.text = viewState.link.host
-
-                            textViewDashboardPopupRedeemBadgeTokenTitle.text = getString(R.string.dashboard_redeem_badge_token_popup_title)
-                            buttonRedeemBadgeToken.text = getString(R.string.dashboard_redeem_badge_token_button)
-                        }
-                        binding.layoutDashboardPopup.root.visible
-                    }
-                    is DeepLinkPopupViewState.RedeemBadgeTokenPopupProcessing -> {
-                        binding.layoutDashboardPopup.layoutDashboardRedeemBadgeTokenPopup.progressBarRedeemBadgeToken.visible
-                    }
                     is DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo -> {
                         disposable?.dispose()
                         imageJob?.cancel()
@@ -644,11 +609,6 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
                             root.gone
                             progressBarSaveProfile.gone
-                        }
-
-                        binding.layoutDashboardPopup.layoutDashboardRedeemBadgeTokenPopup.apply {
-                            root.gone
-                            progressBarRedeemBadgeToken.gone
                         }
 
                         binding.layoutDashboardPopup.layoutDashboardConnectPopup.apply {
