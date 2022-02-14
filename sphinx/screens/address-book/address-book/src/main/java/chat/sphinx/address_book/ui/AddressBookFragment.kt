@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
@@ -23,18 +24,21 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.resources.inputMethodManager
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class AddressBookFragment: BaseFragment<
+internal class AddressBookFragment: SideEffectFragment<
+        FragmentActivity,
+        AddressBookSideEffect,
         AddressBookViewState,
         AddressBookViewModel,
-        FragmentAddressBookBinding
+        FragmentAddressBookBinding,
         >(R.layout.fragment_address_book)
 {
+
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
@@ -130,5 +134,9 @@ internal class AddressBookFragment: BaseFragment<
 
     override suspend fun onViewStateFlowCollect(viewState: AddressBookViewState) {
 //        TODO("Not yet implemented")
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: AddressBookSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }
