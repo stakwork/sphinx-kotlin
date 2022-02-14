@@ -179,8 +179,7 @@ internal class DashboardViewModel @Inject constructor(
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ||
-                                data.isValidExternalRequestLink ||
-                                data.isValidRedeemBadgeTokenLink ->
+                                data.isValidExternalRequestLink ->
                                 {
                                     Response.Success(Any())
                                 }
