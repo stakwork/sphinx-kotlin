@@ -1021,8 +1021,35 @@ abstract class ChatFragment<
                             return@collect
                         }
 
+                        val menuHeight = (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0))
+                        val menuStandardMargin = Dp(10F).toPx(selectedMessageHolderBinding.root.context).value
+                        val overlappedMenuMargin = Dp(60F).toPx(selectedMessageHolderBinding.root.context).value
+                        var overlappedMenu = false
+
+                        var menuYPos = if (viewState.showMenuTop) {
+                            if ((viewState.holderYPos.value - overlappedMenuMargin) < menuHeight) {
+                                overlappedMenu = true
+                                overlappedMenuMargin
+                            } else {
+                                viewState.holderYPos.value -
+                                        menuHeight -
+                                        menuStandardMargin
+                            }
+                        } else {
+                            if (viewState.holderYPos.value + viewState.bubbleHeight.value + menuHeight + overlappedMenuMargin > viewState.screenHeight.value) {
+                                overlappedMenu = true
+                                viewState.screenHeight.value -
+                                        (menuHeight + overlappedMenuMargin)
+                            } else {
+                                viewState.holderYPos.value +
+                                        viewState.bubbleHeight.value +
+                                        menuStandardMargin
+                            }
+                        }
+
                         selectedMessageHolderBinding.apply {
                             root.y = viewState.holderYPos.value
+                            root.alpha = if (overlappedMenu) 0.6F else 1.0F
 
                             setView(
                                 lifecycleScope,
@@ -1075,15 +1102,7 @@ abstract class ChatFragment<
 
                             this@message.includeLayoutSelectedMessageMenu.apply menu@ {
 
-                                this@menu.root.y = if (viewState.showMenuTop) {
-                                    viewState.holderYPos.value -
-                                            (resources.getDimension(R.dimen.selected_message_menu_item_height) * (viewState.messageHolderViewState.selectionMenuItems?.size ?: 0)) -
-                                            Dp(10F).toPx(root.context).value
-                                } else {
-                                    viewState.holderYPos.value +
-                                            viewState.bubbleHeight.value +
-                                            Dp(10F).toPx(root.context).value
-                                }
+                                this@menu.root.y = menuYPos
 
                                 val menuWidth = resources.getDimension(R.dimen.selected_message_menu_width)
                                 var menuXPos = viewState.bubbleCenterXPos.value - (menuWidth / 2F)

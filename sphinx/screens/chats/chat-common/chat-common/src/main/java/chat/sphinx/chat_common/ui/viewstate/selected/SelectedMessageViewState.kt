@@ -15,6 +15,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
         val bubbleCenterXPos: Px,
         val bubbleHeight: Px,
         val recyclerViewWidth: Px,
+        val screenHeight: Px,
         val showMenuTop: Boolean,
     ): SelectedMessageViewState() {
 
@@ -56,6 +57,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                     bubbleWidth.divideBy(2F).add(bubbleXPosStart).add(margin),
                     bubbleHeight,
                     recyclerViewWidth,
+                    screenHeight,
                     spaceTop.isGreaterThanOrEqualTo(spaceBottom)
                 )
             }
