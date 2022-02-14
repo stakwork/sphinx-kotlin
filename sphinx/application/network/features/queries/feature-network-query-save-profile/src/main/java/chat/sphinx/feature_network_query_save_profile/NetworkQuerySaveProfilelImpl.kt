@@ -3,7 +3,7 @@ package chat.sphinx.feature_network_query_save_profile
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
-import chat.sphinx.concept_network_query_save_profile.model.GetPeopleProfileDto
+import chat.sphinx.concept_network_query_save_profile.model.GetExternalRequestDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_save_profile.model.SaveProfileResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -24,14 +24,14 @@ class NetworkQuerySaveProfileImpl(
     override fun getExternalRequestByKey(
         host: String,
         key: String
-    ): Flow<LoadResponse<GetPeopleProfileDto, ResponseError>> =
+    ): Flow<LoadResponse<GetExternalRequestDto, ResponseError>> =
         networkRelayCall.get(
             url = String.format(
                 ENDPOINT_SAVE_KEY,
                 host,
                 key
             ),
-            responseJsonClass = GetPeopleProfileDto::class.java,
+            responseJsonClass = GetExternalRequestDto::class.java,
         )
 
 
