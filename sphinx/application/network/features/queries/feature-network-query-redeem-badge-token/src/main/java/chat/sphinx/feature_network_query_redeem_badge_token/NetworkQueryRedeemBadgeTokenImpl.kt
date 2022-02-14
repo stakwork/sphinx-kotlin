@@ -16,21 +16,8 @@ class NetworkQueryRedeemBadgeTokenImpl(
 ): NetworkQueryRedeemBadgeToken() {
 
     companion object {
-        private const val ENDPOINT_SAVE_KEY = "https://%s/save/%s"
         private const val ENDPOINT_CLAIM_ON_LIQUID = "/claim_on_liquid"
     }
-    override fun getRedeemBadgeTokenByKey(
-        host: String,
-        key: String
-    ): Flow<LoadResponse<GetRedeemBadgeTokenDto, ResponseError>> =
-        networkRelayCall.get(
-            url = String.format(
-                ENDPOINT_SAVE_KEY,
-                host,
-                key
-            ),
-            responseJsonClass = GetRedeemBadgeTokenDto::class.java,
-        )
 
     override fun redeemBadgeToken(
         data: RedeemBadgeTokenDto,

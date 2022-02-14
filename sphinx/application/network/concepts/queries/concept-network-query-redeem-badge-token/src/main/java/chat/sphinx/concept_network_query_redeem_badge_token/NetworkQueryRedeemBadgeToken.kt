@@ -9,11 +9,6 @@ import chat.sphinx.wrapper_relay.RelayUrl
 import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkQueryRedeemBadgeToken{
-    abstract fun getRedeemBadgeTokenByKey(
-        host: String,
-        key: String
-    ): Flow<LoadResponse<GetRedeemBadgeTokenDto, ResponseError>>
-
     abstract fun redeemBadgeToken(
         data: RedeemBadgeTokenDto,
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
