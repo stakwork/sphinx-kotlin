@@ -14,6 +14,9 @@ import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
 import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
 import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
+import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
+import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
+import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -127,8 +130,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleExternalAuthorizeLink(externalAuthorizeLink)
             } ?: deepLink?.toPeopleConnectLink()?.let { peopleConnectLink ->
                 handlePeopleConnectLink(peopleConnectLink)
-            } ?: deepLink?.toSaveProfileLink()?.let { savePeopleLink ->
-                handleSaveProfileLink(savePeopleLink)
+            } ?: deepLink?.toExternalRequestLink()?.let { externalRequestLink ->
+                handleExternalRequestLink(externalRequestLink)
             }
         }
     }
@@ -146,7 +149,7 @@ internal class DashboardViewModel @Inject constructor(
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ||
-                                data.isValidSaveProfileLink ->
+                                data.isValidExternalRequestLink ->
                                 {
                                     Response.Success(Any())
                                 }
@@ -173,9 +176,9 @@ internal class DashboardViewModel @Inject constructor(
 
                     handleExternalAuthorizeLink(externalAuthorizeLink)
 
-                } ?: code.toSaveProfileLink()?.let { externalSaveProfileLink ->
+                } ?: code.toExternalRequestLink()?.let { externalRequestLink ->
 
-                    handleSaveProfileLink(externalSaveProfileLink)
+                    handleExternalRequestLink(externalRequestLink)
 
                 } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
 
@@ -262,12 +265,12 @@ internal class DashboardViewModel @Inject constructor(
         )
     }
 
-    private suspend fun handleSaveProfileLink(link: SaveProfileLink) {
+    private suspend fun handleExternalRequestLink(link: ExternalRequestLink) {
         deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.LoadingPeopleProfilePopup
+            DeepLinkPopupViewState.LoadingExternalRequestPopup
         )
 
-        networkQuerySaveProfile.getPeopleProfileByKey(
+        networkQuerySaveProfile.getExternalRequestByKey(
             link.host,
             link.key
         ).collect { loadResponse ->
@@ -298,9 +301,22 @@ internal class DashboardViewModel @Inject constructor(
                             )
                         } else if (loadResponse.value.isSaveMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.SavePeopleProfilePopup(
+                                DeepLinkPopupViewState.ExternalRequestPopup(
                                     link,
-                                    loadResponse.value.body
+                                    loadResponse.value.body,
+                                    loadResponse.value.path,
+                                    app.getString(R.string.dashboard_save_profile_popup_title)
+                                )
+                            )
+                        }
+                    } else if (loadResponse.value.isClaimOnLiquidPath()){
+                        if(loadResponse.value.isSaveMethod()){
+                            deepLinkPopupViewStateContainer.updateViewState(
+                                DeepLinkPopupViewState.ExternalRequestPopup(
+                                    link,
+                                    loadResponse.value.body,
+                                    loadResponse.value.path,
+                                    app.getString(R.string.dashboard_redeem_badge_token_popup_title)
                                 )
                             )
                         }
@@ -481,11 +497,15 @@ internal class DashboardViewModel @Inject constructor(
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
         deepLinkPopupViewStateContainer.updateViewState(
-            DeepLinkPopupViewState.SaveProfilePopupProcessing
+            DeepLinkPopupViewState.ExternalRequestPopupProcessing
         )
 
-        if (viewState is DeepLinkPopupViewState.SavePeopleProfilePopup) {
-            savePeopleProfile(viewState.body)
+        if (viewState is DeepLinkPopupViewState.ExternalRequestPopup) {
+            if(viewState.path == "claim_on_liquid"){
+                redeemBadgeToken(viewState.body)
+            }else{
+                savePeopleProfile(viewState.body)
+            }
         } else if (viewState is DeepLinkPopupViewState.DeletePeopleProfilePopup) {
             deletePeopleProfile(viewState.body)
         }
@@ -543,6 +563,35 @@ internal class DashboardViewModel @Inject constructor(
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.PopupDismissed
         )
+    }
+
+    private suspend fun redeemBadgeToken(body: String) {
+            viewModelScope.launch(mainImmediate) {
+                val response = repositoryDashboard.redeemBadgeToken(
+                    body
+                )
+
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(
+                                app.getString(R.string.dashboard_redeem_badge_token_generic_error)
+                            )
+                        )
+                    }
+                    is Response.Success -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(
+                                app.getString(R.string.dashboard_redeem_badge_token_success)
+                            )
+                        )
+                    }
+                }
+            }.join()
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
+            )
     }
 
     val deepLinkPopupViewStateContainer: ViewStateContainer<DeepLinkPopupViewState> by lazy {
