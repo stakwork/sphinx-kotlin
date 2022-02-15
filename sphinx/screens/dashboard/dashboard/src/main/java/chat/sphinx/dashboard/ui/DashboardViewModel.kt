@@ -15,8 +15,6 @@ import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
 import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
 import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
 import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
-import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
-import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -295,28 +293,24 @@ internal class DashboardViewModel @Inject constructor(
                         if (loadResponse.value.isDeleteMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
                                 DeepLinkPopupViewState.DeletePeopleProfilePopup(
-                                    link,
+                                    link.host,
                                     loadResponse.value.body
                                 )
                             )
                         } else if (loadResponse.value.isSaveMethod()) {
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.ExternalRequestPopup(
-                                    link,
+                                DeepLinkPopupViewState.SaveProfilePopup(
+                                    link.host,
                                     loadResponse.value.body,
-                                    loadResponse.value.path,
-                                    app.getString(R.string.dashboard_save_profile_popup_title)
                                 )
                             )
                         }
                     } else if (loadResponse.value.isClaimOnLiquidPath()){
                         if(loadResponse.value.isSaveMethod()){
                             deepLinkPopupViewStateContainer.updateViewState(
-                                DeepLinkPopupViewState.ExternalRequestPopup(
-                                    link,
+                                DeepLinkPopupViewState.RedeemTokensPopup(
+                                    link.host,
                                     loadResponse.value.body,
-                                    loadResponse.value.path,
-                                    app.getString(R.string.dashboard_redeem_badge_token_popup_title)
                                 )
                             )
                         }
@@ -500,14 +494,17 @@ internal class DashboardViewModel @Inject constructor(
             DeepLinkPopupViewState.ExternalRequestPopupProcessing
         )
 
-        if (viewState is DeepLinkPopupViewState.ExternalRequestPopup) {
-            if(viewState.path == "claim_on_liquid"){
+        when (viewState) {
+            is DeepLinkPopupViewState.RedeemTokensPopup -> {
                 redeemBadgeToken(viewState.body)
-            }else{
+            }
+            is DeepLinkPopupViewState.SaveProfilePopup -> {
                 savePeopleProfile(viewState.body)
             }
-        } else if (viewState is DeepLinkPopupViewState.DeletePeopleProfilePopup) {
-            deletePeopleProfile(viewState.body)
+            is DeepLinkPopupViewState.DeletePeopleProfilePopup -> {
+                deletePeopleProfile(viewState.body)
+            }
+            else -> {}
         }
     }
 

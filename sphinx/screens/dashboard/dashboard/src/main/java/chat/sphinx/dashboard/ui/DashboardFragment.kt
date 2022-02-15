@@ -517,13 +517,13 @@ internal class DashboardFragment : MotionLayoutFragment<
                         }
                         binding.layoutDashboardPopup.root.visible
                     }
-                    is DeepLinkPopupViewState.ExternalRequestPopup -> {
+                    is DeepLinkPopupViewState.SaveProfilePopup -> {
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
                             layoutConstraintLoadingProfile.gone
 
-                            textViewDashboardPopupPeopleProfileHost.text = viewState.link.host
+                            textViewDashboardPopupPeopleProfileHost.text = viewState.host
 
-                            textViewDashboardPopupPeopleProfileTitle.text = viewState.title
+                            textViewDashboardPopupPeopleProfileTitle.text = getString(R.string.dashboard_save_profile_popup_title)
                             buttonSaveProfile.text = getString(R.string.dashboard_save_profile_button)
                         }
                         binding.layoutDashboardPopup.root.visible
@@ -532,12 +532,23 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
                             layoutConstraintLoadingProfile.gone
 
-                            textViewDashboardPopupPeopleProfileHost.text = viewState.link.host
+                            textViewDashboardPopupPeopleProfileHost.text = viewState.host
 
                             textViewDashboardPopupPeopleProfileTitle.text = getString(R.string.dashboard_delete_profile_popup_title)
                             buttonSaveProfile.text = getString(R.string.dashboard_delete_profile_button)
                         }
 
+                        binding.layoutDashboardPopup.root.visible
+                    }
+                    is DeepLinkPopupViewState.RedeemTokensPopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
+                            layoutConstraintLoadingProfile.gone
+
+                            textViewDashboardPopupPeopleProfileHost.text = viewState.host
+
+                            textViewDashboardPopupPeopleProfileTitle.text = getString(R.string.dashboard_redeem_badge_token_popup_title)
+                            buttonSaveProfile.text = getString(R.string.dashboard_save_profile_button)
+                        }
                         binding.layoutDashboardPopup.root.visible
                     }
                     is DeepLinkPopupViewState.ExternalRequestPopupProcessing -> {
