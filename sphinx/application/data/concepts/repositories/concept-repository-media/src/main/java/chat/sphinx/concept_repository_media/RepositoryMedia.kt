@@ -7,12 +7,16 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_feed.DownloadableFeedItem
 import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_podcast.PodcastDestination
 import java.io.File
 
 interface RepositoryMedia {
 
-    fun updateChatMetaData(chatId: ChatId, metaData: ChatMetaData, shouldSync: Boolean = true)
+    fun updateChatMetaData(
+        chatId: ChatId,
+        podcastId: FeedId?,
+        metaData: ChatMetaData,
+        shouldSync: Boolean = true
+    )
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
 

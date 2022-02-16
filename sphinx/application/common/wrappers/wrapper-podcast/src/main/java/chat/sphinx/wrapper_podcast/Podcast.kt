@@ -118,6 +118,11 @@ data class Podcast(
         playingEpisode?.let { episode ->
             return episode
         } ?: run {
+            episodeId?.let { episodeId ->
+                getEpisodeWithId(episodeId)?.let { episode ->
+                    return episode
+                }
+            }
             return episodes[0]
         }
     }

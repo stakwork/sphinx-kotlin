@@ -461,14 +461,19 @@ fun TransactionCallbacks.upsertFeed(
         return
     }
 
+    var cItemId: FeedId? = null
+
     if (chatId.value != ChatId.NULL_CHAT_ID.toLong()) {
-        //Deleting old feed associated with chat
         queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
+            //Deleting old feed associated with chat
             if (feedDbo.feed_url.value != feedUrl.value) {
                 deleteFeedById(
                     feedDbo.id,
                     queries
                 )
+            } else {
+                //Using existing current item id on update if param is null
+                cItemId = currentItemId ?: feedDbo.current_item_id
             }
         }
     }
@@ -548,7 +553,7 @@ fun TransactionCallbacks.upsertFeed(
         content_type = feedDto.contentType?.toFeedContentType(),
         language = feedDto.language?.toFeedLanguage(),
         items_count = FeedItemsCount(feedDto.items.count().toLong()),
-        current_item_id = currentItemId,
+        current_item_id = cItemId,
         chat_id = chatId,
         subscribed = subscribed,
         id = feedId,

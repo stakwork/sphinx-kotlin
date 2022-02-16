@@ -13,7 +13,7 @@ internal class FeedDboPodcastPresenterMapper(
     dispatchers: CoroutineDispatchers,
 ): ClassMapper<FeedDbo, Podcast>(dispatchers) {
     override suspend fun mapFrom(value: FeedDbo): Podcast {
-        return Podcast(
+        val podcast = Podcast(
             id = value.id,
             title = value.title,
             description = value.description,
@@ -24,6 +24,8 @@ internal class FeedDboPodcastPresenterMapper(
             feedUrl = value.feed_url,
             subscribed = value.subscribed
         )
+        podcast.episodeId = value.current_item_id?.value
+        return podcast
     }
 
     override suspend fun mapTo(value: Podcast): FeedDbo {
