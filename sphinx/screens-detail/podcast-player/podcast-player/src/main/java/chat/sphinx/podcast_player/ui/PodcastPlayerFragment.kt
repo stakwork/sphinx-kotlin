@@ -27,7 +27,6 @@ import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
-import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -301,7 +300,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
             textViewEpisodeTitleLabel.text = currentEpisode?.title?.value ?: ""
 
-            podcast.image?.value?.let { podcastImage ->
+            podcast.imageToShow?.value?.let { podcastImage ->
                 imageLoader.load(
                     imageViewPodcastImage,
                     podcastImage,
@@ -389,9 +388,19 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         }
     }
 
-    private fun loadingEpisode(episode: PodcastEpisode) {
+    private suspend fun loadingEpisode(episode: PodcastEpisode) {
         binding.apply {
             textViewEpisodeTitleLabel.text = episode.title.value
+
+            episode.image?.value?.let { podcastImage ->
+                imageLoader.load(
+                    imageViewPodcastImage,
+                    podcastImage,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                        .build()
+                )
+            }
 
             includeLayoutEpisodeSliderControl.apply {
                 textViewCurrentEpisodeDuration.text = 0.toLong().getHHMMSSString()
