@@ -916,9 +916,11 @@ abstract class SphinxRepository(
                                 )
 
                                 inviteLock.withLock {
-                                    queries.transaction {
-                                        for (dto in loadResponse.value.invites) {
-                                            upsertInvite(dto, queries)
+                                    contactLock.withLock {
+                                        queries.transaction {
+                                            for (dto in loadResponse.value.invites) {
+                                                upsertInvite(dto, queries)
+                                            }
                                         }
                                     }
                                 }
@@ -936,7 +938,10 @@ abstract class SphinxRepository(
                             error?.let {
                                 throw it
                             } ?: run {
-                                if (loadResponse.value.contacts.size > 0 || loadResponse.value.chats.size > 0) {
+                                if (
+                                    loadResponse.value.contacts.isNotEmpty() ||
+                                    loadResponse.value.chats.isNotEmpty()
+                                ) {
                                     authenticationStorage.putString(
                                         REPOSITORY_LAST_SEEN_CONTACTS_DATE,
                                         now
