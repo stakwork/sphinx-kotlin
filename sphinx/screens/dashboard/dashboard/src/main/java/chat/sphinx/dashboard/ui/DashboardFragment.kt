@@ -27,16 +27,16 @@ import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
 import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
-import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
+import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.resources.SphinxToastUtils
-import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_view.Px
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -55,7 +55,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         Any,
         Context,
         ChatListSideEffect,
-        NavDrawerViewState,
+        DashboardMotionViewState,
         DashboardViewModel,
         FragmentDashboardBinding
         >(R.layout.fragment_dashboard), SwipeRefreshLayout.OnRefreshListener
@@ -68,8 +68,15 @@ internal class DashboardFragment : MotionLayoutFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var userColorsHelper: UserColorsHelper
 
+    private val screenWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(binding.root.measuredHeight.toFloat())
+    }
+
     override val viewModel: DashboardViewModel by viewModels()
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
+
+    private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
+        get() = binding.layoutPodcastPlayerFooter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -80,7 +87,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         setupViewPager()
         setupDashboardHeader()
-        setupNavBar()
+        setupFooter()
         setupNavDrawer()
         setupPopups()
         setupRestorePopup()
@@ -103,8 +110,8 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     fun closeDrawerIfOpen(): Boolean {
-        if (viewModel.currentViewState is NavDrawerViewState.Open) {
-            viewModel.updateViewState(NavDrawerViewState.Closed)
+        if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpen) {
+            viewModel.updateViewState(DashboardMotionViewState.Default)
             return true
         }
         return false
@@ -117,7 +124,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             arguments: Bundle?
         ) {
             controller.removeOnDestinationChangedListener(this)
-            viewModel.updateViewState(NavDrawerViewState.Closed)
+            viewModel.updateViewState(DashboardMotionViewState.Default)
         }
     }
 
@@ -193,7 +200,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             val newHeaderHeight = header.layoutConstraintDashboardHeader.layoutParams.height + activity.statusBarInsetHeight.top
 
-            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_closed)?.let { constraintSet ->
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_default)?.let { constraintSet ->
                 constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
             }
 
@@ -201,8 +208,12 @@ internal class DashboardFragment : MotionLayoutFragment<
                 constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
             }
 
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_nav_bar_hidden)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
+
             header.imageViewNavDrawerMenu.setOnClickListener {
-                viewModel.updateViewState(NavDrawerViewState.Open)
+                viewModel.updateViewState(DashboardMotionViewState.DrawerOpen)
             }
 
             header.textViewDashboardHeaderUpgradeApp.setOnClickListener {
@@ -214,11 +225,15 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun setupFooter() {
+        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
+
+        setupNavBar()
+        setupPodcastPlayerFooter()
+    }
+
     private fun setupNavBar() {
         binding.layoutDashboardNavBar.let { navBar ->
-
-            (requireActivity() as InsetterActivity)
-                .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
 
             navBar.navBarButtonPaymentReceive.setOnClickListener {
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
@@ -235,6 +250,19 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun setupPodcastPlayerFooter() {
+        podcastPlayerBinding.apply {
+            textViewEpisodeTitle.text = "Episode title example"
+            textViewContributorTitle.text = "Contributor"
+
+            textViewPlayButton.visible
+            textViewForward30Button.visible
+            progressBarAudioLoading.gone
+
+            root.visible
+        }
+    }
+
     private fun setupRestorePopup() {
         binding.layoutDashboardRestore.layoutDashboardRestoreProgress.apply {
             buttonStopRestore.setOnClickListener {
@@ -245,7 +273,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupNavDrawer() {
         binding.dashboardNavDrawerInputLock.setOnClickListener {
-            viewModel.updateViewState(NavDrawerViewState.Closed)
+            viewModel.updateViewState(DashboardMotionViewState.Default)
         }
 
         binding.layoutDashboardNavDrawer.let { navDrawer ->
@@ -318,6 +346,18 @@ internal class DashboardFragment : MotionLayoutFragment<
                 viewModel.connectToContact(
                     editTextDashboardPeoplePopupMessage.text?.toString()
                 )
+            }
+        }
+    }
+
+    fun shouldToggleNavBar(show: Boolean) {
+        if (show) {
+            if (viewModel.currentViewState !is DashboardMotionViewState.Default) {
+                viewModel.updateViewState(DashboardMotionViewState.Default)
+            }
+        } else {
+            if (viewModel.currentViewState !is DashboardMotionViewState.NavBarHidden) {
+                viewModel.updateViewState(DashboardMotionViewState.NavBarHidden)
             }
         }
     }
@@ -431,14 +471,17 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: DashboardMotionViewState) {
         @Exhaustive
         when (viewState) {
-            NavDrawerViewState.Closed -> {
-                binding.layoutMotionDashboard.setTransitionDuration(150)
+            DashboardMotionViewState.Default -> {
+                binding.layoutMotionDashboard.setTransitionDuration(200)
             }
-            NavDrawerViewState.Open -> {
+            DashboardMotionViewState.DrawerOpen -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
+            }
+            DashboardMotionViewState.NavBarHidden -> {
+                binding.layoutMotionDashboard.setTransitionDuration(200)
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
@@ -642,7 +685,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     override fun onViewCreatedRestoreMotionScene(
-        viewState: NavDrawerViewState,
+        viewState: DashboardMotionViewState,
         binding: FragmentDashboardBinding
     ) {
         viewState.restoreMotionScene(binding.layoutMotionDashboard)

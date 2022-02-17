@@ -5,7 +5,7 @@
     android:id="@+id/layout_constraint_podcast_player_footer"
     android:layout_width="match_parent"
     android:layout_height="@dimen/player_bar_height"
-    android:background="@color/headerBG"
+    android:background="@color/headerBGSemiTransparent"
     android:visibility="gone"
     tools:visibility="visible">
 
@@ -17,9 +17,9 @@
         android:layout_marginStart="@dimen/default_layout_margin"
         android:layout_marginTop="@dimen/player_bar_image_top_margin"
         android:visibility="visible"
+        android:src="@drawable/ic_podcast_placeholder"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_episode_title"
@@ -76,6 +76,7 @@
             android:backgroundTint="@color/text"
             android:clickable="true"
             android:gravity="center"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/text_view_forward_30_button"
             app:layout_constraintStart_toStartOf="parent"
@@ -90,6 +91,7 @@
             android:adjustViewBounds="true"
             android:padding="@dimen/player_bar_pause_button_margin"
             android:clickable="true"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/text_view_forward_30_button"
             app:layout_constraintStart_toStartOf="parent"
@@ -99,8 +101,7 @@
             app:lottie_loop="true"
             app:lottie_repeatMode="reverse"
             app:lottie_speed="1"
-            tools:ignore="ContentDescription"
-            tools:visibility="gone" />
+            tools:ignore="ContentDescription" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_forward_30_button"
@@ -110,6 +111,7 @@
             android:backgroundTint="@color/whiteSeventyPercentOpacity"
             android:gravity="center"
             android:clickable="true"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -121,43 +123,13 @@
             android:layout_height="@dimen/player_bar_play_button_xy"
             android:indeterminate="true"
             android:indeterminateTint="@color/whiteSemiTransparent"
-            android:visibility="gone"
+            android:visibility="visible"
             android:padding="@dimen/default_small_layout_margin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-<!--    <androidx.appcompat.widget.AppCompatTextView-->
-<!--        android:id="@+id/text_view_forward_30_button"-->
-<!--        android:layout_width="@dimen/chat_footer_button_xy"-->
-<!--        android:layout_height="@dimen/chat_footer_button_xy"-->
-<!--        android:background="@drawable/ic_forward_30"-->
-<!--        android:backgroundTint="@color/secondaryText"-->
-<!--        android:gravity="center"-->
-<!--        android:layout_marginHorizontal="@dimen/default_layout_margin"-->
-<!--        android:clickable="true"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toStartOf="@id/text_view_play_pause_button"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
-
-<!--    <androidx.appcompat.widget.AppCompatTextView-->
-<!--        android:id="@+id/text_view_play_pause_button"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:layout_marginHorizontal="@dimen/default_layout_margin"-->
-<!--        android:fontFamily="@font/material_icons_regular"-->
-<!--        android:gravity="center"-->
-<!--        android:text="@string/material_icon_name_play_button"-->
-<!--        android:background="@android:color/transparent"-->
-<!--        android:textColor="@color/receivedIcon"-->
-<!--        android:textSize="@dimen/chat_footer_button_icon_text_size"-->
-<!--        android:clickable="true"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        tools:visibility="visible" />-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/progress_bar_container"
@@ -172,7 +144,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/progress_bar"
-            android:layout_width="100dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

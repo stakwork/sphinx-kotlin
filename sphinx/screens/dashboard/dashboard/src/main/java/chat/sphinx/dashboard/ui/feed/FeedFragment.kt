@@ -19,6 +19,7 @@ import chat.sphinx.dashboard.databinding.FragmentFeedBinding
 import chat.sphinx.dashboard.ui.DashboardFragment
 import chat.sphinx.dashboard.ui.DashboardFragmentsAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedSearchAdapter
+import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
 import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
@@ -208,6 +209,12 @@ internal class FeedFragment : SideEffectFragment<
             this.setHasFixedSize(false)
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = searchResultsAdapter
+        }
+    }
+
+    fun shouldToggleNavBar(show: Boolean) {
+        if (parentFragment is DashboardFragment) {
+            (parentFragment as DashboardFragment)?.shouldToggleNavBar(show)
         }
     }
 

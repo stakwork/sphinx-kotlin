@@ -9,11 +9,10 @@
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
 
-
     <!--
-           Set 1: Nav Drawer Closed
+           Set 1: Nav Drawer Closed / Nav Bar Visible
     -->
-    <ConstraintSet android:id="@+id/motion_scene_dashboard_drawer_closed">
+    <ConstraintSet android:id="@+id/motion_scene_dashboard_default">
 
         <Constraint android:id="@id/layout_dashboard_popup">
             <Layout
@@ -47,19 +46,20 @@
                 app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header" />
         </Constraint>
 
-        <Constraint android:id="@+id/layout_dashboard_chats">
-            <Layout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
-                app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_search_bar" />
-        </Constraint>
-
         <Constraint android:id="@+id/layout_dashboard_nav_bar">
             <Layout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_podcast_player_footer">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/player_bar_height"
+                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar" />
+            <PropertySet
+                app:visibilityMode="ignore" />
         </Constraint>
 
         <Constraint android:id="@+id/dashboard_nav_drawer_input_lock">
@@ -78,32 +78,12 @@
 
     </ConstraintSet>
 
-
     <!--
-           Set 2: Nav Drawer Open
+           Set 2: Nav Drawer Open / Nav Bar Visible
     -->
     <ConstraintSet
         android:id="@+id/motion_scene_dashboard_drawer_open"
-        app:deriveConstraintsFrom="@+id/motion_scene_dashboard_drawer_closed">
-
-        <Constraint android:id="@id/layout_dashboard_popup">
-            <PropertySet
-                app:applyMotionScene="false"
-                app:visibilityMode="ignore" />
-        </Constraint>
-
-        <Constraint android:id="@id/layout_dashboard_restore">
-            <PropertySet
-                app:applyMotionScene="false"
-                app:visibilityMode="ignore" />
-        </Constraint>
-
-        <Constraint android:id="@+id/layout_dashboard_header">
-            <Layout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_header_height"
-                app:layout_constraintTop_toTopOf="parent" />
-        </Constraint>
+        app:deriveConstraintsFrom="@+id/motion_scene_dashboard_default">
 
         <Constraint android:id="@+id/dashboard_nav_drawer_input_lock">
             <PropertySet
@@ -120,10 +100,31 @@
 
     </ConstraintSet>
 
+    <!--
+           Set 3: Nav Drawer Closed / Nav Bar Hidden
+    -->
+    <ConstraintSet android:id="@+id/motion_scene_dashboard_nav_bar_hidden"
+        app:deriveConstraintsFrom="@+id/motion_scene_dashboard_default">
+
+        <Constraint android:id="@+id/layout_dashboard_nav_bar">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="parent" />
+        </Constraint>
+
+    </ConstraintSet>
+
     <Transition
         android:id="@+id/transition_dashboard_drawer_closed_to_open"
         app:constraintSetEnd="@+id/motion_scene_dashboard_drawer_open"
-        app:constraintSetStart="@+id/motion_scene_dashboard_drawer_closed"
+        app:constraintSetStart="@+id/motion_scene_dashboard_default"
+        app:duration="300" />
+
+    <Transition
+        android:id="@+id/transition_dashboard_nav_visible_to_hidden"
+        app:constraintSetEnd="@+id/motion_scene_dashboard_nav_bar_hidden"
+        app:constraintSetStart="@+id/motion_scene_dashboard_default"
         app:duration="300" />
 
     <!-- Duration is set programmatically from the DashboardFragment's onViewStateFlowCollect -->

@@ -92,14 +92,14 @@ internal class DashboardViewModel @Inject constructor(
         Any,
         Context,
         ChatListSideEffect,
-        NavDrawerViewState
-        >(dispatchers, NavDrawerViewState.Closed)
+        DashboardMotionViewState
+        >(dispatchers, DashboardMotionViewState.Default)
 {
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
     val newVersionAvailable: MutableStateFlow<Boolean> by lazy(LazyThreadSafetyMode.NONE) {
-        MutableStateFlow<Boolean>(false)
+        MutableStateFlow(false)
     }
 
     val currentVersion: MutableStateFlow<String> by lazy(LazyThreadSafetyMode.NONE) {

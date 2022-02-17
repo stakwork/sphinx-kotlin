@@ -114,6 +114,8 @@
     <dimen name="chat_footer_progress_line_height">2dp</dimen>
 
     <!-- Podcast Player bar -->
+    <dimen name="feed_fragment_bottom_padding">80dp</dimen>
+
     <dimen name="player_bar_height">64dp</dimen>
     <dimen name="player_bar_image_xy">48dp</dimen>
     <dimen name="player_bar_image_top_margin">7dp</dimen>
