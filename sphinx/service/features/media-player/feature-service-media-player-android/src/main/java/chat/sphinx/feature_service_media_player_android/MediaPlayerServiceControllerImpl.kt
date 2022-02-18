@@ -80,10 +80,10 @@ internal class MediaPlayerServiceControllerImpl(
     override suspend fun submitAction(userAction: UserAction) {
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
-                repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
             }
             is UserAction.AdjustSatsPerMinute -> {
-                repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
             }
             is UserAction.SendBoost -> {
                 repositoryMedia.streamFeedPayments(
@@ -103,7 +103,7 @@ internal class MediaPlayerServiceControllerImpl(
                 }
             }
             is UserAction.ServiceAction.Seek -> {
-                repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 listenerHandler.dispatch(getCurrentState())
             }
         }

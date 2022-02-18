@@ -586,22 +586,32 @@ abstract class SphinxRepository(
 
     override fun updateChatMetaData(
         chatId: ChatId,
+        podcastId: FeedId?,
         metaData: ChatMetaData,
         shouldSync: Boolean
     ) {
-        if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-            return
-        }
-
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+                //Podcast with no chat. Updating current item id
+                podcastId?.let { nnPodcastId ->
+                    podcastLock.withLock {
+                        queries.feedUpdateCurrentItemId(
+                            metaData.itemId,
+                            nnPodcastId
+                        )
+                    }
+                }
+                return@launch
+            }
 
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
             }
 
             podcastLock.withLock {
-                queries.feedUpdateCurrentItemId(
+                queries.feedUpdateCurrentItemIdByChatId(
                     metaData.itemId,
                     chatId
                 )
@@ -615,7 +625,6 @@ abstract class SphinxRepository(
                     ).collect {}
                 } catch (e: AssertionError) {
                 }
-                // TODO: Network call to update Relay
             }
         }
     }

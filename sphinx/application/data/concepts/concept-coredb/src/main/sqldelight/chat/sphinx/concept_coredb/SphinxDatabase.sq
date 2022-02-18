@@ -1068,10 +1068,15 @@ FROM feedDbo
 WHERE (title LIKE :title)
 AND feed_type = :feed_type;
 
-feedUpdateCurrentItemId:
+feedUpdateCurrentItemIdByChatId:
 UPDATE feedDbo
 SET current_item_id = :item_id
 WHERE chat_id = ?;
+
+feedUpdateCurrentItemId:
+UPDATE feedDbo
+SET current_item_id = :item_id
+WHERE id = ?;
 
 feedUpdateSubscribe:
 UPDATE feedDbo

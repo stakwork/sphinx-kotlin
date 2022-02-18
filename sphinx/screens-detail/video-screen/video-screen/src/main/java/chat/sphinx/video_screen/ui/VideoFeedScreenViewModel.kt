@@ -186,6 +186,7 @@ internal open class VideoFeedScreenViewModel(
 
             repositoryMedia.updateChatMetaData(
                 getArgChatId(),
+                video.feed?.id,
                 ChatMetaData(
                     itemId = video.id,
                     itemLongId = ItemId(-1),

@@ -24,6 +24,7 @@ import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.toItemId
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
@@ -143,7 +144,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         }
                     }
 
-                    repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                    repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
 
                 }
                 is UserAction.AdjustSatsPerMinute -> {
@@ -151,7 +152,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         nnData.setSatsPerMinute(userAction.chatMetaData.satsPerMinute)
                     }
 
-                    repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                    repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 }
                 is UserAction.SetPaymentsDestinations -> {
                     podData?.let { nnData ->
@@ -239,6 +240,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                             repositoryMedia.updateChatMetaData(
                                 nnData.chatId,
+                                nnData.podcastId.toFeedId(),
                                 ChatMetaData(
                                     FeedId(nnData.episodeId),
                                     nnData.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
@@ -255,6 +257,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                     repositoryMedia.updateChatMetaData(
                         userAction.chatId,
+                        userAction.podcastId.toFeedId(),
                         ChatMetaData(
                             FeedId(userAction.episodeId),
                             userAction.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
@@ -285,7 +288,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         }
                     }
 
-                    repositoryMedia.updateChatMetaData(userAction.chatId, userAction.chatMetaData)
+                    repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 }
             }
         }
@@ -326,6 +329,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                         repositoryMedia.updateChatMetaData(
                             chatId,
+                            nnData.podcastId?.toFeedId(),
                             ChatMetaData(
                                 FeedId(nnData.episodeId),
                                 nnData.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
@@ -470,6 +474,7 @@ internal abstract class MediaPlayerService: SphinxService() {
             podData?.let { data ->
                 repositoryMedia.updateChatMetaData(
                     data.chatId,
+                    data.podcastId.toFeedId(),
                     ChatMetaData(
                         FeedId(data.episodeId),
                         data.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
