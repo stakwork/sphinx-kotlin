@@ -59,6 +59,17 @@
     <dimen name="dashboard_authorize_popup_authorize_button_text_size">12sp</dimen>
     <dimen name="dashboard_authorize_popup_progress_bar_zy">32dp</dimen>
 
+    <!-- Deep link redeem badge token popup -->
+    <dimen name="dashboard_redeem_badge_token_popup_width">240dp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_height">300dp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_verified_icon_margin_top">40sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_verified_icon_text_size">40sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_title_text_size">13sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_name_text_size">14sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_button_height">52dp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_button_text_size">12sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_progress_bar_zy">32dp</dimen>
+
     <!-- Deep save profile authorize popup -->
     <dimen name="dashboard_save_profile_popup_width">240dp</dimen>
     <dimen name="dashboard_save_profile_popup_height">300dp</dimen>
