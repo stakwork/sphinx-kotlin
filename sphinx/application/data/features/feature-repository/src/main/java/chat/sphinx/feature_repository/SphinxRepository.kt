@@ -1225,6 +1225,27 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to update contact"))
     }
 
+    override suspend fun forceKeyExchange(
+        contactId: ContactId,
+    ) {
+        applicationScope.launch(mainImmediate) {
+            try {
+                networkQueryContact.exchangeKeys(
+                    contactId,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> { }
+                        is Response.Error -> { }
+                        is Response.Success -> { }
+                    }
+                }
+            } catch (e: Exception) {
+                LOG.e(TAG, "Failed to update contact", e)
+            }
+        }
+    }
+
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
         var response: Response<Any, ResponseError> = Response.Success(Any())
