@@ -120,9 +120,7 @@ class ChatGroupViewModel @Inject constructor(
         return null
     }
 
-    override fun forceKeyExchange() {
-        TODO("Not yet implemented")
-    }
+    override fun forceKeyExchange() { }
 
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
         TODO("Not yet implemented")
