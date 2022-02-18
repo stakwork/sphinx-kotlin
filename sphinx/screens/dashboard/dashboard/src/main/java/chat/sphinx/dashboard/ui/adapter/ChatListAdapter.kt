@@ -75,8 +75,9 @@ internal class ChatListAdapter(
                         old.chat.latestMessageId    == new.chat.latestMessageId
                     }
                     old is DashboardChat.Inactive.Invite && new is DashboardChat.Inactive.Invite -> {
-                        old.invite?.status == new.invite?.status &&
-                        old.invite?.id     == new.invite?.id
+                        old.invite?.status          == new.invite?.status           &&
+                        old.invite?.id              == new.invite?.id               &&
+                        old.contact.status          == new.contact.status
                     }
                     old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
                         old.chatName                == new.chatName
@@ -111,12 +112,12 @@ internal class ChatListAdapter(
                         old.chat.photoUrl           == new.chat.photoUrl
                     }
                     old is DashboardChat.Inactive.Invite && new is DashboardChat.Inactive.Invite -> {
-                        old.invite?.status == new.invite?.status &&
-                        old.invite?.id     == new.invite?.id
-
+                        old.invite?.status          == new.invite?.status           &&
+                        old.invite?.id              == new.invite?.id               &&
+                        old.contact.status          == new.contact.status
                     }
                     old is DashboardChat.Inactive && new is DashboardChat.Inactive -> {
-                        old.chatName == new.chatName
+                        old.chatName                == new.chatName
                     }
                     else -> {
                         false
