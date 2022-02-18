@@ -11,6 +11,8 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
+import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
@@ -18,11 +20,11 @@ import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
-import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
-import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
+import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
@@ -52,11 +54,6 @@ import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMa
 import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.podcast.*
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboFeedSearchResultPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDestinationDboPodcastDestinationPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.FeedModelDboPodcastModelPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
@@ -93,8 +90,8 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
-import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
+import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
@@ -144,6 +141,7 @@ abstract class SphinxRepository(
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
+    private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
     private val rsa: RSA,
@@ -583,22 +581,32 @@ abstract class SphinxRepository(
 
     override fun updateChatMetaData(
         chatId: ChatId,
+        podcastId: FeedId?,
         metaData: ChatMetaData,
         shouldSync: Boolean
     ) {
-        if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-            return
-        }
-
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+                //Podcast with no chat. Updating current item id
+                podcastId?.let { nnPodcastId ->
+                    podcastLock.withLock {
+                        queries.feedUpdateCurrentItemId(
+                            metaData.itemId,
+                            nnPodcastId
+                        )
+                    }
+                }
+                return@launch
+            }
 
             chatLock.withLock {
                 queries.chatUpdateMetaData(metaData, chatId)
             }
 
             podcastLock.withLock {
-                queries.feedUpdateCurrentItemId(
+                queries.feedUpdateCurrentItemIdByChatId(
                     metaData.itemId,
                     chatId
                 )
@@ -612,7 +620,6 @@ abstract class SphinxRepository(
                     ).collect {}
                 } catch (e: AssertionError) {
                 }
-                // TODO: Network call to update Relay
             }
         }
     }
@@ -916,9 +923,12 @@ abstract class SphinxRepository(
                                 )
 
                                 inviteLock.withLock {
-                                    queries.transaction {
-                                        for (dto in loadResponse.value.invites) {
-                                            upsertInvite(dto, queries)
+                                    contactLock.withLock {
+                                        queries.transaction {
+                                            for (dto in loadResponse.value.invites) {
+                                                updatedContactIds.add(ContactId(dto.contact_id))
+                                                upsertInvite(dto, queries)
+                                            }
                                         }
                                     }
                                 }
@@ -936,7 +946,10 @@ abstract class SphinxRepository(
                             error?.let {
                                 throw it
                             } ?: run {
-                                if (loadResponse.value.contacts.size > 0 || loadResponse.value.chats.size > 0) {
+                                if (
+                                    loadResponse.value.contacts.size > 1 ||
+                                    loadResponse.value.chats.isNotEmpty()
+                                ) {
                                     authenticationStorage.putString(
                                         REPOSITORY_LAST_SEEN_CONTACTS_DATE,
                                         now
@@ -1222,6 +1235,27 @@ abstract class SphinxRepository(
         }.join()
 
         return response ?: Response.Error(ResponseError("Failed to update contact"))
+    }
+
+    override suspend fun forceKeyExchange(
+        contactId: ContactId,
+    ) {
+        applicationScope.launch(mainImmediate) {
+            try {
+                networkQueryContact.exchangeKeys(
+                    contactId,
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> { }
+                        is Response.Error -> { }
+                        is Response.Success -> { }
+                    }
+                }
+            } catch (e: Exception) {
+                LOG.e(TAG, "Failed to update contact", e)
+            }
+        }
     }
 
     override suspend fun updateOwnerDeviceId(deviceId: DeviceId): Response<Any, ResponseError> {
@@ -4580,6 +4614,36 @@ abstract class SphinxRepository(
 
         return response ?: Response.Error(ResponseError("Profile save failed"))
     }
+
+    override suspend fun redeemBadgeToken(
+        body: String
+    ): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            moshi.adapter(RedeemBadgeTokenDto::class.java).fromJson(body)?.let { profile ->
+                networkQueryRedeemBadgeToken.redeemBadgeToken(
+                    profile
+                ).collect { redeemBadgeTokenResponse ->
+                    when (redeemBadgeTokenResponse) {
+                        is LoadResponse.Loading -> {
+                        }
+
+                        is Response.Error -> {
+                            response = redeemBadgeTokenResponse 
+                        }
+
+                        is Response.Success -> {
+                            response = Response.Success(true)
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Redeem Badge Token failed"))
+    }
+
 
 
     override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {

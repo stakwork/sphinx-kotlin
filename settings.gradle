@@ -88,6 +88,8 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-auth
 include ':sphinx:application:network:features:queries:feature-network-query-authorize-external'
 include ':sphinx:application:network:concepts:queries:concept-network-query-save-profile'
 include ':sphinx:application:network:features:queries:feature-network-query-save-profile'
+include ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token'
+include ':sphinx:application:network:features:queries:feature-network-query-redeem-badge-token'
 include ':sphinx:application:network:concepts:calls:concept-network-call'
 include ':sphinx:application:network:concepts:calls:concept-network-relay-call'
 include ':sphinx:application:network:features:feature-network-relay-call'

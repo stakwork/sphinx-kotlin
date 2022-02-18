@@ -181,6 +181,8 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    override fun forceKeyExchange() { }
+
     override suspend fun getInitialHolderViewStateForReceivedMessage(
         message: Message,
         owner: Contact

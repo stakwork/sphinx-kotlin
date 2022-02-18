@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha46 (2022-02-18)
+ - Fixes issues related with podcast last played episode
+ - Fixes issues on invite creation process
+ - Fixes issues on messages menu
+ - Add ability to redeem liquid badge tokens
+
 # Version 1.0.0-alpha45 (2022-02-11)
  - Adds support por podcast clip rows
  - Adds ability to listen to podcast clips

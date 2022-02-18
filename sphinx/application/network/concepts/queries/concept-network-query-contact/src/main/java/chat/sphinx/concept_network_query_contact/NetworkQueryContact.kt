@@ -43,6 +43,11 @@ abstract class NetworkQueryContact {
         relayData: Pair<AuthorizationToken, RelayUrl>? = null
     ): Flow<LoadResponse<ContactDto, ResponseError>>
 
+    abstract fun exchangeKeys(
+        contactId: ContactId,
+        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+    ): Flow<LoadResponse<ContactDto, ResponseError>>
+
     abstract fun toggleBlockedContact(
         contactId: ContactId,
         blocked: Blocked,

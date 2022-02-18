@@ -399,6 +399,7 @@ internal class TribeFeedViewModel @Inject constructor(
 
             repositoryMedia.updateChatMetaData(
                 args.chatId,
+                vs.podcast.id,
                 vs.podcast.getMetaData(),
                 false
             )

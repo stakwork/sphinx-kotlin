@@ -237,13 +237,15 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.updated_at.toDateTime(),
         dto.notification_sound?.toNotificationSound(),
         dto.tip_amount?.toSat(),
-        dto.invite?.id?.let { InviteId(it) },
-        dto.invite?.status?.toInviteStatus(),
         dto.blockedActual.toBlocked(),
         contactId,
         isOwner,
         createdAt,
     )
+
+    dto.invite?.let { inviteDto ->
+        upsertInvite(inviteDto, queries)
+    }
 
     if (!isOwner.isTrue()) {
         queries.dashboardUpsert(
@@ -260,10 +262,6 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
             photoUrl,
             contactId
         )
-    }
-
-    dto.invite?.let {
-        upsertInvite(it, queries)
     }
 }
 
@@ -294,6 +292,12 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
         InviteId(dto.id),
         ContactId(dto.contact_id),
         dto.created_at.toDateTime(),
+    )
+
+    queries.contactUpdateInvite(
+        inviteStatus,
+        InviteId(dto.id),
+        ContactId(dto.contact_id)
     )
 
 // TODO: Work out what status needs to be included to be shown on the dashboard
@@ -461,14 +465,19 @@ fun TransactionCallbacks.upsertFeed(
         return
     }
 
+    var cItemId: FeedId? = null
+
     if (chatId.value != ChatId.NULL_CHAT_ID.toLong()) {
-        //Deleting old feed associated with chat
         queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
+            //Deleting old feed associated with chat
             if (feedDbo.feed_url.value != feedUrl.value) {
                 deleteFeedById(
                     feedDbo.id,
                     queries
                 )
+            } else {
+                //Using existing current item id on update if param is null
+                cItemId = currentItemId ?: feedDbo.current_item_id
             }
         }
     }
@@ -548,7 +557,7 @@ fun TransactionCallbacks.upsertFeed(
         content_type = feedDto.contentType?.toFeedContentType(),
         language = feedDto.language?.toFeedLanguage(),
         items_count = FeedItemsCount(feedDto.items.count().toLong()),
-        current_item_id = currentItemId,
+        current_item_id = cItemId,
         chat_id = chatId,
         subscribed = subscribed,
         id = feedId,

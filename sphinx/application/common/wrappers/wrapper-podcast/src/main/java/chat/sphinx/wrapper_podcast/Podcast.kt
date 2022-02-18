@@ -67,6 +67,14 @@ data class Podcast(
     val hasDestinations: Boolean
         get() = destinations.isNotEmpty()
 
+    var imageToShow: PhotoUrl? = null
+        get() {
+            getCurrentEpisode()?.image?.let {
+                return it
+            }
+            return image
+        }
+
     fun getEpisodesListCopy(): ArrayList<PodcastEpisode> {
         var episodesList = ArrayList<PodcastEpisode>()
 
@@ -110,6 +118,11 @@ data class Podcast(
         playingEpisode?.let { episode ->
             return episode
         } ?: run {
+            episodeId?.let { episodeId ->
+                getEpisodeWithId(episodeId)?.let { episode ->
+                    return episode
+                }
+            }
             return episodes[0]
         }
     }

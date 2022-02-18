@@ -12,6 +12,7 @@ import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -136,6 +137,7 @@ object RepositoryModule {
         networkQueryInvite: NetworkQueryInvite,
         networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
         networkQuerySaveProfile: NetworkQuerySaveProfile,
+        networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
         networkQuerySubscription: NetworkQuerySubscription,
         networkQueryFeedSearch: NetworkQueryFeedSearch,
         socketIOManager: SocketIOManager,
@@ -162,6 +164,7 @@ object RepositoryModule {
             networkQueryInvite,
             networkQueryAuthorizeExternal,
             networkQuerySaveProfile,
+            networkQueryRedeemBadgeToken,
             networkQuerySubscription,
             networkQueryFeedSearch,
             rsa,

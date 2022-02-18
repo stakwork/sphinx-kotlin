@@ -320,8 +320,6 @@ contactUpsert {
         updated_at = :updated_at,
         notification_sound = :notification_sound,
         tip_amount = :tip_amount,
-        invite_id = :invite_id,
-        invite_status = :invite_status,
         blocked = :blocked
     WHERE id = :id;
 
@@ -341,8 +339,6 @@ contactUpsert {
         updated_at,
         notification_sound,
         tip_amount,
-        invite_id,
-        invite_status,
         blocked
     )
     VALUES (
@@ -361,8 +357,6 @@ contactUpsert {
         :updated_at,
         :notification_sound,
         :tip_amount,
-        :invite_id,
-        :invite_status,
         :blocked
     );
 }
@@ -371,6 +365,12 @@ contactUpdateInviteStatus:
 UPDATE contactDbo
 SET invite_status = :invite_status
 WHERE invite_id = ?;
+
+contactUpdateInvite:
+UPDATE contactDbo
+SET invite_status = :invite_status,
+invite_id = :invite_id
+WHERE id = ?;
 
 contactUpdatePhotoUrl:
 UPDATE contactDbo
@@ -1068,10 +1068,15 @@ FROM feedDbo
 WHERE (title LIKE :title)
 AND feed_type = :feed_type;
 
-feedUpdateCurrentItemId:
+feedUpdateCurrentItemIdByChatId:
 UPDATE feedDbo
 SET current_item_id = :item_id
 WHERE chat_id = ?;
+
+feedUpdateCurrentItemId:
+UPDATE feedDbo
+SET current_item_id = :item_id
+WHERE id = ?;
 
 feedUpdateSubscribe:
 UPDATE feedDbo
