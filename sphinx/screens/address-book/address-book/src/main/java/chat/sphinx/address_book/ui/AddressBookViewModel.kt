@@ -1,15 +1,16 @@
 package chat.sphinx.address_book.ui
 
-import android.util.Log
+import android.app.Application
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.address_book.R
 import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.concept_repository_contact.ContactRepository
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.isTrue
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.*
@@ -20,10 +21,16 @@ import javax.inject.Inject
 @HiltViewModel
 internal class AddressBookViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     var addressBookNavigator: AddressBookNavigator,
     private val contactRepository: ContactRepository,
-): BaseViewModel<AddressBookViewState>(dispatchers, AddressBookViewState.ListMode(listOf(), listOf()))
+): SideEffectViewModel<
+        FragmentActivity,
+        AddressBookSideEffect,
+        AddressBookViewState,
+        >(dispatchers, AddressBookViewState.ListMode(listOf(), listOf()))
 {
+
     private val addressBookViewStateContainer: AddressBookViewStateContainer by lazy {
         AddressBookViewStateContainer(dispatchers)
     }
@@ -44,6 +51,14 @@ internal class AddressBookViewModel @Inject constructor(
     fun blockContact(contact: Contact) {
         viewModelScope.launch(mainImmediate) {
             contactRepository.toggleContactBlocked(contact)
+        }
+    }
+
+    fun onItemLongClick() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(AddressBookSideEffect.Notify(
+                app.getString(R.string.swipe_left_to_delete))
+            )
         }
     }
 

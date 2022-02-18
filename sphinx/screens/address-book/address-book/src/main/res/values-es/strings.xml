@@ -7,4 +7,5 @@
     <string name="delete_contact">Borrar</string>
     <string name="block_contact">Bloquear</string>
     <string name="unblock_contact">Desbloquear</string>
+    <string name="swipe_left_to_delete">Desliza hacia la izquierda para eliminar o bloquear el contacto</string>
 </resources>
