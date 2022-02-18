@@ -23,6 +23,7 @@ data class ContactDto(
     val from_group: Any?,
     val notification_sound: String?,
     val tip_amount: Long?,
+    val invite: InviteDto?,
     val pending: Any?,
     val blocked: Any?,
 ) {

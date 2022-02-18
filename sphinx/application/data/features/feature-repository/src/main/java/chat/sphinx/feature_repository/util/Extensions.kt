@@ -243,6 +243,10 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         createdAt,
     )
 
+    dto.invite?.let { inviteDto ->
+        upsertInvite(inviteDto, queries)
+    }
+
     if (!isOwner.isTrue()) {
         queries.dashboardUpsert(
             dto.alias,
