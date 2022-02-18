@@ -36,6 +36,7 @@ import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_contact.getColorKey
+import chat.sphinx.wrapper_contact.isEncrypted
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.PodcastClip
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -180,6 +181,16 @@ internal class ChatContactViewModel @Inject constructor(
                 photoUrl?.value?.let { PhotoUrl(it) },
                 colorKey
             )
+        }
+    }
+
+    override fun forceKeyExchange() {
+        viewModelScope.launch(io) {
+            contactSharedFlow.firstOrNull()?.let { nnContact ->
+                if (!nnContact.isEncrypted()) {
+                    contactRepository.forceKeyExchange(nnContact.id)
+                }
+            }
         }
     }
 

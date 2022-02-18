@@ -237,13 +237,15 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
         dto.updated_at.toDateTime(),
         dto.notification_sound?.toNotificationSound(),
         dto.tip_amount?.toSat(),
-        dto.invite?.id?.let { InviteId(it) },
-        dto.invite?.status?.toInviteStatus(),
         dto.blockedActual.toBlocked(),
         contactId,
         isOwner,
         createdAt,
     )
+
+    dto.invite?.let { inviteDto ->
+        upsertInvite(inviteDto, queries)
+    }
 
     if (!isOwner.isTrue()) {
         queries.dashboardUpsert(
@@ -260,10 +262,6 @@ inline fun TransactionCallbacks.upsertContact(dto: ContactDto, queries: SphinxDa
             photoUrl,
             contactId
         )
-    }
-
-    dto.invite?.let {
-        upsertInvite(it, queries)
     }
 }
 
@@ -294,6 +292,12 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
         InviteId(dto.id),
         ContactId(dto.contact_id),
         dto.created_at.toDateTime(),
+    )
+
+    queries.contactUpdateInvite(
+        inviteStatus,
+        InviteId(dto.id),
+        ContactId(dto.contact_id)
     )
 
 // TODO: Work out what status needs to be included to be shown on the dashboard
