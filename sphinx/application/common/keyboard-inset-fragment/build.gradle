@@ -30,6 +30,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
+    implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':android:features:android-feature-activity')
     implementation project(path: ':android:features:android-feature-screens')
 

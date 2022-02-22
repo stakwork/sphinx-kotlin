@@ -92,19 +92,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
-
-        binding.layoutConstraintMainStatusBar.applyInsetter {
-            type(statusBars = true) {
-                padding()
-            }
-        }
-        binding.layoutConstraintMainNavigationBar.applyInsetter {
-            type(navigationBars = true) {
-                padding()
-            }
-        }
 
         binding.viewMainInputLock.setOnClickListener { viewModel }
 
@@ -249,10 +238,10 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
             isKeyboardVisible = imeInsets.bottom > 0
 
-            if (isKeyboardVisible) {
-                keyboardInsets = InsetPadding(imeInsets.left, imeInsets.top, imeInsets.right, imeInsets.bottom)
+            keyboardInsets = if (isKeyboardVisible) {
+                InsetPadding(imeInsets.left, imeInsets.top, imeInsets.right, imeInsets.bottom)
             } else {
-                keyboardInsets = InsetPadding(navBarInsets.left, navBarInsets.top, navBarInsets.right, navBarInsets.bottom)
+                InsetPadding(navBarInsets.left, navBarInsets.top, navBarInsets.right, navBarInsets.bottom)
             }
 
             binding.layoutConstraintMainStatusBar.setPadding(0, statusBarInset.top,0,0)
