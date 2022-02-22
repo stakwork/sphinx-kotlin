@@ -35,7 +35,7 @@ inline fun InsetterActivity.addNavigationBarPaddingFromInsets(view: View): Inset
     return this
 }
 
-data class InsetPadding(val left: Int, val right: Int, val top: Int, val bottom: Int)
+data class InsetPadding(val left: Int, val top: Int, val right: Int, val bottom: Int)
 
 /**
  * This is a workaround to using window insets in fragments that are loaded via
@@ -46,6 +46,4 @@ data class InsetPadding(val left: Int, val right: Int, val top: Int, val bottom:
 interface InsetterActivity {
     val statusBarInsetHeight: InsetPadding
     val navigationBarInsetHeight: InsetPadding
-
-    val keyboardVisible: Boolean
 }

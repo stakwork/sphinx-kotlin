@@ -80,7 +80,7 @@
         app:navGraph="@navigation/main_authentication_nav_graph" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_main_navigation_bar"
+        android:id="@+id/layout_constraint_main_navigation_bar_overlay"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/blackSemiTransparent"

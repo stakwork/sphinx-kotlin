@@ -188,18 +188,15 @@ abstract class ChatFragment<
         viewModel.screenInit()
     }
 
-    private var keyboardVisible: Boolean = false
+    private var viewHeight: Int = 0
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     private fun addGlobalLayoutChangeListener() {
         globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
             val insetterActivity = (requireActivity() as InsetterActivity)
 
-            if ((keyboardVisible && !insetterActivity.keyboardVisible) ||
-                (!keyboardVisible && insetterActivity.keyboardVisible)
-            ) {
-
-                keyboardVisible = insetterActivity.keyboardVisible
+            if (viewHeight != binding.root.measuredHeight) {
+                viewHeight = binding.root.measuredHeight
 
                 footerBinding.apply {
                     insetterActivity.addNavigationBarPaddingFromInsets(root)

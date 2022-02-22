@@ -58,35 +58,15 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         get() = viewModel
 
     companion object {
-        // Setting these here at initial load time will negate the need to query the view
-        // parameters again. This is ok as we're locked to portrait mode, and allows activity
-        // re-creation after the first call is made to InsetterActivity.
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
     }
 
-    override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
-        statusBarInsets ?: binding.layoutConstraintMainStatusBar.let {
-            InsetPadding(
-                it.paddingLeft,
-                it.paddingRight,
-                it.paddingTop,
-                it.paddingBottom
-            )
-        }.also { statusBarInsets = it }
-    }
+    override val statusBarInsetHeight: InsetPadding
+        get() = statusBarInsets ?: InsetPadding(0, 0, 0, 0)
 
     override val navigationBarInsetHeight: InsetPadding
-        get() {
-            binding.layoutConstraintMainNavigationBar.let {
-                return InsetPadding(
-                    it.paddingLeft,
-                    it.paddingRight,
-                    it.paddingTop,
-                    it.paddingBottom
-                )
-            }
-        }
+        get() = navigationBarInsets ?: InsetPadding(0, 0, 0, 0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
@@ -96,10 +76,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
         binding.viewMainInputLock.setOnClickListener { viewModel }
 
-        setWindowTransparency { statusBarSize, navigationBarSize ->
-            binding.layoutConstraintMainStatusBar.setPadding(0,statusBarSize, 0,0)
-            binding.layoutConstraintMainNavigationBar.setPadding(0,0, 0,navigationBarSize)
-        }
+        setOnWindowInsetListener()
     }
 
     override fun onStart() {
@@ -230,6 +207,16 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
     }
 
+    private fun setOnWindowInsetListener() {
+        setWindowTransparency { statusBarSize, navigationBarSize ->
+            statusBarInsets = InsetPadding(0, statusBarSize, 0,0)
+            navigationBarInsets = InsetPadding(0,0,0, navigationBarSize)
+
+            binding.layoutConstraintMainStatusBar.setPadding(0,statusBarSize,0,0)
+            binding.layoutConstraintMainNavigationBarOverlay.setPadding(0,0,0,navigationBarSize)
+        }
+    }
+
     private fun removeSystemInsets(view: View, listener: OnSystemInsetsChangedListener) {
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
 
@@ -265,11 +252,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         window.statusBarColor = Color.TRANSPARENT
     }
 
-    override var keyboardVisible: Boolean = false
-
     private fun isKeyboardAppeared(bottomInset: Int): Boolean {
-        keyboardVisible = bottomInset / window.decorView.rootView.measuredHeight.toDouble() > .25
-        return keyboardVisible
+        return bottomInset / window.decorView.rootView.measuredHeight.toDouble() > .25
     }
 
 
