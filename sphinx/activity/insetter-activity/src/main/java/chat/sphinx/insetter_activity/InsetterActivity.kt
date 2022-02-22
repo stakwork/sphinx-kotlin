@@ -24,6 +24,17 @@ inline fun InsetterActivity.addNavigationBarPadding(view: View): InsetterActivit
     return this
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun InsetterActivity.addNavigationBarPaddingFromInsets(view: View): InsetterActivity {
+    view.setPadding(
+        navigationBarInsetHeight.left,
+        navigationBarInsetHeight.top,
+        navigationBarInsetHeight.right,
+        navigationBarInsetHeight.bottom
+    )
+    return this
+}
+
 data class InsetPadding(val left: Int, val right: Int, val top: Int, val bottom: Int)
 
 /**
@@ -35,4 +46,6 @@ data class InsetPadding(val left: Int, val right: Int, val top: Int, val bottom:
 interface InsetterActivity {
     val statusBarInsetHeight: InsetPadding
     val navigationBarInsetHeight: InsetPadding
+
+    val keyboardVisible: Boolean
 }

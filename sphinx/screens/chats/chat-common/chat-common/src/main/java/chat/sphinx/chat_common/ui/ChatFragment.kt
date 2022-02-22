@@ -3,6 +3,7 @@ package chat.sphinx.chat_common.ui
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -56,6 +57,7 @@ import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addNavigationBarPaddingFromInsets
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -181,8 +183,46 @@ abstract class ChatFragment<
         setupAttachmentSendPreview(insetterActivity)
         setupAttachmentFullscreen(insetterActivity)
         setupRecyclerView()
+        addGlobalLayoutChangeListener()
 
         viewModel.screenInit()
+    }
+
+    private var keyboardVisible: Boolean = false
+    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+
+    private fun addGlobalLayoutChangeListener() {
+        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            val insetterActivity = (requireActivity() as InsetterActivity)
+
+            if ((keyboardVisible && !insetterActivity.keyboardVisible) ||
+                (!keyboardVisible && insetterActivity.keyboardVisible)
+            ) {
+
+                keyboardVisible = insetterActivity.keyboardVisible
+
+                footerBinding.apply {
+                    insetterActivity.addNavigationBarPaddingFromInsets(root)
+                }
+
+                scrollToBottom(force = true)
+            }
+        }
+
+        binding.root.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+
+        binding.root.addOnAttachStateChangeListener(object: View.OnAttachStateChangeListener {
+            override fun onViewAttachedToWindow(p0: View?) {}
+
+            override fun onViewDetachedFromWindow(p0: View?) {
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                    p0?.viewTreeObserver?.removeOnGlobalLayoutListener(globalLayoutListener)
+                } else {
+                    p0?.viewTreeObserver?.removeGlobalOnLayoutListener(globalLayoutListener)
+                }
+                globalLayoutListener = null
+            }
+        })
     }
 
     private inner class SelectedMessageStateBackPressHandler(
@@ -674,11 +714,16 @@ abstract class ChatFragment<
     }
 
     protected fun scrollToBottom(
-        callback: () -> Unit,
-        replyingToMessage: Boolean = false
+        callback: (() -> Unit)? = null,
+        replyingToMessage: Boolean = false,
+        force: Boolean = false,
     ) {
         (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
-            (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+            if (force) {
+                (messagesListAdapter as MessageListAdapter<*>).forceScrollToBottom()
+            } else {
+                (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+            }
         }
     }
 
@@ -1370,6 +1415,7 @@ abstract class ChatFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
+
         messageReplyLastViewState = null
         headerInitialHolderLastViewState = null
         fullscreenLastViewState = null

@@ -1,11 +1,18 @@
 package chat.sphinx.activitymain
 
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.WindowInsets
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -16,6 +23,7 @@ import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
@@ -68,35 +76,30 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }.also { statusBarInsets = it }
     }
 
-    override val navigationBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
-        navigationBarInsets ?: binding.layoutConstraintMainNavigationBar.let {
-            InsetPadding(
-                it.paddingLeft,
-                it.paddingRight,
-                it.paddingTop,
-                it.paddingBottom
-            )
-        }.also { navigationBarInsets = it }
-    }
+    override val navigationBarInsetHeight: InsetPadding
+        get() {
+            binding.layoutConstraintMainNavigationBar.let {
+                return InsetPadding(
+                    it.paddingLeft,
+                    it.paddingRight,
+                    it.paddingTop,
+                    it.paddingBottom
+                )
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.setDecorFitsSystemWindows(window, true)
         setTransitionListener(binding.layoutMotionMain)
 
-        binding.layoutConstraintMainStatusBar.applyInsetter {
-            type(statusBars = true) {
-                padding()
-            }
-        }
-        binding.layoutConstraintMainNavigationBar.applyInsetter {
-            type(navigationBars = true) {
-                padding()
-            }
-        }
-
         binding.viewMainInputLock.setOnClickListener { viewModel }
+
+        setWindowTransparency { statusBarSize, navigationBarSize ->
+            binding.layoutConstraintMainStatusBar.setPadding(0,statusBarSize, 0,0)
+            binding.layoutConstraintMainNavigationBar.setPadding(0,0, 0,navigationBarSize)
+        }
     }
 
     override fun onStart() {
@@ -226,4 +229,52 @@ internal class MainActivity: MotionLayoutNavigationActivity<
             }
         }
     }
+
+    private fun removeSystemInsets(view: View, listener: OnSystemInsetsChangedListener) {
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+
+            val desiredBottomInset = calculateDesiredBottomInset(
+                insets.systemWindowInsetTop,
+                insets.systemWindowInsetBottom,
+                listener
+            )
+
+            ViewCompat.onApplyWindowInsets(
+                view,
+                insets.replaceSystemWindowInsets(0, 0, 0, desiredBottomInset)
+            )
+        }
+    }
+
+    private fun calculateDesiredBottomInset(
+        topInset: Int,
+        bottomInset: Int,
+        listener: OnSystemInsetsChangedListener
+    ): Int {
+        val hasKeyboard = isKeyboardAppeared(bottomInset)
+        val desiredBottomInset = if (hasKeyboard) bottomInset else 0
+        listener(topInset, if (hasKeyboard) 0 else bottomInset)
+        return desiredBottomInset
+    }
+
+    private fun setWindowTransparency(
+        listener: OnSystemInsetsChangedListener = { _, _ -> }
+    ) {
+        removeSystemInsets(window.decorView, listener)
+        window.navigationBarColor = Color.TRANSPARENT
+        window.statusBarColor = Color.TRANSPARENT
+    }
+
+    override var keyboardVisible: Boolean = false
+
+    private fun isKeyboardAppeared(bottomInset: Int): Boolean {
+        keyboardVisible = bottomInset / window.decorView.rootView.measuredHeight.toDouble() > .25
+        return keyboardVisible
+    }
+
+
 }
+
+typealias OnSystemInsetsChangedListener =
+            (statusBarSize: Int, navigationBarSize: Int) -> Unit
+
