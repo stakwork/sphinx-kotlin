@@ -304,3 +304,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
+include ':sphinx:application:common:keyboard-inset-fragment'

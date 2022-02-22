@@ -56,9 +56,9 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addNavigationBarPaddingFromInsets
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.keyboard_inset_fragment.KeyboardInsetFragment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
@@ -80,7 +80,6 @@ import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
 import chat.sphinx.wrapper_message_media.isVideo
 import chat.sphinx.wrapper_view.Dp
-import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
@@ -98,7 +97,7 @@ abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>
-        >(@LayoutRes layoutId: Int): MotionLayoutFragment<
+        >(@LayoutRes layoutId: Int): KeyboardInsetFragment<
         Nothing,
         ChatSideEffectFragment,
         ChatSideEffect,
@@ -175,51 +174,42 @@ abstract class ChatFragment<
         SelectedMessageStateBackPressHandler(viewLifecycleOwner, requireActivity())
 
         val insetterActivity = (requireActivity() as InsetterActivity)
-        setupMenu(insetterActivity)
-        setupFooter(insetterActivity)
+        setViewsNavigationBarPadding(insetterActivity)
+        setupMenu()
+        setupFooter()
         setupAttachmentPriceView()
-        setupHeader(insetterActivity)
         setupSelectedMessage()
+        setupHeader(insetterActivity)
         setupAttachmentSendPreview(insetterActivity)
         setupAttachmentFullscreen(insetterActivity)
         setupRecyclerView()
-        addGlobalLayoutChangeListener()
 
         viewModel.screenInit()
     }
 
-    private var viewHeight: Int = 0
-    private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
+    override fun onViewHeightChanged() {
+        setViewsNavigationBarPadding(
+            (requireActivity() as InsetterActivity)
+        )
+        scrollToBottom(force = true)
+    }
 
-    private fun addGlobalLayoutChangeListener() {
-        globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            val insetterActivity = (requireActivity() as InsetterActivity)
-
-            if (viewHeight != binding.root.measuredHeight) {
-                viewHeight = binding.root.measuredHeight
-
-                footerBinding.apply {
-                    insetterActivity.addNavigationBarPaddingFromInsets(root)
-                }
-
-                scrollToBottom(force = true)
-            }
+    private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
+        callMenuBinding.apply {
+            insetterActivity.addNavigationBarPaddingFromInsets(root)
         }
 
-        binding.root.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+        recordingCircleBinding.apply {
+            insetterActivity.addNavigationBarPaddingFromInsets(root)
+        }
 
-        binding.root.addOnAttachStateChangeListener(object: View.OnAttachStateChangeListener {
-            override fun onViewAttachedToWindow(p0: View?) {}
+        footerBinding.apply {
+            insetterActivity.addNavigationBarPaddingFromInsets(root)
+        }
 
-            override fun onViewDetachedFromWindow(p0: View?) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                    p0?.viewTreeObserver?.removeOnGlobalLayoutListener(globalLayoutListener)
-                } else {
-                    p0?.viewTreeObserver?.removeGlobalOnLayoutListener(globalLayoutListener)
-                }
-                globalLayoutListener = null
-            }
-        })
+        menuBinding.includeLayoutChatMenuOptions.apply {
+            insetterActivity.addNavigationBarPaddingFromInsets(root)
+        }
     }
 
     private inner class SelectedMessageStateBackPressHandler(
@@ -267,9 +257,8 @@ abstract class ChatFragment<
         }
     }
 
-    private fun setupMenu(insetterActivity: InsetterActivity) {
+    private fun setupMenu() {
         menuBinding.includeLayoutChatMenuOptions.apply options@ {
-            insetterActivity.addNavigationBarPadding(root)
 
             textViewMenuOptionCancel.setOnClickListener {
                 viewModel.updateViewState(ChatMenuViewState.Closed)
@@ -320,7 +309,7 @@ abstract class ChatFragment<
         }
     }
 
-    private fun setupFooter(insetterActivity: InsetterActivity) {
+    private fun setupFooter() {
         bottomMenuCall.newBuilder(callMenuBinding, viewLifecycleOwner)
             .setHeaderText(R.string.bottom_menu_call_header_text)
             .setOptions(
@@ -342,17 +331,7 @@ abstract class ChatFragment<
                 )
             ).build()
 
-        callMenuBinding.apply {
-            insetterActivity.addNavigationBarPadding(root)
-        }
-
-        recordingCircleBinding.apply {
-            insetterActivity.addNavigationBarPadding(root)
-        }
-
         footerBinding.apply {
-            insetterActivity.addNavigationBarPadding(root)
-
             textViewChatFooterSend.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     sendMessageBuilder.setText(editTextChatFooter.text?.toString())
