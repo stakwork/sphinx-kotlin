@@ -40,6 +40,8 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:common:keyboard-inset-fragment')
+    
     api project(path: ':sphinx:screens:onboard:onboard-common')
     api project(path: ':sphinx:screens:onboard:onboard-resources')
 

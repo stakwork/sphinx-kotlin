@@ -29,8 +29,7 @@ import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
 import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.insetter_activity.addNavigationBarPaddingFromInsets
+import chat.sphinx.insetter_activity.addBottomPaddingFromWindowInset
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
 import chat.sphinx.kotlin_response.LoadResponse
@@ -97,11 +96,11 @@ internal class DashboardFragment : KeyboardInsetMotionLayoutFragment<
 
     private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
         binding.layoutDashboardNavBar.let { navBar ->
-            insetterActivity.addNavigationBarPaddingFromInsets(navBar.layoutConstraintDashboardNavBar)
+            insetterActivity.addBottomPaddingFromWindowInset(navBar.layoutConstraintDashboardNavBar)
         }
 
         binding.layoutDashboardNavDrawer.let { navDrawer ->
-            insetterActivity.addNavigationBarPaddingFromInsets(navDrawer.layoutConstraintDashboardNavDrawer)
+            insetterActivity.addBottomPaddingFromWindowInset(navDrawer.layoutConstraintDashboardNavDrawer)
         }
     }
 

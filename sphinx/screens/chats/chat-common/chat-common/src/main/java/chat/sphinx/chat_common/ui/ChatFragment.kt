@@ -55,7 +55,7 @@ import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPaddingFromInsets
+import chat.sphinx.insetter_activity.addBottomPaddingFromWindowInset
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
 import chat.sphinx.kotlin_response.LoadResponse
@@ -195,19 +195,19 @@ abstract class ChatFragment<
 
     private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
         callMenuBinding.apply {
-            insetterActivity.addNavigationBarPaddingFromInsets(root)
+            insetterActivity.addBottomPaddingFromWindowInset(root)
         }
 
         recordingCircleBinding.apply {
-            insetterActivity.addNavigationBarPaddingFromInsets(root)
+            insetterActivity.addBottomPaddingFromWindowInset(root)
         }
 
         footerBinding.apply {
-            insetterActivity.addNavigationBarPaddingFromInsets(root)
+            insetterActivity.addBottomPaddingFromWindowInset(root)
         }
 
         menuBinding.includeLayoutChatMenuOptions.apply {
-            insetterActivity.addNavigationBarPaddingFromInsets(root)
+            insetterActivity.addBottomPaddingFromWindowInset(root)
         }
     }
 

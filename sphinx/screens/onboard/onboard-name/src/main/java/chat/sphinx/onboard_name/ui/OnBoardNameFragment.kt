@@ -8,8 +8,9 @@ import androidx.navigation.fragment.navArgs
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addBottomPaddingFromWindowInset
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.keyboard_inset_fragment.KeyboardInsetSideEffectFragment
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_name.R
 import chat.sphinx.onboard_name.databinding.FragmentOnBoardNameBinding
@@ -17,13 +18,12 @@ import chat.sphinx.onboard_name.navigation.inviterData
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 
 @AndroidEntryPoint
-internal class OnBoardNameFragment: SideEffectFragment<
+internal class OnBoardNameFragment: KeyboardInsetSideEffectFragment<
         Context,
         OnBoardNameSideEffect,
         OnBoardNameViewState,
@@ -39,7 +39,9 @@ internal class OnBoardNameFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupHeaderAndFooter()
+        val insetterActivity = (requireActivity() as InsetterActivity)
+        setupHeaderAndFooter(insetterActivity)
+        setViewsNavigationBarPadding(insetterActivity)
 
         CloseAppOnBackPress(view.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
@@ -54,10 +56,18 @@ internal class OnBoardNameFragment: SideEffectFragment<
         }
     }
 
-    private fun setupHeaderAndFooter() {
-        (requireActivity() as InsetterActivity)
-            .addStatusBarPadding(binding.layoutConstraintOnBoardName)
-            .addNavigationBarPadding(binding.layoutConstraintOnBoardName)
+    override fun onViewHeightChanged() {
+        setViewsNavigationBarPadding(
+            (requireActivity() as InsetterActivity)
+        )
+    }
+
+    private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
+        insetterActivity.addBottomPaddingFromWindowInset(binding.layoutConstraintOnBoardName)
+    }
+
+    private fun setupHeaderAndFooter(insetterActivity: InsetterActivity) {
+        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoardName)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardNameSideEffect) {

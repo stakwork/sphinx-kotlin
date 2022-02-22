@@ -25,7 +25,7 @@ inline fun InsetterActivity.addNavigationBarPadding(view: View): InsetterActivit
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun InsetterActivity.addNavigationBarPaddingFromInsets(view: View): InsetterActivity {
+inline fun InsetterActivity.addBottomPaddingFromWindowInset(view: View): InsetterActivity {
     view.setPadding(
         view.paddingLeft,
         view.paddingTop,
