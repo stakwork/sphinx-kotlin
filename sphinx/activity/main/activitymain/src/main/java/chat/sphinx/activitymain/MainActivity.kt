@@ -19,6 +19,7 @@ import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
+import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.flow.collect
@@ -78,7 +79,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     }
 
     override val keyboardInsetHeight: InsetPadding
-        get() = keyboardInsets ?: InsetPadding(0, 0, 0, 0)
+        get() = keyboardInsets ?: navigationBarInsetHeight
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,6 +87,18 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
+
+        binding.layoutConstraintMainStatusBar.applyInsetter {
+            type(statusBars = true) {
+                padding()
+            }
+        }
+
+        binding.layoutConstraintMainNavigationBar.applyInsetter {
+            type(navigationBars = true) {
+                padding()
+            }
+        }
 
         binding.viewMainInputLock.setOnClickListener { viewModel }
 
@@ -222,11 +235,10 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
     override var isKeyboardVisible: Boolean = false
     private fun addSystemInsetsChangeListener() {
-        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
 
             val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
             val navBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
-            val statusBarInset = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
 
             isKeyboardVisible = imeInsets.bottom > 0
 
@@ -236,10 +248,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 InsetPadding(navBarInsets.left, navBarInsets.top, navBarInsets.right, navBarInsets.bottom)
             }
 
-            binding.layoutConstraintMainStatusBar.setPadding(0, statusBarInset.top,0,0)
-            binding.layoutConstraintMainNavigationBar.setPadding(0,0,0, navBarInsets.bottom)
-
-            WindowInsetsCompat.CONSUMED
+            windowInsets
         }
     }
 }
