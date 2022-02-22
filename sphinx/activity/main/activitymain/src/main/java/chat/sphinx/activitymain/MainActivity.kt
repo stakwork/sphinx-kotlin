@@ -60,13 +60,34 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     companion object {
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
+        private var keyboardInsets: InsetPadding? = null
     }
 
-    override val statusBarInsetHeight: InsetPadding
-        get() = statusBarInsets ?: InsetPadding(0, 0, 0, 0)
+    override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
+        statusBarInsets ?: binding.layoutConstraintMainStatusBar.let {
+            InsetPadding(
+                it.paddingLeft,
+                it.paddingTop,
+                it.paddingRight,
+                it.paddingBottom
+            )
+        }.also { statusBarInsets = it }
+    }
 
-    override val navigationBarInsetHeight: InsetPadding
-        get() = navigationBarInsets ?: InsetPadding(0, 0, 0, 0)
+    override val navigationBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
+        navigationBarInsets ?: binding.layoutConstraintMainNavigationBar.let {
+            InsetPadding(
+                it.paddingLeft,
+                it.paddingTop,
+                it.paddingRight,
+                it.paddingBottom
+            )
+        }.also { navigationBarInsets = it }
+    }
+
+    override val keyboardInsetHeight: InsetPadding
+        get() = keyboardInsets ?: InsetPadding(0, 0, 0, 0)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
@@ -74,9 +95,20 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         WindowCompat.setDecorFitsSystemWindows(window, true)
         setTransitionListener(binding.layoutMotionMain)
 
+        binding.layoutConstraintMainStatusBar.applyInsetter {
+            type(statusBars = true) {
+                padding()
+            }
+        }
+        binding.layoutConstraintMainNavigationBar.applyInsetter {
+            type(navigationBars = true) {
+                padding()
+            }
+        }
+
         binding.viewMainInputLock.setOnClickListener { viewModel }
 
-        setOnWindowInsetListener()
+        addSystemInsetsChangeListener()
     }
 
     override fun onStart() {
@@ -207,58 +239,27 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
     }
 
-    private fun setOnWindowInsetListener() {
-        setWindowTransparency { statusBarSize, navigationBarSize ->
-            statusBarInsets = InsetPadding(0, statusBarSize, 0,0)
-            navigationBarInsets = InsetPadding(0,0,0, navigationBarSize)
+    override var isKeyboardVisible: Boolean = false
+    private fun addSystemInsetsChangeListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { view, windowInsets ->
 
-            binding.layoutConstraintMainStatusBar.setPadding(0,statusBarSize,0,0)
-            binding.layoutConstraintMainNavigationBarOverlay.setPadding(0,0,0,navigationBarSize)
+            val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+            val navBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            val statusBarInset = windowInsets.getInsets(WindowInsetsCompat.Type.statusBars())
+
+            isKeyboardVisible = imeInsets.bottom > 0
+
+            if (isKeyboardVisible) {
+                keyboardInsets = InsetPadding(imeInsets.left, imeInsets.top, imeInsets.right, imeInsets.bottom)
+            } else {
+                keyboardInsets = InsetPadding(navBarInsets.left, navBarInsets.top, navBarInsets.right, navBarInsets.bottom)
+            }
+
+            binding.layoutConstraintMainStatusBar.setPadding(0, statusBarInset.top,0,0)
+            binding.layoutConstraintMainNavigationBar.setPadding(0,0,0, navBarInsets.bottom)
+
+            WindowInsetsCompat.CONSUMED
         }
     }
-
-    private fun removeSystemInsets(view: View, listener: OnSystemInsetsChangedListener) {
-        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-
-            val desiredBottomInset = calculateDesiredBottomInset(
-                insets.systemWindowInsetTop,
-                insets.systemWindowInsetBottom,
-                listener
-            )
-
-            ViewCompat.onApplyWindowInsets(
-                view,
-                insets.replaceSystemWindowInsets(0, 0, 0, desiredBottomInset)
-            )
-        }
-    }
-
-    private fun calculateDesiredBottomInset(
-        topInset: Int,
-        bottomInset: Int,
-        listener: OnSystemInsetsChangedListener
-    ): Int {
-        val hasKeyboard = isKeyboardAppeared(bottomInset)
-        val desiredBottomInset = if (hasKeyboard) bottomInset else 0
-        listener(topInset, if (hasKeyboard) 0 else bottomInset)
-        return desiredBottomInset
-    }
-
-    private fun setWindowTransparency(
-        listener: OnSystemInsetsChangedListener = { _, _ -> }
-    ) {
-        removeSystemInsets(window.decorView, listener)
-        window.navigationBarColor = Color.TRANSPARENT
-        window.statusBarColor = Color.TRANSPARENT
-    }
-
-    private fun isKeyboardAppeared(bottomInset: Int): Boolean {
-        return bottomInset / window.decorView.rootView.measuredHeight.toDouble() > .25
-    }
-
-
 }
-
-typealias OnSystemInsetsChangedListener =
-            (statusBarSize: Int, navigationBarSize: Int) -> Unit
 

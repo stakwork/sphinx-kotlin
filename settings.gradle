@@ -8,6 +8,7 @@ include ':sphinx:application:sphinx'
 include ':sphinx:application:common:resources'
 include ':sphinx:application:common:kotlin-response'
 include ':sphinx:application:common:logger'
+include ':sphinx:application:common:keyboard-inset-fragment'
 include ':sphinx:application:common:menus:menu-bottom'
 include ':sphinx:application:common:menus:menu-bottom-picture'
 include ':sphinx:application:common:menus:menu-bottom-share-qr-code'
@@ -304,4 +305,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:application:common:keyboard-inset-fragment'

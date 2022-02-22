@@ -12,13 +12,14 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addBottomPaddingFromWindowInset
-import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
+import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard_connecting.R
 import chat.sphinx.onboard_connecting.databinding.FragmentOnBoardConnectingBinding
 import chat.sphinx.resources.SphinxToastUtils
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
+import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.invisibleIfFalse
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -30,7 +31,7 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class OnBoardConnectingFragment: KeyboardInsetMotionLayoutFragment<
+internal class OnBoardConnectingFragment: MotionLayoutFragment<
         Any,
         Context,
         OnBoardConnectingSideEffect,
@@ -55,8 +56,7 @@ internal class OnBoardConnectingFragment: KeyboardInsetMotionLayoutFragment<
 
         OnBackPress(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
 
-        val insetterActivity = (requireActivity() as InsetterActivity)
-        setViewsNavigationBarPadding(insetterActivity)
+        setupHeaderAndFooter()
 
         lifecycleScope.launch {
             imageLoader.load(
@@ -66,14 +66,9 @@ internal class OnBoardConnectingFragment: KeyboardInsetMotionLayoutFragment<
         }
     }
 
-    override fun onViewHeightChanged() {
-        setViewsNavigationBarPadding(
-            (requireActivity() as InsetterActivity)
-        )
-    }
-
-    private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
-        insetterActivity.addBottomPaddingFromWindowInset(binding.layoutMotionOnBoardConnecting)
+    private fun setupHeaderAndFooter() {
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.layoutMotionOnBoardConnecting)
     }
 
     private var doublePressBackJob: Job? = null

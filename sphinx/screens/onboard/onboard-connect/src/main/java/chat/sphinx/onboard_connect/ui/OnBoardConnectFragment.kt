@@ -12,12 +12,12 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addBottomPaddingFromWindowInset
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
-import chat.sphinx.keyboard_inset_fragment.KeyboardInsetSideEffectFragment
 import chat.sphinx.onboard_connect.R
 import chat.sphinx.onboard_connect.databinding.FragmentOnBoardConnectBinding
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
-internal class OnBoardConnectFragment: KeyboardInsetSideEffectFragment<
+internal class OnBoardConnectFragment: SideEffectFragment<
         Context,
         OnBoardConnectSideEffect,
         OnBoardConnectViewState,
@@ -39,10 +39,7 @@ internal class OnBoardConnectFragment: KeyboardInsetSideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val insetterActivity = (requireActivity() as InsetterActivity)
-        setupHeaderAndFooter(insetterActivity)
-        setViewsNavigationBarPadding(insetterActivity)
-
+        setupHeaderAndFooter()
         setupEditText()
 
         binding.apply {
@@ -64,18 +61,10 @@ internal class OnBoardConnectFragment: KeyboardInsetSideEffectFragment<
         }
     }
 
-    override fun onViewHeightChanged() {
-        setViewsNavigationBarPadding(
-            (requireActivity() as InsetterActivity)
-        )
-    }
-
-    private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
-        insetterActivity.addBottomPaddingFromWindowInset(binding.layoutConstraintOnBoardConnect)
-    }
-
-    private fun setupHeaderAndFooter(insetterActivity: InsetterActivity) {
-        insetterActivity.addStatusBarPadding(binding.layoutConstraintOnBoardConnect)
+    private fun setupHeaderAndFooter() {
+        (requireActivity() as InsetterActivity)
+            .addStatusBarPadding(binding.layoutConstraintOnBoardConnect)
+            .addNavigationBarPadding(binding.layoutConstraintOnBoardConnect)
     }
 
     private fun setupEditText() {

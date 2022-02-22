@@ -27,11 +27,12 @@ abstract class KeyboardInsetBaseFragment<
 
     private fun addGlobalLayoutChangeListener() {
         globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            if (viewHeight != binding.root.measuredHeight) {
-                viewHeight = binding.root.measuredHeight
-
-                onViewHeightChanged()
-            }
+//            if (viewHeight != binding.root.measuredHeight) {
+//                viewHeight = binding.root.measuredHeight
+//
+//                onViewHeightChanged()
+//            }
+            onKeyboardToggle()
         }
 
         binding.root.viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
@@ -50,5 +51,5 @@ abstract class KeyboardInsetBaseFragment<
         })
     }
 
-    protected abstract fun onViewHeightChanged()
+    protected abstract fun onKeyboardToggle()
 }

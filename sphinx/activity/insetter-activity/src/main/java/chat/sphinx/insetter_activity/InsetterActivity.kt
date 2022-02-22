@@ -25,12 +25,12 @@ inline fun InsetterActivity.addNavigationBarPadding(view: View): InsetterActivit
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun InsetterActivity.addBottomPaddingFromWindowInset(view: View): InsetterActivity {
+inline fun InsetterActivity.addKeyboardPadding(view: View): InsetterActivity {
     view.setPadding(
         view.paddingLeft,
         view.paddingTop,
         view.paddingRight,
-        navigationBarInsetHeight.bottom
+        keyboardInsetHeight.bottom
     )
     return this
 }
@@ -46,4 +46,7 @@ data class InsetPadding(val left: Int, val top: Int, val right: Int, val bottom:
 interface InsetterActivity {
     val statusBarInsetHeight: InsetPadding
     val navigationBarInsetHeight: InsetPadding
+    val keyboardInsetHeight: InsetPadding
+
+    var isKeyboardVisible: Boolean
 }

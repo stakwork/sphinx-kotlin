@@ -54,9 +54,7 @@ import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
-import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addBottomPaddingFromWindowInset
-import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.insetter_activity.*
 import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -173,9 +171,8 @@ abstract class ChatFragment<
         SelectedMessageStateBackPressHandler(viewLifecycleOwner, requireActivity())
 
         val insetterActivity = (requireActivity() as InsetterActivity)
-        setViewsNavigationBarPadding(insetterActivity)
-        setupMenu()
-        setupFooter()
+        setupMenu(insetterActivity)
+        setupFooter(insetterActivity)
         setupAttachmentPriceView()
         setupSelectedMessage()
         setupHeader(insetterActivity)
@@ -186,7 +183,7 @@ abstract class ChatFragment<
         viewModel.screenInit()
     }
 
-    override fun onViewHeightChanged() {
+    override fun onKeyboardToggle() {
         setViewsNavigationBarPadding(
             (requireActivity() as InsetterActivity)
         )
@@ -195,19 +192,19 @@ abstract class ChatFragment<
 
     private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
         callMenuBinding.apply {
-            insetterActivity.addBottomPaddingFromWindowInset(root)
+            insetterActivity.addKeyboardPadding(root)
         }
 
         recordingCircleBinding.apply {
-            insetterActivity.addBottomPaddingFromWindowInset(root)
+            insetterActivity.addKeyboardPadding(root)
         }
 
         footerBinding.apply {
-            insetterActivity.addBottomPaddingFromWindowInset(root)
+            insetterActivity.addKeyboardPadding(root)
         }
 
         menuBinding.includeLayoutChatMenuOptions.apply {
-            insetterActivity.addBottomPaddingFromWindowInset(root)
+            insetterActivity.addKeyboardPadding(root)
         }
     }
 
@@ -256,8 +253,10 @@ abstract class ChatFragment<
         }
     }
 
-    private fun setupMenu() {
+    private fun setupMenu(insetterActivity: InsetterActivity) {
         menuBinding.includeLayoutChatMenuOptions.apply options@ {
+
+            insetterActivity.addNavigationBarPadding(root)
 
             textViewMenuOptionCancel.setOnClickListener {
                 viewModel.updateViewState(ChatMenuViewState.Closed)
@@ -308,7 +307,7 @@ abstract class ChatFragment<
         }
     }
 
-    private fun setupFooter() {
+    private fun setupFooter(insetterActivity: InsetterActivity) {
         bottomMenuCall.newBuilder(callMenuBinding, viewLifecycleOwner)
             .setHeaderText(R.string.bottom_menu_call_header_text)
             .setOptions(
@@ -330,7 +329,17 @@ abstract class ChatFragment<
                 )
             ).build()
 
+        callMenuBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+
+        recordingCircleBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+
         footerBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+
             textViewChatFooterSend.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     sendMessageBuilder.setText(editTextChatFooter.text?.toString())
