@@ -184,13 +184,13 @@ abstract class ChatFragment<
     }
 
     override fun onKeyboardToggle() {
-        setViewsNavigationBarPadding(
+        addViewKeyboardBottomPadding(
             (requireActivity() as InsetterActivity)
         )
         scrollToBottom(force = true)
     }
 
-    private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
+    private fun addViewKeyboardBottomPadding(insetterActivity: InsetterActivity) {
         callMenuBinding.apply {
             insetterActivity.addKeyboardPadding(root)
         }

@@ -1,13 +1,7 @@
 package chat.sphinx.activitymain
 
-import android.app.Activity
 import android.content.Intent
-import android.content.pm.ActivityInfo
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.view.WindowInsets
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.ViewCompat
@@ -23,10 +17,8 @@ import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
-import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.flow.collect
