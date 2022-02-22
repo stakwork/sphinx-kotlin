@@ -30,16 +30,15 @@ import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addNavigationBarPaddingFromInsets
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.keyboard_inset_fragment.KeyboardInsetFragment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.resources.SphinxToastUtils
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -51,7 +50,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class DashboardFragment : MotionLayoutFragment<
+internal class DashboardFragment : KeyboardInsetFragment<
         Any,
         Context,
         ChatListSideEffect,
@@ -78,12 +77,32 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         findNavController().addOnDestinationChangedListener(CloseDrawerOnDestinationChange())
 
+        setViewsNavigationBarPadding(
+            (requireActivity() as InsetterActivity)
+        )
+
         setupViewPager()
         setupDashboardHeader()
         setupNavBar()
         setupNavDrawer()
         setupPopups()
         setupRestorePopup()
+    }
+
+    override fun onViewHeightChanged() {
+        setViewsNavigationBarPadding(
+            (requireActivity() as InsetterActivity)
+        )
+    }
+
+    private fun setViewsNavigationBarPadding(insetterActivity: InsetterActivity) {
+        binding.layoutDashboardNavBar.let { navBar ->
+            insetterActivity.addNavigationBarPaddingFromInsets(navBar.layoutConstraintDashboardNavBar)
+        }
+
+        binding.layoutDashboardNavDrawer.let { navDrawer ->
+            insetterActivity.addNavigationBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
+        }
     }
 
     override fun onResume() {
@@ -216,10 +235,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupNavBar() {
         binding.layoutDashboardNavBar.let { navBar ->
-
-            (requireActivity() as InsetterActivity)
-                .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
-
             navBar.navBarButtonPaymentReceive.setOnClickListener {
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
             }
@@ -251,7 +266,6 @@ internal class DashboardFragment : MotionLayoutFragment<
         binding.layoutDashboardNavDrawer.let { navDrawer ->
             (requireActivity() as InsetterActivity)
                 .addStatusBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
-                .addNavigationBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
 
             navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
 
