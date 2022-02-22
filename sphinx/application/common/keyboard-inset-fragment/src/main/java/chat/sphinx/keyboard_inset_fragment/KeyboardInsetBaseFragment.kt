@@ -5,40 +5,22 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewTreeObserver
 import androidx.annotation.LayoutRes
-import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.viewbinding.ViewBinding
-import io.matthewnelson.android_concept_views.MotionLayoutViewState
-import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
-import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
-import io.matthewnelson.concept_views.sideeffect.SideEffect
+import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.concept_views.viewstate.ViewState
 
-abstract class KeyboardInsetFragment<
-        MSC: Any,
-        T,
-        SE: SideEffect<T>,
-        MLVS: MotionLayoutViewState<MLVS>,
-        MLVM: MotionLayoutViewModel<MSC, T, SE, MLVS>,
+abstract class KeyboardInsetBaseFragment<
+        VS: ViewState<VS>,
+        BVM: BaseViewModel<VS>,
         VB: ViewBinding
-        >(@LayoutRes layoutId: Int): MotionLayoutFragment<
-        MSC,
-        T,
-        SE,
-        MLVS,
-        MLVM,
-        VB
-        >(layoutId), MotionLayout.TransitionListener
+        >(@LayoutRes layoutId: Int): BaseFragment<VS, BVM, VB>(layoutId)
 {
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         addGlobalLayoutChangeListener()
     }
-
-    override fun getMotionLayouts(): Array<MotionLayout> {
-        return arrayOf()
-    }
-
-    override fun onViewCreatedRestoreMotionScene(viewState: MLVS, binding: VB) {}
 
     private var viewHeight: Int = 0
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null

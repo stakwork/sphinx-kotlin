@@ -11,8 +11,7 @@
         android:id="@+id/layout_constraint_header_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
-        app:layout_constraintTop_toTopOf="parent"
-        >
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_nav_drawer_menu"

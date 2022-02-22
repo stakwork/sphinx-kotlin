@@ -3,7 +3,6 @@ package chat.sphinx.chat_common.ui
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.os.Build
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -58,7 +57,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPaddingFromInsets
 import chat.sphinx.insetter_activity.addStatusBarPadding
-import chat.sphinx.keyboard_inset_fragment.KeyboardInsetFragment
+import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
@@ -97,7 +96,7 @@ abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>
-        >(@LayoutRes layoutId: Int): KeyboardInsetFragment<
+        >(@LayoutRes layoutId: Int): KeyboardInsetMotionLayoutFragment<
         Nothing,
         ChatSideEffectFragment,
         ChatSideEffect,

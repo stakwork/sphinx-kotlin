@@ -32,7 +32,7 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addNavigationBarPaddingFromInsets
 import chat.sphinx.insetter_activity.addStatusBarPadding
-import chat.sphinx.keyboard_inset_fragment.KeyboardInsetFragment
+import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class DashboardFragment : KeyboardInsetFragment<
+internal class DashboardFragment : KeyboardInsetMotionLayoutFragment<
         Any,
         Context,
         ChatListSideEffect,
@@ -101,7 +101,7 @@ internal class DashboardFragment : KeyboardInsetFragment<
         }
 
         binding.layoutDashboardNavDrawer.let { navDrawer ->
-            insetterActivity.addNavigationBarPadding(navDrawer.layoutConstraintDashboardNavDrawer)
+            insetterActivity.addNavigationBarPaddingFromInsets(navDrawer.layoutConstraintDashboardNavDrawer)
         }
     }
 
