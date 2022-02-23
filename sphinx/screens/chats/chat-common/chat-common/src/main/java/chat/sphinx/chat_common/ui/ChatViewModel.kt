@@ -717,6 +717,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             viewStateContainer.viewStateFlow.firstOrNull()
         }
 
+        forceKeyExchange()
+
         viewModelScope.launch(mainImmediate) {
             delay(500)
             // cancel the setup jobs as the view has taken over observation
@@ -735,6 +737,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             }
         }
     }
+
+    protected abstract fun forceKeyExchange()
 
     fun screenInit() {
         viewModelScope.launch(mainImmediate) {

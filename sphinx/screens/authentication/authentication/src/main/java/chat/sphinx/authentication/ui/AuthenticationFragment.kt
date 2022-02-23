@@ -50,6 +50,7 @@ internal class AuthenticationFragment: SideEffectFragment<
 
         viewModel.currentViewState.pinPadChars.let { chars ->
             binding.layoutPinPad.let { pinPad ->
+
                 (requireActivity() as InsetterActivity)
                     .addNavigationBarPadding(pinPad.layoutConstraintPinPad)
 

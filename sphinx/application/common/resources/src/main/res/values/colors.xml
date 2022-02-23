@@ -59,6 +59,8 @@
     <color name="whiteTenPercentOpacity">#1AFFFFFF</color>
     <color name="whiteFiftyPercentOpacity">#80FFFFFF</color>
     <color name="whiteSeventyPercentOpacity">#B3FFFFFF</color>
+    <color name="blackSemiTransparent">#80000000</color>
+
     <color name="greenBorder">#2EB379</color>
 
     <color name="primaryRed">#ED7474</color>

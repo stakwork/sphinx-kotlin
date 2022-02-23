@@ -164,6 +164,11 @@ internal class AddressBookListAdapter(
                     }
                 }
 
+                layoutConstraintContactInfoContainer.setOnLongClickListener {
+                    viewModel.onItemLongClick()
+                    return@setOnLongClickListener true
+                }
+
                 layoutConstraintDeleteButtonContainer.setOnClickListener {
                     dContact?.let { contact ->
                         viewModel.deleteContact(contact)

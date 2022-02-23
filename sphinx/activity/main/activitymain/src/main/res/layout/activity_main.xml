@@ -14,12 +14,6 @@
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_main_navigation_bar"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_primary_host_backer"
         android:layout_width="0dp"
@@ -84,5 +78,13 @@
         android:layout_height="match_parent"
         app:defaultNavHost="true"
         app:navGraph="@navigation/main_authentication_nav_graph" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_main_navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/blackSemiTransparent"
+        android:elevation="100dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.motion.widget.MotionLayout>
