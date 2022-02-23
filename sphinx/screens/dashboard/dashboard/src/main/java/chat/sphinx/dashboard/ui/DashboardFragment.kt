@@ -110,8 +110,11 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     fun closeDrawerIfOpen(): Boolean {
-        if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpen) {
-            viewModel.updateViewState(DashboardMotionViewState.Default)
+        if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarHidden) {
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarHidden)
+            return true
+        } else if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarVisible) {
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
             return true
         }
         return false
@@ -124,7 +127,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             arguments: Bundle?
         ) {
             controller.removeOnDestinationChangedListener(this)
-            viewModel.updateViewState(DashboardMotionViewState.Default)
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
         }
     }
 
@@ -204,7 +207,11 @@ internal class DashboardFragment : MotionLayoutFragment<
                 constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
             }
 
-            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open)?.let { constraintSet ->
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open_nav_bar_visible)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
+
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open_nav_bar_hidden)?.let { constraintSet ->
                 constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
             }
 
@@ -213,7 +220,11 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
 
             header.imageViewNavDrawerMenu.setOnClickListener {
-                viewModel.updateViewState(DashboardMotionViewState.DrawerOpen)
+                if (viewModel.currentViewState is DashboardMotionViewState.DrawerCloseNavBarVisible) {
+                    viewModel.updateViewState(DashboardMotionViewState.DrawerOpenNavBarVisible)
+                } else if (viewModel.currentViewState is DashboardMotionViewState.DrawerCloseNavBarHidden) {
+                    viewModel.updateViewState(DashboardMotionViewState.DrawerOpenNavBarHidden)
+                }
             }
 
             header.textViewDashboardHeaderUpgradeApp.setOnClickListener {
@@ -273,7 +284,11 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupNavDrawer() {
         binding.dashboardNavDrawerInputLock.setOnClickListener {
-            viewModel.updateViewState(DashboardMotionViewState.Default)
+            if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarVisible) {
+                viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
+            } else if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarHidden) {
+                viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarHidden)
+            }
         }
 
         binding.layoutDashboardNavDrawer.let { navDrawer ->
@@ -352,13 +367,9 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     fun shouldToggleNavBar(show: Boolean) {
         if (show) {
-            if (viewModel.currentViewState !is DashboardMotionViewState.Default) {
-                viewModel.updateViewState(DashboardMotionViewState.Default)
-            }
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
         } else {
-            if (viewModel.currentViewState !is DashboardMotionViewState.NavBarHidden) {
-                viewModel.updateViewState(DashboardMotionViewState.NavBarHidden)
-            }
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarHidden)
         }
     }
 
@@ -474,14 +485,17 @@ internal class DashboardFragment : MotionLayoutFragment<
     override suspend fun onViewStateFlowCollect(viewState: DashboardMotionViewState) {
         @Exhaustive
         when (viewState) {
-            DashboardMotionViewState.Default -> {
-                binding.layoutMotionDashboard.setTransitionDuration(200)
+            DashboardMotionViewState.DrawerCloseNavBarHidden -> {
+                binding.layoutMotionDashboard.setTransitionDuration(150)
             }
-            DashboardMotionViewState.DrawerOpen -> {
+            DashboardMotionViewState.DrawerCloseNavBarVisible -> {
+                binding.layoutMotionDashboard.setTransitionDuration(150)
+            }
+            DashboardMotionViewState.DrawerOpenNavBarHidden -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
             }
-            DashboardMotionViewState.NavBarHidden -> {
-                binding.layoutMotionDashboard.setTransitionDuration(200)
+            DashboardMotionViewState.DrawerOpenNavBarVisible -> {
+                binding.layoutMotionDashboard.setTransitionDuration(300)
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)

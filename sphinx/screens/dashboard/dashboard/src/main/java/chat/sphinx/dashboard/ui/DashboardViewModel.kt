@@ -94,7 +94,7 @@ internal class DashboardViewModel @Inject constructor(
         Context,
         ChatListSideEffect,
         DashboardMotionViewState
-        >(dispatchers, DashboardMotionViewState.Default)
+        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible)
 {
 
     private val args: DashboardFragmentArgs by handler.navArgs()

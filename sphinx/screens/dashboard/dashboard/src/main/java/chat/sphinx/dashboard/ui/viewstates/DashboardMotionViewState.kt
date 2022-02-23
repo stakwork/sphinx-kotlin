@@ -6,35 +6,47 @@ import io.matthewnelson.android_concept_views.MotionLayoutViewState
 
 internal sealed class DashboardMotionViewState: MotionLayoutViewState<DashboardMotionViewState>() {
 
-    object Default: DashboardMotionViewState() {
+    object DrawerCloseNavBarVisible: DashboardMotionViewState() {
         override val startSetId: Int
-            get() = R.id.motion_scene_dashboard_drawer_open
+            get() = R.id.motion_scene_dashboard_drawer_open_nav_bar_visible
         override val endSetId: Int
             get() = R.id.motion_scene_dashboard_default
 
         override fun restoreMotionScene(motionLayout: MotionLayout) {}
     }
 
-    object DrawerOpen: DashboardMotionViewState() {
+    object DrawerCloseNavBarHidden: DashboardMotionViewState() {
         override val startSetId: Int
-            get() = R.id.motion_scene_dashboard_default
-        override val endSetId: Int
-            get() = R.id.motion_scene_dashboard_drawer_open
-
-        override fun restoreMotionScene(motionLayout: MotionLayout) {
-            motionLayout.setTransition(R.id.transition_dashboard_drawer_closed_to_open)
-            motionLayout.setProgress(1F, 1F)
-        }
-    }
-
-    object NavBarHidden: DashboardMotionViewState() {
-        override val startSetId: Int
-            get() = R.id.motion_scene_dashboard_default
+            get() = R.id.motion_scene_dashboard_drawer_open_nav_bar_hidden
         override val endSetId: Int
             get() = R.id.motion_scene_dashboard_nav_bar_hidden
 
         override fun restoreMotionScene(motionLayout: MotionLayout) {
-            motionLayout.setTransition(R.id.transition_dashboard_nav_visible_to_hidden)
+            motionLayout.setTransition(R.id.transition_dashboard_nav_drawer_open_to_close_nav_bar_hidden)
+            motionLayout.setProgress(1F, 1F)
+        }
+    }
+
+    object DrawerOpenNavBarHidden: DashboardMotionViewState() {
+        override val startSetId: Int
+            get() = R.id.motion_scene_dashboard_default
+        override val endSetId: Int
+            get() = R.id.motion_scene_dashboard_drawer_open_nav_bar_hidden
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_dashboard_drawer_closed_to_open_nav_bar_hidden)
+            motionLayout.setProgress(1F, 1F)
+        }
+    }
+
+    object DrawerOpenNavBarVisible: DashboardMotionViewState() {
+        override val startSetId: Int
+            get() = R.id.motion_scene_dashboard_default
+        override val endSetId: Int
+            get() = R.id.motion_scene_dashboard_drawer_open_nav_bar_visible
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_dashboard_drawer_closed_to_open_nav_bar_visible)
             motionLayout.setProgress(1F, 1F)
         }
     }

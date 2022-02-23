@@ -5,9 +5,8 @@
     android:id="@+id/layout_constraint_podcast_player_footer"
     android:layout_width="match_parent"
     android:layout_height="@dimen/player_bar_height"
-    android:background="@color/headerBGSemiTransparent"
     android:visibility="gone"
-    tools:visibility="visible">
+    android:background="@color/headerBGSemiTransparent">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_podcast_episode"
