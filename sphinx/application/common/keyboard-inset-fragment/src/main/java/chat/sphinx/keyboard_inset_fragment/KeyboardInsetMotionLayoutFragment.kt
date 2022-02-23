@@ -37,15 +37,20 @@ abstract class KeyboardInsetMotionLayoutFragment<
     private var isKeyboardVisible: Boolean = false
     private var globalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
+    private var didToggleKeyboard : Boolean = false
+        get() {
+            val insetterActivity = (requireActivity() as InsetterActivity)
+
+            return (!isKeyboardVisible && insetterActivity.isKeyboardVisible) ||
+                    (isKeyboardVisible && !insetterActivity.isKeyboardVisible)
+        }
+
     private fun addGlobalLayoutChangeListener() {
         val insetterActivity = (requireActivity() as InsetterActivity)
 
         globalLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            if ((!isKeyboardVisible && insetterActivity.isKeyboardVisible) ||
-                (isKeyboardVisible && !insetterActivity.isKeyboardVisible)) {
-
+            if (didToggleKeyboard) {
                 isKeyboardVisible = insetterActivity.isKeyboardVisible
-
                 onKeyboardToggle()
             }
         }
@@ -56,14 +61,23 @@ abstract class KeyboardInsetMotionLayoutFragment<
             override fun onViewAttachedToWindow(p0: View?) {}
 
             override fun onViewDetachedFromWindow(p0: View?) {
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                    p0?.viewTreeObserver?.removeOnGlobalLayoutListener(globalLayoutListener)
-                } else {
-                    p0?.viewTreeObserver?.removeGlobalOnLayoutListener(globalLayoutListener)
-                }
-                globalLayoutListener = null
+                removeGlobalOnLayoutListenerOn(p0)
             }
         })
+    }
+
+    private fun removeGlobalOnLayoutListenerOn(view: View?) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            view?.viewTreeObserver?.removeOnGlobalLayoutListener(globalLayoutListener)
+        } else {
+            view?.viewTreeObserver?.removeGlobalOnLayoutListener(globalLayoutListener)
+        }
+        globalLayoutListener = null
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        removeGlobalOnLayoutListenerOn(binding.root)
     }
 
     protected abstract fun onKeyboardToggle()

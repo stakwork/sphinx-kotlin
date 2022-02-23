@@ -102,7 +102,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
         binding.viewMainInputLock.setOnClickListener { viewModel }
 
-        addSystemInsetsChangeListener()
+        addWindowInsetChangeListener()
     }
 
     override fun onStart() {
@@ -234,18 +234,17 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     }
 
     override var isKeyboardVisible: Boolean = false
-    private fun addSystemInsetsChangeListener() {
+    private fun addWindowInsetChangeListener() {
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
 
             val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
-            val navBarInsets = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars())
 
             isKeyboardVisible = imeInsets.bottom > 0
 
             keyboardInsets = if (isKeyboardVisible) {
                 InsetPadding(imeInsets.left, imeInsets.top, imeInsets.right, imeInsets.bottom)
             } else {
-                InsetPadding(navBarInsets.left, navBarInsets.top, navBarInsets.right, navBarInsets.bottom)
+                null
             }
 
             windowInsets

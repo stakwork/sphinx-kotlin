@@ -126,7 +126,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
     fun scrollToBottomIfNeeded(
         callback: (() -> Unit)? = null,
-        replyingToMessage: Boolean = false
+        replyingToMessage: Boolean = false,
+        itemsDiff: Int = 0
     ) {
         val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
         val listSizeBeforeDispatch = messages.size
@@ -136,12 +137,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         }
 
         val listSizeAfterDispatch = messages.size
+        val lastItemPosition = messages.size - 1
 
         if (
-            (!viewModel.isMessageSelected() || replyingToMessage)           &&
-            listSizeAfterDispatch >= listSizeBeforeDispatch                 &&
-            recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE      &&
-            lastVisibleItemPositionBeforeDispatch == listSizeBeforeDispatch
+            (!viewModel.isMessageSelected() || replyingToMessage)                    &&
+            listSizeAfterDispatch >= listSizeBeforeDispatch                          &&
+            recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE               &&
+            lastVisibleItemPositionBeforeDispatch + itemsDiff >= lastItemPosition
         ) {
             recyclerView.scrollToPosition(listSizeAfterDispatch)
         }

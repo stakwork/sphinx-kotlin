@@ -187,7 +187,7 @@ abstract class ChatFragment<
         addViewKeyboardBottomPadding(
             (requireActivity() as InsetterActivity)
         )
-        scrollToBottom(force = true)
+        scrollToBottom(itemsDiff = 3)
     }
 
     private fun addViewKeyboardBottomPadding(insetterActivity: InsetterActivity) {
@@ -700,14 +700,10 @@ abstract class ChatFragment<
     protected fun scrollToBottom(
         callback: (() -> Unit)? = null,
         replyingToMessage: Boolean = false,
-        force: Boolean = false,
+        itemsDiff: Int = 0,
     ) {
         (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
-            if (force) {
-                (messagesListAdapter as MessageListAdapter<*>).forceScrollToBottom()
-            } else {
-                (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
-            }
+            (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage, itemsDiff)
         }
     }
 
