@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.media.MediaPlayer
 import android.os.IBinder
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
@@ -78,6 +79,8 @@ internal class MediaPlayerServiceControllerImpl(
 
     private val userActionLock = Mutex()
     override suspend fun submitAction(userAction: UserAction) {
+        playActionSound(userAction)
+
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
                 repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
@@ -106,6 +109,45 @@ internal class MediaPlayerServiceControllerImpl(
                 repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 listenerHandler.dispatch(getCurrentState())
             }
+        }
+    }
+
+    private var mp: MediaPlayer? = null
+    private var soundIndex = 0
+    private val sounds = arrayOf(
+        chat.sphinx.resources.R.raw.skip_30_v1,
+        chat.sphinx.resources.R.raw.skip_30_v2,
+        chat.sphinx.resources.R.raw.skip_30_v3,
+        chat.sphinx.resources.R.raw.skip_30_v4
+    )
+
+    private fun playActionSound(userAction: UserAction) {
+        when (userAction) {
+            is UserAction.ServiceAction.Seek -> {
+                playSkipSound()
+            }
+            else -> {}
+        }
+    }
+
+    private fun playSkipSound() {
+        val sound = sounds[soundIndex]
+
+        soundIndex = if (soundIndex < sounds.size - 1) {
+            soundIndex + 1
+        } else {
+            0
+        }
+
+        try {
+            if (mp?.isPlaying == true) {
+                mp?.stop()
+                mp?.release()
+            }
+            mp = MediaPlayer.create(app.applicationContext, sound)
+            mp?.start()
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
         }
     }
 
