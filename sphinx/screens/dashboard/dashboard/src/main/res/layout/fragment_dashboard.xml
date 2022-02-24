@@ -44,6 +44,14 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_current_episode_image_shadow_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:elevation="2dp"
+        android:src="@drawable/bottom_bar_elevation_gradient"
+        app:layout_constraintBottom_toTopOf="@+id/layout_podcast_player_footer" />
+
     <include
         android:id="@+id/layout_podcast_player_footer"
         layout="@layout/layout_podcast_player_footer"

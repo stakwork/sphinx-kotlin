@@ -128,7 +128,7 @@ internal class ChatTribeFragment: ChatFragment<
             animationViewPauseButton.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickPlayPause?.invoke()
             }
-            textViewEpisodeTitle.setOnClickListener {
+            layoutConstraintPodcastInfo.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickTitle?.invoke()
             }
         }
@@ -210,6 +210,7 @@ internal class ChatTribeFragment: ChatFragment<
                             progressBar.layoutParams.width = calculatedWidth.toInt()
                             progressBar.requestLayout()
 
+                            textViewEpisodeTitle.isSelected = !viewState.showPlayButton && !viewState.showLoading
                             textViewEpisodeTitle.text = viewState.title
                             textViewContributorTitle.text = viewState.subtitle
 

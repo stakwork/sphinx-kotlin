@@ -5,60 +5,84 @@
     android:id="@+id/layout_constraint_podcast_player_footer"
     android:layout_width="match_parent"
     android:layout_height="@dimen/player_bar_height"
-    android:visibility="gone"
+    android:visibility="visible"
     android:background="@color/headerBGSemiTransparent">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_podcast_episode"
-        android:layout_width="@dimen/player_bar_image_xy"
-        android:layout_height="@dimen/player_bar_image_xy"
-        android:scaleType="centerCrop"
-        android:layout_marginStart="@dimen/default_layout_margin"
-        android:layout_marginTop="@dimen/player_bar_image_top_margin"
-        android:visibility="visible"
-        android:src="@drawable/ic_podcast_placeholder"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_podcast_info"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:background="@android:color/transparent"
+        android:clickable="true"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_controls_container">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_episode_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:ellipsize="end"
-        android:textColor="@color/text"
-        android:textSize="@dimen/chat_footer_episode_title_text_size"
-        android:fontFamily="@font/roboto_regular"
-        android:text=""
-        android:gravity="center|start"
-        android:maxLines="3"
-        android:clickable="true"
-        android:background="@android:color/transparent"
-        android:layout_marginTop="@dimen/chat_footer_episode_label_vertical_margin"
-        app:layout_constraintStart_toEndOf="@+id/image_view_podcast_episode"
-        app:layout_constraintTop_toTopOf="@+id/image_view_podcast_episode"
-        tools:text="Episode Title"/>
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_podcast_episode"
+            android:layout_width="@dimen/player_bar_image_xy"
+            android:layout_height="@dimen/player_bar_image_xy"
+            android:scaleType="centerCrop"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:layout_marginTop="@dimen/player_bar_image_top_margin"
+            android:visibility="visible"
+            android:src="@drawable/ic_podcast_placeholder"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_contributor_title"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:ellipsize="end"
-        android:textColor="@color/whiteFiftyPercentOpacity"
-        android:textSize="@dimen/chat_footer_episode_sub_title_text_size"
-        android:fontFamily="@font/roboto_regular"
-        android:text=""
-        android:gravity="center|start"
-        android:maxLines="3"
-        android:clickable="true"
-        android:background="@android:color/transparent"
-        android:layout_marginBottom="@dimen/chat_footer_episode_label_vertical_margin"
-        app:layout_constraintStart_toEndOf="@+id/image_view_podcast_episode"
-        app:layout_constraintBottom_toBottomOf="@+id/image_view_podcast_episode"
-        tools:text="Contributor name"/>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/chat_footer_episode_label_vertical_margin"
+            app:layout_constraintStart_toEndOf="@+id/image_view_podcast_episode"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/image_view_podcast_episode"
+            android:layout_marginStart="@dimen/default_layout_margin">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_episode_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/text"
+                android:textSize="@dimen/chat_footer_episode_title_text_size"
+                android:fontFamily="@font/roboto_regular"
+                android:text=""
+                android:singleLine="true"
+                android:maxLines="1"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:focusable="true"
+                android:clickable="true"
+                android:focusableInTouchMode="true"
+                tools:text="Episode Title"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_contributor_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:textColor="@color/whiteFiftyPercentOpacity"
+            android:textSize="@dimen/chat_footer_episode_sub_title_text_size"
+            android:fontFamily="@font/roboto_regular"
+            android:text=""
+            android:gravity="center|start"
+            android:maxLines="3"
+            android:clickable="true"
+            android:background="@android:color/transparent"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:layout_marginBottom="@dimen/chat_footer_episode_label_vertical_margin"
+            app:layout_constraintStart_toEndOf="@+id/image_view_podcast_episode"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/image_view_podcast_episode"
+            tools:text="Contributor name"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_controls_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/player_bar_end_margin"

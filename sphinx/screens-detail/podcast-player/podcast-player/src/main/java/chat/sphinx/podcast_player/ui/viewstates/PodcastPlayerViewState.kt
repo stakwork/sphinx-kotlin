@@ -1,4 +1,4 @@
-package chat.sphinx.podcast_player.ui
+package chat.sphinx.podcast_player.ui.viewstates
 
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.wrapper_podcast.Podcast

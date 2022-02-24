@@ -24,9 +24,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
-import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
-import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
-import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
+import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -44,6 +42,7 @@ import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -73,6 +72,8 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     override val viewModel: DashboardViewModel by viewModels()
+    private val dashboardPodcastViewModel: DashboardPodcastViewModel by viewModels()
+
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
 
     private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
@@ -263,14 +264,18 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupPodcastPlayerFooter() {
         podcastPlayerBinding.apply {
-            textViewEpisodeTitle.text = "Episode title example"
-            textViewContributorTitle.text = "Contributor"
-
-            textViewPlayButton.visible
-            textViewForward30Button.visible
-            progressBarAudioLoading.gone
-
-            root.visible
+            textViewForward30Button.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickFastForward?.invoke()
+            }
+            textViewPlayButton.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickPlayPause?.invoke()
+            }
+            animationViewPauseButton.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickPlayPause?.invoke()
+            }
+            layoutConstraintPodcastInfo.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickTitle?.invoke()
+            }
         }
     }
 
@@ -298,9 +303,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
 
-//            navDrawer.navDrawerButtonAddSats.setOnClickListener {
-//                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddSatsScreen() }
-//            }
             navDrawer.navDrawerButtonContacts.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddressBookScreen() }
             }
@@ -501,6 +503,10 @@ internal class DashboardFragment : MotionLayoutFragment<
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
     }
 
+    private val progressWidth: Px by lazy {
+        Px(binding.root.measuredWidth.toFloat())
+    }
+
     private var disposable: Disposable? = null
     private var imageJob: Job? = null
 
@@ -547,6 +553,45 @@ internal class DashboardFragment : MotionLayoutFragment<
                         tribesTab?.findViewById<View>(R.id.view_unseen_messages_dot)?.goneIfFalse(
                             viewState.tribesBadgeVisible
                         )
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            dashboardPodcastViewModel.playingPodcastViewStateContainer.collect { viewState ->
+                podcastPlayerBinding.apply {
+                    when (viewState) {
+                        is PlayingPodcastViewState.NoPodcast -> {
+                            root.gone
+                        }
+                        is PlayingPodcastViewState.PodcastVS -> {
+                            textViewPlayButton.goneIfFalse(viewState.showPlayButton && !viewState.showLoading)
+                            animationViewPauseButton.goneIfFalse(!viewState.showPlayButton && !viewState.showLoading)
+
+                            val calculatedWidth = progressWidth.value.toDouble() * (viewState.playingProgress / 100.0)
+                            progressBar.layoutParams.width = calculatedWidth.toInt()
+                            progressBar.requestLayout()
+
+                            podcastPlayerBinding.textViewEpisodeTitle.isSelected = !viewState.showPlayButton && !viewState.showLoading
+                            textViewEpisodeTitle.text = viewState.title
+                            textViewContributorTitle.text = viewState.subtitle
+
+                            viewState.imageUrl?.let { imageUrl ->
+                                imageLoader.load(
+                                    imageViewPodcastEpisode,
+                                    imageUrl,
+                                    ImageLoaderOptions.Builder()
+                                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                        .build()
+                                )
+                            }
+
+                            textViewForward30Button.goneIfFalse(!viewState.showLoading)
+                            progressBarAudioLoading.goneIfFalse(viewState.showLoading)
+
+                            root.visible
+                        }
                     }
                 }
             }
