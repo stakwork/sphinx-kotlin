@@ -53,7 +53,6 @@
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
                 android:focusable="true"
-                android:clickable="true"
                 android:focusableInTouchMode="true"
                 tools:text="Episode Title"/>
 
@@ -70,7 +69,6 @@
             android:text=""
             android:gravity="center|start"
             android:maxLines="3"
-            android:clickable="true"
             android:background="@android:color/transparent"
             android:layout_marginStart="@dimen/default_layout_margin"
             android:layout_marginBottom="@dimen/chat_footer_episode_label_vertical_margin"
