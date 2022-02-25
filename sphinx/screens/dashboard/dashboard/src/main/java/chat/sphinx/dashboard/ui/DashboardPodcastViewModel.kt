@@ -13,6 +13,7 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.dashboard.ui.viewstates.DashboardPodcastViewState
 import chat.sphinx.dashboard.ui.viewstates.OnClickCallback
 import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState
@@ -252,6 +253,15 @@ internal class DashboardPodcastViewModel @Inject constructor(
             ).let { initialViewState ->
                 playingPodcastViewStateContainer.updateViewState(initialViewState)
             }
+        }
+    }
+
+    fun pausePodcastIfPlaying() {
+        val isPlaying =
+            (currentServiceState is MediaPlayerServiceState.ServiceActive.MediaState.Playing)
+
+        if (isPlaying) {
+            playingPodcastViewStateContainer.value.clickPlayPause?.invoke()
         }
     }
 

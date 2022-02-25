@@ -35,6 +35,7 @@ import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_view.Px
+import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -263,6 +264,19 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     private fun setupPodcastPlayerFooter() {
+        binding.swipeRevealLayoutPlayer.setSwipeListener(object: SwipeRevealLayout.SwipeListener {
+            override fun onClosed(view: SwipeRevealLayout?) {}
+
+            override fun onOpened(view: SwipeRevealLayout?) {
+                dashboardPodcastViewModel.pausePodcastIfPlaying()
+
+                podcastPlayerBinding.root.gone
+                binding.imageViewBottomBarShadow.visible
+            }
+
+            override fun onSlide(view: SwipeRevealLayout?, slideOffset: Float) {}
+        })
+
         podcastPlayerBinding.apply {
             textViewForward30Button.setOnClickListener {
                 dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickFastForward?.invoke()
@@ -564,6 +578,8 @@ internal class DashboardFragment : MotionLayoutFragment<
                     when (viewState) {
                         is PlayingPodcastViewState.NoPodcast -> {
                             root.gone
+                            binding.imageViewPlayerBarShadow.gone
+                            binding.imageViewBottomBarShadow.visible
                         }
                         is PlayingPodcastViewState.PodcastVS -> {
                             textViewPlayButton.goneIfFalse(viewState.showPlayButton && !viewState.showLoading)
@@ -591,6 +607,8 @@ internal class DashboardFragment : MotionLayoutFragment<
                             progressBarAudioLoading.goneIfFalse(viewState.showLoading)
 
                             root.visible
+                            binding.imageViewPlayerBarShadow.visible
+                            binding.imageViewBottomBarShadow.gone
                         }
                     }
                 }

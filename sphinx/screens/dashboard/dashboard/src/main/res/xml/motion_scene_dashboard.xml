@@ -46,13 +46,30 @@
                 app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header" />
         </Constraint>
 
-        <Constraint android:id="@+id/image_view_current_episode_image_shadow_overlay">
+        <Constraint android:id="@+id/swipe_reveal_layout_player">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/player_bar_height_with_shadow"
+                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar" />
+            <PropertySet
+                app:visibilityMode="ignore" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_podcast_player_footer">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet
+                app:visibilityMode="ignore" />
+        </Constraint>
+
+        <Constraint android:id="@+id/image_view_bottom_bar_shadow">
             <Layout
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
-                app:layout_constraintBottom_toTopOf="@+id/layout_podcast_player_footer" />
+                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar" />
             <PropertySet
-                android:elevation="5dp" />
+                app:visibilityMode="ignore" />
         </Constraint>
 
         <Constraint android:id="@+id/layout_dashboard_nav_bar">
@@ -60,15 +77,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent" />
-        </Constraint>
-
-        <Constraint android:id="@+id/layout_podcast_player_footer">
-            <Layout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/player_bar_height"
-                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar" />
-            <PropertySet
-                app:visibilityMode="ignore" />
         </Constraint>
 
         <Constraint android:id="@+id/dashboard_nav_drawer_input_lock">
