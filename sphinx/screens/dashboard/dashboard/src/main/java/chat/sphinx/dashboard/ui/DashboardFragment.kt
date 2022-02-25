@@ -578,8 +578,11 @@ internal class DashboardFragment : MotionLayoutFragment<
                     when (viewState) {
                         is PlayingPodcastViewState.NoPodcast -> {
                             root.gone
-                            binding.imageViewPlayerBarShadow.gone
-                            binding.imageViewBottomBarShadow.visible
+
+                            binding.apply {
+                                imageViewPlayerBarShadow.gone
+                                imageViewBottomBarShadow.visible
+                            }
                         }
                         is PlayingPodcastViewState.PodcastVS -> {
                             textViewPlayButton.goneIfFalse(viewState.showPlayButton && !viewState.showLoading)
@@ -606,9 +609,16 @@ internal class DashboardFragment : MotionLayoutFragment<
                             textViewForward30Button.goneIfFalse(!viewState.showLoading)
                             progressBarAudioLoading.goneIfFalse(viewState.showLoading)
 
+                            binding.apply {
+                                if (swipeRevealLayoutPlayer.isOpened) {
+                                    swipeRevealLayoutPlayer.close(true)
+                                }
+
+                                imageViewPlayerBarShadow.visible
+                                imageViewBottomBarShadow.gone
+                            }
+
                             root.visible
-                            binding.imageViewPlayerBarShadow.visible
-                            binding.imageViewBottomBarShadow.gone
                         }
                     }
                 }
