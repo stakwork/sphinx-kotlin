@@ -68,7 +68,6 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
 
     private fun setupHeaderAndFooter() {
         (requireActivity() as InsetterActivity)
-            .addStatusBarPadding(binding.layoutMotionOnBoardConnecting)
             .addNavigationBarPadding(binding.layoutMotionOnBoardConnecting)
     }
 

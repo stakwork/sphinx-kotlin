@@ -46,6 +46,7 @@ dependencies {
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:resources')
+
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')

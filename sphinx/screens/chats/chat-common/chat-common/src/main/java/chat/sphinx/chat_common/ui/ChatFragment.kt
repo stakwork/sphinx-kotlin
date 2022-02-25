@@ -54,9 +54,8 @@ import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
-import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.insetter_activity.*
+import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
@@ -78,7 +77,6 @@ import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isSphinxText
 import chat.sphinx.wrapper_message_media.isVideo
 import chat.sphinx.wrapper_view.Dp
-import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
@@ -96,7 +94,7 @@ abstract class ChatFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ChatViewModel<ARGS>
-        >(@LayoutRes layoutId: Int): MotionLayoutFragment<
+        >(@LayoutRes layoutId: Int): KeyboardInsetMotionLayoutFragment<
         Nothing,
         ChatSideEffectFragment,
         ChatSideEffect,
@@ -176,13 +174,38 @@ abstract class ChatFragment<
         setupMenu(insetterActivity)
         setupFooter(insetterActivity)
         setupAttachmentPriceView()
-        setupHeader(insetterActivity)
         setupSelectedMessage()
+        setupHeader(insetterActivity)
         setupAttachmentSendPreview(insetterActivity)
         setupAttachmentFullscreen(insetterActivity)
         setupRecyclerView()
 
         viewModel.screenInit()
+    }
+
+    override fun onKeyboardToggle() {
+        addViewKeyboardBottomPadding(
+            (requireActivity() as InsetterActivity)
+        )
+        scrollToBottom(itemsDiff = 3)
+    }
+
+    private fun addViewKeyboardBottomPadding(insetterActivity: InsetterActivity) {
+        callMenuBinding.apply {
+            insetterActivity.addKeyboardPadding(root)
+        }
+
+        recordingCircleBinding.apply {
+            insetterActivity.addKeyboardPadding(root)
+        }
+
+        footerBinding.apply {
+            insetterActivity.addKeyboardPadding(root)
+        }
+
+        menuBinding.includeLayoutChatMenuOptions.apply {
+            insetterActivity.addKeyboardPadding(root)
+        }
     }
 
     private inner class SelectedMessageStateBackPressHandler(
@@ -232,6 +255,7 @@ abstract class ChatFragment<
 
     private fun setupMenu(insetterActivity: InsetterActivity) {
         menuBinding.includeLayoutChatMenuOptions.apply options@ {
+
             insetterActivity.addNavigationBarPadding(root)
 
             textViewMenuOptionCancel.setOnClickListener {
@@ -674,11 +698,12 @@ abstract class ChatFragment<
     }
 
     protected fun scrollToBottom(
-        callback: () -> Unit,
-        replyingToMessage: Boolean = false
+        callback: (() -> Unit)? = null,
+        replyingToMessage: Boolean = false,
+        itemsDiff: Int = 0,
     ) {
         (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
-            (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage)
+            (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage, itemsDiff)
         }
     }
 
@@ -1370,6 +1395,7 @@ abstract class ChatFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
+
         messageReplyLastViewState = null
         headerInitialHolderLastViewState = null
         fullscreenLastViewState = null
