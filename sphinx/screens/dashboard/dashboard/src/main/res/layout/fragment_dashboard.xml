@@ -34,7 +34,7 @@
         android:id="@+id/swipe_refresh_layout_data_reload"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tab_layout_dashboard_tabs">
 
         <androidx.viewpager2.widget.ViewPager2
@@ -43,6 +43,66 @@
             android:layout_height="match_parent" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.chauthai.swipereveallayout.SwipeRevealLayout
+        android:id="@+id/swipe_reveal_layout_player"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/player_bar_height_with_shadow"
+        app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
+        app:mode="same_level"
+        app:dragEdge="right">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent">
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/image_view_player_bar_shadow"
+                    android:layout_width="match_parent"
+                    android:layout_height="20dp"
+                    android:elevation="2dp"
+                    android:src="@drawable/bottom_bar_elevation_gradient"
+                    android:scaleType="centerInside"
+                    app:layout_constraintBottom_toTopOf="@+id/layout_podcast_player_footer" />
+
+                <include
+                    android:id="@+id/layout_podcast_player_footer"
+                    layout="@layout/layout_podcast_player_footer"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/player_bar_height"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </FrameLayout>
+
+    </com.chauthai.swipereveallayout.SwipeRevealLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_bottom_bar_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:elevation="2dp"
+        android:src="@drawable/bottom_bar_elevation_gradient"
+        android:scaleType="centerInside"
+        app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar" />
 
     <include
         android:id="@+id/layout_dashboard_nav_bar"

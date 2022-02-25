@@ -7,6 +7,7 @@
     <color name="bodyTransparent">#40151E27</color>
     <color name="bodyInverted">#ffffff</color>
     <color name="headerBG">#1A242E</color>
+    <color name="headerBGSemiTransparent">#F21A242E</color>
     <color name="listBG">#141E27</color>
     <color name="lightBG">#1A242E</color>
     <color name="profileBG">#1A242E</color>
@@ -55,7 +56,11 @@
 
     <color name="primaryGreen">#49C998</color>
     <color name="whiteSemiTransparent">#B3FFFFFF</color>
+    <color name="whiteTenPercentOpacity">#1AFFFFFF</color>
+    <color name="whiteFiftyPercentOpacity">#80FFFFFF</color>
+    <color name="whiteSeventyPercentOpacity">#B3FFFFFF</color>
     <color name="blackSemiTransparent">#80000000</color>
+
     <color name="greenBorder">#2EB379</color>
 
     <color name="primaryRed">#ED7474</color>

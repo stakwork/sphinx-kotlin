@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -11,10 +12,10 @@ import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
 import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
 import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
 import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
-import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -93,14 +94,14 @@ internal class DashboardViewModel @Inject constructor(
         Any,
         Context,
         ChatListSideEffect,
-        NavDrawerViewState
-        >(dispatchers, NavDrawerViewState.Closed)
+        DashboardMotionViewState
+        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible)
 {
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
     val newVersionAvailable: MutableStateFlow<Boolean> by lazy(LazyThreadSafetyMode.NONE) {
-        MutableStateFlow<Boolean>(false)
+        MutableStateFlow(false)
     }
 
     val currentVersion: MutableStateFlow<String> by lazy(LazyThreadSafetyMode.NONE) {

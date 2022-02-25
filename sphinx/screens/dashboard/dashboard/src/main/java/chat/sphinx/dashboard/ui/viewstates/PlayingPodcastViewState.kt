@@ -1,4 +1,4 @@
-package chat.sphinx.chat_tribe.ui
+package chat.sphinx.dashboard.ui.viewstates
 
 import chat.sphinx.wrapper_podcast.Podcast
 import io.matthewnelson.concept_views.viewstate.ViewState
@@ -39,7 +39,7 @@ internal class OnClickCallback(val callback: (() -> Unit)) {
 }
 
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun PodcastViewState.PodcastVS.adjustState(
+internal inline fun PlayingPodcastViewState.PodcastVS.adjustState(
     showLoading: Boolean? = null,
     showPlayButton: Boolean? = null,
     title: String? = null,
@@ -50,10 +50,10 @@ internal inline fun PodcastViewState.PodcastVS.adjustState(
     clickBoost: OnClickCallback? = null,
     clickFastForward: OnClickCallback? = null,
     clickTitle: OnClickCallback? = null,
-): PodcastViewState.PodcastVS? {
+): PlayingPodcastViewState.PodcastVS? {
     return when (this) {
-        is PodcastViewState.PodcastVS.Available -> {
-            PodcastViewState.PodcastVS.Available(
+        is PlayingPodcastViewState.PodcastVS.Available -> {
+            PlayingPodcastViewState.PodcastVS.Available(
                 showLoading = showLoading ?: this.showLoading,
                 showPlayButton = showPlayButton ?: this.showPlayButton,
                 title = title ?: this.title,
@@ -67,8 +67,8 @@ internal inline fun PodcastViewState.PodcastVS.adjustState(
                 podcast = podcast
             )
         }
-        is PodcastViewState.PodcastVS.Ready -> {
-            PodcastViewState.PodcastVS.Ready(
+        is PlayingPodcastViewState.PodcastVS.Ready -> {
+            PlayingPodcastViewState.PodcastVS.Ready(
                 showLoading = showLoading ?: this.showLoading,
                 showPlayButton = showPlayButton ?: this.showPlayButton,
                 title = title ?: this.title,
@@ -88,14 +88,14 @@ internal inline fun PodcastViewState.PodcastVS.adjustState(
     }
 }
 
-internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
+internal sealed class PlayingPodcastViewState: ViewState<PlayingPodcastViewState>() {
 
     abstract val clickPlayPause: OnClickCallback?
     abstract val clickBoost: OnClickCallback?
     abstract val clickFastForward: OnClickCallback?
     abstract val clickTitle: OnClickCallback?
 
-    object NoPodcast: PodcastViewState() {
+    object NoPodcast: PlayingPodcastViewState() {
         override val clickPlayPause: OnClickCallback?
             get() = null
         override val clickBoost: OnClickCallback?
@@ -107,7 +107,7 @@ internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
     }
 
 
-    abstract class PodcastVS : PodcastViewState() {
+    abstract class PodcastVS : PlayingPodcastViewState() {
 
         abstract val showLoading: Boolean
         abstract val showPlayButton: Boolean
@@ -146,3 +146,4 @@ internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
         ) : PodcastVS()
     }
 }
+

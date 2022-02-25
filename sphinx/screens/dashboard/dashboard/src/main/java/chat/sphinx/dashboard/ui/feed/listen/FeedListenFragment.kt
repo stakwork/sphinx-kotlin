@@ -1,5 +1,6 @@
 package chat.sphinx.dashboard.ui.feed.listen
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.View
@@ -10,8 +11,10 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedListenBinding
+import chat.sphinx.dashboard.ui.DashboardFragment
 import chat.sphinx.dashboard.ui.adapter.FeedListenNowAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedFollowingAdapter
+import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.dashboard.ui.placeholder.PlaceholderContent
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,8 +44,19 @@ internal class FeedListenFragment : SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupNestedScrollView()
         setupListenNowAdapter()
         setupFollowingAdapter()
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun setupNestedScrollView() {
+        binding.scrollViewContent.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+            if (parentFragment is FeedFragment) {
+                val offsetY = binding.scrollViewContent.computeVerticalScrollOffset()
+                (parentFragment as FeedFragment)?.shouldToggleNavBar(scrollY < oldScrollY && offsetY < 50)
+            }
+        }
     }
 
     private fun setupListenNowAdapter() {

@@ -27,6 +27,7 @@ import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
+import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId

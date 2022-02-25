@@ -321,6 +321,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                         currentState = MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                             nnData.chatId,
+                            nnData.podcastId,
                             nnData.episodeId,
                             currentTime,
                             nnData.durationMilliSeconds
@@ -425,6 +426,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         if (nnData.mediaPlayer.isPlaying) {
                             currentState = MediaPlayerServiceState.ServiceActive.MediaState.Playing(
                                 nnData.chatId,
+                                nnData.podcastId,
                                 nnData.episodeId,
                                 currentTimeMilliseconds,
                                 nnData.durationMilliSeconds
@@ -434,6 +436,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                             val state = if (nnData.mediaPlayer.duration <= currentTimeMilliseconds) {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Ended(
                                     nnData.chatId,
+                                    nnData.podcastId,
                                     nnData.episodeId,
                                     currentTimeMilliseconds,
                                     nnData.durationMilliSeconds
@@ -441,6 +444,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                             } else {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Paused(
                                     nnData.chatId,
+                                    nnData.podcastId,
                                     nnData.episodeId,
                                     currentTimeMilliseconds,
                                     nnData.durationMilliSeconds

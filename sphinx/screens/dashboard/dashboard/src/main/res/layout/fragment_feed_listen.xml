@@ -18,7 +18,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="@dimen/default_layout_margin">
+            android:paddingTop="@dimen/default_layout_margin"
+            android:paddingBottom="@dimen/feed_fragment_bottom_padding">
 
             <TextView
                 android:id="@+id/text_view_listen_now_header"

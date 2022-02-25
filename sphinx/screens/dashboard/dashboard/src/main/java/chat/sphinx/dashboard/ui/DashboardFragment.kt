@@ -24,17 +24,18 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
-import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
-import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
-import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
-import chat.sphinx.dashboard.ui.viewstates.NavDrawerViewState
+import chat.sphinx.dashboard.ui.viewstates.*
+import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_view.Px
+import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -42,6 +43,7 @@ import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
@@ -53,7 +55,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         Any,
         Context,
         ChatListSideEffect,
-        NavDrawerViewState,
+        DashboardMotionViewState,
         DashboardViewModel,
         FragmentDashboardBinding
         >(R.layout.fragment_dashboard), SwipeRefreshLayout.OnRefreshListener
@@ -66,8 +68,17 @@ internal class DashboardFragment : MotionLayoutFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var userColorsHelper: UserColorsHelper
 
+    private val screenWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
+        Px(binding.root.measuredHeight.toFloat())
+    }
+
     override val viewModel: DashboardViewModel by viewModels()
+    private val dashboardPodcastViewModel: DashboardPodcastViewModel by viewModels()
+
     override val binding: FragmentDashboardBinding by viewBinding(FragmentDashboardBinding::bind)
+
+    private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
+        get() = binding.layoutPodcastPlayerFooter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -78,7 +89,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
         setupViewPager()
         setupDashboardHeader()
-        setupNavBar()
+        setupFooter()
         setupNavDrawer()
         setupPopups()
         setupRestorePopup()
@@ -101,8 +112,11 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     fun closeDrawerIfOpen(): Boolean {
-        if (viewModel.currentViewState is NavDrawerViewState.Open) {
-            viewModel.updateViewState(NavDrawerViewState.Closed)
+        if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarHidden) {
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarHidden)
+            return true
+        } else if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarVisible) {
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
             return true
         }
         return false
@@ -115,7 +129,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             arguments: Bundle?
         ) {
             controller.removeOnDestinationChangedListener(this)
-            viewModel.updateViewState(NavDrawerViewState.Closed)
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
         }
     }
 
@@ -191,16 +205,28 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             val newHeaderHeight = header.layoutConstraintDashboardHeader.layoutParams.height + activity.statusBarInsetHeight.top
 
-            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_closed)?.let { constraintSet ->
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_default)?.let { constraintSet ->
                 constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
             }
 
-            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open)?.let { constraintSet ->
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open_nav_bar_visible)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
+
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_drawer_open_nav_bar_hidden)?.let { constraintSet ->
+                constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
+            }
+
+            binding.layoutMotionDashboard.getConstraintSet(R.id.motion_scene_dashboard_nav_bar_hidden)?.let { constraintSet ->
                 constraintSet.constrainHeight(R.id.layout_dashboard_header, newHeaderHeight)
             }
 
             header.imageViewNavDrawerMenu.setOnClickListener {
-                viewModel.updateViewState(NavDrawerViewState.Open)
+                if (viewModel.currentViewState is DashboardMotionViewState.DrawerCloseNavBarVisible) {
+                    viewModel.updateViewState(DashboardMotionViewState.DrawerOpenNavBarVisible)
+                } else if (viewModel.currentViewState is DashboardMotionViewState.DrawerCloseNavBarHidden) {
+                    viewModel.updateViewState(DashboardMotionViewState.DrawerOpenNavBarHidden)
+                }
             }
 
             header.textViewDashboardHeaderUpgradeApp.setOnClickListener {
@@ -212,10 +238,15 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun setupFooter() {
+        (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
+
+        setupNavBar()
+        setupPodcastPlayerFooter()
+    }
+
     private fun setupNavBar() {
         binding.layoutDashboardNavBar.let { navBar ->
-            (requireActivity() as InsetterActivity)
-                .addNavigationBarPadding(navBar.layoutConstraintDashboardNavBar)
 
             navBar.navBarButtonPaymentReceive.setOnClickListener {
                 lifecycleScope.launch { viewModel.navBarNavigator.toPaymentReceiveDetail() }
@@ -232,6 +263,36 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun setupPodcastPlayerFooter() {
+        binding.swipeRevealLayoutPlayer.setSwipeListener(object: SwipeRevealLayout.SwipeListener {
+            override fun onClosed(view: SwipeRevealLayout?) {}
+
+            override fun onOpened(view: SwipeRevealLayout?) {
+                dashboardPodcastViewModel.pausePodcastIfPlaying()
+
+                podcastPlayerBinding.root.gone
+                binding.imageViewBottomBarShadow.visible
+            }
+
+            override fun onSlide(view: SwipeRevealLayout?, slideOffset: Float) {}
+        })
+
+        podcastPlayerBinding.apply {
+            textViewForward30Button.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickFastForward?.invoke()
+            }
+            textViewPlayButton.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickPlayPause?.invoke()
+            }
+            animationViewPauseButton.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickPlayPause?.invoke()
+            }
+            layoutConstraintPodcastInfo.setOnClickListener {
+                dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickTitle?.invoke()
+            }
+        }
+    }
+
     private fun setupRestorePopup() {
         binding.layoutDashboardRestore.layoutDashboardRestoreProgress.apply {
             buttonStopRestore.setOnClickListener {
@@ -242,7 +303,11 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private fun setupNavDrawer() {
         binding.dashboardNavDrawerInputLock.setOnClickListener {
-            viewModel.updateViewState(NavDrawerViewState.Closed)
+            if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarVisible) {
+                viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
+            } else if (viewModel.currentViewState is DashboardMotionViewState.DrawerOpenNavBarHidden) {
+                viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarHidden)
+            }
         }
 
         binding.layoutDashboardNavDrawer.let { navDrawer ->
@@ -252,9 +317,6 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             navDrawer.layoutConstraintDashboardNavDrawer.setOnClickListener { viewModel }
 
-//            navDrawer.navDrawerButtonAddSats.setOnClickListener {
-//                lifecycleScope.launch { viewModel.navDrawerNavigator.toAddSatsScreen() }
-//            }
             navDrawer.navDrawerButtonContacts.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddressBookScreen() }
             }
@@ -316,6 +378,14 @@ internal class DashboardFragment : MotionLayoutFragment<
                     editTextDashboardPeoplePopupMessage.text?.toString()
                 )
             }
+        }
+    }
+
+    fun shouldToggleNavBar(show: Boolean) {
+        if (show) {
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarVisible)
+        } else {
+            viewModel.updateViewState(DashboardMotionViewState.DrawerCloseNavBarHidden)
         }
     }
 
@@ -428,17 +498,27 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: NavDrawerViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: DashboardMotionViewState) {
         @Exhaustive
         when (viewState) {
-            NavDrawerViewState.Closed -> {
+            DashboardMotionViewState.DrawerCloseNavBarHidden -> {
                 binding.layoutMotionDashboard.setTransitionDuration(150)
             }
-            NavDrawerViewState.Open -> {
+            DashboardMotionViewState.DrawerCloseNavBarVisible -> {
+                binding.layoutMotionDashboard.setTransitionDuration(150)
+            }
+            DashboardMotionViewState.DrawerOpenNavBarHidden -> {
+                binding.layoutMotionDashboard.setTransitionDuration(300)
+            }
+            DashboardMotionViewState.DrawerOpenNavBarVisible -> {
                 binding.layoutMotionDashboard.setTransitionDuration(300)
             }
         }
         viewState.transitionToEndSet(binding.layoutMotionDashboard)
+    }
+
+    private val progressWidth: Px by lazy {
+        Px(binding.root.measuredWidth.toFloat())
     }
 
     private var disposable: Disposable? = null
@@ -487,6 +567,59 @@ internal class DashboardFragment : MotionLayoutFragment<
                         tribesTab?.findViewById<View>(R.id.view_unseen_messages_dot)?.goneIfFalse(
                             viewState.tribesBadgeVisible
                         )
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            dashboardPodcastViewModel.playingPodcastViewStateContainer.collect { viewState ->
+                podcastPlayerBinding.apply {
+                    when (viewState) {
+                        is PlayingPodcastViewState.NoPodcast -> {
+                            root.gone
+
+                            binding.apply {
+                                imageViewPlayerBarShadow.gone
+                                imageViewBottomBarShadow.visible
+                            }
+                        }
+                        is PlayingPodcastViewState.PodcastVS -> {
+                            textViewPlayButton.goneIfFalse(viewState.showPlayButton && !viewState.showLoading)
+                            animationViewPauseButton.goneIfFalse(!viewState.showPlayButton && !viewState.showLoading)
+
+                            val calculatedWidth = progressWidth.value.toDouble() * (viewState.playingProgress / 100.0)
+                            progressBar.layoutParams.width = calculatedWidth.toInt()
+                            progressBar.requestLayout()
+
+                            podcastPlayerBinding.textViewEpisodeTitle.isSelected = !viewState.showPlayButton && !viewState.showLoading
+                            textViewEpisodeTitle.text = viewState.title
+                            textViewContributorTitle.text = viewState.subtitle
+
+                            viewState.imageUrl?.let { imageUrl ->
+                                imageLoader.load(
+                                    imageViewPodcastEpisode,
+                                    imageUrl,
+                                    ImageLoaderOptions.Builder()
+                                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                        .build()
+                                )
+                            }
+
+                            textViewForward30Button.goneIfFalse(!viewState.showLoading)
+                            progressBarAudioLoading.goneIfFalse(viewState.showLoading)
+
+                            binding.apply {
+                                if (swipeRevealLayoutPlayer.isOpened) {
+                                    swipeRevealLayoutPlayer.close(true)
+                                }
+
+                                imageViewPlayerBarShadow.visible
+                                imageViewBottomBarShadow.gone
+                            }
+
+                            root.visible
+                        }
                     }
                 }
             }
@@ -650,7 +783,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     }
 
     override fun onViewCreatedRestoreMotionScene(
-        viewState: NavDrawerViewState,
+        viewState: DashboardMotionViewState,
         binding: FragmentDashboardBinding
     ) {
         viewState.restoreMotionScene(binding.layoutMotionDashboard)

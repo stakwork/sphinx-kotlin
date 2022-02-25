@@ -41,6 +41,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
 
     implementation project(path: ':sphinx:activity:insetter-activity')
@@ -60,10 +61,14 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
 
+    api project(path: ':sphinx:service:concepts:concept-service-media-player')
+
     implementation deps.androidx.swipeRefreshLayout
     implementation deps.androidx.recyclerView
     implementation deps.androidx.lifecycle.hilt
+    implementation deps.swipeRevealLayout.sdk
     implementation deps.google.hilt
+    implementation deps.lottie.sdk
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_dashboard_nav_bar"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/headerBG"
+    android:layout_height="@dimen/default_bottom_bar_height"
+    android:background="@color/headerBGSemiTransparent"
     android:elevation="@dimen/default_elevation">
 
     <androidx.appcompat.widget.AppCompatImageView
@@ -14,6 +14,7 @@
         android:layout_height="@dimen/default_bottom_bar_height"
         android:padding="@dimen/nav_bar_button_padding"
         android:src="@drawable/ic_request"
+        android:tint="@color/whiteSeventyPercentOpacity"
         app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_transactions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,6 +25,7 @@
         android:layout_height="@dimen/default_bottom_bar_height"
         android:padding="19dp"
         android:src="@drawable/ic_transaction"
+        android:tint="@color/whiteSeventyPercentOpacity"
         app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_scanner"
         app:layout_constraintStart_toEndOf="@+id/nav_bar_button_payment_receive"
         app:layout_constraintTop_toTopOf="parent" />
@@ -34,6 +36,7 @@
         android:layout_height="@dimen/default_bottom_bar_height"
         android:padding="18dp"
         android:src="@drawable/ic_scan"
+        android:tint="@color/whiteSeventyPercentOpacity"
         app:layout_constraintEnd_toStartOf="@+id/nav_bar_button_payment_send"
         app:layout_constraintStart_toEndOf="@+id/nav_bar_button_transactions"
         app:layout_constraintTop_toTopOf="parent" />
@@ -44,6 +47,7 @@
         android:layout_height="@dimen/default_bottom_bar_height"
         android:padding="@dimen/nav_bar_button_padding"
         android:src="@drawable/ic_send"
+        android:tint="@color/whiteSeventyPercentOpacity"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/nav_bar_button_scanner"
         app:layout_constraintTop_toTopOf="parent" />

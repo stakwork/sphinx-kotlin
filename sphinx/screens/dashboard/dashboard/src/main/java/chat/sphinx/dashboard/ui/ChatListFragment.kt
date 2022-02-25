@@ -2,6 +2,7 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -11,6 +12,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
@@ -18,8 +20,10 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentChatListBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
+import chat.sphinx.dashboard.ui.adapter.DashboardFooterAdapter
 import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.ChatListViewState
+import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_chat.ChatType
@@ -85,7 +89,6 @@ internal class ChatListFragment : SideEffectFragment<
     }
 
     private fun setupChats() {
-
         binding.layoutChatListChats.recyclerViewChats.apply {
             val linearLayoutManager = LinearLayoutManager(context)
             val chatListAdapter = ChatListAdapter(
@@ -99,10 +102,28 @@ internal class ChatListFragment : SideEffectFragment<
             )
 
             val chatListFooterAdapter = ChatListFooterAdapter(viewLifecycleOwner, onStopSupervisor, viewModel)
+            val footerSpaceAdapter = DashboardFooterAdapter()
             this.setHasFixedSize(false)
             layoutManager = linearLayoutManager
-            adapter = ConcatAdapter(chatListAdapter, chatListFooterAdapter)
+
+            adapter = ConcatAdapter(
+                chatListAdapter,
+                chatListFooterAdapter,
+                footerSpaceAdapter
+            )
+
             itemAnimator = null
+
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    if (parentFragment is DashboardFragment) {
+                        val offsetY = recyclerView.computeVerticalScrollOffset()
+                        (parentFragment as DashboardFragment)?.shouldToggleNavBar(dy <= 0 && offsetY < 200)
+                    }
+                }
+            })
         }
     }
 

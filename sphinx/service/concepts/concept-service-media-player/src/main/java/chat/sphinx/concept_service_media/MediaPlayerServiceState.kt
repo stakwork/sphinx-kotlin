@@ -14,6 +14,7 @@ sealed class MediaPlayerServiceState {
 
         sealed class MediaState(
             val chatId: ChatId,
+            val podcastId: String,
             val episodeId: String,
             val currentTime: Int,
             val episodeDuration: Int,
@@ -21,11 +22,13 @@ sealed class MediaPlayerServiceState {
 
             class Playing(
                 chatId: ChatId,
+                podcastId: String,
                 episodeId: String,
                 currentTime: Int,
                 episodeDuration: Int
             ): MediaState(
                 chatId,
+                podcastId,
                 episodeId,
                 currentTime,
                 episodeDuration
@@ -33,11 +36,13 @@ sealed class MediaPlayerServiceState {
 
             class Paused(
                 chatId: ChatId,
+                podcastId: String,
                 episodeId: String,
                 currentTime: Int,
                 episodeDuration: Int
             ): MediaState(
                 chatId,
+                podcastId,
                 episodeId,
                 currentTime,
                 episodeDuration
@@ -45,11 +50,13 @@ sealed class MediaPlayerServiceState {
 
             class Ended(
                 chatId: ChatId,
+                podcastId: String,
                 episodeId: String,
                 currentTime: Int,
                 episodeDuration: Int
             ): MediaState(
                 chatId,
+                podcastId,
                 episodeId,
                 currentTime,
                 episodeDuration
