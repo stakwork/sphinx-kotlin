@@ -33,7 +33,7 @@
         android:id="@+id/include_podcast_player_footer"
         layout="@layout/layout_podcast_player_footer"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/chat_footer_height"
+        android:layout_height="@dimen/player_bar_height"
         app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_message_reply"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

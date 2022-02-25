@@ -1,11 +1,12 @@
 package chat.sphinx.activitymain
 
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -50,19 +51,17 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         get() = viewModel
 
     companion object {
-        // Setting these here at initial load time will negate the need to query the view
-        // parameters again. This is ok as we're locked to portrait mode, and allows activity
-        // re-creation after the first call is made to InsetterActivity.
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
+        private var keyboardInsets: InsetPadding? = null
     }
 
     override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
         statusBarInsets ?: binding.layoutConstraintMainStatusBar.let {
             InsetPadding(
                 it.paddingLeft,
-                it.paddingRight,
                 it.paddingTop,
+                it.paddingRight,
                 it.paddingBottom
             )
         }.also { statusBarInsets = it }
@@ -72,12 +71,16 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         navigationBarInsets ?: binding.layoutConstraintMainNavigationBar.let {
             InsetPadding(
                 it.paddingLeft,
-                it.paddingRight,
                 it.paddingTop,
+                it.paddingRight,
                 it.paddingBottom
             )
         }.also { navigationBarInsets = it }
     }
+
+    override val keyboardInsetHeight: InsetPadding
+        get() = keyboardInsets ?: navigationBarInsetHeight
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
@@ -90,6 +93,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 padding()
             }
         }
+
         binding.layoutConstraintMainNavigationBar.applyInsetter {
             type(navigationBars = true) {
                 padding()
@@ -97,6 +101,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
 
         binding.viewMainInputLock.setOnClickListener { viewModel }
+
+        addWindowInsetChangeListener()
     }
 
     override fun onStart() {
@@ -226,4 +232,23 @@ internal class MainActivity: MotionLayoutNavigationActivity<
             }
         }
     }
+
+    override var isKeyboardVisible: Boolean = false
+    private fun addWindowInsetChangeListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
+
+            val imeInsets = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+
+            isKeyboardVisible = imeInsets.bottom > 0
+
+            keyboardInsets = if (isKeyboardVisible) {
+                InsetPadding(imeInsets.left, imeInsets.top, imeInsets.right, imeInsets.bottom)
+            } else {
+                null
+            }
+
+            windowInsets
+        }
+    }
 }
+

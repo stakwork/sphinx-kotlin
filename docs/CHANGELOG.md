@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha47 (2022-02-25)
+ - Fixes issue related with view moving up wen keyboard appears
+ - Adds collapsed podcast player bar on Dashboard
+ - Improves chat podcast player bar design
+
 # Version 1.0.0-alpha46 (2022-02-18)
  - Fixes issues related with podcast last played episode
  - Fixes issues on invite creation process

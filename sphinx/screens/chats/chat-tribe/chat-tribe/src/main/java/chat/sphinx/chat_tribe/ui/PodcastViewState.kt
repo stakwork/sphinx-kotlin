@@ -43,6 +43,8 @@ internal inline fun PodcastViewState.PodcastVS.adjustState(
     showLoading: Boolean? = null,
     showPlayButton: Boolean? = null,
     title: String? = null,
+    subtitle: String? = null,
+    imageUrl: String? = null,
     playingProgress: Int? = null,
     clickPlayPause: OnClickCallback? = null,
     clickBoost: OnClickCallback? = null,
@@ -55,6 +57,8 @@ internal inline fun PodcastViewState.PodcastVS.adjustState(
                 showLoading = showLoading ?: this.showLoading,
                 showPlayButton = showPlayButton ?: this.showPlayButton,
                 title = title ?: this.title,
+                subtitle = subtitle ?: this.subtitle,
+                imageUrl = imageUrl ?: this.imageUrl,
                 playingProgress = playingProgress ?: this.playingProgress,
                 clickPlayPause = clickPlayPause ?: this.clickPlayPause,
                 clickBoost = clickBoost ?: this.clickBoost,
@@ -68,6 +72,8 @@ internal inline fun PodcastViewState.PodcastVS.adjustState(
                 showLoading = showLoading ?: this.showLoading,
                 showPlayButton = showPlayButton ?: this.showPlayButton,
                 title = title ?: this.title,
+                subtitle = subtitle ?: this.subtitle,
+                imageUrl = imageUrl ?: this.imageUrl,
                 playingProgress = playingProgress ?: this.playingProgress,
                 clickPlayPause = clickPlayPause ?: this.clickPlayPause,
                 clickBoost = clickBoost ?: this.clickBoost,
@@ -106,6 +112,8 @@ internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
         abstract val showLoading: Boolean
         abstract val showPlayButton: Boolean
         abstract val title: String
+        abstract val subtitle: String
+        abstract val imageUrl: String?
         abstract val playingProgress: Int
         abstract val podcast: Podcast
 
@@ -113,6 +121,8 @@ internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
             override val showLoading: Boolean,
             override val showPlayButton: Boolean,
             override val title: String,
+            override val subtitle: String,
+            override val imageUrl: String?,
             override val playingProgress: Int,
             override val clickPlayPause: OnClickCallback?,
             override val clickBoost: OnClickCallback?,
@@ -125,6 +135,8 @@ internal sealed class PodcastViewState: ViewState<PodcastViewState>() {
             override val showLoading: Boolean,
             override val showPlayButton: Boolean,
             override val title: String,
+            override val subtitle: String,
+            override val imageUrl: String?,
             override val playingProgress: Int,
             override val clickPlayPause: OnClickCallback?,
             override val clickBoost: OnClickCallback?,

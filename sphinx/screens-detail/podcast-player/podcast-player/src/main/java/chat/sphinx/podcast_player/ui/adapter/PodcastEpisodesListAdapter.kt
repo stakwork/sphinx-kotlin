@@ -15,7 +15,7 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.LayoutEpisodeListItemHolderBinding
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewModel
-import chat.sphinx.podcast_player.ui.PodcastPlayerViewState
+import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.goneIfFalse

@@ -9,11 +9,10 @@
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
     <!-- ////////////////////////////////////////////////////////////////////////////////-->
 
-
     <!--
-           Set 1: Nav Drawer Closed
+           Set 1: Nav Drawer Closed / Nav Bar Visible
     -->
-    <ConstraintSet android:id="@+id/motion_scene_dashboard_drawer_closed">
+    <ConstraintSet android:id="@+id/motion_scene_dashboard_default">
 
         <Constraint android:id="@id/layout_dashboard_popup">
             <Layout
@@ -47,12 +46,30 @@
                 app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_header" />
         </Constraint>
 
-        <Constraint android:id="@+id/layout_dashboard_chats">
+        <Constraint android:id="@+id/swipe_reveal_layout_player">
             <Layout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
-                app:layout_constraintTop_toBottomOf="@+id/layout_dashboard_search_bar" />
+                android:layout_height="@dimen/player_bar_height_with_shadow"
+                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar" />
+            <PropertySet
+                app:visibilityMode="ignore" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_podcast_player_footer">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet
+                app:visibilityMode="ignore" />
+        </Constraint>
+
+        <Constraint android:id="@+id/image_view_bottom_bar_shadow">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar" />
+            <PropertySet
+                app:visibilityMode="ignore" />
         </Constraint>
 
         <Constraint android:id="@+id/layout_dashboard_nav_bar">
@@ -78,32 +95,12 @@
 
     </ConstraintSet>
 
-
     <!--
-           Set 2: Nav Drawer Open
+           Set 2: Nav Drawer Open / Nav Bar Visible
     -->
     <ConstraintSet
-        android:id="@+id/motion_scene_dashboard_drawer_open"
-        app:deriveConstraintsFrom="@+id/motion_scene_dashboard_drawer_closed">
-
-        <Constraint android:id="@id/layout_dashboard_popup">
-            <PropertySet
-                app:applyMotionScene="false"
-                app:visibilityMode="ignore" />
-        </Constraint>
-
-        <Constraint android:id="@id/layout_dashboard_restore">
-            <PropertySet
-                app:applyMotionScene="false"
-                app:visibilityMode="ignore" />
-        </Constraint>
-
-        <Constraint android:id="@+id/layout_dashboard_header">
-            <Layout
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_header_height"
-                app:layout_constraintTop_toTopOf="parent" />
-        </Constraint>
+        android:id="@+id/motion_scene_dashboard_drawer_open_nav_bar_visible"
+        app:deriveConstraintsFrom="@+id/motion_scene_dashboard_default">
 
         <Constraint android:id="@+id/dashboard_nav_drawer_input_lock">
             <PropertySet
@@ -118,12 +115,75 @@
                 app:layout_constraintStart_toStartOf="parent" />
         </Constraint>
 
+        <Constraint android:id="@+id/layout_dashboard_nav_bar">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <!--
+           Set 3: Nav Drawer Open / Nav Bar Hidden
+    -->
+    <ConstraintSet
+        android:id="@+id/motion_scene_dashboard_drawer_open_nav_bar_hidden"
+        app:deriveConstraintsFrom="@+id/motion_scene_dashboard_default">
+
+        <Constraint android:id="@+id/dashboard_nav_drawer_input_lock">
+            <PropertySet
+                android:alpha="@dimen/nav_drawer_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_dashboard_nav_drawer">
+            <Layout
+                android:layout_width="@dimen/nav_drawer_width"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent" />
+        </Constraint>
+
+        <Constraint android:id="@+id/layout_dashboard_nav_bar">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="parent" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <!--
+           Set 4: Nav Drawer Closed / Nav Bar Hidden
+    -->
+    <ConstraintSet android:id="@+id/motion_scene_dashboard_nav_bar_hidden"
+        app:deriveConstraintsFrom="@+id/motion_scene_dashboard_default">
+
+        <Constraint android:id="@+id/layout_dashboard_nav_bar">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="parent" />
+        </Constraint>
+
     </ConstraintSet>
 
     <Transition
-        android:id="@+id/transition_dashboard_drawer_closed_to_open"
-        app:constraintSetEnd="@+id/motion_scene_dashboard_drawer_open"
-        app:constraintSetStart="@+id/motion_scene_dashboard_drawer_closed"
+        android:id="@+id/transition_dashboard_drawer_closed_to_open_nav_bar_hidden"
+        app:constraintSetEnd="@+id/motion_scene_dashboard_drawer_open_nav_bar_hidden"
+        app:constraintSetStart="@+id/motion_scene_dashboard_default"
+        app:duration="300" />
+
+    <Transition
+        android:id="@+id/transition_dashboard_drawer_closed_to_open_nav_bar_visible"
+        app:constraintSetEnd="@+id/motion_scene_dashboard_drawer_open_nav_bar_visible"
+        app:constraintSetStart="@+id/motion_scene_dashboard_default"
+        app:duration="300" />
+
+    <Transition
+        android:id="@+id/transition_dashboard_nav_drawer_open_to_close_nav_bar_hidden"
+        app:constraintSetEnd="@+id/motion_scene_dashboard_nav_bar_hidden"
+        app:constraintSetStart="@+id/motion_scene_dashboard_drawer_open_nav_bar_hidden"
         app:duration="300" />
 
     <!-- Duration is set programmatically from the DashboardFragment's onViewStateFlowCollect -->
