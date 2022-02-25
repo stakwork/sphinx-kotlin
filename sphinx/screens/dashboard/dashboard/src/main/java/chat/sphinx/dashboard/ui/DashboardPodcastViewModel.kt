@@ -81,6 +81,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                     showLoading = false,
                     showPlayButton = false,
                     title = vs.podcast.getCurrentEpisode().title.value,
+                    imageUrl = vs.podcast.imageToShow?.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     playingPodcastViewStateContainer.updateViewState(it)
@@ -93,6 +94,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                     showLoading = false,
                     showPlayButton = true,
                     title = vs.podcast.getCurrentEpisode().title.value,
+                    imageUrl = vs.podcast.imageToShow?.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     playingPodcastViewStateContainer.updateViewState(it)
@@ -108,6 +110,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                     showLoading = false,
                     showPlayButton = true,
                     title = vs.podcast.getCurrentEpisode().title.value,
+                    imageUrl = vs.podcast.imageToShow?.value,
                     playingProgress = vs.podcast.getPlayingProgress(::retrieveEpisodeDuration),
                 )?.let {
                     playingPodcastViewStateContainer.updateViewState(it)
