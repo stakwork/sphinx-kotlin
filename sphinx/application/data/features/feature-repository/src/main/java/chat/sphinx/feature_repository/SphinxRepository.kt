@@ -859,7 +859,7 @@ abstract class SphinxRepository(
     }
 
     private val inviteLock = Mutex()
-    override val networkRefreshLatestContacts: Flow<LoadResponse<Boolean, ResponseError>> by lazy {
+    override val networkRefreshLatestContacts: Flow<LoadResponse<RestoreProgress, ResponseError>> by lazy {
         flow {
 
             val lastSeenContactsDate: String? = authenticationStorage.getString(
@@ -871,6 +871,13 @@ abstract class SphinxRepository(
                 ?: DATE_NIXON_SHOCK.toDateTime()
 
             val now: String = DateTime.nowUTC()
+            val restoring = lastSeenContactsDate == null
+
+            emit(
+                Response.Success(
+                    RestoreProgress(restoring, 2)
+                )
+            )
 
             networkQueryContact.getLatestContacts(
                 lastSeenContactsDateResolved
@@ -957,7 +964,15 @@ abstract class SphinxRepository(
                                 }
                             }
 
-                            emit(processChatsResponse)
+                            emit(
+                                if (processChatsResponse is Response.Success) {
+                                    Response.Success(
+                                        RestoreProgress(restoring, 4)
+                                    )
+                                } else {
+                                    Response.Error(ResponseError("Failed to refresh contacts and chats"))
+                                }
+                            )
 
                         } catch (e: ParseException) {
                             val msg =
@@ -4116,8 +4131,7 @@ abstract class SphinxRepository(
 
                             if (restoring && messagesTotal > 0) {
 
-                                val restoreProgress = getRestoreProgress(
-                                    newMessages,
+                                val restoreProgress = getMessagesRestoreProgress(
                                     messagesTotal,
                                     offset
                                 )
@@ -4266,8 +4280,7 @@ abstract class SphinxRepository(
         }
     }
 
-    private fun getRestoreProgress(
-        newMessages: List<MessageDto>,
+    private fun getMessagesRestoreProgress(
         newMessagesTotal: Int,
         offset: Int
     ): RestoreProgress {
@@ -4278,8 +4291,10 @@ abstract class SphinxRepository(
             newMessagesTotal / MESSAGE_PAGINATION_LIMIT
         }
 
+        val contactsRestoreProgressTotal = 4
+        val messagesRestoreProgressTotal = 96
         val currentPage: Int = offset / MESSAGE_PAGINATION_LIMIT
-        val progress: Int = currentPage * 100 / pages
+        val progress: Int = contactsRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
 
         return RestoreProgress(
             true,

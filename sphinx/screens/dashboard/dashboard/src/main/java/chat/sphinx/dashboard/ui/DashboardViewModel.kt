@@ -821,7 +821,13 @@ internal class DashboardViewModel @Inject constructor(
                     is Response.Error -> {
                         _networkStateFlow.value = response
                     }
-                    is Response.Success -> {}
+                    is Response.Success -> {
+                        val restoreProgress = response.value
+
+                        if (restoreProgress.restoring) {
+                            _restoreStateFlow.value = restoreProgress
+                        }
+                    }
                 }
             }
 
