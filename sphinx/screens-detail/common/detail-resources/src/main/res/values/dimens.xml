@@ -3,7 +3,6 @@
     <dimen name="detail_header_nav_button_width">40dp</dimen>
     <dimen name="detail_header_exit_button_width">40dp</dimen>
     <dimen name="detail_header_height">40dp</dimen>
-    <dimen name="detail_drag_space_height">100dp</dimen>
 
     <!-- Used by the activity for the motion layout, but needed by some detail screens -->
     <item name="space_detail_host_height" format="float" type="dimen">.025</item>
