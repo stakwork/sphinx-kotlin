@@ -1,5 +1,12 @@
 # ChangeLog
 
+# Version 1.0.0-alpha48 (2022-03-02)
+ - Adds ability to dismiss detail screens with swipe gesture
+ - Improves podcast player bar layouts
+ - Improves restore process
+ - Fixes crash during restore
+ - Fixes podcast player progress bar issue
+
 # Version 1.0.0-alpha47 (2022-02-25)
  - Fixes issue related with view moving up wen keyboard appears
  - Adds collapsed podcast player bar on Dashboard
