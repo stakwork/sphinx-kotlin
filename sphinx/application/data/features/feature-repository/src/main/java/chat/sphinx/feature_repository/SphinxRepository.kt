@@ -391,8 +391,7 @@ abstract class SphinxRepository(
                         emit(null)
                     }
                 }
-            } catch (e: Exception) {
-            }
+            } catch (e: Exception) {}
             delay(25L)
         }
 
@@ -415,10 +414,11 @@ abstract class SphinxRepository(
                     if (contact != null) {
                         ownerId = contact.id
                         throw Exception()
+                    } else {
+                        emit(null)
                     }
                 }
-            } catch (e: Exception) {
-            }
+            } catch (e: Exception) {}
             delay(25L)
         }
 
@@ -441,10 +441,11 @@ abstract class SphinxRepository(
                     if (contact != null) {
                         ownerId = contact.id
                         throw Exception()
+                    } else {
+                        emit(null)
                     }
                 }
-            } catch (e: Exception) {
-            }
+            } catch (e: Exception) {}
             delay(25L)
         }
 
@@ -468,10 +469,11 @@ abstract class SphinxRepository(
                     if (contact != null) {
                         ownerId = contact.id
                         throw Exception()
+                    } else {
+                        emit(null)
                     }
                 }
-            } catch (e: Exception) {
-            }
+            } catch (e: Exception) {}
             delay(25L)
         }
 
