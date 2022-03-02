@@ -83,7 +83,7 @@
         android:id="@+id/layout_constraint_controls_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/player_bar_end_margin"
+        android:layout_marginEnd="@dimen/default_layout_margin"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -99,7 +99,7 @@
             android:gravity="center"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/text_view_forward_30_button"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_forward_30_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
@@ -114,7 +114,7 @@
             android:clickable="true"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/text_view_forward_30_button"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_forward_30_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:lottie_autoPlay="true"
@@ -124,18 +124,20 @@
             app:lottie_speed="1"
             tools:ignore="ContentDescription" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_forward_30_button"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_forward_30_button"
             android:layout_width="@dimen/chat_footer_button_xy"
             android:layout_height="@dimen/chat_footer_button_xy"
-            android:background="@drawable/ic_forward_30"
-            android:backgroundTint="@color/whiteSeventyPercentOpacity"
+            android:src="@drawable/ic_skip_30"
+            android:tint="@color/whiteSeventyPercentOpacity"
+            android:scaleType="centerInside"
             android:gravity="center"
             android:clickable="true"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible"/>
 
         <ProgressBar
             android:id="@+id/progress_bar_audio_loading"
@@ -148,32 +150,24 @@
             android:padding="@dimen/default_small_layout_margin"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/progress_bar_container"
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/chat_footer_progress_line_height"
+        android:layout_height="2dp"
+        android:indeterminate="false"
+        android:max="100"
+        android:minHeight="@dimen/chat_footer_progress_line_height"
+        android:progress="0"
+        android:progressDrawable="@drawable/podcast_player_progress_bar"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:backgroundTint="@color/whiteTenPercentOpacity"
-        android:background="@drawable/button_background_white_rad_48">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/progress_bar"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:backgroundTint="@color/whiteFiftyPercentOpacity"
-            android:background="@drawable/button_background_white_rad_48">
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

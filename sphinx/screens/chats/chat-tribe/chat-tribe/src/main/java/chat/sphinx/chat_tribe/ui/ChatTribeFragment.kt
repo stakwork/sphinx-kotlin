@@ -119,7 +119,7 @@ internal class ChatTribeFragment: ChatFragment<
 //                    }
 //                }
 //            }
-            textViewForward30Button.setOnClickListener {
+            imageViewForward30Button.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickFastForward?.invoke()
             }
             textViewPlayButton.setOnClickListener {
@@ -150,10 +150,6 @@ internal class ChatTribeFragment: ChatFragment<
                 MessageReplyViewState.CommentingOnPodcast(podcastClip)
             )
         }
-    }
-
-    private val progressWidth: Px by lazy {
-        Px(binding.root.measuredWidth.toFloat())
     }
 
     override fun subscribeToViewStateFlow() {
@@ -206,9 +202,7 @@ internal class ChatTribeFragment: ChatFragment<
                             textViewPlayButton.goneIfFalse(viewState.showPlayButton && !viewState.showLoading)
                             animationViewPauseButton.goneIfFalse(!viewState.showPlayButton && !viewState.showLoading)
 
-                            val calculatedWidth = progressWidth.value.toDouble() * (viewState.playingProgress / 100.0)
-                            progressBar.layoutParams.width = calculatedWidth.toInt()
-                            progressBar.requestLayout()
+                            progressBar.progress = viewState.playingProgress
 
                             textViewEpisodeTitle.isSelected = !viewState.showPlayButton && !viewState.showLoading
                             textViewEpisodeTitle.text = viewState.title
@@ -224,7 +218,7 @@ internal class ChatTribeFragment: ChatFragment<
                                 )
                             }
 
-                            textViewForward30Button.goneIfFalse(!viewState.showLoading)
+                            imageViewForward30Button.goneIfFalse(!viewState.showLoading)
                             progressBarAudioLoading.goneIfFalse(viewState.showLoading)
 
                             scrollToBottom(callback = {

@@ -2,6 +2,7 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -67,10 +68,6 @@ internal class DashboardFragment : MotionLayoutFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var userColorsHelper: UserColorsHelper
-
-    private val screenWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
-        Px(binding.root.measuredHeight.toFloat())
-    }
 
     override val viewModel: DashboardViewModel by viewModels()
     private val dashboardPodcastViewModel: DashboardPodcastViewModel by viewModels()
@@ -278,7 +275,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         })
 
         podcastPlayerBinding.apply {
-            textViewForward30Button.setOnClickListener {
+            imageViewForward30Button.setOnClickListener {
                 dashboardPodcastViewModel.playingPodcastViewStateContainer.value.clickFastForward?.invoke()
             }
             textViewPlayButton.setOnClickListener {
@@ -588,9 +585,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                             textViewPlayButton.goneIfFalse(viewState.showPlayButton && !viewState.showLoading)
                             animationViewPauseButton.goneIfFalse(!viewState.showPlayButton && !viewState.showLoading)
 
-                            val calculatedWidth = progressWidth.value.toDouble() * (viewState.playingProgress / 100.0)
-                            progressBar.layoutParams.width = calculatedWidth.toInt()
-                            progressBar.requestLayout()
+                            progressBar.progress = viewState.playingProgress
 
                             podcastPlayerBinding.textViewEpisodeTitle.isSelected = !viewState.showPlayButton && !viewState.showLoading
                             textViewEpisodeTitle.text = viewState.title
@@ -606,7 +601,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                 )
                             }
 
-                            textViewForward30Button.goneIfFalse(!viewState.showLoading)
+                            imageViewForward30Button.goneIfFalse(!viewState.showLoading)
                             progressBarAudioLoading.goneIfFalse(viewState.showLoading)
 
                             binding.apply {
