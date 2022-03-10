@@ -21,6 +21,7 @@ import chat.sphinx.dashboard.databinding.FragmentChatListBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
 import chat.sphinx.dashboard.ui.adapter.DashboardFooterAdapter
+import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.ChatListViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -119,8 +120,10 @@ internal class ChatListFragment : SideEffectFragment<
                     super.onScrolled(recyclerView, dx, dy)
 
                     if (parentFragment is DashboardFragment) {
-                        val offsetY = recyclerView.computeVerticalScrollOffset()
-                        (parentFragment as DashboardFragment)?.shouldToggleNavBar(dy <= 0 && offsetY < 200)
+                        val bottomOfScroll = !canScrollVertically(1)
+                        (parentFragment as DashboardFragment)?.shouldToggleNavBar(
+                            dy <= 0 && !bottomOfScroll
+                        )
                     }
                 }
             })

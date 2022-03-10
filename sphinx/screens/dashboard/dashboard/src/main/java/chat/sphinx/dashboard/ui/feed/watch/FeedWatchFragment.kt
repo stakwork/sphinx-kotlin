@@ -49,8 +49,11 @@ internal class FeedWatchFragment : SideEffectFragment<
     private fun setupNestedScrollView() {
         binding.scrollViewContent.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
             if (parentFragment is FeedFragment) {
-                val offsetY = binding.scrollViewContent.computeVerticalScrollOffset()
-                (parentFragment as FeedFragment)?.shouldToggleNavBar(scrollY < oldScrollY && offsetY < 50)
+                val bottomOfScroll = !binding.scrollViewContent.canScrollVertically(1)
+
+                (parentFragment as FeedFragment)?.shouldToggleNavBar(
+                    scrollY <= oldScrollY && !bottomOfScroll
+                )
             }
         }
     }
