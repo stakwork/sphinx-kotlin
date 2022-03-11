@@ -27,6 +27,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="parent" />
+            <PropertySet android:visibility="invisible" />
         </Constraint>
 
     </ConstraintSet>
@@ -50,6 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent" />
+            <PropertySet android:visibility="visible" />
         </Constraint>
 
     </ConstraintSet>

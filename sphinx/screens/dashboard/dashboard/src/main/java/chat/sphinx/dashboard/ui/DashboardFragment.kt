@@ -2,7 +2,6 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -22,7 +21,6 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.viewstates.*
@@ -64,10 +62,6 @@ internal class DashboardFragment : MotionLayoutFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
-
-    @Inject
-    @Suppress("ProtectedInFinal")
-    protected lateinit var userColorsHelper: UserColorsHelper
 
     override val viewModel: DashboardViewModel by viewModels()
     private val dashboardPodcastViewModel: DashboardPodcastViewModel by viewModels()

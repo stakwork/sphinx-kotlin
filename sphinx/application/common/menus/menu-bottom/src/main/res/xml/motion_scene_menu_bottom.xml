@@ -29,6 +29,7 @@
                 android:layout_marginStart="@dimen/default_layout_margin"
                 android:layout_marginEnd="@dimen/default_layout_margin"
                 app:layout_constraintTop_toBottomOf="parent" />
+            <PropertySet android:visibility="invisible" />
         </Constraint>
 
     </ConstraintSet>
@@ -54,6 +55,7 @@
                 android:layout_marginStart="@dimen/default_layout_margin"
                 android:layout_marginEnd="@dimen/default_layout_margin"
                 app:layout_constraintBottom_toBottomOf="parent" />
+            <PropertySet android:visibility="visible" />
         </Constraint>
 
     </ConstraintSet>
