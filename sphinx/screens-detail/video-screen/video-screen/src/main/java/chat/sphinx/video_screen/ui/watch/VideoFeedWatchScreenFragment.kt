@@ -119,7 +119,9 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
                 removeFocusOnEnter(editTextCustomBoost)
 
                 imageViewFeedBoostButton.setOnClickListener {
-                    val amount = editTextCustomBoost.text.toString().toLongOrNull()?.toSat() ?: Sat(0)
+                    val amount = editTextCustomBoost.text.toString()
+                        .replace(" ", "")
+                        .toLongOrNull()?.toSat() ?: Sat(0)
 
                     viewModel.sendBoost(
                         amount,
@@ -181,7 +183,9 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
     ) {
         binding.apply {
             includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
-                editTextCustomBoost.setText(amount?.asFormattedString())
+                editTextCustomBoost.setText(
+                    (amount ?: Sat(100)).asFormattedString()
+                )
             }
 
             includeLayoutBoostFireworks.apply {

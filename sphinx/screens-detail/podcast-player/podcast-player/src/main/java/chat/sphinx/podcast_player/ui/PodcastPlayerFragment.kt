@@ -3,6 +3,7 @@ package chat.sphinx.podcast_player.ui
 import android.animation.Animator
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.view.MenuItem
@@ -223,7 +224,9 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
                 includeLayoutCustomBoost.apply customBoost@ {
                     this@customBoost.imageViewFeedBoostButton.setOnClickListener {
-                        val amount = editTextCustomBoost.text.toString().toLongOrNull()?.toSat() ?: Sat(0)
+                        val amount = editTextCustomBoost.text.toString()
+                            .replace(" ", "")
+                            .toLongOrNull()?.toSat() ?: Sat(0)
 
                         viewModel.sendPodcastBoost(
                             amount,
@@ -346,7 +349,9 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
         binding.apply {
             includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
-                editTextCustomBoost.setText(amount?.asFormattedString())
+                editTextCustomBoost.setText(
+                    (amount ?: Sat(100)).asFormattedString()
+                )
             }
 
             includeLayoutBoostFireworks.apply {

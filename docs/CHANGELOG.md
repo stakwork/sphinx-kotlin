@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha48 (2022-03-11)
+ - Fixes layout issue on keyboard dismissed
+ - Improves bottom bar toggle when scrolling
+ - Fixes default tip amount on Podcast Player
+ - Fixes podcast image scale
+
 # Version 1.0.0-alpha48 (2022-03-02)
  - Adds ability to dismiss detail screens with swipe gesture
  - Improves podcast player bar layouts

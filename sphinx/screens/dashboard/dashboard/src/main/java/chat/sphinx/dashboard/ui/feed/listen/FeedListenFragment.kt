@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.feed.listen
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
@@ -53,8 +54,10 @@ internal class FeedListenFragment : SideEffectFragment<
     private fun setupNestedScrollView() {
         binding.scrollViewContent.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
             if (parentFragment is FeedFragment) {
-                val offsetY = binding.scrollViewContent.computeVerticalScrollOffset()
-                (parentFragment as FeedFragment)?.shouldToggleNavBar(scrollY < oldScrollY && offsetY < 50)
+                val bottomOfScroll = !binding.scrollViewContent.canScrollVertically(1)
+                (parentFragment as FeedFragment)?.shouldToggleNavBar(
+                    scrollY <= oldScrollY && !bottomOfScroll
+                )
             }
         }
     }

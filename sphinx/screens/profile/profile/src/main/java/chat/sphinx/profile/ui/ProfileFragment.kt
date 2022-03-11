@@ -31,6 +31,7 @@ import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
 import chat.sphinx.resources.getColor
 import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.isTrue
@@ -377,8 +378,11 @@ internal class ProfileFragment: SideEffectFragment<
                             editTextProfileBasicContainerUserName.setText(owner.alias?.value ?: "")
                             editTextProfileBasicContainerAddress.setText(owner.nodePubKey?.value ?: "")
                             editTextProfileBasicContainerRouteHint.setText(owner.routeHint?.value ?: "")
-                            editTextProfileBasicContainerTip.setText("${owner.tipAmount?.value ?: "100"}")
                             switchProfileBasicContainerPin.isChecked = !owner.privatePhoto.value.toPrivatePhoto().isTrue()
+
+                            editTextProfileBasicContainerTip.setText(
+                                (owner.tipAmount ?: Sat(100)).asFormattedString()
+                            )
                         }
                     }
                 }
