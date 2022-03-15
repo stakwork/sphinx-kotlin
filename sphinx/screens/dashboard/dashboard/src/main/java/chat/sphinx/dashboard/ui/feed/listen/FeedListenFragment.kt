@@ -55,8 +55,10 @@ internal class FeedListenFragment : SideEffectFragment<
         binding.scrollViewContent.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
             if (parentFragment is FeedFragment) {
                 val bottomOfScroll = !binding.scrollViewContent.canScrollVertically(1)
+                val topOfScroll = !binding.scrollViewContent.canScrollVertically(-1)
+                val scrollNotAvailable = (bottomOfScroll && topOfScroll)
                 (parentFragment as FeedFragment)?.shouldToggleNavBar(
-                    scrollY <= oldScrollY && !bottomOfScroll
+                    (scrollY <= oldScrollY && !bottomOfScroll) || scrollNotAvailable
                 )
             }
         }
