@@ -121,8 +121,10 @@ internal class ChatListFragment : SideEffectFragment<
 
                     if (parentFragment is DashboardFragment) {
                         val bottomOfScroll = !canScrollVertically(1)
+                        val topOfScroll = !canScrollVertically(-1)
+                        val scrollNotAvailable = (bottomOfScroll && topOfScroll)
                         (parentFragment as DashboardFragment)?.shouldToggleNavBar(
-                            dy <= 0 && !bottomOfScroll
+                            (dy <= 0 && !bottomOfScroll) || scrollNotAvailable
                         )
                     }
                 }
