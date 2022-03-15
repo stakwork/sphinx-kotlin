@@ -1,6 +1,9 @@
 # ChangeLog
 
-# Version 1.0.0-alpha48 (2022-03-11)
+# Version 1.0.0-alpha50 (2022-03-15)
+ - Fixes issue where dashboard bottom bar is missing
+
+# Version 1.0.0-alpha49 (2022-03-11)
  - Fixes layout issue on keyboard dismissed
  - Improves bottom bar toggle when scrolling
  - Fixes default tip amount on Podcast Player
