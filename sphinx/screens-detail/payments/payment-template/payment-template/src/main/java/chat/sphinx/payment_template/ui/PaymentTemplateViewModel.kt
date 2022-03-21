@@ -118,7 +118,12 @@ internal class PaymentTemplateViewModel @Inject constructor(
         }
     }
 
+    private var sendPaymentJob: Job? = null
     fun sendPayment() {
+        if (sendPaymentJob?.isActive == true) {
+            return
+        }
+
         sendPaymentBuilder.setChatId(args.chatId)
         sendPaymentBuilder.setContactId(args.contactId)
         sendPaymentBuilder.setAmount(args.amount.value)
@@ -126,7 +131,7 @@ internal class PaymentTemplateViewModel @Inject constructor(
 
         viewStateContainer.updateViewState(PaymentTemplateViewState.ProcessingPayment)
 
-        viewModelScope.launch(mainImmediate) {
+        sendPaymentJob = viewModelScope.launch(mainImmediate) {
             val sendPayment = sendPaymentBuilder.build()
 
             when (messageRepository.sendPayment(sendPayment)) {
