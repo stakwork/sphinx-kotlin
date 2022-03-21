@@ -174,7 +174,6 @@ internal class AddressBookListAdapter(
                         lifecycleOwner.lifecycleScope.launch {
                             viewModel.confirmDeleteContact(contact) {
                                 swipeRevealLayoutContact.close(false)
-                                notifyItemRemoved(position)
                             }
                         }
                     }
