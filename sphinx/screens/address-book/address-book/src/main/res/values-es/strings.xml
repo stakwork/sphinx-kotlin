@@ -8,4 +8,10 @@
     <string name="block_contact">Bloquear</string>
     <string name="unblock_contact">Desbloquear</string>
     <string name="swipe_left_to_delete">Desliza hacia la izquierda para eliminar o bloquear el contacto</string>
+    <string name="alert_confirm_delete_contact_title">Eliminar Contact</string>
+    <string name="alert_confirm_delete_contact">¿Estás seguro que deseas eliminar este contacto?</string>
+    <string name="alert_confirm_block_contact_title">Bloquear Contacto</string>
+    <string name="alert_confirm_block_contact">¿Estás seguro que deseas bloquear este contacto?</string>
+    <string name="alert_confirm_unblock_contact_title">Desbloquear Contacto</string>
+    <string name="alert_confirm_unblock_contact">¿Estás seguro que deseas desbloquear este contacto?</string>
 </resources>
