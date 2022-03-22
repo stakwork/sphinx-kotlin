@@ -4,6 +4,8 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_rsa.RsaPublicKey
+import java.security.interfaces.RSAPublicKey
 
 @Suppress("NOTHING_TO_INLINE")
 suspend inline fun RelayDataHandler.retrieveRelayUrlAndAuthorizationToken(): Response<
@@ -39,6 +41,12 @@ abstract class RelayDataHandler {
      * */
     abstract suspend fun persistAuthorizationToken(token: AuthorizationToken?): Boolean
     abstract suspend fun retrieveAuthorizationToken(): AuthorizationToken?
+
+    /**
+     * Send `null` to clear the relay transport key from persistent storage
+     * */
+    abstract suspend fun persistRelayTransportKey(key: RsaPublicKey?): Boolean
+    abstract suspend fun retrieveRelayTransportKey(): RsaPublicKey?
 
     /**
      * Will parse the [relayUrl] for a proper scheme (http or https). If a scheme is

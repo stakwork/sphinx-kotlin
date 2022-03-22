@@ -33,7 +33,6 @@ class NetworkQueryContactImpl(
         private const val ENDPOINT_KEYS_EXCHANGE = "/contacts/%d/keys"
 
         private const val ENDPOINT_CREATE_INVITE = "/invites"
-        private const val HUB_URL = "https://hub.sphinx.chat"
 
         private const val ENDPOINT_BLOCK_CONTACT = "/%s/%d"
         private const val BLOCK_CONTACT = "block"
