@@ -4,8 +4,6 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.exception
-import chat.sphinx.kotlin_response.message
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
@@ -25,7 +23,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okio.base64.encodeBase64
-import java.security.interfaces.RSAPublicKey
 import java.util.concurrent.TimeUnit
 
 class RelayDataHandlerImpl(
@@ -236,7 +233,7 @@ class RelayDataHandlerImpl(
                 return true
             } else {
                 val encryptedTransportKey = try {
-                    encryptData(privateKey, UnencryptedString(key.value.toString()))
+                    encryptData(privateKey, UnencryptedString(key.value.joinToString("")))
                 } catch (e: Exception) {
                     return false
                 }

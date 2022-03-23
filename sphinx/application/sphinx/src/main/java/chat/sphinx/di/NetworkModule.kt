@@ -49,6 +49,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.meme_input_stream.MemeInputStreamHandlerImpl
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.TransportToken
 import coil.util.CoilUtils
 import com.squareup.moshi.Moshi
 import dagger.Module
@@ -143,6 +144,7 @@ object NetworkModule {
             NetworkClientImpl.RedactedLoggingHeaders(
                 listOf(
                     AuthorizationToken.AUTHORIZATION_HEADER,
+                    TransportToken.TRANSPORT_TOKEN_HEADER,
                     AuthenticationToken.HEADER_KEY
                 )
             ),

@@ -275,11 +275,12 @@ class SocketIOManagerImpl(
                 (args[0] as Transport).on(Transport.EVENT_REQUEST_HEADERS) { requestArgs ->
 
                     val headers = requestArgs[0] as java.util.Map<String, List<String>>
-                    headers.put(
-                        AuthorizationToken.AUTHORIZATION_HEADER,
-                        listOf(nnRelayData.first.value)
-                    )
 
+                    if (nnRelayData.second != null) {
+                        headers.put(TransportToken.TRANSPORT_TOKEN_HEADER, listOf(nnRelayData.second!!.value))
+                    } else {
+                        headers.put(AuthorizationToken.AUTHORIZATION_HEADER, listOf(nnRelayData.first.value))
+                    }
                 }
             } catch (e: Exception) {
                 LOG.e(TAG, "Adding authorization to RequestHeaders failed.", e)
