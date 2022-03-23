@@ -17,6 +17,7 @@ import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import com.squareup.moshi.*
 import com.squareup.moshi.Types.collectionElementType
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -68,7 +69,7 @@ class NetworkQueryMemeServerImpl(
 
     override fun signChallenge(
         challenge: AuthenticationChallenge,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<MemeServerChallengeSigDto, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = MemeServerChallengeSigRelayResponse::class.java,

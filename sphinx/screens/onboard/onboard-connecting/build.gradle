@@ -41,11 +41,13 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-common')
     api project(path: ':sphinx:screens:onboard:onboard-resources')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    api project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
 
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens:onboard:key-restore')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-transport-key')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
 

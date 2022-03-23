@@ -5,6 +5,7 @@ import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.JsonClass
 
 @Suppress("NOTHING_TO_INLINE")
@@ -32,9 +33,10 @@ internal inline fun Step1Json.InviteDataJson.toOnBoardInviteData(): OnBoardInvit
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun OnBoardStep.Step1_WelcomeMessage.toStep1Json(): Step1Json =
     Step1Json(
-        relayUrl.value,
-        authorizationToken.value,
-        inviterData.toInviteDataJson(),
+        relay_url = relayUrl.value,
+        authorization_token = authorizationToken.value,
+        transport_key = transportKey?.value.toString() ?: "",
+        invite_data_json = inviterData.toInviteDataJson(),
     )
 
 @Suppress("NOTHING_TO_INLINE")
@@ -42,6 +44,7 @@ internal inline fun Step1Json.toOnboardStep1(): OnBoardStep.Step1_WelcomeMessage
     OnBoardStep.Step1_WelcomeMessage(
         RelayUrl(relay_url),
         AuthorizationToken(authorization_token),
+        RsaPublicKey(transport_key.toCharArray()),
         invite_data_json.toOnBoardInviteData(),
     )
 
@@ -49,6 +52,7 @@ internal inline fun Step1Json.toOnboardStep1(): OnBoardStep.Step1_WelcomeMessage
 internal data class Step1Json(
     val relay_url: String,
     val authorization_token: String,
+    val transport_key: String,
     val invite_data_json: InviteDataJson,
 ) {
 

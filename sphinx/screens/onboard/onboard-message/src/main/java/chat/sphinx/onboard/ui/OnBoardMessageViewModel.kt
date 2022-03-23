@@ -9,6 +9,7 @@ import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.isOnionAddress
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -39,8 +40,9 @@ internal class OnBoardMessageViewModel @Inject constructor(
 
     private var loginJob: Job? = null
     fun presentLoginModal(
-        authToken: AuthorizationToken,
         relayUrl: RelayUrl,
+        authToken: AuthorizationToken,
+        transportKey: RsaPublicKey?,
         inviterData: OnBoardInviterData,
     ) {
         if (loginJob?.isActive == true || proceedJob?.isActive == true) {
@@ -69,7 +71,12 @@ internal class OnBoardMessageViewModel @Inject constructor(
                                     relayUrl = relayUrl,
                                     callback = { url ->
                                         if (url != null) {
-                                            proceedToLightningScreen(authToken, inviterData, url)
+                                            proceedToLightningScreen(
+                                                relayUrl,
+                                                authToken,
+                                                transportKey,
+                                                inviterData
+                                            )
                                         } else {
                                             // cancelled
                                             updateViewState(OnBoardMessageViewState.Idle)
@@ -78,7 +85,12 @@ internal class OnBoardMessageViewModel @Inject constructor(
                                 )
                             )
                         } else {
-                            proceedToLightningScreen(authToken, inviterData, relayUrl)
+                            proceedToLightningScreen(
+                                relayUrl,
+                                authToken,
+                                transportKey,
+                                inviterData
+                            )
                         }
                     }
                     is AuthenticationResponse.Success.Key -> {
@@ -91,9 +103,10 @@ internal class OnBoardMessageViewModel @Inject constructor(
 
     private var proceedJob: Job? = null
     private fun proceedToLightningScreen(
-        authorizationToken: AuthorizationToken,
-        inviterData: OnBoardInviterData,
         relayUrl: RelayUrl,
+        authorizationToken: AuthorizationToken,
+        transportKey: RsaPublicKey?,
+        inviterData: OnBoardInviterData,
     ) {
         if (proceedJob?.isActive == true) {
             return
@@ -102,6 +115,10 @@ internal class OnBoardMessageViewModel @Inject constructor(
         proceedJob = viewModelScope.launch(mainImmediate) {
             relayDataHandler.persistAuthorizationToken(authorizationToken)
             relayDataHandler.persistRelayUrl(relayUrl)
+
+            transportKey?.let { key ->
+                relayDataHandler.persistRelayTransportKey(key)
+            }
 
             val step2 = onBoardStepHandler.persistOnBoardStep2Data(inviterData)
 

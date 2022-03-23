@@ -1,10 +1,12 @@
 package chat.sphinx.feature_relay
 
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_tor.TorManager
-import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.isOnionAddress
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.exception
+import chat.sphinx.kotlin_response.message
+import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -22,7 +24,9 @@ import io.matthewnelson.crypto_common.exceptions.EncryptionException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okio.base64.encodeBase64
 import java.security.interfaces.RSAPublicKey
+import java.util.concurrent.TimeUnit
 
 class RelayDataHandlerImpl(
     private val authenticationStorage: AuthenticationStorage,
@@ -30,6 +34,7 @@ class RelayDataHandlerImpl(
     private val dispatchers: CoroutineDispatchers,
     private val encryptionKeyHandler: EncryptionKeyHandler,
     private val torManager: TorManager,
+    private val rsa: RSA,
 ) : RelayDataHandler(), CoroutineDispatchers by dispatchers {
 
     companion object {
@@ -262,5 +267,36 @@ class RelayDataHandlerImpl(
                     }
             }
         }
+    }
+
+    @OptIn(UnencryptedDataAccess::class)
+    override suspend fun retrieveRelayTransportToken(
+        authorizationToken: AuthorizationToken
+    ): TransportToken? {
+        retrieveRelayTransportKey()?.let { key ->
+
+            val unixTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+            val tokenAndTime = "${authorizationToken.value}|${unixTime}"
+
+            val response = rsa.encrypt(
+                key,
+                UnencryptedString(tokenAndTime),
+                formatOutput = false,
+                dispatcher = default,
+            )
+
+            return when (response) {
+                is Response.Error -> {
+                    null
+                }
+                is Response.Success -> {
+                    response.value.value
+                        .toByteArray()
+                        .encodeBase64()
+                        .toTransportToken()
+                }
+            }
+        }
+        return null
     }
 }

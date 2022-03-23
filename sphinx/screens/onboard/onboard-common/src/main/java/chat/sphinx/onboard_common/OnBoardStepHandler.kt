@@ -12,6 +12,8 @@ import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -48,6 +50,7 @@ class OnBoardStepHandler @Inject constructor(
     suspend fun persistOnBoardStep1Data(
         relayUrl: RelayUrl,
         authorizationToken: AuthorizationToken,
+        transportKey: RsaPublicKey?,
         inviterData: OnBoardInviterData?
     ): OnBoardStep.Step1_WelcomeMessage? {
         lock.withLock {
@@ -64,6 +67,7 @@ class OnBoardStepHandler @Inject constructor(
             val step1 = OnBoardStep.Step1_WelcomeMessage(
                 relayUrl,
                 authorizationToken,
+                transportKey,
                 inviterDataRealized
             )
 

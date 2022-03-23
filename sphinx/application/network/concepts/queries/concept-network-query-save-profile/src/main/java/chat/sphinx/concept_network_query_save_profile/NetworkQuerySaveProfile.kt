@@ -7,6 +7,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkQuerySaveProfile {
@@ -18,11 +19,11 @@ abstract class NetworkQuerySaveProfile {
 
     abstract fun savePeopleProfile(
         profile: PeopleProfileDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<Any, ResponseError>>
 
     abstract fun deletePeopleProfile(
         deletePeopleProfileDto: DeletePeopleProfileDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<Any, ResponseError>>
 }

@@ -104,6 +104,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-feed-search')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-save-profile')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-redeem-badge-token')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-transport-key')
     implementation project(path: ':sphinx:application:network:features:feature-network-relay-call')
     implementation project(path: ':sphinx:application:network:features:feature-socket-io')
     implementation project(path: ':sphinx:application:network:features:tor:feature-network-tor')

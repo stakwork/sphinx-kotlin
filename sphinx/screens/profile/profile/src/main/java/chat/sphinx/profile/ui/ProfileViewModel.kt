@@ -234,8 +234,11 @@ internal class ProfileViewModel @Inject constructor(
 
                 submitSideEffect(ProfileSideEffect.UpdatingRelayUrl)
 
+                val transportToken =
+                    relayDataHandler.retrieveRelayTransportToken(authorizationToken)
+
                 lightningRepository.getAccountBalanceAll(
-                    Pair(authorizationToken, relayUrl)
+                    Triple(authorizationToken, transportToken, relayUrl)
                 ).collect { loadResponse ->
                     @Exhaustive
                     when (loadResponse) {
