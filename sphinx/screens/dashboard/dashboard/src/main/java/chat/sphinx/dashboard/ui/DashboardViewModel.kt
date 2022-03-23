@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -140,7 +141,9 @@ internal class DashboardViewModel @Inject constructor(
 
                                     is Response.Success -> {
                                         relayDataHandler.persistRelayTransportKey(
-                                            RsaPublicKey(loadResponse.value.transport_token.toCharArray())
+                                            RsaPublicKey(
+                                                loadResponse.value.transport_key.toCharArray()
+                                            )
                                         )
                                     }
                                 }
