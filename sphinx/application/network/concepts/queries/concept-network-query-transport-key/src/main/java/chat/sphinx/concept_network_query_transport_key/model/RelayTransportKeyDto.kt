@@ -4,5 +4,5 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class RelayTransportKeyDto(
-    val transport_token: String,
+    val transport_key: String,
 )

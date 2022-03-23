@@ -158,7 +158,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                         is Response.Error -> {}
 
                         is Response.Success -> {
-                            transportKey = RsaPublicKey(loadResponse.value.transport_token.toCharArray())
+                            transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
                         }
                     }
                 }
@@ -254,7 +254,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 is Response.Error -> {}
 
                 is Response.Success -> {
-                    transportKey = RsaPublicKey(loadResponse.value.transport_token.toCharArray())
+                    transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
                 }
             }
         }

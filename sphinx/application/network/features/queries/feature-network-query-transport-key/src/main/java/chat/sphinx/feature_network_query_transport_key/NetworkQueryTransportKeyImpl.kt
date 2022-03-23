@@ -14,7 +14,7 @@ class NetworkQueryTransportKeyImpl(
 ): NetworkQueryTransportKey() {
 
     companion object {
-        private const val ENDPOINT_TRANSPORT_KEY = "/request_transport_token"
+        private const val ENDPOINT_TRANSPORT_KEY = "/request_transport_key"
     }
 
     override fun getRelayTransportKey(
