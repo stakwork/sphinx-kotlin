@@ -288,8 +288,6 @@ class RelayDataHandlerImpl(
                 }
                 is Response.Success -> {
                     response.value.value
-                        .toByteArray()
-                        .encodeBase64()
                         .toTransportToken()
                 }
             }
