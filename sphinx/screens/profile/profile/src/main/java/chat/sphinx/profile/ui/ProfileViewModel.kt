@@ -8,6 +8,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -29,6 +30,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.*
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -60,6 +62,7 @@ internal class ProfileViewModel @Inject constructor(
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
+    private val networkQueryTransportKey: NetworkQueryTransportKey,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
 ): SideEffectViewModel<
@@ -234,8 +237,24 @@ internal class ProfileViewModel @Inject constructor(
 
                 submitSideEffect(ProfileSideEffect.UpdatingRelayUrl)
 
-                val transportToken =
-                    relayDataHandler.retrieveRelayTransportToken(authorizationToken)
+                var transportKey: RsaPublicKey? = null
+
+                networkQueryTransportKey.getRelayTransportKey(relayUrl).collect { loadResponse ->
+                    @javax.annotation.meta.Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+
+                        is Response.Success -> {
+                            transportKey = RsaPublicKey(loadResponse.value.transport_key.toCharArray())
+                        }
+                    }
+                }
+
+                val transportToken = relayDataHandler.retrieveRelayTransportToken(
+                    authorizationToken,
+                    transportKey
+                )
 
                 lightningRepository.getAccountBalanceAll(
                     Triple(authorizationToken, transportToken, relayUrl)
@@ -249,6 +268,9 @@ internal class ProfileViewModel @Inject constructor(
                             success = false
                         }
                         is Response.Success -> {
+                            transportKey?.let { key ->
+                                relayDataHandler.persistRelayTransportKey(key)
+                            }
                             success = relayDataHandler.persistRelayUrl(relayUrl)
                         }
                     }
