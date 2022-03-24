@@ -299,29 +299,11 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             )
         }
 
-        val relayTransportToken = transportToken ?: transportKey?.let {
-
-            val unixTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
-            val tokenAndTime = "${authToken.value}|${unixTime}"
-
-            val response = rsa.encrypt(
-                transportKey,
-                UnencryptedString(tokenAndTime),
-                formatOutput = false,
-                dispatcher = default,
+        val relayTransportToken = transportToken ?: transportKey?.let { transportKey ->
+            relayDataHandler.retrieveRelayTransportToken(
+                authToken,
+                transportKey
             )
-
-            when (response) {
-                is Response.Error -> {
-                    null
-                }
-                is Response.Success -> {
-                    response.value.value
-                        .toByteArray()
-                        .encodeBase64()
-                        .toTransportToken()
-                }
-            }
         } ?: null
 
         val relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl> =

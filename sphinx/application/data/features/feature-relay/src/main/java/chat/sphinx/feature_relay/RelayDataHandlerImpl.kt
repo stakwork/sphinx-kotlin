@@ -268,10 +268,10 @@ class RelayDataHandlerImpl(
 
     @OptIn(UnencryptedDataAccess::class)
     override suspend fun retrieveRelayTransportToken(
-        authorizationToken: AuthorizationToken
+        authorizationToken: AuthorizationToken,
+        transportKey: RsaPublicKey?
     ): TransportToken? {
-        retrieveRelayTransportKey()?.let { key ->
-
+        (transportKey ?: retrieveRelayTransportKey())?.let { key ->
             val unixTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
             val tokenAndTime = "${authorizationToken.value}|${unixTime}"
 

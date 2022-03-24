@@ -43,7 +43,7 @@ class ToOnBoardScreen(
 ): NavigationRequest<NavController>() {
 
     override fun navigate(controller: NavController) {
-        val transportKeyOrEmpty = onBoardStep.transportKey?.value.toString() ?: ""
+        val transportKeyOrEmpty = onBoardStep.transportKey?.value?.joinToString("") ?: ""
 
         OnBoardMessageFragmentArgs.Builder(
             onBoardStep.relayUrl.value,

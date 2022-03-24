@@ -35,7 +35,7 @@ internal inline fun OnBoardStep.Step1_WelcomeMessage.toStep1Json(): Step1Json =
     Step1Json(
         relay_url = relayUrl.value,
         authorization_token = authorizationToken.value,
-        transport_key = transportKey?.value.toString() ?: "",
+        transport_key = transportKey?.value?.joinToString("") ?: "",
         invite_data_json = inviterData.toInviteDataJson(),
     )
 

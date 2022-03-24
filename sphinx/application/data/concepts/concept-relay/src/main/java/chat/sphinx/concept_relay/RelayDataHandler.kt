@@ -52,7 +52,8 @@ abstract class RelayDataHandler {
     abstract suspend fun retrieveRelayTransportKey(): RsaPublicKey?
 
     abstract suspend fun retrieveRelayTransportToken(
-        authorizationToken: AuthorizationToken
+        authorizationToken: AuthorizationToken,
+        transportKey: RsaPublicKey? = null
     ): TransportToken?
 
     /**
