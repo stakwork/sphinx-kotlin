@@ -45,6 +45,11 @@ internal class OnBoardNameViewModel @Inject constructor(
         }
 
         ownerUpdateJob = viewModelScope.launch(mainImmediate) {
+            if (name.isEmpty()) {
+                updateViewState(OnBoardNameViewState.Error)
+                return@launch
+            }
+
             authenticationCoordinator.submitAuthenticationRequest(
                 AuthenticationRequest.GetEncryptionKey()
             ).firstOrNull().let { authenticationResponse ->
