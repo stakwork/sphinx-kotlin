@@ -26,7 +26,6 @@ import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
-import chat.sphinx.wrapper_rsa.toRsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -35,13 +34,10 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
-import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import okio.base64.encodeBase64
-import java.util.concurrent.TimeUnit
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -106,7 +102,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     OnBoardConnectingViewState.Transition_Set2_DecryptKeys(restoreCode)
                 )
             } ?: args.connectionCode?.let { connectionCode ->
-                getTransportToken(
+                getTransportKey(
                     ip = connectionCode.ip,
                     nodePubKey = null,
                     password = connectionCode.password,
@@ -223,7 +219,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     val inviteResponse = loadResponse.value.response
 
                     inviteResponse?.invite?.let { invite ->
-                        getTransportToken(
+                        getTransportKey(
                             ip = RelayUrl(inviteResponse.ip),
                             nodePubKey = inviteResponse.pubkey,
                             password = null,
@@ -235,7 +231,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getTransportToken(
+    private suspend fun getTransportKey(
         ip: RelayUrl,
         nodePubKey: String?,
         password: String?,
