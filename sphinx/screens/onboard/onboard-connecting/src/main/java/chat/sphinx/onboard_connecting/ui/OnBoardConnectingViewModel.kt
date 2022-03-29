@@ -302,15 +302,16 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             )
         } ?: null
 
-        val relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl> =
-            Triple(authToken, relayTransportToken, relayUrl)
-
         var generateTokenResponse: LoadResponse<GenerateTokenResponse, ResponseError> = Response.Error(
             ResponseError("generateToken endpoint failed")
         )
 
         if (relayTransportToken != null) {
-            networkQueryContact.generateToken(password, nodePubKey, relayData).collect { loadResponse ->
+            networkQueryContact.generateToken(
+                password,
+                nodePubKey,
+                Triple(authToken, relayTransportToken, relayUrl)
+            ).collect { loadResponse ->
                 generateTokenResponse = loadResponse
             }
         } else {
