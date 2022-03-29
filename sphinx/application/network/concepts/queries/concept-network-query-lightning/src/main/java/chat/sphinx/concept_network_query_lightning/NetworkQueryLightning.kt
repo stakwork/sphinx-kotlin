@@ -16,6 +16,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 
 abstract class NetworkQueryLightning {
@@ -24,44 +25,44 @@ abstract class NetworkQueryLightning {
     /// GET ///
     ///////////
     abstract fun getInvoices(
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<InvoicesDto, ResponseError>>
 
     abstract fun getChannels(
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<ChannelsDto, ResponseError>>
 
     abstract fun getBalance(
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<BalanceDto, ResponseError>>
 
     abstract fun getBalanceAll(
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<BalanceAllDto, ResponseError>>
 
     abstract fun checkRoute(
         publicKey: LightningNodePubKey,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
 
     abstract fun checkRoute(
         publicKey: LightningNodePubKey,
         routeHint: LightningRouteHint,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
 
     abstract fun checkRoute(
         chatId: ChatId,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<RouteSuccessProbabilityDto, ResponseError>>
 
     abstract fun getLogs(
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<String, ResponseError>>
 
     abstract fun postRequestPayment(
         postPaymentDto: PostRequestPaymentDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
     ): Flow<LoadResponse<LightningPaymentInvoiceDto, ResponseError>>
 
     /**
@@ -69,7 +70,7 @@ abstract class NetworkQueryLightning {
      */
     abstract fun putLightningPaymentRequest(
         payRequestDto: PayRequestDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
     ): Flow<LoadResponse<PaymentMessageDto, ResponseError>>
 
 //    app.get('/getinfo', details.getInfo)

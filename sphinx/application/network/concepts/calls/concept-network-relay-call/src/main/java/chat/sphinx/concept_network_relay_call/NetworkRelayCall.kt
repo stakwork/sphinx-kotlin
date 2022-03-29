@@ -5,7 +5,9 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 /**
  * Methods for GET/PUT/POST/DELETE that are specific to interacting with Relay.
@@ -35,8 +37,25 @@ abstract class NetworkRelayCall: NetworkCall() {
         responseJsonClass: Class<V>,
         relayEndpoint: String,
         additionalHeaders: Map<String, String>? = null,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
         useExtendedNetworkCallClient: Boolean = false,
+    ): Flow<LoadResponse<T, ResponseError>>
+
+    /**
+     * GET
+     *
+     * @param [responseJsonClass] the class to serialize the response json into
+     * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
+     * @param [additionalHeaders] any additional headers to add to the call
+     * @param [relayUrl] unauthenticated relay URL
+     * */
+    abstract fun <
+            T: Any,
+            V: RelayResponse<T>
+            > relayUnauthenticatedGet(
+        responseJsonClass: Class<V>,
+        relayEndpoint: String,
+        relayUrl: RelayUrl
     ): Flow<LoadResponse<T, ResponseError>>
 
     /**
@@ -61,7 +80,7 @@ abstract class NetworkRelayCall: NetworkCall() {
         requestBody: RequestBody? = null,
         mediaType: String? = "application/json",
         additionalHeaders: Map<String, String>? = null,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
 
     // TODO: Remove and replace all uses with post (DO NOT USE THIS METHOD FOR NEW CODE)
@@ -111,7 +130,7 @@ abstract class NetworkRelayCall: NetworkCall() {
         requestBody: RequestBody,
         mediaType: String? = "application/json",
         additionalHeaders: Map<String, String>? = null,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
 
     /**
@@ -136,7 +155,7 @@ abstract class NetworkRelayCall: NetworkCall() {
         requestBody: RequestBody? = null,
         mediaType: String? = null,
         additionalHeaders: Map<String, String>? = null,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
 
 }

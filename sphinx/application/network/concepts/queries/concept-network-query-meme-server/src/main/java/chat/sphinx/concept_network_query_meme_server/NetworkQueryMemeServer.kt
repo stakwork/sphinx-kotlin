@@ -14,6 +14,7 @@ import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import com.squareup.moshi.Moshi
 import io.matthewnelson.crypto_common.clazzes.Password
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +28,7 @@ abstract class NetworkQueryMemeServer {
 
     abstract fun signChallenge(
         challenge: AuthenticationChallenge,
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null,
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
     ): Flow<LoadResponse<MemeServerChallengeSigDto, ResponseError>>
 
     abstract fun verifyAuthentication(

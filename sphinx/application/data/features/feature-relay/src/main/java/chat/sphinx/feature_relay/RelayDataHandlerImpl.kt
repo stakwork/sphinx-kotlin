@@ -1,10 +1,11 @@
 package chat.sphinx.feature_relay
 
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_tor.TorManager
-import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.isOnionAddress
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.wrapper_relay.*
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
@@ -21,6 +22,8 @@ import io.matthewnelson.crypto_common.exceptions.EncryptionException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okio.base64.encodeBase64
+import java.util.concurrent.TimeUnit
 
 class RelayDataHandlerImpl(
     private val authenticationStorage: AuthenticationStorage,
@@ -28,6 +31,7 @@ class RelayDataHandlerImpl(
     private val dispatchers: CoroutineDispatchers,
     private val encryptionKeyHandler: EncryptionKeyHandler,
     private val torManager: TorManager,
+    private val rsa: RSA,
 ) : RelayDataHandler(), CoroutineDispatchers by dispatchers {
 
     companion object {
@@ -37,8 +41,12 @@ class RelayDataHandlerImpl(
         @Volatile
         private var tokenCache: AuthorizationToken? = null
 
+        @Volatile
+        private var relayTransportKeyCache: RsaPublicKey? = null
+
         const val RELAY_URL_KEY = "RELAY_URL_KEY"
         const val RELAY_AUTHORIZATION_KEY = "RELAY_JWT_KEY"
+        const val RELAY_TRANSPORT_ENCRYPTION_KEY = "RELAY_TRANSPORT_KEY"
     }
 
     private val kOpenSSL: KOpenSSL by lazy {
@@ -209,5 +217,81 @@ class RelayDataHandlerImpl(
                     }
             }
         }
+    }
+
+    override suspend fun persistRelayTransportKey(key: RsaPublicKey?): Boolean {
+        return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
+            persistRelayTransportKeyImpl(key, privateKey)
+        } ?: false
+    }
+
+    suspend fun persistRelayTransportKeyImpl(key: RsaPublicKey?, privateKey: Password): Boolean {
+        lock.withLock {
+            if (key == null) {
+                authenticationStorage.putString(RELAY_TRANSPORT_ENCRYPTION_KEY, null)
+                relayTransportKeyCache = null
+                return true
+            } else {
+                val encryptedTransportKey = try {
+                    encryptData(privateKey, UnencryptedString(key.value.joinToString("")))
+                } catch (e: Exception) {
+                    return false
+                }
+                authenticationStorage.putString(RELAY_TRANSPORT_ENCRYPTION_KEY, encryptedTransportKey.value)
+                relayTransportKeyCache = key
+                return true
+            }
+        }
+    }
+
+    @OptIn(UnencryptedDataAccess::class)
+    override suspend fun retrieveRelayTransportKey(): RsaPublicKey? {
+        return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
+            lock.withLock {
+                relayTransportKeyCache ?: authenticationStorage.getString(RELAY_TRANSPORT_ENCRYPTION_KEY, null)
+                    ?.let { encryptedTransportKey ->
+                        try {
+                            decryptData(privateKey, EncryptedString(encryptedTransportKey))
+                                .value
+                                .let { decryptedUrlString ->
+                                    val relayTransportKey = RsaPublicKey(decryptedUrlString.toCharArray())
+                                    relayTransportKeyCache = relayTransportKey
+                                    relayTransportKey
+                                }
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+            }
+        }
+    }
+
+    @OptIn(UnencryptedDataAccess::class)
+    override suspend fun retrieveRelayTransportToken(
+        authorizationToken: AuthorizationToken,
+        transportKey: RsaPublicKey?
+    ): TransportToken? {
+        (transportKey ?: retrieveRelayTransportKey())?.let { key ->
+            val unixTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+            val tokenAndTime = "${authorizationToken.value}|${unixTime}"
+
+            val response = rsa.encrypt(
+                key,
+                UnencryptedString(tokenAndTime),
+                formatOutput = false,
+                dispatcher = default,
+            )
+
+            return when (response) {
+                is Response.Error -> {
+                    null
+                }
+                is Response.Success -> {
+                    response.value.value
+                        .toTransportToken()
+                }
+            }
+        }
+        return null
     }
 }

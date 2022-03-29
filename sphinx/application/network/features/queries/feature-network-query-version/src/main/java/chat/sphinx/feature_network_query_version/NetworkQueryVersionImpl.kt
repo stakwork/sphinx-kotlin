@@ -8,6 +8,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryVersionImpl(
@@ -19,7 +20,7 @@ class NetworkQueryVersionImpl(
     }
 
     override fun getAppVersions(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<AppVersionsDto, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetAppVersionsRelayResponse::class.java,

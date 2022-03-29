@@ -4,12 +4,13 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 abstract class SocketIOManager {
     abstract suspend fun connect(
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Response<Any, ResponseError>
 
     abstract val isConnected: Boolean

@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha50 (2022-03-29)
+ - Fixes issue about duplicated direct payments going out on chat
+ - Adds confirmation when deleting or blocking contacts
+ - Adds support for secure user token authentication
+
 # Version 1.0.0-alpha50 (2022-03-15)
  - Fixes issue where dashboard bottom bar is missing
 

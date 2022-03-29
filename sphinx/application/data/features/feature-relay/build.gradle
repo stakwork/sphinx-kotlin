@@ -7,8 +7,10 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':kotlin:crypto:k-openssl')
     implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
+    implementation project(path: ':kotlin:encoders:base64')
 
     // Sphinx
+    api project(path: ':sphinx:application:data:features:crypto:feature-crypto-rsa')
     api project(path: ':sphinx:application:data:concepts:concept-relay')
     api project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
 
