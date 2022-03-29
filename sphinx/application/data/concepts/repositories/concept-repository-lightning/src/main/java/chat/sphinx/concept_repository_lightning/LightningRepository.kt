@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -13,6 +14,6 @@ interface LightningRepository {
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     suspend fun getAccountBalance(): StateFlow<NodeBalance?>
     suspend fun getAccountBalanceAll(
-        relayData: Pair<AuthorizationToken, RelayUrl>? = null
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null
     ): Flow<LoadResponse<NodeBalanceAll, ResponseError>>
 }

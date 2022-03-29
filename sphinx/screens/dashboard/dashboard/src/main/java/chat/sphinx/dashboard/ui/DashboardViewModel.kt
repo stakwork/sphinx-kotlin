@@ -3,8 +3,8 @@ package chat.sphinx.dashboard.ui
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -16,9 +16,11 @@ import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
 import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
 import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
 import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
+import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
@@ -31,9 +33,7 @@ import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
-import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
-import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.*
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -48,6 +48,7 @@ import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -83,6 +84,7 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
+    private val networkQueryTransportKey: NetworkQueryTransportKey,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -115,8 +117,43 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
+        getAndSaveTransportKey()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
+    }
+
+    private fun getAndSaveTransportKey() {
+        viewModelScope.launch(mainImmediate) {
+            relayDataHandler.retrieveRelayUrlAndToken()?.let { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {}
+                    is Response.Success -> {
+
+                        if (response.value.second == null) {
+                            networkQueryTransportKey.getRelayTransportKey(
+                                response.value.third
+                            ).collect { loadResponse ->
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {}
+
+                                    is Response.Success -> {
+                                        relayDataHandler.persistRelayTransportKey(
+                                            RsaPublicKey(
+                                                loadResponse.value.transport_key.toCharArray()
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
     }
 
     fun handleDeepLink(deepLink: String?) {

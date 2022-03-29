@@ -1,5 +1,6 @@
 package chat.sphinx.test_network_query
 
+import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -14,6 +15,8 @@ import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_network_tor.*
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.feature_crypto_rsa.RSAAlgorithm
+import chat.sphinx.feature_crypto_rsa.RSAImpl
 import chat.sphinx.feature_network_client.NetworkClientImpl
 import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
@@ -32,6 +35,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.test_tor_manager.TestTorManager
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import com.squareup.moshi.Moshi
 import io.matthewnelson.build_config.BuildConfigDebug
 import io.matthewnelson.crypto_common.clazzes.Password
@@ -64,6 +68,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
         protected var privKey: String? = null
         protected var pubKey: String? = null
         protected var relayUrl: RelayUrl? = null
+        protected var transportToken: TransportToken? = null
         protected var authorizationToken: AuthorizationToken? = null
 
         @BeforeClass
@@ -116,6 +121,10 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
 
     private val testTorManager: TorManager by lazy {
         TestTorManager()
+    }
+
+    private val testRSA: RSA by lazy {
+        RSAImpl(RSAAlgorithm.RSA)
     }
 
     protected data class Credentials(
@@ -191,6 +200,7 @@ abstract class NetworkQueryTestHelper: AuthenticationCoreDefaultsTestHelper() {
             dispatchers,
             testHandler,
             testTorManager,
+            testRSA
         )
     }
 

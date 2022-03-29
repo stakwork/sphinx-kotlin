@@ -17,6 +17,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryChatImpl(
@@ -54,7 +55,7 @@ class NetworkQueryChatImpl(
     }
 
     override fun getChats(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<List<ChatDto>, ResponseError>> =
         if (relayData == null) {
             getChatsFlowNullData
@@ -96,7 +97,7 @@ class NetworkQueryChatImpl(
     override fun updateChat(
         chatId: ChatId,
         putChatDto: PutChatDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = UpdateChatRelayResponse::class.java,
@@ -109,7 +110,7 @@ class NetworkQueryChatImpl(
     override fun kickMemberFromChat(
         chatId: ChatId,
         contactId: ContactId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>>  =
         networkRelayCall.relayPut(
             responseJsonClass = UpdateChatRelayResponse::class.java,
@@ -124,7 +125,7 @@ class NetworkQueryChatImpl(
     override fun updateTribe(
         chatId: ChatId,
         postGroupDto: PostGroupDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = PostGroupRelayResponse::class.java,
@@ -139,7 +140,7 @@ class NetworkQueryChatImpl(
     ////////////
     override fun createTribe(
         postGroupDto: PostGroupDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto?, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = PostGroupRelayResponse::class.java,
@@ -151,7 +152,7 @@ class NetworkQueryChatImpl(
 
     override fun streamSats(
         postStreamSatsDto: PostStreamSatsDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<Any?, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = StreamSatsRelayResponse::class.java,
@@ -164,7 +165,7 @@ class NetworkQueryChatImpl(
     override fun toggleMuteChat(
         chatId: ChatId,
         muted: ChatMuted,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         toggleMuteChatImpl(
             endpoint = String.format(ENDPOINT_MUTE_CHAT, chatId.value, (if (muted.isTrue()) UN_MUTE_CHAT else MUTE_CHAT)),
@@ -173,7 +174,7 @@ class NetworkQueryChatImpl(
 
     private fun toggleMuteChatImpl(
         endpoint: String,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = UpdateChatRelayResponse::class.java,
@@ -185,7 +186,7 @@ class NetworkQueryChatImpl(
 
     override fun joinTribe(
         tribeDto: TribeDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = JoinTribeRelayResponse::class.java,
@@ -197,7 +198,7 @@ class NetworkQueryChatImpl(
 
     override suspend fun deleteChat(
         chatId: ChatId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<Map<String, Long>, ResponseError>> =
         networkRelayCall.relayDelete(
             responseJsonClass = DeleteChatRelayResponse::class.java,

@@ -3,15 +3,12 @@ package chat.sphinx.onboard_common
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.onboard_common.internal.json.*
-import chat.sphinx.onboard_common.internal.json.Step1Json
-import chat.sphinx.onboard_common.internal.json.Step2Json
-import chat.sphinx.onboard_common.internal.json.toOnboardStep1
-import chat.sphinx.onboard_common.internal.json.toStep1Json
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -48,6 +45,7 @@ class OnBoardStepHandler @Inject constructor(
     suspend fun persistOnBoardStep1Data(
         relayUrl: RelayUrl,
         authorizationToken: AuthorizationToken,
+        transportKey: RsaPublicKey?,
         inviterData: OnBoardInviterData?
     ): OnBoardStep.Step1_WelcomeMessage? {
         lock.withLock {
@@ -64,6 +62,7 @@ class OnBoardStepHandler @Inject constructor(
             val step1 = OnBoardStep.Step1_WelcomeMessage(
                 relayUrl,
                 authorizationToken,
+                transportKey,
                 inviterDataRealized
             )
 

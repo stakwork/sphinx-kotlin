@@ -2,6 +2,8 @@ package chat.sphinx.onboard_common.model
 
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 
 @Suppress("DataClassPrivateConstructor", "ClassName")
 sealed class OnBoardStep {
@@ -9,6 +11,7 @@ sealed class OnBoardStep {
     data class Step1_WelcomeMessage private constructor(
         val relayUrl: RelayUrl,
         val authorizationToken: AuthorizationToken,
+        val transportKey: RsaPublicKey?,
         val inviterData: OnBoardInviterData
     ): OnBoardStep() {
 
@@ -17,9 +20,10 @@ sealed class OnBoardStep {
             internal operator fun invoke(
                 relayUrl: RelayUrl,
                 authorizationToken: AuthorizationToken,
+                transportKey: RsaPublicKey?,
                 inviterData: OnBoardInviterData
             ) : Step1_WelcomeMessage =
-                Step1_WelcomeMessage(relayUrl, authorizationToken, inviterData)
+                Step1_WelcomeMessage(relayUrl, authorizationToken, transportKey, inviterData)
         }
 
     }

@@ -14,6 +14,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 
 class NetworkQuerySubscriptionImpl(
@@ -37,7 +38,7 @@ class NetworkQuerySubscriptionImpl(
     }
 
     override fun getSubscriptions(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
         if (relayData == null) {
             getSubscriptionsFlowNullData
@@ -51,7 +52,7 @@ class NetworkQuerySubscriptionImpl(
 
     override fun getSubscriptionById(
         subscriptionId: SubscriptionId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = SubscriptionRelayResponse::class.java,
@@ -61,7 +62,7 @@ class NetworkQuerySubscriptionImpl(
 
     override fun getSubscriptionsByContactId(
         contactId: ContactId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<List<SubscriptionDto>, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetSubscriptionsRelayResponse::class.java,
@@ -75,7 +76,7 @@ class NetworkQuerySubscriptionImpl(
     override fun putSubscription(
         subscriptionId: SubscriptionId,
         putSubscriptionDto: PutSubscriptionDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = SubscriptionRelayResponse::class.java,
@@ -87,7 +88,7 @@ class NetworkQuerySubscriptionImpl(
 
     override fun putPauseSubscription(
         subscriptionId: SubscriptionId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = SubscriptionRelayResponse::class.java,
@@ -99,7 +100,7 @@ class NetworkQuerySubscriptionImpl(
 
     override fun putRestartSubscription(
         subscriptionId: SubscriptionId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = SubscriptionRelayResponse::class.java,
@@ -114,7 +115,7 @@ class NetworkQuerySubscriptionImpl(
     ////////////
     override fun postSubscription(
         postSubscriptionDto: PostSubscriptionDto,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<SubscriptionDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = SubscriptionRelayResponse::class.java,
@@ -129,7 +130,7 @@ class NetworkQuerySubscriptionImpl(
     //////////////
     override fun deleteSubscription(
         subscriptionId: SubscriptionId,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.relayDelete(
             responseJsonClass = DeleteSubscriptionRelayResponse::class.java,

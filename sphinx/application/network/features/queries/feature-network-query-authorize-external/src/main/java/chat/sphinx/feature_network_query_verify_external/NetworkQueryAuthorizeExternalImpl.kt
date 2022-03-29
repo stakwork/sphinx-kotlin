@@ -12,6 +12,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
 
 class NetworkQueryAuthorizeExternalImpl(
@@ -26,7 +27,7 @@ class NetworkQueryAuthorizeExternalImpl(
     }
 
     override fun verifyExternal(
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<VerifyExternalDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = VerifyExternalRelayResponse::class.java,
@@ -38,7 +39,7 @@ class NetworkQueryAuthorizeExternalImpl(
 
     override fun signBase64(
         base64: String,
-        relayData: Pair<AuthorizationToken, RelayUrl>?
+        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
     ): Flow<LoadResponse<SignBase64Dto, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = SignBase64RelayResponse::class.java,
