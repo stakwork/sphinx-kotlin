@@ -171,16 +171,21 @@ internal class AddressBookListAdapter(
 
                 layoutConstraintDeleteButtonContainer.setOnClickListener {
                     dContact?.let { contact ->
-                        viewModel.deleteContact(contact)
-                        swipeRevealLayoutContact.close(false)
-                        notifyItemRemoved(position)
+                        lifecycleOwner.lifecycleScope.launch {
+                            viewModel.confirmDeleteContact(contact) {
+                                swipeRevealLayoutContact.close(false)
+                            }
+                        }
                     }
                 }
 
                 layoutConstraintBlockButtonContainer.setOnClickListener {
                     dContact?.let { contact ->
-                        viewModel.blockContact(contact)
-                        swipeRevealLayoutContact.close(true)
+                        lifecycleOwner.lifecycleScope.launch {
+                            viewModel.confirmToggleBlockContactState(contact) {
+                                swipeRevealLayoutContact.close(true)
+                            }
+                        }
                     }
                 }
             }

@@ -7,6 +7,7 @@ import chat.sphinx.address_book.R
 import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.isBlocked
 import chat.sphinx.wrapper_contact.isTrue
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -42,16 +43,42 @@ internal class AddressBookViewModel @Inject constructor(
         addressBookViewStateContainer.updateAddressBookContacts(null, filter)
     }
 
-    fun deleteContact(contact: Contact) {
-        viewModelScope.launch(mainImmediate) {
-            contactRepository.deleteContactById(contact.id)
-        }
+    suspend fun confirmDeleteContact(
+        contact: Contact,
+        contactDeletedCallback: () -> Unit
+    ) {
+        submitSideEffect(
+            AddressBookSideEffect.AlertConfirmDeleteContact {
+                viewModelScope.launch(mainImmediate) {
+                    contactRepository.deleteContactById(contact.id)
+                }
+                contactDeletedCallback()
+            }
+        )
     }
 
-    fun blockContact(contact: Contact) {
-        viewModelScope.launch(mainImmediate) {
-            contactRepository.toggleContactBlocked(contact)
+    suspend fun confirmToggleBlockContactState(
+        contact: Contact,
+        callback: () -> Unit
+    ) {
+        val alertConfirmCallback: () -> Unit = {
+            viewModelScope.launch(mainImmediate) {
+                contactRepository.toggleContactBlocked(contact)
+            }
+            callback()
         }
+
+        submitSideEffect(
+            if (contact.isBlocked()) {
+                AddressBookSideEffect.AlertConfirmUnblockContact {
+                    alertConfirmCallback()
+                }
+            } else {
+                AddressBookSideEffect.AlertConfirmBlockContact {
+                    alertConfirmCallback()
+                }
+            }
+        )
     }
 
     fun onItemLongClick() {
