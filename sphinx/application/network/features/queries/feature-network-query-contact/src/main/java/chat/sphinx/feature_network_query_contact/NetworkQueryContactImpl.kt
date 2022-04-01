@@ -1,6 +1,5 @@
 package chat.sphinx.feature_network_query_contact
 
-import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -8,7 +7,6 @@ import chat.sphinx.feature_network_query_contact.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.contact.Blocked
 import chat.sphinx.wrapper_common.contact.isTrue
@@ -16,6 +14,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessagePagination
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
@@ -53,7 +52,7 @@ class NetworkQueryContactImpl(
     }
 
     override fun getContacts(
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<GetContactsResponse, ResponseError>> =
         if (relayData == null) {
             getContactsFlowNullData
@@ -68,7 +67,7 @@ class NetworkQueryContactImpl(
 
     override fun getLatestContacts(
         date: DateTime?,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<GetLatestContactsResponse, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetLatestContactsRelayResponse::class.java,
@@ -85,7 +84,7 @@ class NetworkQueryContactImpl(
         chatId: ChatId,
         offset: Int,
         limit: Int,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<GetTribeMembersResponse, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetTribeMembersRelayResponse::class.java,
@@ -99,7 +98,7 @@ class NetworkQueryContactImpl(
     override fun updateContact(
         contactId: ContactId,
         putContactDto: PutContactDto,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = ContactRelayResponse::class.java,
@@ -112,7 +111,7 @@ class NetworkQueryContactImpl(
     override fun toggleBlockedContact(
         contactId: ContactId,
         blocked: Blocked,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         toggleBlockedContactImpl(
             endpoint = String.format(ENDPOINT_BLOCK_CONTACT, (if (blocked.isTrue()) UN_BLOCK_CONTACT else BLOCK_CONTACT), contactId.value),
@@ -121,7 +120,7 @@ class NetworkQueryContactImpl(
 
     private fun toggleBlockedContactImpl(
         endpoint: String,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = ContactRelayResponse::class.java,
@@ -140,7 +139,7 @@ class NetworkQueryContactImpl(
     override fun generateToken(
         password: String?,
         publicKey: String?,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<GenerateTokenResponse, ResponseError>> {
         return networkRelayCall.relayPost(
             responseJsonClass = GenerateTokenRelayResponse::class.java,
@@ -176,7 +175,7 @@ class NetworkQueryContactImpl(
 
     override fun createContact(
         postContactDto: PostContactDto,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = ContactRelayResponse::class.java,
@@ -191,7 +190,7 @@ class NetworkQueryContactImpl(
     //////////////
     override suspend fun deleteContact(
         contactId: ContactId,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Response<Any, ResponseError> {
 
         var response: Response<Any, ResponseError> = Response.Success(true)
@@ -212,7 +211,7 @@ class NetworkQueryContactImpl(
     override fun createNewInvite(
         nickname: String,
         welcomeMessage: String,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = CreateInviteRelayResponse::class.java,
@@ -227,7 +226,7 @@ class NetworkQueryContactImpl(
 
     override fun exchangeKeys(
         contactId: ContactId,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<ContactDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = ContactRelayResponse::class.java,

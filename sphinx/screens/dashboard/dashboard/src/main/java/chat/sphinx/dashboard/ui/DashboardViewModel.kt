@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -16,7 +15,7 @@ import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
 import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
 import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
 import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
-import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -84,7 +83,7 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
-    private val networkQueryTransportKey: NetworkQueryTransportKey,
+    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -131,7 +130,7 @@ internal class DashboardViewModel @Inject constructor(
                     is Response.Success -> {
 
                         if (response.value.second == null) {
-                            networkQueryTransportKey.getRelayTransportKey(
+                            networkQueryRelayKeys.getRelayTransportKey(
                                 response.value.third
                             ).collect { loadResponse ->
                                 @Exhaustive

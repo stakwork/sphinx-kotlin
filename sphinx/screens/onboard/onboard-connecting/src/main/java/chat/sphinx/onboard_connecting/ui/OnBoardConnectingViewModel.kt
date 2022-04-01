@@ -8,7 +8,7 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.GenerateTokenResponse
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
-import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.key_restore.KeyRestore
@@ -75,7 +75,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val rsa: RSA,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
-    private val networkQueryTransportKey: NetworkQueryTransportKey,
+    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val onBoardStepHandler: OnBoardStepHandler,
 ): MotionLayoutViewModel<
         Any,
@@ -147,7 +147,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
                 var transportKey: RsaPublicKey? = null
 
-                networkQueryTransportKey.getRelayTransportKey(relayUrl).collect { loadResponse ->
+                networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
                     @Exhaustive
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
@@ -243,7 +243,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
         var transportKey: RsaPublicKey? = null
 
-        networkQueryTransportKey.getRelayTransportKey(relayUrl).collect { loadResponse ->
+        networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
                 is LoadResponse.Loading -> {}
@@ -310,7 +310,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             networkQueryContact.generateToken(
                 password,
                 nodePubKey,
-                Triple(authToken, relayTransportToken, relayUrl)
+                Triple(Pair(authToken, relayTransportToken), null, relayUrl)
             ).collect { loadResponse ->
                 generateTokenResponse = loadResponse
             }

@@ -3,21 +3,36 @@ package chat.sphinx.concept_relay
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import io.matthewnelson.crypto_common.clazzes.Password
 
 @Suppress("NOTHING_TO_INLINE")
-suspend inline fun RelayDataHandler.retrieveRelayUrlAndToken(): Response<
-        Triple<AuthorizationToken, TransportToken?, RelayUrl>,
+suspend inline fun RelayDataHandler.retrieveRelayUrlAndToken(
+    method: String? = null,
+    path: String? = null,
+    bodyJsonString: String? = null
+): Response<
+        Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>,
         ResponseError
-        > {
+    > {
 
     return retrieveRelayUrl()?.let { relayUrl ->
         retrieveAuthorizationToken()?.let { jwt ->
             retrieveRelayTransportToken(jwt)?.let { tt ->
-                Response.Success(Triple(jwt, tt, relayUrl))
-            } ?: Response.Success(Triple(jwt, null, relayUrl))
+                retrieveRelayHMacKey()?.let { hMacKey ->
+                    retrieveRelayRequestSignature(
+                        Password(hMacKey.toCharArray()),
+                        method,
+                        path,
+                        bodyJsonString
+                    )?.let { hMacSignedRequest ->
+                        Response.Success(Triple(Pair(jwt, tt), hMacSignedRequest, relayUrl))
+                    } ?: Response.Success(Triple(Pair(jwt, tt), null, relayUrl))
+                } ?: Response.Success(Triple(Pair(jwt, tt), null, relayUrl))
+            } ?: Response.Success(Triple(Pair(jwt, null), null, relayUrl))
         } ?: Response.Error(
             ResponseError("Was unable to retrieve the AuthorizationToken from storage")
         )
@@ -51,10 +66,24 @@ abstract class RelayDataHandler {
     abstract suspend fun persistRelayTransportKey(key: RsaPublicKey?): Boolean
     abstract suspend fun retrieveRelayTransportKey(): RsaPublicKey?
 
+    /**
+     * Send `null` to clear the relay hmac key from persistent storage
+     * */
+    abstract suspend fun persistRelayHMacKey(key: String?): Boolean
+    abstract suspend fun retrieveRelayHMacKey(): String?
+
+
     abstract suspend fun retrieveRelayTransportToken(
         authorizationToken: AuthorizationToken,
         transportKey: RsaPublicKey? = null
     ): TransportToken?
+
+    abstract suspend fun retrieveRelayRequestSignature(
+        hMacKey: Password,
+        method: String? = null,
+        path: String? = null,
+        bodyJsonString: String? = null
+    ): RequestSignature?
 
     /**
      * Will parse the [relayUrl] for a proper scheme (http or https). If a scheme is

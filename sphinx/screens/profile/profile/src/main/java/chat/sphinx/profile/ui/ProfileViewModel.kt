@@ -8,7 +8,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -24,8 +24,6 @@ import chat.sphinx.wrapper_common.PreviewsEnabled
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
-import chat.sphinx.wrapper_common.message.toSphinxCallLink
-import chat.sphinx.wrapper_common.toPreviewsEnabled
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -62,7 +60,7 @@ internal class ProfileViewModel @Inject constructor(
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
-    private val networkQueryTransportKey: NetworkQueryTransportKey,
+    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
 ): SideEffectViewModel<
@@ -239,7 +237,7 @@ internal class ProfileViewModel @Inject constructor(
 
                 var transportKey: RsaPublicKey? = null
 
-                networkQueryTransportKey.getRelayTransportKey(relayUrl).collect { loadResponse ->
+                networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
                     @javax.annotation.meta.Exhaustive
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
@@ -257,7 +255,7 @@ internal class ProfileViewModel @Inject constructor(
                 )
 
                 lightningRepository.getAccountBalanceAll(
-                    Triple(authorizationToken, transportToken, relayUrl)
+                    Triple(Pair(authorizationToken, transportToken), null, relayUrl)
                 ).collect { loadResponse ->
                     @Exhaustive
                     when (loadResponse) {
