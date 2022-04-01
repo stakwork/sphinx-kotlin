@@ -2,10 +2,7 @@ package chat.sphinx.concept_relay
 
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
-import chat.sphinx.wrapper_relay.AuthorizationToken
-import chat.sphinx.wrapper_relay.RequestSignature
-import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.TransportToken
+import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.crypto_common.clazzes.Password
 
@@ -24,7 +21,7 @@ suspend inline fun RelayDataHandler.retrieveRelayUrlAndToken(
             retrieveRelayTransportToken(jwt)?.let { tt ->
                 retrieveRelayHMacKey()?.let { hMacKey ->
                     retrieveRelayRequestSignature(
-                        Password(hMacKey.toCharArray()),
+                        hMacKey,
                         method,
                         path,
                         bodyJsonString
@@ -69,8 +66,8 @@ abstract class RelayDataHandler {
     /**
      * Send `null` to clear the relay hmac key from persistent storage
      * */
-    abstract suspend fun persistRelayHMacKey(key: String?): Boolean
-    abstract suspend fun retrieveRelayHMacKey(): String?
+    abstract suspend fun persistRelayHMacKey(key: RelayHMacKey?): Boolean
+    abstract suspend fun retrieveRelayHMacKey(): RelayHMacKey?
 
 
     abstract suspend fun retrieveRelayTransportToken(
@@ -79,7 +76,7 @@ abstract class RelayDataHandler {
     ): TransportToken?
 
     abstract suspend fun retrieveRelayRequestSignature(
-        hMacKey: Password,
+        hMacKey: RelayHMacKey,
         method: String? = null,
         path: String? = null,
         bodyJsonString: String? = null

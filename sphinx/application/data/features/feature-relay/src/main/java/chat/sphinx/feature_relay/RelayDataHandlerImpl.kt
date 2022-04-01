@@ -50,7 +50,7 @@ class RelayDataHandlerImpl(
         private var relayTransportKeyCache: RsaPublicKey? = null
 
         @Volatile
-        private var relayHMacKeyCache: String? = null
+        private var relayHMacKeyCache: RelayHMacKey? = null
 
         const val RELAY_URL_KEY = "RELAY_URL_KEY"
         const val RELAY_AUTHORIZATION_KEY = "RELAY_JWT_KEY"
@@ -113,15 +113,14 @@ class RelayDataHandlerImpl(
         }
     }
 
-    @OptIn(RawPasswordAccess::class)
     private fun signHMacSha256(
-        key: Password,
+        key: RelayHMacKey,
         text: String
     ) : String {
         val sha256HMac = Mac.getInstance("HMacSHA256")
 
         val secretKey = SecretKeySpec(
-            key.value.joinToString("").toByteArray(), "HMacSHA256"
+            key.value.toByteArray(), "HMacSHA256"
         )
         sha256HMac.init(secretKey)
 
@@ -292,14 +291,13 @@ class RelayDataHandlerImpl(
         }
     }
 
-    override suspend fun persistRelayHMacKey(key: String?): Boolean {
+    override suspend fun persistRelayHMacKey(key: RelayHMacKey?): Boolean {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
             persistRelayHMacKeyImpl(key, privateKey)
         } ?: false
     }
 
-    @OptIn(RawPasswordAccess::class)
-    suspend fun persistRelayHMacKeyImpl(key: String?, privateKey: Password): Boolean {
+    suspend fun persistRelayHMacKeyImpl(key: RelayHMacKey?, privateKey: Password): Boolean {
         lock.withLock {
             if (key == null) {
                 authenticationStorage.putString(RELAY_HMAC_KEY, null)
@@ -307,7 +305,7 @@ class RelayDataHandlerImpl(
                 return true
             } else {
                 val encryptedHMacKey = try {
-                    encryptData(privateKey, UnencryptedString(key))
+                    encryptData(privateKey, UnencryptedString(key.value))
                 } catch (e: Exception) {
                     return false
                 }
@@ -319,7 +317,7 @@ class RelayDataHandlerImpl(
     }
 
     @OptIn(UnencryptedDataAccess::class)
-    override suspend fun retrieveRelayHMacKey(): String? {
+    override suspend fun retrieveRelayHMacKey(): RelayHMacKey? {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
             lock.withLock {
                 relayHMacKeyCache ?: authenticationStorage.getString(RELAY_HMAC_KEY, null)
@@ -328,8 +326,9 @@ class RelayDataHandlerImpl(
                             decryptData(privateKey, EncryptedString(encryptedHMacKey))
                                 .value
                                 .let { decryptedHMacKeyString ->
-                                    relayHMacKeyCache = decryptedHMacKeyString
-                                    decryptedHMacKeyString
+                                    val relayHMacKey = RelayHMacKey(decryptedHMacKeyString)
+                                    relayHMacKeyCache = relayHMacKey
+                                    relayHMacKey
                                 }
                         } catch (e: Exception) {
                             null
@@ -369,7 +368,7 @@ class RelayDataHandlerImpl(
     }
 
     override suspend fun retrieveRelayRequestSignature(
-        hMacKey: Password,
+        hMacKey: RelayHMacKey,
         method: String?,
         path: String?,
         bodyJsonString: String?
