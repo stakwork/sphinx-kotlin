@@ -1,6 +1,7 @@
 package chat.sphinx.onboard_connecting.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_crypto_rsa.RSA
@@ -36,10 +37,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
-import io.matthewnelson.crypto_common.clazzes.EncryptedString
-import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
-import io.matthewnelson.crypto_common.clazzes.UnencryptedString
-import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
+import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -124,6 +122,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     }
 
     private var decryptionJob: Job? = null
+    @OptIn(RawPasswordAccess::class)
     fun decryptInput(viewState: OnBoardConnectingViewState.Set2_DecryptKeys) {
         // TODO: Replace with automatic launching upon entering the 6th PIN character
         //  when Authentication View's Layout gets incorporated
@@ -165,6 +164,10 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     }
                 }
 
+                var ownerPrivateKey = RsaPrivateKey(
+                    Password(decryptedCode.privateKey.value.copyOf()).value
+                )
+
                 var success: KeyRestoreResponse.Success? = null
                 keyRestore.restoreKeys(
                     privateKey = decryptedCode.privateKey,
@@ -187,13 +190,10 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                         viewState.pinWriter.append('0')
                     }
 
-                    getOrCreateHMacKey(
-                        RsaPrivateKey(decryptedCode.privateKey.toString().toCharArray()),
+                    goToConnectedScreen(
+                        ownerPrivateKey,
                         transportKey
                     )
-
-                    navigator.toOnBoardConnectedScreen()
-
                 } ?: updateViewState(
                     OnBoardConnectingViewState.Set2_DecryptKeys(viewState.restoreCode)
                 ).also {
@@ -380,6 +380,20 @@ internal class OnBoardConnectingViewModel @Inject constructor(
         }
     }
 
+    private suspend fun goToConnectedScreen(
+        ownerPrivateKey: RsaPrivateKey,
+        transportKey: RsaPublicKey?
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            getOrCreateHMacKey(
+                ownerPrivateKey,
+                transportKey
+            )
+        }.join()
+
+        navigator.toOnBoardConnectedScreen()
+    }
+
     @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
     private suspend fun getOrCreateHMacKey(
         ownerPrivateKey: RsaPrivateKey,
@@ -407,6 +421,9 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
                     when (response) {
                         is Response.Error -> {}
+                        is Response.Error -> {
+                            Log.d("SPHINX", "SPHINX")
+                        }
                         is Response.Success -> {
                             relayDataHandler.persistRelayHMacKey(
                                 RelayHMacKey(
