@@ -5532,44 +5532,41 @@ abstract class SphinxRepository(
     @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
     override fun getOrCreateHMacKey() {
         applicationScope.launch(io) {
-            relayDataHandler.retrieveRelayHMacKey()?.let { relayHMacKey ->
-                if (relayHMacKey == null) {
-                    networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
-                        @Exhaustive
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {
-                                when (val hMacKeyResponse = createHMacKey()) {
-                                    is Response.Error -> {}
-                                    is Response.Success -> {
-                                        relayDataHandler.persistRelayHMacKey(
-                                            hMacKeyResponse.value
-                                        )
-                                    }
+            if (relayDataHandler.retrieveRelayHMacKey() == null) {
+                networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            when (val hMacKeyResponse = createHMacKey()) {
+                                is Response.Error -> {}
+                                is Response.Success -> {
+                                    relayDataHandler.persistRelayHMacKey(
+                                        hMacKeyResponse.value
+                                    )
                                 }
                             }
-                            is Response.Success -> {
+                        }
+                        is Response.Success -> {
+                            val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
+                                ?.privateKey
+                                ?.value
+                                ?: return@collect
 
-                                val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
-                                    ?.privateKey
-                                    ?.value
-                                    ?: return@collect
+                            val response = rsa.decrypt(
+                                rsaPrivateKey = RsaPrivateKey(privateKey),
+                                text = EncryptedString(loadResponse.value.encrypted_key),
+                                dispatcher = default
+                            )
 
-                                val response = rsa.decrypt(
-                                    rsaPrivateKey = RsaPrivateKey(privateKey),
-                                    text = EncryptedString(loadResponse.value.encrypted_key),
-                                    dispatcher = default
-                                )
-
-                                when (response) {
-                                    is Response.Error -> {}
-                                    is Response.Success -> {
-                                        relayDataHandler.persistRelayHMacKey(
-                                            RelayHMacKey(
-                                                response.value.toUnencryptedString(trim = false).value
-                                            )
+                            when (response) {
+                                is Response.Error -> {}
+                                is Response.Success -> {
+                                    relayDataHandler.persistRelayHMacKey(
+                                        RelayHMacKey(
+                                            response.value.toUnencryptedString(trim = false).value
                                         )
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -5584,35 +5581,32 @@ abstract class SphinxRepository(
             ResponseError("HMac Key creation failed")
         )
 
-        applicationScope.launch(io) {
+        @OptIn(RawPasswordAccess::class)
+        val hMacKeyString = PasswordGenerator(passwordLength = 20).password.value.joinToString("")
 
-            @OptIn(RawPasswordAccess::class)
-            val hMacKeyString = PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+        relayDataHandler.retrieveRelayTransportKey()?.let { key ->
 
-            relayDataHandler.retrieveRelayTransportKey()?.let { key ->
+            val encryptionResponse = rsa.encrypt(
+                key,
+                UnencryptedString(hMacKeyString),
+                formatOutput = false,
+                dispatcher = default,
+            )
 
-                val encryptionResponse = rsa.encrypt(
-                    key,
-                    UnencryptedString(hMacKeyString),
-                    formatOutput = false,
-                    dispatcher = default,
-                )
-
-                when (encryptionResponse) {
-                    is Response.Error -> {}
-                    is Response.Success -> {
-                        networkQueryRelayKeys.addRelayHMacKey(
-                            PostHMacKeyDto(encryptionResponse.value.value)
-                        ).collect { loadResponse ->
-                            @Exhaustive
-                            when (loadResponse) {
-                                is LoadResponse.Loading -> {}
-                                is Response.Error -> {}
-                                is Response.Success -> {
-                                    response = Response.Success(
-                                        RelayHMacKey(hMacKeyString)
-                                    )
-                                }
+            when (encryptionResponse) {
+                is Response.Error -> {}
+                is Response.Success -> {
+                    networkQueryRelayKeys.addRelayHMacKey(
+                        PostHMacKeyDto(encryptionResponse.value.value)
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                response = Response.Success(
+                                    RelayHMacKey(hMacKeyString)
+                                )
                             }
                         }
                     }
