@@ -26,6 +26,7 @@ import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.*
+import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -34,8 +35,11 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.EncryptedString
 import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
 import io.matthewnelson.crypto_common.clazzes.UnencryptedString
+import io.matthewnelson.crypto_common.clazzes.toUnencryptedString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -182,6 +186,11 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     repeat(6) {
                         viewState.pinWriter.append('0')
                     }
+
+                    getOrCreateHMacKey(
+                        RsaPrivateKey(decryptedCode.privateKey.toString().toCharArray()),
+                        transportKey
+                    )
 
                     navigator.toOnBoardConnectedScreen()
 
@@ -351,11 +360,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             }
             is Response.Success -> {
 
-                val hMacKey = if (transportKey != null) {
-                    createHMacKey(transportKey)
-                } else {
-                    null
-                }
+                val hMacKey = createHMacKey(transportKey)
 
                 val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
                     relayUrl,
@@ -370,6 +375,46 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     navigator.popBackStack()
                 } else {
                     navigator.toOnBoardMessageScreen(step1Message)
+                }
+            }
+        }
+    }
+
+    @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
+    private suspend fun getOrCreateHMacKey(
+        ownerPrivateKey: RsaPrivateKey,
+        transportKey: RsaPublicKey?
+    ) {
+        if (transportKey == null) {
+            return
+        }
+
+        networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    createHMacKey(transportKey)?.let { relayHMacKey ->
+                        relayDataHandler.persistRelayHMacKey(relayHMacKey)
+                    }
+                }
+                is Response.Success -> {
+                    val response = rsa.decrypt(
+                        rsaPrivateKey = ownerPrivateKey,
+                        text = EncryptedString(loadResponse.value.encrypted_key),
+                        dispatcher = default
+                    )
+
+                    when (response) {
+                        is Response.Error -> {}
+                        is Response.Success -> {
+                            relayDataHandler.persistRelayHMacKey(
+                                RelayHMacKey(
+                                    response.value.toUnencryptedString(trim = false).value
+                                )
+                            )
+                        }
+                    }
                 }
             }
         }
