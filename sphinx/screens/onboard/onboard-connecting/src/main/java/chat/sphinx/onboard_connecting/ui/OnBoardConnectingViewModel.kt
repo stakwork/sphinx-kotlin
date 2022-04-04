@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_contact.model.GenerateTokenResponse
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
+import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.key_restore.KeyRestore
@@ -34,6 +35,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
+import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -72,11 +74,11 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val keyRestore: KeyRestore,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
-    private val rsa: RSA,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val onBoardStepHandler: OnBoardStepHandler,
+    private val rsa: RSA,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -348,10 +350,18 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 }
             }
             is Response.Success -> {
+
+                val hMacKey = if (transportKey != null) {
+                    createHMacKey(transportKey)
+                } else {
+                    null
+                }
+
                 val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
                     relayUrl,
                     authToken,
                     transportKey,
+                    hMacKey,
                     inviterData
                 )
 
@@ -363,6 +373,46 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun createHMacKey(
+        transportKey: RsaPublicKey?
+    ): RelayHMacKey? {
+        var hMacKey: RelayHMacKey? = null
+
+        if (transportKey == null) {
+            return hMacKey
+        }
+
+        @OptIn(RawPasswordAccess::class)
+        val hMacKeyString = PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+
+        val encryptionResponse = rsa.encrypt(
+            transportKey,
+            UnencryptedString(hMacKeyString),
+            formatOutput = false,
+            dispatcher = default,
+        )
+
+        when (encryptionResponse) {
+            is Response.Error -> {}
+            is Response.Success -> {
+                networkQueryRelayKeys.addRelayHMacKey(
+                    PostHMacKeyDto(encryptionResponse.value.value)
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+                        is Response.Success -> {
+                            hMacKey = RelayHMacKey(hMacKeyString)
+                        }
+                    }
+                }
+            }
+        }
+
+        return hMacKey
     }
 
     override suspend fun onMotionSceneCompletion(value: Any) {

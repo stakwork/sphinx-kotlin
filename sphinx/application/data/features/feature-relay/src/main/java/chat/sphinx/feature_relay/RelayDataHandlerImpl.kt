@@ -4,8 +4,6 @@ import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
@@ -36,7 +34,6 @@ class RelayDataHandlerImpl(
     private val encryptionKeyHandler: EncryptionKeyHandler,
     private val torManager: TorManager,
     private val rsa: RSA,
-    private val LOG: SphinxLogger,
 ) : RelayDataHandler(), CoroutineDispatchers by dispatchers {
 
     companion object {
@@ -55,7 +52,7 @@ class RelayDataHandlerImpl(
         const val RELAY_URL_KEY = "RELAY_URL_KEY"
         const val RELAY_AUTHORIZATION_KEY = "RELAY_JWT_KEY"
         const val RELAY_TRANSPORT_ENCRYPTION_KEY = "RELAY_TRANSPORT_KEY"
-        const val RELAY_HMAC_KEY = "RELAY_HMAC_KEY"
+        const val RELAY_H_MAC_KEY = "RELAY_H_MAC_KEY"
     }
 
     private val kOpenSSL: KOpenSSL by lazy {
@@ -300,7 +297,7 @@ class RelayDataHandlerImpl(
     suspend fun persistRelayHMacKeyImpl(key: RelayHMacKey?, privateKey: Password): Boolean {
         lock.withLock {
             if (key == null) {
-                authenticationStorage.putString(RELAY_HMAC_KEY, null)
+                authenticationStorage.putString(RELAY_H_MAC_KEY, null)
                 relayHMacKeyCache = null
                 return true
             } else {
@@ -309,7 +306,7 @@ class RelayDataHandlerImpl(
                 } catch (e: Exception) {
                     return false
                 }
-                authenticationStorage.putString(RELAY_HMAC_KEY, encryptedHMacKey.value)
+                authenticationStorage.putString(RELAY_H_MAC_KEY, encryptedHMacKey.value)
                 relayHMacKeyCache = key
                 return true
             }
@@ -320,7 +317,7 @@ class RelayDataHandlerImpl(
     override suspend fun retrieveRelayHMacKey(): RelayHMacKey? {
         return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
             lock.withLock {
-                relayHMacKeyCache ?: authenticationStorage.getString(RELAY_HMAC_KEY, null)
+                relayHMacKeyCache ?: authenticationStorage.getString(RELAY_H_MAC_KEY, null)
                     ?.let { encryptedHMacKey ->
                         try {
                             decryptData(privateKey, EncryptedString(encryptedHMacKey))
@@ -384,10 +381,6 @@ class RelayDataHandlerImpl(
             key = hMacKey,
             text = "${method!!}|${path!!}|${bodyJsonString ?: ""}"
         )
-
-        LOG.d("SIGNED REQUEST", signedString)
-        LOG.d("SIGNED REQUEST", signedString)
-        LOG.d("SIGNED REQUEST", signedString)
 
         return RequestSignature("sha256=$signedString")
     }

@@ -112,7 +112,6 @@ object NetworkModule {
         encryptionKeyHandler: EncryptionKeyHandler,
         torManager: TorManager,
         rsa: RSA,
-        LOG: SphinxLogger,
     ): RelayDataHandlerImpl =
         RelayDataHandlerImpl(
             authenticationStorage,
@@ -121,7 +120,6 @@ object NetworkModule {
             encryptionKeyHandler,
             torManager,
             rsa,
-            LOG
         )
 
     @Provides

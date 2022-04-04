@@ -7,6 +7,7 @@ import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_common.OnBoardStepHandler
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayHMacKey
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.isOnionAddress
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -43,6 +44,7 @@ internal class OnBoardMessageViewModel @Inject constructor(
         relayUrl: RelayUrl,
         authToken: AuthorizationToken,
         transportKey: RsaPublicKey?,
+        hMacKey: RelayHMacKey?,
         inviterData: OnBoardInviterData,
     ) {
         if (loginJob?.isActive == true || proceedJob?.isActive == true) {
@@ -75,6 +77,7 @@ internal class OnBoardMessageViewModel @Inject constructor(
                                                 relayUrl,
                                                 authToken,
                                                 transportKey,
+                                                hMacKey,
                                                 inviterData
                                             )
                                         } else {
@@ -89,6 +92,7 @@ internal class OnBoardMessageViewModel @Inject constructor(
                                 relayUrl,
                                 authToken,
                                 transportKey,
+                                hMacKey,
                                 inviterData
                             )
                         }
@@ -106,6 +110,7 @@ internal class OnBoardMessageViewModel @Inject constructor(
         relayUrl: RelayUrl,
         authorizationToken: AuthorizationToken,
         transportKey: RsaPublicKey?,
+        hMacKey: RelayHMacKey?,
         inviterData: OnBoardInviterData,
     ) {
         if (proceedJob?.isActive == true) {
@@ -118,6 +123,10 @@ internal class OnBoardMessageViewModel @Inject constructor(
 
             transportKey?.let { key ->
                 relayDataHandler.persistRelayTransportKey(key)
+            }
+
+            hMacKey?.let { key ->
+                relayDataHandler.persistRelayHMacKey(key)
             }
 
             val step2 = onBoardStepHandler.persistOnBoardStep2Data(inviterData)
