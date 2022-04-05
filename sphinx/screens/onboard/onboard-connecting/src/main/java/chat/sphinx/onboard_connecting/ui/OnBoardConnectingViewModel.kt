@@ -336,7 +336,6 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             }
         }
 
-
         @Exhaustive
         when (generateTokenResponse) {
             is LoadResponse.Loading -> {}
@@ -360,7 +359,10 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             }
             is Response.Success -> {
 
-                val hMacKey = createHMacKey(transportKey)
+                val hMacKey = createHMacKey(
+                    relayData = Triple(Pair(authToken, relayTransportToken), null, relayUrl),
+                    transportKey = transportKey
+                )
 
                 val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
                     relayUrl,
@@ -408,7 +410,9 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             when (loadResponse) {
                 is LoadResponse.Loading -> {}
                 is Response.Error -> {
-                    createHMacKey(transportKey)?.let { relayHMacKey ->
+                    createHMacKey(
+                        transportKey = transportKey
+                    )?.let { relayHMacKey ->
                         relayDataHandler.persistRelayHMacKey(relayHMacKey)
                     }
                 }
@@ -421,9 +425,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
                     when (response) {
                         is Response.Error -> {}
-                        is Response.Error -> {
-                            Log.d("SPHINX", "SPHINX")
-                        }
+                        is Response.Error -> {}
                         is Response.Success -> {
                             relayDataHandler.persistRelayHMacKey(
                                 RelayHMacKey(
@@ -438,6 +440,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     }
 
     private suspend fun createHMacKey(
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
         transportKey: RsaPublicKey?
     ): RelayHMacKey? {
         var hMacKey: RelayHMacKey? = null
@@ -446,33 +449,41 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             return hMacKey
         }
 
-        @OptIn(RawPasswordAccess::class)
-        val hMacKeyString = PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+        viewModelScope.launch(mainImmediate) {
 
-        val encryptionResponse = rsa.encrypt(
-            transportKey,
-            UnencryptedString(hMacKeyString),
-            formatOutput = false,
-            dispatcher = default,
-        )
+            @OptIn(RawPasswordAccess::class)
+            val hMacKeyString =
+                PasswordGenerator(passwordLength = 20).password.value.joinToString("")
 
-        when (encryptionResponse) {
-            is Response.Error -> {}
-            is Response.Success -> {
-                networkQueryRelayKeys.addRelayHMacKey(
-                    PostHMacKeyDto(encryptionResponse.value.value)
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
-                        is Response.Success -> {
-                            hMacKey = RelayHMacKey(hMacKeyString)
+            val encryptionResponse = rsa.encrypt(
+                transportKey,
+                UnencryptedString(hMacKeyString),
+                formatOutput = false,
+                dispatcher = default,
+            )
+
+            when (encryptionResponse) {
+                is Response.Error -> {
+                }
+                is Response.Success -> {
+                    networkQueryRelayKeys.addRelayHMacKey(
+                        PostHMacKeyDto(encryptionResponse.value.value),
+                        relayData
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {
+                            }
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                hMacKey = RelayHMacKey(hMacKeyString)
+                            }
                         }
                     }
                 }
             }
-        }
+
+        }.join()
 
         return hMacKey
     }
