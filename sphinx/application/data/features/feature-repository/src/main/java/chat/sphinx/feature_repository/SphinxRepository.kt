@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_contact.model.GithubPATDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
@@ -30,6 +31,7 @@ import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
+import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -128,6 +130,7 @@ abstract class SphinxRepository(
     private val applicationScope: CoroutineScope,
     private val authenticationCoreManager: AuthenticationCoreManager,
     private val authenticationStorage: AuthenticationStorage,
+    private val relayDataHandler: RelayDataHandler,
     protected val coreDB: CoreDB,
     private val dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
@@ -1525,6 +1528,55 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
+
+        return response
+    }
+
+    override suspend fun setGithubPat(
+        pat: String
+    ): Response<Boolean, ResponseError> {
+
+        var response: Response<Boolean, ResponseError> = Response.Error(
+            ResponseError("generate Github PAT failed to execute")
+        )
+
+        relayDataHandler.retrieveRelayTransportKey()?.let { key ->
+
+            applicationScope.launch(mainImmediate) {
+
+                val encryptionResponse = rsa.encrypt(
+                    key,
+                    UnencryptedString(pat),
+                    formatOutput = false,
+                    dispatcher = default,
+                )
+
+                @Exhaustive
+                when (encryptionResponse) {
+                    is Response.Error -> {}
+
+                    is Response.Success -> {
+                        networkQueryContact.generateGithubPAT(
+                            GithubPATDto(
+                                encryptionResponse.value.value
+                            )
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                
+                                is Response.Error -> {
+                                    response = loadResponse
+                                }
+                                is Response.Success -> {
+                                    response = Response.Success(true)
+                                }
+                            }
+                        }
+                    }
+                }
+            }.join()
+        }
 
         return response
     }

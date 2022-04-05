@@ -262,6 +262,10 @@ internal class ProfileFragment: SideEffectFragment<
                     }
                 )
 
+                buttonProfileAdvancedContainerGithubPat.setOnClickListener {
+                    viewModel.setGithubPAT()
+                }
+
                 buttonProfileAdvancedContainerChangePin.setOnClickListener {
                     viewModel.resetPIN()
                 }
