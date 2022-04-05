@@ -80,4 +80,6 @@ interface ContactRepository {
     ): Response<Any, ResponseError>
 
     suspend fun toggleContactBlocked(contact: Contact): Response<Boolean, ResponseError>
+
+    suspend fun setGithubPat(pat: String): Response<Boolean, ResponseError>
 }

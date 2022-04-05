@@ -14,6 +14,7 @@ dependencies {
     api project(path: ':sphinx:application:common:logger')
 
     api project(path: ':sphinx:application:data:concepts:concept-coredb')
+    api project(path: ':sphinx:application:data:concepts:concept-relay')
     api project(path: ':sphinx:application:data:concepts:crypto:concept-crypto-rsa')
 
     api project(path: ':sphinx:application:data:concepts:concept-media-cache')

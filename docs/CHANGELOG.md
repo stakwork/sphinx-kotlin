@@ -1,6 +1,11 @@
 # ChangeLog
 
-# Version 1.0.0-alpha50 (2022-03-29)
+# Version 1.0.0-alpha52 (2022-04-05)
+ - Fixes crash during restore
+ - Fixes issue where some options are missing on message menu
+ - Adds ability to set Github Personal Access Token for git bot
+
+# Version 1.0.0-alpha51 (2022-03-29)
  - Fixes issue about duplicated direct payments going out on chat
  - Adds confirmation when deleting or blocking contacts
  - Adds support for secure user token authentication

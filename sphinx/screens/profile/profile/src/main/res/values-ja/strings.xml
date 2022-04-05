@@ -17,6 +17,7 @@
     <string name="profile_change_pin">PINコードの変更</string>
     <string name="profile_change_privacy_pin">プライバシーPINコードの変更</string>
     <string name="profile_always_require_pin">起動時のPINコード入力を必須にする</string>
+    <string name="profile_set_github_pat">Set Github Personal Access Token</string>
     <string name="profile_export_keys_title_alert">バックアップキーをエクスポート</string>
     <string name="profile_export_keys_pin_message">バックアップキーを暗号化するPINコードを入力してください。このPINコードは別の端末でアカウントを復元する時に必要です。</string>
     <string name="profile_keys_copied_clipboard">バックアップキーをクリップボードにコピーします。アプリを削除する前に、この文字列とPINコードを保存してください。一方でも失くすとアプリ再インストール後にデータを復元できません。</string>
@@ -28,6 +29,7 @@
     <string name="bottom_menu_profile_pic_header_text">プロフィール写真</string>
     <string name="failed_to_process_image">写真をアップロードできませんでした</string>
     <string name="image_uploaded_successfully">写真をアップロードしました</string>
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
 
     <string name="empty_or_null_relay_url">新しいRelay URLの入力は必須です</string>
     <string name="invalid_relay_url">新しいRelay URLは無効です</string>
@@ -36,5 +38,8 @@
     <string name="failed_updating_relay_url">新しいURLのテストに失敗しました。既存設定を復元しています。</string>
     <string name="updating_relay_url_succeed">Relay URLを更新しました</string>
 
-    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
+    <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
+    <string name="github_pat_failed">Github Personal Access Token coult not be set</string>
 </resources>

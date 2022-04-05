@@ -17,6 +17,7 @@
     <string name="profile_change_pin">Modificar PIN</string>
     <string name="profile_change_privacy_pin">Modificar PIN Privado</string>
     <string name="profile_always_require_pin">Siempre solicitar PIN</string>
+    <string name="profile_set_github_pat">Establecer Github Personal Access Token</string>
     <string name="profile_export_keys_title_alert">Exportar Claves</string>
     <string name="profile_export_keys_pin_message">"Ingresa tu PIN para encriptar las claves. ¡Recuérdalo! Lo necesitarás para restaurar tu cuenta en otro dispositivo"</string>
     <string name="profile_keys_copied_clipboard">"Tus claves se copiarán al portapapeles. Guarda las claves y recuerda tu PIN antes de borrar la aplicación o toda la información se perderá"</string>
@@ -28,6 +29,7 @@
     <string name="bottom_menu_profile_pic_header_text">Foto de Perfil</string>
     <string name="failed_to_process_image">No se ha podido procesar la imagen</string>
     <string name="image_uploaded_successfully">Imagen cargada con éxito</string>
+    <string name="invalid_meeting_server_url">Url de Meeting Server inválida</string>
 
     <string name="empty_or_null_relay_url">La nueva URL de Relay no puede ser vacía o nula</string>
     <string name="invalid_relay_url">La nueva URL de Relay es inválida</string>
@@ -36,5 +38,8 @@
     <string name="failed_updating_relay_url">La verificación de la nueva URL de Relay ha fallado, restaurando configuración previa…</string>
     <string name="updating_relay_url_succeed">La URL de Relay ha sido actualizada con éxito</string>
 
-    <string name="invalid_meeting_server_url">Url de Meeting Server inválida</string>
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Crea un Personal Access Token en Github con permisos para el repositorio</string>
+    <string name="github_pat_succeed">El Personal Access Token de Github ha sido establecido con éxito</string>
+    <string name="github_pat_failed">No se pudo establecer el Github Personal Access Token</string>
 </resources>

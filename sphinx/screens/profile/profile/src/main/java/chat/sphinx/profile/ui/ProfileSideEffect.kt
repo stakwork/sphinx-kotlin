@@ -4,6 +4,10 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.FrameLayout
 import chat.sphinx.profile.R
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -117,6 +121,66 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
     object InvalidMeetingServerUrl: ProfileSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils(true).show(value, R.string.invalid_meeting_server_url)
+        }
+    }
+
+    class GithubPATSet(
+        private val callback: (String?) -> Unit,
+    ): ProfileSideEffect() {
+
+        override suspend fun execute(value: Context) {
+
+            val inputEditTextField = EditText(value)
+            inputEditTextField.isSingleLine = true
+            inputEditTextField.setOnFocusChangeListener { _, _ ->
+                inputEditTextField.post {
+                    val inputMethodManager: InputMethodManager =
+                        value.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.showSoftInput(inputEditTextField, InputMethodManager.SHOW_IMPLICIT)
+                }
+            }
+            inputEditTextField.requestFocus()
+
+            val container = FrameLayout(value)
+            val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            params.leftMargin = value.resources.getDimensionPixelSize(R.dimen.default_layout_margin)
+            params.rightMargin = value.resources.getDimensionPixelSize(R.dimen.default_layout_margin)
+            inputEditTextField.layoutParams = params
+            container.addView(inputEditTextField)
+
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(value.getString(R.string.github_pat_title))
+            builder.setMessage(value.getString(R.string.github_pat_message))
+            builder.setView(container)
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                val editTextInput = inputEditTextField.text.toString()
+
+                callback.invoke(
+                    if (editTextInput.isEmpty()) {
+                        null
+                    } else {
+                        editTextInput
+                    }
+                )
+            }
+            builder.setNegativeButton(android.R.string.cancel) { _, _ -> }
+
+            builder.show()
+        }
+    }
+
+    object GithubPATSuccessfullySet: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.github_pat_succeed)
+        }
+    }
+
+    object FailedToSetGithubPat: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.github_pat_failed)
         }
     }
 }
