@@ -2,6 +2,7 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -137,6 +138,28 @@ internal class ProfileViewModel @Inject constructor(
                     is AuthenticationResponse.Success.Key -> {}
                 }
             }
+        }
+    }
+
+    private var setGithubPATJob: Job? = null
+    fun setGithubPAT() {
+        if (setGithubPATJob?.isActive == true) return
+
+        setGithubPATJob = viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.GithubPATSet { pat ->
+                pat?.let {
+                    viewModelScope.launch(mainImmediate) {
+                        when (contactRepository.setGithubPat(pat)) {
+                            is Response.Error -> {
+                                submitSideEffect(ProfileSideEffect.FailedToSetGithubPat)
+                            }
+                            is Response.Success -> {
+                                submitSideEffect(ProfileSideEffect.GithubPATSuccessfullySet)
+                            }
+                        }
+                    }
+                }
+            })
         }
     }
 

@@ -17,6 +17,7 @@
     <string name="profile_change_pin">更新 PIN</string>
     <string name="profile_change_privacy_pin">更新個人 PIN</string>
     <string name="profile_always_require_pin">每次要求 PIN</string>
+    <string name="profile_set_github_pat">Set Github Personal Access Token</string>
     <string name="profile_export_keys_title_alert">匯出私鏈</string>
     <string name="profile_export_keys_pin_message">"請輸入加密私鏈PIN. 您備份恢復將需要它."</string>
     <string name="profile_keys_copied_clipboard">私鏈已複製到剪貼板. 請保留 &amp; 警告! 請刪除APP之前記住私鏈PIN 免得資料損失.</string>
@@ -28,6 +29,7 @@
     <string name="bottom_menu_profile_pic_header_text">個人圖片</string>
     <string name="failed_to_process_image">圖片上傳失敗</string>
     <string name="image_uploaded_successfully">圖片上傳成功</string>
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
 
     <string name="empty_or_null_relay_url">Relay URL 不可無填</string>
     <string name="invalid_relay_url">更新 Relay URL 失敗</string>
@@ -36,5 +38,8 @@
     <string name="failed_updating_relay_url">新 URL 測試失敗, 恢復設定…</string>
     <string name="updating_relay_url_succeed">Relay URL 更新成功</string>
 
-    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
+    <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
+    <string name="github_pat_failed">Github Personal Access Token coult not be set</string>
 </resources>

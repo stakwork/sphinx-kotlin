@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBa
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_paging.PageSourceWrapper
+import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_dashboard.DashboardItem
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_socket_io.SocketIOManager
@@ -44,6 +45,7 @@ class SphinxRepositoryAndroid(
     applicationScope: CoroutineScope,
     authenticationCoreManager: AuthenticationCoreManager,
     authenticationStorage: AuthenticationStorage,
+    relayDataHandler: RelayDataHandler,
     coreDB: CoreDB,
     dispatchers: CoroutineDispatchers,
     moshi: Moshi,
@@ -70,6 +72,7 @@ class SphinxRepositoryAndroid(
     applicationScope,
     authenticationCoreManager,
     authenticationStorage,
+    relayDataHandler,
     coreDB,
     dispatchers,
     moshi,
