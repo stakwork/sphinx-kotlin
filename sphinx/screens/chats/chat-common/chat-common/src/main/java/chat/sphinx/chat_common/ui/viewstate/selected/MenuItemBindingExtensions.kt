@@ -67,6 +67,11 @@ internal inline fun LayoutSelectedMessageBinding.setMenuItems(items: List<MenuIt
         includeLayoutSelectedMessageMenuItem2.setMenuItem(items?.elementAtOrNull(1), itemsSize == 2)
         includeLayoutSelectedMessageMenuItem3.setMenuItem(items?.elementAtOrNull(2), itemsSize == 3)
         includeLayoutSelectedMessageMenuItem4.setMenuItem(items?.elementAtOrNull(3), itemsSize == 4)
+        includeLayoutSelectedMessageMenuItem5.setMenuItem(items?.elementAtOrNull(4), itemsSize == 5)
+        includeLayoutSelectedMessageMenuItem6.setMenuItem(items?.elementAtOrNull(5), itemsSize == 6)
+        includeLayoutSelectedMessageMenuItem7.setMenuItem(items?.elementAtOrNull(6), itemsSize == 7)
+        includeLayoutSelectedMessageMenuItem8.setMenuItem(items?.elementAtOrNull(7), itemsSize == 8)
+        includeLayoutSelectedMessageMenuItem9.setMenuItem(items?.elementAtOrNull(8), itemsSize == 9)
     }
 }
 

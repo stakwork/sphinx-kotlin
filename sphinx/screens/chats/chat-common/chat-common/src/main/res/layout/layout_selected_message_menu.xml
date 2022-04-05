@@ -54,6 +54,46 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_3" />
 
+        <include
+            android:id="@+id/include_layout_selected_message_menu_item_5"
+            layout="@layout/layout_selected_message_menu_item"
+            android:layout_width="@dimen/selected_message_menu_width"
+            android:layout_height="@dimen/selected_message_menu_item_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_4" />
+
+        <include
+            android:id="@+id/include_layout_selected_message_menu_item_6"
+            layout="@layout/layout_selected_message_menu_item"
+            android:layout_width="@dimen/selected_message_menu_width"
+            android:layout_height="@dimen/selected_message_menu_item_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_5" />
+
+        <include
+            android:id="@+id/include_layout_selected_message_menu_item_7"
+            layout="@layout/layout_selected_message_menu_item"
+            android:layout_width="@dimen/selected_message_menu_width"
+            android:layout_height="@dimen/selected_message_menu_item_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_6" />
+
+        <include
+            android:id="@+id/include_layout_selected_message_menu_item_8"
+            layout="@layout/layout_selected_message_menu_item"
+            android:layout_width="@dimen/selected_message_menu_width"
+            android:layout_height="@dimen/selected_message_menu_item_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_7" />
+
+        <include
+            android:id="@+id/include_layout_selected_message_menu_item_9"
+            layout="@layout/layout_selected_message_menu_item"
+            android:layout_width="@dimen/selected_message_menu_width"
+            android:layout_height="@dimen/selected_message_menu_item_height"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_selected_message_menu_item_8" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <Space
