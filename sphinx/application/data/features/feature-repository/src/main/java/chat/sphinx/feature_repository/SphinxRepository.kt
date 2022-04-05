@@ -398,7 +398,13 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .chatGetConversationForContact(listOf(ownerId!!, contactId))
+                .chatGetConversationForContact(
+                    if (ownerId != null) {
+                        listOf(ownerId!!, contactId)
+                    } else {
+                        listOf()
+                    }
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
@@ -425,7 +431,10 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatId(ownerId!!, chatId)
+                .messageGetUnseenIncomingMessageCountByChatId(
+                    ownerId ?: ContactId(-1),
+                    chatId
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -454,7 +463,11 @@ abstract class SphinxRepository(
 
         emitAll(
             queries
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, blockedContactIds, ChatType.Conversation)
+                .messageGetUnseenIncomingMessageCountByChatType(
+                    ownerId ?: ContactId(-1),
+                    blockedContactIds,
+                    ChatType.Conversation
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -480,7 +493,11 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, listOf(), ChatType.Tribe)
+                .messageGetUnseenIncomingMessageCountByChatType(
+                    ownerId ?: ContactId(-1),
+                    listOf(),
+                    ChatType.Tribe
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
