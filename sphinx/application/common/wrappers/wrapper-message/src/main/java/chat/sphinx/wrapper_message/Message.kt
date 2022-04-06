@@ -38,6 +38,7 @@ inline fun Message.retrieveTextToShow(): String? =
         decrypted.value
     }
 
+
 //Invoice memo shows on a different TextView than messageContent
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveInvoiceTextToShow(): String? =

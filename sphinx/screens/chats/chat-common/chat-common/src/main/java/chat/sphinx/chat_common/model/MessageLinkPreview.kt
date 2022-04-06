@@ -18,7 +18,9 @@ sealed interface MessageLinkPreview {
                 return null
             }
 
-            val matcher = SphinxLinkify.SphinxPatterns.LINK_PREVIEWS.matcher(text.text)
+            val matcher = SphinxLinkify.SphinxPatterns.LINK_PREVIEWS.matcher(
+                text.text ?: ""
+            )
             return if (matcher.find()) {
 
                 val group = matcher.group()
