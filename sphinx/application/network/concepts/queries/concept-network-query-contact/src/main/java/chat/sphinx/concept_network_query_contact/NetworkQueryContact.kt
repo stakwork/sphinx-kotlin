@@ -71,11 +71,15 @@ abstract class NetworkQueryContact {
         publicKey: String? = null
     ): Flow<LoadResponse<GenerateTokenResponse, ResponseError>>
 
-
     abstract fun createContact(
         postContactDto: PostContactDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<ContactDto, ResponseError>>
+
+    abstract fun generateGithubPAT(
+        patDto: GithubPATDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
 
     //////////////
     /// DELETE ///

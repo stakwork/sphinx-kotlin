@@ -9,6 +9,7 @@ import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.concept_network_query_contact.model.GithubPATDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
@@ -402,7 +403,13 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .chatGetConversationForContact(listOf(ownerId!!, contactId))
+                .chatGetConversationForContact(
+                    if (ownerId != null) {
+                        listOf(ownerId!!, contactId)
+                    } else {
+                        listOf()
+                    }
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .map { it?.let { chatDboPresenterMapper.mapFrom(it) } }
@@ -429,7 +436,10 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatId(ownerId!!, chatId)
+                .messageGetUnseenIncomingMessageCountByChatId(
+                    ownerId ?: ContactId(-1),
+                    chatId
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -458,7 +468,11 @@ abstract class SphinxRepository(
 
         emitAll(
             queries
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, blockedContactIds, ChatType.Conversation)
+                .messageGetUnseenIncomingMessageCountByChatType(
+                    ownerId ?: ContactId(-1),
+                    blockedContactIds,
+                    ChatType.Conversation
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -484,7 +498,11 @@ abstract class SphinxRepository(
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
-                .messageGetUnseenIncomingMessageCountByChatType(ownerId!!, listOf(), ChatType.Tribe)
+                .messageGetUnseenIncomingMessageCountByChatType(
+                    ownerId ?: ContactId(-1),
+                    listOf(),
+                    ChatType.Tribe
+                )
                 .asFlow()
                 .mapToOneOrNull(io)
                 .distinctUntilChanged()
@@ -1512,6 +1530,55 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
+
+        return response
+    }
+
+    override suspend fun setGithubPat(
+        pat: String
+    ): Response<Boolean, ResponseError> {
+
+        var response: Response<Boolean, ResponseError> = Response.Error(
+            ResponseError("generate Github PAT failed to execute")
+        )
+
+        relayDataHandler.retrieveRelayTransportKey()?.let { key ->
+
+            applicationScope.launch(mainImmediate) {
+
+                val encryptionResponse = rsa.encrypt(
+                    key,
+                    UnencryptedString(pat),
+                    formatOutput = false,
+                    dispatcher = default,
+                )
+
+                @Exhaustive
+                when (encryptionResponse) {
+                    is Response.Error -> {}
+
+                    is Response.Success -> {
+                        networkQueryContact.generateGithubPAT(
+                            GithubPATDto(
+                                encryptionResponse.value.value
+                            )
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                
+                                is Response.Error -> {
+                                    response = loadResponse
+                                }
+                                is Response.Success -> {
+                                    response = Response.Success(true)
+                                }
+                            }
+                        }
+                    }
+                }
+            }.join()
+        }
 
         return response
     }

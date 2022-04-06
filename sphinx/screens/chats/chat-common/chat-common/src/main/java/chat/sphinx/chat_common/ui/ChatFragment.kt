@@ -547,6 +547,21 @@ abstract class ChatFragment<
                 includeLayoutSelectedMessageMenuItem4.root.setOnClickListener {
                     onSelectedMessageMenuItemClick(3)
                 }
+                includeLayoutSelectedMessageMenuItem5.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(4)
+                }
+                includeLayoutSelectedMessageMenuItem6.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(5)
+                }
+                includeLayoutSelectedMessageMenuItem7.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(6)
+                }
+                includeLayoutSelectedMessageMenuItem8.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(7)
+                }
+                includeLayoutSelectedMessageMenuItem9.root.setOnClickListener {
+                    onSelectedMessageMenuItemClick(8)
+                }
             }
         }
         selectedMessageHolderBinding.includeMessageHolderBubble.root.setOnClickListener {

@@ -17,6 +17,7 @@
     <string name="profile_change_pin">Change PIN</string>
     <string name="profile_change_privacy_pin">Change Privacy PIN</string>
     <string name="profile_always_require_pin">Always require PIN</string>
+    <string name="profile_set_github_pat">Set Github Personal Access Token</string>
     <string name="profile_export_keys_title_alert">Export Keys</string>
     <string name="profile_export_keys_pin_message">"Enter your PIN to encrypt your keys. You will need it when restoring account on other device."</string>
     <string name="profile_keys_copied_clipboard">Your keys will be copied to the clipboard. Save this string &amp; remember your pin before deleting the app or all data will be lost.</string>
@@ -28,6 +29,7 @@
     <string name="bottom_menu_profile_pic_header_text">Profile Picture</string>
     <string name="failed_to_process_image">Failed to process image</string>
     <string name="image_uploaded_successfully">Image uploaded successfully</string>
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
 
     <string name="empty_or_null_relay_url">New Relay URL can not be empty or null</string>
     <string name="invalid_relay_url">New Relay URL is invalid</string>
@@ -36,5 +38,8 @@
     <string name="failed_updating_relay_url">New URL test failed, restoring previous setting…</string>
     <string name="updating_relay_url_succeed">Relay URL successfully updated</string>
 
-    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
+    <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
+    <string name="github_pat_failed">Github Personal Access Token coult not be set</string>
 </resources>

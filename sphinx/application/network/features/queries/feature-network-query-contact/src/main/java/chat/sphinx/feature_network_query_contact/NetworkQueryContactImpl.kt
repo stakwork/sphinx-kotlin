@@ -31,6 +31,7 @@ class NetworkQueryContactImpl(
         private const val ENDPOINT_TRIBE_MEMBERS = "/contacts/%d"
         private const val ENDPOINT_GENERATE_TOKEN = "/contacts/tokens"
         private const val ENDPOINT_KEYS_EXCHANGE = "/contacts/%d/keys"
+        private const val ENDPOINT_GENERATE_GITHUB_PAT = "/bot/git"
 
         private const val ENDPOINT_CREATE_INVITE = "/invites"
 
@@ -172,7 +173,6 @@ class NetworkQueryContactImpl(
             )
     }
 
-
     override fun createContact(
         postContactDto: PostContactDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
@@ -184,6 +184,19 @@ class NetworkQueryContactImpl(
             requestBody = postContactDto,
             relayData = relayData
         )
+
+    override fun generateGithubPAT(
+        patDto: GithubPATDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<Any, ResponseError>> {
+        return networkRelayCall.relayPost(
+            responseJsonClass = GenerateGithubPATRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_GENERATE_GITHUB_PAT,
+            requestBodyJsonClass = GithubPATDto::class.java,
+            requestBody = patDto,
+            relayData = relayData
+        )
+    }
 
     //////////////
     /// DELETE ///
