@@ -14,6 +14,7 @@
     <dimen name="default_header_navigation_padding">16dp</dimen>
     <dimen name="default_header_navigation_margin_start">8dp</dimen>
     <dimen name="default_chat_initial_image_xy">46dp</dimen>
+    <dimen name="default_chat_initial_image_radius">23dp</dimen>
     <dimen name="default_small_chat_initial_image_xy">26dp</dimen>
     <dimen name="default_invite_qr_image_xy">40dp</dimen>
     <dimen name="default_message_action_image_xy">28dp</dimen>
@@ -107,7 +108,7 @@
     <dimen name="chat_footer_episode_sub_title_text_size">11sp</dimen>
     <dimen name="chat_footer_button_icon_text_size">28sp</dimen>
 
-    <dimen name="chat_footer_initial_holder_xy">45dp</dimen>
+    <dimen name="chat_footer_initial_holder_xy">46dp</dimen>
     <dimen name="chat_footer_button_xy">32dp</dimen>
     <dimen name="chat_footer_episode_label_vertical_margin">5dp</dimen>
     <dimen name="chat_footer_send_button_margin_horizontal">11dp</dimen>
