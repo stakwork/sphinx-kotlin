@@ -393,8 +393,6 @@ abstract class SphinxRepository(
                     if (it != null) {
                         ownerId = it.id
                         throw Exception()
-                    } else {
-                        emit(null)
                     }
                 }
             } catch (e: Exception) {}
@@ -426,8 +424,6 @@ abstract class SphinxRepository(
                     if (contact != null) {
                         ownerId = contact.id
                         throw Exception()
-                    } else {
-                        emit(null)
                     }
                 }
             } catch (e: Exception) {}
@@ -456,8 +452,6 @@ abstract class SphinxRepository(
                     if (contact != null) {
                         ownerId = contact.id
                         throw Exception()
-                    } else {
-                        emit(null)
                     }
                 }
             } catch (e: Exception) {}
@@ -488,8 +482,6 @@ abstract class SphinxRepository(
                     if (contact != null) {
                         ownerId = contact.id
                         throw Exception()
-                    } else {
-                        emit(null)
                     }
                 }
             } catch (e: Exception) {}
