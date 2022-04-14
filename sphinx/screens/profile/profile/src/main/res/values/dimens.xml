@@ -2,6 +2,7 @@
 <resources>
     <dimen name="profile_basic_info_holder_height">125dp</dimen>
     <dimen name="profile_picture_xy">86dp</dimen>
+    <dimen name="profile_picture_radius">43dp</dimen>
 
     <dimen name="profile_header_height">75dp</dimen>
     <dimen name="profile_tabs_holder_height">30dp</dimen>

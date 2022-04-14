@@ -139,7 +139,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
-            .transformation(Transformation.CircleCrop)
             .build()
     }
 
