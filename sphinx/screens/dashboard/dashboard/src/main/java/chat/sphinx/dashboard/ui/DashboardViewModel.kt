@@ -124,32 +124,24 @@ internal class DashboardViewModel @Inject constructor(
 
     private fun getAndSaveTransportKey() {
         viewModelScope.launch(mainImmediate) {
-            relayDataHandler.retrieveRelayUrlAndToken()?.let { response ->
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {}
-                    is Response.Success -> {
-
-                        if (response.value.second == null) {
-                            networkQueryTransportKey.getRelayTransportKey(
-                                response.value.third
-                            ).collect { loadResponse ->
-                                @Exhaustive
-                                when (loadResponse) {
-                                    is LoadResponse.Loading -> {}
-                                    is Response.Error -> {}
-
-                                    is Response.Success -> {
-                                        relayDataHandler.persistRelayTransportKey(
-                                            RsaPublicKey(
-                                                loadResponse.value.transport_key.toCharArray()
-                                            )
-                                        )
-                                    }
-                                }
-                            }
+            relayDataHandler.retrieveRelayTransportKey()?.let {
+                return@launch
+            }
+            relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
+                networkQueryTransportKey.getRelayTransportKey(
+                    relayUrl
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+                        is Response.Success -> {
+                            relayDataHandler.persistRelayTransportKey(
+                                RsaPublicKey(
+                                    loadResponse.value.transport_key.toCharArray()
+                                )
+                            )
                         }
-
                     }
                 }
             }
