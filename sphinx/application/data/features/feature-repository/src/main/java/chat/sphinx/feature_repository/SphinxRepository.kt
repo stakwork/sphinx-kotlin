@@ -5558,29 +5558,23 @@ abstract class SphinxRepository(
 
     override fun getAndSaveTransportKey() {
         applicationScope.launch(io) {
-            relayDataHandler.retrieveRelayUrlAndToken()?.let { response ->
-                @Exhaustive
-                when (response) {
-                    is Response.Error -> {}
-                    is Response.Success -> {
-
-                        if (response.value.second == null) {
-                            networkQueryRelayKeys.getRelayTransportKey(
-                                response.value.third
-                            ).collect { loadResponse ->
-                                @Exhaustive
-                                when (loadResponse) {
-                                    is LoadResponse.Loading -> {}
-                                    is Response.Error -> {}
-                                    is Response.Success -> {
-                                        relayDataHandler.persistRelayTransportKey(
-                                            RsaPublicKey(
-                                                loadResponse.value.transport_key.toCharArray()
-                                            )
-                                        )
-                                    }
-                                }
-                            }
+            relayDataHandler.retrieveRelayTransportKey()?.let {
+                return@launch
+            }
+            relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
+                networkQueryRelayKeys.getRelayTransportKey(
+                    relayUrl
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+                        is Response.Success -> {
+                            relayDataHandler.persistRelayTransportKey(
+                                RsaPublicKey(
+                                    loadResponse.value.transport_key.toCharArray()
+                                )
+                            )
                         }
                     }
                 }
@@ -5591,42 +5585,43 @@ abstract class SphinxRepository(
     @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
     override fun getOrCreateHMacKey() {
         applicationScope.launch(io) {
-            if (relayDataHandler.retrieveRelayHMacKey() == null) {
-                networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {
-                            when (val hMacKeyResponse = createHMacKey()) {
-                                is Response.Error -> {}
-                                is Response.Success -> {
-                                    relayDataHandler.persistRelayHMacKey(
-                                        hMacKeyResponse.value
-                                    )
-                                }
+            relayDataHandler.retrieveRelayHMacKey()?.let {
+                return@launch
+            }
+            networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        when (val hMacKeyResponse = createHMacKey()) {
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                relayDataHandler.persistRelayHMacKey(
+                                    hMacKeyResponse.value
+                                )
                             }
                         }
-                        is Response.Success -> {
-                            val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
-                                ?.privateKey
-                                ?.value
-                                ?: return@collect
+                    }
+                    is Response.Success -> {
+                        val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
+                            ?.privateKey
+                            ?.value
+                            ?: return@collect
 
-                            val response = rsa.decrypt(
-                                rsaPrivateKey = RsaPrivateKey(privateKey),
-                                text = EncryptedString(loadResponse.value.encrypted_key),
-                                dispatcher = default
-                            )
+                        val response = rsa.decrypt(
+                            rsaPrivateKey = RsaPrivateKey(privateKey),
+                            text = EncryptedString(loadResponse.value.encrypted_key),
+                            dispatcher = default
+                        )
 
-                            when (response) {
-                                is Response.Error -> {}
-                                is Response.Success -> {
-                                    relayDataHandler.persistRelayHMacKey(
-                                        RelayHMacKey(
-                                            response.value.toUnencryptedString(trim = false).value
-                                        )
+                        when (response) {
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                relayDataHandler.persistRelayHMacKey(
+                                    RelayHMacKey(
+                                        response.value.toUnencryptedString(trim = false).value
                                     )
-                                }
+                                )
                             }
                         }
                     }
