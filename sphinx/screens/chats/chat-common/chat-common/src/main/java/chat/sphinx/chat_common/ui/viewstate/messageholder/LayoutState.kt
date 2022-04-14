@@ -174,7 +174,8 @@ internal sealed class LayoutState private constructor() {
             ): ContainerThird()
 
             data class Message(
-                val text: String
+                val text: String?,
+                val decryptionError: Boolean,
             ): ContainerThird()
 
             data class PaidMessage(

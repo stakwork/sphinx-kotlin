@@ -685,7 +685,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             }.join()
 
                             text?.let { nnText ->
-                                messageLayoutState = LayoutState.Bubble.ContainerThird.Message(text = nnText)
+                                messageLayoutState = LayoutState.Bubble.ContainerThird.Message(
+                                    text = nnText,
+                                    decryptionError = false
+                                )
 
                                 nnText.toMessageContentDecrypted()?.let { messageContentDecrypted ->
                                     messageRepository.updateMessageContentDecrypted(
