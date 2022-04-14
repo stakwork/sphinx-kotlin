@@ -180,11 +180,15 @@ internal sealed class MessageHolderViewState(
             } else {
                 null
             }
-        } ?: message.messageDecryptionError?.let {
-            LayoutState.Bubble.ContainerThird.Message(
-                text = null,
-                decryptionError = true
-            )
+        } ?: message.messageDecryptionError?.let { decryptionError ->
+            if (decryptionError) {
+                LayoutState.Bubble.ContainerThird.Message(
+                    text = null,
+                    decryptionError = true
+                )
+            } else {
+                null
+            }
         }
     }
 
