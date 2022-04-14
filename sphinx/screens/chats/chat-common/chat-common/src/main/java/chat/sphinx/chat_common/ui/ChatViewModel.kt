@@ -139,7 +139,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     val imageLoaderDefaults by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
-            .transformation(Transformation.CircleCrop)
             .build()
     }
 
@@ -685,7 +684,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             }.join()
 
                             text?.let { nnText ->
-                                messageLayoutState = LayoutState.Bubble.ContainerThird.Message(text = nnText)
+                                messageLayoutState = LayoutState.Bubble.ContainerThird.Message(
+                                    text = nnText,
+                                    decryptionError = false
+                                )
 
                                 nnText.toMessageContentDecrypted()?.let { messageContentDecrypted ->
                                     messageRepository.updateMessageContentDecrypted(

@@ -17,13 +17,24 @@
         android:layout_marginStart="@dimen/default_layout_margin"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/nav_drawer_image_view_user_profile_picture"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_profile_image"
             android:layout_width="@dimen/nav_drawer_header_profile_picture_xy"
             android:layout_height="@dimen/nav_drawer_header_profile_picture_xy"
-            android:src="@drawable/ic_profile_avatar_circle"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardElevation="0dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:cardCornerRadius="@dimen/nav_drawer_header_profile_picture_radius">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/nav_drawer_image_view_user_profile_picture"
+                android:layout_width="@dimen/nav_drawer_header_profile_picture_xy"
+                android:layout_height="@dimen/nav_drawer_header_profile_picture_xy"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_avatar_circle" />
+
+        </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/nav_drawer_text_view_profile_name"
@@ -37,9 +48,9 @@
             android:textColor="@color/primaryText"
             android:textSize="@dimen/nav_drawer_default_text_size"
             android:fontFamily="@font/montserrat_bold"
-            app:layout_constraintBottom_toBottomOf="@+id/nav_drawer_image_view_user_profile_picture"
+            app:layout_constraintBottom_toBottomOf="@+id/card_view_profile_image"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/nav_drawer_image_view_user_profile_picture"
+            app:layout_constraintStart_toEndOf="@+id/card_view_profile_image"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Matthew long name to see 2 line text wrap"/>
 

@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha53 (2022-04-14)
+ - Fixes crashes
+ - Fixes layout issue for non decrypted messages
+ - Adds support for animated profile pictures
+
 # Version 1.0.0-alpha52 (2022-04-05)
  - Fixes crash during restore
  - Fixes issue where some options are missing on message menu

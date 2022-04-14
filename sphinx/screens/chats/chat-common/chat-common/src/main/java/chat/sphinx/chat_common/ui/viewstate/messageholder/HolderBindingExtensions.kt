@@ -556,8 +556,10 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
         var bubbleWidth: Int = when {
             viewState.message.shouldAdaptBubbleWidth -> {
-                viewState.bubbleMessage?.text?.let { text ->
-                    (includeMessageHolderBubble.textViewMessageText.paint.measureText(text) + (defaultMargins * 2)).toInt()
+                viewState.bubbleMessage?.let { nnBubbleMessage ->
+                    (includeMessageHolderBubble.textViewMessageText.paint.measureText(
+                        nnBubbleMessage.text ?: getString(R.string.decryption_error)
+                    ) + (defaultMargins * 2)).toInt()
                 } ?: bubbleFixedWidth
             }
             viewState.message.isPodcastBoost -> {
@@ -793,7 +795,13 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
             includeMessageHolderBubble.textViewPaidMessageText.gone
 
             visible
-            text = message.text
+            text = message.text ?: getString(R.string.decryption_error)
+
+            val textColor = ContextCompat.getColor(
+                root.context,
+                if (message.decryptionError) R.color.primaryRed else R.color.textMessages
+            )
+            setTextColor(textColor)
 
             if (onSphinxInteractionListener != null) {
                 SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
