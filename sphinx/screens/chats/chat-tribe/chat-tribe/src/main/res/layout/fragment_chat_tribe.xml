@@ -98,8 +98,15 @@
         tools:visibility="gone" />
 
     <include
-        android:id="@id/include_layout_boost_fireworks"
+        android:id="@+id/include_layout_boost_fireworks"
         layout="@layout/layout_boost_fireworks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_popup"
+        layout="@layout/layout_chat_tribe_popup"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"/>

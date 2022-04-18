@@ -1,4 +1,4 @@
-package chat.sphinx.chat_tribe.ui
+package chat.sphinx.chat_tribe.ui.viewstate
 
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat

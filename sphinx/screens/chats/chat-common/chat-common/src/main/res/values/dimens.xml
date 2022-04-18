@@ -148,4 +148,13 @@
     <dimen name="cancel_title_text_size">12sp</dimen>
     <dimen name="option_title_text_size">17sp</dimen>
     <dimen name="progress_bar_z">10dp</dimen>
+
+    <!-- Chat popup -->
+    <dimen name="chat_tribe_direct_payment_popup_width">240dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_height">280dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_profile_picture_xy">86dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_profile_picture_radius">43dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_name_text_size">20sp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_button_height">42dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_button_text_size">12sp</dimen>
 </resources>

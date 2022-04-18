@@ -153,4 +153,6 @@
     <string name="slide_to_cancel">&lt;&lt; 滑动取消</string>
     <string name="recording_permission_granted">授予录音许可</string>
     <string name="recording_permission_required">需要录制权限</string>
+
+    <string name="send_sats">Send Sats</string>
 </resources>

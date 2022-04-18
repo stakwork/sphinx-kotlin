@@ -14,7 +14,10 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
+import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
+import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -22,10 +25,8 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_view.Px
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -48,6 +49,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includePodcastPlayerFooter
     private val boostAnimationBinding: LayoutBoostFireworksBinding
         get() = binding.includeLayoutBoostFireworks
+    private val tribePopupBinding: LayoutChatTribePopupBinding
+        get() = binding.includeLayoutPopup
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
@@ -110,15 +113,6 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         podcastPlayerBinding.apply {
-//            textViewBoostPodcastButton.setOnClickListener {
-//                tribeFeedViewModel.podcastViewStateContainer.value.clickBoost?.let {
-//                    it.invoke()
-//                    boostAnimationBinding.apply {
-//                        root.visible
-//                        lottieAnimationView.playAnimation()
-//                    }
-//                }
-//            }
             imageViewForward30Button.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickFastForward?.invoke()
             }
@@ -249,6 +243,23 @@ internal class ChatTribeFragment: ChatFragment<
                         }
                     }
 
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.tribePopupViewStateContainer.collect { viewState ->
+                tribePopupBinding.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is TribePopupViewState.Idle -> {
+                            root.goneIfFalse(false)
+                        }
+
+                        is TribePopupViewState.TribeMemberPopup -> {
+                            root.goneIfFalse(true)
+                        }
+                    }
                 }
             }
         }
