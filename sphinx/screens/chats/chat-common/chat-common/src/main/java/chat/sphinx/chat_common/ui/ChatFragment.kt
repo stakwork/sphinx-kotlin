@@ -319,7 +319,7 @@ abstract class ChatFragment<
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
-                    sendMessageBuilder.setMessagePrice(
+                    sendMessageBuilder.setPaidMessagePrice(
                         attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull()?.toSat()
                     )
 

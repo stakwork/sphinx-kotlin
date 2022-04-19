@@ -7,6 +7,7 @@ data class PostMessageDto(
     val chat_id: Long?,
     val contact_id: Long?,
     val amount: Long,
+    val message_price: Long,
     val reply_uuid: String?,
     val text: String?,
     val remote_text_map: Map<String, String>?,

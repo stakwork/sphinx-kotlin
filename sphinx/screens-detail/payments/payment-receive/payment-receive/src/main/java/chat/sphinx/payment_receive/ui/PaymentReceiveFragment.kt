@@ -87,7 +87,7 @@ internal class PaymentReceiveFragment: PaymentFragment<
                 binding.includeConstraintMessage.root.visible
                 binding.includeConstraintConfirmButton.buttonConfirm.text = getString(R.string.confirm_button)
 
-                setupDestination(viewState.contact)
+                setupDestination(contact = viewState.contact)
             }
 
             is PaymentReceiveViewState.RequestLightningPayment -> {

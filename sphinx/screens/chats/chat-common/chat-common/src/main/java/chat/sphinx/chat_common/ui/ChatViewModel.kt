@@ -1021,10 +1021,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
             val response = messageRepository.boostMessage(
-                chat.id,
-                chat.pricePerMessage ?: Sat(0),
-                chat.escrowAmount ?: Sat(0),
-                messageUUID,
+                chatId = chat.id,
+                pricePerMessage = chat.pricePerMessage ?: Sat(0),
+                escrowAmount = chat.escrowAmount ?: Sat(0),
+                messageUUID = messageUUID,
             )
 
             @Exhaustive

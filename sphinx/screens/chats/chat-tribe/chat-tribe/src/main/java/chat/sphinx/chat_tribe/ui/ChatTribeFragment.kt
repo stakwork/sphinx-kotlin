@@ -306,7 +306,6 @@ internal class ChatTribeFragment: ChatFragment<
 
                             layoutChatTribePopup.apply {
                                 textViewInitials.apply {
-                                    visible
                                     text = viewState.memberName.value.getInitials()
                                     setBackgroundRandomColor(
                                         chat.sphinx.chat_common.R.drawable.chat_initials_circle,

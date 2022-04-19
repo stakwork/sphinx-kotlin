@@ -13,25 +13,29 @@ class SendMessage private constructor(
     val attachmentInfo: AttachmentInfo?,
     val chatId: ChatId?,
     val contactId: ContactId?,
+    val tribePaymentAmount: Sat?,
     val replyUUID: ReplyUUID?,
     val text: String?,
     val giphyData: GiphyData?,
     val podcastClip: PodcastClip?,
     val isBoost: Boolean,
-    val messagePrice: Sat?,
+    val isTribePayment: Boolean,
+    val paidMessagePrice: Sat?,
     val priceToMeet: Sat?
 ) {
 
     class Builder {
         private var chatId: ChatId?                 = null
         private var contactId: ContactId?           = null
+        private var tribePaymentAmount: Sat?        = null
         private var attachmentInfo: AttachmentInfo? = null
         private var replyUUID: ReplyUUID?           = null
         private var text: String?                   = null
         private var giphyData: GiphyData?           = null
         private var podcastClip: PodcastClip?       = null
         private var isBoost: Boolean                = false
-        private var messagePrice: Sat?              = null
+        private var isTribePayment: Boolean         = false
+        private var paidMessagePrice: Sat?          = null
         private var priceToMeet: Sat?               = null
 
         enum class ValidationError {
@@ -43,12 +47,14 @@ class SendMessage private constructor(
             attachmentInfo = null
             chatId = null
             contactId = null
+            tribePaymentAmount = null
             replyUUID = null
             text = null
             giphyData = null
             podcastClip = null
             isBoost = false
-            messagePrice = null
+            isTribePayment = false
+            paidMessagePrice = null
             priceToMeet = null
         }
 
@@ -82,9 +88,9 @@ class SendMessage private constructor(
                 }
                 else -> {
                     val isPaidTextMessage = attachmentInfo?.mediaType?.isSphinxText == true
-                    val messagePrice = messagePrice?.value ?: 0
+                    val paidMessagePrice = paidMessagePrice?.value ?: 0
 
-                    if (isPaidTextMessage && messagePrice == 0.toLong()) {
+                    if (isPaidTextMessage && paidMessagePrice == 0.toLong()) {
                         return Pair(false, ValidationError.EMPTY_PRICE)
                     }
                 }
@@ -108,6 +114,12 @@ class SendMessage private constructor(
         @Synchronized
         fun setContactId(contactId: ContactId?): Builder {
             this.contactId = contactId
+            return this
+        }
+
+        @Synchronized
+        fun setTribePaymentAmount(tribePaymentAmount: Sat?): Builder {
+            this.tribePaymentAmount = tribePaymentAmount
             return this
         }
 
@@ -146,14 +158,20 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setIsTribePayment(isTribePayment: Boolean): Builder {
+            this.isTribePayment = isTribePayment
+            return this
+        }
+
+        @Synchronized
         fun setPriceToMeet(priceToMeet: Sat?): Builder {
             this.priceToMeet = priceToMeet
             return this
         }
 
         @Synchronized
-        fun setMessagePrice(messagePrice: Sat?): Builder {
-            this.messagePrice = messagePrice
+        fun setPaidMessagePrice(paidMessagePrice: Sat?): Builder {
+            this.paidMessagePrice = paidMessagePrice
             return this
         }
 
@@ -169,12 +187,14 @@ class SendMessage private constructor(
                         attachmentInfo,
                         chatId,
                         contactId,
+                        tribePaymentAmount,
                         replyUUID,
                         text,
                         giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
                         podcastClip?.let { PodcastClip(text, it.title, it.pubkey, it.url, it.feedID, it.itemID, it.ts) },
                         isBoost,
-                        messagePrice,
+                        isTribePayment,
+                        paidMessagePrice,
                         priceToMeet
                     ), null
                 )

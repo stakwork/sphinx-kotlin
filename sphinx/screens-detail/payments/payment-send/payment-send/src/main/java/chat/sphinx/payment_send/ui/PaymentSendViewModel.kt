@@ -1,9 +1,9 @@
 package chat.sphinx.payment_send.ui
 
 import android.app.Application
-import android.os.Message
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -26,13 +26,16 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_message.getColorKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 internal inline val PaymentSendFragmentArgs.chatId: ChatId?
@@ -65,11 +68,14 @@ internal class PaymentSendViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>
 ): PaymentViewModel<PaymentSendFragmentArgs, PaymentSendViewState>(
     dispatchers,
     paymentSendNavigator,
     contactRepository,
+    messageRepository,
+    chatRepository,
     PaymentSendViewState.Idle
 )
 {
@@ -78,20 +84,24 @@ internal class PaymentSendViewModel @Inject constructor(
     override val args: PaymentSendFragmentArgs by savedStateHandle.navArgs()
     override val chatId: ChatId? = args.chatId
     override val contactId: ContactId? = args.contactId
-    val messageUUID: MessageUUID? = args.messageUUID
+    override val messageUUID: MessageUUID? = args.messageUUID
 
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
 
     init {
         viewModelScope.launch(mainImmediate) {
-            val contact = getContactOrNull()
             viewStateContainer.updateViewState(
-                if (contact != null) {
+                viewState = getContactOrNull()?.let { contact ->
                     PaymentSendViewState.ChatPayment(contact)
-                } else {
-                    PaymentSendViewState.KeySendPayment
-                }
+                } ?: getMessageOrNull()?.let { message ->
+                    PaymentSendViewState.TribePayment(
+                        message.senderAlias,
+                        message.getColorKey(),
+                        message.senderPic
+                    )
+                } ?: PaymentSendViewState.KeySendPayment
+
             )
         }
     }
@@ -124,7 +134,35 @@ internal class PaymentSendViewModel @Inject constructor(
         }
     }
 
-    fun sendContactPayment(message: String? = null) {
+    fun sendPayment(message: String? = null) {
+        args.messageUUID?.let { messageUUID ->
+            sendTribeDirectPayment(message, messageUUID)
+        } ?: run {
+            sendContactPayment(message)
+        }
+    }
+
+    private fun sendTribeDirectPayment(
+        message: String? = null,
+        messageUUID: MessageUUID
+    ) {
+        if (chatId == null) return
+
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChatOrNull() ?: return@launch
+
+            messageRepository.sendTribePayment(
+                chatId = chat.id,
+                amount = Sat(sendPaymentBuilder.paymentAmount),
+                messageUUID = messageUUID,
+                text = message ?: ""
+            )
+
+            navigator.closeDetailScreen()
+        }
+    }
+
+    private fun sendContactPayment(message: String? = null) {
         sendPaymentBuilder.setChatId(args.chatId)
         sendPaymentBuilder.setContactId(args.contactId)
         sendPaymentBuilder.setText(message)
