@@ -11,9 +11,10 @@ sealed class TribePopupViewState: ViewState<TribePopupViewState>() {
     object Idle: TribePopupViewState()
 
     class TribeMemberPopup(
+        val messageUUID: MessageUUID,
         val memberName: SenderAlias,
-        val memberPic: PhotoUrl?,
-        val messageUUID: MessageUUID
+        val colorKey: String,
+        val memberPic: PhotoUrl?
     ): TribePopupViewState()
 
 }

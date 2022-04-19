@@ -1,6 +1,7 @@
 package chat.sphinx.payment_send.ui
 
 import android.app.Application
+import android.os.Message
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -23,6 +24,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_lightning.NodeBalance
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -47,6 +49,13 @@ internal inline val PaymentSendFragmentArgs.contactId: ContactId?
         ContactId(argContactId)
     }
 
+internal inline val PaymentSendFragmentArgs.messageUUID: MessageUUID?
+    get() = if (argMessageUUID.isEmpty()) {
+        null
+    } else {
+        MessageUUID(argMessageUUID)
+    }
+
 @HiltViewModel
 internal class PaymentSendViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
@@ -69,6 +78,7 @@ internal class PaymentSendViewModel @Inject constructor(
     override val args: PaymentSendFragmentArgs by savedStateHandle.navArgs()
     override val chatId: ChatId? = args.chatId
     override val contactId: ContactId? = args.contactId
+    val messageUUID: MessageUUID? = args.messageUUID
 
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()

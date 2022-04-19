@@ -11,7 +11,7 @@
     tools:visibility="visible">
 
     <include
-        android:id="@+id/layout_dashboard_authorize_popup"
+        android:id="@+id/layout_chat_tribe_popup"
         layout="@layout/layout_chat_tribe_direct_payment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

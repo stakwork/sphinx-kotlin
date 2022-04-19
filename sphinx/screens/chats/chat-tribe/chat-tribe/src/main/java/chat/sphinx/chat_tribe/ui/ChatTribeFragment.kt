@@ -1,10 +1,14 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
@@ -23,9 +27,13 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
+import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
@@ -97,6 +105,8 @@ internal class ChatTribeFragment: ChatFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+
         lifecycleScope.launch(viewModel.mainImmediate) {
             try {
                 viewModel.feedDataStateFlow.collect { data ->
@@ -143,6 +153,41 @@ internal class ChatTribeFragment: ChatFragment<
             viewModel.messageReplyViewStateContainer.updateViewState(
                 MessageReplyViewState.CommentingOnPodcast(podcastClip)
             )
+        }
+
+        tribePopupBinding.layoutChatTribePopup.apply {
+            buttonSendSats.setOnClickListener {
+                viewModel.goToPaymentSend()
+            }
+
+            textViewDirectPaymentPopupClose.setOnClickListener {
+                viewModel.tribePopupViewStateContainer.updateViewState(TribePopupViewState.Idle)
+            }
+        }
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.tribePopupViewStateContainer.value is TribePopupViewState.TribeMemberPopup) {
+                viewModel.tribePopupViewStateContainer.updateViewState(TribePopupViewState.Idle)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.handleCommonChatOnBackPressed()
+                }
+            }
         }
     }
 
@@ -258,6 +303,37 @@ internal class ChatTribeFragment: ChatFragment<
 
                         is TribePopupViewState.TribeMemberPopup -> {
                             root.goneIfFalse(true)
+
+                            layoutChatTribePopup.apply {
+                                textViewInitials.apply {
+                                    visible
+                                    text = viewState.memberName.value.getInitials()
+                                    setBackgroundRandomColor(
+                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
+                                        Color.parseColor(
+                                            userColorsHelper.getHexCodeForKey(
+                                                viewState.colorKey,
+                                                root.context.getRandomHexCode(),
+                                            )
+                                        ),
+                                    )
+                                }
+
+                                viewState.memberPic?.let { photoUrl ->
+                                    imageViewMemberProfilePicture.visible
+
+                                    imageLoader.load(
+                                        imageViewMemberProfilePicture,
+                                        photoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
+                                }
+
+                                textViewMemberName.text = viewState.memberName.value
+                            }
                         }
                     }
                 }

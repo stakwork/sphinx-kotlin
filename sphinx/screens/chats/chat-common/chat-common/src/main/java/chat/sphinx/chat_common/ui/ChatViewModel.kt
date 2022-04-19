@@ -16,6 +16,7 @@ import androidx.annotation.CallSuper
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
@@ -83,6 +84,7 @@ import com.giphy.sdk.ui.themes.GridType
 import com.giphy.sdk.ui.utils.aspectRatio
 import com.giphy.sdk.ui.views.GiphyDialogFragment
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -984,6 +986,35 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         attachmentFullscreenStateContainer.updateViewState(viewState)
     }
 
+    suspend fun handleCommonChatOnBackPressed() {
+        val attachmentSendViewState = getAttachmentSendViewStateFlow().value
+        val attachmentFullscreenViewState = getAttachmentFullscreenViewStateFlow().value
+
+        when {
+            currentViewState is ChatMenuViewState.Open -> {
+                updateViewState(ChatMenuViewState.Closed)
+            }
+            attachmentFullscreenViewState is AttachmentFullscreenViewState.Fullscreen -> {
+                updateAttachmentFullscreenViewState(AttachmentFullscreenViewState.Idle)
+            }
+            attachmentSendViewState is AttachmentSendViewState.Preview -> {
+                updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                updateFooterViewState(FooterViewState.Default)
+                deleteUnsentAttachment(attachmentSendViewState)
+            }
+            attachmentSendViewState is AttachmentSendViewState.PreviewGiphy -> {
+                updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                updateFooterViewState(FooterViewState.Default)
+            }
+            getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
+                updateSelectedMessageViewState(SelectedMessageViewState.None)
+            }
+            else -> {
+                chatNavigator.popBackStack()
+            }
+        }
+    }
+
     fun boostMessage(messageUUID: MessageUUID?) {
         if (messageUUID == null) return
 
@@ -1505,9 +1536,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     open suspend fun deleteTribe() {}
 
-    open fun showMemberPopup(
-        messageUUID: MessageUUID,
-    ) {}
+    open fun showMemberPopup(message: Message) {}
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused

@@ -393,9 +393,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
             binding.includeMessageHolderChatImageInitialHolder.root.setOnClickListener {
                 currentViewState?.message?.let { nnMessage ->
-                    nnMessage.uuid?.let { messageUUID ->
-                        viewModel.showMemberPopup(messageUUID)
-                    }
+                    viewModel.showMemberPopup(nnMessage)
                 }
             }
         }

@@ -222,33 +222,8 @@ abstract class ChatFragment<
         }
 
         override fun handleOnBackPressed() {
-            val attachmentSendViewState = viewModel.getAttachmentSendViewStateFlow().value
-            val attachmentFullscreenViewState = viewModel.getAttachmentFullscreenViewStateFlow().value
-
-            when {
-                viewModel.currentViewState is ChatMenuViewState.Open -> {
-                    viewModel.updateViewState(ChatMenuViewState.Closed)
-                }
-                attachmentFullscreenViewState is AttachmentFullscreenViewState.Fullscreen -> {
-                    viewModel.updateAttachmentFullscreenViewState(AttachmentFullscreenViewState.Idle)
-                }
-                attachmentSendViewState is AttachmentSendViewState.Preview -> {
-                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                    viewModel.updateFooterViewState(FooterViewState.Default)
-                    viewModel.deleteUnsentAttachment(attachmentSendViewState)
-                }
-                attachmentSendViewState is AttachmentSendViewState.PreviewGiphy -> {
-                    viewModel.updateAttachmentSendViewState(AttachmentSendViewState.Idle)
-                    viewModel.updateFooterViewState(FooterViewState.Default)
-                }
-                viewModel.getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
-                    viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
-                }
-                else -> {
-                    lifecycleScope.launch(viewModel.mainImmediate) {
-                        viewModel.chatNavigator.popBackStack()
-                    }
-                }
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.handleCommonChatOnBackPressed()
             }
         }
     }

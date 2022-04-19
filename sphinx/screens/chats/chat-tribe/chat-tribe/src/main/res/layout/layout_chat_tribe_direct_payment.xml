@@ -2,10 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:visibility="gone"
+    android:visibility="visible"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:visibility="visible">
+    android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_direct_payment_popup"
@@ -25,29 +24,50 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_view_profile_image"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_image_initials"
                 android:layout_width="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
                 android:layout_height="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardElevation="0dp"
                 android:layout_marginBottom="@dimen/default_layout_margin"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:cardCornerRadius="@dimen/chat_tribe_direct_payment_popup_profile_picture_radius">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/image_view_profile_picture"
-                    android:layout_width="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
-                    android:layout_height="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_profile_avatar_circle" />
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_view_profile_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardElevation="0dp"
+                    app:cardCornerRadius="@dimen/chat_tribe_direct_payment_popup_profile_picture_radius">
 
-            </androidx.cardview.widget.CardView>
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/text_view_initials"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/primaryBlue"
+                        android:fontFamily="@font/montserrat_regular"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/chat_tribe_direct_payment_popup_initials_text_size"
+                        android:textAllCaps="true"
+                        tools:text="tt" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/image_view_member_profile_picture"
+                        android:layout_width="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
+                        android:layout_height="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
+                        android:scaleType="centerCrop"
+                        android:visibility="gone"
+                        android:src="@drawable/ic_profile_avatar_circle" />
+
+                </androidx.cardview.widget.CardView>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_direct_payment_popup_name"
+                android:id="@+id/text_view_member_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto_bold"
@@ -59,7 +79,7 @@
                 android:layout_marginHorizontal="@dimen/default_layout_margin"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/card_view_profile_image" />
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_image_initials" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
