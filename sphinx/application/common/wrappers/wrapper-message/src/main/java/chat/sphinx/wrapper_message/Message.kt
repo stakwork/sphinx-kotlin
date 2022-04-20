@@ -263,6 +263,9 @@ inline val Message.isVideoMessage: Boolean
 inline val Message.isPodcastBoost: Boolean
     get() = type.isBoost() && feedBoost != null
 
+inline val Message.isDirectPayment: Boolean
+    get() = type.isDirectPayment()
+
 inline val Message.isPodcastClip: Boolean
     get() = podcastClip != null
 

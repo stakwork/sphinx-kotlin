@@ -7,106 +7,130 @@
     android:paddingHorizontal="@dimen/default_layout_margin"
     android:paddingTop="@dimen/default_list_row_padding_vertical"
     android:paddingBottom="@dimen/default_list_row_padding_vertical"
+    tools:background="@android:color/black"
     android:visibility="gone"
     tools:visibility="visible">
 
     <!-- Payment Received -->
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_direct_payment_received"
-        android:layout_width="@dimen/icon_container_message_payment_direction_xy"
-        android:layout_height="@dimen/icon_container_message_payment_direction_xy"
-        android:src="@drawable/ic_received"
-        android:tint="@color/receivedIcon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_direct_payment_received_amount_labels"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/default_layout_margin"
-        app:layout_constraintStart_toEndOf="@+id/image_view_direct_payment_received"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:id="@+id/layout_constraint_direct_payment_received_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="visible">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_sats_amount_received"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_bold"
-            android:gravity="center_vertical"
-            android:textAlignment="textStart"
-            android:textColor="@color/textMessages"
-            android:textSize="@dimen/default_text_size_headline"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_direct_payment_received"
+            android:layout_width="@dimen/icon_container_message_payment_direction_xy"
+            android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+            android:src="@drawable/ic_received"
+            android:tint="@color/receivedIcon"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="21 000" />
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_sats_unit_label_received"
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_tribe_direct_payment_received"
+            android:layout_width="@dimen/icon_container_message_payment_direction_xy"
+            android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+            android:src="@drawable/ic_sent"
+            android:tint="@color/textMessages"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginStart="4dp"
-            android:fontFamily="@font/roboto_regular"
-            android:textAlignment="textStart"
-            android:textColor="@color/secondaryTextSent"
-            android:textSize="@dimen/default_text_size_sub_headline"
-            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_sats_amount_received"
-            app:layout_constraintStart_toEndOf="@+id/text_view_sats_amount_received"
-            tools:text="sat" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            app:layout_constraintStart_toEndOf="@+id/image_view_direct_payment_received"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_sats_amount_received"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_bold"
+                android:gravity="center_vertical"
+                android:textColor="@color/textMessages"
+                android:textSize="@dimen/default_text_size_headline"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="21 000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_sats_unit_label_received"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="4dp"
+                android:fontFamily="@font/roboto_regular"
+                android:textAlignment="textStart"
+                android:textColor="@color/secondaryTextSent"
+                android:textSize="@dimen/default_text_size_sub_headline"
+                app:layout_constraintBaseline_toBaselineOf="@+id/text_view_sats_amount_received"
+                app:layout_constraintStart_toEndOf="@+id/text_view_sats_amount_received"
+                tools:text="sats" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     <!-- Payment Sent -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_direct_payment_sent_amount_labels"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:id="@+id/layout_constraint_direct_payment_sent_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_sats_amount_sent"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_bold"
-            android:gravity="center_vertical"
-            android:textAlignment="textStart"
-            android:textColor="@color/textMessages"
-            android:textSize="@dimen/default_text_size_headline"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="21 000" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_sats_unit_label_sent"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_marginStart="4dp"
-            android:fontFamily="@font/roboto_regular"
-            android:textAlignment="textStart"
-            android:textColor="@color/secondaryTextSent"
-            android:textSize="@dimen/default_text_size_sub_headline"
-            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_sats_amount_sent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_sats_amount_sent"
-            tools:text="sat" />
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_direct_payment_sent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_sats_amount_sent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_bold"
+                android:gravity="center_vertical"
+                android:textColor="@color/textMessages"
+                android:textSize="@dimen/default_text_size_headline"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="21 000" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_sats_unit_label_sent"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="4dp"
+                android:fontFamily="@font/roboto_regular"
+                android:textAlignment="textStart"
+                android:textColor="@color/secondaryTextSent"
+                android:textSize="@dimen/default_text_size_sub_headline"
+                app:layout_constraintBaseline_toBaselineOf="@+id/text_view_sats_amount_sent"
+                app:layout_constraintStart_toEndOf="@+id/text_view_sats_amount_sent"
+                tools:text="sat" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_direct_payment_sent"
+            android:layout_width="@dimen/icon_container_message_payment_direction_xy"
+            android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+            android:src="@drawable/ic_sent"
+            android:tint="@color/textMessages"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_direct_payment_sent"
-        android:layout_width="@dimen/icon_container_message_payment_direction_xy"
-        android:layout_height="@dimen/icon_container_message_payment_direction_xy"
-        android:layout_marginStart="@dimen/default_layout_margin"
-        android:src="@drawable/ic_sent"
-        android:tint="@color/textMessages"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/layout_constraint_direct_payment_sent_amount_labels"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

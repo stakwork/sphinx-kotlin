@@ -400,11 +400,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
         } else {
             root.visible
 
-            imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
-            layoutConstraintDirectPaymentSentAmountLabels.goneIfFalse(directPayment.showSent)
-
-            imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
-            layoutConstraintDirectPaymentReceivedAmountLabels.goneIfFalse(directPayment.showReceived)
+            layoutConstraintDirectPaymentReceivedContainer.goneIfFalse(directPayment.showReceived)
+            layoutConstraintDirectPaymentSentContainer.goneIfFalse(directPayment.showSent)
 
             textViewSatsAmountReceived.text = directPayment.amount.asFormattedString()
             textViewSatsUnitLabelReceived.text = directPayment.unitLabel
@@ -561,6 +558,24 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                         nnBubbleMessage.text ?: getString(R.string.decryption_error)
                     ) + (defaultMargins * 2)).toInt()
                 } ?: bubbleFixedWidth
+            }
+            viewState.message.isDirectPayment -> {
+                val paymentMargin = root.context.resources
+                    .getDimensionPixelSize(common_R.dimen.default_payment_row_margin)
+
+                val textWidth = viewState.bubbleMessage?.let { nnBubbleMessage ->
+                    (includeMessageHolderBubble.textViewMessageText.paint.measureText(
+                        nnBubbleMessage.text ?: getString(R.string.decryption_error)
+                    ) + (defaultMargins * 2)).toInt()
+                } ?: 0
+
+                val amountWidth = viewState.bubbleDirectPayment?.let { nnBubbleDirectPayment ->
+                    (includeMessageHolderBubble.includeMessageTypeDirectPayment.textViewSatsAmountReceived.paint.measureText(
+                        nnBubbleDirectPayment.amount.asFormattedString()
+                    ) + paymentMargin).toInt()
+                } ?: 0
+
+                textWidth.coerceAtLeast(amountWidth)
             }
             viewState.message.isPodcastBoost -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
