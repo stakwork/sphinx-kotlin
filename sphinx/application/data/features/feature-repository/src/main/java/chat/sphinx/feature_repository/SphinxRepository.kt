@@ -2415,6 +2415,8 @@ abstract class SphinxRepository(
                                 null,
                                 sendMessage.replyUUID,
                                 messageType,
+                                null,
+                                null,
                                 provisionalId,
                                 null,
                                 chatDbo.id,

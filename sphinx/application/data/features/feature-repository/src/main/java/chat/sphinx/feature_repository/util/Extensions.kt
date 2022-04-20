@@ -360,6 +360,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.original_muid?.toMessageMUID(),
         dto.reply_uuid?.toReplyUUID(),
         dto.type.toMessageType(),
+        dto.recipient_alias?.toRecipientAlias(),
+        dto.recipient_pic?.toPhotoUrl(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,
