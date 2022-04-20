@@ -58,8 +58,8 @@ data class PostMessageDto(
             "muid cannot be empty"
         }
 
-        require(!(remote_text_map == null && media_key_map == null)) {
-            "Both remote_text_map and media_key_map cannot be null"
+        require(!(remote_text_map == null && media_key_map == null && !pay)) {
+            "Both remote_text_map and media_key_map cannot be null unless it's a tribe payment"
         }
     }
 }

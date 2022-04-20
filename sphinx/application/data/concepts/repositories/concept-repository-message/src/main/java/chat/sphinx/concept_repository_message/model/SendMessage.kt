@@ -81,7 +81,8 @@ class SendMessage private constructor(
                     if (
                         text.isNullOrEmpty() &&
                         giphyData == null &&
-                        podcastClip == null
+                        podcastClip == null &&
+                        !isTribePayment
                     ) {
                         return Pair(false, ValidationError.EMPTY_CONTENT)
                     }

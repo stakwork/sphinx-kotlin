@@ -2358,7 +2358,7 @@ abstract class SphinxRepository(
                     null
                 }
 
-            if (message == null && media == null) {
+            if (message == null && media == null && !sendMessage.isTribePayment) {
                 return@launch
             }
 
@@ -2387,7 +2387,7 @@ abstract class SphinxRepository(
                 (sendMessage.isTribePayment) -> {
                     null
                 }
-                else {
+                else -> {
                     sendMessage.replyUUID
                 }
             }
