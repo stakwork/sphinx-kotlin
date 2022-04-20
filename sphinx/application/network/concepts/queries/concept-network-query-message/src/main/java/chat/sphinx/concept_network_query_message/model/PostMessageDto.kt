@@ -16,6 +16,7 @@ data class PostMessageDto(
     val muid: String?,
     val price: Long?,
     val boost: Boolean = false,
+    val pay: Boolean = false,
 ) {
     init {
         require(!(chat_id == null && contact_id == null)) {

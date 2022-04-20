@@ -2382,6 +2382,16 @@ abstract class SphinxRepository(
                 }
             }
 
+            //If is tribe payment, reply UUID is sent to identify recipient. But it's not a response
+            val replyUUID = when {
+                (sendMessage.isTribePayment) -> {
+                    null
+                }
+                else {
+                    sendMessage.replyUUID
+                }
+            }
+
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert
                 provisionalMessageLock.withLock {
@@ -2413,7 +2423,7 @@ abstract class SphinxRepository(
                                 chatDbo.myAlias?.value?.toSenderAlias(),
                                 chatDbo.myPhotoUrl,
                                 null,
-                                sendMessage.replyUUID,
+                                replyUUID,
                                 messageType,
                                 null,
                                 null,
@@ -2529,7 +2539,8 @@ abstract class SphinxRepository(
                     postMemeServerDto?.mime,
                     postMemeServerDto?.muid,
                     sendMessage.paidMessagePrice?.value,
-                    sendMessage.isBoost
+                    sendMessage.isBoost,
+                    sendMessage.isTribePayment
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
