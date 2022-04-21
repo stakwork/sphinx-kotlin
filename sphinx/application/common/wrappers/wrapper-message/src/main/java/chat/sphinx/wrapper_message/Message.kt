@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.DashboardItemType
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -199,6 +200,17 @@ inline fun Message.getColorKey(): String {
         return "message-${sender.value}-${senderAlias.value}-color"
     }
     return "message-${sender.value}-color"
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.getRecipientColorKey(
+    tribeAdminId: ContactId,
+    recipientAlias: RecipientAlias?
+): String {
+    recipientAlias?.let { recipientAlias ->
+        return "message-${tribeAdminId.value}-${recipientAlias.value}-color"
+    }
+    return "message-${tribeAdminId.value}-color"
 }
 
 @Suppress("NOTHING_TO_INLINE")

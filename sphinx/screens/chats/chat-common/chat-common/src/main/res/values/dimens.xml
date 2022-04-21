@@ -65,7 +65,7 @@
     <dimen name="message_type_podcast_boost_width">180dp</dimen>
     <dimen name="message_type_expired_invoice_width">210dp</dimen>
     <dimen name="message_type_boost_width">220dp</dimen>
-    <dimen name="message_type_direct_payment_height">46dp</dimen>
+    <dimen name="message_type_direct_payment_height">56dp</dimen>
     <dimen name="message_type_image_loading_container_height">160dp</dimen>
     <dimen name="message_type_file_attachment_height">60dp</dimen>
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
@@ -148,6 +148,10 @@
     <dimen name="cancel_title_text_size">12sp</dimen>
     <dimen name="option_title_text_size">17sp</dimen>
     <dimen name="progress_bar_z">10dp</dimen>
+
+    <dimen name="message_type_direct_payment_recipient_pic_xy">36dp</dimen>
+    <dimen name="payment_row_margin">104dp</dimen>
+    <dimen name="tribe_payment_row_margin">170dp</dimen>
 
     <!-- Chat popup -->
     <dimen name="chat_tribe_direct_payment_popup_width">240dp</dimen>

@@ -346,6 +346,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         val owner = getOwner()
 
+        val tribeAdmin = chat.ownerPubKey?.let {
+            contactRepository.getContactByPubKey(it).firstOrNull()
+        } ?: null
+
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
         withContext(io) {
@@ -394,6 +398,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         MessageHolderViewState.Sent(
                             message,
                             chat,
+                            tribeAdmin,
                             background =  when {
                                 isDeleted -> {
                                     BubbleBackground.Gone(setSpacingEqual = false)
@@ -452,6 +457,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         MessageHolderViewState.Received(
                             message,
                             chat,
+                            tribeAdmin,
                             background = when {
                                 isDeleted -> {
                                     BubbleBackground.Gone(setSpacingEqual = false)
