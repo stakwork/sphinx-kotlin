@@ -374,7 +374,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.expiration_date?.toDateTime(),
         dto.message_content?.toMessageContent(),
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
-        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID()
+        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID(),
+        false.toFlagged()
     )
 
     if (dto.type.toMessageType()?.isInvoicePayment()) {

@@ -734,7 +734,10 @@ messageUpsert {
         sender_pic,
         original_muid,
         reply_uuid,
-        muid
+        muid,
+        flagged,
+        recipient_alias,
+        recipient_pic
     )
     VALUES (
         :id,
@@ -756,7 +759,10 @@ messageUpsert {
         :sender_pic,
         :original_muid,
         :reply_uuid,
-        :muid
+        :muid,
+        :flagged,
+        :recipient_alias,
+        :recipient_pic
     );
 }
 
