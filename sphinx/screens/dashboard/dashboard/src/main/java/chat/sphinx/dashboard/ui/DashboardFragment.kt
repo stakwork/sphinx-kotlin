@@ -262,6 +262,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                 dashboardPodcastViewModel.pausePodcastIfPlaying()
 
                 podcastPlayerBinding.root.gone
+                binding.swipeRevealLayoutPlayer.gone
                 binding.imageViewBottomBarShadow.visible
             }
 
@@ -570,6 +571,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                             root.gone
 
                             binding.apply {
+                                swipeRevealLayoutPlayer.gone
                                 imageViewPlayerBarShadow.gone
                                 imageViewBottomBarShadow.visible
                             }
@@ -604,6 +606,8 @@ internal class DashboardFragment : MotionLayoutFragment<
 
                                 imageViewPlayerBarShadow.visible
                                 imageViewBottomBarShadow.gone
+
+                                swipeRevealLayoutPlayer.visible
                             }
 
                             root.visible
