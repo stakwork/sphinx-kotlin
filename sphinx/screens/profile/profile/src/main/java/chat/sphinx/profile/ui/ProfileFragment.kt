@@ -365,7 +365,6 @@ internal class ProfileFragment: SideEffectFragment<
                                     url,
                                     ImageLoaderOptions.Builder()
                                         .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                                        .transformation(Transformation.CircleCrop)
                                         .build()
                                 )
                             } ?: imageViewProfilePicture.setImageDrawable(

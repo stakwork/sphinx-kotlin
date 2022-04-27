@@ -6,15 +6,26 @@
     android:layout_height="match_parent"
     android:background="@color/body">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_profile_picture"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_profile_image"
         android:layout_width="@dimen/profile_picture_xy"
         android:layout_height="@dimen/profile_picture_xy"
-        android:src="@drawable/ic_profile_avatar_circle"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp"
         android:layout_marginStart="@dimen/default_double_layout_margin"
         android:layout_marginTop="@dimen/default_half_layout_margin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardCornerRadius="@dimen/profile_picture_radius">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_profile_picture"
+            android:layout_width="@dimen/profile_picture_xy"
+            android:layout_height="@dimen/profile_picture_xy"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_avatar_circle" />
+
+    </androidx.cardview.widget.CardView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_uploading_picture"
@@ -22,9 +33,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@+id/image_view_profile_picture"
-        app:layout_constraintEnd_toEndOf="@+id/image_view_profile_picture"
-        app:layout_constraintStart_toStartOf="@+id/image_view_profile_picture"
+        app:layout_constraintTop_toBottomOf="@+id/card_view_profile_image"
+        app:layout_constraintEnd_toEndOf="@+id/card_view_profile_image"
+        app:layout_constraintStart_toStartOf="@+id/card_view_profile_image"
         tools:visibility="visible">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -70,9 +81,9 @@
         android:textColor="@color/primaryText"
         android:textSize="@dimen/profile_name_text_size"
         android:fontFamily="@font/montserrat_bold"
-        app:layout_constraintTop_toTopOf="@+id/image_view_profile_picture"
+        app:layout_constraintTop_toTopOf="@+id/card_view_profile_image"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/image_view_profile_picture"
+        app:layout_constraintStart_toEndOf="@+id/card_view_profile_image"
         android:text="TEST NAME"
         tools:text="TEST NAME"/>
 

@@ -200,7 +200,6 @@ internal class ChatListAdapter(
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
-            .transformation(Transformation.CircleCrop)
             .build()
     }
 

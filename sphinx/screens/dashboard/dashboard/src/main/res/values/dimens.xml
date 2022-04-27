@@ -9,7 +9,8 @@
     <dimen name="dashboard_search_text_size">14sp</dimen>
 
     <dimen name="nav_drawer_header_margin">32dp</dimen>
-    <dimen name="nav_drawer_header_profile_picture_xy">45dp</dimen>
+    <dimen name="nav_drawer_header_profile_picture_xy">46dp</dimen>
+    <dimen name="nav_drawer_header_profile_picture_radius">23dp</dimen>
     <dimen name="nav_drawer_header_profile_text_margin">8dp</dimen>
 
     <dimen name="nav_drawer_button_image_xy">29dp</dimen>

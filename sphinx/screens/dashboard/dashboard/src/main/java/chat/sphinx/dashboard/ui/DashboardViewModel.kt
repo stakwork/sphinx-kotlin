@@ -116,7 +116,7 @@ internal class DashboardViewModel @Inject constructor(
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
     }
-
+    
     private fun getRelayKeys() {
         repositoryDashboard.getAndSaveTransportKey()
         repositoryDashboard.getOrCreateHMacKey()

@@ -24,15 +24,25 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="TT" />
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_chat_picture"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_centerInParent="true"
-        android:src="@drawable/ic_profile_avatar_circle"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_chat_picture"
+        android:layout_width="@dimen/default_chat_initial_image_xy"
+        android:layout_height="@dimen/default_chat_initial_image_xy"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardCornerRadius="@dimen/default_chat_initial_image_radius">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_chat_picture"
+            android:scaleType="centerCrop"
+            android:layout_width="@dimen/default_chat_initial_image_xy"
+            android:layout_height="@dimen/default_chat_initial_image_xy"
+            android:src="@drawable/ic_profile_avatar_circle" />
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
