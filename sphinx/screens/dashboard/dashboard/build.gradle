@@ -48,6 +48,7 @@ dependencies {
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:resources')
 
+    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
@@ -70,6 +71,7 @@ dependencies {
     implementation deps.swipeRevealLayout.sdk
     implementation deps.google.hilt
     implementation deps.lottie.sdk
+    implementation deps.bip39.sdk
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

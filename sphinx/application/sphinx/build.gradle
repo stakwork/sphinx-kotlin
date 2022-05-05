@@ -87,6 +87,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:features:feature-media-cache')
     implementation project(path: ':sphinx:application:data:features:feature-meme-server')
     implementation project(path: ':sphinx:application:data:features:feature-relay')
+    implementation project(path: ':sphinx:application:data:features:feature-wallet')
     implementation project(path: ':sphinx:application:data:features:feature-repository-android')
     implementation project(path: ':sphinx:application:data:features:feature-sphinx-notification-manager')
     implementation project(path: ':sphinx:application:network:features:feature-link-preview')

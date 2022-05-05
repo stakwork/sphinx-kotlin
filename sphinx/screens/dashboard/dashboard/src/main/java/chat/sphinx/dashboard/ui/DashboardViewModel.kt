@@ -4,10 +4,11 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toEntropy
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
@@ -20,7 +21,6 @@ import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
@@ -28,12 +28,15 @@ import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -47,6 +50,7 @@ import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -56,6 +60,8 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -92,13 +98,15 @@ internal class DashboardViewModel @Inject constructor(
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val socketIOManager: SocketIOManager,
-): MotionLayoutViewModel<
+
+    private val LOG: SphinxLogger,
+    private val walletDataHandler: WalletDataHandler,
+) : MotionLayoutViewModel<
         Any,
         Context,
         ChatListSideEffect,
         DashboardMotionViewState
-        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible)
-{
+        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible) {
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
@@ -120,6 +128,30 @@ internal class DashboardViewModel @Inject constructor(
         getAndSaveTransportKey()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
+    }
+
+    private fun generateAndPersistMnemonic() {
+        val entropy = (Mnemonics.WordCount.COUNT_12).toEntropy()
+
+        Mnemonics.MnemonicCode(entropy).use { mnemonicCode ->
+            val wordsArray:MutableList<String> = mutableListOf()
+            mnemonicCode.words.forEach { word ->
+                wordsArray.add(word.joinToString(""))
+            }
+            val words = wordsArray.joinToString(" ")
+
+            LOG.d("MNEMONIC WORDS" , words)
+            LOG.d("MNEMONIC WORDS" , words)
+
+            viewModelScope.launch(mainImmediate) {
+                words.toWalletMnemonic()?.let { walletMnemonic ->
+                    if (walletDataHandler.persistWalletMnemonic(walletMnemonic)) {
+                        LOG.d("MNEMONIC WORDS SAVED" , words)
+                        LOG.d("MNEMONIC WORDS SAVED" , words)
+                    }
+                }
+            }
+        }
     }
 
     private fun getAndSaveTransportKey() {
@@ -165,6 +197,8 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     fun toScanner() {
+        generateAndPersistMnemonic()
+
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
