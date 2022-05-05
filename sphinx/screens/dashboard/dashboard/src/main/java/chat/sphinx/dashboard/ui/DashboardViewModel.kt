@@ -197,8 +197,6 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     fun toScanner() {
-        generateAndPersistMnemonic()
-
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
