@@ -213,7 +213,7 @@ internal class ChatTribeFragment: ChatFragment<
                                     imageViewPodcastEpisode,
                                     imageUrl,
                                     ImageLoaderOptions.Builder()
-                                        .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                        .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_podcast_placeholder)
                                         .build()
                                 )
                             }

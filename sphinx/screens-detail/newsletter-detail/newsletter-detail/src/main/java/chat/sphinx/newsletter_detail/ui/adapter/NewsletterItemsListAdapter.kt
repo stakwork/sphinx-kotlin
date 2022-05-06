@@ -157,7 +157,7 @@ internal class NewsletterItemsListAdapter(
 
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .placeholderResId(R.drawable.ic_newsletter_placeholder)
             .build()
     }
 
