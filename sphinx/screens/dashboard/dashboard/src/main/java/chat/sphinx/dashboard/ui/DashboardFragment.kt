@@ -259,7 +259,7 @@ internal class DashboardFragment : MotionLayoutFragment<
             override fun onClosed(view: SwipeRevealLayout?) {}
 
             override fun onOpened(view: SwipeRevealLayout?) {
-                dashboardPodcastViewModel.pausePodcastIfPlaying()
+                dashboardPodcastViewModel.forcePodcastStop()
 
                 podcastPlayerBinding.root.gone
                 binding.swipeRevealLayoutPlayer.gone
