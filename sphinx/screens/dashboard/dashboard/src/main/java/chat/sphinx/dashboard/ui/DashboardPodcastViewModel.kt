@@ -259,13 +259,15 @@ internal class DashboardPodcastViewModel @Inject constructor(
         }
     }
 
-    fun pausePodcastIfPlaying() {
+    fun forcePodcastStop() {
         val isPlaying =
             (currentServiceState is MediaPlayerServiceState.ServiceActive.MediaState.Playing)
 
         if (isPlaying) {
             playingPodcastViewStateContainer.value.clickPlayPause?.invoke()
         }
+
+        playingPodcastViewStateContainer.updateViewState(PlayingPodcastViewState.NoPodcast)
     }
 
     private fun requestPodcastPlayer(
