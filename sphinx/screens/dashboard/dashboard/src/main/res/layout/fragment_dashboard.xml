@@ -49,6 +49,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/player_bar_height_with_shadow"
         app:layout_constraintBottom_toTopOf="@+id/layout_dashboard_nav_bar"
+        android:visibility="gone"
         app:mode="same_level"
         app:dragEdge="right">
 
