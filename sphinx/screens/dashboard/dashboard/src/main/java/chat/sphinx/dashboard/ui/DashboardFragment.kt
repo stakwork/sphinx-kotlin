@@ -259,9 +259,10 @@ internal class DashboardFragment : MotionLayoutFragment<
             override fun onClosed(view: SwipeRevealLayout?) {}
 
             override fun onOpened(view: SwipeRevealLayout?) {
-                dashboardPodcastViewModel.pausePodcastIfPlaying()
+                dashboardPodcastViewModel.forcePodcastStop()
 
                 podcastPlayerBinding.root.gone
+                binding.swipeRevealLayoutPlayer.gone
                 binding.imageViewBottomBarShadow.visible
             }
 
@@ -570,6 +571,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                             root.gone
 
                             binding.apply {
+                                swipeRevealLayoutPlayer.gone
                                 imageViewPlayerBarShadow.gone
                                 imageViewBottomBarShadow.visible
                             }
@@ -589,7 +591,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                     imageViewPodcastEpisode,
                                     imageUrl,
                                     ImageLoaderOptions.Builder()
-                                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                        .placeholderResId(R.drawable.ic_podcast_placeholder)
                                         .build()
                                 )
                             }
@@ -604,6 +606,8 @@ internal class DashboardFragment : MotionLayoutFragment<
 
                                 imageViewPlayerBarShadow.visible
                                 imageViewBottomBarShadow.gone
+
+                                swipeRevealLayoutPlayer.visible
                             }
 
                             root.visible

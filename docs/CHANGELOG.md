@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha54 (2022-05-06)
+ - Fixes podcast issues
+ - Fixes newsletter issues
+
 # Version 1.0.0-alpha53 (2022-04-14)
  - Fixes crashes
  - Fixes layout issue for non decrypted messages
