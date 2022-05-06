@@ -591,7 +591,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                     imageViewPodcastEpisode,
                                     imageUrl,
                                     ImageLoaderOptions.Builder()
-                                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                        .placeholderResId(R.drawable.ic_podcast_placeholder)
                                         .build()
                                 )
                             }
