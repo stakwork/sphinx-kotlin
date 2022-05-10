@@ -56,12 +56,12 @@
         android:id="@+id/layout_constraint_direct_payment_received_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_direct_payment_received"
-            android:layout_width="@dimen/icon_container_message_payment_direction_xy"
-            android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+            android:layout_width="@dimen/message_type_direct_payment_icon_xy"
+            android:layout_height="@dimen/message_type_direct_payment_icon_xy"
             android:src="@drawable/ic_received"
             android:tint="@color/receivedIcon"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -111,12 +111,12 @@
         android:id="@+id/layout_constraint_tribe_direct_payment_received_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="visible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_medium_layout_margin"
             app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_direct_payment_received"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
@@ -128,31 +128,18 @@
                 android:fontFamily="@font/roboto_bold"
                 android:gravity="center_vertical"
                 android:textColor="@color/secondaryText"
-                android:textSize="@dimen/default_text_size_headline"
+                android:textSize="@dimen/default_text_size_body"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="21 000" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_tribe_sats_unit_label_received"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_marginStart="4dp"
-                android:fontFamily="@font/roboto_regular"
-                android:textAlignment="textStart"
-                android:textColor="@color/secondaryText"
-                android:textSize="@dimen/default_text_size_sub_headline"
-                app:layout_constraintBaseline_toBaselineOf="@+id/text_view_tribe_sats_amount_received"
-                app:layout_constraintStart_toEndOf="@+id/text_view_tribe_sats_amount_received"
-                tools:text="sat" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_tribe_direct_payment_received"
-            android:layout_width="@dimen/icon_container_message_payment_direction_xy"
-            android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+            android:layout_width="@dimen/message_type_tribe_direct_payment_icon_xy"
+            android:layout_height="@dimen/message_type_tribe_direct_payment_icon_xy"
             android:src="@drawable/ic_sent"
             android:tint="@color/secondaryText"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -207,8 +194,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_direct_payment_sent"
-            android:layout_width="@dimen/icon_container_message_payment_direction_xy"
-            android:layout_height="@dimen/icon_container_message_payment_direction_xy"
+            android:layout_width="@dimen/message_type_direct_payment_icon_xy"
+            android:layout_height="@dimen/message_type_direct_payment_icon_xy"
             android:src="@drawable/ic_sent"
             android:tint="@color/textMessages"
             app:layout_constraintBottom_toBottomOf="parent"

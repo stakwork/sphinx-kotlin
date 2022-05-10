@@ -430,7 +430,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
             layoutConstraintDirectPaymentSentContainer.goneIfFalse(directPayment.showSent)
 
             textViewTribeSatsAmountReceived.text = directPayment.amount.asFormattedString()
-            textViewTribeSatsUnitLabelReceived.text = directPayment.unitLabel
 
             textViewSatsAmountReceived.text = directPayment.amount.asFormattedString()
             textViewSatsUnitLabelReceived.text = directPayment.unitLabel

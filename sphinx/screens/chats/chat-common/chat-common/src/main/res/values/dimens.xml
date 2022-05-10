@@ -66,6 +66,8 @@
     <dimen name="message_type_expired_invoice_width">210dp</dimen>
     <dimen name="message_type_boost_width">220dp</dimen>
     <dimen name="message_type_direct_payment_height">56dp</dimen>
+    <dimen name="message_type_direct_payment_icon_xy">26dp</dimen>
+    <dimen name="message_type_tribe_direct_payment_icon_xy">24dp</dimen>
     <dimen name="message_type_image_loading_container_height">160dp</dimen>
     <dimen name="message_type_file_attachment_height">60dp</dimen>
     <dimen name="message_type_audio_attachment_height">62dp</dimen>
@@ -154,12 +156,13 @@
     <dimen name="tribe_payment_row_margin">170dp</dimen>
 
     <!-- Chat popup -->
-    <dimen name="chat_tribe_direct_payment_popup_width">240dp</dimen>
-    <dimen name="chat_tribe_direct_payment_popup_height">280dp</dimen>
-    <dimen name="chat_tribe_direct_payment_popup_profile_picture_xy">86dp</dimen>
-    <dimen name="chat_tribe_direct_payment_popup_profile_picture_radius">43dp</dimen>
-    <dimen name="chat_tribe_direct_payment_popup_name_text_size">20sp</dimen>
-    <dimen name="chat_tribe_direct_payment_popup_button_height">42dp</dimen>
-    <dimen name="chat_tribe_direct_payment_popup_button_text_size">12sp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_width">280dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_height">350dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_profile_picture_xy">128dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_profile_picture_radius">64dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_name_text_size">30sp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_button_height">48dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_button_width">171dp</dimen>
+    <dimen name="chat_tribe_direct_payment_popup_button_text_size">16sp</dimen>
     <dimen name="chat_tribe_direct_payment_popup_initials_text_size">30sp</dimen>
 </resources>
