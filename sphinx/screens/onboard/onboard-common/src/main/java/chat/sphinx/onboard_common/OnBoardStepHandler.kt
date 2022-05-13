@@ -7,6 +7,7 @@ import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayHMacKey
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.squareup.moshi.Moshi
@@ -46,6 +47,7 @@ class OnBoardStepHandler @Inject constructor(
         relayUrl: RelayUrl,
         authorizationToken: AuthorizationToken,
         transportKey: RsaPublicKey?,
+        hMacKey: RelayHMacKey?,
         inviterData: OnBoardInviterData?
     ): OnBoardStep.Step1_WelcomeMessage? {
         lock.withLock {
@@ -63,6 +65,7 @@ class OnBoardStepHandler @Inject constructor(
                 relayUrl,
                 authorizationToken,
                 transportKey,
+                hMacKey,
                 inviterDataRealized
             )
 

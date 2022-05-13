@@ -11,6 +11,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.onboard.R
 import chat.sphinx.onboard.databinding.FragmentOnBoardMessageBinding
+import chat.sphinx.onboard.navigation.*
 import chat.sphinx.onboard.navigation.authorizationToken
 import chat.sphinx.onboard.navigation.inviterData
 import chat.sphinx.onboard.navigation.relayUrl
@@ -18,6 +19,7 @@ import chat.sphinx.onboard.navigation.transportKey
 import chat.sphinx.onboard_common.model.OnBoardInviterData
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayHMacKey
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.AndroidEntryPoint
@@ -41,6 +43,7 @@ internal class OnBoardMessageFragment: SideEffectFragment<
     private val relayUrl: RelayUrl by lazy(LazyThreadSafetyMode.NONE) { args.relayUrl }
     private val authorizationToken: AuthorizationToken by lazy(LazyThreadSafetyMode.NONE) { args.authorizationToken }
     private val transportKey: RsaPublicKey? by lazy(LazyThreadSafetyMode.NONE) { args.transportKey }
+    private val hMacKey: RelayHMacKey? by lazy(LazyThreadSafetyMode.NONE) { args.hMacKey }
     private val inviterData: OnBoardInviterData by lazy(LazyThreadSafetyMode.NONE) { args.inviterData }
 
     override val viewModel: OnBoardMessageViewModel by viewModels()
@@ -59,7 +62,7 @@ internal class OnBoardMessageFragment: SideEffectFragment<
         binding.inviterMessageTextView.text = inviterData.message ?: ""
 
         binding.buttonContinue.setOnClickListener {
-            viewModel.presentLoginModal(relayUrl, authorizationToken, transportKey, inviterData)
+            viewModel.presentLoginModal(relayUrl, authorizationToken, transportKey, hMacKey, inviterData)
         }
     }
 

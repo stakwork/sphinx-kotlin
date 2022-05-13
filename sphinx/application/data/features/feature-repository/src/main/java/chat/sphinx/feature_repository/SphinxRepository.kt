@@ -26,12 +26,15 @@ import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBa
 import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
+import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -94,9 +97,7 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_relay.AuthorizationToken
-import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.TransportToken
+import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import chat.sphinx.wrapper_subscription.Subscription
@@ -148,10 +149,11 @@ abstract class SphinxRepository(
     private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
+    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     private val sphinxNotificationManager: SphinxNotificationManager,
-    protected val LOG: SphinxLogger,
+    private val LOG: SphinxLogger,
 ) : ChatRepository,
     ContactRepository,
     LightningRepository,
@@ -1821,7 +1823,7 @@ abstract class SphinxRepository(
     }
 
     override suspend fun getAccountBalanceAll(
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
 
         networkQueryLightning.getBalanceAll(
@@ -5601,5 +5603,120 @@ abstract class SphinxRepository(
         }
 
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
+    }
+
+    override fun getAndSaveTransportKey() {
+        applicationScope.launch(io) {
+            relayDataHandler.retrieveRelayTransportKey()?.let {
+                return@launch
+            }
+            relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
+                networkQueryRelayKeys.getRelayTransportKey(
+                    relayUrl
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+                        is Response.Success -> {
+                            relayDataHandler.persistRelayTransportKey(
+                                RsaPublicKey(
+                                    loadResponse.value.transport_key.toCharArray()
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
+    override fun getOrCreateHMacKey() {
+        applicationScope.launch(io) {
+            relayDataHandler.retrieveRelayHMacKey()?.let {
+                return@launch
+            }
+            networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        when (val hMacKeyResponse = createHMacKey()) {
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                relayDataHandler.persistRelayHMacKey(
+                                    hMacKeyResponse.value
+                                )
+                            }
+                        }
+                    }
+                    is Response.Success -> {
+                        val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
+                            ?.privateKey
+                            ?.value
+                            ?: return@collect
+
+                        val response = rsa.decrypt(
+                            rsaPrivateKey = RsaPrivateKey(privateKey),
+                            text = EncryptedString(loadResponse.value.encrypted_key),
+                            dispatcher = default
+                        )
+
+                        when (response) {
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                relayDataHandler.persistRelayHMacKey(
+                                    RelayHMacKey(
+                                        response.value.toUnencryptedString(trim = false).value
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun createHMacKey(): Response<RelayHMacKey, ResponseError> {
+        var response: Response<RelayHMacKey, ResponseError> = Response.Error(
+            ResponseError("HMac Key creation failed")
+        )
+
+        @OptIn(RawPasswordAccess::class)
+        val hMacKeyString = PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+
+        relayDataHandler.retrieveRelayTransportKey()?.let { key ->
+
+            val encryptionResponse = rsa.encrypt(
+                key,
+                UnencryptedString(hMacKeyString),
+                formatOutput = false,
+                dispatcher = default,
+            )
+
+            when (encryptionResponse) {
+                is Response.Error -> {}
+                is Response.Success -> {
+                    networkQueryRelayKeys.addRelayHMacKey(
+                        PostHMacKeyDto(encryptionResponse.value.value)
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                response = Response.Success(
+                                    RelayHMacKey(hMacKeyString)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return response
     }
 }

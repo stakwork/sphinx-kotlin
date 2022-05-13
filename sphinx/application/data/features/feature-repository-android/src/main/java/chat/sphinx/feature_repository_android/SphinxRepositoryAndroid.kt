@@ -15,6 +15,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_paging.PageSourceWrapper
@@ -63,6 +64,7 @@ class SphinxRepositoryAndroid(
     networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     networkQuerySubscription: NetworkQuerySubscription,
     networkQueryFeedSearch: NetworkQueryFeedSearch,
+    networkQueryRelayKeys: NetworkQueryRelayKeys,
     rsa: RSA,
     socketIOManager: SocketIOManager,
     sphinxNotificationManager: SphinxNotificationManager,
@@ -90,6 +92,7 @@ class SphinxRepositoryAndroid(
     networkQueryRedeemBadgeToken,
     networkQuerySubscription,
     networkQueryFeedSearch,
+    networkQueryRelayKeys,
     rsa,
     socketIOManager,
     sphinxNotificationManager,

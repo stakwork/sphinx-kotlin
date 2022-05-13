@@ -9,9 +9,6 @@ import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.concept_authentication.data.AuthenticationStorage
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKeyHandler
-import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
-import io.matthewnelson.k_openssl.KOpenSSL
-import io.matthewnelson.k_openssl.algos.AES256CBC_PBKDF2_HMAC_SHA256
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.EncryptedString
@@ -19,11 +16,16 @@ import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.crypto_common.clazzes.UnencryptedString
 import io.matthewnelson.crypto_common.exceptions.DecryptionException
 import io.matthewnelson.crypto_common.exceptions.EncryptionException
+import io.matthewnelson.crypto_common.extensions.toHex
+import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
+import io.matthewnelson.k_openssl.KOpenSSL
+import io.matthewnelson.k_openssl.algos.AES256CBC_PBKDF2_HMAC_SHA256
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import okio.base64.encodeBase64
 import java.util.concurrent.TimeUnit
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 
 class RelayDataHandlerImpl(
     private val authenticationStorage: AuthenticationStorage,
@@ -44,9 +46,13 @@ class RelayDataHandlerImpl(
         @Volatile
         private var relayTransportKeyCache: RsaPublicKey? = null
 
+        @Volatile
+        private var relayHMacKeyCache: RelayHMacKey? = null
+
         const val RELAY_URL_KEY = "RELAY_URL_KEY"
         const val RELAY_AUTHORIZATION_KEY = "RELAY_JWT_KEY"
         const val RELAY_TRANSPORT_ENCRYPTION_KEY = "RELAY_TRANSPORT_KEY"
+        const val RELAY_H_MAC_KEY = "RELAY_H_MAC_KEY"
     }
 
     private val kOpenSSL: KOpenSSL by lazy {
@@ -102,6 +108,22 @@ class RelayDataHandlerImpl(
         } catch (e: Exception) {
             throw DecryptionException("Failed to decrypt data", e)
         }
+    }
+
+    private fun signHMacSha256(
+        key: RelayHMacKey,
+        text: String
+    ) : String {
+        val sha256HMac = Mac.getInstance("HMacSHA256")
+
+        val secretKey = SecretKeySpec(
+            key.value.toByteArray(), "HMacSHA256"
+        )
+        sha256HMac.init(secretKey)
+
+        return sha256HMac.doFinal(
+            text.toByteArray()
+        ).toHex()
     }
 
     private val lock = Mutex()
@@ -253,10 +275,57 @@ class RelayDataHandlerImpl(
                         try {
                             decryptData(privateKey, EncryptedString(encryptedTransportKey))
                                 .value
-                                .let { decryptedUrlString ->
-                                    val relayTransportKey = RsaPublicKey(decryptedUrlString.toCharArray())
+                                .let { decryptedTransportKeyString ->
+                                    val relayTransportKey = RsaPublicKey(decryptedTransportKeyString.toCharArray())
                                     relayTransportKeyCache = relayTransportKey
                                     relayTransportKey
+                                }
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+            }
+        }
+    }
+
+    override suspend fun persistRelayHMacKey(key: RelayHMacKey?): Boolean {
+        return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
+            persistRelayHMacKeyImpl(key, privateKey)
+        } ?: false
+    }
+
+    suspend fun persistRelayHMacKeyImpl(key: RelayHMacKey?, privateKey: Password): Boolean {
+        lock.withLock {
+            if (key == null) {
+                authenticationStorage.putString(RELAY_H_MAC_KEY, null)
+                relayHMacKeyCache = null
+                return true
+            } else {
+                val encryptedHMacKey = try {
+                    encryptData(privateKey, UnencryptedString(key.value))
+                } catch (e: Exception) {
+                    return false
+                }
+                authenticationStorage.putString(RELAY_H_MAC_KEY, encryptedHMacKey.value)
+                relayHMacKeyCache = key
+                return true
+            }
+        }
+    }
+
+    @OptIn(UnencryptedDataAccess::class)
+    override suspend fun retrieveRelayHMacKey(): RelayHMacKey? {
+        return authenticationCoreManager.getEncryptionKey()?.privateKey?.let { privateKey ->
+            lock.withLock {
+                relayHMacKeyCache ?: authenticationStorage.getString(RELAY_H_MAC_KEY, null)
+                    ?.let { encryptedHMacKey ->
+                        try {
+                            decryptData(privateKey, EncryptedString(encryptedHMacKey))
+                                .value
+                                .let { decryptedHMacKeyString ->
+                                    val relayHMacKey = RelayHMacKey(decryptedHMacKeyString)
+                                    relayHMacKeyCache = relayHMacKey
+                                    relayHMacKey
                                 }
                         } catch (e: Exception) {
                             null
@@ -293,5 +362,26 @@ class RelayDataHandlerImpl(
             }
         }
         return null
+    }
+
+    override suspend fun retrieveRelayRequestSignature(
+        hMacKey: RelayHMacKey,
+        method: String?,
+        path: String?,
+        bodyJsonString: String?
+    ): RequestSignature? {
+        if (
+            method == null ||
+            path == null
+        ) {
+            return null
+        }
+
+        val signedString = signHMacSha256(
+            key = hMacKey,
+            text = "${method!!}|${path!!}|${bodyJsonString ?: ""}"
+        )
+
+        return RequestSignature("sha256=$signedString")
     }
 }

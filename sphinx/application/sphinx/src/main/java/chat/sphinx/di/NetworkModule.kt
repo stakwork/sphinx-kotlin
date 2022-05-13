@@ -19,7 +19,7 @@ import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
-import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_network_tor.TorManager
@@ -38,7 +38,7 @@ import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionIm
 import chat.sphinx.feature_network_query_verify_external.NetworkQueryAuthorizeExternalImpl
 import chat.sphinx.feature_network_query_save_profile.NetworkQuerySaveProfileImpl
 import chat.sphinx.feature_network_query_redeem_badge_token.NetworkQueryRedeemBadgeTokenImpl
-import chat.sphinx.feature_network_query_transport_key.NetworkQueryTransportKeyImpl
+import chat.sphinx.feature_network_query_transport_key.NetworkQueryRelayKeysImpl
 import chat.sphinx.feature_network_query_version.NetworkQueryVersionImpl
 import chat.sphinx.feature_network_relay_call.NetworkRelayCallImpl
 import chat.sphinx.feature_network_tor.TorManagerAndroid
@@ -119,7 +119,7 @@ object NetworkModule {
             dispatchers,
             encryptionKeyHandler,
             torManager,
-            rsa
+            rsa,
         )
 
     @Provides
@@ -393,12 +393,12 @@ object NetworkModule {
     @Singleton
     fun provideNetworkQueryTransportKeyImpl(
         networkRelayCall: NetworkRelayCall
-    ): NetworkQueryTransportKeyImpl =
-        NetworkQueryTransportKeyImpl(networkRelayCall)
+    ): NetworkQueryRelayKeysImpl =
+        NetworkQueryRelayKeysImpl(networkRelayCall)
 
     @Provides
     fun provideNetworkQueryTransportKey(
-        networkQueryTransportKeyImpl: NetworkQueryTransportKeyImpl
-    ): NetworkQueryTransportKey =
+        networkQueryTransportKeyImpl: NetworkQueryRelayKeysImpl
+    ): NetworkQueryRelayKeys =
         networkQueryTransportKeyImpl
 }
