@@ -1,6 +1,7 @@
 package chat.sphinx.onboard_connecting.ui
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_crypto_rsa.RSA
@@ -8,7 +9,8 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.GenerateTokenResponse
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_invite.model.RedeemInviteDto
-import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
+import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.key_restore.KeyRestore
@@ -25,6 +27,7 @@ import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_invite.InviteString
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.*
+import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -33,7 +36,8 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
-import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
+import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
+import io.matthewnelson.crypto_common.clazzes.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -72,11 +76,11 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     private val keyRestore: KeyRestore,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
-    private val rsa: RSA,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
-    private val networkQueryTransportKey: NetworkQueryTransportKey,
+    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val onBoardStepHandler: OnBoardStepHandler,
+    private val rsa: RSA,
 ): MotionLayoutViewModel<
         Any,
         Context,
@@ -118,6 +122,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     }
 
     private var decryptionJob: Job? = null
+    @OptIn(RawPasswordAccess::class)
     fun decryptInput(viewState: OnBoardConnectingViewState.Set2_DecryptKeys) {
         // TODO: Replace with automatic launching upon entering the 6th PIN character
         //  when Authentication View's Layout gets incorporated
@@ -147,7 +152,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
                 var transportKey: RsaPublicKey? = null
 
-                networkQueryTransportKey.getRelayTransportKey(relayUrl).collect { loadResponse ->
+                networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
                     @Exhaustive
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
@@ -158,6 +163,10 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                         }
                     }
                 }
+
+                var ownerPrivateKey = RsaPrivateKey(
+                    Password(decryptedCode.privateKey.value.copyOf()).value
+                )
 
                 var success: KeyRestoreResponse.Success? = null
                 keyRestore.restoreKeys(
@@ -181,8 +190,10 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                         viewState.pinWriter.append('0')
                     }
 
-                    navigator.toOnBoardConnectedScreen()
-
+                    goToConnectedScreen(
+                        ownerPrivateKey,
+                        transportKey
+                    )
                 } ?: updateViewState(
                     OnBoardConnectingViewState.Set2_DecryptKeys(viewState.restoreCode)
                 ).also {
@@ -243,7 +254,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
         var transportKey: RsaPublicKey? = null
 
-        networkQueryTransportKey.getRelayTransportKey(relayUrl).collect { loadResponse ->
+        networkQueryRelayKeys.getRelayTransportKey(relayUrl).collect { loadResponse ->
             @Exhaustive
             when (loadResponse) {
                 is LoadResponse.Loading -> {}
@@ -310,7 +321,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             networkQueryContact.generateToken(
                 password,
                 nodePubKey,
-                Triple(authToken, relayTransportToken, relayUrl)
+                Triple(Pair(authToken, relayTransportToken), null, relayUrl)
             ).collect { loadResponse ->
                 generateTokenResponse = loadResponse
             }
@@ -324,7 +335,6 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 generateTokenResponse = loadResponse
             }
         }
-
 
         @Exhaustive
         when (generateTokenResponse) {
@@ -348,10 +358,17 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 }
             }
             is Response.Success -> {
+
+                val hMacKey = createHMacKey(
+                    relayData = Triple(Pair(authToken, relayTransportToken), null, relayUrl),
+                    transportKey = transportKey
+                )
+
                 val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
                     relayUrl,
                     authToken,
                     transportKey,
+                    hMacKey,
                     inviterData
                 )
 
@@ -363,6 +380,112 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun goToConnectedScreen(
+        ownerPrivateKey: RsaPrivateKey,
+        transportKey: RsaPublicKey?
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            getOrCreateHMacKey(
+                ownerPrivateKey,
+                transportKey
+            )
+        }.join()
+
+        navigator.toOnBoardConnectedScreen()
+    }
+
+    @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
+    private suspend fun getOrCreateHMacKey(
+        ownerPrivateKey: RsaPrivateKey,
+        transportKey: RsaPublicKey?
+    ) {
+        if (transportKey == null) {
+            return
+        }
+
+        networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    createHMacKey(
+                        transportKey = transportKey
+                    )?.let { relayHMacKey ->
+                        relayDataHandler.persistRelayHMacKey(relayHMacKey)
+                    }
+                }
+                is Response.Success -> {
+                    val response = rsa.decrypt(
+                        rsaPrivateKey = ownerPrivateKey,
+                        text = EncryptedString(loadResponse.value.encrypted_key),
+                        dispatcher = default
+                    )
+
+                    when (response) {
+                        is Response.Error -> {}
+                        is Response.Error -> {}
+                        is Response.Success -> {
+                            relayDataHandler.persistRelayHMacKey(
+                                RelayHMacKey(
+                                    response.value.toUnencryptedString(trim = false).value
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun createHMacKey(
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
+        transportKey: RsaPublicKey?
+    ): RelayHMacKey? {
+        var hMacKey: RelayHMacKey? = null
+
+        if (transportKey == null) {
+            return hMacKey
+        }
+
+        viewModelScope.launch(mainImmediate) {
+
+            @OptIn(RawPasswordAccess::class)
+            val hMacKeyString =
+                PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+
+            val encryptionResponse = rsa.encrypt(
+                transportKey,
+                UnencryptedString(hMacKeyString),
+                formatOutput = false,
+                dispatcher = default,
+            )
+
+            when (encryptionResponse) {
+                is Response.Error -> {
+                }
+                is Response.Success -> {
+                    networkQueryRelayKeys.addRelayHMacKey(
+                        PostHMacKeyDto(encryptionResponse.value.value),
+                        relayData
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {
+                            }
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                hMacKey = RelayHMacKey(hMacKeyString)
+                            }
+                        }
+                    }
+                }
+            }
+
+        }.join()
+
+        return hMacKey
     }
 
     override suspend fun onMotionSceneCompletion(value: Any) {

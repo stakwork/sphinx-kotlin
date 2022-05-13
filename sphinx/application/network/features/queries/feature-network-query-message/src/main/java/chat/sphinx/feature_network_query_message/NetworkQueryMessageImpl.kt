@@ -5,23 +5,20 @@ import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_message.model.*
 import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
-import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.isMemberApprove
 import chat.sphinx.wrapper_message_media.MediaToken
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 class NetworkQueryMessageImpl(
     private val networkRelayCall: NetworkRelayCall,
@@ -45,7 +42,7 @@ class NetworkQueryMessageImpl(
 
     override fun getMessages(
         messagePagination: MessagePagination?,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<GetMessagesResponse, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetMessagesRelayResponse::class.java,
@@ -56,7 +53,7 @@ class NetworkQueryMessageImpl(
     override fun getPayments(
         offset: Int,
         limit: Int,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<List<TransactionDto>, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetPaymentsRelayResponse::class.java,
@@ -66,7 +63,7 @@ class NetworkQueryMessageImpl(
 
     override fun sendMessage(
         postMessageDto: PostMessageDto,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = MessageRelayResponse::class.java,
@@ -82,7 +79,7 @@ class NetworkQueryMessageImpl(
 
     override fun sendPayment(
         postPaymentDto: PostPaymentDto,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = MessageRelayResponse::class.java,
@@ -94,7 +91,7 @@ class NetworkQueryMessageImpl(
 
     override fun sendPaymentRequest(
         postPaymentRequestDto: PostPaymentRequestDto,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = MessageRelayResponse::class.java,
@@ -106,7 +103,7 @@ class NetworkQueryMessageImpl(
 
     override fun payPaymentRequest(
         putPaymentRequestDto: PutPaymentRequestDto,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = MessageRelayResponse::class.java,
@@ -118,7 +115,7 @@ class NetworkQueryMessageImpl(
 
     override fun sendKeySendPayment(
         postPaymentDto: PostPaymentDto,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<KeySendPaymentDto, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = KeySendPaymentRelayResponse::class.java,
@@ -129,29 +126,14 @@ class NetworkQueryMessageImpl(
         )
 
     override fun boostMessage(
-        chatId: ChatId,
-        pricePerMessage: Sat,
-        escrowAmount: Sat,
-        tipAmount: Sat,
-        messageUUID: MessageUUID,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        boostMessageDto: PostBoostMessageDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> {
-        val postBoostMessageDto: PostBoostMessage = try {
-            PostBoostMessage(
-                chat_id = chatId.value,
-                amount = pricePerMessage.value + escrowAmount.value + tipAmount.value,
-                message_price = pricePerMessage.value + escrowAmount.value,
-                reply_uuid = messageUUID.value
-            )
-        } catch (e: IllegalArgumentException) {
-            return flowOf(Response.Error(ResponseError("Incorrect Arguments provided", e)))
-        }
-
         return networkRelayCall.relayPost(
             responseJsonClass = MessageRelayResponse::class.java,
             relayEndpoint = ENDPOINT_MESSAGES,
-            requestBodyJsonClass = PostBoostMessage::class.java,
-            requestBody = postBoostMessageDto,
+            requestBodyJsonClass = PostBoostMessageDto::class.java,
+            requestBody = boostMessageDto,
             relayData = relayData
         )
     }
@@ -161,7 +143,7 @@ class NetworkQueryMessageImpl(
         contactId: ContactId?,
         amount: Sat,
         mediaToken: MediaToken,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> {
 
         val payAttachmentDto = PostPayAttachmentDto(
@@ -183,7 +165,7 @@ class NetworkQueryMessageImpl(
 
     override fun readMessages(
         chatId: ChatId,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<Any?, ResponseError>> =
         networkRelayCall.relayPost(
             responseJsonClass = ReadMessagesRelayResponse::class.java,
@@ -205,7 +187,7 @@ class NetworkQueryMessageImpl(
      */
     override fun deleteMessage(
         messageId: MessageId,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> =
         networkRelayCall.relayDelete(
             responseJsonClass = MessageRelayResponse::class.java,
@@ -220,7 +202,7 @@ class NetworkQueryMessageImpl(
         contactId: ContactId,
         messageId: MessageId,
         type: MessageType,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<PutMemberResponseDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = PutMemberRelayResponse::class.java,

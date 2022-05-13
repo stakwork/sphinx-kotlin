@@ -62,6 +62,7 @@ import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
 import chat.sphinx.wrapper_message.MessageStatus;
 import chat.sphinx.wrapper_message.MessageType;
+import chat.sphinx.wrapper_message.RecipientAlias;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
 import chat.sphinx.wrapper_message_media.MediaKey;
@@ -569,7 +570,9 @@ CREATE TABLE messageDbo(
     original_muid               TEXT            AS MessageMUID,
     reply_uuid                  TEXT            AS ReplyUUID,
     muid                        TEXT            AS MessageMUID,
-    flagged                     INTEGER         AS Flagged NOT NULL DEFAULT 0
+    flagged                     INTEGER         AS Flagged NOT NULL DEFAULT 0,
+    recipient_alias             TEXT            AS RecipientAlias,
+    recipient_pic               TEXT            AS PhotoUrl
 );
 
 messageGetAllReactionsByUUID:
@@ -706,7 +709,9 @@ messageUpsert {
         sender_pic = :sender_pic,
         original_muid = :original_muid,
         reply_uuid = :reply_uuid,
-        type = :type
+        type = :type,
+        recipient_alias = :recipient_alias,
+        recipient_pic = :recipient_pic
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(
@@ -729,7 +734,10 @@ messageUpsert {
         sender_pic,
         original_muid,
         reply_uuid,
-        muid
+        muid,
+        flagged,
+        recipient_alias,
+        recipient_pic
     )
     VALUES (
         :id,
@@ -751,7 +759,10 @@ messageUpsert {
         :sender_pic,
         :original_muid,
         :reply_uuid,
-        :muid
+        :muid,
+        :flagged,
+        :recipient_alias,
+        :recipient_pic
     );
 }
 

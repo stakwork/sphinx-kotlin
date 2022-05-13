@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha55 (2022-05-13)
+ - Improves security with request signing
+ - Adds support for direct payments in tribes
+
 # Version 1.0.0-alpha54 (2022-05-06)
  - Fixes podcast issues
  - Fixes newsletter issues

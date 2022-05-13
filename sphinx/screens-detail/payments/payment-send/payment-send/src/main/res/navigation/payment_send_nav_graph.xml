@@ -15,6 +15,9 @@
         <argument
             android:name="argChatId"
             app:argType="long" />
+        <argument
+            android:name="argMessageUUID"
+            app:argType="string" />
     </fragment>
 
 </navigation>

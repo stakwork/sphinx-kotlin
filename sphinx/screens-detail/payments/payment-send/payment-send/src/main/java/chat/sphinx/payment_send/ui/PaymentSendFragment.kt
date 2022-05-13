@@ -71,7 +71,7 @@ internal class PaymentSendFragment: PaymentFragment<
         super.onViewCreated(view, savedInstanceState)
 
         confirmationBinding.buttonConfirm.setOnClickListener {
-            viewModel.sendContactPayment(messageBinding.editTextMessage.text?.toString())
+            viewModel.sendPayment(messageBinding.editTextMessage.text?.toString())
         }
     }
 
@@ -90,7 +90,19 @@ internal class PaymentSendFragment: PaymentFragment<
                 binding.includeConstraintMessage.root.visible
                 binding.includeConstraintConfirmButton.buttonConfirm.text = getString(R.string.confirm_button)
 
-                setupDestination(viewState.contact)
+                setupDestination(contact = viewState.contact)
+            }
+
+            is PaymentSendViewState.TribePayment -> {
+                binding.includeConstraintFromContact.root.visible
+                binding.includeConstraintMessage.root.visible
+                binding.includeConstraintConfirmButton.buttonConfirm.text = getString(R.string.confirm_button)
+
+                setupDestination(
+                    memberAlias = viewState.memberAlias,
+                    memberColorKey = viewState.memberColorKey,
+                    memberPic = viewState.memberPic
+                )
             }
 
             is PaymentSendViewState.KeySendPayment -> {

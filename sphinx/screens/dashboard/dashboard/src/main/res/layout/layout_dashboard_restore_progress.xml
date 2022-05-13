@@ -9,7 +9,7 @@
         android:id="@+id/layout_constraint_restore_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/background_authorize_popup"
+        android:background="@drawable/background_popup"
         android:layout_marginHorizontal="@dimen/default_large_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"

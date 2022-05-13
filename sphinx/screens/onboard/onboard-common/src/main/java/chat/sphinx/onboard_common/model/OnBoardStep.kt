@@ -1,6 +1,7 @@
 package chat.sphinx.onboard_common.model
 
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayHMacKey
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -12,6 +13,7 @@ sealed class OnBoardStep {
         val relayUrl: RelayUrl,
         val authorizationToken: AuthorizationToken,
         val transportKey: RsaPublicKey?,
+        val hMacKey: RelayHMacKey?,
         val inviterData: OnBoardInviterData
     ): OnBoardStep() {
 
@@ -21,9 +23,10 @@ sealed class OnBoardStep {
                 relayUrl: RelayUrl,
                 authorizationToken: AuthorizationToken,
                 transportKey: RsaPublicKey?,
+                hMacKey: RelayHMacKey?,
                 inviterData: OnBoardInviterData
             ) : Step1_WelcomeMessage =
-                Step1_WelcomeMessage(relayUrl, authorizationToken, transportKey, inviterData)
+                Step1_WelcomeMessage(relayUrl, authorizationToken, transportKey, hMacKey, inviterData)
         }
 
     }

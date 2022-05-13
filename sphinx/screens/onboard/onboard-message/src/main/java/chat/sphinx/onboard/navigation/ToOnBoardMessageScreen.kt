@@ -9,6 +9,7 @@ import chat.sphinx.onboard_common.model.OnBoardStep
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayHMacKey
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.android_feature_navigation.DefaultNavOptions
@@ -25,6 +26,13 @@ internal inline val OnBoardMessageFragmentArgs.transportKey: RsaPublicKey?
         null
     } else {
         RsaPublicKey(argTransportKey.toCharArray())
+    }
+
+internal inline val OnBoardMessageFragmentArgs.hMacKey: RelayHMacKey?
+    get() = if (argHMacKey.isEmpty()) {
+        null
+    } else {
+        RelayHMacKey(argHMacKey)
     }
 
 internal inline val OnBoardMessageFragmentArgs.inviterData: OnBoardInviterData
@@ -44,11 +52,13 @@ class ToOnBoardScreen(
 
     override fun navigate(controller: NavController) {
         val transportKeyOrEmpty = onBoardStep.transportKey?.value?.joinToString("") ?: ""
+        val hMacKeyOrEmpty = onBoardStep.hMacKey?.value ?: ""
 
         OnBoardMessageFragmentArgs.Builder(
             onBoardStep.relayUrl.value,
             onBoardStep.authorizationToken.value,
             transportKeyOrEmpty,
+            hMacKeyOrEmpty,
             onBoardStep.inviterData.nickname,
             onBoardStep.inviterData.pubkey?.value,
             onBoardStep.inviterData.routeHint,

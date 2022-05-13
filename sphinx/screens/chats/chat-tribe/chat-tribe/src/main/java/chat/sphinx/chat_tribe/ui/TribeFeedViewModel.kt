@@ -7,6 +7,8 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
+import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -23,7 +25,6 @@ import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip

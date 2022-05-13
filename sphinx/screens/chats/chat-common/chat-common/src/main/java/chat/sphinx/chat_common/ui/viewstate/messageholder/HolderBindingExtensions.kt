@@ -37,7 +37,6 @@ import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_common.util.getHHMMSSString
@@ -228,8 +227,29 @@ internal fun  LayoutMessageHolderBinding.setView(
                 viewState.bubbleBotResponse
             )
             setBubbleDirectPaymentLayout(
-                viewState.bubbleDirectPayment
-            )
+                viewState.bubbleDirectPayment,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper
+            ) { imageView, url ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    val disposable: Disposable = imageLoader.load(
+                        imageView,
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+
+                    disposables.add(disposable)
+                    disposable.await()
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
             setBubbleInvoiceLayout(
                 viewState.bubbleInvoice
             )
@@ -374,8 +394,6 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.BotCmd,
                 MessageType.BotInstall,
                 is MessageType.Unknown -> {
-                    // ❓: Should we ever get here if the type isn't one we plan to
-                    // render a unique message for?
                     getString(R.string.placeholder_unsupported_message_type_default)
                 }
             }
@@ -392,7 +410,12 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
-    directPayment: LayoutState.Bubble.ContainerSecond.DirectPayment?
+    directPayment: LayoutState.Bubble.ContainerSecond.DirectPayment?,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    loadImage: (ImageView, String) -> Unit
 ) {
     includeMessageHolderBubble.includeMessageTypeDirectPayment.apply {
         if (directPayment == null) {
@@ -400,17 +423,43 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
         } else {
             root.visible
 
-            imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
-            layoutConstraintDirectPaymentSentAmountLabels.goneIfFalse(directPayment.showSent)
+            layoutConstraintDirectPaymentRecipient.goneIfFalse(directPayment.isTribe)
 
-            imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
-            layoutConstraintDirectPaymentReceivedAmountLabels.goneIfFalse(directPayment.showReceived)
+            layoutConstraintTribeDirectPaymentReceivedContainer.goneIfFalse(directPayment.showReceived && directPayment.isTribe)
+            layoutConstraintDirectPaymentReceivedContainer.goneIfFalse(directPayment.showReceived && !directPayment.isTribe)
+            layoutConstraintDirectPaymentSentContainer.goneIfFalse(directPayment.showSent)
+
+            textViewTribeSatsAmountReceived.text = directPayment.amount.asFormattedString()
 
             textViewSatsAmountReceived.text = directPayment.amount.asFormattedString()
             textViewSatsUnitLabelReceived.text = directPayment.unitLabel
 
             textViewSatsAmountSent.text = directPayment.amount.asFormattedString()
             textViewSatsUnitLabelSent.text = directPayment.unitLabel
+
+            if (directPayment.isTribe) {
+                imageViewRecipientPicture.gone
+
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    val initialsColor = Color.parseColor(
+                        userColorsHelper.getHexCodeForKey(directPayment.recipientColorKey, root.context.getRandomHexCode())
+                    )
+
+                    textViewRecipientInitials.text = (directPayment.recipientAlias?.value ?: getString(R.string.unknown)).getInitials()
+                    textViewRecipientInitials.setInitialsColor(
+                        initialsColor,
+                        R.drawable.chat_initials_circle
+                    )
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+
+                directPayment.recipientPic?.let { recipientPic ->
+                    imageViewRecipientPicture.visible
+
+                    loadImage(imageViewRecipientPicture, recipientPic.value)
+                }
+            }
         }
     }
 }
@@ -561,6 +610,29 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                         nnBubbleMessage.text ?: getString(R.string.decryption_error)
                     ) + (defaultMargins * 2)).toInt()
                 } ?: bubbleFixedWidth
+            }
+            viewState.message.isDirectPayment -> {
+                val textWidth = viewState.bubbleMessage?.let { nnBubbleMessage ->
+                    (includeMessageHolderBubble.textViewMessageText.paint.measureText(
+                        nnBubbleMessage.text ?: getString(R.string.decryption_error)
+                    ) + (defaultMargins * 2)).toInt()
+                } ?: 0
+
+                val amountWidth = viewState.bubbleDirectPayment?.let { nnBubbleDirectPayment ->
+                    val paymentMargin = root.context.resources.getDimensionPixelSize(
+                            if (nnBubbleDirectPayment.isTribe) {
+                                R.dimen.tribe_payment_row_margin
+                            } else {
+                                R.dimen.payment_row_margin
+                            }
+                        )
+
+                    (includeMessageHolderBubble.includeMessageTypeDirectPayment.textViewSatsAmountReceived.paint.measureText(
+                        nnBubbleDirectPayment.amount.asFormattedString()
+                    ) + paymentMargin).toInt()
+                } ?: 0
+
+                textWidth.coerceAtLeast(amountWidth)
             }
             viewState.message.isPodcastBoost -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)

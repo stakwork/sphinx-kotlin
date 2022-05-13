@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import javax.inject.Inject
 
@@ -24,7 +25,15 @@ internal class GroupChatNavigatorImpl @Inject constructor(
 ): GroupChatNavigator(navigationDriver)
 {
     override suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?) {
-        detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
+        detailDriver.submitNavigationRequest(
+            ToPaymentSendDetail(contactId = contactId, chatId = chatId)
+        )
+    }
+
+    override suspend fun toPaymentSendDetail(messageUUID: MessageUUID, chatId: ChatId) {
+        detailDriver.submitNavigationRequest(
+            ToPaymentSendDetail(chatId = chatId, messageUUID = messageUUID)
+        )
     }
 
     override suspend fun toPaymentReceiveDetail(contactId: ContactId, chatId: ChatId?) {

@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
+import chat.sphinx.wrapper_rsa.RsaPublicKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -69,4 +70,7 @@ interface RepositoryDashboard {
     val networkRefreshMessages: Flow<LoadResponse<RestoreProgress, ResponseError>>
 
     suspend fun didCancelRestore()
+
+    fun getAndSaveTransportKey()
+    fun getOrCreateHMacKey()
 }
