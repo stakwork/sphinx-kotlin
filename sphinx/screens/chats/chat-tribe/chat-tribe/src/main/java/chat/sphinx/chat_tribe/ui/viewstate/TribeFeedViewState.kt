@@ -1,4 +1,4 @@
-package chat.sphinx.chat_tribe.ui
+package chat.sphinx.chat_tribe.ui.viewstate
 
 import io.matthewnelson.concept_views.viewstate.ViewState
 

@@ -154,4 +154,6 @@
     <string name="recording_permission_granted">録音が許可されました</string>
     <string name="recording_permission_required">録音許可を取ってください</string>
 
+    <string name="send_sats">Send Sats</string>
+
 </resources>

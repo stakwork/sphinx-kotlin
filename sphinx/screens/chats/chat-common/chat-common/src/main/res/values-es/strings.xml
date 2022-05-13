@@ -154,4 +154,6 @@
     <string name="slide_to_cancel">&lt;&lt; Desliza para cancelar</string>
     <string name="recording_permission_granted">Permiso de grabación concedido</string>
     <string name="recording_permission_required">Se requieren permisos de grabación</string>
+
+    <string name="send_sats">Enviar Sats</string>
 </resources>

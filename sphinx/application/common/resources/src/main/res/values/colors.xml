@@ -87,6 +87,9 @@
     <color name="linkSentButtonColor">#3E6189</color>
     <color name="linkReceivedButtonColor">#618AFF</color>
 
+    <color name="lightPopupBackground">#33ffffff</color>
+    <color name="popupBackground">#80000000</color>
+
     <!-- Random users colors-->
     <color name="randomColor1">#7077FF</color>
     <color name="randomColor2">#DBD23C</color>

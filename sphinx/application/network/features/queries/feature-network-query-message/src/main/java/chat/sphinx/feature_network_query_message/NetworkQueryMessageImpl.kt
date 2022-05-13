@@ -5,14 +5,12 @@ import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_message.model.*
 import chat.sphinx.kotlin_response.LoadResponse
-import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
-import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.isMemberApprove
 import chat.sphinx.wrapper_message_media.MediaToken
@@ -21,7 +19,6 @@ import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 class NetworkQueryMessageImpl(
     private val networkRelayCall: NetworkRelayCall,
@@ -129,29 +126,14 @@ class NetworkQueryMessageImpl(
         )
 
     override fun boostMessage(
-        chatId: ChatId,
-        pricePerMessage: Sat,
-        escrowAmount: Sat,
-        tipAmount: Sat,
-        messageUUID: MessageUUID,
+        boostMessageDto: PostBoostMessageDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<MessageDto, ResponseError>> {
-        val postBoostMessageDto: PostBoostMessage = try {
-            PostBoostMessage(
-                chat_id = chatId.value,
-                amount = pricePerMessage.value + escrowAmount.value + tipAmount.value,
-                message_price = pricePerMessage.value + escrowAmount.value,
-                reply_uuid = messageUUID.value
-            )
-        } catch (e: IllegalArgumentException) {
-            return flowOf(Response.Error(ResponseError("Incorrect Arguments provided", e)))
-        }
-
         return networkRelayCall.relayPost(
             responseJsonClass = MessageRelayResponse::class.java,
             relayEndpoint = ENDPOINT_MESSAGES,
-            requestBodyJsonClass = PostBoostMessage::class.java,
-            requestBody = postBoostMessageDto,
+            requestBodyJsonClass = PostBoostMessageDto::class.java,
+            requestBody = boostMessageDto,
             relayData = relayData
         )
     }

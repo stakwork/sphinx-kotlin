@@ -16,6 +16,7 @@ import androidx.annotation.CallSuper
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
@@ -83,6 +84,7 @@ import com.giphy.sdk.ui.themes.GridType
 import com.giphy.sdk.ui.utils.aspectRatio
 import com.giphy.sdk.ui.views.GiphyDialogFragment
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -344,6 +346,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
         val owner = getOwner()
 
+        val tribeAdmin = chat.ownerPubKey?.let {
+            contactRepository.getContactByPubKey(it).firstOrNull()
+        } ?: null
+
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
         withContext(io) {
@@ -392,6 +398,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         MessageHolderViewState.Sent(
                             message,
                             chat,
+                            tribeAdmin,
                             background =  when {
                                 isDeleted -> {
                                     BubbleBackground.Gone(setSpacingEqual = false)
@@ -450,6 +457,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         MessageHolderViewState.Received(
                             message,
                             chat,
+                            tribeAdmin,
                             background = when {
                                 isDeleted -> {
                                     BubbleBackground.Gone(setSpacingEqual = false)
@@ -984,16 +992,45 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         attachmentFullscreenStateContainer.updateViewState(viewState)
     }
 
+    suspend fun handleCommonChatOnBackPressed() {
+        val attachmentSendViewState = getAttachmentSendViewStateFlow().value
+        val attachmentFullscreenViewState = getAttachmentFullscreenViewStateFlow().value
+
+        when {
+            currentViewState is ChatMenuViewState.Open -> {
+                updateViewState(ChatMenuViewState.Closed)
+            }
+            attachmentFullscreenViewState is AttachmentFullscreenViewState.Fullscreen -> {
+                updateAttachmentFullscreenViewState(AttachmentFullscreenViewState.Idle)
+            }
+            attachmentSendViewState is AttachmentSendViewState.Preview -> {
+                updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                updateFooterViewState(FooterViewState.Default)
+                deleteUnsentAttachment(attachmentSendViewState)
+            }
+            attachmentSendViewState is AttachmentSendViewState.PreviewGiphy -> {
+                updateAttachmentSendViewState(AttachmentSendViewState.Idle)
+                updateFooterViewState(FooterViewState.Default)
+            }
+            getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
+                updateSelectedMessageViewState(SelectedMessageViewState.None)
+            }
+            else -> {
+                chatNavigator.popBackStack()
+            }
+        }
+    }
+
     fun boostMessage(messageUUID: MessageUUID?) {
         if (messageUUID == null) return
 
         viewModelScope.launch(mainImmediate) {
             val chat = getChat()
             val response = messageRepository.boostMessage(
-                chat.id,
-                chat.pricePerMessage ?: Sat(0),
-                chat.escrowAmount ?: Sat(0),
-                messageUUID,
+                chatId = chat.id,
+                pricePerMessage = chat.pricePerMessage ?: Sat(0),
+                escrowAmount = chat.escrowAmount ?: Sat(0),
+                messageUUID = messageUUID,
             )
 
             @Exhaustive
@@ -1504,6 +1541,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     ) {}
 
     open suspend fun deleteTribe() {}
+
+    open fun showMemberPopup(message: Message) {}
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused

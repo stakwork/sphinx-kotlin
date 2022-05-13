@@ -6,9 +6,11 @@ import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
+import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.invoiceExpirationTimeFormat
 import chat.sphinx.wrapper_common.invoicePaymentDateFormat
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -51,6 +53,7 @@ internal val MessageHolderViewState.showSentBubbleArrow: Boolean
 internal sealed class MessageHolderViewState(
     val message: Message,
     chat: Chat,
+    private val tribeAdmin: Contact?,
     val background: BubbleBackground,
     val invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
     val initialHolder: InitialHolderViewState,
@@ -147,7 +150,17 @@ internal sealed class MessageHolderViewState(
 
     val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message.type.isDirectPayment()) {
-            LayoutState.Bubble.ContainerSecond.DirectPayment(showSent = this is Sent, amount = message.amount)
+            LayoutState.Bubble.ContainerSecond.DirectPayment(
+                showSent = this is Sent,
+                amount = message.amount,
+                isTribe = chat.isTribe(),
+                recipientAlias = message.recipientAlias,
+                recipientPic = message.recipientPic,
+                recipientColorKey = message.getRecipientColorKey(
+                    tribeAdminId = tribeAdmin?.id ?: ContactId(-1),
+                    recipientAlias = message.recipientAlias
+                )
+            )
         } else {
             null
         }
@@ -516,6 +529,7 @@ internal sealed class MessageHolderViewState(
     class Sent(
         message: Message,
         chat: Chat,
+        tribeAdmin: Contact?,
         background: BubbleBackground,
         invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
@@ -527,6 +541,7 @@ internal sealed class MessageHolderViewState(
     ) : MessageHolderViewState(
         message,
         chat,
+        tribeAdmin,
         background,
         invoiceLinesHolderViewState,
         InitialHolderViewState.None,
@@ -541,6 +556,7 @@ internal sealed class MessageHolderViewState(
     class Received(
         message: Message,
         chat: Chat,
+        tribeAdmin: Contact?,
         background: BubbleBackground,
         invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         initialHolder: InitialHolderViewState,
@@ -553,6 +569,7 @@ internal sealed class MessageHolderViewState(
     ) : MessageHolderViewState(
         message,
         chat,
+        tribeAdmin,
         background,
         invoiceLinesHolderViewState,
         initialHolder,

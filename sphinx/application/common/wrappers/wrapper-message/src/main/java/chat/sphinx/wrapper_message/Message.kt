@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.dashboard.DashboardItemType
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -202,6 +203,17 @@ inline fun Message.getColorKey(): String {
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun Message.getRecipientColorKey(
+    tribeAdminId: ContactId,
+    recipientAlias: RecipientAlias?
+): String {
+    recipientAlias?.let { recipientAlias ->
+        return "message-${tribeAdminId.value}-${recipientAlias.value}-color"
+    }
+    return "message-${tribeAdminId.value}-color"
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
     val hasSameSenderId = this.sender.value == message.sender.value
     val hasSameSenderAlias = (this.senderAlias?.value ?: "") == (message.senderAlias?.value ?: "")
@@ -263,6 +275,9 @@ inline val Message.isVideoMessage: Boolean
 inline val Message.isPodcastBoost: Boolean
     get() = type.isBoost() && feedBoost != null
 
+inline val Message.isDirectPayment: Boolean
+    get() = type.isDirectPayment()
+
 inline val Message.isPodcastClip: Boolean
     get() = podcastClip != null
 
@@ -295,6 +310,8 @@ abstract class Message {
     abstract val originalMUID: MessageMUID?
     abstract val replyUUID: ReplyUUID?
     abstract val flagged: Flagged
+    abstract val recipientAlias: RecipientAlias?
+    abstract val recipientPic: PhotoUrl?
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
     abstract val messageDecryptionError: Boolean
@@ -335,6 +352,8 @@ abstract class Message {
                 other.feedBoost                     == feedBoost                    &&
                 other.podcastClip                   == podcastClip                  &&
                 other.giphyData                     == giphyData                    &&
+                other.recipientAlias                == recipientAlias               &&
+                other.recipientPic                  == recipientPic                 &&
                 other.reactions.let { a ->
                     reactions.let { b ->
                         (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
@@ -385,6 +404,8 @@ abstract class Message {
         result = _31 * result + feedBoost.hashCode()
         result = _31 * result + podcastClip.hashCode()
         result = _31 * result + giphyData.hashCode()
+        result = _31 * result + recipientAlias.hashCode()
+        result = _31 * result + recipientPic.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
         result = _31 * result + replyMessage.hashCode()
@@ -403,6 +424,7 @@ abstract class Message {
                 "messageDecryptionException=$messageDecryptionException,"                       +
                 "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
-                "replyMessage=$replyMessage)"
+                "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
+                "recipientPic=$recipientPic"
     }
 }
