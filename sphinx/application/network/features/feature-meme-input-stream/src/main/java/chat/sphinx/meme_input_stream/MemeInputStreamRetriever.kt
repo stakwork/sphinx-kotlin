@@ -57,7 +57,10 @@ internal data class MemeInputStreamRetriever(
             }
         }
 
-        return response?.body?.source()?.inputStream()
-
+        return if (response?.isSuccessful == false) {
+            null
+        } else {
+            response?.body?.source()?.inputStream()
+        }
     }
 }

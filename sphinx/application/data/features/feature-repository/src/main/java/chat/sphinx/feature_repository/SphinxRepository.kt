@@ -2358,7 +2358,7 @@ abstract class SphinxRepository(
                     null
                 }
 
-            if (message == null && media == null) {
+            if (message == null && media == null && !sendMessage.isTribePayment) {
                 return@launch
             }
 
@@ -2366,6 +2366,31 @@ abstract class SphinxRepository(
             val escrowAmount = chat?.escrowAmount?.value ?: 0
             val priceToMeet = sendMessage.priceToMeet?.value ?: 0
             val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
+
+            val messageType = when {
+                (media != null) -> {
+                    MessageType.Attachment
+                }
+                (sendMessage.isBoost) -> {
+                    MessageType.Boost
+                }
+                (sendMessage.isTribePayment) -> {
+                    MessageType.DirectPayment
+                }
+                else -> {
+                    MessageType.Message
+                }
+            }
+
+            //If is tribe payment, reply UUID is sent to identify recipient. But it's not a response
+            val replyUUID = when {
+                (sendMessage.isTribePayment) -> {
+                    null
+                }
+                else -> {
+                    sendMessage.replyUUID
+                }
+            }
 
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert
@@ -2398,27 +2423,24 @@ abstract class SphinxRepository(
                                 chatDbo.myAlias?.value?.toSenderAlias(),
                                 chatDbo.myPhotoUrl,
                                 null,
-                                sendMessage.replyUUID,
-                                if (media != null) {
-                                    MessageType.Attachment
-                                } else if (sendMessage.isBoost) {
-                                    MessageType.Boost
-                                } else {
-                                    MessageType.Message
-                                },
+                                replyUUID,
+                                messageType,
+                                null,
+                                null,
                                 provisionalId,
                                 null,
                                 chatDbo.id,
                                 owner.id,
                                 sendMessage.contactId,
-                                messagePrice,
+                                sendMessage.tribePaymentAmount ?: messagePrice,
                                 null,
                                 null,
                                 DateTime.nowUTC().toDateTime(),
                                 null,
                                 message?.second,
                                 message?.first,
-                                null
+                                null,
+                                false.toFlagged()
                             )
 
                             if (media != null) {
@@ -2441,7 +2463,7 @@ abstract class SphinxRepository(
 
             val isPaidTextMessage =
                 sendMessage.attachmentInfo?.mediaType?.isSphinxText == true &&
-                        sendMessage.messagePrice?.value ?: 0 > 0
+                        sendMessage.paidMessagePrice?.value ?: 0 > 0
 
             val messageContent: String? = if (isPaidTextMessage) null else message?.second?.value
 
@@ -2503,10 +2525,13 @@ abstract class SphinxRepository(
                 null
             }
 
+            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value
+
             val postMessageDto: PostMessageDto = try {
                 PostMessageDto(
                     sendMessage.chatId?.value,
                     sendMessage.contactId?.value,
+                    amount,
                     messagePrice.value,
                     sendMessage.replyUUID?.value,
                     messageContent,
@@ -2514,8 +2539,9 @@ abstract class SphinxRepository(
                     mediaKeyMap,
                     postMemeServerDto?.mime,
                     postMemeServerDto?.muid,
-                    sendMessage.messagePrice?.value,
-                    sendMessage.isBoost
+                    sendMessage.paidMessagePrice?.value,
+                    sendMessage.isBoost,
+                    sendMessage.isTribePayment
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
@@ -2754,6 +2780,7 @@ abstract class SphinxRepository(
                 PostMessageDto(
                     message.chatId.value,
                     contact?.id?.value,
+                    messagePrice.value,
                     messagePrice.value,
                     message.replyUUID?.value,
                     message.messageContentDecrypted?.value,
@@ -3052,6 +3079,27 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun sendTribePayment(
+        chatId: ChatId,
+        amount: Sat,
+        messageUUID: MessageUUID,
+        text: String,
+    ) {
+        applicationScope.launch(mainImmediate) {
+
+            val sendMessageBuilder = SendMessage.Builder()
+            sendMessageBuilder.setChatId(chatId)
+            sendMessageBuilder.setTribePaymentAmount(amount)
+            sendMessageBuilder.setText(text)
+            sendMessageBuilder.setReplyUUID(messageUUID.value.toReplyUUID())
+            sendMessageBuilder.setIsTribePayment(true)
+
+            sendMessage(
+                sendMessageBuilder.build().first
+            )
+        }
+    }
+
     override suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,
@@ -3093,11 +3141,12 @@ abstract class SphinxRepository(
             }
 
             networkQueryMessage.boostMessage(
-                chatId,
-                pricePerMessage,
-                escrowAmount,
-                owner.tipAmount ?: Sat(20L),
-                messageUUID,
+                boostMessageDto = PostBoostMessageDto(
+                    chat_id = chatId.value,
+                    amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(20L)).value,
+                    message_price = pricePerMessage.value + escrowAmount.value,
+                    reply_uuid = messageUUID.value
+                )
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {

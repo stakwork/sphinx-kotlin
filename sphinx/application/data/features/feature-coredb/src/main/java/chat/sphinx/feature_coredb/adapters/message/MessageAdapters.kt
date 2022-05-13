@@ -115,3 +115,13 @@ internal class FlaggedAdapter private constructor(): ColumnAdapter<Flagged, Long
         return value.value.toLong()
     }
 }
+
+internal class RecipientAliasAdapter: ColumnAdapter<RecipientAlias, String> {
+    override fun decode(databaseValue: String): RecipientAlias {
+        return RecipientAlias(databaseValue)
+    }
+
+    override fun encode(value: RecipientAlias): String {
+        return value.value
+    }
+}

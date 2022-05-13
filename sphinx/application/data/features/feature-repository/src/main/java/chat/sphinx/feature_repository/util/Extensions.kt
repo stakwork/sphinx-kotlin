@@ -360,6 +360,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.original_muid?.toMessageMUID(),
         dto.reply_uuid?.toReplyUUID(),
         dto.type.toMessageType(),
+        dto.recipient_alias?.toRecipientAlias(),
+        dto.recipient_pic?.toPhotoUrl(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,
@@ -372,7 +374,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.expiration_date?.toDateTime(),
         dto.message_content?.toMessageContent(),
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
-        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID()
+        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID(),
+        false.toFlagged()
     )
 
     if (dto.type.toMessageType()?.isInvoicePayment()) {

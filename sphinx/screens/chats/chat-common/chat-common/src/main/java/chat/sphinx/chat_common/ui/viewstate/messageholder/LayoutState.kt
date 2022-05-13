@@ -14,6 +14,7 @@ import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip as PodcastClipObject
 import chat.sphinx.wrapper_message.PurchaseStatus
+import chat.sphinx.wrapper_message.RecipientAlias
 import chat.sphinx.wrapper_message_media.MessageMedia
 import java.io.File
 
@@ -94,7 +95,11 @@ internal sealed class LayoutState private constructor() {
 
             data class DirectPayment(
                 val showSent: Boolean,
-                val amount: Sat
+                val amount: Sat,
+                val isTribe: Boolean,
+                val recipientAlias: RecipientAlias?,
+                val recipientPic: PhotoUrl?,
+                val recipientColorKey: String,
             ): ContainerSecond() {
                 val showReceived: Boolean
                     get() = !showSent

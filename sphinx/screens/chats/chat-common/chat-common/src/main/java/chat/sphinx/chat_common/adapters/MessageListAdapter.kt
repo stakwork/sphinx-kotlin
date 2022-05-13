@@ -390,6 +390,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
+
+            binding.includeMessageHolderChatImageInitialHolder.root.setOnClickListener {
+                currentViewState?.message?.let { nnMessage ->
+                    viewModel.showMemberPopup(nnMessage)
+                }
+            }
         }
 
         private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {

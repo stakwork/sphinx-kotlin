@@ -36,11 +36,7 @@ abstract class NetworkQueryMessage {
     ): Flow<LoadResponse<MessageDto, ResponseError>>
 
     abstract fun boostMessage(
-        chatId: ChatId,
-        pricePerMessage: Sat,
-        escrowAmount: Sat,
-        tipAmount: Sat,
-        messageUUID: MessageUUID,
+        boostMessageDto: PostBoostMessageDto,
         relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
     ): Flow<LoadResponse<MessageDto, ResponseError>>
 

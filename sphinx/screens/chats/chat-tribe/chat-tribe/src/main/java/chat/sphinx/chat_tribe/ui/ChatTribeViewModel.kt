@@ -8,9 +8,12 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -31,7 +34,6 @@ import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -42,8 +44,11 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -108,6 +113,10 @@ internal class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    val tribePopupViewStateContainer: ViewStateContainer<TribePopupViewState> by lazy {
+        ViewStateContainer(TribePopupViewState.Idle)
+    }
 
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
@@ -294,6 +303,36 @@ internal class ChatTribeViewModel @Inject constructor(
                 }
             }
         }.join()
+    }
+
+    override fun showMemberPopup(message: Message) {
+        message.uuid?.let { messageUUID ->
+            message.senderAlias?.let { senderAlias ->
+                tribePopupViewStateContainer.updateViewState(
+                    TribePopupViewState.TribeMemberPopup(
+                        messageUUID,
+                        senderAlias,
+                        message.getColorKey(),
+                        message.senderPic
+                    )
+                )
+            }
+        }
+    }
+
+    fun goToPaymentSend() {
+        viewModelScope.launch(mainImmediate) {
+            (tribePopupViewStateContainer.value as TribePopupViewState.TribeMemberPopup)?.let { viewState ->
+                chatNavigator.toPaymentSendDetail(
+                    viewState.messageUUID,
+                    chatId
+                )
+            }
+
+            tribePopupViewStateContainer.updateViewState(
+                TribePopupViewState.Idle
+            )
+        }
     }
 
     override fun navigateToChatDetailScreen() {
