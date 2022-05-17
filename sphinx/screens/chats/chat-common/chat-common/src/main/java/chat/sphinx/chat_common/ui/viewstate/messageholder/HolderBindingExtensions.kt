@@ -271,7 +271,14 @@ internal fun  LayoutMessageHolderBinding.setView(
                 userColorsHelper
             ) { imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    imageLoader.load(imageView, url, imageLoaderDefaults)
+                    imageLoader.load(
+                        imageView, 
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()    
+                    )
                         .also { disposables.add(it) }
                 }.let { job ->
                     holderJobs.add(job)
@@ -1732,7 +1739,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
                     holderJobs.add(job)
                 }
 
-                boostSenderHolder.photoUrl?.thumbnailUrl?.let { photoUrl ->
+                boostSenderHolder.photoUrl?.let { photoUrl ->
                     textViewInitials.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)
