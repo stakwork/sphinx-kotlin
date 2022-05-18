@@ -288,7 +288,8 @@ abstract class SphinxRepository(
                                                 moshi,
                                                 chatSeenMap,
                                                 queries,
-                                                contactDto
+                                                contactDto,
+                                                accountOwner.value?.nodePubKey
                                             )
 
                                             chatId = ChatId(nnChatDto.id)
@@ -568,7 +569,14 @@ abstract class SphinxRepository(
                                             null
                                         }
 
-                                    upsertChat(dto, moshi, chatSeenMap, queries, contactDto)
+                                    upsertChat(
+                                        dto,
+                                        moshi,
+                                        chatSeenMap,
+                                        queries,
+                                        contactDto,
+                                        accountOwner.value?.nodePubKey
+                                    )
                                 }
 
                             }
@@ -1661,7 +1669,8 @@ abstract class SphinxRepository(
                                                     moshi,
                                                     chatSeenMap,
                                                     queries,
-                                                    null
+                                                    null,
+                                                    accountOwner.value?.nodePubKey
                                                 )
                                             }
                                         }
@@ -1716,7 +1725,8 @@ abstract class SphinxRepository(
                                         moshi,
                                         chatSeenMap,
                                         queries,
-                                        null
+                                        null,
+                                        accountOwner.value?.nodePubKey
                                     )
                                 }
                             }
@@ -2733,6 +2743,7 @@ abstract class SphinxRepository(
                                                 chatSeenMap,
                                                 queries,
                                                 loadResponse.value.contact,
+                                                accountOwner.value?.nodePubKey
                                             )
                                         }
 
@@ -3572,7 +3583,8 @@ abstract class SphinxRepository(
                                         moshi,
                                         chatSeenMap,
                                         queries,
-                                        null
+                                        null,
+                                        accountOwner.value?.nodePubKey
                                     )
                                     updateChatTribeData(
                                         tribeDto,
@@ -4876,7 +4888,8 @@ abstract class SphinxRepository(
                                                     moshi,
                                                     chatSeenMap,
                                                     queries,
-                                                    null
+                                                    null,
+                                                    accountOwner.value?.nodePubKey
                                                 )
                                             }
                                         }
@@ -4960,7 +4973,8 @@ abstract class SphinxRepository(
                                                 moshi,
                                                 chatSeenMap,
                                                 queries,
-                                                null
+                                                null,
+                                                accountOwner.value?.nodePubKey
                                             )
                                         }
                                     }
@@ -5013,7 +5027,8 @@ abstract class SphinxRepository(
                                             moshi,
                                             chatSeenMap,
                                             queries,
-                                            null
+                                            null,
+                                            accountOwner.value?.nodePubKey
                                         )
 
                                         upsertMessage(loadResponse.value.message, queries)
@@ -5069,7 +5084,8 @@ abstract class SphinxRepository(
                                             moshi,
                                             chatSeenMap,
                                             queries,
-                                            null
+                                            null,
+                                            accountOwner.value?.nodePubKey
                                         )
                                     }
                                 }

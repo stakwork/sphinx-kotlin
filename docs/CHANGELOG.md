@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha56 (2022-05-18)
+ - Fixes issue about tribe message price being reset
+ - Fixes issue about messages boosts profile pictures
+
 # Version 1.0.0-alpha55 (2022-05-13)
  - Improves security with request signing
  - Adds support for direct payments in tribes

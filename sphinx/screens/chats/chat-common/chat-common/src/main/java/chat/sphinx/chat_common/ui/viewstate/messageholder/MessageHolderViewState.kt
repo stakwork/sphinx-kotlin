@@ -374,9 +374,9 @@ internal sealed class MessageHolderViewState(
                         boostedByOwner = true
 
                         set.add(BoostSenderHolder(
-                            owner.photoUrl,
-                            owner.alias,
-                            owner.getColorKey()
+                            photoUrl = chat.myPhotoUrl ?: owner.photoUrl,
+                            alias = chat.myAlias?.value?.toContactAlias() ?: owner.alias,
+                            colorKey = owner.getColorKey()
                         ))
                     } else {
                         if (chat.type.isConversation()) {
