@@ -7,27 +7,28 @@ abstract class ImageLoader<ImageView> {
     abstract suspend fun load(
         imageView: ImageView,
         url: String,
-        options: ImageLoaderOptions? = null
+        options: ImageLoaderOptions? = null,
+        listener: OnImageLoadListener? = null,
     ): Disposable
 
     abstract suspend fun load(
         imageView: ImageView,
         drawableResId: Int,
-        options: ImageLoaderOptions? = null
+        options: ImageLoaderOptions? = null,
+        listener: OnImageLoadListener? = null,
     ): Disposable
 
     abstract suspend fun load(
         imageView: ImageView,
         file: File,
-        options: ImageLoaderOptions? = null
+        options: ImageLoaderOptions? = null,
+        listener: OnImageLoadListener? = null,
     ): Disposable
 
-//    abstract suspend fun loadImmediate(
-//        imageView: ImageView,
-//        file: File,
-//        options: ImageLoaderOptions? = null
-//    )
+}
 
+interface OnImageLoadListener {
+    fun onSuccess() {}
 }
 
 /**
