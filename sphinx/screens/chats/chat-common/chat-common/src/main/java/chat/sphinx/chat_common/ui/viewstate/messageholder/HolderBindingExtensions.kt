@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypePodcastClipBinding
@@ -25,10 +26,7 @@ import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.chat_common.util.VideoThumbnailUtil
-import chat.sphinx.concept_image_loader.Disposable
-import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_image_loader.*
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
@@ -53,9 +51,13 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.concurrent.atomic.AtomicInteger
 import chat.sphinx.resources.R as common_R
+
+
 
 
 @MainThread
@@ -67,13 +69,14 @@ internal fun  LayoutMessageHolderBinding.setView(
     dispatchers: CoroutineDispatchers,
     audioPlayerController: AudioPlayerController,
     imageLoader: ImageLoader<ImageView>,
-    imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
+    onRowLayoutListener: MessageListAdapter.OnRowLayoutListener? = null,
 ) {
+
     for (job in holderJobs) {
         job.cancel()
     }
@@ -171,9 +174,19 @@ internal fun  LayoutMessageHolderBinding.setView(
                     }
 
                     val disposable: Disposable = if (file != null) {
-                        imageLoader.load(imageView, file, options)
+                        imageLoader.load(imageView, file, options, object: OnImageLoadListener {
+                            override fun onSuccess() {
+                                super.onSuccess()
+                                onRowLayoutListener?.onRowHeightChange()
+                            }
+                        })
                     } else {
-                        imageLoader.load(imageView, url, options)
+                        imageLoader.load(imageView, url, options, object: OnImageLoadListener {
+                            override fun onSuccess() {
+                                super.onSuccess()
+                                onRowLayoutListener?.onRowHeightChange()
+                            }
+                        })
                     }
 
                     disposables.add(disposable)
@@ -218,7 +231,8 @@ internal fun  LayoutMessageHolderBinding.setView(
                 holderJobs,
                 imageLoader,
                 lifecycleScope,
-                viewState
+                viewState,
+                onRowLayoutListener,
             )
             setBubbleCallInvite(
                 viewState.bubbleCallInvite
@@ -948,6 +962,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
     imageLoader: ImageLoader<ImageView>,
     lifecycleScope: CoroutineScope,
     viewState: MessageHolderViewState,
+    onRowLayoutListener: MessageListAdapter.OnRowLayoutListener?,
 ) {
     includeMessageHolderBubble.apply {
         val previewLink = viewState.messageLinkPreview
@@ -1020,6 +1035,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                         progressBarLinkPreview.gone
                         layoutConstraintContactLinkPreview.visible
 
+                        onRowLayoutListener?.onRowHeightChange()
+
                     }.let { job ->
                         holderJobs.add(job)
                     }
@@ -1084,6 +1101,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                                 }.let { job ->
                                     holderJobs.add(job)
                                 }
+
+                                onRowLayoutListener?.onRowHeightChange()
                             }
 
                             layoutConstraintLinkPreviewTribeDashedBorder.goneIfFalse(state.showBanner)
@@ -1163,6 +1182,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
 
                             progressBarLinkPreview.gone
                             layoutConstraintUrlLinkPreview.visible
+
+                            onRowLayoutListener?.onRowHeightChange()
                         }
                     }.let { job ->
                         holderJobs.add(job)
