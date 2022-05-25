@@ -612,13 +612,6 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
         var bubbleWidth: Int = when {
             viewState.message.shouldAdaptBubbleWidth -> {
-                viewState.bubbleMessage?.let { nnBubbleMessage ->
-                    (includeMessageHolderBubble.textViewMessageText.paint.measureText(
-                        nnBubbleMessage.text ?: getString(R.string.decryption_error)
-                    ) + (defaultMargins * 2)).toInt()
-                } ?: bubbleFixedWidth
-            }
-            viewState.message.isDirectPayment -> {
                 val textWidth = viewState.bubbleMessage?.let { nnBubbleMessage ->
                     (includeMessageHolderBubble.textViewMessageText.paint.measureText(
                         nnBubbleMessage.text ?: getString(R.string.decryption_error)
@@ -627,19 +620,25 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
                 val amountWidth = viewState.bubbleDirectPayment?.let { nnBubbleDirectPayment ->
                     val paymentMargin = root.context.resources.getDimensionPixelSize(
-                            if (nnBubbleDirectPayment.isTribe) {
-                                R.dimen.tribe_payment_row_margin
-                            } else {
-                                R.dimen.payment_row_margin
-                            }
-                        )
+                        if (nnBubbleDirectPayment.isTribe) {
+                            R.dimen.tribe_payment_row_margin
+                        } else {
+                            R.dimen.payment_row_margin
+                        }
+                    )
 
                     (includeMessageHolderBubble.includeMessageTypeDirectPayment.textViewSatsAmountReceived.paint.measureText(
                         nnBubbleDirectPayment.amount.asFormattedString()
                     ) + paymentMargin).toInt()
                 } ?: 0
 
-                textWidth.coerceAtLeast(amountWidth)
+                val imageWidth = viewState.bubbleImageAttachment?.let {
+                    (bubbleFixedWidth * 0.8F).toInt()
+                } ?: 0
+
+                textWidth
+                    .coerceAtLeast(amountWidth)
+                    .coerceAtLeast(imageWidth)
             }
             viewState.message.isPodcastBoost -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
