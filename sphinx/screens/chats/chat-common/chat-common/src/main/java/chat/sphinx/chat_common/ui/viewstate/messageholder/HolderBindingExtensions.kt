@@ -177,14 +177,14 @@ internal fun  LayoutMessageHolderBinding.setView(
                         imageLoader.load(imageView, file, options, object: OnImageLoadListener {
                             override fun onSuccess() {
                                 super.onSuccess()
-                                onRowLayoutListener?.onRowHeightChange()
+                                onRowLayoutListener?.onRowHeightChanged()
                             }
                         })
                     } else {
                         imageLoader.load(imageView, url, options, object: OnImageLoadListener {
                             override fun onSuccess() {
                                 super.onSuccess()
-                                onRowLayoutListener?.onRowHeightChange()
+                                onRowLayoutListener?.onRowHeightChanged()
                             }
                         })
                     }
@@ -1035,7 +1035,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                         progressBarLinkPreview.gone
                         layoutConstraintContactLinkPreview.visible
 
-                        onRowLayoutListener?.onRowHeightChange()
+                        onRowLayoutListener?.onRowHeightChanged()
 
                     }.let { job ->
                         holderJobs.add(job)
@@ -1102,7 +1102,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                                     holderJobs.add(job)
                                 }
 
-                                onRowLayoutListener?.onRowHeightChange()
+                                onRowLayoutListener?.onRowHeightChanged()
                             }
 
                             layoutConstraintLinkPreviewTribeDashedBorder.goneIfFalse(state.showBanner)
@@ -1183,7 +1183,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                             progressBarLinkPreview.gone
                             layoutConstraintUrlLinkPreview.visible
 
-                            onRowLayoutListener?.onRowHeightChange()
+                            onRowLayoutListener?.onRowHeightChanged()
                         }
                     }.let { job ->
                         holderJobs.add(job)

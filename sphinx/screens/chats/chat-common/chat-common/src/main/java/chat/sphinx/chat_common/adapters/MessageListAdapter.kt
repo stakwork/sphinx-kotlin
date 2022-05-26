@@ -54,13 +54,16 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 {
 
     interface OnRowLayoutListener {
-        fun onRowHeightChange()
+        fun onRowHeightChanged()
     }
 
     private val onRowLayoutListener: OnRowLayoutListener = object: OnRowLayoutListener {
-        override fun onRowHeightChange() {
-            val lastVisibleItem = (recyclerView.layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
-            if (lastVisibleItem == (recyclerView.layoutManager?.itemCount ?: 0) - 1) {
+        override fun onRowHeightChanged() {
+            val lastVisibleItemPosition = (recyclerView.layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
+            val itemsCount = (recyclerView.layoutManager?.itemCount ?: 0)
+            val isScrolledToBottom = lastVisibleItemPosition == (itemsCount - 1)
+
+            if (isScrolledToBottom) {
                 forceScrollToBottom()
             }
         }
