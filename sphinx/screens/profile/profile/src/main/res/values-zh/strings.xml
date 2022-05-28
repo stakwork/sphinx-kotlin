@@ -38,8 +38,8 @@
     <string name="failed_updating_relay_url">新 URL 測試失敗, 恢復設定…</string>
     <string name="updating_relay_url_succeed">Relay URL 更新成功</string>
 
-    <string name="github_pat_title">Github Personal Access Token</string>
-    <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
-    <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
-    <string name="github_pat_failed">Github Personal Access Token coult not be set</string>
+    <string name="github_pat_title"> Github個人訪問令牌</string>
+    <string name="github_pat_message"> 在具有回購範圍的github上生成個人訪問令牌</string>
+    <string name="github_pat_succeed"> Github個人訪問令牌成功設置</string>
+    <string name="github_pat_failed"> 無法設置Github個人訪問令牌</string>
 </resources>

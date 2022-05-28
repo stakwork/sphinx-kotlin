@@ -85,53 +85,53 @@
     <string name="dashboard_connect_message_empty">訊息不可無填</string>
     <string name="dashboard_connect_generic_error">聯絡人連結失敗，請稍後再試</string>
 
-    <string name="dashboard_network_disconnected_node_toast">Disconnected node</string>
-    <string name="dashboard_network_connected_node_toast">Connected node</string>
+    <string name="dashboard_network_disconnected_node_toast"> 斷開的節點</string>
+    <string name="dashboard_network_connected_node_toast"> 連接節點</string>
 
-    <string name="dashboard_save_profile_popup_title">Save Profile from:</string>
-    <string name="dashboard_delete_profile_popup_title">Delete Profile from:</string>
-    <string name="dashboard_save_profile_button">SAVE</string>
-    <string name="dashboard_delete_profile_button">DELETE</string>
-    <string name="dashboard_save_profile_generic_error">Could not Save Profile</string>
-    <string name="dashboard_save_profile_success">Profile successfully saved</string>
-    <string name="dashboard_delete_profile_generic_error">Could not Delete Profile</string>
-    <string name="dashboard_delete_profile_success">Profile successfully deleted</string>
+    <string name="dashboard_save_profile_popup_title"> 從以下位置保存配置文件:</string>
+    <string name="dashboard_delete_profile_popup_title"> 從中刪除個人資料:</string>
+    <string name="dashboard_save_profile_button"> 保存</string>
+    <string name="dashboard_delete_profile_button"> 刪除</string>
+    <string name="dashboard_save_profile_generic_error"> 無法保存配置文件</string>
+    <string name="dashboard_save_profile_success"> 配置文件已成功保存</string>
+    <string name="dashboard_delete_profile_generic_error"> 無法刪除個人資料</string>
+    <string name="dashboard_delete_profile_success"> 配置文件已成功刪除</string>
 
-    <string name="dashboard_redeem_badge_token_popup_title">Redeem Badge Token from:</string>
-    <string name="dashboard_redeem_badge_token_generic_error">Could not Redeem Badge Token</string>
-    <string name="dashboard_redeem_badge_token_success">Redeemed Badge Token successfully</string>
+    <string name="dashboard_redeem_badge_token_popup_title"> 兌換徽章令牌:</string>
+    <string name="dashboard_redeem_badge_token_generic_error"> 無法兌換徽章令牌</string>
+    <string name="dashboard_redeem_badge_token_success"> 重新兌換徽章令牌成功</string>
 
-    <string name="dashboard_feed_tab_name">Feed</string>
-    <string name="dashboard_friends_tab_name">Friends</string>
-    <string name="dashboard_tribes_tab_name">Tribes</string>
+    <string name="dashboard_feed_tab_name"> 飼料</string>
+    <string name="dashboard_friends_tab_name"> 朋友</string>
+    <string name="dashboard_tribes_tab_name"> 部落</string>
 
-    <string name="all">All</string>
-    <string name="listen">Listen</string>
-    <string name="watch">Watch</string>
-    <string name="read">Read</string>
-    <string name="play">Play</string>
-    <string name="listen_now">Listen Now</string>
-    <string name="following">Following</string>
-    <string name="read_now">Read Now</string>
-    <string name="watch_now">Watch Now</string>
+    <string name="all"> 所有</string>
+    <string name="listen"> 聽</string>
+    <string name="watch"> 看</string>
+    <string name="read"> 閱讀</string>
+    <string name="play"> 玩</string>
+    <string name="listen_now"> 現在聽</string>
+    <string name="following"> 跟隨</string>
+    <string name="read_now"> 現在閱讀</string>
+    <string name="watch_now"> 現在看</string>
 
-    <string name="all_place_holder">No \"Feed\" Results Found</string>
-    <string name="listen_place_holder">No \"Listen\" Results Found</string>
-    <string name="watch_place_holder">No \"Watch\" Results Found</string>
-    <string name="read_place_holder">No \"Read\" Results Found</string>
-    <string name="play_place_holder">No \"Play\" Results Found</string>
+    <string name="all_place_holder">No \" 飼料\"  找到的結果</string>
+    <string name="listen_place_holder">No \" 聽\"  找到的結果</string>
+    <string name="watch_place_holder">No \" 看\"  找到的結果</string>
+    <string name="read_place_holder">No \" 閱讀\"  找到的結果</string>
+    <string name="play_place_holder">No \" 玩\"  找到的結果</string>
 
-    <string name="feed_search_placeholder_1">Search over</string>
-    <string name="feed_search_placeholder_2">your subscribed feeds</string>
+    <string name="feed_search_placeholder_1"> 搜索</string>
+    <string name="feed_search_placeholder_2"> 您的訂閱供稿</string>
 
-    <string name="video_search_placeholder_1">Search over</string>
-    <string name="video_search_placeholder_2">thousand of videos</string>
-    <string name="video_search_placeholder_3">on Youtube</string>
+    <string name="video_search_placeholder_1"> 搜索</string>
+    <string name="video_search_placeholder_2"> 千個視頻</string>
+    <string name="video_search_placeholder_3"> 在Youtube上</string>
 
-    <string name="podcast_search_placeholder_1">Search over</string>
-    <string name="podcast_search_placeholder_2">4 000 000 podcasts</string>
-    <string name="podcast_search_placeholder_3">on the Podcast Index</string>
+    <string name="podcast_search_placeholder_1"> 搜索</string>
+    <string name="podcast_search_placeholder_2">4 000 000  播客</string>
+    <string name="podcast_search_placeholder_3"> 播客指數</string>
 
-    <string name="dashboard_restore_progress">Restoring: %s</string>
-    <string name="dashboard_stop_restore">Continue later</string>
+    <string name="dashboard_restore_progress"> 恢復: %s</string>
+    <string name="dashboard_stop_restore"> 繼續</string>
 </resources>
