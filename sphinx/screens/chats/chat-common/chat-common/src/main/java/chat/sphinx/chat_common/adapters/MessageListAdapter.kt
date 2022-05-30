@@ -83,7 +83,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return try {
-                oldList[oldItemPosition].message.id == newList[newItemPosition].message.id
+                oldList[oldItemPosition].message?.id == newList[newItemPosition].message?.id
             } catch (e: IndexOutOfBoundsException) {
                 false
             }
@@ -125,7 +125,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (messages.isEmpty()) {
                     messages.addAll(list)
                     notifyDataSetChanged()
-                    recyclerView.layoutManager?.scrollToPosition(messages.size)
+                    scrollToUnseenSeparatorOrBottom(list)
                 } else {
                     withContext(viewModel.dispatchers.default) {
                         DiffUtil.calculateDiff(
@@ -141,6 +141,20 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
             }
         }
+    }
+
+    private fun scrollToUnseenSeparatorOrBottom(messageHolders: List<MessageHolderViewState>) {
+        var indexToScroll = messageHolders.size
+        for ((index, message) in messageHolders.withIndex()) {
+            (message as? MessageHolderViewState.Separator)?.let {
+                if (it.messageHolderType.isUnseenSeparatorHolder()) {
+                    indexToScroll = index + 5
+                }
+            }
+        }
+        recyclerView.layoutManager?.scrollToPosition(
+            indexToScroll.coerceAtMost(messageHolders.size)
+        )
     }
 
     fun scrollToBottomIfNeeded(

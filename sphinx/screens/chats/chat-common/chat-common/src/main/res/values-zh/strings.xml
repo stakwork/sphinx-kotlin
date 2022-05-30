@@ -20,6 +20,10 @@
     <string name="send_message_empty_content_error">Message or Attachment is required</string>
     <string name="send_message_empty_price_error">Price is required</string>
 
+    <!--  Separators  -->
+    <string name="unseen_messages">Unseen Messages</string>
+    <string name="today">Today</string>
+
     <!--  Message type invoices  -->
     <string name="request_expired">REQUEST EXPIRED</string>
     <string name="request_expiration">EXPIRES AT: %s</string>

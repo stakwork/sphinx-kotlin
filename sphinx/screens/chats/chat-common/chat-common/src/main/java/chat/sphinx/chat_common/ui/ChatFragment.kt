@@ -625,37 +625,39 @@ abstract class ChatFragment<
         viewModel.getSelectedMessageViewStateFlow().value.let { state ->
             if (state is SelectedMessageViewState.SelectedMessage) {
                 state.messageHolderViewState.let { holderState ->
-                    holderState.selectionMenuItems?.elementAtOrNull(index)?.let { item ->
-                        when (item) {
-                            is MenuItemState.Boost -> {
-                                viewModel.boostMessage(holderState.message.uuid)
-                            }
-                            is MenuItemState.CopyCallLink -> {
-                                // TODO: Implement
-                            }
-                            is MenuItemState.CopyLink -> {
-                                viewModel.copyMessageLink(holderState.message)
-                            }
-                            is MenuItemState.CopyText -> {
-                                viewModel.copyMessageText(holderState.message)
-                            }
-                            is MenuItemState.Delete -> {
-                                viewModel.deleteMessage(holderState.message)
-                            }
-                            is MenuItemState.Reply -> {
-                                viewModel.replyToMessage(holderState.message)
-                            }
-                            is MenuItemState.SaveFile -> {
-                                viewModel.saveFile(
-                                    holderState.message,
-                                    selectedMessageBinding.includeLayoutMessageHolderSelectedMessage.includeMessageHolderBubble.includeMessageTypeImageAttachment.imageViewAttachmentImage.drawable
-                                )
-                            }
-                            is MenuItemState.Resend -> {
-                                viewModel.resendMessage(holderState.message)
-                            }
-                            is MenuItemState.Flag -> {
-                                viewModel.flagMessage(holderState.message)
+                    holderState.message?.let { message ->
+                        holderState.selectionMenuItems?.elementAtOrNull(index)?.let { item ->
+                            when (item) {
+                                is MenuItemState.Boost -> {
+                                    viewModel.boostMessage(message.uuid)
+                                }
+                                is MenuItemState.CopyCallLink -> {
+                                    // TODO: Implement
+                                }
+                                is MenuItemState.CopyLink -> {
+                                    viewModel.copyMessageLink(message)
+                                }
+                                is MenuItemState.CopyText -> {
+                                    viewModel.copyMessageText(message)
+                                }
+                                is MenuItemState.Delete -> {
+                                    viewModel.deleteMessage(message)
+                                }
+                                is MenuItemState.Reply -> {
+                                    viewModel.replyToMessage(message)
+                                }
+                                is MenuItemState.SaveFile -> {
+                                    viewModel.saveFile(
+                                        message,
+                                        selectedMessageBinding.includeLayoutMessageHolderSelectedMessage.includeMessageHolderBubble.includeMessageTypeImageAttachment.imageViewAttachmentImage.drawable
+                                    )
+                                }
+                                is MenuItemState.Resend -> {
+                                    viewModel.resendMessage(message)
+                                }
+                                is MenuItemState.Flag -> {
+                                    viewModel.flagMessage(message)
+                                }
                             }
                         }
                     }
@@ -695,11 +697,6 @@ abstract class ChatFragment<
         (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
             (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage, itemsDiff)
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.readMessages()
     }
 
     override fun getMotionLayouts(): Array<MotionLayout> {
