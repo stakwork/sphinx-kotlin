@@ -132,7 +132,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             Diff(messages, list)
                         )
                     }.let { result ->
-                        scrollToBottomIfNeeded(callback = {
+                        scrollToPreviousPosition(callback = {
                             messages.clear()
                             messages.addAll(list)
                             result.dispatchUpdatesTo(this@MessageListAdapter)
@@ -144,16 +144,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     private fun scrollToUnseenSeparatorOrBottom(messageHolders: List<MessageHolderViewState>) {
-        var indexToScroll = messageHolders.size
         for ((index, message) in messageHolders.withIndex()) {
             (message as? MessageHolderViewState.Separator)?.let {
                 if (it.messageHolderType.isUnseenSeparatorHolder()) {
-                    indexToScroll = index + 5
+                    (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(index, recyclerView.measuredHeight / 4)
+                    return
                 }
             }
         }
+
         recyclerView.layoutManager?.scrollToPosition(
-            indexToScroll.coerceAtMost(messageHolders.size)
+            messageHolders.size
         )
     }
 
@@ -180,6 +181,21 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         ) {
             recyclerView.scrollToPosition(listSizeAfterDispatch)
         }
+    }
+
+    private fun scrollToPreviousPosition(
+        callback: (() -> Unit)? = null,
+    ) {
+        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
+        val listSizeBeforeDispatch = messages.size
+        val diffToBottom = listSizeBeforeDispatch - lastVisibleItemPositionBeforeDispatch
+
+        if (callback != null) {
+            callback()
+        }
+
+        val listSizeAfterDispatch = messages.size
+        recyclerView.scrollToPosition(listSizeAfterDispatch - diffToBottom)
     }
 
     fun forceScrollToBottom() {
