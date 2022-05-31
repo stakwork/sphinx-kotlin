@@ -32,6 +32,7 @@ inline val Message.isCopyLinkAllowed: Boolean
 
 inline val Message.shouldAdaptBubbleWidth: Boolean
     get() = (type.isMessage() &&
+            !isSphinxCallLink &&
             podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&

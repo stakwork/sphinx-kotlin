@@ -667,6 +667,9 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
             viewState.message?.isExpiredInvoice == true -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_expired_invoice_width)
             }
+            viewState.message?.isSphinxCallLink == true -> {
+                (bubbleFixedWidth * 0.8F).toInt()
+            }
             else -> {
                 bubbleFixedWidth
             }
