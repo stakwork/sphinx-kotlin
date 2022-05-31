@@ -389,7 +389,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     openReceivedPaidInvoicesCount > 0
                 )
 
-                if (!message.seen.isTrue() && !unseenSeparatorAdded) {
+                if (!message.seen.isTrue() && !sent && !unseenSeparatorAdded) {
                     newList.add(
                         MessageHolderViewState.Separator(
                             MessageHolderType.UnseenSeparator,
