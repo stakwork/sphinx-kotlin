@@ -62,6 +62,10 @@
     <string name="material_icon_name_add" translatable="false">add</string>
     <string name="material_icon_name_lens" translatable="false">lens</string>
     <string name="material_icon_name_block" translatable="false">block</string>
+    <string name="material_icon_name_search" translatable="false">search</string>
+    <string name="material_icon_name_done" translatable="false">done</string>
+    <string name="material_icon_name_expand_more" translatable="false">expand_more</string>
+    <string name="material_icon_name_expand_less" translatable="false">expand_less</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete" translatable="false">delete</string>

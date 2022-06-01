@@ -1,6 +1,7 @@
 package chat.sphinx.chat_group.ui
 
 import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -28,6 +29,10 @@ internal class ChatGroupFragment: ChatFragment<
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_group_header
     )
+
+    override val recordingAudioContainer: ConstraintLayout
+        get() = binding.layoutConstraintRecordingAudioContainer
+
     override val recordingCircleBinding: LayoutChatRecordingCircleBinding by viewBinding(
         LayoutChatRecordingCircleBinding::bind, R.id.include_chat_recording_circle
     )

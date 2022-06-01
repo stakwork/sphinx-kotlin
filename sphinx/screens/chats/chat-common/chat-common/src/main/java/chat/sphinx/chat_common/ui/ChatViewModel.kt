@@ -759,7 +759,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
             delay(1000L)
 
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 0).distinctUntilChanged().collect { messages ->
                 messageHolderViewStateFlow.value =
                     getMessageHolderViewStateList(messages).toList()
             }

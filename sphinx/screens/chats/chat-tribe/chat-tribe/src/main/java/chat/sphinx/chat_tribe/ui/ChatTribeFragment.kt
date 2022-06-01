@@ -6,11 +6,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
@@ -26,6 +28,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
@@ -62,6 +65,8 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
+    override val recordingAudioContainer: ConstraintLayout
+        get() = binding.layoutConstraintRecordingAudioContainer
     override val recordingCircleBinding: LayoutChatRecordingCircleBinding
         get() = binding.includeChatRecordingCircle
     override val headerBinding: LayoutChatHeaderBinding
