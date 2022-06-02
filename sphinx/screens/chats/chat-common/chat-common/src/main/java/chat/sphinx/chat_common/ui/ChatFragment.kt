@@ -300,7 +300,7 @@ abstract class ChatFragment<
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
-//        setupMoreOptionsMenu()
+        setupMoreOptionsMenu()
         setupCallMenu()
 
         callMenuBinding.apply {
