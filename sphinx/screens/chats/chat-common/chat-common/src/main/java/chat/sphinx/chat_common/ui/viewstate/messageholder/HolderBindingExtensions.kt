@@ -3,6 +3,8 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import android.graphics.Color
 import android.view.Gravity
 import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -38,10 +40,9 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.before
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.thumbnailUrl
-import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_common.util.getHHMMString
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -54,13 +55,9 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
-import java.util.concurrent.atomic.AtomicInteger
 import chat.sphinx.resources.R as common_R
-
-
 
 
 @MainThread
@@ -245,7 +242,8 @@ internal fun  LayoutMessageHolderBinding.setView(
                 viewState.bubbleCallInvite
             )
             setBubbleBotResponse(
-                viewState.bubbleBotResponse
+                viewState.bubbleBotResponse,
+                onRowLayoutListener
             )
             setBubbleDirectPaymentLayout(
                 viewState.bubbleDirectPayment,
@@ -1261,7 +1259,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
-    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?
+    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?,
+    onRowLayoutListener: MessageListAdapter.OnRowLayoutListener?,
 ) {
     includeMessageHolderBubble.includeMessageTypeBotResponse.apply {
         if (botResponse == null) {
@@ -1283,6 +1282,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
                 "utf-8",
                 null
             )
+
+            webViewMessageTypeBotResponse.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    onRowLayoutListener?.onRowHeightChanged()
+                }
+            }
         }
     }
 }
