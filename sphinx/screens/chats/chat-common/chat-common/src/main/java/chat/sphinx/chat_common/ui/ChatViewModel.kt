@@ -40,6 +40,7 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.InvoiceLinesHolderView
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -141,6 +142,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .build()
     }
 
+    val messagesSearchViewStateContainer: ViewStateContainer<MessagesSearchViewState> by lazy {
+        ViewStateContainer(MessagesSearchViewState.Idle)
+    }
 
     val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
         ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
@@ -894,6 +898,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    fun searchMessages(text: String?) {
+        moreOptionsMenuHandler.updateViewState(
+            MenuBottomViewState.Closed
+        )
+        messagesSearchViewStateContainer.updateViewState(
+            MessagesSearchViewState.Searching(0, null)
+        )
+    }
+
+    fun finishSearchingMessages() {
+        messagesSearchViewStateContainer.updateViewState(
+            MessagesSearchViewState.Idle
+        )
     }
 
     private val selectedMessageContainer: ViewStateContainer<SelectedMessageViewState> by lazy {

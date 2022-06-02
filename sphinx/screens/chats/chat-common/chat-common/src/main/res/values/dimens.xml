@@ -8,7 +8,7 @@
     <dimen name="chat_footer_recording_audio_slide_text_size">15sp</dimen>
 
     <dimen name="chat_search_footer_results_text_size">15sp</dimen>
-    <dimen name="chat_search_footer_height">50dp</dimen>
+    <dimen name="chat_search_footer_height">60dp</dimen>
 
     <dimen name="chat_header_exit_tribe_width">28sp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>

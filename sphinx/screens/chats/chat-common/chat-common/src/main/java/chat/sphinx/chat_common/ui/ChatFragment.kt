@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -39,6 +40,7 @@ import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
@@ -105,7 +107,9 @@ abstract class ChatFragment<
         >(layoutId), ChatSideEffectFragment, SlideToCancelImageView.SlideToCancelListener
 {
     protected abstract val footerBinding: LayoutChatFooterBinding
+    protected abstract val searchFooterBinding: LayoutChatSearchFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val searchHeaderBinding: LayoutChatSearchHeaderBinding
     protected abstract val recordingAudioContainer: ConstraintLayout
     protected abstract val recordingCircleBinding: LayoutChatRecordingCircleBinding
     protected abstract val replyingMessageBinding: LayoutMessageReplyBinding
@@ -215,6 +219,10 @@ abstract class ChatFragment<
         }
 
         footerBinding.apply {
+            insetterActivity.addKeyboardPadding(root)
+        }
+
+        searchFooterBinding.apply {
             insetterActivity.addKeyboardPadding(root)
         }
 
@@ -442,6 +450,10 @@ abstract class ChatFragment<
             }
         }
 
+        searchFooterBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+
         replyingMessageBinding.apply {
             textViewReplyClose.visible
             textViewReplyClose.setOnClickListener {
@@ -473,7 +485,7 @@ abstract class ChatFragment<
                         text = R.string.bottom_menu_more_option_search,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-
+                            viewModel.searchMessages(null)
                         }
                     )
                 )
@@ -533,8 +545,7 @@ abstract class ChatFragment<
         headerBinding.apply {
             insetterActivity.addStatusBarPadding(root)
 
-            root.layoutParams.height =
-                root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
+            root.layoutParams.height = root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
             root.requestLayout()
 
             imageViewChatHeaderMuted.setOnClickListener {
@@ -555,6 +566,19 @@ abstract class ChatFragment<
 
             layoutConstraintChatHeaderName.setOnClickListener {
                 viewModel.goToChatDetailScreen()
+            }
+        }
+
+        searchHeaderBinding.apply {
+            insetterActivity.addStatusBarPadding(root)
+
+            root.layoutParams.height = root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
+            root.requestLayout()
+
+            textViewChatSearchDone.setOnClickListener {
+                viewModel.messagesSearchViewStateContainer.updateViewState(
+                    MessagesSearchViewState.Idle
+                )
             }
         }
     }
@@ -1419,6 +1443,36 @@ abstract class ChatFragment<
 
                             root.visible
                         }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.messagesSearchViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is MessagesSearchViewState.Idle -> {
+                        headerBinding.root.visible
+                        footerBinding.root.visible
+
+                        searchHeaderBinding.root.gone
+                        searchFooterBinding.root.gone
+                    }
+                    is MessagesSearchViewState.Searching -> {
+                        headerBinding.root.gone
+                        footerBinding.root.gone
+
+                        searchHeaderBinding.apply {
+                            root.visible
+                            editTextChatSearch.requestFocus()
+
+                            context?.let {
+                                val inputMethodManager = ContextCompat.getSystemService(it, InputMethodManager::class.java)
+                                inputMethodManager?.showSoftInput(editTextChatSearch, InputMethodManager.SHOW_IMPLICIT)
+                            }
+                        }
+                        searchFooterBinding.root.visible
                     }
                 }
             }

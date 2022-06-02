@@ -26,8 +26,14 @@ internal class ChatContactFragment: ChatFragment<
     override val footerBinding: LayoutChatFooterBinding by viewBinding(
         LayoutChatFooterBinding::bind, R.id.include_chat_contact_footer
     )
+    override val searchFooterBinding: LayoutChatSearchFooterBinding by viewBinding(
+        LayoutChatSearchFooterBinding::bind, R.id.include_chat_contact_search_footer
+    )
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_contact_header
+    )
+    override val searchHeaderBinding: LayoutChatSearchHeaderBinding by viewBinding(
+        LayoutChatSearchHeaderBinding::bind, R.id.include_chat_contact_search_header
     )
 
     override val recordingAudioContainer: ConstraintLayout

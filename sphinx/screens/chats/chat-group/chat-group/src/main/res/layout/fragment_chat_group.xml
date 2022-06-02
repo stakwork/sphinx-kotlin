@@ -70,11 +70,8 @@
             android:id="@+id/include_chat_group_search_footer"
             layout="@layout/layout_chat_search_footer"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/chat_search_footer_height"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             android:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

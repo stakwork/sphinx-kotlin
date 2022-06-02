@@ -65,12 +65,16 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
+    override val searchFooterBinding: LayoutChatSearchFooterBinding
+        get() = binding.includeChatTribeSearchFooter
     override val recordingAudioContainer: ConstraintLayout
         get() = binding.layoutConstraintRecordingAudioContainer
     override val recordingCircleBinding: LayoutChatRecordingCircleBinding
         get() = binding.includeChatRecordingCircle
     override val headerBinding: LayoutChatHeaderBinding
         get() = binding.includeChatTribeHeader
+    override val searchHeaderBinding: LayoutChatSearchHeaderBinding
+        get() = binding.includeChatTribeSearchHeader
     override val replyingMessageBinding: LayoutMessageReplyBinding
         get() = binding.includeChatTribeMessageReply
     override val selectedMessageBinding: LayoutSelectedMessageBinding
@@ -233,7 +237,7 @@ internal class ChatTribeFragment: ChatFragment<
                 text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_search,
                 textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
                 onClick = {
-
+                    viewModel.searchMessages(null)
                 }
             )
         )
