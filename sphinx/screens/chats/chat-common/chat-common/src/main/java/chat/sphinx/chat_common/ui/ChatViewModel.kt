@@ -16,7 +16,6 @@ import androidx.annotation.CallSuper
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
@@ -35,6 +34,7 @@ import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.InvoiceLinesHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
@@ -43,7 +43,6 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
 import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
@@ -66,7 +65,6 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -97,7 +95,6 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -150,6 +147,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     val callMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
+        ViewStateContainer(MenuBottomViewState.Closed)
+    }
+
+    val moreOptionsMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
         ViewStateContainer(MenuBottomViewState.Closed)
     }
 
@@ -220,7 +221,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         ChatHeaderViewStateContainer()
     }
 
-    protected suspend fun getChat(): Chat {
+    suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             return chat
         }
@@ -272,7 +273,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         owner: Contact
     ): InitialHolderViewState
 
-    private suspend fun getOwner(): Contact {
+    suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact

@@ -19,7 +19,6 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding

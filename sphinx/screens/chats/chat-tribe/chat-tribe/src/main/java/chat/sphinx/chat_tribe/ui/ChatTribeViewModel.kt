@@ -8,11 +8,10 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
-import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
@@ -29,6 +28,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -164,6 +164,10 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
+    internal val moreOptionsMenuStateFlow: MutableStateFlow<MoreMenuOptionsViewState> by lazy {
+        MutableStateFlow(MoreMenuOptionsViewState.OwnTribe)
+    }
+
     override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
     }
@@ -242,6 +246,12 @@ internal class ChatTribeViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+
+                moreOptionsMenuStateFlow.value = if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
+                    MoreMenuOptionsViewState.OwnTribe
+                } else {
+                    MoreMenuOptionsViewState.NotOwnTribe
+                }
 
                 chatRepository.updateTribeInfo(chat)?.let { tribeData ->
 
@@ -339,5 +349,15 @@ internal class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
         }
+    }
+
+    fun navigateToTribeShareScreen() {
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            val shareTribeURL = "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
+            (chatNavigator as TribeChatNavigator).toShareTribeScreen(shareTribeURL, app.getString(R.string.qr_code_title))
+        }
+
+        moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
     }
 }

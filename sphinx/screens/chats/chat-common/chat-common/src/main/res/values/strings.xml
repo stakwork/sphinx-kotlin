@@ -150,6 +150,12 @@
     <string name="bottom_menu_call_header_text">Call Options</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+
+    <string name="bottom_menu_more_header_text">Chat Options</string>
+    <string name="bottom_menu_more_option_call">Create Call</string>
+    <string name="bottom_menu_more_option_share">Share Tribe Link</string>
+    <string name="bottom_menu_more_option_search">Search Messages</string>
+
     <string name="slide_to_cancel">&lt;&lt; Slide to cancel</string>
     <string name="recording_permission_granted">Recording permission granted</string>
     <string name="recording_permission_required">Recording permissions required</string>

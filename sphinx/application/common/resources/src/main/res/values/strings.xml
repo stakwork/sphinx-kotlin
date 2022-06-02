@@ -66,6 +66,7 @@
     <string name="material_icon_name_done" translatable="false">done</string>
     <string name="material_icon_name_expand_more" translatable="false">expand_more</string>
     <string name="material_icon_name_expand_less" translatable="false">expand_less</string>
+    <string name="material_icon_name_more_horizontal" translatable="false">more_horiz</string>
 
     <!--  Message Action Material Icons  -->
     <string name="material_icon_name_message_action_delete" translatable="false">delete</string>

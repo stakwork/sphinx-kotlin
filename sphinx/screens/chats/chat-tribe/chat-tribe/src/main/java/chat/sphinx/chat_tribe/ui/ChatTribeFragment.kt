@@ -12,11 +12,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
@@ -28,16 +28,16 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
-import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_message.*
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -83,6 +83,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeChatTribeMenu
     override val callMenuBinding: LayoutMenuBottomBinding
         get() = binding.includeLayoutMenuBottomCall
+    override val moreMenuBinding: LayoutMenuBottomBinding
+        get() = binding.includeLayoutMenuBottomMore
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
 
@@ -196,8 +198,60 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
+    override fun setupMoreOptionsMenu() {
+        val menuOptions: MutableSet<MenuBottomOption> = LinkedHashSet(3)
+
+        menuOptions.add(
+            MenuBottomOption(
+                text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_call,
+                textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+                onClick = {
+                    viewModel.moreOptionsMenuHandler.updateViewState(
+                        MenuBottomViewState.Closed
+                    )
+                    viewModel.callMenuHandler.updateViewState(
+                        MenuBottomViewState.Open
+                    )
+                }
+            )
+        )
+
+        if (viewModel.moreOptionsMenuStateFlow.value is MoreMenuOptionsViewState.OwnTribe) {
+            menuOptions.add(
+                MenuBottomOption(
+                    text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_share,
+                    textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+                    onClick = {
+                        viewModel.navigateToTribeShareScreen()
+                    }
+                )
+            )
+        }
+
+        menuOptions.add(
+            MenuBottomOption(
+                text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_search,
+                textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+                onClick = {
+
+                }
+            )
+        )
+
+        bottomMenuMore.newBuilder(moreMenuBinding, viewLifecycleOwner)
+            .setHeaderText(chat.sphinx.chat_common.R.string.bottom_menu_more_header_text)
+            .setOptions(menuOptions)
+            .build()
+    }
+
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.moreOptionsMenuStateFlow.collect {
+                setupMoreOptionsMenu()
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             tribeFeedViewModel.boostAnimationViewStateContainer.collect { viewState ->

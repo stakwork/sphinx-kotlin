@@ -61,6 +61,10 @@ internal class ChatGroupFragment: ChatFragment<
         LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_call
     )
 
+    override val moreMenuBinding: LayoutMenuBottomBinding by viewBinding(
+        LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_more
+    )
+
     override val menuEnablePayments: Boolean
         get() = false
 

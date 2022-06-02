@@ -64,6 +64,7 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
@@ -82,7 +83,6 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
@@ -115,6 +115,7 @@ abstract class ChatFragment<
     protected abstract val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
     protected abstract val menuBinding: LayoutChatMenuBinding
     protected abstract val callMenuBinding: LayoutMenuBottomBinding
+    protected abstract val moreMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
 
     protected abstract val menuEnablePayments: Boolean
@@ -138,6 +139,14 @@ abstract class ChatFragment<
             viewModel.dispatchers,
             onStopSupervisor,
             viewModel.callMenuHandler
+        )
+    }
+
+    val bottomMenuMore: BottomMenu by lazy(LazyThreadSafetyMode.NONE) {
+        BottomMenu(
+            viewModel.dispatchers,
+            onStopSupervisor,
+            viewModel.moreOptionsMenuHandler
         )
     }
 
@@ -194,6 +203,10 @@ abstract class ChatFragment<
 
     private fun addViewKeyboardBottomPadding(insetterActivity: InsetterActivity) {
         callMenuBinding.apply {
+            insetterActivity.addKeyboardPadding(root)
+        }
+
+        moreMenuBinding.apply {
             insetterActivity.addKeyboardPadding(root)
         }
 
@@ -287,28 +300,14 @@ abstract class ChatFragment<
     }
 
     private fun setupFooter(insetterActivity: InsetterActivity) {
-        bottomMenuCall.newBuilder(callMenuBinding, viewLifecycleOwner)
-            .setHeaderText(R.string.bottom_menu_call_header_text)
-            .setOptions(
-                setOf(
-                    MenuBottomOption(
-                        text = R.string.bottom_menu_call_option_audio,
-                        textColor = R.color.primaryBlueFontColor,
-                        onClick = {
-                            viewModel.sendCallInvite(true)
-                        }
-                    ),
-                    MenuBottomOption(
-                        text = R.string.bottom_menu_call_option_video_or_audio,
-                        textColor = R.color.primaryBlueFontColor,
-                        onClick = {
-                            viewModel.sendCallInvite(false)
-                        }
-                    )
-                )
-            ).build()
+//        setupMoreOptionsMenu()
+        setupCallMenu()
 
         callMenuBinding.apply {
+            insetterActivity.addNavigationBarPadding(root)
+        }
+
+        moreMenuBinding.apply {
             insetterActivity.addNavigationBarPadding(root)
         }
 
@@ -453,6 +452,57 @@ abstract class ChatFragment<
         }
     }
 
+    open fun setupMoreOptionsMenu() {
+        bottomMenuMore.newBuilder(moreMenuBinding, viewLifecycleOwner)
+            .setHeaderText(R.string.bottom_menu_more_header_text)
+            .setOptions(
+                setOf(
+                    MenuBottomOption(
+                        text = R.string.bottom_menu_more_option_call,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+                            viewModel.moreOptionsMenuHandler.updateViewState(
+                                MenuBottomViewState.Closed
+                            )
+                            viewModel.callMenuHandler.updateViewState(
+                                MenuBottomViewState.Open
+                            )
+                        }
+                    ),
+                    MenuBottomOption(
+                        text = R.string.bottom_menu_more_option_search,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+
+                        }
+                    )
+                )
+            ).build()
+    }
+
+    private fun setupCallMenu() {
+        bottomMenuCall.newBuilder(callMenuBinding, viewLifecycleOwner)
+            .setHeaderText(R.string.bottom_menu_call_header_text)
+            .setOptions(
+                setOf(
+                    MenuBottomOption(
+                        text = R.string.bottom_menu_call_option_audio,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+                            viewModel.sendCallInvite(true)
+                        }
+                    ),
+                    MenuBottomOption(
+                        text = R.string.bottom_menu_call_option_video_or_audio,
+                        textColor = R.color.primaryBlueFontColor,
+                        onClick = {
+                            viewModel.sendCallInvite(false)
+                        }
+                    )
+                )
+            ).build()
+    }
+
     private fun setupAttachmentPriceView() {
         attachmentSendBinding.editTextMessagePrice.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -491,8 +541,8 @@ abstract class ChatFragment<
                 viewModel.toggleChatMuted()
             }
 
-            textViewChatHeaderPhone.setOnClickListener {
-                viewModel.callMenuHandler.updateViewState(
+            textViewChatHeaderMore.setOnClickListener {
+                viewModel.moreOptionsMenuHandler.updateViewState(
                     MenuBottomViewState.Open
                 )
             }

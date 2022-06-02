@@ -121,16 +121,16 @@
         android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
         android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_chat_header_phone"
+        app:layout_constraintEnd_toStartOf="@+id/text_view_chat_header_more"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_chat_header_phone"
+        android:id="@+id/text_view_chat_header_more"
         android:layout_width="38dp"
         android:layout_height="match_parent"
         android:fontFamily="@font/material_icons_regular"
         android:textSize="@dimen/chat_header_phone_text_size"
-        android:text="@string/material_icon_name_call_button"
+        android:text="@string/material_icon_name_more_horizontal"
         android:textColor="@color/washedOutReceivedText"
         android:gravity="center"
         android:visibility="visible"

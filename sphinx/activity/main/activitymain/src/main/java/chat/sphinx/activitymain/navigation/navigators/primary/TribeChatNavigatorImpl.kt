@@ -12,6 +12,7 @@ import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
+import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -51,6 +52,16 @@ internal class TribeChatNavigatorImpl @Inject constructor(
 
     override suspend fun toTribeDetailScreen(chatId: ChatId) {
         detailDriver.submitNavigationRequest(ToTribeDetailScreen(chatId))
+    }
+
+    override suspend fun toShareTribeScreen(
+        qrText: String,
+        viewTitle: String,
+        description: String?,
+    ) {
+        detailDriver.submitNavigationRequest(
+            ToQRCodeDetail(qrText, viewTitle, description)
+        )
     }
 
     override suspend fun toAddContactDetail(
