@@ -150,8 +150,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     fun forceScrollToBottom() {
-        val listSizeAfterDispatch = messages.size
-        recyclerView.scrollToPosition(listSizeAfterDispatch)
+        recyclerView.scrollToPosition(messages.size)
+    }
+
+        fun scrollToMessage(
+        message: Message
+    ) {
+        for ((index, messageHolderVS) in messages.withIndex()) {
+            if (messageHolderVS.message.id == message.id) {
+                recyclerView.scrollToPosition(index)
+            }
+        }
     }
 
     override fun onLayoutChange(

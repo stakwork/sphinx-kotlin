@@ -700,6 +700,7 @@ messagesSearchByTerm:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
+AND status != 5
 AND LOWER(message_content_decrypted) LIKE ?
 ORDER BY date DESC;
 

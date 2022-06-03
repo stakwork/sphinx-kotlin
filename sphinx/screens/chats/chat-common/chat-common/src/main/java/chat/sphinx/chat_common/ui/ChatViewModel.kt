@@ -938,6 +938,20 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         )
     }
 
+    fun navigateResults(
+        advanceBy: Int
+    ) {
+        val searchViewState = messagesSearchViewStateContainer.viewStateFlow.value
+        if (searchViewState is MessagesSearchViewState.Searching) {
+            messagesSearchViewStateContainer.updateViewState(
+                MessagesSearchViewState.Searching(
+                    searchViewState.messages,
+                    searchViewState.index + advanceBy
+                )
+            )
+        }
+    }
+
     private fun loadAllMessages() {
         if (messagesLoadJob?.isActive == true) {
             messagesLoadJob?.cancel()

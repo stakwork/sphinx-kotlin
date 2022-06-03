@@ -452,6 +452,14 @@ abstract class ChatFragment<
 
         searchFooterBinding.apply {
             insetterActivity.addNavigationBarPadding(root)
+
+            textViewChatSearchNext.setOnClickListener {
+                viewModel.navigateResults(1)
+            }
+
+            textViewChatSearchPrevious.setOnClickListener {
+                viewModel.navigateResults(-1)
+            }
         }
 
         replyingMessageBinding.apply {
@@ -590,9 +598,13 @@ abstract class ChatFragment<
             })
 
             textViewChatSearchDone.setOnClickListener {
+                editTextChatSearch.setText("")
+
                 viewModel.messagesSearchViewStateContainer.updateViewState(
                     MessagesSearchViewState.Idle
                 )
+
+//                forceScrollToBottom()
             }
         }
     }
@@ -788,6 +800,12 @@ abstract class ChatFragment<
     ) {
         (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
             (messagesListAdapter as MessageListAdapter<*>).scrollToBottomIfNeeded(callback, replyingToMessage, itemsDiff)
+        }
+    }
+
+    protected fun forceScrollToBottom() {
+        (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
+            (messagesListAdapter as MessageListAdapter<*>).forceScrollToBottom()
         }
     }
 
@@ -1495,18 +1513,63 @@ abstract class ChatFragment<
 
                         searchFooterBinding.apply {
                             progressBarLoadingSearch.gone
+
                             textViewChatSearchResultsFound.text = getString(R.string.results_found, viewState.messages.size)
+
+                            val enabledColor = ContextCompat.getColor(binding.root.context, R.color.text)
+                            val disabledColor = ContextCompat.getColor(binding.root.context, R.color.secondaryText)
+
+                            val nextButtonEnable = viewState.index < viewState.messages.size - 1
+                            textViewChatSearchNext.isEnabled = nextButtonEnable
+                            textViewChatSearchNext.setTextColor(
+                                if (nextButtonEnable) {
+                                    enabledColor
+                                } else {
+                                    disabledColor
+                                }
+                            )
+
+                            val previousButtonEnable = viewState.index > 0
+                            textViewChatSearchPrevious.isEnabled = previousButtonEnable
+                            textViewChatSearchPrevious.setTextColor(
+                                if (previousButtonEnable) {
+                                    enabledColor
+                                } else {
+                                    disabledColor
+                                }
+                            )
+
                         }
 
-                        searchHeaderBinding.apply {
-                            editTextChatSearch.requestFocus()
-
-                            context?.let {
-                                val inputMethodManager = ContextCompat.getSystemService(it, InputMethodManager::class.java)
-                                inputMethodManager?.showSoftInput(editTextChatSearch, InputMethodManager.SHOW_IMPLICIT)
-                            }
-                        }
+                        setFocusOnSearchField()
+                        scrollToResult(viewState.messages, viewState.index)
                     }
+                }
+            }
+        }
+    }
+
+    private fun scrollToResult(
+        messages: List<Message>,
+        index: Int
+    ) {
+        if (messages.size > index) {
+            (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
+                messages[index]?.let { message ->
+                    (messagesListAdapter as MessageListAdapter<*>).scrollToMessage(message)
+                }
+            }
+        }
+    }
+
+    private fun setFocusOnSearchField() {
+        searchHeaderBinding.apply {
+            if (!editTextChatSearch.hasFocus()) {
+                editTextChatSearch.requestFocus()
+
+                context?.let {
+                    val inputMethodManager = ContextCompat.getSystemService(it, InputMethodManager::class.java)
+                    inputMethodManager?.showSoftInput(editTextChatSearch, InputMethodManager.SHOW_IMPLICIT)
                 }
             }
         }
