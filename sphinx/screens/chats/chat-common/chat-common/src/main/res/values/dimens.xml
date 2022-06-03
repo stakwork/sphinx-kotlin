@@ -9,6 +9,7 @@
 
     <dimen name="chat_search_footer_results_text_size">15sp</dimen>
     <dimen name="chat_search_footer_height">60dp</dimen>
+    <dimen name="chat_search_footer_progress_bar_xy">30dp</dimen>
 
     <dimen name="chat_header_exit_tribe_width">28sp</dimen>
     <dimen name="chat_header_mute_padding_horizontal">4dp</dimen>

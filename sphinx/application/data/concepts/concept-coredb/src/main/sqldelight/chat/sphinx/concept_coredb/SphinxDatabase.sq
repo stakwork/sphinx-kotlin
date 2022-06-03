@@ -696,6 +696,13 @@ FROM messageDbo
 WHERE (chat_id IS NULL OR chat_id = 0)
 AND (message_content LIKE :message_content1 OR message_content LIKE :message_content2);
 
+messagesSearchByTerm:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND LOWER(message_content_decrypted) LIKE ?
+ORDER BY date DESC;
+
 messageUpdateSeenByChatId:
 UPDATE messageDbo
 SET seen = :seen

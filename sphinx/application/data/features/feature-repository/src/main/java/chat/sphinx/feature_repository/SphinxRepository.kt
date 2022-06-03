@@ -2147,6 +2147,24 @@ abstract class SphinxRepository(
             }
             .distinctUntilChanged()
 
+    override fun searchMessagesBy(chatId: ChatId, term: String): Flow<List<Message>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messagesSearchByTerm(
+                    chatId,
+                    "%${term.lowercase()}%"
+                )
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        messageDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
+
     override fun getTribeLastMemberRequestByContactId(
         contactId: ContactId,
         chatId: ChatId, ): Flow<Message?> = flow {

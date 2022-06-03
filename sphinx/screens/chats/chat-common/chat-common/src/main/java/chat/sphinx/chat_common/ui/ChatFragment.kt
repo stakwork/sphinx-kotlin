@@ -485,7 +485,9 @@ abstract class ChatFragment<
                         text = R.string.bottom_menu_more_option_search,
                         textColor = R.color.primaryBlueFontColor,
                         onClick = {
-                            viewModel.searchMessages(null)
+                            lifecycleScope.launch(viewModel.mainImmediate) {
+                                viewModel.searchMessages(null)
+                            }
                         }
                     )
                 )
@@ -574,6 +576,18 @@ abstract class ChatFragment<
 
             root.layoutParams.height = root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
             root.requestLayout()
+
+            editTextChatSearch.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.searchMessages(s.toString())
+                    }
+                }
+            })
 
             textViewChatSearchDone.setOnClickListener {
                 viewModel.messagesSearchViewStateContainer.updateViewState(
@@ -1459,12 +1473,32 @@ abstract class ChatFragment<
                         searchHeaderBinding.root.gone
                         searchFooterBinding.root.gone
                     }
+                    is MessagesSearchViewState.Loading -> {
+                        headerBinding.root.gone
+                        footerBinding.root.gone
+
+                        searchHeaderBinding.root.visible
+                        searchFooterBinding.root.visible
+
+                        searchFooterBinding.apply {
+                            progressBarLoadingSearch.visible
+                            textViewChatSearchResultsFound.text = getString(R.string.searching_messages)
+                            root.visible
+                        }
+                    }
                     is MessagesSearchViewState.Searching -> {
                         headerBinding.root.gone
                         footerBinding.root.gone
 
+                        searchHeaderBinding.root.visible
+                        searchFooterBinding.root.visible
+
+                        searchFooterBinding.apply {
+                            progressBarLoadingSearch.gone
+                            textViewChatSearchResultsFound.text = getString(R.string.results_found, viewState.messages.size)
+                        }
+
                         searchHeaderBinding.apply {
-                            root.visible
                             editTextChatSearch.requestFocus()
 
                             context?.let {
@@ -1472,7 +1506,6 @@ abstract class ChatFragment<
                                 inputMethodManager?.showSoftInput(editTextChatSearch, InputMethodManager.SHOW_IMPLICIT)
                             }
                         }
-                        searchFooterBinding.root.visible
                     }
                 }
             }

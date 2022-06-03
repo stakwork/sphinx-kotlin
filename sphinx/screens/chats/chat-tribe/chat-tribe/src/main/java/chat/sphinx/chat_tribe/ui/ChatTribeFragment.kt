@@ -237,7 +237,9 @@ internal class ChatTribeFragment: ChatFragment<
                 text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_search,
                 textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
                 onClick = {
-                    viewModel.searchMessages(null)
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.searchMessages(null)
+                    }
                 }
             )
         )

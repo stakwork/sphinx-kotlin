@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_chat_header"
+    android:id="@+id/layout_constraint_search_chat_header"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/headerBG"
@@ -53,6 +53,18 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar_loading_search"
+            android:layout_width="@dimen/chat_search_footer_progress_bar_xy"
+            android:layout_height="@dimen/chat_search_footer_progress_bar_xy"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@color/secondaryText"
+            android:indeterminate="true"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -156,6 +156,9 @@
     <string name="bottom_menu_more_option_share">Share Tribe Link</string>
     <string name="bottom_menu_more_option_search">Search Messages</string>
 
+    <string name="searching_messages">Searching...</string>
+    <string name="results_found">%d Results Found</string>
+
     <string name="slide_to_cancel">&lt;&lt; 滑动取消</string>
     <string name="recording_permission_granted">授予录音许可</string>
     <string name="recording_permission_required">需要录制权限</string>

@@ -755,8 +755,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected abstract fun forceKeyExchange()
 
+    var messagesLoadJob: Job? = null
     fun screenInit() {
-        viewModelScope.launch(mainImmediate) {
+        messagesLoadJob = viewModelScope.launch(mainImmediate) {
             messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
                 messageHolderViewStateFlow.value =
                     getMessageHolderViewStateList(messages).toList()
@@ -764,7 +765,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
             delay(1000L)
 
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 0).distinctUntilChanged().collect { messages ->
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
                 messageHolderViewStateFlow.value =
                     getMessageHolderViewStateList(messages).toList()
             }
@@ -900,19 +901,54 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    fun searchMessages(text: String?) {
+    var messagesSearchJob: Job? = null
+    suspend fun searchMessages(text: String?) {
         moreOptionsMenuHandler.updateViewState(
             MenuBottomViewState.Closed
         )
+
+        if (messagesSearchViewStateContainer.viewStateFlow.value is MessagesSearchViewState.Idle) {
+            loadAllMessages()
+        }
+
+        chatId?.let { nnChatId ->
+            text?.let { nnText ->
+                if (nnText.toCharArray().size > 2) {
+                    messagesSearchViewStateContainer.updateViewState(
+                        MessagesSearchViewState.Loading
+                    )
+
+                    messagesSearchJob?.cancel()
+                    messagesSearchJob = viewModelScope.launch(io) {
+                        delay(500L)
+
+                        messageRepository.searchMessagesBy(nnChatId, nnText).firstOrNull()?.let { messages ->
+                            messagesSearchViewStateContainer.updateViewState(
+                                MessagesSearchViewState.Searching(messages, 0)
+                            )
+                        }
+                    }
+                    return
+                }
+            }
+        }
+
         messagesSearchViewStateContainer.updateViewState(
-            MessagesSearchViewState.Searching(0, null)
+            MessagesSearchViewState.Searching(emptyList(), 0)
         )
     }
 
-    fun finishSearchingMessages() {
-        messagesSearchViewStateContainer.updateViewState(
-            MessagesSearchViewState.Idle
-        )
+    private fun loadAllMessages() {
+        if (messagesLoadJob?.isActive == true) {
+            messagesLoadJob?.cancel()
+        }
+        messagesLoadJob = viewModelScope.launch(io) {
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 0)
+                .distinctUntilChanged().collect { messages ->
+                    messageHolderViewStateFlow.value =
+                        getMessageHolderViewStateList(messages).toList()
+                }
+        }
     }
 
     private val selectedMessageContainer: ViewStateContainer<SelectedMessageViewState> by lazy {

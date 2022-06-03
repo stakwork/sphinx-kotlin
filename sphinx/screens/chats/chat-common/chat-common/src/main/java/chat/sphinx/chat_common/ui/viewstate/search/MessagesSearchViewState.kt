@@ -8,8 +8,10 @@ sealed class MessagesSearchViewState: ViewState<MessagesSearchViewState>() {
 
     object Idle: MessagesSearchViewState()
 
+    object Loading: MessagesSearchViewState()
+
     class Searching(
-        val resultsCount: Int,
-        val currentMessageFound: Message?,
+        val messages: List<Message>,
+        val index: Int,
     ): MessagesSearchViewState()
 }
