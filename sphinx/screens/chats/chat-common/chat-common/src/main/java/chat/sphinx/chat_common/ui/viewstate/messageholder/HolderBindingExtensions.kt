@@ -701,7 +701,7 @@ internal inline fun LayoutMessageHolderBinding.setSearchHighlightedStatus(
 ) {
     root.setBackgroundColor(
         if (searchStatus != null) {
-            root.context.getColor(R.color.lightPurple)
+            root.context.getColor(R.color.lightDivider)
         } else {
             root.context.getColor(android.R.color.transparent)
         }
