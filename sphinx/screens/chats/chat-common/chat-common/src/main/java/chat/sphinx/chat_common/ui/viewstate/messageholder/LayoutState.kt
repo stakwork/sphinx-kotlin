@@ -20,6 +20,10 @@ import java.io.File
 
 internal sealed class LayoutState private constructor() {
 
+    data class SearchHighlightedStatus(
+        val highlightedText: String
+    ): LayoutState()
+
     data class MessageStatusHeader(
         val senderName: String?,
         val colorKey: String,

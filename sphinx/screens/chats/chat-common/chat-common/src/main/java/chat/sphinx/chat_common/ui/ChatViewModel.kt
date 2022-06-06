@@ -419,6 +419,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 }
                             },
                             invoiceLinesHolderViewState = invoiceLinesHolderViewState,
+                            highlightedText = null,
                             messageSenderInfo = { messageCallback ->
                                 when {
                                     messageCallback.sender == chat.contactIds.firstOrNull() -> {
@@ -489,6 +490,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     getInitialHolderViewStateForReceivedMessage(message, owner)
                                 }
                             },
+                            highlightedText = null,
                             messageSenderInfo = { messageCallback ->
                                 when {
                                     messageCallback.sender == chat.contactIds.firstOrNull() -> {
@@ -924,7 +926,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                         messageRepository.searchMessagesBy(nnChatId, nnText).firstOrNull()?.let { messages ->
                             messagesSearchViewStateContainer.updateViewState(
-                                MessagesSearchViewState.Searching(messages, 0)
+                                MessagesSearchViewState.Searching(messages, 0, true)
                             )
                         }
                     }
@@ -934,7 +936,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
 
         messagesSearchViewStateContainer.updateViewState(
-            MessagesSearchViewState.Searching(emptyList(), 0)
+            MessagesSearchViewState.Searching(emptyList(), 0, true)
         )
     }
 
@@ -946,7 +948,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             messagesSearchViewStateContainer.updateViewState(
                 MessagesSearchViewState.Searching(
                     searchViewState.messages,
-                    searchViewState.index + advanceBy
+                    searchViewState.index + advanceBy,
+                    advanceBy > 0
                 )
             )
         }

@@ -13,5 +13,6 @@ sealed class MessagesSearchViewState: ViewState<MessagesSearchViewState>() {
     class Searching(
         val messages: List<Message>,
         val index: Int,
+        val navigatingForward: Boolean
     ): MessagesSearchViewState()
 }

@@ -1489,6 +1489,10 @@ abstract class ChatFragment<
 
                         searchHeaderBinding.root.gone
                         searchFooterBinding.root.gone
+
+                        (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
+                            (messagesListAdapter as MessageListAdapter<*>).resetHighlighted()
+                        }
                     }
                     is MessagesSearchViewState.Loading -> {
                         headerBinding.root.gone
@@ -1541,7 +1545,11 @@ abstract class ChatFragment<
                         }
 
                         setFocusOnSearchField()
-                        scrollToResult(viewState.messages, viewState.index)
+                        scrollToResult(
+                            viewState.messages,
+                            viewState.index,
+                            if (viewState.navigatingForward) viewState.index - 1 else viewState.index + 1
+                        )
                     }
                 }
             }
@@ -1550,12 +1558,17 @@ abstract class ChatFragment<
 
     private fun scrollToResult(
         messages: List<Message>,
-        index: Int
+        index: Int,
+        prevIndex: Int
     ) {
         if (messages.size > index) {
             (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
                 messages[index]?.let { message ->
-                    (messagesListAdapter as MessageListAdapter<*>).scrollToMessage(message)
+                    (messagesListAdapter as MessageListAdapter<*>).highlightAndScrollToSearchResult(
+                        message,
+                        if (messages.size > prevIndex && prevIndex >= 0) messages[prevIndex] else null,
+                        searchHeaderBinding.editTextChatSearch.text?.toString() ?: ""
+                    )
                 }
             }
         }
