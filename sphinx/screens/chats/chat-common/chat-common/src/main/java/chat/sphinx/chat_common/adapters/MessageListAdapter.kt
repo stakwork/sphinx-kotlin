@@ -1,5 +1,7 @@
 package chat.sphinx.chat_common.adapters
 
+import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -32,6 +34,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,6 +52,22 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     DefaultLifecycleObserver,
     View.OnLayoutChangeListener
 {
+
+    interface OnRowLayoutListener {
+        fun onRowHeightChanged()
+    }
+
+    private val onRowLayoutListener: OnRowLayoutListener = object: OnRowLayoutListener {
+        override fun onRowHeightChanged() {
+            val lastVisibleItemPosition = (recyclerView.layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
+            val itemsCount = (recyclerView.layoutManager?.itemCount ?: 0)
+            val isScrolledToBottom = lastVisibleItemPosition == (itemsCount - 1)
+
+            if (isScrolledToBottom) {
+                forceScrollToBottom()
+            }
+        }
+    }
 
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,
@@ -454,12 +473,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.dispatchers,
                 viewModel.audioPlayerController,
                 imageLoader,
-                viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
-                onSphinxInteractionListener
+                onSphinxInteractionListener,
+                onRowLayoutListener
             )
 
             observeAudioAttachmentState()

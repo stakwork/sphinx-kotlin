@@ -34,12 +34,13 @@ inline val Message.isCopyLinkAllowed: Boolean
     } ?: false
 
 inline val Message.shouldAdaptBubbleWidth: Boolean
-    get() = type.isMessage() &&
+    get() = (type.isMessage() &&
             podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
             !status.isDeleted() &&
-            !flagged.isTrue()
+            !flagged.isTrue()) ||
+            type.isDirectPayment()
 
 internal inline val MessageHolderViewState.isReceived: Boolean
     get() = this is MessageHolderViewState.Received
