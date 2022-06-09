@@ -1,5 +1,7 @@
 package chat.sphinx.chat_common.adapters
 
+import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -32,6 +34,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -50,6 +53,22 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     View.OnLayoutChangeListener
 {
 
+    interface OnRowLayoutListener {
+        fun onRowHeightChanged()
+    }
+
+    private val onRowLayoutListener: OnRowLayoutListener = object: OnRowLayoutListener {
+        override fun onRowHeightChanged() {
+            val lastVisibleItemPosition = (recyclerView.layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
+            val itemsCount = (recyclerView.layoutManager?.itemCount ?: 0)
+            val isScrolledAtLastRow = lastVisibleItemPosition == (itemsCount - 1)
+
+            if (isScrolledAtLastRow) {
+                forceScrollToBottom()
+            }
+        }
+    }
+
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,
         private val newList: List<MessageHolderViewState>
@@ -64,7 +83,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return try {
-                oldList[oldItemPosition].message.id == newList[newItemPosition].message.id
+                oldList[oldItemPosition].message?.id == newList[newItemPosition].message?.id
             } catch (e: IndexOutOfBoundsException) {
                 false
             }
@@ -106,14 +125,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (messages.isEmpty()) {
                     messages.addAll(list)
                     notifyDataSetChanged()
-                    recyclerView.layoutManager?.scrollToPosition(messages.size)
+                    scrollToUnseenSeparatorOrBottom(list)
                 } else {
                     withContext(viewModel.dispatchers.default) {
                         DiffUtil.calculateDiff(
                             Diff(messages, list)
                         )
                     }.let { result ->
-                        scrollToBottomIfNeeded(callback = {
+                        scrollToPreviousPosition(callback = {
                             messages.clear()
                             messages.addAll(list)
                             result.dispatchUpdatesTo(this@MessageListAdapter)
@@ -122,6 +141,21 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
             }
         }
+    }
+
+    private fun scrollToUnseenSeparatorOrBottom(messageHolders: List<MessageHolderViewState>) {
+        for ((index, message) in messageHolders.withIndex()) {
+            (message as? MessageHolderViewState.Separator)?.let {
+                if (it.messageHolderType.isUnseenSeparatorHolder()) {
+                    (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(index, recyclerView.measuredHeight / 4)
+                    return
+                }
+            }
+        }
+
+        recyclerView.layoutManager?.scrollToPosition(
+            messageHolders.size
+        )
     }
 
     fun scrollToBottomIfNeeded(
@@ -147,6 +181,21 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         ) {
             recyclerView.scrollToPosition(listSizeAfterDispatch)
         }
+    }
+
+    private fun scrollToPreviousPosition(
+        callback: (() -> Unit)? = null,
+    ) {
+        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
+        val listSizeBeforeDispatch = messages.size
+        val diffToBottom = listSizeBeforeDispatch - lastVisibleItemPositionBeforeDispatch
+
+        if (callback != null) {
+            callback()
+        }
+
+        val listSizeAfterDispatch = messages.size
+        recyclerView.scrollToPosition(listSizeAfterDispatch - diffToBottom)
     }
 
     fun forceScrollToBottom() {
@@ -445,12 +494,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.dispatchers,
                 viewModel.audioPlayerController,
                 imageLoader,
-                viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
-                onSphinxInteractionListener
+                onSphinxInteractionListener,
+                onRowLayoutListener
             )
 
             observeAudioAttachmentState()

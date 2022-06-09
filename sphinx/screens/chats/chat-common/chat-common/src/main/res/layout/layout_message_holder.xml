@@ -18,6 +18,16 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
+    <include
+        android:id="@+id/include_message_type_separator_holder"
+        layout="@layout/layout_message_type_separator_holder"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
     <!-- Group Action Indicator  -->
     <include
         android:id="@+id/include_message_type_group_action_holder"

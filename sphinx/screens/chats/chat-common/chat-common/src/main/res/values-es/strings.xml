@@ -20,6 +20,10 @@
     <string name="send_message_empty_content_error">Mensaje o Archivo adjunto requeridos</string>
     <string name="send_message_empty_price_error">Precio requerido</string>
 
+    <!--  Separators  -->
+    <string name="unseen_messages">Nuevo Mensajes</string>
+    <string name="today">Hoy</string>
+
     <!--  Message type invoices  -->
     <string name="request_expired">Solicitud caducada</string>
     <string name="request_expiration">Expira: %s</string>

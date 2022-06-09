@@ -35,8 +35,8 @@ import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.InvoiceLinesHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -350,6 +350,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             contactRepository.getContactByPubKey(it).firstOrNull()
         } ?: null
 
+        var unseenSeparatorAdded = false
+
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
         withContext(io) {
@@ -386,6 +388,37 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     openSentPaidInvoicesCount > 0,
                     openReceivedPaidInvoicesCount > 0
                 )
+
+                if (!message.seen.isTrue() && !sent && !unseenSeparatorAdded) {
+                    newList.add(
+                        MessageHolderViewState.Separator(
+                            MessageHolderType.UnseenSeparator,
+                            null,
+                            chat,
+                            tribeAdmin,
+                            BubbleBackground.Gone(setSpacingEqual = true),
+                            invoiceLinesHolderViewState,
+                            InitialHolderViewState.None,
+                            accountOwner = { owner }
+                        )
+                    )
+                    unseenSeparatorAdded = true
+                }
+
+                if (previousMessage == null || message.date.isDifferentDayThan(previousMessage.date)) {
+                    newList.add(
+                        MessageHolderViewState.Separator(
+                            MessageHolderType.DateSeparator,
+                            message.date,
+                            chat,
+                            tribeAdmin,
+                            BubbleBackground.Gone(setSpacingEqual = true),
+                            invoiceLinesHolderViewState,
+                            InitialHolderViewState.None,
+                            accountOwner = { owner }
+                        )
+                    )
+                }
 
                 val isDeleted = message.status.isDeleted()
 
