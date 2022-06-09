@@ -628,7 +628,7 @@ WHERE id < 0
 ORDER BY id
 LIMIT 1;
 
-messageGetAllToShowByChatId:
+messageGetAllToShowByChatIdWithLimit:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
@@ -650,6 +650,28 @@ AND (
 )
 ORDER BY date DESC
 LIMIT ?;
+
+messageGetAllToShowByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND (
+    type = 0 OR
+    type = 2 OR
+    type = 3 OR
+    type = 5 OR
+    type = 6 OR
+    type = 14 OR
+    type = 15 OR
+    type = 16 OR
+    type = 19 OR
+    type = 20 OR
+    type = 21 OR
+    type = 22 OR
+    type = 25 OR
+    (type = 29 AND reply_uuid IS NULL)
+)
+ORDER BY date DESC;
 
 messageGetUnseenIncomingMessageCountByChatId:
 SELECT COUNT(*)
@@ -673,6 +695,14 @@ SELECT SUM(amount)
 FROM messageDbo
 WHERE (chat_id IS NULL OR chat_id = 0)
 AND (message_content LIKE :message_content1 OR message_content LIKE :message_content2);
+
+messagesSearchByTerm:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND status != 5
+AND LOWER(message_content_decrypted) LIKE ?
+ORDER BY date DESC;
 
 messageUpdateSeenByChatId:
 UPDATE messageDbo

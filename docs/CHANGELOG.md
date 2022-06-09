@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha57 (2022-06-09)
+- Adds day separator rows on chat
+- Adds unseen messages separator row on chat
+- Adds support for chat messages search
+
 # Version 1.0.0-alpha56 (2022-05-18)
  - Fixes issue about tribe message price being reset
  - Fixes issue about messages boosts profile pictures

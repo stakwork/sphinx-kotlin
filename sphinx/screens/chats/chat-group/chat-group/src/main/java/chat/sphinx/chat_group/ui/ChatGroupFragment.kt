@@ -1,6 +1,7 @@
 package chat.sphinx.chat_group.ui
 
 import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -25,9 +26,19 @@ internal class ChatGroupFragment: ChatFragment<
     override val footerBinding: LayoutChatFooterBinding by viewBinding(
         LayoutChatFooterBinding::bind, R.id.include_chat_group_footer
     )
+    override val searchFooterBinding: LayoutChatSearchFooterBinding by viewBinding(
+        LayoutChatSearchFooterBinding::bind, R.id.include_chat_group_search_footer
+    )
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_group_header
     )
+    override val searchHeaderBinding: LayoutChatSearchHeaderBinding by viewBinding(
+        LayoutChatSearchHeaderBinding::bind, R.id.include_chat_group_search_header
+    )
+
+    override val recordingAudioContainer: ConstraintLayout
+        get() = binding.layoutConstraintRecordingAudioContainer
+
     override val recordingCircleBinding: LayoutChatRecordingCircleBinding by viewBinding(
         LayoutChatRecordingCircleBinding::bind, R.id.include_chat_recording_circle
     )
@@ -54,6 +65,10 @@ internal class ChatGroupFragment: ChatFragment<
 
     override val callMenuBinding: LayoutMenuBottomBinding by viewBinding(
         LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_call
+    )
+
+    override val moreMenuBinding: LayoutMenuBottomBinding by viewBinding(
+        LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_more
     )
 
     override val menuEnablePayments: Boolean
