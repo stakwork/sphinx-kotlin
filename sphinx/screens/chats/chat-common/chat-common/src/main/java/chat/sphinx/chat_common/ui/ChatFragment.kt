@@ -823,11 +823,6 @@ abstract class ChatFragment<
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.readMessages()
-    }
-
     override fun getMotionLayouts(): Array<MotionLayout> {
         return arrayOf(menuBinding.root)
     }
