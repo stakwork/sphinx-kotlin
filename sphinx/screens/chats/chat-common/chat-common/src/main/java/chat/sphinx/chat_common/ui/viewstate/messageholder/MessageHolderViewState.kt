@@ -58,6 +58,7 @@ internal sealed class MessageHolderViewState(
     val background: BubbleBackground,
     val invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
     val initialHolder: InitialHolderViewState,
+    var highlightedText: String?,
     private val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>?,
     private val accountOwner: () -> Contact,
     private val urlLinkPreviewsEnabled: Boolean,
@@ -75,6 +76,16 @@ internal sealed class MessageHolderViewState(
             )
         }
     }
+
+    val searchHighlightedStatus: LayoutState.SearchHighlightedStatus?
+    get() = if (highlightedText != null && highlightedText?.isEmpty() == false) {
+                LayoutState.SearchHighlightedStatus(
+                    highlightedText!!
+                )
+            } else {
+                null
+            }
+
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
         if (
@@ -632,6 +643,7 @@ internal sealed class MessageHolderViewState(
         tribeAdmin: Contact?,
         background: BubbleBackground,
         invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
+        highlightedText: String?,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         urlLinkPreviewsEnabled: Boolean,
@@ -647,6 +659,7 @@ internal sealed class MessageHolderViewState(
         background,
         invoiceLinesHolderViewState,
         InitialHolderViewState.None,
+        highlightedText,
         messageSenderInfo,
         accountOwner,
         urlLinkPreviewsEnabled,
@@ -662,6 +675,7 @@ internal sealed class MessageHolderViewState(
         background: BubbleBackground,
         invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         initialHolder: InitialHolderViewState,
+        highlightedText: String?,
         messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>,
         accountOwner: () -> Contact,
         urlLinkPreviewsEnabled: Boolean,
@@ -677,6 +691,7 @@ internal sealed class MessageHolderViewState(
         background,
         invoiceLinesHolderViewState,
         initialHolder,
+        highlightedText,
         messageSenderInfo,
         accountOwner,
         urlLinkPreviewsEnabled,
@@ -703,6 +718,7 @@ internal sealed class MessageHolderViewState(
         background,
         invoiceLinesHolderViewState,
         initialHolder,
+        null,
         messageSenderInfo = { null },
         accountOwner,
         false,

@@ -2043,8 +2043,15 @@ abstract class SphinxRepository(
 
     override fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
+
         emitAll(
-            queries.messageGetAllToShowByChatId(chatId, limit)
+            (
+                if (limit > 0) {
+                    queries.messageGetAllToShowByChatIdWithLimit(chatId, limit)
+                } else {
+                    queries.messageGetAllToShowByChatId(chatId)
+                }
+            )
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->
@@ -2139,6 +2146,24 @@ abstract class SphinxRepository(
                 }
             }
             .distinctUntilChanged()
+
+    override fun searchMessagesBy(chatId: ChatId, term: String): Flow<List<Message>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messagesSearchByTerm(
+                    chatId,
+                    "%${term.lowercase()}%"
+                )
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        messageDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
 
     override fun getTribeLastMemberRequestByContactId(
         contactId: ContactId,

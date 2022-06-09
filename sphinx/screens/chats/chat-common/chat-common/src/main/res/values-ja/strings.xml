@@ -154,6 +154,15 @@
     <string name="bottom_menu_call_header_text">コール方法</string>
     <string name="bottom_menu_call_option_audio">音声</string>
     <string name="bottom_menu_call_option_video_or_audio">動画または音声</string>
+
+    <string name="bottom_menu_more_header_text">Chat Options</string>
+    <string name="bottom_menu_more_option_call">Create Call</string>
+    <string name="bottom_menu_more_option_share">Share Tribe Link</string>
+    <string name="bottom_menu_more_option_search">Search Messages</string>
+
+    <string name="searching_messages">Searching...</string>
+    <string name="results_found">%d Results Found</string>
+
     <string name="slide_to_cancel">&lt;&lt; スライドするとキャンセルできます</string>
     <string name="recording_permission_granted">録音が許可されました</string>
     <string name="recording_permission_required">録音許可を取ってください</string>

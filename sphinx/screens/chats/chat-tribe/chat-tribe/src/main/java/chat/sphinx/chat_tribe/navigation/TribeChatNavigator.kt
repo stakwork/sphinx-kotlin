@@ -13,4 +13,10 @@ abstract class TribeChatNavigator(
 {
     abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, currentEpisodeDuration: Long)
     abstract suspend fun toTribeDetailScreen(chatId: ChatId)
+
+    abstract suspend fun toShareTribeScreen(
+        qrText: String,
+        viewTitle: String,
+        description: String? = null,
+    )
 }

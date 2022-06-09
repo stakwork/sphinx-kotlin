@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/default_layout_margin"
+    android:paddingHorizontal="@dimen/default_layout_margin"
     android:elevation="@dimen/default_elevation">
 
     <include

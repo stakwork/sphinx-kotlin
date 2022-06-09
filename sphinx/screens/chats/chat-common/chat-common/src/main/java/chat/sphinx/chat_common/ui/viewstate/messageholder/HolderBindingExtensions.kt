@@ -107,11 +107,12 @@ internal fun  LayoutMessageHolderBinding.setView(
         }.let { job ->
             holderJobs.add(job)
         }
-
+        setSearchHighlightedStatus(
+            viewState.searchHighlightedStatus
+        )
         setMessagesSeparator(
             viewState.messagesSeparator
         )
-
         setStatusHeader(
             viewState.statusHeader,
             holderJobs,
@@ -734,6 +735,20 @@ internal inline fun LayoutMessageHolderBinding.setMessagesSeparator(
             }
         }
     }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setSearchHighlightedStatus(
+    searchStatus: LayoutState.SearchHighlightedStatus?
+) {
+    root.setBackgroundColor(
+        if (searchStatus != null) {
+            root.context.getColor(R.color.lightDivider)
+        } else {
+            root.context.getColor(android.R.color.transparent)
+        }
+    )
 }
 
 @MainThread

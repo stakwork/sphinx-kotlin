@@ -38,6 +38,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.notifyAll
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
@@ -199,8 +200,60 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     fun forceScrollToBottom() {
-        val listSizeAfterDispatch = messages.size
-        recyclerView.scrollToPosition(listSizeAfterDispatch)
+        recyclerView.scrollToPosition(messages.size)
+    }
+
+    fun highlightAndScrollToSearchResult(
+        message: Message,
+        previousMessage: Message?,
+        searchTerm: String
+    ) {
+        var previousMessageUpdated = (previousMessage == null)
+        var indexToScroll: Int? = null
+
+        for ((index, messageHolderVS) in messages.withIndex()) {
+            if (messageHolderVS.message?.id == previousMessage?.id && !previousMessageUpdated) {
+
+                (messageHolderVS as? MessageHolderViewState.Sent)?.let {
+                    it.highlightedText = null
+                } ?: (messageHolderVS as? MessageHolderViewState.Received)?.let {
+                    it.highlightedText = null
+                }
+
+                notifyItemChanged(index)
+
+                previousMessageUpdated = true
+            }
+
+            if (messageHolderVS.message?.id == message.id && indexToScroll == null) {
+
+                (messageHolderVS as? MessageHolderViewState.Sent)?.let {
+                    it.highlightedText = searchTerm
+                } ?: (messageHolderVS as? MessageHolderViewState.Received)?.let {
+                    it.highlightedText = searchTerm
+                }
+
+                notifyItemChanged(index)
+
+                indexToScroll = index
+            }
+
+            if (previousMessageUpdated) {
+                indexToScroll?.let {
+                    recyclerView.scrollToPosition(it)
+                    return
+                }
+            }
+        }
+    }
+
+    fun resetHighlighted() {
+        for ((index, messageHolderVS) in messages.withIndex()) {
+            if (messageHolderVS.highlightedText != null) {
+                messageHolderVS.highlightedText = null
+                notifyItemChanged(index)
+            }
+        }
     }
 
     override fun onLayoutChange(

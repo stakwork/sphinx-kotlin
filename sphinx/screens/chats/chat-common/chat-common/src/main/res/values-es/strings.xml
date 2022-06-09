@@ -155,6 +155,15 @@
     <string name="bottom_menu_call_header_text">Opciones de LLamada</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video o Audio</string>
+
+    <string name="bottom_menu_more_header_text">Opciones del Chat</string>
+    <string name="bottom_menu_more_option_call">Crear Llamada</string>
+    <string name="bottom_menu_more_option_share">Compartir Link de la Tribu</string>
+    <string name="bottom_menu_more_option_search">Buscar Mensajes</string>
+
+    <string name="searching_messages">Buscando...</string>
+    <string name="results_found">%d Resultados Encontrados</string>
+
     <string name="slide_to_cancel">&lt;&lt; Desliza para cancelar</string>
     <string name="recording_permission_granted">Permiso de grabación concedido</string>
     <string name="recording_permission_required">Se requieren permisos de grabación</string>
