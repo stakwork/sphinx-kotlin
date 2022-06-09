@@ -75,18 +75,11 @@ internal sealed class MessageHolderViewState(
     }
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (
-            unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isSphinxText != true &&
-            message.messageMedia?.mediaType?.isImage != true && message.messageMedia?.mediaType?.isAudio != true &&
-            message.messageMedia?.mediaType?.isVideo != true
-        ) {
-            LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
+        null
+/*            LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
                 messageType = message.type,
                 gravityStart = this is Received,
-            )
-        } else {
-            null
-        }
+            )*/
     }
 
     val statusHeader: LayoutState.MessageStatusHeader? by lazy(LazyThreadSafetyMode.NONE) {
