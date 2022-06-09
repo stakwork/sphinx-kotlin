@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -11,6 +12,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip as PodcastClipObject
 import chat.sphinx.wrapper_message.PurchaseStatus
@@ -44,6 +46,11 @@ internal sealed class LayoutState private constructor() {
         val showExpiredLabel: Boolean,
         val showExpiresAtLabel: Boolean,
         val expirationTimestamp: String?,
+    ): LayoutState()
+
+    data class Separator(
+        val messageHolderType: MessageHolderType,
+        val date: DateTime?,
     ): LayoutState()
 
     data class GroupActionIndicator(

@@ -36,6 +36,9 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.before
+import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_common.util.getHHMMString
@@ -106,6 +109,9 @@ internal fun  LayoutMessageHolderBinding.setView(
         }
         setSearchHighlightedStatus(
             viewState.searchHighlightedStatus
+        )
+        setMessagesSeparator(
+            viewState.messagesSeparator
         )
         setStatusHeader(
             viewState.statusHeader,
@@ -625,7 +631,7 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         } ?: 0
 
         var bubbleWidth: Int = when {
-            viewState.message.shouldAdaptBubbleWidth -> {
+            viewState.message?.shouldAdaptBubbleWidth == true -> {
                 val textWidth = viewState.bubbleMessage?.let { nnBubbleMessage ->
                     (includeMessageHolderBubble.textViewMessageText.paint.measureText(
                         nnBubbleMessage.text ?: getString(R.string.decryption_error)
@@ -654,13 +660,13 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                     .coerceAtLeast(amountWidth)
                     .coerceAtLeast(imageWidth)
             }
-            viewState.message.isPodcastBoost -> {
+            viewState.message?.isPodcastBoost == true -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
             }
-            viewState.message.isExpiredInvoice -> {
+            viewState.message?.isExpiredInvoice == true -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_expired_invoice_width)
             }
-            viewState.message.isSphinxCallLink -> {
+            viewState.message?.isSphinxCallLink == true -> {
                 (bubbleFixedWidth * 0.8F).toInt()
             }
             else -> {
@@ -689,6 +695,43 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                 spaceMessageHolderRight.updateLayoutParams {
                     width = defaultSentRightMargin
                 }
+            }
+            is MessageHolderViewState.Separator -> { }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setMessagesSeparator(
+    messagesSeparator: LayoutState.Separator?,
+) {
+    includeMessageTypeSeparatorHolder.apply {
+        if (messagesSeparator == null) {
+            root.gone
+        } else {
+            root.visible
+
+            if (messagesSeparator.messageHolderType == MessageHolderType.DateSeparator) {
+                includeMessageTypeUnseenSeparator.root.gone
+
+                includeMessageTypeDateSeparator.apply {
+                    root.visible
+
+                    textViewDateSeparator.text = messagesSeparator.date?.let { date ->
+                        when {
+                            DateTime.getToday00().before(date) -> {
+                                getString(R.string.today)
+                            }
+                            else -> {
+                                DateTime.getFormatMMMEEEdd().format(date.value)
+                            }
+                        }
+                    } ?: ""
+                }
+            } else if (messagesSeparator.messageHolderType == MessageHolderType.UnseenSeparator) {
+                includeMessageTypeUnseenSeparator.root.visible
+                includeMessageTypeDateSeparator.root.gone
             }
         }
     }

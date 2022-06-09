@@ -20,6 +20,10 @@
     <string name="send_message_empty_content_error">メッセージを入力するか、ファイルを添付してください</string>
     <string name="send_message_empty_price_error">価格を設定してください</string>
 
+    <!--  Separators  -->
+    <string name="unseen_messages">Unseen Messages</string>
+    <string name="today">Today</string>
+
     <!--  Message type invoices  -->
     <string name="request_expired">リクエストの有効期限が切れています</string>
     <string name="request_expiration">有効期限: %s</string>
