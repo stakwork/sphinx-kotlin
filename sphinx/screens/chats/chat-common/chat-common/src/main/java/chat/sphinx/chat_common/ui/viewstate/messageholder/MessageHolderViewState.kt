@@ -68,7 +68,6 @@ internal sealed class MessageHolderViewState(
     companion object {
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
-                MessageType.Attachment,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
             )
