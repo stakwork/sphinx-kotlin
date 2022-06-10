@@ -341,6 +341,26 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val bubbleFileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isPdf) {
+                nnMessageMedia.localFile?.let { nnFile ->
+                    LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
+                        "Default Name",
+                        nnFile.length().toInt()
+                    )
+                } ?: run {
+                    onBindDownloadMedia.invoke()
+
+                    LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable(message.id)
+
+                }
+            } else {
+                null
+            }
+        }
+    }
+
     val bubblePodcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost? by lazy(LazyThreadSafetyMode.NONE) {
         message.feedBoost?.let { podBoost ->
             LayoutState.Bubble.ContainerSecond.PodcastBoost(

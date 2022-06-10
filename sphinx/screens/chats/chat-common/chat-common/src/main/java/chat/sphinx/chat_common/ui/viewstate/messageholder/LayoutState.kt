@@ -154,12 +154,10 @@ internal sealed class LayoutState private constructor() {
                 data class FileAvailable(
                     val fileName: String,
                     val fileSize: Int,
-                    val media: MessageMedia?
                 ): FileAttachment()
 
                 data class FileUnavailable(
                     val messageId: MessageId,
-                    val showPaidOverlay: Boolean
                 ): FileAttachment()
             }
 
