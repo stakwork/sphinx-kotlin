@@ -347,7 +347,8 @@ internal sealed class MessageHolderViewState(
                 nnMessageMedia.localFile?.let { nnFile ->
                     LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
                         "Default Name",
-                        nnFile.length().toInt()
+                        nnFile.length().toInt(),
+                        nnFile.extension
                     )
                 } ?: run {
                     onBindDownloadMedia.invoke()

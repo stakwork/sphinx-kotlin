@@ -154,6 +154,7 @@ internal sealed class LayoutState private constructor() {
                 data class FileAvailable(
                     val fileName: String,
                     val fileSize: Int,
+                    val fileExtension: String
                 ): FileAttachment()
 
                 data class FileUnavailable(

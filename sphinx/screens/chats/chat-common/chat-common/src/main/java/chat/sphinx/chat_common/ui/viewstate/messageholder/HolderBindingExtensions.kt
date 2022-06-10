@@ -1608,8 +1608,11 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
             is LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable -> {
                 root.visible
 
-                textViewAttachmentFileName.text = fileAttachment.fileName
-                textViewAttachmentFileSize.text = fileAttachment.fileSize.toString()
+                val fileName = fileAttachment.fileName + "." + fileAttachment.fileExtension
+                val fileSize = fileAttachment.fileSize.toString() + " KB"
+
+                textViewAttachmentFileName.text = fileName
+                textViewAttachmentFileSize.text = fileSize
             }
             is LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable -> {
                 root.visible
