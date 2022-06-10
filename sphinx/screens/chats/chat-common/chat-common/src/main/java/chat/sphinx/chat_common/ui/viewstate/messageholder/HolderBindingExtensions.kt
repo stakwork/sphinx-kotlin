@@ -1592,6 +1592,35 @@ internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
+    fileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment?
+) {
+    includeMessageHolderBubble.includeMessageTypeFileAttachment.apply {
+
+        @Exhaustive
+        when (fileAttachment){
+            null -> {
+                root.gone
+            }
+            is LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable -> {
+                root.visible
+
+                textViewAttachmentFileName.text = fileAttachment.fileName
+                textViewAttachmentFileSize.text = fileAttachment.fileSize.toString()
+            }
+            is LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable -> {
+                root.visible
+
+                progressBarAttachmentFileDownload.visible
+            }
+        }
+
+    }
+
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePodcastBoost(
     podcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost?
 ) {
