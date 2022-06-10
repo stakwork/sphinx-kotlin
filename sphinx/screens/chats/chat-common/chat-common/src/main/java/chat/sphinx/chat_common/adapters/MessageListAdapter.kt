@@ -318,6 +318,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
 
+                includeMessageTypeFileAttachment.apply {
+
+                }
+
                 includePaidMessageReceivedDetailsHolder.apply {
                     buttonPayAttachment.setOnClickListener {
                         currentViewState?.message?.let { message ->

@@ -1607,6 +1607,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
             }
             is LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable -> {
                 root.visible
+                progressBarAttachmentFileDownload.gone
+                buttonAttachmentFileDownload.visible
 
                 val fileName = fileAttachment.fileName + "." + fileAttachment.fileExtension
                 val fileSize = fileAttachment.fileSize.toString() + " KB"
