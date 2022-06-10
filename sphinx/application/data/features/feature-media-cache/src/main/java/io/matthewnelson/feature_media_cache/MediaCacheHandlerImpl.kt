@@ -35,6 +35,7 @@ class MediaCacheHandlerImpl(
         const val AUDIO_CACHE_DIR = "sphinx_audio_cache"
         const val IMAGE_CACHE_DIR = "sphinx_image_cache"
         const val VIDEO_CACHE_DIR = "sphinx_video_cache"
+        const val PDF_CACHE_DIR = "sphinx_pdf_cache"
         const val PAID_TEXT_CACHE_DIR = "sphinx_paid_text_cache"
 
         const val DATE_FORMAT = "yyy_MM_dd_HH_mm_ss_SSS"
@@ -42,6 +43,7 @@ class MediaCacheHandlerImpl(
         const val AUD = "AUD"
         const val IMG = "IMG"
         const val VID = "VID"
+        const val PDF = "PDF"
         const val TXT = "TXT"
 
         private val cacheDirLock = Object()
@@ -62,6 +64,12 @@ class MediaCacheHandlerImpl(
     private val videoCache: File by lazy {
         File(cacheDir, VIDEO_CACHE_DIR).also {
             it.mkdirs()
+        }
+    }
+
+    private val pdfCache: File by lazy {
+        File(cacheDir, PDF_CACHE_DIR).also {
+            it.mkdir()
         }
     }
 
@@ -102,8 +110,17 @@ class MediaCacheHandlerImpl(
                 null
             }
             is MediaType.Pdf -> {
-                // TODO: Implement
-                null
+                mediaType.value.split("/").lastOrNull()?.let { fileType ->
+                    when {
+                        fileType.contains("pdf", ignoreCase = true) -> {
+                            createPdfFile("pdf")
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+                }
+
             }
             is MediaType.Text -> {
                 // TODO: Implement
@@ -148,6 +165,10 @@ class MediaCacheHandlerImpl(
 
     override fun createVideoFile(extension: String): File =
         createFileImpl(videoCache, VID, extension)
+
+    override fun createPdfFile(extension: String): File =
+        createFileImpl(
+            pdfCache, PDF, extension)
 
     override fun createPaidTextFile(extension: String): File =
         createFileImpl(paidTextCache, TXT, extension)

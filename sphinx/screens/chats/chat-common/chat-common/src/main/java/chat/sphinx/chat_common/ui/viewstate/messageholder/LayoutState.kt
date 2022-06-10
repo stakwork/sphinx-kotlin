@@ -149,6 +149,20 @@ internal sealed class LayoutState private constructor() {
                 data class FileUnavailable(val showPaidOverlay: Boolean): VideoAttachment()
             }
 
+            sealed class FileAttachment: ContainerSecond(){
+
+                data class FileAvailable(
+                    val fileName: String,
+                    val fileSize: Int,
+                    val media: MessageMedia?
+                ): FileAttachment()
+
+                data class FileUnavailable(
+                    val messageId: MessageId,
+                    val showPaidOverlay: Boolean
+                ): FileAttachment()
+            }
+
             data class PodcastBoost(
                 val amount: Sat,
             ): ContainerSecond()
