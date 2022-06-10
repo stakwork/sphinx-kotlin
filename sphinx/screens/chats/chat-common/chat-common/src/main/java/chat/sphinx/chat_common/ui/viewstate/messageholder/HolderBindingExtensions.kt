@@ -199,6 +199,9 @@ internal fun  LayoutMessageHolderBinding.setView(
             setBubbleVideoAttachment(
                 viewState.bubbleVideoAttachment,
             )
+            setBubbleFileAttachment(
+                viewState.bubbleFileAttachment
+            )
             setUnsupportedMessageTypeLayout(
                 viewState.unsupportedMessageType
             )
