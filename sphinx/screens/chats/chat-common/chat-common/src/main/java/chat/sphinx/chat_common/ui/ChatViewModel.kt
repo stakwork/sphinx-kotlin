@@ -1626,7 +1626,49 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 attachmentUrlAndMessageMedia?.second?.let { messageMedia ->
                     originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
-                        originalMessageMessageMedia?.retrieveMediaStorageUri()
+                        originalMessageMessageMedia?.retrieveMediaStorageUri()?.let { mediaStorageUri ->
+                            app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
+                                val inputStream: InputStream? =
+                                    if (originalMessageMessageMedia?.localFile != null) {
+                                        FileInputStream(originalMessageMessageMedia?.localFile)
+                                    }
+                                else {
+                                    messageMedia.retrieveRemoteMediaInputStream(
+                                        attachmentUrlAndMessageMedia.first,
+                                        memeServerTokenHandler,
+                                        memeInputStreamHandler
+                                    )
+                                }
+
+                                try {
+                                    inputStream?.use { nnInputStream ->
+                                        app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
+                                            if (savedFileOutputStream != null) {
+                                                nnInputStream.copyTo(savedFileOutputStream, 1024)
+
+                                                submitSideEffect(
+                                                    ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
+                                                )
+                                                return@launch
+                                            }
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    LOG.e(TAG, "Failed to store file: ", e)
+                                }
+
+                                submitSideEffect(
+                                    ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
+                                )
+                                try {
+                                    app.contentResolver.delete(savedFileUri, null, null)
+                                } catch (fileE: Exception) {
+                                    LOG.e(TAG, "Failed to delete file: ", fileE)
+                                }
+
+                            }
+
+                        }
 
                     }
                 }
