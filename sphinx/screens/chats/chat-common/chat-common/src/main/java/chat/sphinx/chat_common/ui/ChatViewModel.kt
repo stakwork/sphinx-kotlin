@@ -1749,7 +1749,7 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues? 
         return ContentValues().apply {
             put(MediaStore.Files.FileColumns.TITLE, message.id.value)
             put(MediaStore.Files.FileColumns.DISPLAY_NAME, message.senderAlias?.value)
-            put(MediaStore.Files.FileColumns.MIME_TYPE, "files/pdf")
+            put(MediaStore.Files.FileColumns.MIME_TYPE, "file/pdf")
         }
     }
     return null
