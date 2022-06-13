@@ -1721,6 +1721,9 @@ inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
         this.mediaType.isAudio -> {
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         }
+        this.mediaType.isPdf -> {
+            MediaStore.Files.getContentUri("external")
+        }
         else -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI
