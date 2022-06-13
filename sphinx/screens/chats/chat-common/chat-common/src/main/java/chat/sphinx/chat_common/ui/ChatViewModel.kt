@@ -1551,7 +1551,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     fun saveFile(
         message: Message,
         drawable: Drawable?
-    ) {1
+    ) {
         viewModelScope.launch(mainImmediate) {
             if (message.isMediaAttachmentAvailable) {
 
