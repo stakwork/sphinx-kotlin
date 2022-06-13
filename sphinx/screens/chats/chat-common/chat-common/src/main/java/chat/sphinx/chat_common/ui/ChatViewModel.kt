@@ -1614,6 +1614,28 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
+    fun saveAttachmentFile(
+        message: Message
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            if (message.isFileAttachmentAvailable) {
+
+                val originalMessageMessageMedia = message.messageMedia
+
+                val attachmentUrlAndMessageMedia = message.retrievePdfUrlAndMessageMedia()
+
+                attachmentUrlAndMessageMedia?.second?.let { messageMedia ->
+                    originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
+                        originalMessageMessageMedia?.retrieveMediaStorageUri()
+
+                    }
+                }
+
+            }
+        }
+
+    }
+
     fun showAttachmentImageFullscreen(message: Message) {
         message.retrieveImageUrlAndMessageMedia()?.let {
             updateAttachmentFullscreenViewState(
@@ -1722,6 +1744,12 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues? 
             put(MediaStore.Video.Media.TITLE, message.id.value)
             put(MediaStore.Video.Media.DISPLAY_NAME, message.senderAlias?.value)
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+        }
+    } else if (this.mediaType.isPdf) {
+        return ContentValues().apply {
+            put(MediaStore.Files.FileColumns.TITLE, message.id.value)
+            put(MediaStore.Files.FileColumns.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Files.FileColumns.MIME_TYPE, "files/pdf")
         }
     }
     return null
