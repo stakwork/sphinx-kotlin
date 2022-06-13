@@ -14,11 +14,13 @@
         android:id="@+id/text_view_attachment_file_icon"
         android:layout_width="@dimen/icon_file_attachment_xy"
         android:layout_height="@dimen/icon_file_attachment_xy"
+        android:layout_marginStart="16dp"
         android:fontFamily="@font/material_icons_regular"
         android:text="@string/material_icon_name_file_attachment"
         android:textColor="@color/primaryText"
         android:textSize="@dimen/icon_file_attachment_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_attachment_file_main_info_group"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

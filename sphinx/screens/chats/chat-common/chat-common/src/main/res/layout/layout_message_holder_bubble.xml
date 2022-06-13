@@ -60,12 +60,15 @@
             tools:visibility="gone" />
 
         <!--  Audio Attachment  -->
+
+        <!--  Video Attachment  -->
         <include
             android:id="@+id/include_message_type_podcast_clip"
             layout="@layout/layout_message_type_podcast_clip"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp"
             tools:visibility="visible" />
 
-        <!--  Video Attachment  -->
         <include
             android:id="@+id/include_message_type_video_attachment"
             layout="@layout/layout_message_type_attachment_video"
