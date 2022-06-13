@@ -1763,9 +1763,6 @@ inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
         this.mediaType.isAudio -> {
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         }
-        this.mediaType.isPdf -> {
-            MediaStore.Files.getContentUri("external")
-        }
         else -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 MediaStore.Downloads.EXTERNAL_CONTENT_URI
@@ -1792,9 +1789,9 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues? 
         }
     } else if (this.mediaType.isPdf) {
         return ContentValues().apply {
-            put(MediaStore.Files.FileColumns.TITLE, message.id.value)
-            put(MediaStore.Files.FileColumns.DISPLAY_NAME, message.senderAlias?.value)
-            put(MediaStore.Files.FileColumns.MIME_TYPE, "file/pdf")
+            put(MediaStore.Downloads.TITLE, message.id.value)
+            put(MediaStore.Downloads.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
         }
     }
     return null
