@@ -719,7 +719,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
 
-                            val inputStream = memeInputStreamHandler.retrieveMediaInputStream(
+                            val streamAndFileName = memeInputStreamHandler.retrieveMediaInputStream(
                                 urlAndMedia.first,
                                 token,
                                 mediaKeyDecrypted
@@ -728,7 +728,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             var text: String? = null
 
                             viewModelScope.launch(io) {
-                                text = inputStream?.bufferedReader().use { it?.readText() }
+                                text = streamAndFileName?.first?.bufferedReader().use { it?.readText() }
                             }.join()
 
                             text?.let { nnText ->
@@ -1846,7 +1846,7 @@ suspend inline fun MessageMedia.retrieveRemoteMediaInputStream(
                 url,
                 authenticationToken,
                 mediaKeyDecrypted
-            )
+            )?.first
         }
     }
 }

@@ -36,6 +36,7 @@ class MediaCacheHandlerImpl(
         const val IMAGE_CACHE_DIR = "sphinx_image_cache"
         const val VIDEO_CACHE_DIR = "sphinx_video_cache"
         const val PAID_TEXT_CACHE_DIR = "sphinx_paid_text_cache"
+        const val GENERIC_FILES_CACHE_DIR = "sphinx_files_cache"
 
         const val DATE_FORMAT = "yyy_MM_dd_HH_mm_ss_SSS"
 
@@ -43,6 +44,7 @@ class MediaCacheHandlerImpl(
         const val IMG = "IMG"
         const val VID = "VID"
         const val TXT = "TXT"
+        const val FILE = "FILE"
 
         private val cacheDirLock = Object()
     }
@@ -71,7 +73,16 @@ class MediaCacheHandlerImpl(
         }
     }
 
-    override fun createFile(mediaType: MediaType): File? {
+    private val genericFilesCache: File by lazy {
+        File(cacheDir, GENERIC_FILES_CACHE_DIR).also {
+            it.mkdirs()
+        }
+    }
+
+    override fun createFile(
+        mediaType: MediaType,
+        extension: String?
+    ): File? {
         return when (mediaType) {
             is MediaType.Audio -> {
                 mediaType.value.split("/").lastOrNull()?.let { fileType ->
@@ -135,7 +146,7 @@ class MediaCacheHandlerImpl(
                 }
             }
             is MediaType.Unknown -> {
-                null
+                createGenericFile(extension ?: "txt")
             }
         }
     }
@@ -151,6 +162,9 @@ class MediaCacheHandlerImpl(
 
     override fun createPaidTextFile(extension: String): File =
         createFileImpl(paidTextCache, TXT, extension)
+
+    private fun createGenericFile(extension: String): File =
+        createFileImpl(genericFilesCache, FILE, extension)
 
     private fun createFileImpl(cacheDir: File, prefix: String, extension: String): File {
         if (!cacheDir.exists()) {
