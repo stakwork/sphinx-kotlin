@@ -11,25 +11,25 @@
 
     <string name="unsupported_message_type_placeholder_text">%1$s: 向未使用</string>
     <string name="deleted_message_label_text">訊息已刪除</string>
-    <string name="flagged_message_label_text">This message has been flagged</string>
+    <string name="flagged_message_label_text">消息已被標記</string>
     <string name="join_call_header_label_text">加入通話…</string>
 
     <string name="failed_message">傳送訊息 失敗</string>
 
-    <string name="send_message_empty_destination_error">Contact or Chat is required</string>
-    <string name="send_message_empty_content_error">Message or Attachment is required</string>
-    <string name="send_message_empty_price_error">Price is required</string>
+    <string name="send_message_empty_destination_error">需要聯繫或聊天</string>
+    <string name="send_message_empty_content_error">需要信息或附件</string>
+    <string name="send_message_empty_price_error">價格為必填項</string>
 
     <!--  Separators  -->
     <string name="unseen_messages">Unseen Messages</string>
     <string name="today">Today</string>
 
     <!--  Message type invoices  -->
-    <string name="request_expired">REQUEST EXPIRED</string>
-    <string name="request_expiration">EXPIRES AT: %s</string>
-    <string name="invoice_paid_on">Invoice paid on %s</string>
-    <string name="alert_confirm_pay_chat_invoice_title">Confirm Paying Invoice</string>
-    <string name="alert_confirm_pay_chat_invoice_message">Are you sure you want to pay for this invoice?</string>
+    <string name="request_expired">請求已過期</string>
+    <string name="request_expiration">到期時間: %s</string>
+    <string name="invoice_paid_on">發票已付 %s</string>
+    <string name="alert_confirm_pay_chat_invoice_title">確認付款發票</string>
+    <string name="alert_confirm_pay_chat_invoice_message">您確定要為發票付款嗎?</string>
 
     <!--  Message type placeholder display names  -->
     <string name="placeholder_display_name_message_type_attachment">附加檔案 訊息</string>
@@ -58,7 +58,7 @@
     <!-- Replies -->
     <string name="reply_message_media_content_description">媒體內容</string>
     <string name="reply_message_close_button_content_description">關閉</string>
-    <string name="share_audio_clip">"Share audio clip:"</string>
+    <string name="share_audio_clip">"分享音頻片段:"</string>
 
     <!--  Purchase Status Labels: Paid Message Details  -->
     <string name="purchase_status_label_paid_message_details_pending">等待</string>
@@ -72,7 +72,7 @@
     <string name="purchase_status_label_paid_message_sent_status_accepted">成功</string>
     <string name="purchase_status_label_paid_message_sent_status_denied">失敗</string>
     <string name="purchase_status_label_paid_message_sent_status_processing">支付中…</string>
-    <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
+    <string name="purchase_status_label_paid_message_sent_status_default">未知</string>
 
 
     <!--  Group Action  -->
@@ -99,13 +99,13 @@
     <string name="selected_message_menu_item_reply">回應</string>
     <string name="selected_message_menu_item_save_file">存檔</string>
     <string name="selected_message_menu_item_resend">重新發送</string>
-    <string name="selected_message_menu_item_flag">Flag</string>
+    <string name="selected_message_menu_item_flag">旗幟</string>
 
-    <string name="alert_confirm_flag_message_title">Confirm Flagging message</string>
-    <string name="alert_confirm_flag_message_message">Are you sure you want to flag this message? This action can not be undone</string>
+    <string name="alert_confirm_flag_message_title">確認標記信息</string>
+    <string name="alert_confirm_flag_message_message">確定要標記信息嗎？操作無法撤消</string>
 
-    <string name="alert_confirm_delete_message_title">Confirm Deleting message</string>
-    <string name="alert_confirm_delete_message_message">Are you sure you want to delete this message? This action can not be undone</string>
+    <string name="alert_confirm_delete_message_title">確認刪除信息</string>
+    <string name="alert_confirm_delete_message_message">確定要刪除這條信息嗎？操作無法撤消</string>
 
     <!-- Notify -->
     <string name="notify_boost_failure">Boost 支付失敗</string>
@@ -118,12 +118,12 @@
     <string name="attachment_send_header_image">傳送圖片</string>
     <string name="attachment_send_header_video">傳送影片</string>
     <string name="attachment_send_header_giphy">傳送 GIPHY</string>
-    <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
+    <string name="attachment_send_header_paid_message">發送付費信息</string>
 
     <!-- Pay Attachment -->
-    <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
-    <string name="paid_message_loading">LOADING MESSAGE...</string>
-    <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
+    <string name="paid_message_pay_to_unlock">付費解鎖信息</string>
+    <string name="paid_message_loading">加載信息...</string>
+    <string name="paid_message_unable_to_load">無法加載信息數據</string>
     <string name="attachment_price_label">費: </string>
     <string name="alert_confirm_pay_attachment_title">確認購物</string>
     <string name="alert_confirm_pay_attachment_message">確定買這品商品？</string>

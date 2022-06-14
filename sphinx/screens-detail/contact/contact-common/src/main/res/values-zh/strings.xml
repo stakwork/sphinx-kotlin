@@ -8,6 +8,6 @@
     <string name="new_contact_invalid_public_key_error">節點住址無效</string>
     <string name="new_contact_invalid_route_hint_error">秘密通路無效</string>
     <string name="failed_to_update_contact">無法保存聯繫人</string>
-    <string name="edit_contact_header_subscribe_button">Subscribe</string>
-    <string name="edit_contact_header_subscribed_button">Subscribed</string>
+    <string name="edit_contact_header_subscribe_button"> 訂閱</string>
+    <string name="edit_contact_header_subscribed_button"> 訂閱</string>
 </resources>

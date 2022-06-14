@@ -30,13 +30,13 @@
     <string name="failed_to_approve_member">接受會員失敗</string>
     <string name="failed_to_reject_member">拒絕會員失敗</string>
 
-    <string name="newsletter_article">NEWSLETTER ARTICLE</string>
+    <string name="newsletter_article"> 通訊文章</string>
 
-    <string name="subscribe">SUBSCRIBE</string>
-    <string name="unsubscribe">UNSUBSCRIBE</string>
-    <string name="feed_search_following_section">FOLLOWING</string>
-    <string name="feed_search_directory_section">DIRECTORY</string>
+    <string name="subscribe"> 訂閱</string>
+    <string name="unsubscribe"> 不訂閱</string>
+    <string name="feed_search_following_section"> 跟隨</string>
+    <string name="feed_search_directory_section"> 方向</string>
 
-    <string name="balance_too_low">Balance too low</string>
-    <string name="boost_amount_too_low">Boost amount must be greater than 0</string>
+    <string name="balance_too_low"> 平衡太低</string>
+    <string name="boost_amount_too_low"> 助推量必須大於0</string>
 </resources>
