@@ -846,7 +846,8 @@ messageMediaUpsert {
         media_key_decrypted,
         media_type,
         media_token,
-        local_file
+        local_file,
+        file_name
     )
     VALUES(
         :id,
@@ -855,7 +856,8 @@ messageMediaUpsert {
         :media_key_decrypted,
         :media_type,
         :media_token,
-        :local_file
+        :local_file,
+        :file_name
     );
 }
 

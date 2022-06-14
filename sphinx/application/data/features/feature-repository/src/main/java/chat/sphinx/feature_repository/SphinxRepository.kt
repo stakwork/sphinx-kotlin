@@ -2451,6 +2451,7 @@ abstract class SphinxRepository(
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
                                     media.third.file,
+                                    null
                                 )
                             }
 
@@ -2488,7 +2489,8 @@ abstract class SphinxRepository(
                                     provisionalId,
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file
+                                    media.third.file,
+                                    null
                                 )
                             }
                         }

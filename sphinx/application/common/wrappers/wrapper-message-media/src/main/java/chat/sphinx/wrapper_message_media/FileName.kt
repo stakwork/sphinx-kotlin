@@ -1,7 +1,5 @@
 package chat.sphinx.wrapper_message_media
 
-import okio.base64.decodeBase64ToArray
-
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.toFileName(): FileName? =
     try {
