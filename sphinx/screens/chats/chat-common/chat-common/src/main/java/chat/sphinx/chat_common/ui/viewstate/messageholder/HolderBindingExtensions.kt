@@ -199,11 +199,13 @@ internal fun  LayoutMessageHolderBinding.setView(
             setBubbleVideoAttachment(
                 viewState.bubbleVideoAttachment,
             )
+
             setBubbleFileAttachment(
                 viewState.bubbleFileAttachment
             )
             setUnsupportedMessageTypeLayout(
-                viewState.unsupportedMessageType
+                viewState.
+                unsupportedMessageType
             )
             setBubbleMessageLayout(
                 viewState.bubbleMessage,
@@ -1620,6 +1622,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
                 root.visible
 
                 progressBarAttachmentFileDownload.visible
+                progressBarAttachmentFileDownload.gone
             }
         }
 

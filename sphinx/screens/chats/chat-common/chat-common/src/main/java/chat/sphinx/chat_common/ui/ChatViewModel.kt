@@ -1793,6 +1793,13 @@ inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues? 
             put(MediaStore.Downloads.DISPLAY_NAME, message.senderAlias?.value)
             put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
         }
+
+    } else if (this.mediaType.isUnknown) {
+        return ContentValues().apply {
+            put(MediaStore.Downloads.TITLE, message.id.value)
+            put(MediaStore.Downloads.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Downloads.MIME_TYPE, mediaType.value)
+        }
     }
     return null
 }
