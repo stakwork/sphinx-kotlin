@@ -320,7 +320,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 includeMessageTypeFileAttachment.apply {
                     buttonAttachmentFileDownload.setOnClickListener {
                         currentViewState?.message?.let { message ->
-                            viewModel.saveAttachmentFile(message)
+                            viewModel.saveFile(message, null)
                         }
                     }
                 }
