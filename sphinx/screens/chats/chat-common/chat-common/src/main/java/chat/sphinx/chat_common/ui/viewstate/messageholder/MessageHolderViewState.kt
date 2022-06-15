@@ -23,7 +23,6 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashSet
 
@@ -312,7 +311,7 @@ internal sealed class MessageHolderViewState(
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageMedia?.let { nnMessageMedia ->
             if (nnMessageMedia.mediaType.isImage || message.giphyData != null) {
-                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                message.retrieveMediaUrlAndMessageMedia()?.let { mediaData ->
                     LayoutState.Bubble.ContainerSecond.ImageAttachment(
                         mediaData.first,
                         mediaData.second,
@@ -434,7 +433,7 @@ internal sealed class MessageHolderViewState(
             var mediaUrl: String? = null
             var messageMedia: MessageMedia? = null
 
-            nnReplyMessage.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+            nnReplyMessage.retrieveMediaUrlAndMessageMedia()?.let { mediaData ->
                 mediaUrl = mediaData.first
                 messageMedia = mediaData.second
             }

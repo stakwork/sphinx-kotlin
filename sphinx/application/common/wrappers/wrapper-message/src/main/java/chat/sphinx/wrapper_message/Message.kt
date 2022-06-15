@@ -5,7 +5,6 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.dashboard.DashboardItemType
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -72,11 +71,11 @@ inline fun Message.retrievePaidTextAttachmentUrlAndMessageMedia(): Pair<String, 
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+inline fun Message.retrieveMediaUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
     giphyData?.let { giphyData->
-        mediaData = giphyData.retrieveImageUrlAndMessageMedia()
+        mediaData = giphyData.retrieveMediaUrlAndMessageMedia()
     }
 
     messageMedia?.let { media ->
@@ -231,7 +230,7 @@ inline val Message.isBoostAllowed: Boolean
 
 inline val Message.isMediaAttachmentAvailable: Boolean
     get() = type.canContainMedia &&
-            (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
+            (retrieveMediaUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()

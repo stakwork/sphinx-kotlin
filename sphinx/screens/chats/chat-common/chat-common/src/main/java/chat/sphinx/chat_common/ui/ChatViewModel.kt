@@ -16,7 +16,6 @@ import androidx.annotation.CallSuper
 import androidx.core.view.inputmethod.InputConnectionCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
@@ -43,7 +42,6 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
 import chat.sphinx.concept_link_preview.model.toPreviewImageUrlOrNull
@@ -66,7 +64,6 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -1559,7 +1556,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 //Getting message media from purchase accept item if is paid.
                 //LocalFile and mediaType should be returned from original message
-                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia()
+                val mediaUrlAndMessageMedia = message.retrieveMediaUrlAndMessageMedia()
 
                 mediaUrlAndMessageMedia?.second?.let { messageMedia ->
                     originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
@@ -1622,7 +1619,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 val originalMessageMessageMedia = message.messageMedia
 
-                val attachmentUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia()
+                val attachmentUrlAndMessageMedia = message.retrieveMediaUrlAndMessageMedia()
 
                 attachmentUrlAndMessageMedia?.second?.let { messageMedia ->
                     originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
@@ -1679,7 +1676,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun showAttachmentImageFullscreen(message: Message) {
-        message.retrieveImageUrlAndMessageMedia()?.let {
+        message.retrieveMediaUrlAndMessageMedia()?.let {
             updateAttachmentFullscreenViewState(
                 AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
             )

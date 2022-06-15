@@ -81,7 +81,6 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
@@ -829,7 +828,7 @@ abstract class ChatFragment<
                                     )
                                 )
 
-                                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                                message.retrieveMediaUrlAndMessageMedia()?.let { mediaData ->
                                     lifecycleScope.launch(viewModel.mainImmediate) {
                                         val options: ImageLoaderOptions? =
                                             if (mediaData.second != null) {
@@ -1276,7 +1275,7 @@ abstract class ChatFragment<
 
                             root.visible
 
-                            viewState.giphyData.retrieveImageUrlAndMessageMedia()?.let {
+                            viewState.giphyData.retrieveMediaUrlAndMessageMedia()?.let {
                                 lifecycleScope.launch(viewModel.mainImmediate) {
                                     val disposable = imageLoader.load(imageViewAttachmentSendPreview, it.first)
                                     attachmentSendViewStateDisposables.add(disposable)
