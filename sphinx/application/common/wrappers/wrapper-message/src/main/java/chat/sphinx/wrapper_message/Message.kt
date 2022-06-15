@@ -89,29 +89,6 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
     return mediaData
 }
 
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrieveVideoUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
-    return messageMedia?.let { media ->
-        if (media.mediaType.isVideo) {
-            retrieveUrlAndMessageMedia()
-        } else {
-            null
-        }
-    }
-}
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrievePdfUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
-    return messageMedia?.let { media ->
-        if (media.mediaType.isPdf) {
-            retrieveUrlAndMessageMedia()
-        } else {
-            null
-        }
-    }
-}
-
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
