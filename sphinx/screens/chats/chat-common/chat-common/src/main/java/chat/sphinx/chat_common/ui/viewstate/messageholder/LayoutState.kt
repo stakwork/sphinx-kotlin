@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -153,7 +154,7 @@ internal sealed class LayoutState private constructor() {
 
                 data class FileAvailable(
                     val fileName: String,
-                    val fileSize: Int,
+                    val fileSize: FileSize,
                     val fileExtension: String
                 ): FileAttachment()
 

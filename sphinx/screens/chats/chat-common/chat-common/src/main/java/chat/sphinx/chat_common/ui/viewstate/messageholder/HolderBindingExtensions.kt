@@ -36,6 +36,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.thumbnailUrl
 import chat.sphinx.wrapper_common.util.getInitials
@@ -1613,7 +1614,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
                 buttonAttachmentFileDownload.visible
 
                 val fileName = fileAttachment.fileName + "." + fileAttachment.fileExtension
-                val fileSize = fileAttachment.fileSize.toString() + " KB"
+                val fileSize = fileAttachment.fileSize.asFormattedString()
 
                 textViewAttachmentFileName.text = fileName
                 textViewAttachmentFileSize.text = fileSize

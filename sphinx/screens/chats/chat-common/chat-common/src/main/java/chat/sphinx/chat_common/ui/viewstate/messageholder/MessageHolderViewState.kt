@@ -8,11 +8,8 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.isConversation
 import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
-import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.chatTimeFormat
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.invoiceExpirationTimeFormat
-import chat.sphinx.wrapper_common.invoicePaymentDateFormat
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.isProvisionalMessage
 import chat.sphinx.wrapper_contact.Contact
@@ -354,7 +351,7 @@ internal sealed class MessageHolderViewState(
                 nnMessageMedia.localFile?.let { nnFile ->
                     LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
                         "Default Name",
-                        nnFile.length().toInt(),
+                        FileSize(nnFile),
                         nnFile.extension
                     )
                 } ?: run {
