@@ -75,15 +75,20 @@ inline fun Message.retrievePaidTextAttachmentUrlAndMessageMedia(): Pair<String, 
 inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
-    giphyData?.let { giphyData ->
+    giphyData?.let { giphyData->
         mediaData = giphyData.retrieveImageUrlAndMessageMedia()
-    } ?: messageMedia?.let { media ->
-        if (media.mediaType.isImage) {
-            mediaData = retrieveUrlAndMessageMedia()
+    }
+
+    messageMedia?.let { media ->
+        media.mediaType.apply {
+            if(isImage || isVideo || isPdf) {
+                mediaData = retrieveUrlAndMessageMedia()
+            }
         }
     }
     return mediaData
 }
+
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveVideoUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
@@ -249,11 +254,7 @@ inline val Message.isBoostAllowed: Boolean
 
 inline val Message.isMediaAttachmentAvailable: Boolean
     get() = type.canContainMedia &&
-            (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
-             retrieveVideoUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
-
-inline val Message.isFileAttachmentAvailable: Boolean
-    get() = retrievePdfUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false
+            (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()

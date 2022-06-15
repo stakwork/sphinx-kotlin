@@ -310,14 +310,22 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
-            LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                mediaData.first,
-                mediaData.second,
-                (this is Received && message.isPaidPendingMessage)
-            )
+        message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isImage || message.giphyData != null) {
+                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                    LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                        mediaData.first,
+                        mediaData.second,
+                        (this is Received && message.isPaidPendingMessage)
+                    )
+                }
+            }
+            else {
+                null
+            }
         }
     }
+
 
     val bubbleVideoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageMedia?.let { nnMessageMedia ->

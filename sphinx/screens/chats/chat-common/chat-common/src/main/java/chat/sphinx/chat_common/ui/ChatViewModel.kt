@@ -1559,7 +1559,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 //Getting message media from purchase accept item if is paid.
                 //LocalFile and mediaType should be returned from original message
-                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia() ?: message.retrieveVideoUrlAndMessageMedia()
+                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia()
 
                 mediaUrlAndMessageMedia?.second?.let { messageMedia ->
                     originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
@@ -1618,11 +1618,11 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         message: Message
     ) {
         viewModelScope.launch(mainImmediate) {
-            if (message.isFileAttachmentAvailable) {
+            if (message.isMediaAttachmentAvailable) {
 
                 val originalMessageMessageMedia = message.messageMedia
 
-                val attachmentUrlAndMessageMedia = message.retrievePdfUrlAndMessageMedia()
+                val attachmentUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia()
 
                 attachmentUrlAndMessageMedia?.second?.let { messageMedia ->
                     originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
