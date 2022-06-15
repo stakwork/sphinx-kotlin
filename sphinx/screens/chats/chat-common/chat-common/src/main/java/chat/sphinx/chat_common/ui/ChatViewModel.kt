@@ -1556,7 +1556,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 //Getting message media from purchase accept item if is paid.
                 //LocalFile and mediaType should be returned from original message
-                val mediaUrlAndMessageMedia = message.retrieveMediaUrlAndMessageMedia()
+                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia()
+                    ?: message.retrieveUrlAndMessageMedia()
+
 
                 mediaUrlAndMessageMedia?.second?.let { messageMedia ->
                     originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
@@ -1612,7 +1614,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     fun showAttachmentImageFullscreen(message: Message) {
-        message.retrieveMediaUrlAndMessageMedia()?.let {
+        message.retrieveImageUrlAndMessageMedia()?.let {
             updateAttachmentFullscreenViewState(
                 AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
             )

@@ -28,7 +28,7 @@ inline fun GiphyData.toJson(moshi: Moshi): String =
         .toJson(this)
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun GiphyData.retrieveMediaUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+inline fun GiphyData.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     return if (url.isNotEmpty()) {
         Pair(url.replace("giphy.gif", "200w.gif"), null)
     } else {

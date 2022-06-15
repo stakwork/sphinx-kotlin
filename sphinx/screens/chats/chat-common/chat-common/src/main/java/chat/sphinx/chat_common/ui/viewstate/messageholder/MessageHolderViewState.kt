@@ -308,7 +308,7 @@ internal sealed class MessageHolderViewState(
     val bubbleImageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? by lazy(LazyThreadSafetyMode.NONE) {
         message.messageMedia?.let { nnMessageMedia ->
             if (nnMessageMedia.mediaType.isImage || message.giphyData != null) {
-                message.retrieveMediaUrlAndMessageMedia()?.let { mediaData ->
+                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                     LayoutState.Bubble.ContainerSecond.ImageAttachment(
                         mediaData.first,
                         mediaData.second,
@@ -430,7 +430,7 @@ internal sealed class MessageHolderViewState(
             var mediaUrl: String? = null
             var messageMedia: MessageMedia? = null
 
-            nnReplyMessage.retrieveMediaUrlAndMessageMedia()?.let { mediaData ->
+            nnReplyMessage.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                 mediaUrl = mediaData.first
                 messageMedia = mediaData.second
             }

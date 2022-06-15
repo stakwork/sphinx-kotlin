@@ -71,21 +71,39 @@ inline fun Message.retrievePaidTextAttachmentUrlAndMessageMedia(): Pair<String, 
 }
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Message.retrieveMediaUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
-    giphyData?.let { giphyData->
-        mediaData = giphyData.retrieveMediaUrlAndMessageMedia()
-    }
-
-    messageMedia?.let { media ->
-        media.mediaType.apply {
-            if(isImage || isVideo || isPdf) {
-                mediaData = retrieveUrlAndMessageMedia()
-            }
+    giphyData?.let { giphyData ->
+        mediaData = giphyData.retrieveImageUrlAndMessageMedia()
+    } ?: messageMedia?.let { media ->
+        if (media.mediaType.isImage) {
+            mediaData = retrieveUrlAndMessageMedia()
         }
     }
     return mediaData
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveVideoUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    return messageMedia?.let { media ->
+        if (media.mediaType.isVideo) {
+            retrieveUrlAndMessageMedia()
+        } else {
+            null
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveFileUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    return messageMedia?.let { media ->
+        if (media.mediaType.isPdf || media.mediaType.isUnknown) {
+            retrieveUrlAndMessageMedia()
+        } else {
+            null
+        }
+    }
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -230,7 +248,9 @@ inline val Message.isBoostAllowed: Boolean
 
 inline val Message.isMediaAttachmentAvailable: Boolean
     get() = type.canContainMedia &&
-            (retrieveMediaUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
+            (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
+                    retrieveVideoUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
+                    retrieveFileUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()

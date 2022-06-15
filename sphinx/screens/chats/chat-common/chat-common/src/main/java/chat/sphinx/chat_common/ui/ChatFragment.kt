@@ -828,7 +828,7 @@ abstract class ChatFragment<
                                     )
                                 )
 
-                                message.retrieveMediaUrlAndMessageMedia()?.let { mediaData ->
+                                message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                                     lifecycleScope.launch(viewModel.mainImmediate) {
                                         val options: ImageLoaderOptions? =
                                             if (mediaData.second != null) {
@@ -1275,7 +1275,7 @@ abstract class ChatFragment<
 
                             root.visible
 
-                            viewState.giphyData.retrieveMediaUrlAndMessageMedia()?.let {
+                            viewState.giphyData.retrieveImageUrlAndMessageMedia()?.let {
                                 lifecycleScope.launch(viewModel.mainImmediate) {
                                     val disposable = imageLoader.load(imageViewAttachmentSendPreview, it.first)
                                     attachmentSendViewStateDisposables.add(disposable)
