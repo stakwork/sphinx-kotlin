@@ -18,6 +18,7 @@ import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip as PodcastClipObject
 import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_message.RecipientAlias
+import chat.sphinx.wrapper_message_media.FileName
 import chat.sphinx.wrapper_message_media.MessageMedia
 import java.io.File
 
@@ -165,8 +166,7 @@ internal sealed class LayoutState private constructor() {
 
                 data class FileAvailable(
                     val fileName: String,
-                    val fileSize: FileSize,
-                    val fileExtension: String
+                    val fileSize: String,
                 ): FileAttachment()
 
                 object  FileUnavailable : FileAttachment()

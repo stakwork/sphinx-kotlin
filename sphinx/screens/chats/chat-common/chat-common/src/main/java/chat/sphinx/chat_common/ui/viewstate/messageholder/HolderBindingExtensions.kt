@@ -48,6 +48,7 @@ import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
+import chat.sphinx.wrapper_message_media.getExtension
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -1700,17 +1701,17 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
                 progressBarAttachmentFileDownload.gone
                 buttonAttachmentFileDownload.visible
 
-                val fileName = fileAttachment.fileName + "." + fileAttachment.fileExtension
-                val fileSize = fileAttachment.fileSize.asFormattedString()
 
-                textViewAttachmentFileName.text = fileName
-                textViewAttachmentFileSize.text = fileSize
+                textViewAttachmentFileName.text = fileAttachment.fileName
+                textViewAttachmentFileSize.text = fileAttachment.fileSize
             }
             is LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable -> {
                 root.visible
 
+                textViewAttachmentFileName.text = "Loading..."
+                textViewAttachmentFileSize.text = "0 kB"
+
                 progressBarAttachmentFileDownload.visible
-                progressBarAttachmentFileDownload.gone
             }
         }
 

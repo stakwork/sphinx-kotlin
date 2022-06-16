@@ -424,10 +424,11 @@ internal sealed class MessageHolderViewState(
             message.messageMedia?.let { nnMessageMedia ->
                 if (nnMessageMedia.mediaType.isPdf) {
                     nnMessageMedia.localFile?.let { nnFile ->
+                        val nnFileName: String = nnMessageMedia.fileName?.value ?: "File.txt"
+                        val nnFileSize: String = FileSize(nnFile).asFormattedString()
                         LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
-                            "Default Name",
-                            FileSize(nnFile),
-                            nnFile.extension
+                            nnFileName,
+                            nnFileSize
                         )
                     } ?: run {
                         onBindDownloadMedia.invoke()
