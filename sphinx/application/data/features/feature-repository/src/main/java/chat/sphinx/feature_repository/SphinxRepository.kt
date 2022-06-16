@@ -2043,8 +2043,15 @@ abstract class SphinxRepository(
 
     override fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
+
         emitAll(
-            queries.messageGetAllToShowByChatId(chatId, limit)
+            (
+                if (limit > 0) {
+                    queries.messageGetAllToShowByChatIdWithLimit(chatId, limit)
+                } else {
+                    queries.messageGetAllToShowByChatId(chatId)
+                }
+            )
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->
@@ -2139,6 +2146,24 @@ abstract class SphinxRepository(
                 }
             }
             .distinctUntilChanged()
+
+    override fun searchMessagesBy(chatId: ChatId, term: String): Flow<List<Message>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messagesSearchByTerm(
+                    chatId,
+                    "%${term.lowercase()}%"
+                )
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        messageDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
 
     override fun getTribeLastMemberRequestByContactId(
         contactId: ContactId,
@@ -2426,6 +2451,7 @@ abstract class SphinxRepository(
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
                                     media.third.file,
+                                    null
                                 )
                             }
 
@@ -2463,7 +2489,8 @@ abstract class SphinxRepository(
                                     provisionalId,
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file
+                                    media.third.file,
+                                    null
                                 )
                             }
                         }
@@ -5377,41 +5404,45 @@ abstract class SphinxRepository(
                     !message.status.isDeleted() &&
                     (!message.isPaidPendingMessage || sent)
                 ) {
-                    val streamToFile: File? = mediaCacheHandler.createFile(
-                        message.messageMedia?.mediaType ?: media.mediaType
-                    )
 
-                    if (streamToFile != null) {
-                        memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-                            memeInputStreamHandler.retrieveMediaInputStream(
-                                url.value,
-                                token,
-                                media.mediaKeyDecrypted,
-                            )?.let { stream ->
-                                mediaCacheHandler.copyTo(stream, streamToFile)
-                                messageLock.withLock {
-                                    withContext(io) {
-                                        queries.transaction {
-                                            queries.messageMediaUpdateFile(
-                                                streamToFile,
-                                                messageId
-                                            )
+                    memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+                        memeInputStreamHandler.retrieveMediaInputStream(
+                            url.value,
+                            token,
+                            media.mediaKeyDecrypted,
+                        )?.let { streamAndFileName ->
 
-                                            // to proc table change so new file path is pushed to UI
-                                            queries.messageUpdateContentDecrypted(
-                                                message.messageContentDecrypted,
-                                                messageId
-                                            )
+                            mediaCacheHandler.createFile(
+                                mediaType = message.messageMedia?.mediaType ?: media.mediaType,
+                                extension = streamAndFileName.second?.getExtension()
+                            )?.let { streamToFile ->
+
+                                streamAndFileName.first?.let { stream ->
+                                    mediaCacheHandler.copyTo(stream, streamToFile)
+                                    messageLock.withLock {
+                                        withContext(io) {
+                                            queries.transaction {
+                                                queries.messageMediaUpdateFile(
+                                                    streamToFile,
+                                                    streamAndFileName.second,
+                                                    messageId
+                                                )
+
+                                                // to proc table change so new file path is pushed to UI
+                                                queries.messageUpdateContentDecrypted(
+                                                    message.messageContentDecrypted,
+                                                    messageId
+                                                )
+                                            }
                                         }
                                     }
+
+                                    // hold downloadLock until table change propagates to UI
+                                    delay(200L)
+
                                 }
-
-                                // hold downloadLock until table change propagates to UI
-                                delay(200L)
-
-                            } ?: streamToFile.delete()
-
-                        } ?: streamToFile.delete()
+                            }
+                        }
                     }
                 }
 
@@ -5485,33 +5516,37 @@ abstract class SphinxRepository(
                             url,
                             authenticationToken = null,
                             mediaKeyDecrypted = null,
-                        )?.let { stream ->
-                            sphinxNotificationManager.notify(
-                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
-                                title = "Completing Download",
-                                message = "Finishing up download of file",
-                            )
-                            mediaCacheHandler.copyTo(stream, streamToFile)
+                        )?.let { streamAndFileName ->
+                            streamAndFileName.first?.let { stream ->
+                                sphinxNotificationManager.notify(
+                                    notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                    title = "Completing Download",
+                                    message = "Finishing up download of file",
+                                )
+                                mediaCacheHandler.copyTo(stream, streamToFile)
 
-                            feedItemLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        queries.feedItemUpdateLocalFile(
-                                            streamToFile,
-                                            feedItemId
-                                        )
+                                feedItemLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            queries.feedItemUpdateLocalFile(
+                                                streamToFile,
+                                                feedItemId
+                                            )
+                                        }
                                     }
                                 }
-                            }
 
-                            sphinxNotificationManager.notify(
-                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
-                                title = "Download complete",
-                                message = "item can now be accessed offline",
-                            )
-                            // hold downloadLock until table change propagates to UI
-                            delay(200L)
-                            downloadCompleteCallback.invoke(streamToFile)
+                                sphinxNotificationManager.notify(
+                                    notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                    title = "Download complete",
+                                    message = "item can now be accessed offline",
+                                )
+                                // hold downloadLock until table change propagates to UI
+                                delay(200L)
+                                downloadCompleteCallback.invoke(streamToFile)
+
+                            } ?: streamToFile.delete()
+
                         } ?: streamToFile.delete()
                     }
                 } else {

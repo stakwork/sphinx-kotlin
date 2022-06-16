@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/message_type_leave_or_join_group_holder_height"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginRight="@dimen/default_layout_margin"
+        android:background="@color/blueTextAccent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/text_view_unseen_separator"></View>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_unseen_separator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:textAlignment="center"
+        android:textColor="@color/blueTextAccent"
+        android:textSize="@dimen/default_text_size_sub_headline"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="@string/unseen_messages" />
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginLeft="@dimen/default_layout_margin"
+        android:background="@color/blueTextAccent"
+        app:layout_constraintLeft_toRightOf="@+id/text_view_unseen_separator"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"></View>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

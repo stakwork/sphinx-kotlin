@@ -8,6 +8,8 @@ import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
 import chat.sphinx.feature_coredb.adapters.feed.*
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
+import chat.sphinx.feature_coredb.adapters.media.*
+import chat.sphinx.feature_coredb.adapters.media.FileNameAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaKeyDecryptedAdapter
 import chat.sphinx.feature_coredb.adapters.media.MediaTokenAdapter
@@ -152,6 +154,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     media_typeAdapter = MediaTypeAdapter(),
                     media_tokenAdapter = MediaTokenAdapter(),
                     local_fileAdapter = FileAdapter.getInstance(),
+                    file_nameAdapter = FileNameAdapter(),
                 ),
                 subscriptionDboAdapter = SubscriptionDbo.Adapter(
                     idAdapter = SubscriptionIdAdapter.getInstance(),

@@ -42,3 +42,13 @@ internal class MediaTokenAdapter: ColumnAdapter<MediaToken, String> {
         return value.value
     }
 }
+
+internal class FileNameAdapter: ColumnAdapter<FileName, String> {
+    override fun decode(databaseValue: String): FileName {
+        return FileName(databaseValue)
+    }
+
+    override fun encode(value: FileName): String {
+        return value.value
+    }
+}

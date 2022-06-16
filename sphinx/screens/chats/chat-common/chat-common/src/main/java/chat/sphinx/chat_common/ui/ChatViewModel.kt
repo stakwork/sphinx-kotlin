@@ -34,11 +34,13 @@ import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.InvoiceLinesHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -94,7 +96,6 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -141,12 +142,19 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             .build()
     }
 
+    val messagesSearchViewStateContainer: ViewStateContainer<MessagesSearchViewState> by lazy {
+        ViewStateContainer(MessagesSearchViewState.Idle)
+    }
 
     val messageReplyViewStateContainer: ViewStateContainer<MessageReplyViewState> by lazy {
         ViewStateContainer(MessageReplyViewState.ReplyingDismissed)
     }
 
     val callMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
+        ViewStateContainer(MenuBottomViewState.Closed)
+    }
+
+    val moreOptionsMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
         ViewStateContainer(MenuBottomViewState.Closed)
     }
 
@@ -217,7 +225,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         ChatHeaderViewStateContainer()
     }
 
-    protected suspend fun getChat(): Chat {
+    suspend fun getChat(): Chat {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             return chat
         }
@@ -269,7 +277,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         owner: Contact
     ): InitialHolderViewState
 
-    private suspend fun getOwner(): Contact {
+    suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact
@@ -347,6 +355,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             contactRepository.getContactByPubKey(it).firstOrNull()
         } ?: null
 
+        var unseenSeparatorAdded = false
+
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
         withContext(io) {
@@ -384,6 +394,37 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     openReceivedPaidInvoicesCount > 0
                 )
 
+                if (!message.seen.isTrue() && !sent && !unseenSeparatorAdded) {
+                    newList.add(
+                        MessageHolderViewState.Separator(
+                            MessageHolderType.UnseenSeparator,
+                            null,
+                            chat,
+                            tribeAdmin,
+                            BubbleBackground.Gone(setSpacingEqual = true),
+                            invoiceLinesHolderViewState,
+                            InitialHolderViewState.None,
+                            accountOwner = { owner }
+                        )
+                    )
+                    unseenSeparatorAdded = true
+                }
+
+                if (previousMessage == null || message.date.isDifferentDayThan(previousMessage.date)) {
+                    newList.add(
+                        MessageHolderViewState.Separator(
+                            MessageHolderType.DateSeparator,
+                            message.date,
+                            chat,
+                            tribeAdmin,
+                            BubbleBackground.Gone(setSpacingEqual = true),
+                            invoiceLinesHolderViewState,
+                            InitialHolderViewState.None,
+                            accountOwner = { owner }
+                        )
+                    )
+                }
+
                 val isDeleted = message.status.isDeleted()
 
                 if (
@@ -411,6 +452,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 }
                             },
                             invoiceLinesHolderViewState = invoiceLinesHolderViewState,
+                            highlightedText = null,
                             messageSenderInfo = { messageCallback ->
                                 when {
                                     messageCallback.sender == chat.contactIds.firstOrNull() -> {
@@ -481,6 +523,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                     getInitialHolderViewStateForReceivedMessage(message, owner)
                                 }
                             },
+                            highlightedText = null,
                             messageSenderInfo = { messageCallback ->
                                 when {
                                     messageCallback.sender == chat.contactIds.firstOrNull() -> {
@@ -676,7 +719,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
 
-                            val inputStream = memeInputStreamHandler.retrieveMediaInputStream(
+                            val streamAndFileName = memeInputStreamHandler.retrieveMediaInputStream(
                                 urlAndMedia.first,
                                 token,
                                 mediaKeyDecrypted
@@ -685,7 +728,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             var text: String? = null
 
                             viewModelScope.launch(io) {
-                                text = inputStream?.bufferedReader().use { it?.readText() }
+                                text = streamAndFileName?.first?.bufferedReader().use { it?.readText() }
                             }.join()
 
                             text?.let { nnText ->
@@ -747,8 +790,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     protected abstract fun forceKeyExchange()
 
+    var messagesLoadJob: Job? = null
     fun screenInit() {
-        viewModelScope.launch(mainImmediate) {
+        messagesLoadJob = viewModelScope.launch(mainImmediate) {
             messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
                 messageHolderViewStateFlow.value =
                     getMessageHolderViewStateList(messages).toList()
@@ -889,6 +933,71 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
                 }
             }
+        }
+    }
+
+    var messagesSearchJob: Job? = null
+    suspend fun searchMessages(text: String?) {
+        moreOptionsMenuHandler.updateViewState(
+            MenuBottomViewState.Closed
+        )
+
+        if (messagesSearchViewStateContainer.viewStateFlow.value is MessagesSearchViewState.Idle) {
+            loadAllMessages()
+        }
+
+        chatId?.let { nnChatId ->
+            text?.let { nnText ->
+                if (nnText.toCharArray().size > 2) {
+                    messagesSearchViewStateContainer.updateViewState(
+                        MessagesSearchViewState.Loading
+                    )
+
+                    messagesSearchJob?.cancel()
+                    messagesSearchJob = viewModelScope.launch(io) {
+                        delay(500L)
+
+                        messageRepository.searchMessagesBy(nnChatId, nnText).firstOrNull()?.let { messages ->
+                            messagesSearchViewStateContainer.updateViewState(
+                                MessagesSearchViewState.Searching(messages, 0, true)
+                            )
+                        }
+                    }
+                    return
+                }
+            }
+        }
+
+        messagesSearchViewStateContainer.updateViewState(
+            MessagesSearchViewState.Searching(emptyList(), 0, true)
+        )
+    }
+
+    fun navigateResults(
+        advanceBy: Int
+    ) {
+        val searchViewState = messagesSearchViewStateContainer.viewStateFlow.value
+        if (searchViewState is MessagesSearchViewState.Searching) {
+            messagesSearchViewStateContainer.updateViewState(
+                MessagesSearchViewState.Searching(
+                    searchViewState.messages,
+                    searchViewState.index + advanceBy,
+                    advanceBy > 0
+                )
+            )
+        }
+    }
+
+    private fun loadAllMessages() {
+        if (messagesLoadJob?.isActive == true) {
+            messagesLoadJob?.cancel()
+        }
+        messagesLoadJob = viewModelScope.launch(io) {
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 0)
+                .distinctUntilChanged().collect { messages ->
+                    messageHolderViewStateFlow.value =
+                        getMessageHolderViewStateList(messages).toList()
+                }
         }
     }
 
@@ -1752,7 +1861,7 @@ suspend inline fun MessageMedia.retrieveRemoteMediaInputStream(
                 url,
                 authenticationToken,
                 mediaKeyDecrypted
-            )
+            )?.first
         }
     }
 }
