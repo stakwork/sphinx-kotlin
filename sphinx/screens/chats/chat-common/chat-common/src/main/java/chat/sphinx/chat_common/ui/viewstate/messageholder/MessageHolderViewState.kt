@@ -418,22 +418,26 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleFileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        message.messageMedia?.let { nnMessageMedia ->
-            if (nnMessageMedia.mediaType.isPdf) {
-                nnMessageMedia.localFile?.let { nnFile ->
-                    LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
-                        "Default Name",
-                        FileSize(nnFile),
-                        nnFile.extension
-                    )
-                } ?: run {
-                    onBindDownloadMedia.invoke()
+        if(message == null){
+            null
+        } else {
+            message.messageMedia?.let { nnMessageMedia ->
+                if (nnMessageMedia.mediaType.isPdf) {
+                    nnMessageMedia.localFile?.let { nnFile ->
+                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
+                            "Default Name",
+                            FileSize(nnFile),
+                            nnFile.extension
+                        )
+                    } ?: run {
+                        onBindDownloadMedia.invoke()
 
-                    LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable(message.id)
+                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable
 
+                    }
+                } else {
+                    null
                 }
-            } else {
-                null
             }
         }
     }

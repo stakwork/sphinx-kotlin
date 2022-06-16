@@ -169,9 +169,7 @@ internal sealed class LayoutState private constructor() {
                     val fileExtension: String
                 ): FileAttachment()
 
-                data class FileUnavailable(
-                    val messageId: MessageId,
-                ): FileAttachment()
+                object  FileUnavailable : FileAttachment()
             }
 
             data class PodcastBoost(
