@@ -114,6 +114,8 @@
     <string name="side_effect_link_copied">%sをコピーしました</string>
     <string name="side_effect_no_link_to_copy">コピーするリンクがありません</string>
 
+    <string name="file_name_loading">Loading...</string>
+
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">写真を送る</string>
     <string name="attachment_send_header_video">動画を送る</string>
@@ -122,6 +124,7 @@
 
     <!-- Pay Attachment -->
     <string name="paid_message_pay_to_unlock">Satsを支払いメッセージを開封する</string>
+    <string name="paid_file_pay_to_unlock">PAY TO UNLOCK FILE</string>
     <string name="paid_message_loading">メッセージを読み込んでいます</string>
     <string name="paid_message_unable_to_load">メッセージを読み込めませんでした</string>
     <string name="attachment_price_label">課金額: </string>

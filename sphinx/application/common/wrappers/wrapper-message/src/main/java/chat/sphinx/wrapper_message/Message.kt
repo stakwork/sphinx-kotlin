@@ -5,7 +5,6 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.Seen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.dashboard.DashboardItemType
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -89,6 +88,17 @@ inline fun Message.retrieveImageUrlAndMessageMedia(): Pair<String, MessageMedia?
 inline fun Message.retrieveVideoUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     return messageMedia?.let { media ->
         if (media.mediaType.isVideo) {
+            retrieveUrlAndMessageMedia()
+        } else {
+            null
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveFileUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    return messageMedia?.let { media ->
+        if (media.mediaType.isPdf || media.mediaType.isUnknown) {
             retrieveUrlAndMessageMedia()
         } else {
             null
@@ -239,7 +249,8 @@ inline val Message.isBoostAllowed: Boolean
 inline val Message.isMediaAttachmentAvailable: Boolean
     get() = type.canContainMedia &&
             (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
-             retrieveVideoUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
+                    retrieveVideoUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
+                    retrieveFileUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()

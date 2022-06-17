@@ -1,0 +1,3 @@
+import chat.sphinx.wrapper_message_media.FileName;
+
+ALTER TABLE messageMediaDbo ADD COLUMN file_name TEXT AS FileName;

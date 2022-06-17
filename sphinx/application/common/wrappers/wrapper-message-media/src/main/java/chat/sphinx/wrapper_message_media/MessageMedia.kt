@@ -10,6 +10,7 @@ abstract class MessageMedia {
     abstract val mediaType: MediaType
     abstract val mediaToken: MediaToken
     abstract val localFile: File?
+    abstract val fileName: FileName?
 
     abstract val mediaKeyDecrypted: MediaKeyDecrypted?
     abstract val mediaKeyDecryptionError: Boolean
@@ -21,6 +22,7 @@ abstract class MessageMedia {
                 other.mediaType                     == mediaType                    &&
                 other.mediaToken                    == mediaToken                   &&
                 other.localFile                     == localFile                    &&
+                other.fileName                      == fileName                     &&
                 other.mediaKeyDecrypted             == mediaKeyDecrypted            &&
                 other.mediaKeyDecryptionError       == mediaKeyDecryptionError
     }
@@ -38,6 +40,7 @@ abstract class MessageMedia {
         result = _31 * result + mediaType.hashCode()
         result = _31 * result + mediaToken.hashCode()
         result = _31 * result + localFile.hashCode()
+        result = _31 * result + fileName.hashCode()
         result = _31 * result + mediaKeyDecrypted.hashCode()
         result = _31 * result + mediaKeyDecryptionError.hashCode()
         return result
@@ -45,7 +48,7 @@ abstract class MessageMedia {
 
     override fun toString(): String {
         return  "MessageMedia(mediaKey=$mediaKey,mediaType=$mediaType,mediaToken=$mediaToken," +
-                "localFile=$localFile,mediaKeyDecrypted=$mediaKeyDecrypted," +
+                "localFile=$localFile,fileName=$fileName,mediaKeyDecrypted=$mediaKeyDecrypted," +
                 "mediaKeyDecryptionError=$mediaKeyDecryptionError," +
                 "mediaKeyDecryptionException=$mediaKeyDecryptionException)"
     }

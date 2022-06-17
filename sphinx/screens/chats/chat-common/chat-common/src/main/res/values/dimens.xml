@@ -111,7 +111,7 @@
     <dimen name="icon_file_attachment_xy">30dp</dimen>
     <dimen name="icon_file_attachment_text_size">30sp</dimen>
     <dimen name="icon_file_download_width">30dp</dimen>
-    <dimen name="icon_file_download_text_size">30sp</dimen>
+    <dimen name="icon_file_download_text_size">25sp</dimen>
     <dimen name="icon_play_pause_button_text_size">25sp</dimen>
     <dimen name="paywall_overlay_video_icon_text_size">40sp</dimen>
     <dimen name="icon_message_boost_xy">20dp</dimen>

@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 
 import chat.sphinx.concept_link_preview.model.*
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
@@ -17,6 +18,7 @@ import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip as PodcastClipObject
 import chat.sphinx.wrapper_message.PurchaseStatus
 import chat.sphinx.wrapper_message.RecipientAlias
+import chat.sphinx.wrapper_message_media.FileName
 import chat.sphinx.wrapper_message_media.MessageMedia
 import java.io.File
 
@@ -158,6 +160,19 @@ internal sealed class LayoutState private constructor() {
             sealed class VideoAttachment : ContainerSecond()  {
                 data class FileAvailable(val file: File): VideoAttachment()
                 data class FileUnavailable(val showPaidOverlay: Boolean): VideoAttachment()
+            }
+
+            sealed class FileAttachment(): ContainerSecond(){
+
+                data class FileAvailable(
+                    val fileName: FileName?,
+                    val fileSize: FileSize,
+                    val isPdf: Boolean
+                ): FileAttachment()
+
+                data class FileUnavailable(
+                    val pendingPayment: Boolean
+                ) : FileAttachment()
             }
 
             data class PodcastBoost(

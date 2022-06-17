@@ -416,7 +416,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         currentViewState?.message?.let { message ->
                             viewModel.goToFullscreenVideo(message.id)
                         }
+                    }
+                }
 
+                includeMessageTypeFileAttachment.apply {
+                    buttonAttachmentFileDownload.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.saveFile(message, null)
+                        }
                     }
                 }
 

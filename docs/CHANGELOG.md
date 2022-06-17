@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha58 (2022-06-17)
+- Adds support for file attachments on chats
+
 # Version 1.0.0-alpha57 (2022-06-09)
 - Adds day separator rows on chat
 - Adds unseen messages separator row on chat

@@ -2,6 +2,7 @@ package chat.sphinx.concept_network_query_message.model
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
+import chat.sphinx.wrapper_message_media.FileName
 import com.squareup.moshi.JsonClass
 import java.io.File
 
@@ -90,5 +91,14 @@ data class MessageDto(
         } catch (e: Exception) {
             null
         }
+    }
+
+    @Transient
+    @Volatile
+    var localFileName: FileName? = null
+        private set
+
+    fun setLocalFileName(fileName: FileName) {
+        localFileName = fileName
     }
 }

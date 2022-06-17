@@ -11,6 +11,8 @@ class MessageMediaDboWrapper(val messageMediaDbo: MessageMediaDbo): MessageMedia
         get() = messageMediaDbo.media_type
     override val mediaToken: MediaToken
         get() = messageMediaDbo.media_token
+    override val fileName: FileName?
+        get() = messageMediaDbo.file_name
 
     @Volatile
     @Suppress("PropertyName")

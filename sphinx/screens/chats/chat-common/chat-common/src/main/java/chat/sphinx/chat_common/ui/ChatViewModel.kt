@@ -719,7 +719,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     urlAndMedia.second?.mediaKeyDecrypted?.let { mediaKeyDecrypted ->
                         memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
 
-                            val inputStream = memeInputStreamHandler.retrieveMediaInputStream(
+                            val streamAndFileName = memeInputStreamHandler.retrieveMediaInputStream(
                                 urlAndMedia.first,
                                 token,
                                 mediaKeyDecrypted
@@ -728,7 +728,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             var text: String? = null
 
                             viewModelScope.launch(io) {
-                                text = inputStream?.bufferedReader().use { it?.readText() }
+                                text = streamAndFileName?.first?.bufferedReader().use { it?.readText() }
                             }.join()
 
                             text?.let { nnText ->
@@ -1665,7 +1665,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 //Getting message media from purchase accept item if is paid.
                 //LocalFile and mediaType should be returned from original message
-                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia() ?: message.retrieveVideoUrlAndMessageMedia()
+                val mediaUrlAndMessageMedia = message.retrieveImageUrlAndMessageMedia()
+                    ?: message.retrieveUrlAndMessageMedia()
+
 
                 mediaUrlAndMessageMedia?.second?.let { messageMedia ->
                     originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
@@ -1817,17 +1819,32 @@ inline fun MessageMedia.retrieveMediaStorageUri(): Uri? {
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun MessageMedia.retrieveContentValues(message: Message): ContentValues? {
+    val fileName = "${this.fileName?.value ?: message.id.value}"
+
     if (this.mediaType.isImage) {
         return ContentValues().apply {
-            put(MediaStore.Images.Media.TITLE, message.id.value)
-            put(MediaStore.Images.Media.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Images.Media.TITLE, fileName)
+            put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
         }
     } else if (this.mediaType.isVideo) {
         return ContentValues().apply {
-            put(MediaStore.Video.Media.TITLE, message.id.value)
-            put(MediaStore.Video.Media.DISPLAY_NAME, message.senderAlias?.value)
+            put(MediaStore.Video.Media.TITLE, fileName)
+            put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+        }
+    } else if (this.mediaType.isPdf) {
+        return ContentValues().apply {
+            put(MediaStore.Downloads.TITLE, fileName)
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
+        }
+
+    } else if (this.mediaType.isUnknown) {
+        return ContentValues().apply {
+            put(MediaStore.Downloads.TITLE, fileName)
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(MediaStore.Downloads.MIME_TYPE, mediaType.value)
         }
     }
     return null
@@ -1846,7 +1863,7 @@ suspend inline fun MessageMedia.retrieveRemoteMediaInputStream(
                 url,
                 authenticationToken,
                 mediaKeyDecrypted
-            )
+            )?.first
         }
     }
 }
