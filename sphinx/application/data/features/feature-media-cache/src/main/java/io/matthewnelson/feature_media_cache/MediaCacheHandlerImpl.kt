@@ -35,14 +35,18 @@ class MediaCacheHandlerImpl(
         const val AUDIO_CACHE_DIR = "sphinx_audio_cache"
         const val IMAGE_CACHE_DIR = "sphinx_image_cache"
         const val VIDEO_CACHE_DIR = "sphinx_video_cache"
+        const val PDF_CACHE_DIR = "sphinx_pdf_cache"
         const val PAID_TEXT_CACHE_DIR = "sphinx_paid_text_cache"
+        const val GENERIC_FILES_CACHE_DIR = "sphinx_files_cache"
 
         const val DATE_FORMAT = "yyy_MM_dd_HH_mm_ss_SSS"
 
         const val AUD = "AUD"
         const val IMG = "IMG"
         const val VID = "VID"
+        const val PDF = "PDF"
         const val TXT = "TXT"
+        const val FILE = "FILE"
 
         private val cacheDirLock = Object()
     }
@@ -65,13 +69,28 @@ class MediaCacheHandlerImpl(
         }
     }
 
+    private val pdfCache: File by lazy {
+        File(cacheDir, PDF_CACHE_DIR).also {
+            it.mkdir()
+        }
+    }
+
     private val paidTextCache: File by lazy {
         File(cacheDir, PAID_TEXT_CACHE_DIR).also {
             it.mkdirs()
         }
     }
 
-    override fun createFile(mediaType: MediaType): File? {
+    private val genericFilesCache: File by lazy {
+        File(cacheDir, GENERIC_FILES_CACHE_DIR).also {
+            it.mkdirs()
+        }
+    }
+
+    override fun createFile(
+        mediaType: MediaType,
+        extension: String?
+    ): File? {
         return when (mediaType) {
             is MediaType.Audio -> {
                 mediaType.value.split("/").lastOrNull()?.let { fileType ->
@@ -102,8 +121,17 @@ class MediaCacheHandlerImpl(
                 null
             }
             is MediaType.Pdf -> {
-                // TODO: Implement
-                null
+                mediaType.value.split("/").lastOrNull()?.let { fileType ->
+                    when {
+                        fileType.contains("pdf", ignoreCase = true) -> {
+                            createPdfFile("pdf")
+                        }
+                        else -> {
+                            null
+                        }
+                    }
+                }
+
             }
             is MediaType.Text -> {
                 // TODO: Implement
@@ -135,7 +163,7 @@ class MediaCacheHandlerImpl(
                 }
             }
             is MediaType.Unknown -> {
-                null
+                createGenericFile(extension ?: "txt")
             }
         }
     }
@@ -149,8 +177,15 @@ class MediaCacheHandlerImpl(
     override fun createVideoFile(extension: String): File =
         createFileImpl(videoCache, VID, extension)
 
+    override fun createPdfFile(extension: String): File =
+        createFileImpl(
+            pdfCache, PDF, extension)
+
     override fun createPaidTextFile(extension: String): File =
         createFileImpl(paidTextCache, TXT, extension)
+
+    private fun createGenericFile(extension: String): File =
+        createFileImpl(genericFilesCache, FILE, extension)
 
     private fun createFileImpl(cacheDir: File, prefix: String, extension: String): File {
         if (!cacheDir.exists()) {
