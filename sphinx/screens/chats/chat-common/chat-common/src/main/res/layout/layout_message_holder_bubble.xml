@@ -30,7 +30,7 @@
         <include
             android:id="@+id/include_paid_message_sent_status_details"
             layout="@layout/layout_paid_message_sent"
-            tools:visibility="gone" />
+            tools:visibility="visible" />
 
         <!--   Direct Payment Message  -->
         <include
@@ -51,7 +51,10 @@
         <include
             android:id="@+id/include_message_type_file_attachment"
             layout="@layout/layout_message_type_attachment_file"
-            tools:visibility="gone" />
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/message_type_file_attachment_height"
+            app:layout_constraintTop_toBottomOf="@+id/include_paid_message_sent_status_details"
+            tools:visibility="visible" />
 
         <!--  Audio Attachment  -->
         <include
@@ -59,15 +62,13 @@
             layout="@layout/layout_message_type_attachment_audio"
             tools:visibility="gone" />
 
-        <!--  Audio Attachment  -->
-
         <!--  Video Attachment  -->
         <include
             android:id="@+id/include_message_type_podcast_clip"
             layout="@layout/layout_message_type_podcast_clip"
             tools:layout_editor_absoluteX="0dp"
             tools:layout_editor_absoluteY="0dp"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
 
         <include
             android:id="@+id/include_message_type_video_attachment"

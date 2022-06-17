@@ -114,6 +114,8 @@
     <string name="side_effect_link_copied">已複製 %s</string>
     <string name="side_effect_no_link_to_copy">無連結複製</string>
 
+    <string name="file_name_loading">Loading...</string>
+
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">傳送圖片</string>
     <string name="attachment_send_header_video">傳送影片</string>
@@ -122,6 +124,7 @@
 
     <!-- Pay Attachment -->
     <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
+    <string name="paid_file_pay_to_unlock">PAY TO UNLOCK FILE</string>
     <string name="paid_message_loading">LOADING MESSAGE...</string>
     <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
     <string name="attachment_price_label">費: </string>

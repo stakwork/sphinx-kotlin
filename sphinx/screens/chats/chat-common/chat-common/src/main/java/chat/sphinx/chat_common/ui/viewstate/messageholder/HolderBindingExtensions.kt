@@ -1701,17 +1701,31 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
                 progressBarAttachmentFileDownload.gone
                 buttonAttachmentFileDownload.visible
 
+                textViewAttachmentFileIcon.text = if (fileAttachment?.isPdf) {
+                    getString(R.string.material_icon_name_file_pdf)
+                } else {
+                    getString(R.string.material_icon_name_file_attachment)
+                }
 
-                textViewAttachmentFileName.text = fileAttachment.fileName
-                textViewAttachmentFileSize.text = fileAttachment.fileSize
+                textViewAttachmentFileName.text = fileAttachment.fileName?.value ?: "File.txt"
+                textViewAttachmentFileSize.text = fileAttachment.fileSize.asFormattedString()
             }
             is LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable -> {
                 root.visible
 
-                textViewAttachmentFileName.text = "Loading..."
+                textViewAttachmentFileIcon.text = getString(R.string.material_icon_name_file_attachment)
+
+                textViewAttachmentFileName.text = if (fileAttachment.pendingPayment) {
+                    getString(R.string.paid_file_pay_to_unlock)
+                } else {
+                    getString(R.string.file_name_loading)
+                }
+
                 textViewAttachmentFileSize.text = "0 kB"
 
-                progressBarAttachmentFileDownload.visible
+                progressBarAttachmentFileDownload.goneIfFalse(
+                    !fileAttachment.pendingPayment
+                )
             }
         }
 

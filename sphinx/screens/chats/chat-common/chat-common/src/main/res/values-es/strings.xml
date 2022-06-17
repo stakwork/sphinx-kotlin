@@ -115,6 +115,8 @@
     <string name="side_effect_link_copied">Copiado %s</string>
     <string name="side_effect_no_link_to_copy">Sin enlace para copiar</string>
 
+    <string name="file_name_loading">Cargando...</string>
+
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>
     <string name="attachment_send_header_video">ENVIAR VIDEO</string>
@@ -123,6 +125,7 @@
 
     <!-- Pay Attachment -->
     <string name="paid_message_pay_to_unlock">PAGA PARA DESBLOQUEAR</string>
+    <string name="paid_file_pay_to_unlock">PAGA PARA DESBLOQUEAR</string>
     <string name="paid_message_loading">CARGANDO MENSAJE...</string>
     <string name="paid_message_unable_to_load">ERROR AL CARGAR EL MENSAJE</string>
     <string name="attachment_price_label">Precio: </string>

@@ -421,19 +421,26 @@ internal sealed class MessageHolderViewState(
         if(message == null){
             null
         } else {
-            message.messageMedia?.let { nnMessageMedia ->
+            val nnMessage = message!!
+
+            nnMessage.messageMedia?.let { nnMessageMedia ->
                 if (nnMessageMedia.mediaType.isPdf || nnMessageMedia.mediaType.isUnknown) {
                     nnMessageMedia.localFile?.let { nnFile ->
-                        val nnFileName: String = nnMessageMedia.fileName?.value ?: "File.txt"
-                        val nnFileSize: String = FileSize(nnFile).asFormattedString()
                         LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
-                            nnFileName,
-                            nnFileSize
+                            nnMessageMedia.fileName,
+                            FileSize(nnFile),
+                            nnMessageMedia.mediaType.isPdf
                         )
                     } ?: run {
-                        onBindDownloadMedia.invoke()
+                        val pendingPayment = this is Received && nnMessage.isPaidPendingMessage
 
-                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable
+                        if (!pendingPayment) {
+                            onBindDownloadMedia.invoke()
+                        }
+
+                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable(
+                            pendingPayment
+                        )
 
                     }
                 } else {
