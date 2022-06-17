@@ -20,7 +20,6 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashSet
 
@@ -70,7 +69,6 @@ internal sealed class MessageHolderViewState(
     companion object {
         val unsupportedMessageTypes: List<MessageType> by lazy {
             listOf(
-                MessageType.Attachment,
                 MessageType.Payment,
                 MessageType.GroupAction.TribeDelete,
             )
@@ -88,19 +86,7 @@ internal sealed class MessageHolderViewState(
 
 
     val unsupportedMessageType: LayoutState.Bubble.ContainerThird.UnsupportedMessageType? by lazy(LazyThreadSafetyMode.NONE) {
-        if (
-            message != null &&
-            unsupportedMessageTypes.contains(message.type) && message.messageMedia?.mediaType?.isSphinxText != true &&
-            message.messageMedia?.mediaType?.isImage != true && message.messageMedia?.mediaType?.isAudio != true &&
-            message.messageMedia?.mediaType?.isVideo != true
-        ) {
-            LayoutState.Bubble.ContainerThird.UnsupportedMessageType(
-                messageType = message.type,
-                gravityStart = this is Received,
-            )
-        } else {
-            null
-        }
+        null
     }
 
     val messagesSeparator: LayoutState.Separator? by lazy(LazyThreadSafetyMode.NONE) {
@@ -423,6 +409,39 @@ internal sealed class MessageHolderViewState(
                         LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable(
                             pendingPayment
                         )
+                    }
+                } else {
+                    null
+                }
+            }
+        }
+    }
+
+    val bubbleFileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment? by lazy(LazyThreadSafetyMode.NONE) {
+        if(message == null){
+            null
+        } else {
+            val nnMessage = message!!
+
+            nnMessage.messageMedia?.let { nnMessageMedia ->
+                if (nnMessageMedia.mediaType.isPdf || nnMessageMedia.mediaType.isUnknown) {
+                    nnMessageMedia.localFile?.let { nnFile ->
+                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
+                            nnMessageMedia.fileName,
+                            FileSize(nnFile),
+                            nnMessageMedia.mediaType.isPdf
+                        )
+                    } ?: run {
+                        val pendingPayment = this is Received && nnMessage.isPaidPendingMessage
+
+                        if (!pendingPayment) {
+                            onBindDownloadMedia.invoke()
+                        }
+
+                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable(
+                            pendingPayment
+                        )
+
                     }
                 } else {
                     null

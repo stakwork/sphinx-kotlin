@@ -65,6 +65,7 @@ import chat.sphinx.wrapper_message.MessageType;
 import chat.sphinx.wrapper_message.RecipientAlias;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
+import chat.sphinx.wrapper_message_media.FileName;
 import chat.sphinx.wrapper_message_media.MediaKey;
 import chat.sphinx.wrapper_message_media.MediaKeyDecrypted;
 import chat.sphinx.wrapper_message_media.MediaToken;
@@ -811,7 +812,8 @@ CREATE TABLE messageMediaDbo(
     media_key_decrypted         TEXT            AS MediaKeyDecrypted,
     media_type                  TEXT            AS MediaType NOT NULL,
     media_token                 TEXT            AS MediaToken NOT NULL,
-    local_file                  TEXT            AS File
+    local_file                  TEXT            AS File,
+    file_name                   TEXT            AS FileName
 );
 
 messageMediaGetById:
@@ -826,7 +828,8 @@ WHERE id = ?;
 
 messageMediaUpdateFile:
 UPDATE messageMediaDbo
-SET local_file = :local_file
+SET local_file = :local_file,
+    file_name = ?
 WHERE id = ?;
 
 messageMediaUpsert {
@@ -843,7 +846,8 @@ messageMediaUpsert {
         media_key_decrypted,
         media_type,
         media_token,
-        local_file
+        local_file,
+        file_name
     )
     VALUES(
         :id,
@@ -852,7 +856,8 @@ messageMediaUpsert {
         :media_key_decrypted,
         :media_type,
         :media_token,
-        :local_file
+        :local_file,
+        :file_name
     );
 }
 

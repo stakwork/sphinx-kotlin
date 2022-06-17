@@ -36,6 +36,7 @@
     <string name="material_icon_name_nav_back" translatable="false">arrow_back</string>
     <string name="material_icon_name_nav_forward" translatable="false">arrow_forward</string>
     <string name="material_icon_name_file_attachment" translatable="false">insert_drive_file</string>
+    <string name="material_icon_name_file_pdf" translatable="false">picture_as_pdf</string>
     <string name="material_icon_name_file_download" translatable="false">file_download</string>
     <string name="material_icon_name_cloud_download" translatable="false">cloud_download</string>
     <string name="material_icon_name_play_button" translatable="false">play_arrow</string>
