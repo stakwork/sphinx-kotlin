@@ -9,7 +9,7 @@ import java.util.*
 @Suppress("NOTHING_TO_INLINE")
 inline fun FileSize.asFormattedString(): String{
 
-    var bytes = file.length()
+    var bytes = value
     if (-1000 < bytes && bytes < 1000) {
         return "$bytes B"
     }
@@ -22,4 +22,4 @@ inline fun FileSize.asFormattedString(): String{
 }
 
 @JvmInline
-value class FileSize (val file: File)
+value class FileSize(val value: Long)

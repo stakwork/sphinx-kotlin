@@ -1,6 +1,11 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
+import android.os.ParcelFileDescriptor
+import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.view.Gravity
 import android.view.View
 import android.webkit.WebView
@@ -36,10 +41,9 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
-import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.before
-import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_common.util.getHHMMString
@@ -48,12 +52,8 @@ import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
-import chat.sphinx.wrapper_message_media.getExtension
 import chat.sphinx.wrapper_view.Px
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -141,7 +141,7 @@ internal fun  LayoutMessageHolderBinding.setView(
             viewState.groupActionIndicator
         )
         if (viewState.background !is BubbleBackground.Gone) {
-            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
+            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, loadingContainer, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
 
                     val file: File? = media?.localFile
@@ -184,6 +184,7 @@ internal fun  LayoutMessageHolderBinding.setView(
                         imageLoader.load(imageView, file, options, object: OnImageLoadListener {
                             override fun onSuccess() {
                                 super.onSuccess()
+                                loadingContainer.gone
                                 onRowLayoutListener?.onRowHeightChanged()
                             }
                         })
@@ -191,6 +192,7 @@ internal fun  LayoutMessageHolderBinding.setView(
                         imageLoader.load(imageView, url, options, object: OnImageLoadListener {
                             override fun onSuccess() {
                                 super.onSuccess()
+                                loadingContainer.gone
                                 onRowLayoutListener?.onRowHeightChanged()
                             }
                         })
@@ -224,8 +226,7 @@ internal fun  LayoutMessageHolderBinding.setView(
                 viewState.bubbleFileAttachment
             )
             setUnsupportedMessageTypeLayout(
-                viewState.
-                unsupportedMessageType
+                viewState.unsupportedMessageType
             )
             setBubbleMessageLayout(
                 viewState.bubbleMessage,
@@ -1436,7 +1437,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
     imageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment?,
-    loadImage: (ImageView, String, MessageMedia?) -> Unit,
+    loadImage: (ImageView, ConstraintLayout, String, MessageMedia?) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
         if (imageAttachment == null) {
@@ -1451,9 +1452,10 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
             } else {
                 layoutConstraintPaidImageOverlay.gone
 
+                loadingImageProgressContainer.visible
                 imageViewAttachmentImage.visible
 
-                loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
+                loadImage(imageViewAttachmentImage, loadingImageProgressContainer, imageAttachment.url, imageAttachment.media)
             }
         }
     }
@@ -1698,17 +1700,27 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
             }
             is LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable -> {
                 root.visible
+
                 progressBarAttachmentFileDownload.gone
                 buttonAttachmentFileDownload.visible
 
-                textViewAttachmentFileIcon.text = if (fileAttachment?.isPdf) {
+                textViewAttachmentFileIcon.text = if (fileAttachment.isPdf) {
                     getString(R.string.material_icon_name_file_pdf)
                 } else {
                     getString(R.string.material_icon_name_file_attachment)
                 }
 
                 textViewAttachmentFileName.text = fileAttachment.fileName?.value ?: "File.txt"
-                textViewAttachmentFileSize.text = fileAttachment.fileSize.asFormattedString()
+
+                textViewAttachmentFileSize.text = if (fileAttachment.isPdf) {
+                    if (fileAttachment.pageCount > 1) {
+                        "${fileAttachment.pageCount} ${getString(R.string.pdf_pages)}"
+                    } else {
+                        "${fileAttachment.pageCount} ${getString(R.string.pdf_page)}"
+                    }
+                } else {
+                    fileAttachment.fileSize.asFormattedString()
+                }
             }
             is LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable -> {
                 root.visible
@@ -1721,16 +1733,14 @@ internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
                     getString(R.string.file_name_loading)
                 }
 
-                textViewAttachmentFileSize.text = "0 kB"
+                textViewAttachmentFileSize.text = "-"
 
                 progressBarAttachmentFileDownload.goneIfFalse(
                     !fileAttachment.pendingPayment
                 )
             }
         }
-
     }
-
 }
 
 @MainThread

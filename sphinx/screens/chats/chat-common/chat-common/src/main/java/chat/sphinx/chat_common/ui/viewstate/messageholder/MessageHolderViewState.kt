@@ -1,5 +1,8 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.graphics.pdf.PdfRenderer
+import android.os.ParcelFileDescriptor
+import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
@@ -20,8 +23,7 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashSet
+
 
 // TODO: Remove
 inline val Message.isCopyLinkAllowed: Boolean
@@ -425,11 +427,22 @@ internal sealed class MessageHolderViewState(
 
             nnMessage.messageMedia?.let { nnMessageMedia ->
                 if (nnMessageMedia.mediaType.isPdf || nnMessageMedia.mediaType.isUnknown) {
+
                     nnMessageMedia.localFile?.let { nnFile ->
+
+                        val pageCount = if (nnMessageMedia.mediaType.isPdf) {
+                            val fileDescriptor = ParcelFileDescriptor.open(nnFile, MODE_READ_ONLY)
+                            val renderer = PdfRenderer(fileDescriptor)
+                            renderer.pageCount
+                        } else {
+                            0
+                        }
+
                         LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
                             nnMessageMedia.fileName,
-                            FileSize(nnFile),
-                            nnMessageMedia.mediaType.isPdf
+                            FileSize(nnFile.length()),
+                            nnMessageMedia.mediaType.isPdf,
+                            pageCount
                         )
                     } ?: run {
                         val pendingPayment = this is Received && nnMessage.isPaidPendingMessage

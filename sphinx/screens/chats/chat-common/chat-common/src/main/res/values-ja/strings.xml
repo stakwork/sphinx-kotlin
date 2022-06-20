@@ -115,6 +115,8 @@
     <string name="side_effect_no_link_to_copy">コピーするリンクがありません</string>
 
     <string name="file_name_loading">Loading...</string>
+    <string name="pdf_page">page</string>
+    <string name="pdf_pages">pages</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">写真を送る</string>

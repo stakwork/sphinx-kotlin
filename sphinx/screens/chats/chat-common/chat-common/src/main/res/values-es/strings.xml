@@ -116,6 +116,8 @@
     <string name="side_effect_no_link_to_copy">Sin enlace para copiar</string>
 
     <string name="file_name_loading">Cargando...</string>
+    <string name="pdf_page">página</string>
+    <string name="pdf_pages">páginas</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>
