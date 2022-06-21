@@ -3,4 +3,5 @@
     <string name="payment_send_header_name">ENVIAR PAGO</string>
 
     <string name="invalid_node_pub_key_qr_code">El código QR no es una clave pública de un nodo de Lightning</string>
+    <string name="amount_too_high">El monto es demasiado alto</string>
 </resources>
