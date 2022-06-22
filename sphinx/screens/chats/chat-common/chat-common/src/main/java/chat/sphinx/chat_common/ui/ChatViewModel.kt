@@ -7,8 +7,11 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
@@ -1729,6 +1732,41 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             )
         }
     }
+
+    fun showAttachmentPdfFullscreen(message: Message?, page: Int) {
+
+        if(message?.messageMedia?.mediaType?.isPdf == true) {
+            message.messageMedia?.localFile?.let { localFile ->
+
+                val fullscreenViewState = getAttachmentFullscreenViewStateFlow().value
+
+                if (fullscreenViewState is AttachmentFullscreenViewState.PdfFullScreen) {
+                    updateAttachmentFullscreenViewState(
+                        AttachmentFullscreenViewState.PdfFullScreen(
+                            message.messageMedia?.fileName ?: FileName("File.txt"),
+                            fullscreenViewState.pdfRender.pageCount,
+                            page,
+                            fullscreenViewState.pdfRender
+                        )
+                    )
+                    }
+                else {
+                    val pfd = ParcelFileDescriptor.open(localFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                    val renderer = PdfRenderer(pfd)
+
+                    updateAttachmentFullscreenViewState(
+                        AttachmentFullscreenViewState.PdfFullScreen(
+                            message.messageMedia?.fileName ?: FileName("File.txt"),
+                            renderer.pageCount,
+                            page,
+                            renderer
+                        )
+                    )
+                }
+            }
+        }
+    }
+
 
     // TODO: Re-work to track messageID + job such that multiple paid messages can
     //  be fired at a time, but only once for that particular message until a response

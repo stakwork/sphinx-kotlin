@@ -3,7 +3,9 @@ package chat.sphinx.chat_common.ui
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -1470,7 +1472,7 @@ abstract class ChatFragment<
                                         }
                                     }
 
-                                    val disposable =imageLoader.load(
+                                    val disposable = imageLoader.load(
                                         imageViewAttachmentFullscreen,
                                         viewState.url,
                                         builder.build()
@@ -1482,6 +1484,26 @@ abstract class ChatFragment<
                             }
 
                             root.visible
+                        }
+                        is AttachmentFullscreenViewState.PdfFullScreen -> {
+                            val page = viewState.pdfRender.openPage(viewState.currentPage)
+
+                            val bitmap = Bitmap.createBitmap(
+                                page.width,
+                                page.height,
+                                Bitmap.Config.ARGB_8888
+                            )
+
+                            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                            page.close()
+
+                            imageViewAttachmentFullscreen.resetInteractionProperties()
+                            imageViewAttachmentFullscreen.setImageBitmap(bitmap)
+                            imageViewAttachmentFullscreen.setBackgroundColor(getColor(android.R.color.white))
+
+                            progressBarAttachmentFullscreen.gone
+                            root.visible
+
                         }
                     }
                 }
