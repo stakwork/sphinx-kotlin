@@ -606,7 +606,7 @@ abstract class ChatFragment<
                     MessagesSearchViewState.Idle
                 )
 
-//                forceScrollToBottom()
+//                forceScrollToBottom()?
             }
         }
     }
@@ -1381,7 +1381,7 @@ abstract class ChatFragment<
 
                                         textViewPaidMessagePreviewPrice.text =
                                             (viewState.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
-                                            ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
+                                                ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
 
                                         root.visible
                                     }
@@ -1500,6 +1500,13 @@ abstract class ChatFragment<
                             imageViewAttachmentFullscreen.resetInteractionProperties()
                             imageViewAttachmentFullscreen.setImageBitmap(bitmap)
                             imageViewAttachmentFullscreen.setBackgroundColor(getColor(android.R.color.white))
+
+                            textViewAttachmentNextPage.setOnClickListener {
+                                if(viewState.currentPage < viewState.pageCount){
+                                    viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage + 1)
+                                }
+                            }
+
 
                             progressBarAttachmentFullscreen.gone
                             root.visible
