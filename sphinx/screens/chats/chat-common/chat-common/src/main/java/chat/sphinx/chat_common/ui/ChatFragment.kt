@@ -1501,19 +1501,17 @@ abstract class ChatFragment<
                             imageViewAttachmentFullscreen.setImageBitmap(bitmap)
                             imageViewAttachmentFullscreen.setBackgroundColor(getColor(android.R.color.white))
 
+                            textViewAttachmentNextPage.goneIfTrue(viewState.currentPage == viewState.pageCount - 1)
+                            textViewAttachmentPreviousPage.goneIfTrue(viewState.currentPage == 0)
 
                             textViewAttachmentNextPage.setOnClickListener {
-                                if(viewState.currentPage < viewState.pageCount){
-                                    viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage + 1)
-                                }
+                                viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage + 1)
                             }
 
                             textViewAttachmentPreviousPage.setOnClickListener {
-                                if(viewState.currentPage > 0){
-                                    viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage - 1)
-                                }
-                            }
+                                viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage - 1)
 
+                            }
 
                             progressBarAttachmentFullscreen.gone
                             root.visible
