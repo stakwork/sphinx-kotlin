@@ -1098,6 +1098,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     @JvmSynthetic
     internal fun updateAttachmentFullscreenViewState(viewState: AttachmentFullscreenViewState) {
+        if (viewState is AttachmentFullscreenViewState.Idle) {
+            val currentState = attachmentFullscreenStateContainer.viewStateFlow.value
+
+            if (currentState is AttachmentFullscreenViewState.PdfFullScreen) {
+                currentState.pdfRender.close()
+            }
+        }
         attachmentFullscreenStateContainer.updateViewState(viewState)
     }
 

@@ -1511,10 +1511,8 @@ abstract class ChatFragment<
                             textViewAttachmentNextPage.setOnClickListener {
                                 viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage + 1)
                             }
-
                             textViewAttachmentPreviousPage.setOnClickListener {
                                 viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage - 1)
-
                             }
 
                             progressBarAttachmentFullscreen.gone
