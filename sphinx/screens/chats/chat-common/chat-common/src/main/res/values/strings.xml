@@ -117,6 +117,8 @@
     <string name="file_name_loading">Loading...</string>
     <string name="pdf_page">page</string>
     <string name="pdf_pages">pages</string>
+    <string name="page" translatable="false">Page</string>
+    <string name="page_of" translatable="false">of</string>
 
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">SEND IMAGE</string>
