@@ -1735,22 +1735,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     fun showAttachmentPdfFullscreen(message: Message?, page: Int) {
 
-        if(message?.messageMedia?.mediaType?.isPdf == true) {
-            message.messageMedia?.localFile?.let { localFile ->
+        val fullscreenViewState = getAttachmentFullscreenViewStateFlow().value
 
-                val fullscreenViewState = getAttachmentFullscreenViewStateFlow().value
+        if (fullscreenViewState is AttachmentFullscreenViewState.PdfFullScreen) {
+            updateAttachmentFullscreenViewState(
+                AttachmentFullscreenViewState.PdfFullScreen(
+                    fullscreenViewState.fileName,
+                    fullscreenViewState.pdfRender.pageCount,
+                    page,
+                    fullscreenViewState.pdfRender
+                )
+            )
+        } else {
+            if(message?.messageMedia?.mediaType?.isPdf == true) {
+                message.messageMedia?.localFile?.let { localFile ->
 
-                if (fullscreenViewState is AttachmentFullscreenViewState.PdfFullScreen) {
-                    updateAttachmentFullscreenViewState(
-                        AttachmentFullscreenViewState.PdfFullScreen(
-                            message.messageMedia?.fileName ?: FileName("File.txt"),
-                            fullscreenViewState.pdfRender.pageCount,
-                            page,
-                            fullscreenViewState.pdfRender
-                        )
-                    )
-                    }
-                else {
                     val pfd = ParcelFileDescriptor.open(localFile, ParcelFileDescriptor.MODE_READ_ONLY)
                     val renderer = PdfRenderer(pfd)
 
@@ -1766,7 +1765,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             }
         }
     }
-
 
     // TODO: Re-work to track messageID + job such that multiple paid messages can
     //  be fired at a time, but only once for that particular message until a response

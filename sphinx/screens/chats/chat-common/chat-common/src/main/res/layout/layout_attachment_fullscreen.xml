@@ -33,31 +33,33 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_attachment_next_page"
-        android:layout_width="58dp"
-        android:layout_height="19dp"
+        android:layout_width="50dp"
+        android:layout_height="32dp"
         android:fontFamily="@font/material_icons_regular"
         android:gravity="center"
         android:text="@string/material_icon_name_nav_forward"
+        android:background="#99141414"
         android:textColor="@color/exo_white"
         android:textSize="@dimen/default_text_size_back_arrow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.95"
+        app:layout_constraintHorizontal_bias="0.98"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_attachment_previous_page"
-        android:layout_width="58dp"
-        android:layout_height="19dp"
+        android:layout_width="50dp"
+        android:layout_height="32dp"
         android:fontFamily="@font/material_icons_regular"
         android:gravity="center"
         android:text="@string/material_icon_name_nav_back"
+        android:background="#99141414"
         android:textColor="@color/exo_white"
         android:textSize="@dimen/default_text_size_back_arrow"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintHorizontal_bias="0.02"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
