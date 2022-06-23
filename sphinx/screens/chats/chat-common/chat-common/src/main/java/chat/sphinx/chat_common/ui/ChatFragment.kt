@@ -1501,11 +1501,15 @@ abstract class ChatFragment<
                             imageViewAttachmentFullscreen.setImageBitmap(bitmap)
                             imageViewAttachmentFullscreen.setBackgroundColor(getColor(android.R.color.white))
 
+                            layoutConstraintPDFHeader.visible
+                            textViewAttachmentNextPage.visible
+                            textViewAttachmentPreviousPage.visible
+
                             textViewAttachmentPdfName.text = viewState.fileName.value
                             textViewAttachmentPdfCurrentPage.text = (viewState.currentPage + 1).toString()
                             textViewAttachmentPdfPageCount.text = viewState.pageCount.toString()
 
-                            textViewAttachmentNextPage.goneIfTrue(viewState.currentPage == viewState.pageCount - 1)
+                            textViewAttachmentNextPage.gonegit IfTrue(viewState.currentPage == viewState.pageCount - 1)
                             textViewAttachmentPreviousPage.goneIfTrue(viewState.currentPage == 0)
 
                             textViewAttachmentNextPage.setOnClickListener {
