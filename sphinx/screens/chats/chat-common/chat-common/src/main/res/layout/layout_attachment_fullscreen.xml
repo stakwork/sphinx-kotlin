@@ -35,12 +35,12 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_attachment_next_page"
-        android:layout_width="50dp"
-        android:layout_height="32dp"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
         android:fontFamily="@font/material_icons_regular"
         android:gravity="center"
         android:text="@string/material_icon_name_nav_forward"
-        android:background="#99141414"
+        android:background="@drawable/button_background_pdf_navigation"
         android:textColor="@color/exo_white"
         android:textSize="@dimen/default_text_size_back_arrow"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -51,12 +51,12 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_attachment_previous_page"
-        android:layout_width="50dp"
-        android:layout_height="32dp"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
         android:fontFamily="@font/material_icons_regular"
         android:gravity="center"
         android:text="@string/material_icon_name_nav_back"
-        android:background="#99141414"
+        android:background="@drawable/button_background_pdf_navigation"
         android:textColor="@color/exo_white"
         android:textSize="@dimen/default_text_size_back_arrow"
         app:layout_constraintBottom_toBottomOf="parent"
