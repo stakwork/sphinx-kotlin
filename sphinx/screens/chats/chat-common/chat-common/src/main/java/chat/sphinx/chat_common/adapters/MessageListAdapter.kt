@@ -429,7 +429,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     layoutConstraintAttachmentFileMainInfoGroup.setOnClickListener {
                         currentViewState?.message?.let { message ->
                             viewModel.showAttachmentPdfFullscreen(message, 0)
-
                         }
                     }
                 }

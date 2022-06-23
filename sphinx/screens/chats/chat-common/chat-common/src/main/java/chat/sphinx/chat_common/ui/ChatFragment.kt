@@ -1501,6 +1501,10 @@ abstract class ChatFragment<
                             imageViewAttachmentFullscreen.setImageBitmap(bitmap)
                             imageViewAttachmentFullscreen.setBackgroundColor(getColor(android.R.color.white))
 
+                            textViewAttachmentPdfName.text = viewState.fileName.value
+                            textViewAttachmentPdfCurrentPage.text = (viewState.currentPage + 1).toString()
+                            textViewAttachmentPdfPageCount.text = viewState.pageCount.toString()
+
                             textViewAttachmentNextPage.goneIfTrue(viewState.currentPage == viewState.pageCount - 1)
                             textViewAttachmentPreviousPage.goneIfTrue(viewState.currentPage == 0)
 
