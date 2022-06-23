@@ -1509,7 +1509,7 @@ abstract class ChatFragment<
                             textViewAttachmentPdfCurrentPage.text = (viewState.currentPage + 1).toString()
                             textViewAttachmentPdfPageCount.text = viewState.pageCount.toString()
 
-                            textViewAttachmentNextPage.gonegit IfTrue(viewState.currentPage == viewState.pageCount - 1)
+                            textViewAttachmentNextPage.goneIfTrue(viewState.currentPage == viewState.pageCount - 1)
                             textViewAttachmentPreviousPage.goneIfTrue(viewState.currentPage == 0)
 
                             textViewAttachmentNextPage.setOnClickListener {
