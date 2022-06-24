@@ -7,8 +7,11 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Build
+import android.os.ParcelFileDescriptor
+import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.provider.MediaStore
 import android.util.Log
 import android.webkit.MimeTypeMap
@@ -1095,6 +1098,13 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     @JvmSynthetic
     internal fun updateAttachmentFullscreenViewState(viewState: AttachmentFullscreenViewState) {
+        if (viewState is AttachmentFullscreenViewState.Idle) {
+            val currentState = attachmentFullscreenStateContainer.viewStateFlow.value
+
+            if (currentState is AttachmentFullscreenViewState.PdfFullScreen) {
+                currentState.pdfRender.close()
+            }
+        }
         attachmentFullscreenStateContainer.updateViewState(viewState)
     }
 
@@ -1727,6 +1737,39 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             updateAttachmentFullscreenViewState(
                 AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
             )
+        }
+    }
+
+    fun showAttachmentPdfFullscreen(message: Message?, page: Int) {
+
+        val fullscreenViewState = getAttachmentFullscreenViewStateFlow().value
+
+        if (fullscreenViewState is AttachmentFullscreenViewState.PdfFullScreen) {
+            updateAttachmentFullscreenViewState(
+                AttachmentFullscreenViewState.PdfFullScreen(
+                    fullscreenViewState.fileName,
+                    fullscreenViewState.pdfRender.pageCount,
+                    page,
+                    fullscreenViewState.pdfRender
+                )
+            )
+        } else {
+            if(message?.messageMedia?.mediaType?.isPdf == true) {
+                message.messageMedia?.localFile?.let { localFile ->
+
+                    val pfd = ParcelFileDescriptor.open(localFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                    val renderer = PdfRenderer(pfd)
+
+                    updateAttachmentFullscreenViewState(
+                        AttachmentFullscreenViewState.PdfFullScreen(
+                            message.messageMedia?.fileName ?: FileName("File.txt"),
+                            renderer.pageCount,
+                            page,
+                            renderer
+                        )
+                    )
+                }
+            }
         }
     }
 
