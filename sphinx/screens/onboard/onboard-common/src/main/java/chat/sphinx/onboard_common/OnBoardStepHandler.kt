@@ -54,7 +54,7 @@ class OnBoardStepHandler @Inject constructor(
             val inviterDataRealized: OnBoardInviterData = inviterData
                 ?: OnBoardInviterData(
                     nickname = "Sphinx Support",
-                    pubkey = LightningNodePubKey("023d70f2f76d283c6c4e58109ee3a2816eb9d8feb40b23d62469060a2b2867b77f"),
+                    pubkey = null,
                     routeHint = null,
                     message = "Welcome to Sphinx",
                     action = null,

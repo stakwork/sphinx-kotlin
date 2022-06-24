@@ -228,23 +228,36 @@ internal class PaymentSendViewModel @Inject constructor(
                     null
                 }
 
-                sendPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
-
                 when {
                     updatedAmount == null -> {
                         amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(""))
                     }
-                    updatedAmount <= balance.balance.value -> {
+                    updatedAmount <= MAXIMUM_SEND_SAT_AMOUNT && updatedAmount <= balance.balance.value -> {
                         amountViewStateContainer.updateViewState(AmountViewState.AmountUpdated(updatedAmount.toString()))
                     }
                     else -> {
                         submitSideEffect(
-                            PaymentSideEffect.Notify(app.getString(R.string.balance_too_low))
+                            PaymentSideEffect.Notify(
+                                app.getString(
+                                    if (updatedAmount > balance.balance.value) {
+                                        R.string.balance_too_low
+                                    } else {
+                                        R.string.amount_too_high
+                                    }
+                                )
+                            )
                         )
+                        return@let
                     }
                 }
+
+                sendPaymentBuilder.setAmount(updatedAmount?.toLong() ?: 0)
             }
         }
+    }
+
+    companion object {
+        private const val MAXIMUM_SEND_SAT_AMOUNT = 9_999_999
     }
 
 }

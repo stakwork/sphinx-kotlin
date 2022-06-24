@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha59 (2022-06-24)
+- Adds PDF viewer
+
 # Version 1.0.0-alpha58 (2022-06-17)
 - Adds support for file attachments on chats
 

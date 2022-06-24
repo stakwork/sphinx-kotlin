@@ -193,6 +193,6 @@ internal class PaymentReceiveViewModel @Inject constructor(
     }
 
     companion object {
-        private const val MAXIMUM_RECEIVE_SAT_AMOUNT = 1_000_000
+        private const val MAXIMUM_RECEIVE_SAT_AMOUNT = 9_999_999
     }
 }
