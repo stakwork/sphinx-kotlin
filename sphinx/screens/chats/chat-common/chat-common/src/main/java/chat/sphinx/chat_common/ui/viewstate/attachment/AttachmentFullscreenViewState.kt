@@ -11,7 +11,7 @@ AttachmentFullscreenViewState: ViewState<AttachmentFullscreenViewState>() {
 
     object Idle: AttachmentFullscreenViewState()
 
-    data class Fullscreen(
+    data class ImageFullscreen(
         val url: String,
         val media: MessageMedia?
     ): AttachmentFullscreenViewState()

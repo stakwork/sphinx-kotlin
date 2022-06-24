@@ -1116,7 +1116,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             currentViewState is ChatMenuViewState.Open -> {
                 updateViewState(ChatMenuViewState.Closed)
             }
-            attachmentFullscreenViewState is AttachmentFullscreenViewState.Fullscreen -> {
+            attachmentFullscreenViewState is AttachmentFullscreenViewState.ImageFullscreen -> {
                 updateAttachmentFullscreenViewState(AttachmentFullscreenViewState.Idle)
             }
             attachmentSendViewState is AttachmentSendViewState.Preview -> {
@@ -1735,13 +1735,22 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     fun showAttachmentImageFullscreen(message: Message) {
         message.retrieveImageUrlAndMessageMedia()?.let {
             updateAttachmentFullscreenViewState(
-                AttachmentFullscreenViewState.Fullscreen(it.first, it.second)
+                AttachmentFullscreenViewState.ImageFullscreen(it.first, it.second)
             )
         }
     }
 
-    fun showAttachmentPdfFullscreen(message: Message?, page: Int) {
+    fun navigateToPdfPage(pageDiff: Int) {
+        val viewState = getAttachmentFullscreenViewStateFlow().value
+        if (viewState is AttachmentFullscreenViewState.PdfFullScreen) {
+            showAttachmentPdfFullscreen(null, viewState.currentPage + pageDiff)
+        }
+    }
 
+    fun showAttachmentPdfFullscreen(
+        message: Message?,
+        page: Int
+    ) {
         val fullscreenViewState = getAttachmentFullscreenViewStateFlow().value
 
         if (fullscreenViewState is AttachmentFullscreenViewState.PdfFullScreen) {
@@ -1757,7 +1766,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             if(message?.messageMedia?.mediaType?.isPdf == true) {
                 message.messageMedia?.localFile?.let { localFile ->
 
-                    val pfd = ParcelFileDescriptor.open(localFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                    val pfd = ParcelFileDescriptor.open(localFile, MODE_READ_ONLY)
                     val renderer = PdfRenderer(pfd)
 
                     updateAttachmentFullscreenViewState(

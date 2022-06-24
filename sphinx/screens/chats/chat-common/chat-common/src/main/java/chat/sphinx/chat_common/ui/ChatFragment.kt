@@ -696,6 +696,13 @@ abstract class ChatFragment<
                 )
             }
 
+            textViewAttachmentNextPage.setOnClickListener {
+                viewModel.navigateToPdfPage(1)
+            }
+            textViewAttachmentPreviousPage.setOnClickListener {
+                viewModel.navigateToPdfPage(-1)
+            }
+
             imageViewAttachmentFullscreen.onSingleTapListener = object: SphinxFullscreenImageView.OnSingleTapListener {
                 override fun onSingleTapConfirmed() {
                     layoutConstraintAttachmentFullscreenHeader.goneIfTrue(
@@ -1438,8 +1445,15 @@ abstract class ChatFragment<
                             root.gone
                             imageViewAttachmentFullscreen.setImageDrawable(null)
                         }
-                        is AttachmentFullscreenViewState.Fullscreen -> {
+                        is AttachmentFullscreenViewState.ImageFullscreen -> {
+                            layoutConstraintPDFHeader.gone
+                            textViewAttachmentNextPage.gone
+                            textViewAttachmentPreviousPage.gone
+
                             imageViewAttachmentFullscreen.resetInteractionProperties()
+                            imageViewAttachmentFullscreen.setBackgroundColor(
+                                getColor(android.R.color.transparent)
+                            )
 
                             viewState.media?.localFile?.let { nnLocalFile ->
                                 lifecycleScope.launch(viewModel.mainImmediate) {
@@ -1499,29 +1513,20 @@ abstract class ChatFragment<
 
                             imageViewAttachmentFullscreen.resetInteractionProperties()
                             imageViewAttachmentFullscreen.setImageBitmap(bitmap)
-                            imageViewAttachmentFullscreen.setBackgroundColor(getColor(android.R.color.white))
+                            imageViewAttachmentFullscreen.setBackgroundColor(
+                                getColor(android.R.color.white)
+                            )
 
                             layoutConstraintPDFHeader.visible
-                            textViewAttachmentNextPage.visible
-                            textViewAttachmentPreviousPage.visible
 
                             textViewAttachmentPdfName.text = viewState.fileName.value
-                            textViewAttachmentPdfCurrentPage.text = (viewState.currentPage + 1).toString()
-                            textViewAttachmentPdfPageCount.text = viewState.pageCount.toString()
+                            textViewAttachmentPdfPage.text = getString(R.string.pdf_page_of, viewState.currentPage + 1, viewState.pageCount)
 
-                            textViewAttachmentNextPage.goneIfTrue(viewState.currentPage == viewState.pageCount - 1)
-                            textViewAttachmentPreviousPage.goneIfTrue(viewState.currentPage == 0)
-
-                            textViewAttachmentNextPage.setOnClickListener {
-                                viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage + 1)
-                            }
-                            textViewAttachmentPreviousPage.setOnClickListener {
-                                viewModel.showAttachmentPdfFullscreen(null, viewState.currentPage - 1)
-                            }
+                            textViewAttachmentNextPage.goneIfFalse(viewState.currentPage < viewState.pageCount - 1)
+                            textViewAttachmentPreviousPage.goneIfFalse(viewState.currentPage > 0)
 
                             progressBarAttachmentFullscreen.gone
                             root.visible
-
                         }
                     }
                 }

@@ -48,7 +48,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.98"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible"/>
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_attachment_previous_page"
@@ -65,7 +66,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.02"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_attachment_fullscreen_header"
@@ -89,18 +91,18 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_PDF_header"
-            android:layout_width="0dp"
-            android:layout_height="64dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_attachment_fullscreen_header_back"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_marginHorizontal="@dimen/default_big_layout_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_attachment_pdf_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 android:ellipsize="middle"
                 android:fontFamily="@font/roboto_medium"
                 android:lines="1"
@@ -115,75 +117,18 @@
                 android:id="@+id/text_view_attachment_pdf_page"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/default_half_layout_margin"
                 android:ellipsize="middle"
                 android:fontFamily="@font/roboto_medium"
                 android:gravity="center"
                 android:lines="1"
-                android:text="@string/page"
+                android:text="@string/pdf_page_of"
                 android:textColor="@color/text"
                 android:textSize="@dimen/default_text_size_list_row_headline"
-                app:layout_constraintEnd_toStartOf="@+id/text_view_attachment_pdf_current_page"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintHorizontal_chainStyle="packed"
-                app:layout_constraintStart_toStartOf="@+id/text_view_attachment_pdf_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_attachment_pdf_name"
                 tools:text="Page" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_attachment_pdf_current_page"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginTop="8dp"
-                android:ellipsize="middle"
-                android:fontFamily="@font/roboto_medium"
-                android:gravity="center"
-                android:lines="1"
-                android:textColor="@color/text"
-                android:textSize="@dimen/default_text_size_list_row_headline"
-                app:layout_constraintEnd_toStartOf="@+id/text_view_attachment_pdf_of"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/text_view_attachment_pdf_page"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_attachment_pdf_name"
-                tools:text="1" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_attachment_pdf_of"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginTop="8dp"
-                android:ellipsize="middle"
-                android:fontFamily="@font/roboto_medium"
-                android:gravity="center"
-                android:lines="1"
-                android:text="@string/page_of"
-                android:textColor="@color/text"
-                android:textSize="@dimen/default_text_size_list_row_headline"
-                app:layout_constraintEnd_toStartOf="@+id/text_view_attachment_pdf_page_count"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/text_view_attachment_pdf_current_page"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_attachment_pdf_name"
-                tools:text="of" />
-
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_attachment_pdf_page_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginTop="8dp"
-                android:ellipsize="middle"
-                android:fontFamily="@font/roboto_medium"
-                android:gravity="center"
-                android:lines="1"
-                android:textColor="@color/text"
-                android:textSize="@dimen/default_text_size_list_row_headline"
-                app:layout_constraintEnd_toEndOf="@+id/text_view_attachment_pdf_name"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toEndOf="@+id/text_view_attachment_pdf_of"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_attachment_pdf_name"
-                tools:text="37" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
