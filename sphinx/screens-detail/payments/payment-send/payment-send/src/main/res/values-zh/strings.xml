@@ -3,4 +3,5 @@
     <string name="payment_send_header_name">支付</string>
 
     <string name="invalid_node_pub_key_qr_code">QR code 不是一個閃電網路節點住址</string>
+    <string name="amount_too_high">Amount is too high</string>
 </resources>
