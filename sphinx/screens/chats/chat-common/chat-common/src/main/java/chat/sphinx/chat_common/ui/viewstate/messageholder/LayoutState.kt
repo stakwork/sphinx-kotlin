@@ -162,12 +162,13 @@ internal sealed class LayoutState private constructor() {
                 data class FileUnavailable(val showPaidOverlay: Boolean): VideoAttachment()
             }
 
-            sealed class FileAttachment(): ContainerSecond(){
+            sealed class FileAttachment: ContainerSecond(){
 
                 data class FileAvailable(
                     val fileName: FileName?,
                     val fileSize: FileSize,
-                    val isPdf: Boolean
+                    val isPdf: Boolean,
+                    val pageCount: Int
                 ): FileAttachment()
 
                 data class FileUnavailable(

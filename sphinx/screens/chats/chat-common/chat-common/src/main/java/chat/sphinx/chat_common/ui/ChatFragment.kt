@@ -3,7 +3,9 @@ package chat.sphinx.chat_common.ui
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -604,7 +606,7 @@ abstract class ChatFragment<
                     MessagesSearchViewState.Idle
                 )
 
-//                forceScrollToBottom()
+//                forceScrollToBottom()?
             }
         }
     }
@@ -692,6 +694,13 @@ abstract class ChatFragment<
                 viewModel.updateAttachmentFullscreenViewState(
                     AttachmentFullscreenViewState.Idle
                 )
+            }
+
+            textViewAttachmentNextPage.setOnClickListener {
+                viewModel.navigateToPdfPage(1)
+            }
+            textViewAttachmentPreviousPage.setOnClickListener {
+                viewModel.navigateToPdfPage(-1)
             }
 
             imageViewAttachmentFullscreen.onSingleTapListener = object: SphinxFullscreenImageView.OnSingleTapListener {
@@ -1379,7 +1388,7 @@ abstract class ChatFragment<
 
                                         textViewPaidMessagePreviewPrice.text =
                                             (viewState.paidMessage?.second ?: attachmentSendBinding.editTextMessagePrice.text?.toString()?.toLongOrNull())
-                                            ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
+                                                ?.toSat()?.asFormattedString(appendUnit = true) ?: "0 sats"
 
                                         root.visible
                                     }
@@ -1436,8 +1445,15 @@ abstract class ChatFragment<
                             root.gone
                             imageViewAttachmentFullscreen.setImageDrawable(null)
                         }
-                        is AttachmentFullscreenViewState.Fullscreen -> {
+                        is AttachmentFullscreenViewState.ImageFullscreen -> {
+                            layoutConstraintPDFHeader.gone
+                            textViewAttachmentNextPage.gone
+                            textViewAttachmentPreviousPage.gone
+
                             imageViewAttachmentFullscreen.resetInteractionProperties()
+                            imageViewAttachmentFullscreen.setBackgroundColor(
+                                getColor(android.R.color.transparent)
+                            )
 
                             viewState.media?.localFile?.let { nnLocalFile ->
                                 lifecycleScope.launch(viewModel.mainImmediate) {
@@ -1470,7 +1486,7 @@ abstract class ChatFragment<
                                         }
                                     }
 
-                                    val disposable =imageLoader.load(
+                                    val disposable = imageLoader.load(
                                         imageViewAttachmentFullscreen,
                                         viewState.url,
                                         builder.build()
@@ -1481,6 +1497,35 @@ abstract class ChatFragment<
                                 }
                             }
 
+                            root.visible
+                        }
+                        is AttachmentFullscreenViewState.PdfFullScreen -> {
+                            val page = viewState.pdfRender.openPage(viewState.currentPage)
+
+                            val bitmap = Bitmap.createBitmap(
+                                page.width,
+                                page.height,
+                                Bitmap.Config.ARGB_8888
+                            )
+
+                            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                            page.close()
+
+                            imageViewAttachmentFullscreen.resetInteractionProperties()
+                            imageViewAttachmentFullscreen.setImageBitmap(bitmap)
+                            imageViewAttachmentFullscreen.setBackgroundColor(
+                                getColor(android.R.color.white)
+                            )
+
+                            layoutConstraintPDFHeader.visible
+
+                            textViewAttachmentPdfName.text = viewState.fileName.value
+                            textViewAttachmentPdfPage.text = getString(R.string.pdf_page_of, viewState.currentPage + 1, viewState.pageCount)
+
+                            textViewAttachmentNextPage.goneIfFalse(viewState.currentPage < viewState.pageCount - 1)
+                            textViewAttachmentPreviousPage.goneIfFalse(viewState.currentPage > 0)
+
+                            progressBarAttachmentFullscreen.gone
                             root.visible
                         }
                     }

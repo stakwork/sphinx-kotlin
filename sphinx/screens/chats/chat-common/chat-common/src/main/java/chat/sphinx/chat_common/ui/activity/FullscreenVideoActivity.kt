@@ -22,7 +22,8 @@ import kotlinx.coroutines.launch
  * status bar and navigation/system bar) with user interaction.
  */
 @AndroidEntryPoint
-internal class FullscreenVideoActivity : AppCompatActivity() {
+internal class
+FullscreenVideoActivity : AppCompatActivity() {
     private lateinit var orientationListener: OrientationEventListener
 
     private val onStopSupervisor: OnStopSupervisor = OnStopSupervisor()
