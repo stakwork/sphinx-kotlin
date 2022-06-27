@@ -42,7 +42,9 @@
     <string name="last_message_description_invoice_sent">送信したインボイス: %s</string>
     <string name="last_message_description_invoice_receive">受信したインボイス: %s</string>
     <string name="last_message_description_payment_sent">送金額: %s</string>
+    <string name="last_message_description_tribe_payment_sent">Payment of %s sent to %s</string>
     <string name="last_message_description_payment_received">受金額: %s</string>
+    <string name="last_message_description_tribe_payment">%s sent a payment of %s to %s</string>
 
     <string name="last_message_description_sent">送信しました</string>
     <string name="last_message_description_an_audio_clip">音声</string>
