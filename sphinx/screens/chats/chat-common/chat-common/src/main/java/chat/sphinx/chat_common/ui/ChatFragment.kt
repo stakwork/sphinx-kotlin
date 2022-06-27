@@ -78,10 +78,7 @@ import chat.sphinx.wrapper_common.util.getHHMMString
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.isImage
-import chat.sphinx.wrapper_message_media.isSphinxText
-import chat.sphinx.wrapper_message_media.isVideo
+import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -346,7 +343,11 @@ abstract class ChatFragment<
                             sendMessageBuilder.setAttachmentInfo(null)
                         }
                         is AttachmentSendViewState.Preview -> {
-                            if (attachmentViewState.type.isImage || attachmentViewState.type.isVideo) {
+                            if (attachmentViewState.type.isImage ||
+                                attachmentViewState.type.isVideo ||
+                                attachmentViewState.type.isPdf ||
+                                attachmentViewState.type.isUnknown
+                            ) {
                                 attachmentViewState.file?.let { nnFile ->
                                     sendMessageBuilder.setAttachmentInfo(
                                         AttachmentInfo(
@@ -1357,7 +1358,7 @@ abstract class ChatFragment<
                                     // TODO: Implement
                                 }
                                 is MediaType.Pdf -> {
-                                    // TODO: Implement
+                                    textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_pdf)
                                 }
                                 is MediaType.Video -> {
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_video)
@@ -1393,7 +1394,10 @@ abstract class ChatFragment<
                                         root.visible
                                     }
                                 }
-                                is MediaType.Unknown -> {}
+                                is MediaType.Unknown -> {
+                                    textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_file)
+
+                                }
                             }
                             root.visible
                         }

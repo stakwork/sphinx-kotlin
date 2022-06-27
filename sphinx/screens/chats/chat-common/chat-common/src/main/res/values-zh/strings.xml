@@ -122,6 +122,8 @@
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">傳送圖片</string>
     <string name="attachment_send_header_video">傳送影片</string>
+    <string name="attachment_send_header_pdf">SEND PDF</string>
+    <string name="attachment_send_header_file">SEND FILE</string>
     <string name="attachment_send_header_giphy">傳送 GIPHY</string>
     <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
 

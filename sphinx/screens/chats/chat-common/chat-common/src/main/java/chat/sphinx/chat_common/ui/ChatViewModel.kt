@@ -1341,7 +1341,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal fun chatMenuOptionFileLibrary() {
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(
-                ChatSideEffect.Notify("File library not implemented yet")
+                ChatSideEffect.RetrieveFile
             )
         }
     }
@@ -1455,7 +1455,25 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             }
                         }
                         is MediaType.Pdf -> {
-                            // TODO: Implement
+                            viewModelScope.launch(mainImmediate) {
+                                val newFile: File = mediaCacheHandler.createPdfFile(ext)
+
+                                try {
+                                    mediaCacheHandler.copyTo(stream, newFile)
+                                    updateViewState(ChatMenuViewState.Closed)
+                                    updateFooterViewState(FooterViewState.Attachment)
+                                    attachmentSendStateContainer.updateViewState(
+                                        AttachmentSendViewState.Preview(newFile, mType, null)
+                                    )
+                                } catch (e: Exception) {
+                                    newFile.delete()
+                                    LOG.e(
+                                        TAG,
+                                        "Failed to copy content to new file: ${newFile.path}",
+                                        e
+                                    )
+                                }
+                            }
                         }
                         is MediaType.Video -> {
                             // TODO: Reduce code duplication
@@ -1482,7 +1500,26 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                         is MediaType.Text,
                         is MediaType.Unknown -> {
-                            // do nothing
+                            viewModelScope.launch(mainImmediate) {
+                                val newFile: File = mediaCacheHandler.createFile(mType, ext)!!
+
+                                try {
+                                    mediaCacheHandler.copyTo(stream, newFile)
+                                    updateViewState(ChatMenuViewState.Closed)
+                                    updateFooterViewState(FooterViewState.Attachment)
+                                    attachmentSendStateContainer.updateViewState(
+                                        AttachmentSendViewState.Preview(newFile, mType, null)
+                                    )
+                                } catch (e: Exception) {
+                                    newFile.delete()
+                                    LOG.e(
+                                        TAG,
+                                        "Failed to copy content to new file: ${newFile.path}",
+                                        e
+                                    )
+                                }
+                            }
+
                         }
                     }
                 }
