@@ -70,6 +70,8 @@ import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
@@ -1343,6 +1345,7 @@ abstract class ChatFragment<
                             when (viewState.type) {
                                 is MediaType.Image -> {
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_image)
+                                    layoutConstraintFileAttachmentPreview.gone
                                     // will load almost immediately b/c it's a file, so
                                     // no need to launch separate coroutine.
                                     viewState.file?.let { nnFile ->
@@ -1359,9 +1362,17 @@ abstract class ChatFragment<
                                 }
                                 is MediaType.Pdf -> {
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_pdf)
+                                    textViewAttachmentFileIconPreview.text = getString(R.string.material_icon_name_file_pdf)
+                                    layoutConstraintFileAttachmentPreview.visible
+
+                                    viewState.file?.let { nnFile ->
+                                        textViewAttachmentFileNamePreview.text = nnFile.name
+                                        textViewAttachmentFileSizePreview.text = FileSize(nnFile.length()).asFormattedString()
+                                    }
                                 }
                                 is MediaType.Video -> {
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_video)
+                                    layoutConstraintFileAttachmentPreview.gone
                                     // will load almost immediately b/c it's a file, so
                                     // no need to launch separate coroutine.
                                     viewState.file?.let { nnFile ->
@@ -1383,6 +1394,7 @@ abstract class ChatFragment<
                                 }
                                 is MediaType.Text -> {
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_paid_message)
+                                    layoutConstraintFileAttachmentPreview.gone
 
                                     includePaidTextMessageSendPreview.apply {
                                         textViewPaidMessagePreviewText.text = viewState.paidMessage?.first ?: footerBinding.editTextChatFooter.text
@@ -1396,16 +1408,22 @@ abstract class ChatFragment<
                                 }
                                 is MediaType.Unknown -> {
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_file)
+                                    textViewAttachmentFileIconPreview.text = getString(R.string.material_icon_name_file_attachment)
+                                    layoutConstraintFileAttachmentPreview.visible
 
+                                    viewState.file?.let { nnFile ->
+                                        textViewAttachmentFileNamePreview.text = nnFile.name
+                                        textViewAttachmentFileSizePreview.text = FileSize(nnFile.length()).asFormattedString()
+                                    }
                                 }
                             }
                             root.visible
                         }
                         is AttachmentSendViewState.PreviewGiphy -> {
-
                             textViewAttachmentSendHeaderName.apply {
                                 text = getString(R.string.attachment_send_header_giphy)
                             }
+                            layoutConstraintFileAttachmentPreview.gone
 
                             root.visible
 
