@@ -123,6 +123,8 @@
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">ENVIAR IMAGEN</string>
     <string name="attachment_send_header_video">ENVIAR VIDEO</string>
+    <string name="attachment_send_header_pdf">ENVIAR PDF</string>
+    <string name="attachment_send_header_file">ENVIAR ARCHIVO</string>
     <string name="attachment_send_header_giphy">ENVIAR GIPHY</string>
     <string name="attachment_send_header_paid_message">ENVIAR MENSAJE PAGO</string>
 

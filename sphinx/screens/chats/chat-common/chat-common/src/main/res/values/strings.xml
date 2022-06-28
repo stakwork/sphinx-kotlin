@@ -122,6 +122,8 @@
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">SEND IMAGE</string>
     <string name="attachment_send_header_video">SEND VIDEO</string>
+    <string name="attachment_send_header_pdf">SEND PDF</string>
+    <string name="attachment_send_header_file">SEND FILE</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
     <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
 

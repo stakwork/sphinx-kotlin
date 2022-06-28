@@ -26,6 +26,18 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         }
     }
 
+    object RetrieveFile: ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            try {
+                value.contentChooserContract.launch(
+                    arrayOf(
+                        "application/*"
+                    )
+                )
+            } catch (e: ActivityNotFoundException) {}
+        }
+    }
+
     class Notify(
         private val msg: String,
         private val notificationLengthLong: Boolean = true
