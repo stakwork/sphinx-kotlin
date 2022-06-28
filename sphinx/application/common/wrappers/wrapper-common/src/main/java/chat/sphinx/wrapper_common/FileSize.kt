@@ -13,7 +13,7 @@ inline fun FileSize.asFormattedString(): String{
     if (-1000 < bytes && bytes < 1000) {
         return "$bytes B"
     }
-    val ci: CharacterIterator = StringCharacterIterator("kMGTPE")
+    val ci: CharacterIterator = StringCharacterIterator("KMGTPE")
     while (bytes <= -999950 || bytes >= 999950) {
         bytes /= 1000
         ci.next()

@@ -92,13 +92,4 @@ data class MessageDto(
             null
         }
     }
-
-    @Transient
-    @Volatile
-    var localFileName: FileName? = null
-        private set
-
-    fun setLocalFileName(fileName: FileName) {
-        localFileName = fileName
-    }
 }
