@@ -2451,7 +2451,7 @@ abstract class SphinxRepository(
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
                                     media.third.file,
-                                    null
+                                    sendMessage.attachmentInfo?.fileName
                                 )
                             }
 
@@ -2490,13 +2490,13 @@ abstract class SphinxRepository(
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
                                     media.third.file,
-                                    null
+                                    sendMessage.attachmentInfo?.fileName
                                 )
                             }
                         }
-                    }
 
-                    provisionalId
+                        provisionalId
+                    }
                 }
             }
 
@@ -2539,6 +2539,7 @@ abstract class SphinxRepository(
                     token,
                     media.third.mediaType,
                     media.third.file,
+                    media.third.fileName,
                     media.first,
                     MediaHost.DEFAULT,
                 )
@@ -2778,7 +2779,11 @@ abstract class SphinxRepository(
                                             upsertContact(contactDto, queries)
                                         }
 
-                                        upsertMessage(loadResponse.value, queries)
+                                        upsertMessage(
+                                            loadResponse.value,
+                                            queries,
+                                            media?.third?.fileName
+                                        )
 
                                         provisionalMessageId?.let { provId ->
                                             deleteMessageById(provId, queries)
@@ -5422,6 +5427,7 @@ abstract class SphinxRepository(
                                     messageLock.withLock {
                                         withContext(io) {
                                             queries.transaction {
+
                                                 queries.messageMediaUpdateFile(
                                                     streamToFile,
                                                     streamAndFileName.second,

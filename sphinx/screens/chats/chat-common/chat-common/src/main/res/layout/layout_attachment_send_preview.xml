@@ -81,7 +81,65 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_file_attachment_preview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="@+id/image_view_attachment_send_preview"
+        app:layout_constraintBottom_toBottomOf="@+id/image_view_attachment_send_preview"
+        app:layout_constraintStart_toStartOf="@+id/image_view_attachment_send_preview"
+        app:layout_constraintEnd_toEndOf="@+id/image_view_attachment_send_preview"
+        android:background="@color/selectedMessageBackground"
+        tools:visibility="visible">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_file_icon_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_file_attachment"
+            android:textColor="@color/primaryText"
+            android:textSize="40sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_file_name_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:ellipsize="middle"
+            android:fontFamily="@font/roboto_medium"
+            android:lines="1"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/text_view_attachment_file_icon_preview"
+            tools:text="sphinx-world-domination-plans.pdf" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_file_size_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="middle"
+            android:fontFamily="@font/roboto_medium"
+            android:lines="1"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintEnd_toEndOf="@+id/text_view_attachment_file_name_preview"
+            app:layout_constraintStart_toStartOf="@+id/text_view_attachment_file_name_preview"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_attachment_file_name_preview"
+            tools:text="24 kB" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -106,7 +164,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_attachment_send_header">
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_attachment_price"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
