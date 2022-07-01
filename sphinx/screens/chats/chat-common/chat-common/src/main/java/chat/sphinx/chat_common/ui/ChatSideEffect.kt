@@ -13,13 +13,26 @@ import io.matthewnelson.concept_views.sideeffect.SideEffect
 
 sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
 
-    object RetrieveImage: ChatSideEffect() {
+    object RetrieveImageOrVideo: ChatSideEffect() {
         override suspend fun execute(value: ChatSideEffectFragment) {
             try {
                 value.contentChooserContract.launch(
                     arrayOf(
                         "image/*",
                         "video/*"
+                    )
+                )
+            } catch (e: ActivityNotFoundException) {}
+        }
+    }
+
+    object RetrieveFile: ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            try {
+                value.contentChooserContract.launch(
+                    arrayOf(
+                        "application/*",
+                        "text/*"
                     )
                 )
             } catch (e: ActivityNotFoundException) {}

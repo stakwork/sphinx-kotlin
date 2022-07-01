@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha60 (2022-07-01)
+- Adds ability to send file attachments
+- Fixes tribe direct payments description on chat list
+
 # Version 1.0.0-alpha59 (2022-06-24)
 - Adds PDF viewer
 

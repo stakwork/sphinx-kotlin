@@ -431,6 +431,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             viewModel.showAttachmentPdfFullscreen(message, 0)
                         }
                     }
+                    layoutConstraintAttachmentFileMainInfoGroup.setOnLongClickListener(selectedMessageLongClickListener)
                 }
 
                 includePaidMessageReceivedDetailsHolder.apply {

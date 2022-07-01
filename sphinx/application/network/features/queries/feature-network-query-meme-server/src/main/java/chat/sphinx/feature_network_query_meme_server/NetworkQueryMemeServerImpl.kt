@@ -11,6 +11,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_meme_server.*
+import chat.sphinx.wrapper_message_media.FileName
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -108,6 +109,7 @@ class NetworkQueryMemeServerImpl(
         authenticationToken: AuthenticationToken,
         mediaType: MediaType,
         file: File,
+        fileName: FileName?,
         password: Password,
         memeServerHost: MediaHost
     ): Response<PostMemeServerUploadDto, ResponseError> {
@@ -159,7 +161,7 @@ class NetworkQueryMemeServerImpl(
             val requestBody: RequestBody = MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart(NAME, type.type)
-                .addFormDataPart(FILE, file.name, fileBody)
+                .addFormDataPart(FILE, fileName?.value ?: file.name, fileBody)
                 .build()
 
             requestBuilder.post(requestBody)

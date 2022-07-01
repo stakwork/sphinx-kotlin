@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.*
@@ -70,6 +71,8 @@ import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_chat.isTrue
+import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
@@ -78,10 +81,7 @@ import chat.sphinx.wrapper_common.util.getHHMMString
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.isImage
-import chat.sphinx.wrapper_message_media.isSphinxText
-import chat.sphinx.wrapper_message_media.isVideo
+import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_view.Dp
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -332,6 +332,7 @@ abstract class ChatFragment<
 
             textViewChatFooterSend.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
+
                     sendMessageBuilder.setText(editTextChatFooter.text?.toString())
 
                     sendMessageBuilder.setPaidMessagePrice(
@@ -346,12 +347,18 @@ abstract class ChatFragment<
                             sendMessageBuilder.setAttachmentInfo(null)
                         }
                         is AttachmentSendViewState.Preview -> {
-                            if (attachmentViewState.type.isImage || attachmentViewState.type.isVideo) {
+                            if (
+                                attachmentViewState.type.isImage ||
+                                attachmentViewState.type.isVideo ||
+                                attachmentViewState.type.isPdf ||
+                                attachmentViewState.type.isUnknown
+                            ) {
                                 attachmentViewState.file?.let { nnFile ->
                                     sendMessageBuilder.setAttachmentInfo(
                                         AttachmentInfo(
                                             file = nnFile,
                                             mediaType = attachmentViewState.type,
+                                            fileName = attachmentViewState.fileName,
                                             isLocalFile = true,
                                         )
                                     )
@@ -365,6 +372,7 @@ abstract class ChatFragment<
                                         AttachmentInfo(
                                             file = file,
                                             mediaType = MediaType.Text,
+                                            fileName = null,
                                             isLocalFile = true,
                                         )
                                     )
@@ -434,6 +442,7 @@ abstract class ChatFragment<
                                 AttachmentSendViewState.Preview(
                                     null,
                                     sendAttachmentViewState.type,
+                                    sendAttachmentViewState.fileName,
                                     Pair(text, price),
                                 )
                             )
@@ -544,6 +553,7 @@ abstract class ChatFragment<
                             AttachmentSendViewState.Preview(
                                 null,
                                 sendAttachmentViewState.type,
+                                sendAttachmentViewState.fileName,
                                 Pair(text, price),
                             )
                         )
@@ -1338,9 +1348,11 @@ abstract class ChatFragment<
                             layoutConstraintVideoPlayButton.gone
                         }
                         is AttachmentSendViewState.Preview -> {
-                            @Exhaustive
                             when (viewState.type) {
                                 is MediaType.Image -> {
+                                    layoutConstraintFileAttachmentPreview.gone
+                                    includePaidTextMessageSendPreview.root.gone
+
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_image)
                                     // will load almost immediately b/c it's a file, so
                                     // no need to launch separate coroutine.
@@ -1353,13 +1365,33 @@ abstract class ChatFragment<
                                         }
                                     }
                                 }
-                                is MediaType.Audio -> {
-                                    // TODO: Implement
-                                }
                                 is MediaType.Pdf -> {
-                                    // TODO: Implement
+                                    includePaidTextMessageSendPreview.root.gone
+
+                                    textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_pdf)
+                                    textViewAttachmentFileIconPreview.text = getString(R.string.material_icon_name_file_pdf)
+
+                                    viewState.file?.let { nnFile ->
+                                        val fileDescriptor = ParcelFileDescriptor.open(nnFile,
+                                            ParcelFileDescriptor.MODE_READ_ONLY
+                                        )
+                                        val renderer = PdfRenderer(fileDescriptor)
+                                        val pageCount = renderer.pageCount
+
+                                        textViewAttachmentFileNamePreview.text = viewState.fileName?.value ?: nnFile.name
+                                        textViewAttachmentFileSizePreview.text = if (pageCount > 1) {
+                                            "$pageCount ${getString(R.string.pdf_pages)}"
+                                        } else {
+                                            "$pageCount ${getString(R.string.pdf_page)}"
+                                        }
+                                    }
+
+                                    layoutConstraintFileAttachmentPreview.visible
                                 }
                                 is MediaType.Video -> {
+                                    layoutConstraintFileAttachmentPreview.gone
+                                    includePaidTextMessageSendPreview.root.gone
+
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_video)
                                     // will load almost immediately b/c it's a file, so
                                     // no need to launch separate coroutine.
@@ -1381,6 +1413,8 @@ abstract class ChatFragment<
                                     }
                                 }
                                 is MediaType.Text -> {
+                                    layoutConstraintFileAttachmentPreview.gone
+
                                     textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_paid_message)
 
                                     includePaidTextMessageSendPreview.apply {
@@ -1393,17 +1427,30 @@ abstract class ChatFragment<
                                         root.visible
                                     }
                                 }
-                                is MediaType.Unknown -> {}
+                                is MediaType.Unknown -> {
+                                    includePaidTextMessageSendPreview.root.gone
+
+                                    textViewAttachmentSendHeaderName.text = getString(R.string.attachment_send_header_file)
+                                    textViewAttachmentFileIconPreview.text = getString(R.string.material_icon_name_file_attachment)
+
+                                    viewState.file?.let { nnFile ->
+                                        textViewAttachmentFileNamePreview.text = viewState.fileName?.value ?: nnFile.name
+                                        textViewAttachmentFileSizePreview.text = FileSize(nnFile.length()).asFormattedString()
+                                    }
+
+                                    layoutConstraintFileAttachmentPreview.visible
+                                }
+                                else -> { }
                             }
                             root.visible
                         }
                         is AttachmentSendViewState.PreviewGiphy -> {
+                            layoutConstraintFileAttachmentPreview.gone
+                            includePaidTextMessageSendPreview.root.gone
 
                             textViewAttachmentSendHeaderName.apply {
                                 text = getString(R.string.attachment_send_header_giphy)
                             }
-
-                            root.visible
 
                             viewState.giphyData.retrieveImageUrlAndMessageMedia()?.let {
                                 lifecycleScope.launch(viewModel.mainImmediate) {
@@ -1413,6 +1460,8 @@ abstract class ChatFragment<
                                     attachmentSendViewStateJobs.add(job)
                                 }
                             }
+
+                            root.visible
                         }
                     }
                 }
@@ -1693,6 +1742,7 @@ abstract class ChatFragment<
                 AttachmentInfo(
                     file = it,
                     mediaType = MediaType.Audio(AudioRecorderController.AUDIO_FORMAT_MIME_TYPE),
+                    fileName = null,
                     isLocalFile = true,
                 )
             )

@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
 import chat.sphinx.wrapper_meme_server.AuthenticationId
 import chat.sphinx.wrapper_meme_server.AuthenticationSig
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
+import chat.sphinx.wrapper_message_media.FileName
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -49,6 +50,7 @@ abstract class NetworkQueryMemeServer {
         authenticationToken: AuthenticationToken,
         mediaType: MediaType,
         file: File,
+        fileName: FileName?,
         password: Password,
         memeServerHost: MediaHost = MediaHost.DEFAULT,
     ): Response<PostMemeServerUploadDto, ResponseError>
