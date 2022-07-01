@@ -4,10 +4,7 @@ import android.content.Context
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.ui.adapter.DashboardChat.Active
 import chat.sphinx.dashboard.ui.adapter.DashboardChat.Inactive
-import chat.sphinx.wrapper_chat.Chat
-import chat.sphinx.wrapper_chat.getColorKey
-import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
+import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.invite.InviteStatus
@@ -217,13 +214,24 @@ sealed class DashboardChat {
 
                 }
                 message.type.isDirectPayment() -> {
+                    val isTribe = chat.isTribe()
+                    val senderAlias = message.senderAlias?.value ?: "Unknown"
+                    val recipientAlias = message.recipientAlias?.value ?: "Unknown"
                     val amount: String = message.amount
                         .asFormattedString(separator = ',', appendUnit = true)
 
                     if (isMessageSenderSelf(message)) {
-                        context.getString(R.string.last_message_description_payment_sent, amount)
+                        if (isTribe) {
+                            context.getString(R.string.last_message_description_tribe_payment_sent, amount, recipientAlias)
+                        } else {
+                            context.getString(R.string.last_message_description_payment_sent, amount)
+                        }
                     } else {
-                        context.getString(R.string.last_message_description_payment_received, amount)
+                        if (isTribe) {
+                            context.getString(R.string.last_message_description_tribe_payment, senderAlias, amount, recipientAlias)
+                        } else {
+                            context.getString(R.string.last_message_description_payment_received, amount)
+                        }
                     }
                 }
                 message.type.isAttachment() -> {
