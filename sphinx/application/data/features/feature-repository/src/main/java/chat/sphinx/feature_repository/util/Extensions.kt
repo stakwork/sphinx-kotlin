@@ -141,7 +141,8 @@ inline fun TransactionCallbacks.upsertChat(
     moshi: Moshi,
     chatSeenMap: SynchronizedMap<ChatId, Seen>,
     queries: SphinxDatabaseQueries,
-    contactDto: ContactDto? = null
+    contactDto: ContactDto? = null,
+    ownerPubKey: LightningNodePubKey? = null
 ) {
     val seen = dto.seenActual.toSeen()
     val chatId = ChatId(dto.id)
@@ -153,6 +154,7 @@ inline fun TransactionCallbacks.upsertChat(
     val pricePerMessage = dto.price_per_message?.toSat()
     val escrowAmount = dto.escrow_amount?.toSat()
     val chatName = dto.name?.toChatName()
+    val adminPubKey = dto.owner_pub_key?.toLightningNodePubKey()
 
     queries.chatUpsert(
         chatName,
@@ -178,7 +180,7 @@ inline fun TransactionCallbacks.upsertChat(
         escrowAmount,
     )
 
-    if (chatType.isTribe() && (pricePerMessage != null || escrowAmount != null)) {
+    if (chatType.isTribe() && (ownerPubKey == adminPubKey) && (pricePerMessage != null || escrowAmount != null)) {
         queries.chatUpdateTribeData(pricePerMessage, escrowAmount, chatName, chatPhotoUrl, chatId)
     }
 
@@ -328,7 +330,11 @@ inline fun TransactionCallbacks.updateInviteStatus(
 }
 
 @Suppress("SpellCheckingInspection")
-fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQueries) {
+fun TransactionCallbacks.upsertMessage(
+    dto: MessageDto,
+    queries: SphinxDatabaseQueries,
+    fileName: FileName? = null
+) {
 
     val chatId: ChatId = dto.chat_id?.let {
         ChatId(it)
@@ -348,8 +354,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
             chatId,
             dto.mediaKeyDecrypted?.toMediaKeyDecrypted(),
             dto.mediaLocalFile,
+            fileName
         )
-
     }
 
     queries.messageUpsert(
@@ -360,6 +366,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.original_muid?.toMessageMUID(),
         dto.reply_uuid?.toReplyUUID(),
         dto.type.toMessageType(),
+        dto.recipient_alias?.toRecipientAlias(),
+        dto.recipient_pic?.toPhotoUrl(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,
@@ -372,7 +380,8 @@ fun TransactionCallbacks.upsertMessage(dto: MessageDto, queries: SphinxDatabaseQ
         dto.expiration_date?.toDateTime(),
         dto.message_content?.toMessageContent(),
         dto.messageContentDecrypted?.toMessageContentDecrypted(),
-        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID()
+        dto.media_token?.toMediaToken()?.getMUIDFromMediaToken()?.value?.toMessageMUID(),
+        false.toFlagged()
     )
 
     if (dto.type.toMessageType()?.isInvoicePayment()) {

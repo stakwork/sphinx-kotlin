@@ -15,6 +15,7 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
 import com.squareup.moshi.Moshi
@@ -38,15 +39,22 @@ import java.util.concurrent.TimeUnit
 
 @Suppress("NOTHING_TO_INLINE")
 private inline fun NetworkRelayCallImpl.mapRelayHeaders(
-    relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>,
+    relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>,
     additionalHeaders: Map<String, String>?
 ): Map<String, String> {
 
     val map: MutableMap<String, String> = mutableMapOf(
-        relayData.second?.let { transportToken ->
+        relayData.first.second?.let { transportToken ->
             Pair(TransportToken.TRANSPORT_TOKEN_HEADER, transportToken.value)
-        } ?: Pair(AuthorizationToken.AUTHORIZATION_HEADER, relayData.first.value)
+        } ?: Pair(AuthorizationToken.AUTHORIZATION_HEADER, relayData.first.first.value)
     )
+
+    relayData.second?.let { signedRequest ->
+        map.put(
+            RequestSignature.REQUEST_SIGNATURE_HEADER,
+            signedRequest.value
+        )
+    }
 
     additionalHeaders?.let {
         map.putAll(it)
@@ -68,13 +76,16 @@ private inline fun NetworkRelayCallImpl.handleException(
 }
 
 @Throws(Exception::class)
-private suspend inline fun RelayDataHandler.retrieveRelayData(): Triple<
-        AuthorizationToken,
-        TransportToken?,
-        RelayUrl
-        > {
-
-    val response = retrieveRelayUrlAndToken()
+private suspend inline fun RelayDataHandler.retrieveRelayData(
+    method: String,
+    path: String,
+    bodyJsonString: String
+): Triple<
+    Pair<AuthorizationToken, TransportToken?>,
+    RequestSignature?,
+    RelayUrl>
+{
+    val response = retrieveRelayUrlAndToken(method, path, bodyJsonString)
 
     @Exhaustive
     when(response) {
@@ -373,13 +384,17 @@ class NetworkRelayCallImpl(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
         additionalHeaders: Map<String, String>?,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?,
         useExtendedNetworkCallClient: Boolean,
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
         val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
-            val nnRelayData: Triple<AuthorizationToken, TransportToken?, RelayUrl> = relayData
-                ?: relayDataHandler.retrieveRelayData()
+            val nnRelayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData(
+                    method = "GET",
+                    path = relayEndpoint,
+                    bodyJsonString = ""
+                )
 
             get(
                 nnRelayData.third.value + relayEndpoint,
@@ -423,19 +438,28 @@ class NetworkRelayCallImpl(
 
     }
 
-    override fun <T: Any, RequestBody: Any, V: RelayResponse<T>> relayPut(
+    override fun <T : Any, RequestBody : Any, V : RelayResponse<T>> relayPut(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
         requestBodyJsonClass: Class<RequestBody>?,
         requestBody: RequestBody?,
         mediaType: String?,
         additionalHeaders: Map<String, String>?,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
-
         val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
-            val nnRelayData: Triple<AuthorizationToken, TransportToken?, RelayUrl> = relayData
-                ?: relayDataHandler.retrieveRelayData()
+            val requestBodyJson: String = if (requestBody == null || requestBodyJsonClass == null) {
+                ""
+            } else {
+                moshi.requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
+            }
+
+            val nnRelayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData(
+                    method = "PUT",
+                    path = relayEndpoint,
+                    bodyJsonString = requestBodyJson
+                )
 
             put(
                 nnRelayData.third.value + relayEndpoint,
@@ -492,12 +516,17 @@ class NetworkRelayCallImpl(
         requestBody: RequestBody,
         mediaType: String?,
         additionalHeaders: Map<String, String>?,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
         val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
-            val nnRelayData: Triple<AuthorizationToken, TransportToken?, RelayUrl> = relayData
-                ?: relayDataHandler.retrieveRelayData()
+            val nnRelayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData(
+                    method = "POST",
+                    path = relayEndpoint,
+                    bodyJsonString = moshi
+                        .requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
+                )
 
             post(
                 nnRelayData.third.value + relayEndpoint,
@@ -525,12 +554,22 @@ class NetworkRelayCallImpl(
         requestBody: RequestBody?,
         mediaType: String?,
         additionalHeaders: Map<String, String>?,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
         val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
-            val nnRelayData: Triple<AuthorizationToken, TransportToken?, RelayUrl> = relayData
-                ?: relayDataHandler.retrieveRelayData()
+            val requestBodyJson: String = if (requestBody == null || requestBodyJsonClass == null) {
+                ""
+            } else {
+                moshi.requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
+            }
+
+            val nnRelayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData(
+                    method = "DELETE",
+                    path = relayEndpoint,
+                    bodyJsonString = requestBodyJson
+                )
 
             delete(
                 nnRelayData.third.value + relayEndpoint,

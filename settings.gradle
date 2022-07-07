@@ -305,7 +305,7 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:application:network:concepts:queries:concept-network-query-transport-key'
+include ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys'
 include ':sphinx:application:network:features:queries:feature-network-query-transport-key'
 include ':sphinx:application:data:concepts:concept-wallet'
 include ':sphinx:application:data:features:feature-wallet'

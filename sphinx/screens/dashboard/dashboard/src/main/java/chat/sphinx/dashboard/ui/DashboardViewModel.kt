@@ -17,7 +17,6 @@ import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
 import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
 import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
 import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
-import chat.sphinx.concept_network_query_transport_key.NetworkQueryTransportKey
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -52,7 +51,6 @@ import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -90,7 +88,6 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
-    private val networkQueryTransportKey: NetworkQueryTransportKey,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -125,7 +122,7 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
-        getAndSaveTransportKey()
+        getRelayKeys()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
     }
@@ -153,31 +150,10 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
     }
-
-    private fun getAndSaveTransportKey() {
-        viewModelScope.launch(mainImmediate) {
-            relayDataHandler.retrieveRelayTransportKey()?.let {
-                return@launch
-            }
-            relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
-                networkQueryTransportKey.getRelayTransportKey(
-                    relayUrl
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {}
-                        is Response.Success -> {
-                            relayDataHandler.persistRelayTransportKey(
-                                RsaPublicKey(
-                                    loadResponse.value.transport_key.toCharArray()
-                                )
-                            )
-                        }
-                    }
-                }
-            }
-        }
+    
+    private fun getRelayKeys() {
+        repositoryDashboard.getAndSaveTransportKey()
+        repositoryDashboard.getOrCreateHMacKey()
     }
 
     fun handleDeepLink(deepLink: String?) {

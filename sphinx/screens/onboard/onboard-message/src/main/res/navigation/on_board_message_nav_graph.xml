@@ -19,6 +19,9 @@
             android:name="arg_transport_key"
             app:argType="string" />
         <argument
+            android:name="arg_h_mac_key"
+            app:argType="string" />
+        <argument
             android:name="arg_nickname"
             app:argType="string"
             app:nullable="true" />

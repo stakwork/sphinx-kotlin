@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/default_layout_margin"
+    android:paddingHorizontal="@dimen/default_layout_margin"
     android:elevation="@dimen/default_elevation">
 
     <include
@@ -13,6 +13,16 @@
         android:layout_height="0dp"
         android:layout_width="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/space_message_holder_bottom"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <include
+        android:id="@+id/include_message_type_separator_holder"
+        layout="@layout/layout_message_type_separator_holder"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

@@ -62,8 +62,10 @@ import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
 import chat.sphinx.wrapper_message.MessageStatus;
 import chat.sphinx.wrapper_message.MessageType;
+import chat.sphinx.wrapper_message.RecipientAlias;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
+import chat.sphinx.wrapper_message_media.FileName;
 import chat.sphinx.wrapper_message_media.MediaKey;
 import chat.sphinx.wrapper_message_media.MediaKeyDecrypted;
 import chat.sphinx.wrapper_message_media.MediaToken;
@@ -569,7 +571,9 @@ CREATE TABLE messageDbo(
     original_muid               TEXT            AS MessageMUID,
     reply_uuid                  TEXT            AS ReplyUUID,
     muid                        TEXT            AS MessageMUID,
-    flagged                     INTEGER         AS Flagged NOT NULL DEFAULT 0
+    flagged                     INTEGER         AS Flagged NOT NULL DEFAULT 0,
+    recipient_alias             TEXT            AS RecipientAlias,
+    recipient_pic               TEXT            AS PhotoUrl
 );
 
 messageGetAllReactionsByUUID:
@@ -625,7 +629,7 @@ WHERE id < 0
 ORDER BY id
 LIMIT 1;
 
-messageGetAllToShowByChatId:
+messageGetAllToShowByChatIdWithLimit:
 SELECT *
 FROM messageDbo
 WHERE chat_id = ?
@@ -647,6 +651,28 @@ AND (
 )
 ORDER BY date DESC
 LIMIT ?;
+
+messageGetAllToShowByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND (
+    type = 0 OR
+    type = 2 OR
+    type = 3 OR
+    type = 5 OR
+    type = 6 OR
+    type = 14 OR
+    type = 15 OR
+    type = 16 OR
+    type = 19 OR
+    type = 20 OR
+    type = 21 OR
+    type = 22 OR
+    type = 25 OR
+    (type = 29 AND reply_uuid IS NULL)
+)
+ORDER BY date DESC;
 
 messageGetUnseenIncomingMessageCountByChatId:
 SELECT COUNT(*)
@@ -670,6 +696,14 @@ SELECT SUM(amount)
 FROM messageDbo
 WHERE (chat_id IS NULL OR chat_id = 0)
 AND (message_content LIKE :message_content1 OR message_content LIKE :message_content2);
+
+messagesSearchByTerm:
+SELECT *
+FROM messageDbo
+WHERE chat_id = ?
+AND status != 5
+AND LOWER(message_content_decrypted) LIKE ?
+ORDER BY date DESC;
 
 messageUpdateSeenByChatId:
 UPDATE messageDbo
@@ -706,7 +740,9 @@ messageUpsert {
         sender_pic = :sender_pic,
         original_muid = :original_muid,
         reply_uuid = :reply_uuid,
-        type = :type
+        type = :type,
+        recipient_alias = :recipient_alias,
+        recipient_pic = :recipient_pic
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(
@@ -729,7 +765,10 @@ messageUpsert {
         sender_pic,
         original_muid,
         reply_uuid,
-        muid
+        muid,
+        flagged,
+        recipient_alias,
+        recipient_pic
     )
     VALUES (
         :id,
@@ -751,7 +790,10 @@ messageUpsert {
         :sender_pic,
         :original_muid,
         :reply_uuid,
-        :muid
+        :muid,
+        :flagged,
+        :recipient_alias,
+        :recipient_pic
     );
 }
 
@@ -770,7 +812,8 @@ CREATE TABLE messageMediaDbo(
     media_key_decrypted         TEXT            AS MediaKeyDecrypted,
     media_type                  TEXT            AS MediaType NOT NULL,
     media_token                 TEXT            AS MediaToken NOT NULL,
-    local_file                  TEXT            AS File
+    local_file                  TEXT            AS File,
+    file_name                   TEXT            AS FileName
 );
 
 messageMediaGetById:
@@ -785,7 +828,8 @@ WHERE id = ?;
 
 messageMediaUpdateFile:
 UPDATE messageMediaDbo
-SET local_file = :local_file
+SET local_file = :local_file,
+    file_name = ?
 WHERE id = ?;
 
 messageMediaUpsert {
@@ -802,7 +846,8 @@ messageMediaUpsert {
         media_key_decrypted,
         media_type,
         media_token,
-        local_file
+        local_file,
+        file_name
     )
     VALUES(
         :id,
@@ -811,7 +856,8 @@ messageMediaUpsert {
         :media_key_decrypted,
         :media_type,
         :media_token,
-        :local_file
+        :local_file,
+        :file_name
     );
 }
 

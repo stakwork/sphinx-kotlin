@@ -96,6 +96,17 @@ inline fun Message.retrieveVideoUrlAndMessageMedia(): Pair<String, MessageMedia?
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun Message.retrieveFileUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
+    return messageMedia?.let { media ->
+        if (media.mediaType.isPdf || media.mediaType.isUnknown) {
+            retrieveUrlAndMessageMedia()
+        } else {
+            null
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveUrlAndMessageMedia(): Pair<String, MessageMedia?>? {
     var mediaData: Pair<String, MessageMedia?>? = null
 
@@ -202,6 +213,17 @@ inline fun Message.getColorKey(): String {
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun Message.getRecipientColorKey(
+    tribeAdminId: ContactId,
+    recipientAlias: RecipientAlias?
+): String {
+    recipientAlias?.let { recipientAlias ->
+        return "message-${tribeAdminId.value}-${recipientAlias.value}-color"
+    }
+    return "message-${tribeAdminId.value}-color"
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Message.hasSameSenderThanMessage(message: Message): Boolean {
     val hasSameSenderId = this.sender.value == message.sender.value
     val hasSameSenderAlias = (this.senderAlias?.value ?: "") == (message.senderAlias?.value ?: "")
@@ -227,7 +249,8 @@ inline val Message.isBoostAllowed: Boolean
 inline val Message.isMediaAttachmentAvailable: Boolean
     get() = type.canContainMedia &&
             (retrieveImageUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
-             retrieveVideoUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
+                    retrieveVideoUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false ||
+                    retrieveFileUrlAndMessageMedia()?.second?.mediaKeyDecrypted?.value?.isNullOrEmpty() == false)
 
 inline val Message.isCopyAllowed: Boolean
     get() = (this.retrieveTextToShow() ?: "").isNotEmpty() || (this.retrieveInvoiceTextToShow() ?: "").isNotEmpty()
@@ -263,6 +286,9 @@ inline val Message.isVideoMessage: Boolean
 inline val Message.isPodcastBoost: Boolean
     get() = type.isBoost() && feedBoost != null
 
+inline val Message.isDirectPayment: Boolean
+    get() = type.isDirectPayment()
+
 inline val Message.isPodcastClip: Boolean
     get() = podcastClip != null
 
@@ -295,6 +321,8 @@ abstract class Message {
     abstract val originalMUID: MessageMUID?
     abstract val replyUUID: ReplyUUID?
     abstract val flagged: Flagged
+    abstract val recipientAlias: RecipientAlias?
+    abstract val recipientPic: PhotoUrl?
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
     abstract val messageDecryptionError: Boolean
@@ -335,6 +363,8 @@ abstract class Message {
                 other.feedBoost                     == feedBoost                    &&
                 other.podcastClip                   == podcastClip                  &&
                 other.giphyData                     == giphyData                    &&
+                other.recipientAlias                == recipientAlias               &&
+                other.recipientPic                  == recipientPic                 &&
                 other.reactions.let { a ->
                     reactions.let { b ->
                         (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
@@ -385,6 +415,8 @@ abstract class Message {
         result = _31 * result + feedBoost.hashCode()
         result = _31 * result + podcastClip.hashCode()
         result = _31 * result + giphyData.hashCode()
+        result = _31 * result + recipientAlias.hashCode()
+        result = _31 * result + recipientPic.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
         result = _31 * result + replyMessage.hashCode()
@@ -403,6 +435,7 @@ abstract class Message {
                 "messageDecryptionException=$messageDecryptionException,"                       +
                 "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
-                "replyMessage=$replyMessage)"
+                "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
+                "recipientPic=$recipientPic"
     }
 }

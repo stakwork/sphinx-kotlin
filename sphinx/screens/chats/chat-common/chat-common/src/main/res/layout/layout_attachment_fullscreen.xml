@@ -29,7 +29,45 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_editor_absoluteX="0dp"
         tools:src="@drawable/image_not_available" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_attachment_next_page"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_nav_forward"
+        android:background="@drawable/button_background_pdf_navigation"
+        android:textColor="@color/exo_white"
+        android:textSize="@dimen/default_text_size_back_arrow"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.98"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_attachment_previous_page"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:fontFamily="@font/material_icons_regular"
+        android:gravity="center"
+        android:text="@string/material_icon_name_nav_back"
+        android:background="@drawable/button_background_pdf_navigation"
+        android:textColor="@color/exo_white"
+        android:textSize="@dimen/default_text_size_back_arrow"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.02"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_attachment_fullscreen_header"
@@ -51,6 +89,50 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_PDF_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginHorizontal="@dimen/default_big_layout_margin"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_attachment_pdf_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:fontFamily="@font/roboto_medium"
+                android:lines="1"
+                android:textColor="@color/text"
+                android:textSize="@dimen/default_text_size_list_row_headline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="sphinx-world-domination-plans.pdf" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_attachment_pdf_page"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_half_layout_margin"
+                android:ellipsize="middle"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:lines="1"
+                android:text="@string/pdf_page_of"
+                android:textColor="@color/text"
+                android:textSize="@dimen/default_text_size_list_row_headline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_attachment_pdf_name"
+                tools:text="Page" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+

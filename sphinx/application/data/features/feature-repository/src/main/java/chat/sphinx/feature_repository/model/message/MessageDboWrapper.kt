@@ -53,6 +53,10 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
         get() = messageDbo.reply_uuid
     override val flagged: Flagged
         get() = messageDbo.flagged
+    override val recipientAlias: RecipientAlias?
+        get() = messageDbo.recipient_alias
+    override val recipientPic: PhotoUrl?
+        get() = messageDbo.recipient_pic
 
     @Volatile
     @Suppress("PropertyName")

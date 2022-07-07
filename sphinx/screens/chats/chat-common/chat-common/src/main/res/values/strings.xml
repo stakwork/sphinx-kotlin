@@ -20,6 +20,10 @@
     <string name="send_message_empty_content_error">Message or Attachment is required</string>
     <string name="send_message_empty_price_error">Price is required</string>
 
+    <!--  Separators  -->
+    <string name="unseen_messages">Unseen Messages</string>
+    <string name="today">Today</string>
+
     <!--  Message type invoices  -->
     <string name="request_expired">REQUEST EXPIRED</string>
     <string name="request_expiration">EXPIRES AT: %s</string>
@@ -110,14 +114,22 @@
     <string name="side_effect_link_copied">Copied %s</string>
     <string name="side_effect_no_link_to_copy">No link to copy</string>
 
+    <string name="file_name_loading">Loading...</string>
+    <string name="pdf_page">page</string>
+    <string name="pdf_pages">pages</string>
+    <string name="pdf_page_of">Page %d of %d</string>
+
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">SEND IMAGE</string>
     <string name="attachment_send_header_video">SEND VIDEO</string>
+    <string name="attachment_send_header_pdf">SEND PDF</string>
+    <string name="attachment_send_header_file">SEND FILE</string>
     <string name="attachment_send_header_giphy">SEND GIPHY</string>
     <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
 
     <!-- Pay Attachment -->
     <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
+    <string name="paid_file_pay_to_unlock">PAY TO UNLOCK FILE</string>
     <string name="paid_message_loading">LOADING MESSAGE...</string>
     <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
     <string name="attachment_price_label">Price: </string>
@@ -150,8 +162,19 @@
     <string name="bottom_menu_call_header_text">Call Options</string>
     <string name="bottom_menu_call_option_audio">Audio</string>
     <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+
+    <string name="bottom_menu_more_header_text">Chat Options</string>
+    <string name="bottom_menu_more_option_call">Create Call</string>
+    <string name="bottom_menu_more_option_share">Share Tribe Link</string>
+    <string name="bottom_menu_more_option_search">Search Messages</string>
+
+    <string name="searching_messages">Searching...</string>
+    <string name="results_found">%d Results Found</string>
+
     <string name="slide_to_cancel">&lt;&lt; Slide to cancel</string>
     <string name="recording_permission_granted">Recording permission granted</string>
     <string name="recording_permission_required">Recording permissions required</string>
+
+    <string name="send_sats">Send Sats</string>
 
 </resources>

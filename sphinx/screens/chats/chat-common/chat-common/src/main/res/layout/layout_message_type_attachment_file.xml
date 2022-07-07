@@ -5,20 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/message_type_file_attachment_height"
     android:visibility="gone"
-    tools:layout_height="@dimen/message_type_file_attachment_height"
-    tools:layout_width="300dp"
+    android:paddingHorizontal="@dimen/default_layout_margin"
+    tools:background="@color/headerBG"
     tools:visibility="visible">
-
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_attachment_file_icon"
         android:layout_width="@dimen/icon_file_attachment_xy"
-        android:layout_height="@dimen/icon_file_attachment_xy"
+        android:layout_height="wrap_content"
         android:fontFamily="@font/material_icons_regular"
         android:text="@string/material_icon_name_file_attachment"
         android:textColor="@color/primaryText"
         android:textSize="@dimen/icon_file_attachment_text_size"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_attachment_file_main_info_group"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -38,6 +38,9 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_medium"
             android:textSize="@dimen/default_text_size_list_row_headline"
+            android:textColor="@color/text"
+            android:lines="1"
+            android:ellipsize="middle"
             app:layout_constraintBottom_toTopOf="@+id/text_view_attachment_file_size"
             app:layout_constraintStart_toStartOf="@id/layout_constraint_attachment_file_main_info_group"
             app:layout_constraintTop_toTopOf="parent"
@@ -50,6 +53,8 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:textSize="@dimen/default_text_size_sub_headline"
+            android:textColor="@color/text"
+            android:lines="1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="@id/layout_constraint_attachment_file_main_info_group"
             app:layout_constraintTop_toBottomOf="@+id/text_view_attachment_file_name"
@@ -60,26 +65,30 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_attachment_file_download_button_group"
-        android:layout_width="50dp"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatButton
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/button_attachment_file_download"
-            android:layout_width="@dimen/icon_file_download_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/material_icons_regular"
+            android:inputType="none"
+            android:focusable="false"
+            android:cursorVisible="false"
             android:text="@string/material_icon_name_file_download"
             android:textSize="@dimen/icon_file_download_text_size"
             android:visibility="gone"
+            android:background="@android:color/transparent"
+            android:textColor="@color/text"
             app:layout_constraintBottom_toBottomOf="@id/layout_constraint_attachment_file_download_button_group"
             app:layout_constraintEnd_toEndOf="@id/layout_constraint_attachment_file_download_button_group"
             app:layout_constraintStart_toStartOf="@id/layout_constraint_attachment_file_download_button_group"
             app:layout_constraintTop_toTopOf="@id/layout_constraint_attachment_file_download_button_group"
             tools:visibility="visible" />
-
 
         <ProgressBar
             android:id="@+id/progress_bar_attachment_file_download"

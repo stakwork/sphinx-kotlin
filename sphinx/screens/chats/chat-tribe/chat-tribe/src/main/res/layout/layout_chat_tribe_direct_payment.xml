@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:visibility="visible"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_direct_payment_popup"
+        android:maxWidth="@dimen/chat_tribe_direct_payment_popup_width"
+        android:layout_height="@dimen/chat_tribe_direct_payment_popup_height"
+        android:layout_width="0dp"
+        android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+        android:background="@drawable/background_popup"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_image_initials"
+            android:layout_width="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
+            android:layout_height="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
+            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_profile_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp"
+                app:cardCornerRadius="@dimen/chat_tribe_direct_payment_popup_profile_picture_radius">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_initials"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/primaryBlue"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/chat_tribe_direct_payment_popup_initials_text_size"
+                    android:textAllCaps="true"
+                    tools:text="tt" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/image_view_member_profile_picture"
+                    android:layout_width="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
+                    android:layout_height="@dimen/chat_tribe_direct_payment_popup_profile_picture_xy"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:src="@drawable/ic_profile_avatar_circle" />
+
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_member_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_bold"
+            android:gravity="center"
+            android:text="..."
+            android:textColor="@color/text"
+            android:textSize="@dimen/chat_tribe_direct_payment_popup_name_text_size"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_image_initials" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="0dp"
+            android:layout_height="@dimen/chat_tribe_direct_payment_popup_button_height"
+            android:maxWidth="@dimen/chat_tribe_direct_payment_popup_button_width"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:layout_marginBottom="@dimen/default_double_layout_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_send_sats"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:textAllCaps="false"
+                android:text="@string/send_sats"
+                android:textSize="@dimen/chat_tribe_direct_payment_popup_button_text_size"
+                android:textColor="@color/text"
+                android:background="@drawable/button_background_send_sats"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_direct_payment_popup_close"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_close"
+            android:textColor="@color/primaryRed"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,6 @@
 package chat.sphinx.payment_common.ui
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -12,6 +13,7 @@ import androidx.viewbinding.ViewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.detail_resources.databinding.LayoutDetailScreenHeaderBinding
 import chat.sphinx.payment_common.R
 import chat.sphinx.payment_common.databinding.LayoutConstraintAmountBinding
@@ -20,13 +22,21 @@ import chat.sphinx.payment_common.databinding.LayoutConstraintFromContactBinding
 import chat.sphinx.payment_common.databinding.LayoutConstraintMessageBinding
 import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.resources.databinding.LayoutAmountPadBinding
+import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.getColorKey
+import chat.sphinx.wrapper_message.SenderAlias
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.ViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
+import javax.inject.Inject
 
 abstract class PaymentFragment<
         VB: ViewBinding,
@@ -52,6 +62,10 @@ abstract class PaymentFragment<
 
     protected abstract val headerStringId: Int
 
+    @Inject
+    @Suppress("ProtectedInFinal", "PropertyName")
+    protected lateinit var userColorsHelper: UserColorsHelper
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -70,16 +84,41 @@ abstract class PaymentFragment<
 
     protected abstract fun setupFooter();
 
-    protected fun setupDestination(contact: Contact) {
+    protected fun setupDestination(
+        contact: Contact? = null,
+        memberAlias: SenderAlias? = null,
+        memberColorKey: String? = null,
+        memberPic: PhotoUrl? = null
+    ) {
 
         contactBinding.apply {
-            contact.alias?.value?.let { alias ->
+            (contact?.alias?.value ?: memberAlias?.value)?.let { alias ->
                 textViewContactName.text = alias
+
+                textViewInitials.apply {
+                    text = alias.getInitials()
+
+                    (contact?.getColorKey() ?: memberColorKey)?.let { colorKey ->
+                        lifecycleScope.launch(viewModel.mainImmediate) {
+                            setBackgroundRandomColor(
+                                R.drawable.chat_initials_circle,
+                                Color.parseColor(
+                                    userColorsHelper.getHexCodeForKey(
+                                        colorKey,
+                                        root.context.getRandomHexCode(),
+                                    )
+                                ),
+                            )
+                        }
+                    }
+                }
             }
 
             lifecycleScope.launch(viewModel.mainImmediate) {
-                contact.photoUrl?.value?.let { img ->
+                (contact?.photoUrl?.value ?: memberPic?.value)?.let { img ->
                     if (img.isNotEmpty()) {
+                        imageViewContactPicture.visible
+
                         imageLoader.load(
                             imageViewContactPicture,
                             img,
@@ -89,15 +128,6 @@ abstract class PaymentFragment<
                                 .build()
                         )
                     }
-                } ?: context?.let {
-                    imageViewContactPicture
-                        .setImageDrawable(
-
-                            ContextCompat.getDrawable(
-                                it,
-                                R.drawable.ic_profile_avatar_circle
-                            )
-                        )
                 }
             }
         }

@@ -1,5 +1,28 @@
 # ChangeLog
 
+# Version 1.0.0-alpha60 (2022-07-01)
+- Adds ability to send file attachments
+- Fixes tribe direct payments description on chat list
+
+# Version 1.0.0-alpha59 (2022-06-24)
+- Adds PDF viewer
+
+# Version 1.0.0-alpha58 (2022-06-17)
+- Adds support for file attachments on chats
+
+# Version 1.0.0-alpha57 (2022-06-09)
+- Adds day separator rows on chat
+- Adds unseen messages separator row on chat
+- Adds support for chat messages search
+
+# Version 1.0.0-alpha56 (2022-05-18)
+ - Fixes issue about tribe message price being reset
+ - Fixes issue about messages boosts profile pictures
+
+# Version 1.0.0-alpha55 (2022-05-13)
+ - Improves security with request signing
+ - Adds support for direct payments in tribes
+
 # Version 1.0.0-alpha54 (2022-05-06)
  - Fixes podcast issues
  - Fixes newsletter issues

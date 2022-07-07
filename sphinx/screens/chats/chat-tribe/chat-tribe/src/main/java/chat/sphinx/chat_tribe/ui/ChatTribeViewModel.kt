@@ -8,9 +8,11 @@ import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -26,12 +28,12 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -42,8 +44,11 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -109,6 +114,10 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
+    val tribePopupViewStateContainer: ViewStateContainer<TribePopupViewState> by lazy {
+        ViewStateContainer(TribePopupViewState.Idle)
+    }
+
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
             return podcast
@@ -154,6 +163,10 @@ internal class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    internal val moreOptionsMenuStateFlow: MutableStateFlow<MoreMenuOptionsViewState> by lazy {
+        MutableStateFlow(MoreMenuOptionsViewState.OwnTribe)
+    }
 
     override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
@@ -234,6 +247,12 @@ internal class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
+                moreOptionsMenuStateFlow.value = if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
+                    MoreMenuOptionsViewState.OwnTribe
+                } else {
+                    MoreMenuOptionsViewState.NotOwnTribe
+                }
+
                 chatRepository.updateTribeInfo(chat)?.let { tribeData ->
 
                     _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
@@ -296,9 +315,49 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
+    override fun showMemberPopup(message: Message) {
+        message.uuid?.let { messageUUID ->
+            message.senderAlias?.let { senderAlias ->
+                tribePopupViewStateContainer.updateViewState(
+                    TribePopupViewState.TribeMemberPopup(
+                        messageUUID,
+                        senderAlias,
+                        message.getColorKey(),
+                        message.senderPic
+                    )
+                )
+            }
+        }
+    }
+
+    fun goToPaymentSend() {
+        viewModelScope.launch(mainImmediate) {
+            (tribePopupViewStateContainer.value as TribePopupViewState.TribeMemberPopup)?.let { viewState ->
+                chatNavigator.toPaymentSendDetail(
+                    viewState.messageUUID,
+                    chatId
+                )
+            }
+
+            tribePopupViewStateContainer.updateViewState(
+                TribePopupViewState.Idle
+            )
+        }
+    }
+
     override fun navigateToChatDetailScreen() {
         viewModelScope.launch(mainImmediate) {
             (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
         }
+    }
+
+    fun navigateToTribeShareScreen() {
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            val shareTribeURL = "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
+            (chatNavigator as TribeChatNavigator).toShareTribeScreen(shareTribeURL, app.getString(R.string.qr_code_title))
+        }
+
+        moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
     }
 }

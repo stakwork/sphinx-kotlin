@@ -26,12 +26,15 @@ import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBa
 import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
+import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
+import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -94,9 +97,7 @@ import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_relay.AuthorizationToken
-import chat.sphinx.wrapper_relay.RelayUrl
-import chat.sphinx.wrapper_relay.TransportToken
+import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import chat.sphinx.wrapper_subscription.Subscription
@@ -148,10 +149,11 @@ abstract class SphinxRepository(
     private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
+    private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     private val sphinxNotificationManager: SphinxNotificationManager,
-    protected val LOG: SphinxLogger,
+    private val LOG: SphinxLogger,
 ) : ChatRepository,
     ContactRepository,
     LightningRepository,
@@ -286,7 +288,8 @@ abstract class SphinxRepository(
                                                 moshi,
                                                 chatSeenMap,
                                                 queries,
-                                                contactDto
+                                                contactDto,
+                                                accountOwner.value?.nodePubKey
                                             )
 
                                             chatId = ChatId(nnChatDto.id)
@@ -566,7 +569,14 @@ abstract class SphinxRepository(
                                             null
                                         }
 
-                                    upsertChat(dto, moshi, chatSeenMap, queries, contactDto)
+                                    upsertChat(
+                                        dto,
+                                        moshi,
+                                        chatSeenMap,
+                                        queries,
+                                        contactDto,
+                                        accountOwner.value?.nodePubKey
+                                    )
                                 }
 
                             }
@@ -1659,7 +1669,8 @@ abstract class SphinxRepository(
                                                     moshi,
                                                     chatSeenMap,
                                                     queries,
-                                                    null
+                                                    null,
+                                                    accountOwner.value?.nodePubKey
                                                 )
                                             }
                                         }
@@ -1714,7 +1725,8 @@ abstract class SphinxRepository(
                                         moshi,
                                         chatSeenMap,
                                         queries,
-                                        null
+                                        null,
+                                        accountOwner.value?.nodePubKey
                                     )
                                 }
                             }
@@ -1821,7 +1833,7 @@ abstract class SphinxRepository(
     }
 
     override suspend fun getAccountBalanceAll(
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<NodeBalanceAll, ResponseError>> = flow {
 
         networkQueryLightning.getBalanceAll(
@@ -2031,8 +2043,15 @@ abstract class SphinxRepository(
 
     override fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
+
         emitAll(
-            queries.messageGetAllToShowByChatId(chatId, limit)
+            (
+                if (limit > 0) {
+                    queries.messageGetAllToShowByChatIdWithLimit(chatId, limit)
+                } else {
+                    queries.messageGetAllToShowByChatId(chatId)
+                }
+            )
                 .asFlow()
                 .mapToList(io)
                 .map { listMessageDbo ->
@@ -2127,6 +2146,24 @@ abstract class SphinxRepository(
                 }
             }
             .distinctUntilChanged()
+
+    override fun searchMessagesBy(chatId: ChatId, term: String): Flow<List<Message>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messagesSearchByTerm(
+                    chatId,
+                    "%${term.lowercase()}%"
+                )
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        messageDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
 
     override fun getTribeLastMemberRequestByContactId(
         contactId: ContactId,
@@ -2358,7 +2395,7 @@ abstract class SphinxRepository(
                     null
                 }
 
-            if (message == null && media == null) {
+            if (message == null && media == null && !sendMessage.isTribePayment) {
                 return@launch
             }
 
@@ -2366,6 +2403,31 @@ abstract class SphinxRepository(
             val escrowAmount = chat?.escrowAmount?.value ?: 0
             val priceToMeet = sendMessage.priceToMeet?.value ?: 0
             val messagePrice = (pricePerMessage + escrowAmount + priceToMeet).toSat() ?: Sat(0)
+
+            val messageType = when {
+                (media != null) -> {
+                    MessageType.Attachment
+                }
+                (sendMessage.isBoost) -> {
+                    MessageType.Boost
+                }
+                (sendMessage.isTribePayment) -> {
+                    MessageType.DirectPayment
+                }
+                else -> {
+                    MessageType.Message
+                }
+            }
+
+            //If is tribe payment, reply UUID is sent to identify recipient. But it's not a response
+            val replyUUID = when {
+                (sendMessage.isTribePayment) -> {
+                    null
+                }
+                else -> {
+                    sendMessage.replyUUID
+                }
+            }
 
             val provisionalMessageId: MessageId? = chat?.let { chatDbo ->
                 // Build provisional message and insert
@@ -2389,6 +2451,7 @@ abstract class SphinxRepository(
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
                                     media.third.file,
+                                    sendMessage.attachmentInfo?.fileName
                                 )
                             }
 
@@ -2398,27 +2461,24 @@ abstract class SphinxRepository(
                                 chatDbo.myAlias?.value?.toSenderAlias(),
                                 chatDbo.myPhotoUrl,
                                 null,
-                                sendMessage.replyUUID,
-                                if (media != null) {
-                                    MessageType.Attachment
-                                } else if (sendMessage.isBoost) {
-                                    MessageType.Boost
-                                } else {
-                                    MessageType.Message
-                                },
+                                replyUUID,
+                                messageType,
+                                null,
+                                null,
                                 provisionalId,
                                 null,
                                 chatDbo.id,
                                 owner.id,
                                 sendMessage.contactId,
-                                messagePrice,
+                                sendMessage.tribePaymentAmount ?: messagePrice,
                                 null,
                                 null,
                                 DateTime.nowUTC().toDateTime(),
                                 null,
                                 message?.second,
                                 message?.first,
-                                null
+                                null,
+                                false.toFlagged()
                             )
 
                             if (media != null) {
@@ -2429,19 +2489,20 @@ abstract class SphinxRepository(
                                     provisionalId,
                                     chatDbo.id,
                                     MediaKeyDecrypted(media.first.value.joinToString("")),
-                                    media.third.file
+                                    media.third.file,
+                                    sendMessage.attachmentInfo?.fileName
                                 )
                             }
                         }
-                    }
 
-                    provisionalId
+                        provisionalId
+                    }
                 }
             }
 
             val isPaidTextMessage =
                 sendMessage.attachmentInfo?.mediaType?.isSphinxText == true &&
-                        sendMessage.messagePrice?.value ?: 0 > 0
+                        sendMessage.paidMessagePrice?.value ?: 0 > 0
 
             val messageContent: String? = if (isPaidTextMessage) null else message?.second?.value
 
@@ -2478,6 +2539,7 @@ abstract class SphinxRepository(
                     token,
                     media.third.mediaType,
                     media.third.file,
+                    media.third.fileName,
                     media.first,
                     MediaHost.DEFAULT,
                 )
@@ -2503,10 +2565,13 @@ abstract class SphinxRepository(
                 null
             }
 
+            val amount = messagePrice.value + (sendMessage.tribePaymentAmount ?: Sat(0)).value
+
             val postMessageDto: PostMessageDto = try {
                 PostMessageDto(
                     sendMessage.chatId?.value,
                     sendMessage.contactId?.value,
+                    amount,
                     messagePrice.value,
                     sendMessage.replyUUID?.value,
                     messageContent,
@@ -2514,8 +2579,9 @@ abstract class SphinxRepository(
                     mediaKeyMap,
                     postMemeServerDto?.mime,
                     postMemeServerDto?.muid,
-                    sendMessage.messagePrice?.value,
-                    sendMessage.isBoost
+                    sendMessage.paidMessagePrice?.value,
+                    sendMessage.isBoost,
+                    sendMessage.isTribePayment
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
@@ -2705,6 +2771,7 @@ abstract class SphinxRepository(
                                                 chatSeenMap,
                                                 queries,
                                                 loadResponse.value.contact,
+                                                accountOwner.value?.nodePubKey
                                             )
                                         }
 
@@ -2712,7 +2779,11 @@ abstract class SphinxRepository(
                                             upsertContact(contactDto, queries)
                                         }
 
-                                        upsertMessage(loadResponse.value, queries)
+                                        upsertMessage(
+                                            loadResponse.value,
+                                            queries,
+                                            media?.third?.fileName
+                                        )
 
                                         provisionalMessageId?.let { provId ->
                                             deleteMessageById(provId, queries)
@@ -2754,6 +2825,7 @@ abstract class SphinxRepository(
                 PostMessageDto(
                     message.chatId.value,
                     contact?.id?.value,
+                    messagePrice.value,
                     messagePrice.value,
                     message.replyUUID?.value,
                     message.messageContentDecrypted?.value,
@@ -3052,6 +3124,27 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun sendTribePayment(
+        chatId: ChatId,
+        amount: Sat,
+        messageUUID: MessageUUID,
+        text: String,
+    ) {
+        applicationScope.launch(mainImmediate) {
+
+            val sendMessageBuilder = SendMessage.Builder()
+            sendMessageBuilder.setChatId(chatId)
+            sendMessageBuilder.setTribePaymentAmount(amount)
+            sendMessageBuilder.setText(text)
+            sendMessageBuilder.setReplyUUID(messageUUID.value.toReplyUUID())
+            sendMessageBuilder.setIsTribePayment(true)
+
+            sendMessage(
+                sendMessageBuilder.build().first
+            )
+        }
+    }
+
     override suspend fun boostMessage(
         chatId: ChatId,
         pricePerMessage: Sat,
@@ -3093,11 +3186,12 @@ abstract class SphinxRepository(
             }
 
             networkQueryMessage.boostMessage(
-                chatId,
-                pricePerMessage,
-                escrowAmount,
-                owner.tipAmount ?: Sat(20L),
-                messageUUID,
+                boostMessageDto = PostBoostMessageDto(
+                    chat_id = chatId.value,
+                    amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(20L)).value,
+                    message_price = pricePerMessage.value + escrowAmount.value,
+                    reply_uuid = messageUUID.value
+                )
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
@@ -3521,7 +3615,8 @@ abstract class SphinxRepository(
                                         moshi,
                                         chatSeenMap,
                                         queries,
-                                        null
+                                        null,
+                                        accountOwner.value?.nodePubKey
                                     )
                                     updateChatTribeData(
                                         tribeDto,
@@ -4825,7 +4920,8 @@ abstract class SphinxRepository(
                                                     moshi,
                                                     chatSeenMap,
                                                     queries,
-                                                    null
+                                                    null,
+                                                    accountOwner.value?.nodePubKey
                                                 )
                                             }
                                         }
@@ -4909,7 +5005,8 @@ abstract class SphinxRepository(
                                                 moshi,
                                                 chatSeenMap,
                                                 queries,
-                                                null
+                                                null,
+                                                accountOwner.value?.nodePubKey
                                             )
                                         }
                                     }
@@ -4962,7 +5059,8 @@ abstract class SphinxRepository(
                                             moshi,
                                             chatSeenMap,
                                             queries,
-                                            null
+                                            null,
+                                            accountOwner.value?.nodePubKey
                                         )
 
                                         upsertMessage(loadResponse.value.message, queries)
@@ -5018,7 +5116,8 @@ abstract class SphinxRepository(
                                             moshi,
                                             chatSeenMap,
                                             queries,
-                                            null
+                                            null,
+                                            accountOwner.value?.nodePubKey
                                         )
                                     }
                                 }
@@ -5310,41 +5409,46 @@ abstract class SphinxRepository(
                     !message.status.isDeleted() &&
                     (!message.isPaidPendingMessage || sent)
                 ) {
-                    val streamToFile: File? = mediaCacheHandler.createFile(
-                        message.messageMedia?.mediaType ?: media.mediaType
-                    )
 
-                    if (streamToFile != null) {
-                        memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
-                            memeInputStreamHandler.retrieveMediaInputStream(
-                                url.value,
-                                token,
-                                media.mediaKeyDecrypted,
-                            )?.let { stream ->
-                                mediaCacheHandler.copyTo(stream, streamToFile)
-                                messageLock.withLock {
-                                    withContext(io) {
-                                        queries.transaction {
-                                            queries.messageMediaUpdateFile(
-                                                streamToFile,
-                                                messageId
-                                            )
+                    memeServerTokenHandler.retrieveAuthenticationToken(host)?.let { token ->
+                        memeInputStreamHandler.retrieveMediaInputStream(
+                            url.value,
+                            token,
+                            media.mediaKeyDecrypted,
+                        )?.let { streamAndFileName ->
 
-                                            // to proc table change so new file path is pushed to UI
-                                            queries.messageUpdateContentDecrypted(
-                                                message.messageContentDecrypted,
-                                                messageId
-                                            )
+                            mediaCacheHandler.createFile(
+                                mediaType = message.messageMedia?.mediaType ?: media.mediaType,
+                                extension = streamAndFileName.second?.getExtension()
+                            )?.let { streamToFile ->
+
+                                streamAndFileName.first?.let { stream ->
+                                    mediaCacheHandler.copyTo(stream, streamToFile)
+                                    messageLock.withLock {
+                                        withContext(io) {
+                                            queries.transaction {
+
+                                                queries.messageMediaUpdateFile(
+                                                    streamToFile,
+                                                    streamAndFileName.second,
+                                                    messageId
+                                                )
+
+                                                // to proc table change so new file path is pushed to UI
+                                                queries.messageUpdateContentDecrypted(
+                                                    message.messageContentDecrypted,
+                                                    messageId
+                                                )
+                                            }
                                         }
                                     }
+
+                                    // hold downloadLock until table change propagates to UI
+                                    delay(200L)
+
                                 }
-
-                                // hold downloadLock until table change propagates to UI
-                                delay(200L)
-
-                            } ?: streamToFile.delete()
-
-                        } ?: streamToFile.delete()
+                            }
+                        }
                     }
                 }
 
@@ -5418,33 +5522,37 @@ abstract class SphinxRepository(
                             url,
                             authenticationToken = null,
                             mediaKeyDecrypted = null,
-                        )?.let { stream ->
-                            sphinxNotificationManager.notify(
-                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
-                                title = "Completing Download",
-                                message = "Finishing up download of file",
-                            )
-                            mediaCacheHandler.copyTo(stream, streamToFile)
+                        )?.let { streamAndFileName ->
+                            streamAndFileName.first?.let { stream ->
+                                sphinxNotificationManager.notify(
+                                    notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                    title = "Completing Download",
+                                    message = "Finishing up download of file",
+                                )
+                                mediaCacheHandler.copyTo(stream, streamToFile)
 
-                            feedItemLock.withLock {
-                                withContext(io) {
-                                    queries.transaction {
-                                        queries.feedItemUpdateLocalFile(
-                                            streamToFile,
-                                            feedItemId
-                                        )
+                                feedItemLock.withLock {
+                                    withContext(io) {
+                                        queries.transaction {
+                                            queries.feedItemUpdateLocalFile(
+                                                streamToFile,
+                                                feedItemId
+                                            )
+                                        }
                                     }
                                 }
-                            }
 
-                            sphinxNotificationManager.notify(
-                                notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
-                                title = "Download complete",
-                                message = "item can now be accessed offline",
-                            )
-                            // hold downloadLock until table change propagates to UI
-                            delay(200L)
-                            downloadCompleteCallback.invoke(streamToFile)
+                                sphinxNotificationManager.notify(
+                                    notificationId = SphinxNotificationManager.DOWNLOAD_NOTIFICATION_ID,
+                                    title = "Download complete",
+                                    message = "item can now be accessed offline",
+                                )
+                                // hold downloadLock until table change propagates to UI
+                                delay(200L)
+                                downloadCompleteCallback.invoke(streamToFile)
+
+                            } ?: streamToFile.delete()
+
                         } ?: streamToFile.delete()
                     }
                 } else {
@@ -5552,5 +5660,120 @@ abstract class SphinxRepository(
         }
 
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
+    }
+
+    override fun getAndSaveTransportKey() {
+        applicationScope.launch(io) {
+            relayDataHandler.retrieveRelayTransportKey()?.let {
+                return@launch
+            }
+            relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
+                networkQueryRelayKeys.getRelayTransportKey(
+                    relayUrl
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+                        is Response.Success -> {
+                            relayDataHandler.persistRelayTransportKey(
+                                RsaPublicKey(
+                                    loadResponse.value.transport_key.toCharArray()
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @OptIn(RawPasswordAccess::class, UnencryptedDataAccess::class)
+    override fun getOrCreateHMacKey() {
+        applicationScope.launch(io) {
+            relayDataHandler.retrieveRelayHMacKey()?.let {
+                return@launch
+            }
+            networkQueryRelayKeys.getRelayHMacKey().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        when (val hMacKeyResponse = createHMacKey()) {
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                relayDataHandler.persistRelayHMacKey(
+                                    hMacKeyResponse.value
+                                )
+                            }
+                        }
+                    }
+                    is Response.Success -> {
+                        val privateKey: CharArray = authenticationCoreManager.getEncryptionKey()
+                            ?.privateKey
+                            ?.value
+                            ?: return@collect
+
+                        val response = rsa.decrypt(
+                            rsaPrivateKey = RsaPrivateKey(privateKey),
+                            text = EncryptedString(loadResponse.value.encrypted_key),
+                            dispatcher = default
+                        )
+
+                        when (response) {
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                relayDataHandler.persistRelayHMacKey(
+                                    RelayHMacKey(
+                                        response.value.toUnencryptedString(trim = false).value
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun createHMacKey(): Response<RelayHMacKey, ResponseError> {
+        var response: Response<RelayHMacKey, ResponseError> = Response.Error(
+            ResponseError("HMac Key creation failed")
+        )
+
+        @OptIn(RawPasswordAccess::class)
+        val hMacKeyString = PasswordGenerator(passwordLength = 20).password.value.joinToString("")
+
+        relayDataHandler.retrieveRelayTransportKey()?.let { key ->
+
+            val encryptionResponse = rsa.encrypt(
+                key,
+                UnencryptedString(hMacKeyString),
+                formatOutput = false,
+                dispatcher = default,
+            )
+
+            when (encryptionResponse) {
+                is Response.Error -> {}
+                is Response.Success -> {
+                    networkQueryRelayKeys.addRelayHMacKey(
+                        PostHMacKeyDto(encryptionResponse.value.value)
+                    ).collect { loadResponse ->
+                        @Exhaustive
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {}
+                            is Response.Success -> {
+                                response = Response.Success(
+                                    RelayHMacKey(hMacKeyString)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return response
     }
 }

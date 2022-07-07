@@ -42,7 +42,9 @@
     <string name="last_message_description_invoice_sent">帳單傳送: %s</string>
     <string name="last_message_description_invoice_receive">帳單收到: %s</string>
     <string name="last_message_description_payment_sent">已支付: %s</string>
+    <string name="last_message_description_tribe_payment_sent">Payment of %s sent to %s</string>
     <string name="last_message_description_payment_received">已收款: %s</string>
+    <string name="last_message_description_tribe_payment">%s sent a payment of %s to %s</string>
 
     <string name="last_message_description_sent">已傳送</string>
     <string name="last_message_description_an_audio_clip">語音檔</string>

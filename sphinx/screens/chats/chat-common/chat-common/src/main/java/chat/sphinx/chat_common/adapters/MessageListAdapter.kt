@@ -1,5 +1,7 @@
 package chat.sphinx.chat_common.adapters
 
+import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -27,14 +29,17 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message_media.isPdf
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.notifyAll
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
@@ -50,6 +55,22 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     View.OnLayoutChangeListener
 {
 
+    interface OnRowLayoutListener {
+        fun onRowHeightChanged()
+    }
+
+    private val onRowLayoutListener: OnRowLayoutListener = object: OnRowLayoutListener {
+        override fun onRowHeightChanged() {
+            val lastVisibleItemPosition = (recyclerView.layoutManager as? LinearLayoutManager)?.findLastVisibleItemPosition()
+            val itemsCount = (recyclerView.layoutManager?.itemCount ?: 0)
+            val isScrolledAtLastRow = lastVisibleItemPosition == (itemsCount - 1)
+
+            if (isScrolledAtLastRow) {
+                forceScrollToBottom()
+            }
+        }
+    }
+
     private inner class Diff(
         private val oldList: List<MessageHolderViewState>,
         private val newList: List<MessageHolderViewState>
@@ -64,7 +85,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             return try {
-                oldList[oldItemPosition].message.id == newList[newItemPosition].message.id
+                oldList[oldItemPosition].message?.id == newList[newItemPosition].message?.id
             } catch (e: IndexOutOfBoundsException) {
                 false
             }
@@ -106,14 +127,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 if (messages.isEmpty()) {
                     messages.addAll(list)
                     notifyDataSetChanged()
-                    recyclerView.layoutManager?.scrollToPosition(messages.size)
+                    scrollToUnseenSeparatorOrBottom(list)
                 } else {
                     withContext(viewModel.dispatchers.default) {
                         DiffUtil.calculateDiff(
                             Diff(messages, list)
                         )
                     }.let { result ->
-                        scrollToBottomIfNeeded(callback = {
+                        scrollToPreviousPosition(callback = {
                             messages.clear()
                             messages.addAll(list)
                             result.dispatchUpdatesTo(this@MessageListAdapter)
@@ -122,6 +143,21 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
             }
         }
+    }
+
+    private fun scrollToUnseenSeparatorOrBottom(messageHolders: List<MessageHolderViewState>) {
+        for ((index, message) in messageHolders.withIndex()) {
+            (message as? MessageHolderViewState.Separator)?.let {
+                if (it.messageHolderType.isUnseenSeparatorHolder()) {
+                    (recyclerView.layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(index, recyclerView.measuredHeight / 4)
+                    return
+                }
+            }
+        }
+
+        recyclerView.layoutManager?.scrollToPosition(
+            messageHolders.size
+        )
     }
 
     fun scrollToBottomIfNeeded(
@@ -149,9 +185,76 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         }
     }
 
-    fun forceScrollToBottom() {
+    private fun scrollToPreviousPosition(
+        callback: (() -> Unit)? = null,
+    ) {
+        val lastVisibleItemPositionBeforeDispatch = layoutManager.findLastVisibleItemPosition()
+        val listSizeBeforeDispatch = messages.size
+        val diffToBottom = listSizeBeforeDispatch - lastVisibleItemPositionBeforeDispatch
+
+        if (callback != null) {
+            callback()
+        }
+
         val listSizeAfterDispatch = messages.size
-        recyclerView.scrollToPosition(listSizeAfterDispatch)
+        recyclerView.scrollToPosition(listSizeAfterDispatch - diffToBottom)
+    }
+
+    fun forceScrollToBottom() {
+        recyclerView.scrollToPosition(messages.size)
+    }
+
+    fun highlightAndScrollToSearchResult(
+        message: Message,
+        previousMessage: Message?,
+        searchTerm: String
+    ) {
+        var previousMessageUpdated = (previousMessage == null)
+        var indexToScroll: Int? = null
+
+        for ((index, messageHolderVS) in messages.withIndex()) {
+            if (messageHolderVS.message?.id == previousMessage?.id && !previousMessageUpdated) {
+
+                (messageHolderVS as? MessageHolderViewState.Sent)?.let {
+                    it.highlightedText = null
+                } ?: (messageHolderVS as? MessageHolderViewState.Received)?.let {
+                    it.highlightedText = null
+                }
+
+                notifyItemChanged(index)
+
+                previousMessageUpdated = true
+            }
+
+            if (messageHolderVS.message?.id == message.id && indexToScroll == null) {
+
+                (messageHolderVS as? MessageHolderViewState.Sent)?.let {
+                    it.highlightedText = searchTerm
+                } ?: (messageHolderVS as? MessageHolderViewState.Received)?.let {
+                    it.highlightedText = searchTerm
+                }
+
+                notifyItemChanged(index)
+
+                indexToScroll = index
+            }
+
+            if (previousMessageUpdated) {
+                indexToScroll?.let {
+                    recyclerView.scrollToPosition(it)
+                    return
+                }
+            }
+        }
+    }
+
+    fun resetHighlighted() {
+        for ((index, messageHolderVS) in messages.withIndex()) {
+            if (messageHolderVS.highlightedText != null) {
+                messageHolderVS.highlightedText = null
+                notifyItemChanged(index)
+            }
+        }
     }
 
     override fun onLayoutChange(
@@ -314,8 +417,21 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         currentViewState?.message?.let { message ->
                             viewModel.goToFullscreenVideo(message.id)
                         }
-
                     }
+                }
+
+                includeMessageTypeFileAttachment.apply {
+                    buttonAttachmentFileDownload.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.saveFile(message, null)
+                        }
+                    }
+                    layoutConstraintAttachmentFileMainInfoGroup.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            viewModel.showAttachmentPdfFullscreen(message, 0)
+                        }
+                    }
+                    layoutConstraintAttachmentFileMainInfoGroup.setOnLongClickListener(selectedMessageLongClickListener)
                 }
 
                 includePaidMessageReceivedDetailsHolder.apply {
@@ -390,6 +506,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
+
+            binding.includeMessageHolderChatImageInitialHolder.root.setOnClickListener {
+                currentViewState?.message?.let { nnMessage ->
+                    viewModel.showMemberPopup(nnMessage)
+                }
+            }
         }
 
         private fun processMemberRequest(contactId: ContactId, messageId: MessageId, type: MessageType.GroupAction) {
@@ -439,12 +561,12 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 viewModel.dispatchers,
                 viewModel.audioPlayerController,
                 imageLoader,
-                viewModel.imageLoaderDefaults,
                 viewModel.memeServerTokenHandler,
                 recyclerViewWidth,
                 viewState,
                 userColorsHelper,
-                onSphinxInteractionListener
+                onSphinxInteractionListener,
+                onRowLayoutListener
             )
 
             observeAudioAttachmentState()

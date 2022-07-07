@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendPaymentRequest
@@ -17,6 +18,7 @@ import chat.sphinx.payment_receive.R
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -51,16 +53,20 @@ internal class PaymentReceiveViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val networkQueryLightning: NetworkQueryLightning,
     private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
 ): PaymentViewModel<PaymentReceiveFragmentArgs, PaymentReceiveViewState>(
     dispatchers,
     paymentReceiveNavigator,
     contactRepository,
+    messageRepository,
+    chatRepository,
     PaymentReceiveViewState.Idle
 )
 {
     override val args: PaymentReceiveFragmentArgs by savedStateHandle.navArgs()
     override val chatId: ChatId? = args.chatId
     override val contactId: ContactId? = args.contactId
+    override val messageUUID: MessageUUID? = null
 
     private val sendPaymentRequestBuilder = SendPaymentRequest.Builder()
 
@@ -187,6 +193,6 @@ internal class PaymentReceiveViewModel @Inject constructor(
     }
 
     companion object {
-        private const val MAXIMUM_RECEIVE_SAT_AMOUNT = 1_000_000
+        private const val MAXIMUM_RECEIVE_SAT_AMOUNT = 9_999_999
     }
 }

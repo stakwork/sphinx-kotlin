@@ -6,11 +6,8 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.LayoutSelectedMessageBinding
 import chat.sphinx.chat_common.databinding.LayoutSelectedMessageMenuItemBinding
-import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
-import chat.sphinx.resources.getColor
 import chat.sphinx.resources.getString
-import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.resources.setTextColorExt
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -54,6 +51,7 @@ internal inline fun LayoutSelectedMessageBinding.setMenuColor(viewState: Message
                 imageViewSelectedMessageMenuArrowBottomLeft
                     .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
             }
+            is MessageHolderViewState.Separator -> { }
         }
     }
 }

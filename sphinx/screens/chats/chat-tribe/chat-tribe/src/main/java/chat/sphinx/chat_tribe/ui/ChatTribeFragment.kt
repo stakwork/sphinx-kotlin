@@ -1,31 +1,43 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
+import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
+import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.menu_bottom.model.MenuBottomOption
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.resources.getString
+import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_message.*
-import chat.sphinx.wrapper_view.Px
+import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -48,13 +60,21 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includePodcastPlayerFooter
     private val boostAnimationBinding: LayoutBoostFireworksBinding
         get() = binding.includeLayoutBoostFireworks
+    private val tribePopupBinding: LayoutChatTribePopupBinding
+        get() = binding.includeLayoutPopup
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
+    override val searchFooterBinding: LayoutChatSearchFooterBinding
+        get() = binding.includeChatTribeSearchFooter
+    override val recordingAudioContainer: ConstraintLayout
+        get() = binding.layoutConstraintRecordingAudioContainer
     override val recordingCircleBinding: LayoutChatRecordingCircleBinding
         get() = binding.includeChatRecordingCircle
     override val headerBinding: LayoutChatHeaderBinding
         get() = binding.includeChatTribeHeader
+    override val searchHeaderBinding: LayoutChatSearchHeaderBinding
+        get() = binding.includeChatTribeSearchHeader
     override val replyingMessageBinding: LayoutMessageReplyBinding
         get() = binding.includeChatTribeMessageReply
     override val selectedMessageBinding: LayoutSelectedMessageBinding
@@ -67,6 +87,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeChatTribeMenu
     override val callMenuBinding: LayoutMenuBottomBinding
         get() = binding.includeLayoutMenuBottomCall
+    override val moreMenuBinding: LayoutMenuBottomBinding
+        get() = binding.includeLayoutMenuBottomMore
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
 
@@ -94,6 +116,8 @@ internal class ChatTribeFragment: ChatFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+
         lifecycleScope.launch(viewModel.mainImmediate) {
             try {
                 viewModel.feedDataStateFlow.collect { data ->
@@ -110,15 +134,6 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         podcastPlayerBinding.apply {
-//            textViewBoostPodcastButton.setOnClickListener {
-//                tribeFeedViewModel.podcastViewStateContainer.value.clickBoost?.let {
-//                    it.invoke()
-//                    boostAnimationBinding.apply {
-//                        root.visible
-//                        lottieAnimationView.playAnimation()
-//                    }
-//                }
-//            }
             imageViewForward30Button.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickFastForward?.invoke()
             }
@@ -150,10 +165,99 @@ internal class ChatTribeFragment: ChatFragment<
                 MessageReplyViewState.CommentingOnPodcast(podcastClip)
             )
         }
+
+        tribePopupBinding.layoutChatTribePopup.apply {
+            buttonSendSats.setOnClickListener {
+                viewModel.goToPaymentSend()
+            }
+
+            textViewDirectPaymentPopupClose.setOnClickListener {
+                viewModel.tribePopupViewStateContainer.updateViewState(TribePopupViewState.Idle)
+            }
+        }
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.tribePopupViewStateContainer.value is TribePopupViewState.TribeMemberPopup) {
+                viewModel.tribePopupViewStateContainer.updateViewState(TribePopupViewState.Idle)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.handleCommonChatOnBackPressed()
+                }
+            }
+        }
+    }
+
+    override fun setupMoreOptionsMenu() {
+        val menuOptions: MutableSet<MenuBottomOption> = LinkedHashSet(3)
+
+        menuOptions.add(
+            MenuBottomOption(
+                text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_call,
+                textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+                onClick = {
+                    viewModel.moreOptionsMenuHandler.updateViewState(
+                        MenuBottomViewState.Closed
+                    )
+                    viewModel.callMenuHandler.updateViewState(
+                        MenuBottomViewState.Open
+                    )
+                }
+            )
+        )
+
+        if (viewModel.moreOptionsMenuStateFlow.value is MoreMenuOptionsViewState.OwnTribe) {
+            menuOptions.add(
+                MenuBottomOption(
+                    text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_share,
+                    textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+                    onClick = {
+                        viewModel.navigateToTribeShareScreen()
+                    }
+                )
+            )
+        }
+
+        menuOptions.add(
+            MenuBottomOption(
+                text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_search,
+                textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+                onClick = {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.searchMessages(null)
+                    }
+                }
+            )
+        )
+
+        bottomMenuMore.newBuilder(moreMenuBinding, viewLifecycleOwner)
+            .setHeaderText(chat.sphinx.chat_common.R.string.bottom_menu_more_header_text)
+            .setOptions(menuOptions)
+            .build()
     }
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.moreOptionsMenuStateFlow.collect {
+                setupMoreOptionsMenu()
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             tribeFeedViewModel.boostAnimationViewStateContainer.collect { viewState ->
@@ -249,6 +353,53 @@ internal class ChatTribeFragment: ChatFragment<
                         }
                     }
 
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.tribePopupViewStateContainer.collect { viewState ->
+                tribePopupBinding.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is TribePopupViewState.Idle -> {
+                            root.goneIfFalse(false)
+                        }
+
+                        is TribePopupViewState.TribeMemberPopup -> {
+                            root.goneIfFalse(true)
+
+                            layoutChatTribePopup.apply {
+                                textViewInitials.apply {
+                                    text = viewState.memberName.value.getInitials()
+                                    setBackgroundRandomColor(
+                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
+                                        Color.parseColor(
+                                            userColorsHelper.getHexCodeForKey(
+                                                viewState.colorKey,
+                                                root.context.getRandomHexCode(),
+                                            )
+                                        ),
+                                    )
+                                }
+
+                                viewState.memberPic?.let { photoUrl ->
+                                    imageViewMemberProfilePicture.visible
+
+                                    imageLoader.load(
+                                        imageViewMemberProfilePicture,
+                                        photoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
+                                }
+
+                                textViewMemberName.text = viewState.memberName.value
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
     fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>>
+    fun searchMessagesBy(chatId: ChatId, term: String): Flow<List<Message>>
+
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getTribeLastMemberRequestByContactId(contactId: ContactId, chatId: ChatId, ): Flow<Message?>
     fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
@@ -73,6 +75,13 @@ interface MessageRepository {
         escrowAmount: Sat,
         messageUUID: MessageUUID,
     ): Response<Any, ResponseError>
+
+    suspend fun sendTribePayment(
+        chatId: ChatId,
+        amount: Sat,
+        messageUUID: MessageUUID,
+        text: String,
+    )
 
     suspend fun processMemberRequest(
         contactId: ContactId,

@@ -17,6 +17,7 @@ import coil.decode.SvgDecoder
 import coil.fetch.VideoFrameFileFetcher
 import coil.fetch.VideoFrameUriFetcher
 import coil.request.ImageRequest
+import coil.request.ImageResult
 import coil.transform.BlurTransformation
 import coil.transform.CircleCropTransformation
 import coil.transform.GrayscaleTransformation
@@ -59,42 +60,38 @@ class ImageLoaderAndroid(
     override suspend fun load(
         imageView: ImageView,
         url: String,
-        options: ImageLoaderOptions?
+        options: ImageLoaderOptions?,
+        listener: OnImageLoadListener?,
     ): Disposable {
-        return loadImpl(imageView, url, options)
+        return loadImpl(imageView, url, options, listener)
     }
 
     override suspend fun load(
         imageView: ImageView,
         @DrawableRes drawableResId: Int,
-        options: ImageLoaderOptions?
+        options: ImageLoaderOptions?,
+        listener: OnImageLoadListener?,
     ): Disposable {
-        return loadImpl(imageView, drawableResId, options)
+        return loadImpl(imageView, drawableResId, options, listener)
     }
 
     override suspend fun load(
         imageView: ImageView,
         file: File,
-        options: ImageLoaderOptions?
+        options: ImageLoaderOptions?,
+        listener: OnImageLoadListener?,
     ): Disposable {
-        return loadImpl(imageView, file, options)
+        return loadImpl(imageView, file, options, listener)
     }
-
-//    override suspend fun loadImmediate(
-//        imageView: ImageView,
-//        file: File,
-//        options: ImageLoaderOptions?
-//    ) {
-//        loadImmediateImpl(imageView, file, options)
-//    }
 
     private suspend fun loadImpl(
         imageView: ImageView,
         any: Any,
-        options: ImageLoaderOptions?
+        options: ImageLoaderOptions?,
+        listener: OnImageLoadListener? = null,
     ): Disposable {
         loaderLock.withLock {
-            val request = buildRequest(imageView, any, options)
+            val request = buildRequest(imageView, any, options, listener)
 
             // Future-proofing:
             // Always retrieve the client, as Tor may be enabled but
@@ -110,13 +107,14 @@ class ImageLoaderAndroid(
     private suspend fun loadImmediateImpl(
         imageView: ImageView,
         any: Any,
-        options: ImageLoaderOptions?
+        options: ImageLoaderOptions?,
+        listener: OnImageLoadListener? = null,
     ) {
         loaderLock.withLock {
             val client = networkClientCache.getCachingClient()
             retrieveLoader(client)
         }.let { loader ->
-            val builder = buildRequest(imageView, any, options)
+            val builder = buildRequest(imageView, any, options, listener)
             loader.execute(builder.build())
         }
     }
@@ -125,11 +123,22 @@ class ImageLoaderAndroid(
     private fun buildRequest(
         imageView: ImageView,
         any: Any,
-        options: ImageLoaderOptions?
+        options: ImageLoaderOptions?,
+        listener: OnImageLoadListener? = null,
     ): ImageRequest.Builder {
-        val request = coil.request.ImageRequest.Builder(appContext)
+        val request = ImageRequest.Builder(appContext)
             .data(any)
             .dispatcher(io)
+            .listener(
+                object: ImageRequest.Listener {
+                    override fun onSuccess(request: ImageRequest, metadata: ImageResult.Metadata) {
+                        super.onSuccess(request, metadata)
+                        listener?.let {
+                            it.onSuccess()
+                        }
+                    }
+                }
+            )
             .target(imageView)
 
         options?.let {

@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
@@ -18,6 +19,8 @@ abstract class ChatNavigator(
 ): Navigator<NavController>(navigationDriver)
 {
     abstract suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?)
+
+    abstract suspend fun toPaymentSendDetail(messageUUID: MessageUUID, chatId: ChatId)
 
     abstract suspend fun toPaymentReceiveDetail(contactId: ContactId, chatId: ChatId?)
 

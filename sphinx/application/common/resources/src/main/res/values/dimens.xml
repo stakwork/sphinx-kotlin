@@ -21,7 +21,7 @@
     <dimen name="default_header_margin_horizontal">24dp</dimen>
     <dimen name="default_header_headline_margin_horizontal">12dp</dimen>
     <dimen name="default_header_headline_margin_vertical">8dp</dimen>
-    <dimen name="default_bottom_bar_height">56dp</dimen>
+    <dimen name="default_bottom_bar_height">58dp</dimen>
     <dimen name="default_elevation">8dp</dimen>
 
     <dimen name="default_text_size_back_arrow">21sp</dimen>

@@ -20,6 +20,10 @@
     <string name="send_message_empty_content_error">メッセージを入力するか、ファイルを添付してください</string>
     <string name="send_message_empty_price_error">価格を設定してください</string>
 
+    <!--  Separators  -->
+    <string name="unseen_messages">Unseen Messages</string>
+    <string name="today">Today</string>
+
     <!--  Message type invoices  -->
     <string name="request_expired">リクエストの有効期限が切れています</string>
     <string name="request_expiration">有効期限: %s</string>
@@ -110,14 +114,22 @@
     <string name="side_effect_link_copied">%sをコピーしました</string>
     <string name="side_effect_no_link_to_copy">コピーするリンクがありません</string>
 
+    <string name="file_name_loading">Loading...</string>
+    <string name="pdf_page">page</string>
+    <string name="pdf_pages">pages</string>
+    <string name="pdf_page_of">Page %d of %d</string>
+
     <!-- Send Attachment -->
     <string name="attachment_send_header_image">写真を送る</string>
     <string name="attachment_send_header_video">動画を送る</string>
+    <string name="attachment_send_header_pdf">SEND PDF</string>
+    <string name="attachment_send_header_file">SEND FILE</string>
     <string name="attachment_send_header_giphy">ミームを送る</string>
     <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
 
     <!-- Pay Attachment -->
     <string name="paid_message_pay_to_unlock">Satsを支払いメッセージを開封する</string>
+    <string name="paid_file_pay_to_unlock">PAY TO UNLOCK FILE</string>
     <string name="paid_message_loading">メッセージを読み込んでいます</string>
     <string name="paid_message_unable_to_load">メッセージを読み込めませんでした</string>
     <string name="attachment_price_label">課金額: </string>
@@ -150,8 +162,19 @@
     <string name="bottom_menu_call_header_text">コール方法</string>
     <string name="bottom_menu_call_option_audio">音声</string>
     <string name="bottom_menu_call_option_video_or_audio">動画または音声</string>
+
+    <string name="bottom_menu_more_header_text">Chat Options</string>
+    <string name="bottom_menu_more_option_call">Create Call</string>
+    <string name="bottom_menu_more_option_share">Share Tribe Link</string>
+    <string name="bottom_menu_more_option_search">Search Messages</string>
+
+    <string name="searching_messages">Searching...</string>
+    <string name="results_found">%d Results Found</string>
+
     <string name="slide_to_cancel">&lt;&lt; スライドするとキャンセルできます</string>
     <string name="recording_permission_granted">録音が許可されました</string>
     <string name="recording_permission_required">録音許可を取ってください</string>
+
+    <string name="send_sats">Send Sats</string>
 
 </resources>

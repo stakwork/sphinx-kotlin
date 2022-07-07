@@ -42,7 +42,9 @@
     <string name="last_message_description_invoice_sent">Invoice Sent: %s</string>
     <string name="last_message_description_invoice_receive">Invoice Received: %s</string>
     <string name="last_message_description_payment_sent">Payment Sent: %s</string>
+    <string name="last_message_description_tribe_payment_sent">Payment of %s sent to %s</string>
     <string name="last_message_description_payment_received">Payment Received: %s</string>
+    <string name="last_message_description_tribe_payment">%s sent a payment of %s to %s</string>
 
     <string name="last_message_description_sent">sent</string>
     <string name="last_message_description_an_audio_clip">an Audio Clip</string>

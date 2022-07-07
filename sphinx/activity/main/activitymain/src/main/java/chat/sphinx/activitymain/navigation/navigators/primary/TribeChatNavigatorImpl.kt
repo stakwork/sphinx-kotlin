@@ -12,6 +12,7 @@ import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
+import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -19,6 +20,7 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import javax.inject.Inject
 
@@ -29,7 +31,15 @@ internal class TribeChatNavigatorImpl @Inject constructor(
 {
 
     override suspend fun toPaymentSendDetail(contactId: ContactId, chatId: ChatId?) {
-        detailDriver.submitNavigationRequest(ToPaymentSendDetail(contactId, chatId))
+        detailDriver.submitNavigationRequest(
+            ToPaymentSendDetail(contactId = contactId, chatId = chatId)
+        )
+    }
+
+    override suspend fun toPaymentSendDetail(messageUUID: MessageUUID, chatId: ChatId) {
+        detailDriver.submitNavigationRequest(
+            ToPaymentSendDetail(chatId = chatId, messageUUID = messageUUID)
+        )
     }
 
     override suspend fun toPaymentReceiveDetail(contactId: ContactId, chatId: ChatId?) {
@@ -42,6 +52,16 @@ internal class TribeChatNavigatorImpl @Inject constructor(
 
     override suspend fun toTribeDetailScreen(chatId: ChatId) {
         detailDriver.submitNavigationRequest(ToTribeDetailScreen(chatId))
+    }
+
+    override suspend fun toShareTribeScreen(
+        qrText: String,
+        viewTitle: String,
+        description: String?,
+    ) {
+        detailDriver.submitNavigationRequest(
+            ToQRCodeDetail(qrText, viewTitle, description)
+        )
     }
 
     override suspend fun toAddContactDetail(

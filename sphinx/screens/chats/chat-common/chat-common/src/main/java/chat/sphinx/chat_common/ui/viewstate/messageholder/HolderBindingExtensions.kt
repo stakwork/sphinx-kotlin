@@ -1,8 +1,15 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.pdf.PdfRenderer
+import android.os.ParcelFileDescriptor
+import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.view.Gravity
 import android.view.View
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -13,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_common.R
+import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypePodcastClipBinding
@@ -25,10 +33,7 @@ import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.chat_common.util.VideoThumbnailUtil
-import chat.sphinx.concept_image_loader.Disposable
-import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_image_loader.*
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_client_crypto.CryptoHeader
 import chat.sphinx.concept_network_client_crypto.CryptoScheme
@@ -36,21 +41,19 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.*
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.wrapper_chat.ChatType
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.asFormattedString
+import chat.sphinx.wrapper_common.before
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.thumbnailUrl
-import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_common.util.getHHMMString
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_view.Px
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -68,13 +71,14 @@ internal fun  LayoutMessageHolderBinding.setView(
     dispatchers: CoroutineDispatchers,
     audioPlayerController: AudioPlayerController,
     imageLoader: ImageLoader<ImageView>,
-    imageLoaderDefaults: ImageLoaderOptions,
     memeServerTokenHandler: MemeServerTokenHandler,
     recyclerViewWidth: Px,
     viewState: MessageHolderViewState,
     userColorsHelper: UserColorsHelper,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener? = null,
+    onRowLayoutListener: MessageListAdapter.OnRowLayoutListener? = null,
 ) {
+
     for (job in holderJobs) {
         job.cancel()
     }
@@ -105,7 +109,12 @@ internal fun  LayoutMessageHolderBinding.setView(
         }.let { job ->
             holderJobs.add(job)
         }
-
+        setSearchHighlightedStatus(
+            viewState.searchHighlightedStatus
+        )
+        setMessagesSeparator(
+            viewState.messagesSeparator
+        )
         setStatusHeader(
             viewState.statusHeader,
             holderJobs,
@@ -132,7 +141,7 @@ internal fun  LayoutMessageHolderBinding.setView(
             viewState.groupActionIndicator
         )
         if (viewState.background !is BubbleBackground.Gone) {
-            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, url, media ->
+            setBubbleImageAttachment(viewState.bubbleImageAttachment) { imageView, loadingContainer, url, media ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
 
                     val file: File? = media?.localFile
@@ -172,9 +181,21 @@ internal fun  LayoutMessageHolderBinding.setView(
                     }
 
                     val disposable: Disposable = if (file != null) {
-                        imageLoader.load(imageView, file, options)
+                        imageLoader.load(imageView, file, options, object: OnImageLoadListener {
+                            override fun onSuccess() {
+                                super.onSuccess()
+                                loadingContainer.gone
+                                onRowLayoutListener?.onRowHeightChanged()
+                            }
+                        })
                     } else {
-                        imageLoader.load(imageView, url, options)
+                        imageLoader.load(imageView, url, options, object: OnImageLoadListener {
+                            override fun onSuccess() {
+                                super.onSuccess()
+                                loadingContainer.gone
+                                onRowLayoutListener?.onRowHeightChanged()
+                            }
+                        })
                     }
 
                     disposables.add(disposable)
@@ -200,6 +221,10 @@ internal fun  LayoutMessageHolderBinding.setView(
             setBubbleVideoAttachment(
                 viewState.bubbleVideoAttachment,
             )
+
+            setBubbleFileAttachment(
+                viewState.bubbleFileAttachment
+            )
             setUnsupportedMessageTypeLayout(
                 viewState.unsupportedMessageType
             )
@@ -219,17 +244,40 @@ internal fun  LayoutMessageHolderBinding.setView(
                 holderJobs,
                 imageLoader,
                 lifecycleScope,
-                viewState
+                viewState,
+                onRowLayoutListener,
             )
             setBubbleCallInvite(
                 viewState.bubbleCallInvite
             )
             setBubbleBotResponse(
-                viewState.bubbleBotResponse
+                viewState.bubbleBotResponse,
+                onRowLayoutListener
             )
             setBubbleDirectPaymentLayout(
-                viewState.bubbleDirectPayment
-            )
+                viewState.bubbleDirectPayment,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper
+            ) { imageView, url ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+
+                    val disposable: Disposable = imageLoader.load(
+                        imageView,
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+
+                    disposables.add(disposable)
+                    disposable.await()
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
             setBubbleInvoiceLayout(
                 viewState.bubbleInvoice
             )
@@ -251,7 +299,14 @@ internal fun  LayoutMessageHolderBinding.setView(
                 userColorsHelper
             ) { imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    imageLoader.load(imageView, url, imageLoaderDefaults)
+                    imageLoader.load(
+                        imageView, 
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()    
+                    )
                         .also { disposables.add(it) }
                 }.let { job ->
                     holderJobs.add(job)
@@ -374,8 +429,6 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.BotCmd,
                 MessageType.BotInstall,
                 is MessageType.Unknown -> {
-                    // ❓: Should we ever get here if the type isn't one we plan to
-                    // render a unique message for?
                     getString(R.string.placeholder_unsupported_message_type_default)
                 }
             }
@@ -392,7 +445,12 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
-    directPayment: LayoutState.Bubble.ContainerSecond.DirectPayment?
+    directPayment: LayoutState.Bubble.ContainerSecond.DirectPayment?,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    loadImage: (ImageView, String) -> Unit
 ) {
     includeMessageHolderBubble.includeMessageTypeDirectPayment.apply {
         if (directPayment == null) {
@@ -400,17 +458,43 @@ internal inline fun LayoutMessageHolderBinding.setBubbleDirectPaymentLayout(
         } else {
             root.visible
 
-            imageViewDirectPaymentSent.goneIfFalse(directPayment.showSent)
-            layoutConstraintDirectPaymentSentAmountLabels.goneIfFalse(directPayment.showSent)
+            layoutConstraintDirectPaymentRecipient.goneIfFalse(directPayment.isTribe)
 
-            imageViewDirectPaymentReceived.goneIfFalse(directPayment.showReceived)
-            layoutConstraintDirectPaymentReceivedAmountLabels.goneIfFalse(directPayment.showReceived)
+            layoutConstraintTribeDirectPaymentReceivedContainer.goneIfFalse(directPayment.showReceived && directPayment.isTribe)
+            layoutConstraintDirectPaymentReceivedContainer.goneIfFalse(directPayment.showReceived && !directPayment.isTribe)
+            layoutConstraintDirectPaymentSentContainer.goneIfFalse(directPayment.showSent)
+
+            textViewTribeSatsAmountReceived.text = directPayment.amount.asFormattedString()
 
             textViewSatsAmountReceived.text = directPayment.amount.asFormattedString()
             textViewSatsUnitLabelReceived.text = directPayment.unitLabel
 
             textViewSatsAmountSent.text = directPayment.amount.asFormattedString()
             textViewSatsUnitLabelSent.text = directPayment.unitLabel
+
+            if (directPayment.isTribe) {
+                imageViewRecipientPicture.gone
+
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    val initialsColor = Color.parseColor(
+                        userColorsHelper.getHexCodeForKey(directPayment.recipientColorKey, root.context.getRandomHexCode())
+                    )
+
+                    textViewRecipientInitials.text = (directPayment.recipientAlias?.value ?: getString(R.string.unknown)).getInitials()
+                    textViewRecipientInitials.setInitialsColor(
+                        initialsColor,
+                        R.drawable.chat_initials_circle
+                    )
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+
+                directPayment.recipientPic?.let { recipientPic ->
+                    imageViewRecipientPicture.visible
+
+                    loadImage(imageViewRecipientPicture, recipientPic.value)
+                }
+            }
         }
     }
 }
@@ -555,18 +639,43 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
         } ?: 0
 
         var bubbleWidth: Int = when {
-            viewState.message.shouldAdaptBubbleWidth -> {
-                viewState.bubbleMessage?.let { nnBubbleMessage ->
+            viewState.message?.shouldAdaptBubbleWidth == true -> {
+                val textWidth = viewState.bubbleMessage?.let { nnBubbleMessage ->
                     (includeMessageHolderBubble.textViewMessageText.paint.measureText(
                         nnBubbleMessage.text ?: getString(R.string.decryption_error)
                     ) + (defaultMargins * 2)).toInt()
-                } ?: bubbleFixedWidth
+                } ?: 0
+
+                val amountWidth = viewState.bubbleDirectPayment?.let { nnBubbleDirectPayment ->
+                    val paymentMargin = root.context.resources.getDimensionPixelSize(
+                        if (nnBubbleDirectPayment.isTribe) {
+                            R.dimen.tribe_payment_row_margin
+                        } else {
+                            R.dimen.payment_row_margin
+                        }
+                    )
+
+                    (includeMessageHolderBubble.includeMessageTypeDirectPayment.textViewSatsAmountReceived.paint.measureText(
+                        nnBubbleDirectPayment.amount.asFormattedString()
+                    ) + paymentMargin).toInt()
+                } ?: 0
+
+                val imageWidth = viewState.bubbleImageAttachment?.let {
+                    (bubbleFixedWidth * 0.8F).toInt()
+                } ?: 0
+
+                textWidth
+                    .coerceAtLeast(amountWidth)
+                    .coerceAtLeast(imageWidth)
             }
-            viewState.message.isPodcastBoost -> {
+            viewState.message?.isPodcastBoost == true -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_podcast_boost_width)
             }
-            viewState.message.isExpiredInvoice -> {
+            viewState.message?.isExpiredInvoice == true -> {
                 root.context.resources.getDimensionPixelSize(R.dimen.message_type_expired_invoice_width)
+            }
+            viewState.message?.isSphinxCallLink == true -> {
+                (bubbleFixedWidth * 0.8F).toInt()
             }
             else -> {
                 bubbleFixedWidth
@@ -595,8 +704,59 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                     width = defaultSentRightMargin
                 }
             }
+            is MessageHolderViewState.Separator -> { }
         }
     }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setMessagesSeparator(
+    messagesSeparator: LayoutState.Separator?,
+) {
+    includeMessageTypeSeparatorHolder.apply {
+        if (messagesSeparator == null) {
+            root.gone
+        } else {
+            root.visible
+
+            if (messagesSeparator.messageHolderType == MessageHolderType.DateSeparator) {
+                includeMessageTypeUnseenSeparator.root.gone
+
+                includeMessageTypeDateSeparator.apply {
+                    root.visible
+
+                    textViewDateSeparator.text = messagesSeparator.date?.let { date ->
+                        when {
+                            DateTime.getToday00().before(date) -> {
+                                getString(R.string.today)
+                            }
+                            else -> {
+                                DateTime.getFormatMMMEEEdd().format(date.value)
+                            }
+                        }
+                    } ?: ""
+                }
+            } else if (messagesSeparator.messageHolderType == MessageHolderType.UnseenSeparator) {
+                includeMessageTypeUnseenSeparator.root.visible
+                includeMessageTypeDateSeparator.root.gone
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setSearchHighlightedStatus(
+    searchStatus: LayoutState.SearchHighlightedStatus?
+) {
+    root.setBackgroundColor(
+        if (searchStatus != null) {
+            root.context.getColor(R.color.lightDivider)
+        } else {
+            root.context.getColor(android.R.color.transparent)
+        }
+    )
 }
 
 @MainThread
@@ -870,6 +1030,7 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
     imageLoader: ImageLoader<ImageView>,
     lifecycleScope: CoroutineScope,
     viewState: MessageHolderViewState,
+    onRowLayoutListener: MessageListAdapter.OnRowLayoutListener?,
 ) {
     includeMessageHolderBubble.apply {
         val previewLink = viewState.messageLinkPreview
@@ -942,6 +1103,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                         progressBarLinkPreview.gone
                         layoutConstraintContactLinkPreview.visible
 
+                        onRowLayoutListener?.onRowHeightChanged()
+
                     }.let { job ->
                         holderJobs.add(job)
                     }
@@ -1006,6 +1169,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
                                 }.let { job ->
                                     holderJobs.add(job)
                                 }
+
+                                onRowLayoutListener?.onRowHeightChanged()
                             }
 
                             layoutConstraintLinkPreviewTribeDashedBorder.goneIfFalse(state.showBanner)
@@ -1085,6 +1250,8 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
 
                             progressBarLinkPreview.gone
                             layoutConstraintUrlLinkPreview.visible
+
+                            onRowLayoutListener?.onRowHeightChanged()
                         }
                     }.let { job ->
                         holderJobs.add(job)
@@ -1115,7 +1282,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleCallInvite(
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
-    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?
+    botResponse: LayoutState.Bubble.ContainerSecond.BotResponse?,
+    onRowLayoutListener: MessageListAdapter.OnRowLayoutListener?,
 ) {
     includeMessageHolderBubble.includeMessageTypeBotResponse.apply {
         if (botResponse == null) {
@@ -1137,6 +1305,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleBotResponse(
                 "utf-8",
                 null
             )
+
+            webViewMessageTypeBotResponse.webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    onRowLayoutListener?.onRowHeightChanged()
+                }
+            }
         }
     }
 }
@@ -1263,7 +1437,7 @@ internal inline fun LayoutMessageHolderBinding.setBubblePaidMessageSentStatusLay
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
     imageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment?,
-    loadImage: (ImageView, String, MessageMedia?) -> Unit,
+    loadImage: (ImageView, ConstraintLayout, String, MessageMedia?) -> Unit,
 ) {
     includeMessageHolderBubble.includeMessageTypeImageAttachment.apply {
         if (imageAttachment == null) {
@@ -1278,9 +1452,10 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
             } else {
                 layoutConstraintPaidImageOverlay.gone
 
+                loadingImageProgressContainer.visible
                 imageViewAttachmentImage.visible
 
-                loadImage(imageViewAttachmentImage, imageAttachment.url, imageAttachment.media)
+                loadImage(imageViewAttachmentImage, loadingImageProgressContainer, imageAttachment.url, imageAttachment.media)
             }
         }
     }
@@ -1513,6 +1688,63 @@ internal inline fun LayoutMessageHolderBinding.setBubbleVideoAttachment(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleFileAttachment(
+    fileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment?
+) {
+    includeMessageHolderBubble.includeMessageTypeFileAttachment.apply {
+
+        @Exhaustive
+        when (fileAttachment){
+            null -> {
+                root.gone
+            }
+            is LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable -> {
+                root.visible
+
+                progressBarAttachmentFileDownload.gone
+                buttonAttachmentFileDownload.visible
+
+                textViewAttachmentFileIcon.text = if (fileAttachment.isPdf) {
+                    getString(R.string.material_icon_name_file_pdf)
+                } else {
+                    getString(R.string.material_icon_name_file_attachment)
+                }
+
+                textViewAttachmentFileName.text = fileAttachment.fileName?.value ?: "File.txt"
+
+                textViewAttachmentFileSize.text = if (fileAttachment.isPdf) {
+                    if (fileAttachment.pageCount > 1) {
+                        "${fileAttachment.pageCount} ${getString(R.string.pdf_pages)}"
+                    } else {
+                        "${fileAttachment.pageCount} ${getString(R.string.pdf_page)}"
+                    }
+                } else {
+                    fileAttachment.fileSize.asFormattedString()
+                }
+            }
+            is LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable -> {
+                root.visible
+
+                textViewAttachmentFileIcon.text = getString(R.string.material_icon_name_file_attachment)
+
+                textViewAttachmentFileName.text = if (fileAttachment.pendingPayment) {
+                    getString(R.string.paid_file_pay_to_unlock)
+                } else {
+                    getString(R.string.file_name_loading)
+                }
+
+                textViewAttachmentFileSize.text = "-"
+
+                progressBarAttachmentFileDownload.goneIfFalse(
+                    !fileAttachment.pendingPayment
+                )
+            }
+        }
+    }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubblePodcastBoost(
     podcastBoost: LayoutState.Bubble.ContainerSecond.PodcastBoost?
 ) {
@@ -1660,7 +1892,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
                     holderJobs.add(job)
                 }
 
-                boostSenderHolder.photoUrl?.thumbnailUrl?.let { photoUrl ->
+                boostSenderHolder.photoUrl?.let { photoUrl ->
                     textViewInitials.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)

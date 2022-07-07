@@ -7,6 +7,7 @@ data class PostMessageDto(
     val chat_id: Long?,
     val contact_id: Long?,
     val amount: Long,
+    val message_price: Long,
     val reply_uuid: String?,
     val text: String?,
     val remote_text_map: Map<String, String>?,
@@ -15,6 +16,7 @@ data class PostMessageDto(
     val muid: String?,
     val price: Long?,
     val boost: Boolean = false,
+    val pay: Boolean = false,
 ) {
     init {
         require(!(chat_id == null && contact_id == null)) {
@@ -56,8 +58,8 @@ data class PostMessageDto(
             "muid cannot be empty"
         }
 
-        require(!(remote_text_map == null && media_key_map == null)) {
-            "Both remote_text_map and media_key_map cannot be null"
+        require(!(remote_text_map == null && media_key_map == null && !pay)) {
+            "Both remote_text_map and media_key_map cannot be null unless it's a tribe payment"
         }
     }
 }

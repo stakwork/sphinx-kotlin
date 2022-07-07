@@ -50,7 +50,6 @@
             android:lines="1"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_caption1"
-            android:background="@color/body"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/text_view_message_status_received_lock_icon"
             app:layout_constraintHorizontal_bias="0.5"
@@ -145,7 +144,6 @@
             android:lines="1"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_caption1"
-            android:background="@color/body"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toEndOf="@+id/text_view_message_status_sent_lock_icon"
@@ -162,7 +160,7 @@
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_message_status_sent_container">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_message_status_sent_failed_icon"

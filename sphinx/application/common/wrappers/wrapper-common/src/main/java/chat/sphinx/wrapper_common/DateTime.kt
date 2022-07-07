@@ -100,6 +100,20 @@ inline fun DateTime.getMinutesDifferenceWithDateTime(dateTime: DateTime): Double
     return seconds / 60
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun DateTime.getDayOfYear(): Int {
+    val date: Date = Date(this.time)
+    val calendar: Calendar = GregorianCalendar()
+    calendar.timeZone = TimeZone.getDefault()
+    calendar.time = date
+    return calendar[Calendar.DAY_OF_YEAR]
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun DateTime.isDifferentDayThan(dateTime: DateTime): Boolean {
+    return this.getDayOfYear() != dateTime.getDayOfYear()
+}
+
 /**
  * DateTime format from Relay: 2021-02-26T10:48:20.025Z
  *

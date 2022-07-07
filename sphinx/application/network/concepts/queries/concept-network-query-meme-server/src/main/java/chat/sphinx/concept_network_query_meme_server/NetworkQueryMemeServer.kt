@@ -10,9 +10,11 @@ import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
 import chat.sphinx.wrapper_meme_server.AuthenticationId
 import chat.sphinx.wrapper_meme_server.AuthenticationSig
 import chat.sphinx.wrapper_meme_server.AuthenticationToken
+import chat.sphinx.wrapper_message_media.FileName
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
 import com.squareup.moshi.Moshi
@@ -28,7 +30,7 @@ abstract class NetworkQueryMemeServer {
 
     abstract fun signChallenge(
         challenge: AuthenticationChallenge,
-        relayData: Triple<AuthorizationToken, TransportToken?, RelayUrl>? = null,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
     ): Flow<LoadResponse<MemeServerChallengeSigDto, ResponseError>>
 
     abstract fun verifyAuthentication(
@@ -48,6 +50,7 @@ abstract class NetworkQueryMemeServer {
         authenticationToken: AuthenticationToken,
         mediaType: MediaType,
         file: File,
+        fileName: FileName?,
         password: Password,
         memeServerHost: MediaHost = MediaHost.DEFAULT,
     ): Response<PostMemeServerUploadDto, ResponseError>
