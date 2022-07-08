@@ -29,6 +29,9 @@ import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.dashboard.R
+import chat.sphinx.dashboard.decrypt
+import chat.sphinx.dashboard.deriveSharedSecret
+import chat.sphinx.dashboard.encrypt
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -58,8 +61,6 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
-import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import java.util.*
@@ -150,6 +151,32 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
     }
+
+    private fun testCrypter() {
+        val sk1 = "86c8977989592a97beb409bc27fde76e981ce3543499fd61743755b832e92a3e"
+        val pk1 = "0362a684901b8d065fb034bc44ea972619a409aeafc2a698016a74f6eee1008aca"
+
+        val sk2 = "21c2d41c7394b0a87dae89576bee2552aedb54a204cdcdbf5cdceb0b4c1c2a17"
+        val pk2 = "027dd6297aff570a409fe05032b6e1dab39f309daa8c438a65c32e3d7b4722b7c3"
+
+        // derive shared secrets
+        val sec1 = deriveSharedSecret(pk2, sk1)
+        val sec2 = deriveSharedSecret(pk1, sk2)
+        val areEqual = sec1 == sec2
+
+        print("Are Equal $areEqual")
+
+        // encrypt plaintext with sec1
+        val plaintext = "59ff446bec1d96dc7d1a69232cd69ca409e069294e983df7f1e3e5fb3c95c41c"
+        val nonce = "0da01cc0c0a73ad3"
+        val cipher = encrypt(plaintext, sec1, nonce)
+
+        // decrypt with sec2
+        val plain = decrypt(cipher, sec2)
+        val areEqual2 = plaintext == plain
+
+        print("Are Equal2 $areEqual2")
+    }
     
     private fun getRelayKeys() {
         repositoryDashboard.getAndSaveTransportKey()
@@ -173,6 +200,8 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     fun toScanner() {
+//        testCrypter()
+
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(

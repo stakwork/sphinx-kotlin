@@ -128,6 +128,7 @@ dependencies {
     implementation deps.sqlCipher
     implementation deps.sqlRequery
     implementation deps.square.sqlDelightAndroid
+    implementation deps.jna.sdk
 
     testImplementation project(path: ':kotlin:test:test-concept-coroutines')
     testImplementation project(path: ':sphinx:test:test-tor-manager')

@@ -72,6 +72,7 @@ dependencies {
     implementation deps.google.hilt
     implementation deps.lottie.sdk
     implementation deps.bip39.sdk
+    implementation deps.jna.sdk
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

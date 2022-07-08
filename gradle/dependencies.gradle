@@ -134,7 +134,11 @@ ext.deps = [
     ],
     bip39: [
             sdk: "cash.z.ecc.android:kotlin-bip39:${versions.bip39}"
+    ],
+    jna: [
+            sdk: "net.java.dev.jna:jna:5.8.0@aar"
     ]
+
 ]
 
 /**
