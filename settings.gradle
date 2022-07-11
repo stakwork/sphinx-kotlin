@@ -309,3 +309,5 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-rela
 include ':sphinx:application:network:features:queries:feature-network-query-transport-key'
 include ':sphinx:application:data:concepts:concept-wallet'
 include ':sphinx:application:data:features:feature-wallet'
+include ':sphinx:application:network:concepts:queries:concept-network-query-crypter'
+include ':sphinx:application:network:features:queries:feature-network-query-crypter'
