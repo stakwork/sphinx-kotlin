@@ -36,6 +36,7 @@ import chat.sphinx.dashboard.encrypt
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.dashboard.pubkeyFromSecretKey
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
@@ -167,12 +168,11 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun testCrypter() {
-//        val secKey = ByteArray(32)
-//        SecureRandom().nextBytes(secKey)
-//        val sk1 = secKey.toHex()
+        val secKey = ByteArray(32)
+        SecureRandom().nextBytes(secKey)
 
-        val sk1 = "86c8977989592a97beb409bc27fde76e981ce3543499fd61743755b832e92a3e"
-        val pk1 = "0362a684901b8d065fb034bc44ea972619a409aeafc2a698016a74f6eee1008aca"
+        val sk1 = secKey.toHex()
+        val pk1 = pubkeyFromSecretKey(sk1)
 
         var pk2 : String? = null
 
