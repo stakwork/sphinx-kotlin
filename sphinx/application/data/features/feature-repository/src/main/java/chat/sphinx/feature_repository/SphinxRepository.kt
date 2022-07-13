@@ -91,6 +91,7 @@ import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_io_utils.InputStreamProvider
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.NodeBalanceAll
+import chat.sphinx.wrapper_meme_server.AuthenticationChallenge
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
@@ -4662,6 +4663,40 @@ abstract class SphinxRepository(
             }
         }
         return response
+    }
+
+    override suspend fun authorizeStakwork(
+        host: String,
+        id: String,
+        challenge: String
+    ): Response<String, ResponseError> {
+        var response: Response<String, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryMemeServer.signChallenge(
+                AuthenticationChallenge(challenge)
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+
+                        val sig = loadResponse.value.sig
+                        val publicKey = accountOwner.value?.nodePubKey?.value ?: ""
+                        val urlString = "https://auth.sphinx.chat/oauth_verify?id=$id&sig=$sig&pubkey=$publicKey"
+
+                        response = Response.Success(urlString)
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Returned before completing"))
     }
 
     override suspend fun authorizeExternal(

@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha61 (2022-07-13)
+- Adds support for Stakwork login and cash out
+
 # Version 1.0.0-alpha60 (2022-07-01)
 - Adds ability to send file attachments
 - Fixes tribe direct payments description on chat list

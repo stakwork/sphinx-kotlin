@@ -2,7 +2,4 @@
 <resources>
     <string name="payment_receive_header_name">收款金額</string>
     <string name="requested_amount_too_high">收款金額太高</string>
-    <string name="failed_to_request_payment">無法收款</string>
-    <string name="amount_n_sats">金額: %d sats</string>
-    <string name="qr_code_view_title">收款帳單</string>
 </resources>

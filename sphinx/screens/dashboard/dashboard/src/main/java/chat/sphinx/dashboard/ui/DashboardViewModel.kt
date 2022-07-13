@@ -10,6 +10,7 @@ import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
+import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
 import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
 import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
@@ -134,6 +135,10 @@ internal class DashboardViewModel @Inject constructor(
                 handlePeopleConnectLink(peopleConnectLink)
             } ?: deepLink?.toExternalRequestLink()?.let { externalRequestLink ->
                 handleExternalRequestLink(externalRequestLink)
+            } ?: deepLink?.toStakworkAuthorizeLink()?.let { stakworkAuthorizeLink ->
+                handleStakworkAuthorizeLink(stakworkAuthorizeLink)
+            } ?: deepLink?.toCreateInvoiceLink()?.let { createInvoiceLink ->
+                handleCreateInvoiceLink(createInvoiceLink)
             }
         }
     }
@@ -171,36 +176,26 @@ internal class DashboardViewModel @Inject constructor(
                 val code = response.value.value
 
                 code.toTribeJoinLink()?.let { tribeJoinLink ->
-
                     handleTribeJoinLink(tribeJoinLink)
-
                 } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
-
                     handleExternalAuthorizeLink(externalAuthorizeLink)
-
                 } ?: code.toExternalRequestLink()?.let { externalRequestLink ->
-
                     handleExternalRequestLink(externalRequestLink)
-
+                } ?: code.toStakworkAuthorizeLink()?.let { stakworkAuthorizeLink ->
+                    handleStakworkAuthorizeLink(stakworkAuthorizeLink)
+                } ?: code.toCreateInvoiceLink()?.let { createInvoiceLink ->
+                    handleCreateInvoiceLink(createInvoiceLink)
                 } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
-
                     handlePeopleConnectLink(peopleConnectLink)
-
                 } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
-
                     handleContactLink(lightningNodePubKey, null)
-
                 } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
-
                     virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-
                         handleContactLink(
                             lightningNodePubKey,
                             virtualNodeAddress.getRouteHint()
                         )
-
                     }
-
                 } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
                     try {
                         val bolt11 = Bolt11.decode(lightningPaymentRequest)
@@ -265,6 +260,42 @@ internal class DashboardViewModel @Inject constructor(
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.ExternalAuthorizePopup(link)
         )
+    }
+
+    private fun handleStakworkAuthorizeLink(link: StakworkAuthorizeLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.StakworkAuthorizePopup(link)
+        )
+    }
+
+    private fun handleCreateInvoiceLink(link: CreateInvoiceLink) {
+        viewModelScope.launch(mainImmediate) {
+            val postRequestPaymentDto = PostRequestPaymentDto(
+                link.amount.toLong(),
+            )
+
+            networkQueryLightning.postRequestPayment(postRequestPaymentDto)
+                .collect { loadResponse ->
+                    @javax.annotation.meta.Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            submitSideEffect(
+                                ChatListSideEffect.Notify(
+                                    app.getString(R.string.failed_to_request_payment)
+                                )
+                            )
+                        }
+                        is Response.Success -> {
+                            dashboardNavigator.toQRCodeDetail(
+                                loadResponse.value.invoice,
+                                app.getString(R.string.payment_request),
+                                app.getString(R.string.amount_n_sats, link.amount.toLong()),
+                            )
+                        }
+                    }
+                }
+        }
     }
 
     private suspend fun handleExternalRequestLink(link: ExternalRequestLink) {
@@ -476,7 +507,30 @@ internal class DashboardViewModel @Inject constructor(
                         app.startActivity(i)
                     }
                 }
+            } else if (viewState is DeepLinkPopupViewState.StakworkAuthorizePopup) {
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.ExternalAuthorizePopupProcessing
+                )
 
+                val response = repositoryDashboard.authorizeStakwork(
+                    viewState.link.host,
+                    viewState.link.id,
+                    viewState.link.challenge
+                )
+
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(response.cause.message)
+                        )
+                    }
+                    is Response.Success -> {
+                        val i = Intent(Intent.ACTION_VIEW)
+                        i.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        i.data = Uri.parse(response.value)
+                        app.startActivity(i)
+                    }
+                }
             } else {
                 submitSideEffect(
                     ChatListSideEffect.Notify(

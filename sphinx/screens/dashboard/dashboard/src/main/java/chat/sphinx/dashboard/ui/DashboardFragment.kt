@@ -629,6 +629,14 @@ internal class DashboardFragment : MotionLayoutFragment<
                         }
                         binding.layoutDashboardPopup.root.visible
                     }
+                    is DeepLinkPopupViewState.StakworkAuthorizePopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
+                            textViewDashboardPopupAuthorizeName.text = viewState.link.host
+                            layoutConstraintAuthorizePopup.visible
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
                     is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
                     }
