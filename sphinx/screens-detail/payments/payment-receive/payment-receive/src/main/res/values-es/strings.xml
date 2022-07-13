@@ -2,7 +2,4 @@
 <resources>
     <string name="payment_receive_header_name">SOLICITAR PAGO</string>
     <string name="requested_amount_too_high">El monto solicitado es demasiado alto</string>
-    <string name="failed_to_request_payment">La solicitud de pago falló</string>
-    <string name="amount_n_sats">Monto: %d sats</string>
-    <string name="qr_code_view_title">Solicitud de Pago</string>
 </resources>

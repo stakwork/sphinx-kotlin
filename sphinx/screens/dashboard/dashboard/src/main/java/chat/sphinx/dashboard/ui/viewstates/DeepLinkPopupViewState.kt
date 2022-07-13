@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.viewstates
 import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
 import chat.sphinx.wrapper_common.ExternalAuthorizeLink
 import chat.sphinx.wrapper_common.ExternalRequestLink
+import chat.sphinx.wrapper_common.StakworkAuthorizeLink
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
@@ -17,6 +18,10 @@ sealed class DeepLinkPopupViewState: ViewState<DeepLinkPopupViewState>() {
 
     class ExternalAuthorizePopup(
         val link: ExternalAuthorizeLink
+    ): DeepLinkPopupViewState()
+
+    class StakworkAuthorizePopup(
+        val link: StakworkAuthorizeLink
     ): DeepLinkPopupViewState()
 
     object LoadingExternalRequestPopup: DeepLinkPopupViewState()

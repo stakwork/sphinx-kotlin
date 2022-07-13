@@ -52,6 +52,12 @@ interface RepositoryDashboard {
         challenge: String
     ): Response<Boolean, ResponseError>
 
+    suspend fun authorizeStakwork(
+        host: String,
+        id: String,
+        challenge: String
+    ): Response<String, ResponseError>
+
     suspend fun savePeopleProfile(
         body: String
     ): Response<Boolean, ResponseError>

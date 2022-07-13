@@ -50,8 +50,14 @@ internal class DashboardNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToJoinTribeDetail(tribeLink))
     }
 
-    override suspend fun toQRCodeDetail(qrText: String, viewTitle: String) {
-        detailDriver.submitNavigationRequest(ToQRCodeDetail(qrText, viewTitle))
+    override suspend fun toQRCodeDetail(qrText: String, viewTitle: String, description: String?) {
+        detailDriver.submitNavigationRequest(
+            ToQRCodeDetail(
+                qrText,
+                viewTitle,
+                description
+            )
+        )
     }
 
     override suspend fun toAddContactDetail(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
