@@ -121,7 +121,7 @@ internal class PaymentReceiveViewModel @Inject constructor(
                         is Response.Success -> {
                             paymentReceiveNavigator.toQRCodeDetail(
                                 loadResponse.value.invoice,
-                                app.getString(R.string.qr_code_view_title),
+                                app.getString(R.string.payment_request),
                                 app.getString(R.string.amount_n_sats, requestPayment.amount),
                                 false
                             )

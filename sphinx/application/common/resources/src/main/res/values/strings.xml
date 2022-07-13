@@ -106,6 +106,9 @@
     <string name="relay_url_http_negative_keep_http">http</string>
     <string name="relay_url_http_positive_change_to_https">https</string>
 
+    <string name="payment_request">Payment Request</string>
+    <string name="amount_n_sats">Amount: %d sats</string>
+    <string name="failed_to_request_payment">Failed to request payment</string>
 
     <string name="failed_to_approve_member">Failed to approve member</string>
     <string name="failed_to_reject_member">Failed to reject member</string>
