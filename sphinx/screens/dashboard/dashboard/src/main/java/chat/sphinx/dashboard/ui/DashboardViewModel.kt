@@ -7,11 +7,7 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
-import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toEntropy
-import cash.z.ecc.android.bip39.toSeed
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
@@ -30,18 +26,13 @@ import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.dashboard.R
-import chat.sphinx.dashboard.deriveSharedSecret
-import chat.sphinx.dashboard.encrypt
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
-import chat.sphinx.dashboard.pubkeyFromSecretKey
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
-import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
+import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
@@ -50,10 +41,10 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.RestoreProgress
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_lightning.NodeBalance
-import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -62,11 +53,8 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import java.security.SecureRandom
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -92,7 +80,6 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQuerySaveProfile: NetworkQuerySaveProfile,
-    private val networkQueryCrypter: NetworkQueryCrypter,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -100,9 +87,6 @@ internal class DashboardViewModel @Inject constructor(
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val socketIOManager: SocketIOManager,
-
-    private val LOG: SphinxLogger,
-    private val walletDataHandler: WalletDataHandler,
 ) : MotionLayoutViewModel<
         Any,
         Context,
@@ -130,93 +114,6 @@ internal class DashboardViewModel @Inject constructor(
         getRelayKeys()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
-    }
-
-    private suspend fun generateAndPersistMnemonic() : String? {
-        var seed: String? = null
-
-        viewModelScope.launch(mainImmediate) {
-            val walletMnemonic = walletDataHandler.retrieveWalletMnemonic() ?: run {
-                val entropy = (Mnemonics.WordCount.COUNT_12).toEntropy()
-
-                Mnemonics.MnemonicCode(entropy).use { mnemonicCode ->
-                    val wordsArray:MutableList<String> = mutableListOf()
-                    mnemonicCode.words.forEach { word ->
-                        wordsArray.add(word.joinToString(""))
-                    }
-                    val words = wordsArray.joinToString(" ")
-
-                    words.toWalletMnemonic()?.let { walletMnemonic ->
-                        if (walletDataHandler.persistWalletMnemonic(walletMnemonic)) {
-                            LOG.d("MNEMONIC WORDS SAVED" , words)
-                            LOG.d("MNEMONIC WORDS SAVED" , words)
-                        }
-
-                        walletMnemonic
-                    }
-                }
-            }
-
-            walletMnemonic?.value?.toCharArray()?.let { words ->
-                val mnemonic = Mnemonics.MnemonicCode(words)
-                val seedData = mnemonic.toSeed().take(32).toByteArray()
-
-                seed = seedData.toHex()
-            }
-        }.join()
-
-        return seed
-    }
-
-    private suspend fun testCrypter() {
-        val secKey = ByteArray(32)
-        SecureRandom().nextBytes(secKey)
-
-        val sk1 = secKey.toHex()
-        val pk1 = pubkeyFromSecretKey(sk1)
-
-        var pk2 : String? = null
-
-        networkQueryCrypter.getCrypterPubKey().collect { loadResponse ->
-            when (loadResponse) {
-                is LoadResponse.Loading -> {}
-                is Response.Error -> {
-                    LOG.d("Sphinx TAG", "error ${loadResponse.cause}")
-                }
-                is Response.Success -> {
-                    pk2 = loadResponse.value.pubkey
-                }
-            }
-        }
-
-        var cipher: String? = null
-
-        pk2?.let { nnPk2 ->
-            val sec1 = deriveSharedSecret(nnPk2, sk1)
-
-            generateAndPersistMnemonic()?.let { seed ->
-                val nonce = ByteArray(8)
-                SecureRandom().nextBytes(nonce)
-
-                cipher = encrypt(seed, sec1, nonce.toHex())
-            }
-        }
-
-        cipher?.let { nnCipher ->
-            if (nnCipher.isNotEmpty()) {
-                networkQueryCrypter.sendEncryptedSeed(nnCipher, pk1).collect { loadResponse ->
-                    when (loadResponse) {
-                        is LoadResponse.Loading -> {}
-                        is Response.Error -> {
-                            LOG.d("Sphinx TAG", "error ${loadResponse.cause}")
-                        }
-                        is Response.Success -> {
-                            LOG.d("Sphinx TAG", "error ${loadResponse.value}")
-                        }
-                    }
-                }
-            }
-        }
     }
     
     private fun getRelayKeys() {
@@ -246,97 +143,93 @@ internal class DashboardViewModel @Inject constructor(
 
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
-            testCrypter()
-        }
+            val response = scannerCoordinator.submitRequest(
+                ScannerRequest(
+                    filter = object : ScannerFilter() {
+                        override suspend fun checkData(data: String): Response<Any, String> {
+                            return when {
+                                data.isValidTribeJoinLink ||
+                                data.isValidExternalAuthorizeLink ||
+                                data.isValidPeopleConnectLink ||
+                                data.isValidLightningPaymentRequest ||
+                                data.isValidLightningNodePubKey ||
+                                data.isValidVirtualNodeAddress ||
+                                data.isValidExternalRequestLink ->
+                                {
+                                    Response.Success(Any())
+                                }
+                                else -> {
+                                    Response.Error(app.getString(R.string.not_valid_invoice_or_tribe_link))
+                                }
+                            }
+                        }
+                    },
+                    showBottomView = true,
+                    scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
+                )
+            )
 
-//        viewModelScope.launch(mainImmediate) {
-//            val response = scannerCoordinator.submitRequest(
-//                ScannerRequest(
-//                    filter = object : ScannerFilter() {
-//                        override suspend fun checkData(data: String): Response<Any, String> {
-//                            return when {
-//                                data.isValidTribeJoinLink ||
-//                                data.isValidExternalAuthorizeLink ||
-//                                data.isValidPeopleConnectLink ||
-//                                data.isValidLightningPaymentRequest ||
-//                                data.isValidLightningNodePubKey ||
-//                                data.isValidVirtualNodeAddress ||
-//                                data.isValidExternalRequestLink ->
-//                                {
-//                                    Response.Success(Any())
-//                                }
-//                                else -> {
-//                                    Response.Error(app.getString(R.string.not_valid_invoice_or_tribe_link))
-//                                }
-//                            }
-//                        }
-//                    },
-//                    showBottomView = true,
-//                    scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
-//                )
-//            )
-//
-//            if (response is Response.Success) {
-//
-//                val code = response.value.value
-//
-//                code.toTribeJoinLink()?.let { tribeJoinLink ->
-//
-//                    handleTribeJoinLink(tribeJoinLink)
-//
-//                } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
-//
-//                    handleExternalAuthorizeLink(externalAuthorizeLink)
-//
-//                } ?: code.toExternalRequestLink()?.let { externalRequestLink ->
-//
-//                    handleExternalRequestLink(externalRequestLink)
-//
-//                } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
-//
-//                    handlePeopleConnectLink(peopleConnectLink)
-//
-//                } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
-//
-//                    handleContactLink(lightningNodePubKey, null)
-//
-//                } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
-//
-//                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
-//
-//                        handleContactLink(
-//                            lightningNodePubKey,
-//                            virtualNodeAddress.getRouteHint()
-//                        )
-//
-//                    }
-//
-//                } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
-//                    try {
-//                        val bolt11 = Bolt11.decode(lightningPaymentRequest)
-//                        val amount = bolt11.getSatsAmount()
-//
-//                        if (amount != null) {
-//                            submitSideEffect(
-//                                ChatListSideEffect.AlertConfirmPayLightningPaymentRequest(
-//                                    amount.value,
-//                                    bolt11.getMemo()
-//                                ) {
-//                                    payLightningPaymentRequest(lightningPaymentRequest)
-//                                }
-//                            )
-//                        } else {
-//                            submitSideEffect(
-//                                ChatListSideEffect.Notify(
-//                                    app.getString(R.string.payment_request_missing_amount),
-//                                    true
-//                                )
-//                            )
-//                        }
-//                    } catch (e: Exception) {}
-//                }
-//            }
-//        }
+            if (response is Response.Success) {
+
+                val code = response.value.value
+
+                code.toTribeJoinLink()?.let { tribeJoinLink ->
+
+                    handleTribeJoinLink(tribeJoinLink)
+
+                } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
+
+                    handleExternalAuthorizeLink(externalAuthorizeLink)
+
+                } ?: code.toExternalRequestLink()?.let { externalRequestLink ->
+
+                    handleExternalRequestLink(externalRequestLink)
+
+                } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
+
+                    handlePeopleConnectLink(peopleConnectLink)
+
+                } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
+
+                    handleContactLink(lightningNodePubKey, null)
+
+                } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
+                    virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+
+                        handleContactLink(
+                            lightningNodePubKey,
+                            virtualNodeAddress.getRouteHint()
+                        )
+
+                    }
+
+                } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
+                    try {
+                        val bolt11 = Bolt11.decode(lightningPaymentRequest)
+                        val amount = bolt11.getSatsAmount()
+
+                        if (amount != null) {
+                            submitSideEffect(
+                                ChatListSideEffect.AlertConfirmPayLightningPaymentRequest(
+                                    amount.value,
+                                    bolt11.getMemo()
+                                ) {
+                                    payLightningPaymentRequest(lightningPaymentRequest)
+                                }
+                            )
+                        } else {
+                            submitSideEffect(
+                                ChatListSideEffect.Notify(
+                                    app.getString(R.string.payment_request_missing_amount),
+                                    true
+                                )
+                            )
+                        }
+                    } catch (e: Exception) {}
+                }
+            }
+        }
     }
 
     private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {

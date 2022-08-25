@@ -2,25 +2,35 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
+import android.text.InputType
 import android.util.Log
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toEntropy
+import cash.z.ecc.android.bip39.toSeed
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
+import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
+import chat.sphinx.profile.R
 import chat.sphinx.wrapper_common.PreviewsEnabled
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -28,6 +38,8 @@ import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_lightning.WalletMnemonic
+import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,6 +54,7 @@ import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.*
+import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -50,6 +63,10 @@ import kotlinx.coroutines.withContext
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
+import uniffi.crypter.deriveSharedSecret
+import uniffi.crypter.encrypt
+import uniffi.crypter.pubkeyFromSecretKey
+import java.security.SecureRandom
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,8 +79,11 @@ internal class ProfileViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
+    private val networkQueryCrypter: NetworkQueryCrypter,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
+    private val LOG: SphinxLogger,
+    private val walletDataHandler: WalletDataHandler,
 ): SideEffectViewModel<
         Context,
         ProfileSideEffect,
@@ -455,5 +475,180 @@ internal class ProfileViewModel @Inject constructor(
         )
 
         _linkPreviewsEnabledStateFlow.value = linkPreviewsEnabled
+    }
+
+    private var setupSigningDeviceJob: Job? = null
+    private var seedDto = SendSeedDto()
+
+    private fun resetSeedDto() {
+        seedDto = SendSeedDto()
+    }
+
+    fun setupSigningDevice() {
+        if (setupSigningDeviceJob?.isActive == true) return
+
+        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                app.getString(R.string.network_name_title),
+                app.getString(R.string.network_name_message)
+            ) { networkName ->
+                seedDto.ssid = networkName
+
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                        app.getString(R.string.network_password_title),
+                        app.getString(R.string.network_password_message, networkName ?: "-"),
+                        inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                    ) { networkPass ->
+                        seedDto.pass = networkPass
+
+                        viewModelScope.launch(mainImmediate) {
+                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                                app.getString(R.string.lightning_node_ip_title),
+                                app.getString(R.string.lightning_node_ip_message),
+                            ) { lightningNodeIP ->
+                                seedDto.lightningNodeIP = lightningNodeIP
+
+                                viewModelScope.launch(mainImmediate) {
+                                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                                        app.getString(R.string.lightning_node_port_title),
+                                        app.getString(R.string.lightning_node_port_message),
+                                        "1883"
+                                    ) { lightningNodePort ->
+                                        seedDto.lightningNodePort = lightningNodePort
+
+                                        viewModelScope.launch(mainImmediate) {
+                                            linkSigningDevice()
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    }
+
+    private suspend fun linkSigningDevice() {
+        val secKey = ByteArray(32)
+        SecureRandom().nextBytes(secKey)
+
+        val sk1 = secKey.toHex()
+        val pk1 = pubkeyFromSecretKey(sk1)
+
+        var pk2 : String? = null
+
+        if (pk1 == null) {
+            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("error generating secret key"))
+            resetSeedDto()
+            return
+        }
+
+        seedDto.pubkey = pk1
+
+        if (
+            seedDto.lightningNodeIP == null ||
+            seedDto.lightningNodeIP?.isEmpty() == true
+        ) {
+            resetSeedDto()
+            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("lightning node IP can't be empty"))
+            return
+        }
+
+        networkQueryCrypter.getCrypterPubKey().collect { loadResponse ->
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    resetSeedDto()
+                    submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("error getting public key from hardware"))
+                }
+                is Response.Success -> {
+                    pk2 = loadResponse.value.pubkey
+                }
+            }
+        }
+
+        pk2?.let { nnPk2 ->
+            val sec1 = deriveSharedSecret(nnPk2, sk1)
+            val seedAndMnemonic = generateAndPersistMnemonic()
+
+            seedAndMnemonic.second?.let { mnemonic ->
+                submitSideEffect(ProfileSideEffect.ShowMnemonicToUser(
+                    mnemonic.value
+                ) {
+                    seedAndMnemonic.first?.let { seed ->
+                        viewModelScope.launch(mainImmediate) {
+                            encryptAndSendSeed(seed, sec1)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    private suspend fun generateAndPersistMnemonic() : Pair<String?, WalletMnemonic?> {
+        var walletMnemonic: WalletMnemonic? = null
+        var seed: String? = null
+
+        viewModelScope.launch(mainImmediate) {
+            walletMnemonic = walletDataHandler.retrieveWalletMnemonic() ?: run {
+                val entropy = (Mnemonics.WordCount.COUNT_12).toEntropy()
+
+                Mnemonics.MnemonicCode(entropy).use { mnemonicCode ->
+                    val wordsArray:MutableList<String> = mutableListOf()
+                    mnemonicCode.words.forEach { word ->
+                        wordsArray.add(word.joinToString(""))
+                    }
+                    val words = wordsArray.joinToString(" ")
+
+                    words.toWalletMnemonic()?.let { walletMnemonic ->
+                        if (walletDataHandler.persistWalletMnemonic(walletMnemonic)) {
+                            LOG.d("MNEMONIC WORDS SAVED" , words)
+                            LOG.d("MNEMONIC WORDS SAVED" , words)
+                        }
+                        walletMnemonic
+                    }
+                }
+            }
+
+            walletMnemonic?.value?.toCharArray()?.let { words ->
+                val mnemonic = Mnemonics.MnemonicCode(words)
+
+                val seedData = mnemonic.toSeed().take(32).toByteArray()
+                seed = seedData.toHex()
+            }
+        }.join()
+
+        return Pair(seed, walletMnemonic)
+    }
+
+    private suspend fun encryptAndSendSeed(
+        seed: String,
+        sec1: String
+    ) {
+        val nonce = ByteArray(12)
+        SecureRandom().nextBytes(nonce)
+
+        encrypt(seed, sec1, nonce.toHex())?.let { cipher ->
+            if (cipher.isNotEmpty()) {
+                seedDto.seed = cipher
+
+                submitSideEffect(ProfileSideEffect.SendingSeedToHardware)
+
+                networkQueryCrypter.sendEncryptedSeed(seedDto).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            resetSeedDto()
+                            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("error sending seed to hardware"))
+                        }
+                        is Response.Success -> {
+                            submitSideEffect(ProfileSideEffect.SigningDeviceSuccessfullySet)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

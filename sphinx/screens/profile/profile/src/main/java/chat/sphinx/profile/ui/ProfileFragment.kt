@@ -265,6 +265,10 @@ internal class ProfileFragment: SideEffectFragment<
                     viewModel.setGithubPAT()
                 }
 
+                buttonProfileAdvancedContainerSigningDevice.setOnClickListener {
+                    viewModel.setupSigningDevice()
+                }
+
                 buttonProfileAdvancedContainerChangePin.setOnClickListener {
                     viewModel.resetPIN()
                 }

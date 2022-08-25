@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.text.InputType
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
@@ -181,6 +182,100 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
     object FailedToSetGithubPat: ProfileSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils(true).show(value, R.string.github_pat_failed)
+        }
+    }
+
+    class SigningDeviceInfo(
+        private val title: String,
+        private val message: String,
+        private val defaultValue: String? = null,
+        private val inputType: Int? = null,
+        private val callback: (String?) -> Unit,
+    ): ProfileSideEffect() {
+
+        override suspend fun execute(value: Context) {
+
+            val inputEditTextField = EditText(value)
+            inputEditTextField.isSingleLine = true
+            inputType?.let {
+                inputEditTextField.inputType = it
+            }
+            inputEditTextField.setOnFocusChangeListener { _, _ ->
+                inputEditTextField.post {
+                    val inputMethodManager: InputMethodManager =
+                        value.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    inputMethodManager.showSoftInput(inputEditTextField, InputMethodManager.SHOW_IMPLICIT)
+                }
+            }
+            inputEditTextField.requestFocus()
+            inputEditTextField.setText(defaultValue)
+
+            val container = FrameLayout(value)
+            val params: FrameLayout.LayoutParams = FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            params.leftMargin = value.resources.getDimensionPixelSize(R.dimen.default_layout_margin)
+            params.rightMargin = value.resources.getDimensionPixelSize(R.dimen.default_layout_margin)
+            inputEditTextField.layoutParams = params
+            container.addView(inputEditTextField)
+
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(title)
+            builder.setMessage(message)
+            builder.setView(container)
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                val editTextInput = inputEditTextField.text.toString()
+
+                callback.invoke(
+                    if (editTextInput.isEmpty()) {
+                        null
+                    } else {
+                        editTextInput
+                    }
+                )
+            }
+            builder.setNegativeButton(android.R.string.cancel) { _, _ -> }
+
+            builder.show()
+        }
+    }
+
+    class ShowMnemonicToUser(
+        private val mnemonic: String,
+        private val callback: () -> Unit,
+    ): ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(value.getString(R.string.store_mnemonic))
+            builder.setMessage(mnemonic)
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback.invoke()
+            }
+            builder.show()
+        }
+    }
+
+    object SendingSeedToHardware: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.sending_seed)
+        }
+    }
+
+    object SigningDeviceSuccessfullySet: ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.signing_device_successfully_set)
+        }
+    }
+
+    class FailedToSetupSigningDevice(
+        private val errorMessage: String
+    ): ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(
+                value,
+                value.getString(R.string.error_setting_up_signing_device, errorMessage)
+            )
         }
     }
 }

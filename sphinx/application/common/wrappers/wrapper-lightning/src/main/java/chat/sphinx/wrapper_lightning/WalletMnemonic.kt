@@ -16,7 +16,7 @@ inline val String.isValidWalletMnemonic: Boolean
 @JvmInline
 value class WalletMnemonic(val value: String){
     init {
-        require(value.isNotEmpty()) {
+        require(value.isNotEmpty() && value.isValidWalletMnemonic) {
             "WalletMnemonic cannot be empty"
         }
     }

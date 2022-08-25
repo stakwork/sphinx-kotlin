@@ -46,10 +46,8 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
 
     implementation project(path: ':sphinx:activity:insetter-activity')
-    implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:resources')
 
-    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
@@ -59,7 +57,6 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-save-profile')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
@@ -72,8 +69,6 @@ dependencies {
     implementation deps.swipeRevealLayout.sdk
     implementation deps.google.hilt
     implementation deps.lottie.sdk
-    implementation deps.bip39.sdk
-    implementation deps.jna.sdk
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
