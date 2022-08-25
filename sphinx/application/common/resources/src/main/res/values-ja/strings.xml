@@ -27,7 +27,9 @@
     <string name="relay_url_http_negative_keep_http">http</string>
     <string name="relay_url_http_positive_change_to_https">https</string>
 
-
+    <string name="amount_n_sats">金額: %d sats</string>
+    <string name="payment_request">送金をリクエスト</string>
+    <string name="failed_to_request_payment">送金をリクエストできませんでした</string>
     <string name="failed_to_approve_member">メンバーを承認できませんでした</string>
     <string name="failed_to_reject_member">メンバーを拒否できませんでした</string>
 

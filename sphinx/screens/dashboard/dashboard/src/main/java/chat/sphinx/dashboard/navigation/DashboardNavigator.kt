@@ -19,7 +19,7 @@ abstract class DashboardNavigator(
     abstract suspend fun toChatGroup(chatId: ChatId)
     abstract suspend fun toChatTribe(chatId: ChatId)
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
-    abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String)
+    abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String, description: String? = null)
 
     abstract suspend fun toAddContactDetail(
         pubKey: LightningNodePubKey,
