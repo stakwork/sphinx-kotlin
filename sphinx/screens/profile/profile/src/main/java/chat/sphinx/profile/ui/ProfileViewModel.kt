@@ -3,7 +3,6 @@ package chat.sphinx.profile.ui
 import android.app.Application
 import android.content.Context
 import android.text.InputType
-import android.util.Log
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -45,6 +44,7 @@ import chat.sphinx.wrapper_rsa.RsaPublicKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationCoordinator
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationRequest
 import io.matthewnelson.concept_authentication.coordinator.AuthenticationResponse
@@ -90,6 +90,11 @@ internal class ProfileViewModel @Inject constructor(
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
     PictureMenuViewModel
 {
+
+    companion object {
+        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
+        const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
+    }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
         PictureMenuHandler(
@@ -179,6 +184,23 @@ internal class ProfileViewModel @Inject constructor(
                 }
             })
         }
+    }
+
+    fun switchTabTo(basicTab: Boolean) {
+        if (basicTab) {
+            updateViewState(ProfileViewState.Basic)
+        } else {
+            updateViewState(
+                ProfileViewState.Advanced(
+                    if (isSigningDeviceSetupDone()) {
+                        app.getString(R.string.configure_signing_device)
+                    } else {
+                        app.getString(R.string.setup_signing_device)
+                    }
+                )
+            )
+        }
+
     }
 
     suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
@@ -488,37 +510,66 @@ internal class ProfileViewModel @Inject constructor(
         if (setupSigningDeviceJob?.isActive == true) return
 
         setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                app.getString(R.string.network_name_title),
-                app.getString(R.string.network_name_message)
-            ) { networkName ->
-                seedDto.ssid = networkName
-
+            submitSideEffect(ProfileSideEffect.CheckNetwork {
                 viewModelScope.launch(mainImmediate) {
                     submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                        app.getString(R.string.network_password_title),
-                        app.getString(R.string.network_password_message, networkName ?: "-"),
-                        inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                    ) { networkPass ->
-                        seedDto.pass = networkPass
-
+                        app.getString(R.string.network_name_title),
+                        app.getString(R.string.network_name_message)
+                    ) { networkName ->
                         viewModelScope.launch(mainImmediate) {
+                            if (networkName == null) {
+                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
+                                return@launch
+                            }
+
+                            seedDto.ssid = networkName
+
                             submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                app.getString(R.string.lightning_node_ip_title),
-                                app.getString(R.string.lightning_node_ip_message),
-                            ) { lightningNodeIP ->
-                                seedDto.lightningNodeIP = lightningNodeIP
-
+                                app.getString(R.string.network_password_title),
+                                app.getString(
+                                    R.string.network_password_message,
+                                    networkName ?: "-"
+                                ),
+                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                            ) { networkPass ->
                                 viewModelScope.launch(mainImmediate) {
-                                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                        app.getString(R.string.lightning_node_port_title),
-                                        app.getString(R.string.lightning_node_port_message),
-                                        "1883"
-                                    ) { lightningNodePort ->
-                                        seedDto.lightningNodePort = lightningNodePort
+                                    if (networkPass == null) {
+                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
+                                        return@launch
+                                    }
 
+                                    seedDto.pass = networkPass
+
+                                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                                        app.getString(R.string.lightning_node_ip_title),
+                                        app.getString(R.string.lightning_node_ip_message),
+                                    ) { lightningNodeIP ->
                                         viewModelScope.launch(mainImmediate) {
-                                            linkSigningDevice()
+                                            if (lightningNodeIP == null) {
+                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node IP can not be empty"))
+                                                return@launch
+                                            }
+
+                                            seedDto.lightningNodeIP = lightningNodeIP
+
+                                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                                                app.getString(R.string.lightning_node_port_title),
+                                                app.getString(R.string.lightning_node_port_message),
+                                                "1883"
+                                            ) { lightningNodePort ->
+
+                                                viewModelScope.launch(mainImmediate) {
+
+                                                    if (lightningNodePort == null) {
+                                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node port can not be empty"))
+                                                        return@launch
+                                                    }
+
+                                                    seedDto.lightningNodePort = lightningNodePort
+
+                                                    linkSigningDevice()
+                                                }
+                                            })
                                         }
                                     })
                                 }
@@ -645,10 +696,41 @@ internal class ProfileViewModel @Inject constructor(
                         }
                         is Response.Success -> {
                             submitSideEffect(ProfileSideEffect.SigningDeviceSuccessfullySet)
+
+                            setSigningDeviceSetupDone {
+                                switchTabTo(false)
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private fun isSigningDeviceSetupDone(): Boolean {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        return sharedPreferences.getBoolean(
+            SIGNING_DEVICE_SETUP_KEY,
+            false
+        )
+    }
+
+    private suspend fun setSigningDeviceSetupDone(
+        callback: () -> Unit
+    ) {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            sharedPreferences.edit().putBoolean(SIGNING_DEVICE_SETUP_KEY, true)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                    callback.invoke()
+                }
         }
     }
 }

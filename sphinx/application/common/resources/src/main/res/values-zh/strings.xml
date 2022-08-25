@@ -3,6 +3,9 @@
     <string name="to">寄信者</string>
     <string name="from">收信者</string>
 
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
     <string name="sat">sat</string>
     <string name="sats">sats</string>
     <string name="new_contact">新好友</string>

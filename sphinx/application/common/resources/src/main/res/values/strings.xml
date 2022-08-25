@@ -3,6 +3,9 @@
     <string name="to">To</string>
     <string name="from">From</string>
 
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
     <string name="sat">sat</string>
     <string name="sats">sats</string>
     <string name="new_contact">New Contact</string>
