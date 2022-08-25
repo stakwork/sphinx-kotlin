@@ -43,6 +43,8 @@
     <string name="github_pat_succeed">El Personal Access Token de Github ha sido establecido con éxito</string>
     <string name="github_pat_failed">No se pudo establecer el Github Personal Access Token</string>
 
+    <string name="network_check_title">Verifica tu conexión WiFi</string>
+    <string name="network_check_message">Antes de comenzar tenes que conectarte a la red WiFi \"sphinxkey\". De lo contrario no vas a poder configurar tu dispositivo. ¿Estás actualmente conectado a esta red?</string>
     <string name="network_name_title">Red WiFi</string>
     <string name="network_name_message">Por favor especifica la red WiFi</string>
     <string name="network_password_title">Contraseña de WiFi</string>
@@ -54,7 +56,8 @@
     <string name="store_mnemonic">Guarda tus palabras de seguridad cuidadosamente</string>
     <string name="sending_seed">Enviando seed al dispositivo</string>
     <string name="error_setting_up_signing_device">Ocurrió un error configurando el dispositivo de firma: %s</string>
-    <string name="signing_device_successfully_set">Seed envíado al hardware con éxito</string>
+    <string name="signing_device_successfully_set">Seed envíado al dispositivo con éxito</string>
     <string name="setup_signing_device">Configurar Dispositivo de Firma</string>
     <string name="configure_signing_device">Configurar Dispositivo de Firma</string>
+    <string name="mnemonic_copied_to_clipboard">Palabras de seguridad copiadas al portapapeles</string>
 </resources>

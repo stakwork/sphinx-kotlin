@@ -241,6 +241,21 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
         }
     }
 
+    class CheckNetwork(
+        private val callback: () -> Unit,
+    ): ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(value.getString(R.string.network_check_title))
+            builder.setMessage(value.getString(R.string.network_check_message))
+            builder.setNegativeButton(R.string.no) { _, _ -> }
+            builder.setPositiveButton(R.string.yes) { _, _ ->
+                callback.invoke()
+            }
+            builder.show()
+        }
+    }
+
     class ShowMnemonicToUser(
         private val mnemonic: String,
         private val callback: () -> Unit,
@@ -249,6 +264,15 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
             val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.store_mnemonic))
             builder.setMessage(mnemonic)
+            builder.setNeutralButton(android.R.string.copy) { _, _ ->
+                (value.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+                    val clipData = ClipData.newPlainText("mnemonic", mnemonic)
+                    manager.setPrimaryClip(clipData)
+
+                    SphinxToastUtils().show(value, R.string.mnemonic_copied_to_clipboard)
+                }
+                callback.invoke()
+            }
             builder.setPositiveButton(android.R.string.ok) { _, _ ->
                 callback.invoke()
             }

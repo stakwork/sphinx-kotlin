@@ -3,6 +3,9 @@
     <string name="to">A</string>
     <string name="from">De</string>
 
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+
     <string name="sat">sat</string>
     <string name="sats">sats</string>
     <string name="new_contact">Nuevo Contacto</string>
