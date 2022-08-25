@@ -337,7 +337,6 @@
                         android:imeOptions="actionDone"
                         android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
                         android:singleLine="true"
-                        android:text= "20"
                         tools:text= "100"/>
 
                     <androidx.constraintlayout.widget.ConstraintLayout

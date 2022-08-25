@@ -153,10 +153,10 @@ internal class ProfileFragment: SideEffectFragment<
     private fun setupProfileTabs() {
         binding.includeProfileTabsHolder.apply {
             buttonProfileTabBasic.setOnClickListener {
-                viewModel.updateViewState(ProfileViewState.Basic)
+                viewModel.switchTabTo(basicTab = true)
             }
             buttonProfileTabAdvanced.setOnClickListener {
-                viewModel.updateViewState(ProfileViewState.Advanced)
+                viewModel.switchTabTo(basicTab = false)
             }
         }
     }
@@ -263,6 +263,10 @@ internal class ProfileFragment: SideEffectFragment<
 
                 buttonProfileAdvancedContainerGithubPat.setOnClickListener {
                     viewModel.setGithubPAT()
+                }
+
+                buttonProfileAdvancedContainerSigningDevice.setOnClickListener {
+                    viewModel.setupSigningDevice()
                 }
 
                 buttonProfileAdvancedContainerChangePin.setOnClickListener {
@@ -423,6 +427,8 @@ internal class ProfileFragment: SideEffectFragment<
                     }
                     includeProfileBasicContainerHolder.root.gone
                     includeProfileAdvancedContainerHolder.root.visible
+
+                    includeProfileAdvancedContainerHolder.buttonProfileAdvancedContainerSigningDevice.text = viewState.deviceSetupButtonTitle
                 }
                 is ProfileViewState.Basic -> {
                     includeProfileTabsHolder.apply {

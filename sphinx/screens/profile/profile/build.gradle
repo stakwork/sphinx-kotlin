@@ -40,8 +40,10 @@ dependencies {
     implementation project(path: ':sphinx:activity:insetter-activity')
 
     api project(path: ':sphinx:application:common:menus:menu-bottom-picture')
+    implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
 
+    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
@@ -49,6 +51,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
 
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
@@ -58,5 +61,7 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation deps.bip39.sdk
+    implementation deps.jna.sdk
     kapt kaptDeps.google.hilt
 }

@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha62 (2022-08-25)
+- Fix for tip amount automatically reset to 20
+- Support for Signing Device setup
+
 # Version 1.0.0-alpha61 (2022-07-13)
 - Adds support for Stakwork login and cash out
 

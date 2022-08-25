@@ -1,0 +1,18 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+dependencies {
+    // KotlinAndroid
+    implementation project(path: ':kotlin:crypto:k-openssl')
+    implementation project(path: ':kotlin:features:authentication:feature-authentication-core')
+    implementation project(path: ':kotlin:encoders:base64')
+
+    // Sphinx
+    api project(path: ':sphinx:application:data:concepts:concept-wallet')
+
+    implementation deps.square.okhttp
+
+    testImplementation project(path: ':kotlin:test:test-feature-authentication-core')
+}
