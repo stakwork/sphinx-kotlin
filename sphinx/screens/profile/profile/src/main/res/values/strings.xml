@@ -41,5 +41,20 @@
     <string name="github_pat_title">Github Personal Access Token</string>
     <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
     <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
-    <string name="github_pat_failed">Github Personal Access Token coult not be set</string>
+    <string name="github_pat_failed">Github Personal Access Token could not be set</string>
+
+    <string name="network_name_title">WiFi network</string>
+    <string name="network_name_message">Please specify your WiFi network</string>
+    <string name="network_password_title">WiFi password</string>
+    <string name="network_password_message">Enter the WiFi password for %s</string>
+    <string name="lightning_node_ip_title">Lightning node IP</string>
+    <string name="lightning_node_ip_message">Enter the IP of your lightning node</string>
+    <string name="lightning_node_port_title">Lightning node Port</string>
+    <string name="lightning_node_port_message">Enter the Port number of your lightning node</string>
+    <string name="store_mnemonic">Store your Mnemonic securely</string>
+    <string name="sending_seed">Sending seed to hardware</string>
+    <string name="error_setting_up_signing_device">There was an error setting up signing device: %s</string>
+    <string name="signing_device_successfully_set">Seed sent to hardware successfully</string>
+    <string name="setup_signing_device">Setup Signing Device</string>
+    <string name="configure_signing_device">Configure Signing Device</string>
 </resources>

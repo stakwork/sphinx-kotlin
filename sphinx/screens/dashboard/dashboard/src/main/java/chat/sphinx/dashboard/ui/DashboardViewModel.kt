@@ -55,7 +55,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -88,13 +87,12 @@ internal class DashboardViewModel @Inject constructor(
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
     private val socketIOManager: SocketIOManager,
-): MotionLayoutViewModel<
+) : MotionLayoutViewModel<
         Any,
         Context,
         ChatListSideEffect,
         DashboardMotionViewState
-        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible)
-{
+        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible) {
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
@@ -176,26 +174,36 @@ internal class DashboardViewModel @Inject constructor(
                 val code = response.value.value
 
                 code.toTribeJoinLink()?.let { tribeJoinLink ->
+
                     handleTribeJoinLink(tribeJoinLink)
+
                 } ?: code.toExternalAuthorizeLink()?.let { externalAuthorizeLink ->
+
                     handleExternalAuthorizeLink(externalAuthorizeLink)
+
                 } ?: code.toExternalRequestLink()?.let { externalRequestLink ->
+
                     handleExternalRequestLink(externalRequestLink)
-                } ?: code.toStakworkAuthorizeLink()?.let { stakworkAuthorizeLink ->
-                    handleStakworkAuthorizeLink(stakworkAuthorizeLink)
-                } ?: code.toCreateInvoiceLink()?.let { createInvoiceLink ->
-                    handleCreateInvoiceLink(createInvoiceLink)
+
                 } ?: code.toPeopleConnectLink()?.let { peopleConnectLink ->
+
                     handlePeopleConnectLink(peopleConnectLink)
+
                 } ?: code.toLightningNodePubKey()?.let { lightningNodePubKey ->
+
                     handleContactLink(lightningNodePubKey, null)
+
                 } ?: code.toVirtualLightningNodeAddress()?.let { virtualNodeAddress ->
+
                     virtualNodeAddress.getPubKey()?.let { lightningNodePubKey ->
+
                         handleContactLink(
                             lightningNodePubKey,
                             virtualNodeAddress.getRouteHint()
                         )
+
                     }
+
                 } ?: code.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
                     try {
                         val bolt11 = Bolt11.decode(lightningPaymentRequest)
@@ -973,3 +981,4 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 }
+

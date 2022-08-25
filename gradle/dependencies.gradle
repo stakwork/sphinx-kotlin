@@ -22,6 +22,7 @@ ext.versions = [
     'okhttp': '4.9.1',
     'sqlDelight': '1.5.0',
     'toplAndroid': '2.1.2',
+    'bip39': '1.0.1',
 ]
 
 /**
@@ -130,7 +131,14 @@ ext.deps = [
     ],
     swipeRevealLayout: [
             sdk: "com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1"
+    ],
+    bip39: [
+            sdk: "cash.z.ecc.android:kotlin-bip39:${versions.bip39}"
+    ],
+    jna: [
+            sdk: "net.java.dev.jna:jna:5.8.0@aar"
     ]
+
 ]
 
 /**
