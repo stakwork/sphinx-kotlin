@@ -1,7 +1,5 @@
 package chat.sphinx.chat_common.adapters
 
-import android.os.Parcelable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -29,17 +27,14 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message_media.isPdf
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.notifyAll
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
@@ -509,8 +504,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
             binding.includeMessageHolderChatImageInitialHolder.root.setOnClickListener {
                 currentViewState?.message?.let { nnMessage ->
-                    viewModel.showMemberPopup(nnMessage)
+                    viewModel.onSmallProfileImageClick(nnMessage)
                 }
+
             }
         }
 

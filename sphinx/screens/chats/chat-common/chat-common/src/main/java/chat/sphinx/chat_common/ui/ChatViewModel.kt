@@ -1646,6 +1646,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     open suspend fun deleteTribe() {}
 
     open fun showMemberPopup(message: Message) {}
+    open fun onSmallProfileImageClick(message: Message) {}
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused
