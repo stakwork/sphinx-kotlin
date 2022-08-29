@@ -506,7 +506,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 currentViewState?.message?.let { nnMessage ->
                     viewModel.onSmallProfileImageClick(nnMessage)
                 }
-
             }
         }
 
