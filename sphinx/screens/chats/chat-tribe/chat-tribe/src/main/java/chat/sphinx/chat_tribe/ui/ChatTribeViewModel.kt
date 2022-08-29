@@ -330,6 +330,10 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    override fun onSmallProfileImageClick(message: Message) {
+        showMemberPopup(message)
+    }
+
     fun goToPaymentSend() {
         viewModelScope.launch(mainImmediate) {
             (tribePopupViewStateContainer.value as TribePopupViewState.TribeMemberPopup)?.let { viewState ->

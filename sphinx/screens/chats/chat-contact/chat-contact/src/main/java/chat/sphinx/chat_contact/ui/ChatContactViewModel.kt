@@ -309,4 +309,8 @@ internal class ChatContactViewModel @Inject constructor(
             (chatNavigator as ContactChatNavigator).toEditContactDetail(contactId)
         }
     }
+
+    override fun onSmallProfileImageClick(message: Message) {
+        navigateToChatDetailScreen()
+    }
 }
