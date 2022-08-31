@@ -25,6 +25,9 @@ import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isPrivateTribe
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
@@ -368,7 +371,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 root.setOnLongClickListener(onSphinxInteractionListener)
 
-                SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
+                SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, binding.root.context, onSphinxInteractionListener)
+
                 textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
 
                 includeMessageTypeBotResponse.webViewMessageTypeBotResponse.setOnLongClickListener(onSphinxInteractionListener)
