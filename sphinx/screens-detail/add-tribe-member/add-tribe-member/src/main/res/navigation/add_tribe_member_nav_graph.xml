@@ -2,11 +2,11 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tribe_members_list_nav_graph"
-    app:startDestination="@+id/navigation_tribe_members_list_fragment">
+    android:id="@+id/add_tribe_member_nav_graph"
+    app:startDestination="@+id/navigation_add_tribe_member_fragment">
 
     <fragment
-        android:id="@+id/navigation_tribe_members_list_fragment"
+        android:id="@+id/navigation_add_tribe_member_fragment"
         android:name="chat.sphinx.add_tribe_member.ui.AddTribeMemberFragment"
         tools:layout="@layout/fragment_add_tribe_member">
         <argument

@@ -26,6 +26,7 @@ import chat.sphinx.wrapper_common.feed.FeedType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
@@ -60,9 +61,19 @@ internal class CreateTribeFragment: SideEffectFragment<
         super.onViewCreated(view, savedInstanceState)
         binding.includeCreateTribeHeader.apply {
             textViewDetailScreenHeaderName.text = viewModel.headerText()
+
+            textViewDetailScreenClose.goneIfFalse(!viewModel.isEditingTribe())
+            textViewDetailScreenHeaderNavBack.goneIfFalse(viewModel.isEditingTribe())
+
             textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
+                }
+            }
+
+            textViewDetailScreenHeaderNavBack.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
                 }
             }
 
