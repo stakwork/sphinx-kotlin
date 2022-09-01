@@ -92,7 +92,7 @@ internal class CreateTribeFragment: SideEffectFragment<
         viewModel.load()
     }
 
-    fun setupFragmentLayout() {
+    private fun setupFragmentLayout() {
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.constraintLayoutCreateTribeFragment)
             .addNavigationBarPadding(binding.includeLayoutMenuBottomTribePic.root)
@@ -285,6 +285,7 @@ internal class CreateTribeFragment: SideEffectFragment<
             }
         }
     }
+
     override suspend fun onViewStateFlowCollect(viewState: CreateTribeViewState) {
         @Exhaustive
         when (viewState) {
