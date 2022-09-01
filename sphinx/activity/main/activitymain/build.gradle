@@ -83,6 +83,7 @@ dependencies {
     api project(path: ':sphinx:screens-detail:web-view:web-view')
     api project(path: ':sphinx:screens-detail:newsletter-detail:newsletter-detail')
     api project(path: ':sphinx:screens-detail:video-screen:video-screen')
+    api project(path: ':sphinx:screens-detail:add-tribe-member:add-tribe-member')
 
     implementation deps.chrisbanes.insetter
 

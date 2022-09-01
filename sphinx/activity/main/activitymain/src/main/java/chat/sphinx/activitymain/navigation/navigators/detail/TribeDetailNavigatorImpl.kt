@@ -2,6 +2,7 @@ package chat.sphinx.activitymain.navigation.navigators.detail
 
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
+import chat.sphinx.add_tribe_member.navigation.ToAddTribeMember
 import chat.sphinx.create_tribe.navigation.ToCreateTribeDetail
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
@@ -42,5 +43,9 @@ internal class TribeDetailNavigatorImpl @Inject constructor(
 
     override suspend fun toTribeMemberList(chatId: ChatId) {
         detailDriver.submitNavigationRequest(ToTribeMembersListDetail(chatId))
+    }
+
+    override suspend fun toAddMember(chatId: ChatId) {
+        detailDriver.submitNavigationRequest(ToAddTribeMember(chatId))
     }
 }

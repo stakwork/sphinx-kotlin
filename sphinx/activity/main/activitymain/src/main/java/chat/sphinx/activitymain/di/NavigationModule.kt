@@ -7,6 +7,7 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.navigation.navigators.detail.*
 import chat.sphinx.activitymain.navigation.navigators.primary.*
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
+import chat.sphinx.add_tribe_member.navigation.AddTribeMemberNavigator
 import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
@@ -309,6 +310,12 @@ internal object NavigationModule {
         tribeMembersListNavigatorImpl: TribeMembersListNavigatorImpl
     ): TribeMembersListNavigator =
         tribeMembersListNavigatorImpl
+
+    @Provides
+    fun provideAddTribeMemberNavigator(
+        addTribeMemberNavigatorImpl: AddTribeMemberNavigatorImpl
+    ): AddTribeMemberNavigator =
+        addTribeMemberNavigatorImpl
 
     @Provides
     fun provideJoinTribeNavigator(
