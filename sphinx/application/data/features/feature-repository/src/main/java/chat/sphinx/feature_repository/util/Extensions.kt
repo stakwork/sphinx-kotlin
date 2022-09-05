@@ -172,6 +172,7 @@ inline fun TransactionCallbacks.upsertChat(
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },
+        dto.notify?.toNotificationLevel(),
         chatId,
         ChatUUID(dto.uuid),
         chatType,

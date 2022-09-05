@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_chat.ChatPrivate;
 import chat.sphinx.wrapper_chat.ChatStatus;
 import chat.sphinx.wrapper_chat.ChatType;
 import chat.sphinx.wrapper_chat.ChatUnlisted;
+import chat.sphinx.wrapper_chat.NotificationLevel;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
 import chat.sphinx.wrapper_common.Seen;
@@ -97,7 +98,8 @@ CREATE TABLE chatDbo(
     my_alias                    TEXT            AS ChatAlias,
     pending_contact_ids         TEXT            AS List<ContactId>,
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL,
-    content_seen_at             INTEGER         AS DateTime
+    content_seen_at             INTEGER         AS DateTime,
+    notify                      INTEGER         AS NotificationLevel
 );
 
 chatUpdateLatestMessage:
@@ -108,6 +110,11 @@ WHERE id = ?;
 chatUpdateMuted:
 UPDATE chatDbo
 SET is_muted = :muted
+WHERE id = ?;
+
+chatUpdateNotificationLevel:
+UPDATE chatDbo
+SET notify = :notify
 WHERE id = ?;
 
 chatUpdateContentSeenAt:
@@ -163,8 +170,6 @@ chatUpsert {
         is_muted = :is_muted,
         group_key = :group_key,
         host = :host,
---         price_per_message = :price_per_message,
---         escrow_amount = :escrow_amount,
         unlisted = :unlisted,
         private_tribe = :private_tribe,
         owner_pub_key = :owner_pub_key,
@@ -172,7 +177,8 @@ chatUpsert {
         meta_data = :meta_data,
         my_photo_url = :my_photo_url,
         my_alias = :my_alias,
-        pending_contact_ids = :pending_contact_ids
+        pending_contact_ids = :pending_contact_ids,
+        notify = :notify
     WHERE id = :id;
 
     INSERT OR IGNORE INTO chatDbo(
@@ -196,7 +202,8 @@ chatUpsert {
         meta_data,
         my_photo_url,
         my_alias,
-        pending_contact_ids
+        pending_contact_ids,
+        notify
     )
     VALUES (
         :id,
@@ -219,7 +226,8 @@ chatUpsert {
         :meta_data,
         :my_photo_url,
         :my_alias,
-        :pending_contact_ids
+        :pending_contact_ids,
+        :notify
     );
 }
 

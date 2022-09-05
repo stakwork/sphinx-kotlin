@@ -9,6 +9,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
+import chat.sphinx.wrapper_chat.NotificationLevel
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -30,6 +31,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_EDIT_CHAT = "$ENDPOINT_CHATS/%d"
         private const val ENDPOINT_DELETE_CHAT = "$ENDPOINT_CHAT/%d"
         private const val ENDPOINT_MUTE_CHAT = "/chats/%d/%s"
+        private const val ENDPOINT_NOTIFICATION_LEVEL = "/notify/%d/%d"
         private const val MUTE_CHAT = "mute"
         private const val UN_MUTE_CHAT = "unmute"
         private const val ENDPOINT_GROUP = "/group"
@@ -179,6 +181,19 @@ class NetworkQueryChatImpl(
         networkRelayCall.relayPost(
             responseJsonClass = UpdateChatRelayResponse::class.java,
             relayEndpoint = endpoint,
+            requestBodyJsonClass = Map::class.java,
+            requestBody = mapOf(Pair("", "")),
+            relayData = relayData
+        )
+
+    override fun setNotificationLevel(
+        chatId: ChatId,
+        notificationLevel: NotificationLevel,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto, ResponseError>> =
+        networkRelayCall.relayPut(
+            responseJsonClass = UpdateChatRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_NOTIFICATION_LEVEL, chatId.value, notificationLevel.value),
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(Pair("", "")),
             relayData = relayData
