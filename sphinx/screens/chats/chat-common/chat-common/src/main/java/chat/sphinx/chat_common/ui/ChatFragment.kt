@@ -1044,7 +1044,7 @@ abstract class ChatFragment<
 
                             imageViewChatHeaderMuted.apply {
                                 viewState.isMuted?.let { muted ->
-                                    if (muted.isTrue()) {
+                                    if (muted) {
                                         imageLoader.load(
                                             headerBinding.imageViewChatHeaderMuted,
                                             R.drawable.ic_baseline_notifications_off_24

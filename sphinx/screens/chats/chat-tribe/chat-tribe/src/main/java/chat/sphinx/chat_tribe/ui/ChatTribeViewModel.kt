@@ -360,4 +360,12 @@ internal class ChatTribeViewModel @Inject constructor(
 
         moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
     }
+
+    override fun navigateToNotificationLevel() {
+        moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
+
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toNotificationsLevel(chatId)
+        }
+    }
 }

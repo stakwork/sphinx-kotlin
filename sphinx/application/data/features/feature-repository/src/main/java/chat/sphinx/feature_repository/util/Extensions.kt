@@ -109,6 +109,15 @@ inline fun TransactionCallbacks.updateChatMuted(
     queries.dashboardUpdateMuted(muted, chatId)
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateChatNotificationLevel(
+    chatId: ChatId,
+    notificationLevel: NotificationLevel?,
+    queries: SphinxDatabaseQueries
+) {
+    queries.chatUpdateNotificationLevel(notificationLevel, chatId)
+}
+
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun TransactionCallbacks.updateChatTribeData(
     tribe: TribeDto,

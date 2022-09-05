@@ -189,7 +189,7 @@ class NetworkQueryChatImpl(
     override fun setNotificationLevel(
         chatId: ChatId,
         notificationLevel: NotificationLevel,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<ChatDto, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = UpdateChatRelayResponse::class.java,
