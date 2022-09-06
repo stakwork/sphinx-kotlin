@@ -335,7 +335,14 @@ internal class TribeDetailViewModel @Inject constructor(
     override fun editTribe() {
         tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
         viewModelScope.launch(mainImmediate) {
-            navigator.toCreateTribeScreen(chatId)
+            navigator.toEditTribeScreen(chatId)
+        }
+    }
+
+    override fun addTribeMember() {
+        tribeMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+        viewModelScope.launch(mainImmediate) {
+            navigator.toAddMember(chatId)
         }
     }
 

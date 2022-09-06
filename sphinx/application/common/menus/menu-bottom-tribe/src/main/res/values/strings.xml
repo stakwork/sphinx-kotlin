@@ -6,4 +6,5 @@
     <string name="bottom_menu_tribe_option_delete_tribe">Delete Tribe</string>
     <string name="bottom_menu_tribe_option_exit_tribe">Exit Tribe</string>
     <string name="bottom_menu_tribe_option_edit_tribe">Edit Tribe</string>
+    <string name="bottom_menu_tribe_option_add_member">Add Member</string>
 </resources>
