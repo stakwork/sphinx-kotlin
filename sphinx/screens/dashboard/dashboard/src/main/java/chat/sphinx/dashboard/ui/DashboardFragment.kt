@@ -315,6 +315,9 @@ internal class DashboardFragment : MotionLayoutFragment<
             navDrawer.navDrawerButtonProfile.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toProfileScreen() }
             }
+            navDrawer.navDrawerButtonHeaderProfile.setOnClickListener {
+                lifecycleScope.launch { viewModel.navDrawerNavigator.toProfileScreen() }
+            }
             navDrawer.layoutButtonAddFriend.layoutConstraintButtonAddFriend.setOnClickListener {
                 lifecycleScope.launch { viewModel.navDrawerNavigator.toAddFriendDetail() }
             }

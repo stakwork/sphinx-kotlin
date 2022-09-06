@@ -17,6 +17,12 @@
         android:layout_marginStart="@dimen/default_layout_margin"
         app:layout_constraintTop_toTopOf="parent">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/nav_drawer_button_header_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent">
+
         <androidx.cardview.widget.CardView
             android:id="@+id/card_view_profile_image"
             android:layout_width="@dimen/nav_drawer_header_profile_picture_xy"
@@ -54,6 +60,8 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Matthew long name to see 2 line text wrap"/>
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/nav_drawer_text_view_sats_balance"
             android:layout_width="0dp"
@@ -65,8 +73,8 @@
             android:textSize="14sp"
             android:fontFamily="@font/montserrat_regular"
             android:layout_marginTop="15dp"
-            app:layout_constraintStart_toStartOf="@+id/nav_drawer_text_view_profile_name"
-            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_text_view_profile_name"
+            app:layout_constraintStart_toStartOf="@+id/nav_drawer_button_header_profile"
+            app:layout_constraintTop_toBottomOf="@+id/nav_drawer_button_header_profile"
             tools:text="100,000,000" />
 
         <androidx.appcompat.widget.AppCompatTextView

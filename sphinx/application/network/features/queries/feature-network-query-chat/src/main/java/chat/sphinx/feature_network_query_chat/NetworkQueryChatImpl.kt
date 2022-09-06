@@ -40,6 +40,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_MEMBER = "/member"
         private const val ENDPOINT_TRIBE = "/tribe"
         private const val ENDPOINT_STREAM_SATS = "/stream"
+        private const val ENDPOINT_ADD_TRIBE_MEMBER = "/tribe_member"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
         private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s"
@@ -220,5 +221,17 @@ class NetworkQueryChatImpl(
             relayEndpoint = String.format(ENDPOINT_DELETE_CHAT, chatId.value),
             requestBody = null,
             relayData = relayData,
+        )
+
+    override fun addTribeMember(
+        memberDto: TribeMemberDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<Any?, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = AddTribeMemberRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_ADD_TRIBE_MEMBER,
+            requestBodyJsonClass = TribeMemberDto::class.java,
+            requestBody = memberDto,
+            relayData = relayData
         )
 }

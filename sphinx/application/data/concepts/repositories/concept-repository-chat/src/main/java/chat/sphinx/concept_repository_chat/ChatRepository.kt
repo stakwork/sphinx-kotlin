@@ -2,6 +2,8 @@ package chat.sphinx.concept_repository_chat
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.TribeMemberDto
+import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -63,6 +65,8 @@ interface ChatRepository {
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
+
+    suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError>
 
     suspend fun updateChatProfileInfo(
         chatId: ChatId,

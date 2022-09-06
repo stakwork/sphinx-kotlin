@@ -122,6 +122,10 @@ internal class CreateTribeViewModel @Inject constructor(
         }
     }
 
+    fun isEditingTribe(): Boolean {
+        return (chatId != null)
+    }
+
     fun submitButtonText(): String {
         return if (chatId == null) {
             app.getString(R.string.create_tribe)

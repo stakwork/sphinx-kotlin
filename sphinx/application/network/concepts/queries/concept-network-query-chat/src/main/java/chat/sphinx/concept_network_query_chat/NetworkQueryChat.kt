@@ -91,6 +91,11 @@ abstract class NetworkQueryChat {
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
+    abstract fun addTribeMember(
+        memberDto: TribeMemberDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any?, ResponseError>>
+
     /**
      * Returns a map of "chat_id": chatId
      * */

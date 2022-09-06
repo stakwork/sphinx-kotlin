@@ -315,7 +315,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
-    override fun showMemberPopup(message: Message) {
+    private fun showMemberPopup(message: Message) {
         message.uuid?.let { messageUUID ->
             message.senderAlias?.let { senderAlias ->
                 tribePopupViewStateContainer.updateViewState(
@@ -328,6 +328,10 @@ internal class ChatTribeViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    override fun onSmallProfileImageClick(message: Message) {
+        showMemberPopup(message)
     }
 
     fun goToPaymentSend() {
