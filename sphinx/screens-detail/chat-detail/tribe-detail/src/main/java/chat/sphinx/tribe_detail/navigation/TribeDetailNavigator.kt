@@ -22,5 +22,7 @@ abstract class TribeDetailNavigator(
 
     abstract suspend fun toTribeMemberList(chatId: ChatId)
 
+    abstract suspend fun toNotificationLevel(chatId: ChatId)
+
     abstract suspend fun toAddMember(chatId: ChatId)
 }

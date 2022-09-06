@@ -6,6 +6,7 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMuted
+import chat.sphinx.wrapper_chat.NotificationLevel
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -76,6 +77,12 @@ abstract class NetworkQueryChat {
     abstract fun toggleMuteChat(
         chatId: ChatId,
         muted: ChatMuted,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
+
+    abstract fun setNotificationLevel(
+        chatId: ChatId,
+        notificationLevel: NotificationLevel,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 

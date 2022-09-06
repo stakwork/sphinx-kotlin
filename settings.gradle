@@ -47,6 +47,8 @@ include ':sphinx:application:data:concepts:concept-relay'
 include ':sphinx:application:data:features:feature-relay'
 include ':sphinx:application:data:concepts:concept-sphinx-notification-manager'
 include ':sphinx:application:data:features:feature-sphinx-notification-manager'
+include ':sphinx:application:data:concepts:concept-wallet'
+include ':sphinx:application:data:features:feature-wallet'
 
 include ':sphinx:application:data:concepts:repositories:concept-repository-chat'
 include ':sphinx:application:data:concepts:repositories:concept-repository-contact'
@@ -100,6 +102,10 @@ include ':sphinx:application:network:concepts:tor:concept-network-tor'
 include ':sphinx:application:network:features:tor:feature-network-tor'
 include ':sphinx:application:network:concepts:queries:concept-network-query-feed-search'
 include ':sphinx:application:network:features:queries:feature-network-query-feed-search'
+include ':sphinx:application:network:concepts:queries:concept-network-query-crypter'
+include ':sphinx:application:network:features:queries:feature-network-query-crypter'
+include ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys'
+include ':sphinx:application:network:features:queries:feature-network-query-transport-key'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
@@ -170,6 +176,7 @@ include ':sphinx:screens-detail:add-tribe-member:add-tribe-member'
 include ':sphinx:screens-detail:web-view:web-view'
 include ':sphinx:screens-detail:newsletter-detail:newsletter-detail'
 include ':sphinx:screens-detail:video-screen:video-screen'
+include ':sphinx:screens-detail:notification-level:notification-level'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'
@@ -306,9 +313,3 @@ project(':kotlin:test:test-k-openssl').projectDir =
 
 //include ':sample'
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
-include ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys'
-include ':sphinx:application:network:features:queries:feature-network-query-transport-key'
-include ':sphinx:application:data:concepts:concept-wallet'
-include ':sphinx:application:data:features:feature-wallet'
-include ':sphinx:application:network:concepts:queries:concept-network-query-crypter'
-include ':sphinx:application:network:features:queries:feature-network-query-crypter'

@@ -310,6 +310,8 @@ internal class ChatContactViewModel @Inject constructor(
         }
     }
 
+    override fun navigateToNotificationLevel() {}
+
     override fun onSmallProfileImageClick(message: Message) {
         navigateToChatDetailScreen()
     }

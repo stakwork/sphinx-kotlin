@@ -107,7 +107,7 @@ internal class ChatListAdapter(
                     old is DashboardChat.Active && new is DashboardChat.Active -> {
                         old.chat.type               == new.chat.type                &&
                         old.chatName                == new.chatName                 &&
-                        old.chat.isMuted            == new.chat.isMuted             &&
+                        old.chat.isMuted()          == new.chat.isMuted()             &&
                         old.chat.seen               == new.chat.seen                &&
                         old.chat.photoUrl           == new.chat.photoUrl
                     }

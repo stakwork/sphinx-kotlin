@@ -168,6 +168,7 @@
     <string name="bottom_menu_more_option_call">Crear Llamada</string>
     <string name="bottom_menu_more_option_share">Compartir Link de la Tribu</string>
     <string name="bottom_menu_more_option_search">Buscar Mensajes</string>
+    <string name="bottom_menu_more_option_notification">Notificaciones</string>
 
     <string name="searching_messages">Buscando...</string>
     <string name="results_found">%d Resultados Encontrados</string>

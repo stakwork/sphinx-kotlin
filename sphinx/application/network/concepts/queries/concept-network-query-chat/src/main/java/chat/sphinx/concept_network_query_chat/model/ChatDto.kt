@@ -32,7 +32,8 @@ data class ChatDto(
     val meta: String?,
     val my_photo_url: String?,
     val my_alias: String?,
-    val pending_contact_ids: List<Long>?
+    val pending_contact_ids: List<Long>?,
+    val notify: Int?,
 ) {
     @Transient
     val isMutedActual: Boolean =

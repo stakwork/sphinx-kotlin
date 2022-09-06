@@ -126,3 +126,13 @@ internal class ChatAliasAdapter: ColumnAdapter<ChatAlias, String> {
         return value.value
     }
 }
+
+internal class NotifyAdapter: ColumnAdapter<NotificationLevel, Long> {
+    override fun decode(databaseValue: Long): NotificationLevel {
+        return databaseValue.toInt().toNotificationLevel()
+    }
+
+    override fun encode(value: NotificationLevel): Long {
+        return value.value.toLong()
+    }
+}

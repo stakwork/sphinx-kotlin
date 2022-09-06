@@ -25,6 +25,7 @@ import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
+import chat.sphinx.notification_level.navigation.NotificationLevelNavigator
 import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
@@ -358,5 +359,11 @@ internal object NavigationModule {
         newsletterDetailNavigatorImpl: NewsletterDetailNavigatorImpl
     ): NewsletterDetailNavigator =
         newsletterDetailNavigatorImpl
+
+    @Provides
+    fun provideNotificationLevelNavigator(
+        notificationLevelNavigatorImpl: NotificationLevelNavigatorImpl
+    ): NotificationLevelNavigator =
+        notificationLevelNavigatorImpl
 
 }

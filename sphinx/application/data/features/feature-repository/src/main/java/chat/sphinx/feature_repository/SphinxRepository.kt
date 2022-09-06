@@ -3501,45 +3501,43 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to pay for attachment"))
     }
 
-    override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted())
+    override suspend fun setNotificationLevel(chat: Chat, level: NotificationLevel): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(level.isMuteChat())
 
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
-            val currentMutedValue = chat.isMuted
+            val currentNotificationLevel = chat.notify
 
             chatLock.withLock {
                 withContext(io) {
                     queries.transaction {
-                        updateChatMuted(
+                        updateChatNotificationLevel(
                             chat.id,
-                            if (currentMutedValue.isTrue()) ChatMuted.False else ChatMuted.True,
+                            level,
                             queries
                         )
                     }
                 }
             }
 
-            networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
+            networkQueryChat.setNotificationLevel(chat.id, level).collect { loadResponse ->
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
+                    is LoadResponse.Loading -> {}
+                    is Response.Success -> {}
                     is Response.Error -> {
                         response = loadResponse
 
                         chatLock.withLock {
                             withContext(io) {
                                 queries.transaction {
-                                    updateChatMuted(
+                                    updateChatNotificationLevel(
                                         chat.id,
-                                        currentMutedValue,
+                                        currentNotificationLevel,
                                         queries
                                     )
                                 }
                             }
                         }
-                    }
-                    is Response.Success -> {
                     }
                 }
             }

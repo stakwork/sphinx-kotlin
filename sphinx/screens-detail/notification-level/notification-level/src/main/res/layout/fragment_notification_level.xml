@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context=".ui.NotificationLevelFragment">
+
+    <include
+        android:id="@+id/include_notification_level_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/notification_level_options_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/include_notification_level_header">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/notification_level_see_all_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_level_option_height"
+            android:clickable="true"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_see_all_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:breakStrategy="high_quality"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="@dimen/default_text_size_small_headline"
+                android:gravity="center"
+                android:lines="1"
+                android:textAlignment="center"
+                android:textColor="@color/text"
+                android:text="@string/notification_level_see_all"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="See all" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/notification_level_only_mentions_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_level_option_height"
+            android:clickable="true"
+            app:layout_constraintTop_toBottomOf="@+id/notification_level_see_all_container">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_only_mentions_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:breakStrategy="high_quality"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="@dimen/default_text_size_small_headline"
+                android:gravity="center"
+                android:lines="1"
+                android:textAlignment="center"
+                android:textColor="@color/text"
+                android:text="@string/notification_level_only_mentions"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="Only mentions" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/notification_level_mute_chat_container"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/notification_level_option_height"
+            android:clickable="true"
+            app:layout_constraintTop_toBottomOf="@+id/notification_level_only_mentions_container">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_mute_chat_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:breakStrategy="high_quality"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="@dimen/default_text_size_small_headline"
+                android:gravity="center"
+                android:lines="1"
+                android:textAlignment="center"
+                android:textColor="@color/text"
+                android:text="@string/notification_level_mute_chat"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                tools:text="Mute chat" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
