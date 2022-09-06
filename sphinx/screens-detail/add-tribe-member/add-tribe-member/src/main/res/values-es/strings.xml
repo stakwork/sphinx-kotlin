@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_member_header_name">AGREGAR MIEMBRO A LA TRIBE</string>
+    <string name="add_member">Agregar Miembro</string>
+    <string name="member_alias">Alias *</string>
+    <string name="member_image">Imagen del miembro</string>
+    <string name="member_public_key">Clave Pública *</string>
+    <string name="member_route_hint">Pista de Ruta</string>
+    <string name="member_contact_key">Clave Pública de Encriptado *</string>
+    <string name="bottom_menu_member_pic_header_text">Imagen del Miembro</string>
+    <string name="member_info_required">El Alias, La Clave Pública y la Clave Pública de Encriptado son requeridos</string>
+    <string name="invalid_public_key">Clave Pública inválida</string>
+    <string name="invalid_route_hint">Pista de Ruta inválida</string>
+    <string name="failed_to_add_member">No se ha podido agregar al miembro</string>
+    <string name="failed_to_process_image">No se ha podido procesar la imagen</string>
+</resources>

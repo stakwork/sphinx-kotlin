@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="text_view_add_member_margin">2dp</dimen>
+
+    <dimen name="add_member_edit_text_container_height">75dp</dimen>
+    <dimen name="add_member_text_view_margin_top">25dp</dimen>
+
+    <dimen name="add_member_button_container_height">75dp</dimen>
+    <dimen name="add_member_button_height">52dp</dimen>
+    <dimen name="add_member_button_text_size">14sp</dimen>
+    <dimen name="add_member_button_bottom_margin">33dp</dimen>
+    <dimen name="add_member_button_width">230dp</dimen>
+    <dimen name="add_member_progress_bar_xy">25dp</dimen>
+    <dimen name="add_member_progress_bar_margin_left">10dp</dimen>
+</resources>

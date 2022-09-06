@@ -204,7 +204,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     _viewStateFlow.value = ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatInfo()?.first?.value ?: "",
                         showLock = chat != null,
-                        isMuted = chat?.isMuted,
+                        isMuted = chat?.notify?.isMuteChat() == true,
                     )
                     chat?.let { nnChat ->
                         if (nnChat.isPrivateTribe()) {
@@ -890,34 +890,21 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     }
 
     private var toggleChatMutedJob: Job? = null
-    private var notifyJob: Job? = null
     fun toggleChatMuted() {
-        if (toggleChatMutedJob?.isActive == true) {
-            if (notifyJob?.isActive == true) {
-                return
+        chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
+
+            if (chat.isTribe()) {
+                navigateToNotificationLevel()
+                return@let
             }
 
-            notifyJob = viewModelScope.launch(mainImmediate) {
-                submitSideEffect(
-                    ChatSideEffect.Notify(
-                        app.getString(R.string.chat_muted_waiting_on_network),
-                        notificationLengthLong = false
-                    )
-                )
-                delay(1_000)
-            }
-            return
-        }
-        // by the time the user has the ability to click mute, chatSharedFlow
-        // will be instantiated. If there is no chat for the given
-        // conversation (such as with a new contact), the mute button is
-        // invisible, so...
-        chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
             toggleChatMutedJob = viewModelScope.launch(mainImmediate) {
 
                 submitSideEffect(ChatSideEffect.ProduceHapticFeedback)
 
-                val response = chatRepository.toggleChatMuted(chat)
+                val newLevel = if (chat.notify?.isMuteChat() == true) NotificationLevel.SeeAll else NotificationLevel.MuteChat
+                val response = chatRepository.setNotificationLevel(chat, newLevel)
+
                 @Exhaustive
                 when (response) {
                     is Response.Error -> {
@@ -939,6 +926,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             }
         }
     }
+
+    abstract fun navigateToNotificationLevel()
 
     var messagesSearchJob: Job? = null
     suspend fun searchMessages(text: String?) {
@@ -1645,7 +1634,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     open suspend fun deleteTribe() {}
 
-    open fun showMemberPopup(message: Message) {}
+    open fun onSmallProfileImageClick(message: Message) {}
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused

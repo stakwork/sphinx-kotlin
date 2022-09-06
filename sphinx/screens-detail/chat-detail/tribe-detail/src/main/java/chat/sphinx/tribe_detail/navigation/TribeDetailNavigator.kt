@@ -18,7 +18,11 @@ abstract class TribeDetailNavigator(
         description: String? = null,
     )
 
-    abstract suspend fun toCreateTribeScreen(chatId: ChatId)
+    abstract suspend fun toEditTribeScreen(chatId: ChatId)
 
     abstract suspend fun toTribeMemberList(chatId: ChatId)
+
+    abstract suspend fun toNotificationLevel(chatId: ChatId)
+
+    abstract suspend fun toAddMember(chatId: ChatId)
 }

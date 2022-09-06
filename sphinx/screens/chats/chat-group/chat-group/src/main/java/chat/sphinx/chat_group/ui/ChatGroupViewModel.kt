@@ -155,4 +155,8 @@ class ChatGroupViewModel @Inject constructor(
     override fun navigateToChatDetailScreen() {
         // We do nothing because Chat Groups are being aren't supported anymore
     }
+
+    override fun navigateToNotificationLevel() {
+        // We do nothing because Chat Groups are being aren't supported anymore
+    }
 }

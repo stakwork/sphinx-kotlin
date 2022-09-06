@@ -1,7 +1,9 @@
 package chat.sphinx.chat_common.util
 
+import android.text.TextPaint
 import android.text.style.URLSpan
 import android.view.View
+import androidx.annotation.ColorInt
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import java.util.concurrent.atomic.AtomicInteger
@@ -14,8 +16,19 @@ inline val String.isSphinxUrl: Boolean
 
 open class SphinxUrlSpan(
     url: String?,
+    private val underlined: Boolean = true,
+    @ColorInt private val linkColor: Int? = null,
     private val onInteractionListener: OnInteractionListener
 ): URLSpan(url) {
+
+    override fun updateDrawState(ds: TextPaint) {
+        super.updateDrawState(ds)
+        ds.isUnderlineText = underlined
+
+        linkColor?.let {
+            ds.color = it
+        }
+    }
 
     override fun onClick(widget: View) {
         if (onInteractionListener.longClickCounter.get() == 0) {

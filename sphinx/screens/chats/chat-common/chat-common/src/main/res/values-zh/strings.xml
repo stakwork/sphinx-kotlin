@@ -167,6 +167,7 @@
     <string name="bottom_menu_more_option_call">Create Call</string>
     <string name="bottom_menu_more_option_share">Share Tribe Link</string>
     <string name="bottom_menu_more_option_search">Search Messages</string>
+    <string name="bottom_menu_more_option_notification">Notifications</string>
 
     <string name="searching_messages">Searching...</string>
     <string name="results_found">%d Results Found</string>

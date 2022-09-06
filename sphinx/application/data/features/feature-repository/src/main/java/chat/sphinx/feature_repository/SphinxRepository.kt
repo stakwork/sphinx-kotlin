@@ -36,6 +36,7 @@ import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeEx
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
@@ -3500,45 +3501,43 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to pay for attachment"))
     }
 
-    override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted())
+    override suspend fun setNotificationLevel(chat: Chat, level: NotificationLevel): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(level.isMuteChat())
 
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
-            val currentMutedValue = chat.isMuted
+            val currentNotificationLevel = chat.notify
 
             chatLock.withLock {
                 withContext(io) {
                     queries.transaction {
-                        updateChatMuted(
+                        updateChatNotificationLevel(
                             chat.id,
-                            if (currentMutedValue.isTrue()) ChatMuted.False else ChatMuted.True,
+                            level,
                             queries
                         )
                     }
                 }
             }
 
-            networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
+            networkQueryChat.setNotificationLevel(chat.id, level).collect { loadResponse ->
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
+                    is LoadResponse.Loading -> {}
+                    is Response.Success -> {}
                     is Response.Error -> {
                         response = loadResponse
 
                         chatLock.withLock {
                             withContext(io) {
                                 queries.transaction {
-                                    updateChatMuted(
+                                    updateChatNotificationLevel(
                                         chat.id,
-                                        currentMutedValue,
+                                        currentNotificationLevel,
                                         queries
                                     )
                                 }
                             }
                         }
-                    }
-                    is Response.Success -> {
                     }
                 }
             }
@@ -5112,6 +5111,66 @@ abstract class SphinxRepository(
                         }
                     }
                 }
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError(("Failed to add Member")))
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val imgUrl: String? = addMember.img?.let { imgFile ->
+                    // If an image file is provided we should upload it
+                    val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                            ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                    val networkResponse = networkQueryMemeServer.uploadAttachment(
+                        authenticationToken = token,
+                        mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                        stream = object : InputStreamProvider() {
+                            override fun newInputStream(): InputStream = imgFile.inputStream()
+                        },
+                        fileName = imgFile.name,
+                        contentLength = imgFile.length(),
+                        memeServerHost = memeServerHost,
+                    )
+                    @Exhaustive
+                    when (networkResponse) {
+                        is Response.Error -> {
+                            LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                            response = networkResponse
+                            null
+                        }
+                        is Response.Success -> {
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                        }
+                    }
+                }
+
+                networkQueryChat.addTribeMember(
+                    addMember.toTribeMemberDto(imgUrl)
+                ).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {
+                        }
+
+                        is Response.Error -> {
+                            response = loadResponse
+                            LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
+                        }
+                        is Response.Success -> {
+                            response = Response.Success(true)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to add Tribe Member", e)
+                )
             }
         }.join()
 

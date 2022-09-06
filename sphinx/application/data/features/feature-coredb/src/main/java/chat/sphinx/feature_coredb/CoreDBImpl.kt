@@ -81,7 +81,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     my_aliasAdapter = ChatAliasAdapter(),
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
                     latest_message_idAdapter = MessageIdAdapter.getInstance(),
-                    content_seen_atAdapter = DateTimeAdapter.getInstance()
+                    content_seen_atAdapter = DateTimeAdapter.getInstance(),
+                    notifyAdapter = NotifyAdapter()
                 ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),

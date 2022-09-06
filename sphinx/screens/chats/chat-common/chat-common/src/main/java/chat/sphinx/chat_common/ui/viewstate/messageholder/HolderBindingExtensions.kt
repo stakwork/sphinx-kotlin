@@ -964,7 +964,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
             setTextColor(textColor)
 
             if (onSphinxInteractionListener != null) {
-                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, onSphinxInteractionListener)
+                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, includeMessageHolderBubble.root.context, onSphinxInteractionListener)
             }
         }
     }

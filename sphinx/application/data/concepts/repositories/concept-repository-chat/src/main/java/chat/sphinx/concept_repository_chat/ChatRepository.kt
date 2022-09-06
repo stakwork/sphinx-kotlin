@@ -2,12 +2,15 @@ package chat.sphinx.concept_repository_chat
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.TribeMemberDto
+import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatAlias
+import chat.sphinx.wrapper_chat.NotificationLevel
 import chat.sphinx.wrapper_chat.TribeData
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -50,7 +53,7 @@ interface ChatRepository {
      *
      * Returns error if something went wrong (networking)
      * */
-    suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError>
+    suspend fun setNotificationLevel(chat: Chat, level: NotificationLevel): Response<Boolean, ResponseError>
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
 
@@ -62,6 +65,8 @@ interface ChatRepository {
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
+
+    suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError>
 
     suspend fun updateChatProfileInfo(
         chatId: ChatId,
