@@ -292,7 +292,7 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
             val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.select_bitcoin_network))
 
-            val items = arrayOf(BITCOIN_NETWORK_REG_TEST, BITCOIN_NETWORK_MAIN_NET)
+            val items = arrayOf(BITCOIN_NETWORK_REG_TEST.toCapitalized(), BITCOIN_NETWORK_MAIN_NET.toCapitalized())
             builder.setSingleChoiceItems(items, 0
             ) { _, p1 ->
                 when (p1) {
