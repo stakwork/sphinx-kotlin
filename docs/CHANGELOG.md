@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha64 (2022-09-09)
+- Improvements on Signing Device setup
+
 # Version 1.0.0-alpha63 (2022-09-06)
 - Adds ability to add member to a tribe
 - Adds ability to set tribe notifications level

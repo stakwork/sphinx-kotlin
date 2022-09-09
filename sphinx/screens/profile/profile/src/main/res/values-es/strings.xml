@@ -60,4 +60,6 @@
     <string name="setup_signing_device">Configurar Dispositivo de Firma</string>
     <string name="configure_signing_device">Configurar Dispositivo de Firma</string>
     <string name="mnemonic_copied_to_clipboard">Palabras de seguridad copiadas al portapapeles</string>
+    <string name="bitcoin_network">Red de Bitcoin</string>
+    <string name="select_bitcoin_network">Seleccioná la red de Bitcoin</string>
 </resources>
