@@ -39,22 +39,23 @@
         android:id="@+id/edit_text_scanner_input_content"
         android:layout_width="match_parent"
         android:layout_height="@dimen/scanner_bottom_content_height"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="gone">
+        tools:layout_editor_absoluteX="0dp">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/new_contact_route_hint_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/scanner_bottom_content_label"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="@dimen/scanner_bottom_text_view_top_margin"
-            android:textColor="@color/text"
             android:fontFamily="@font/montserrat_semi_bold"
+            android:singleLine="true"
+            android:text="@string/scanner_bottom_content_label"
+            android:textColor="@color/text"
             android:textSize="@dimen/scanner_bottom_text_view_text_size"
-            android:singleLine="true" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_nickname_content"
@@ -70,17 +71,17 @@
                 android:id="@+id/code_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text"
+                android:layout_marginLeft="@dimen/default_edit_text_left_margin"
                 android:fontFamily="@font/roboto_regular"
-                app:backgroundTint="@android:color/transparent"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/scanner_edit_text_hint"
+                android:inputType="textVisiblePassword|textCapWords"
+                android:singleLine="true"
+                android:textColor="@color/text"
                 android:textColorHint="@color/secondaryText"
                 android:textSize="@dimen/default_form_edit_view_size"
-                android:inputType="textVisiblePassword|textCapWords"
-                android:layout_marginLeft="@dimen/default_edit_text_left_margin"
-                android:singleLine="true" />
+                app:backgroundTint="@android:color/transparent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_constraint_new_contact_nickname_bottom_border"
@@ -98,16 +99,28 @@
             style="@style/BaseButton"
             android:layout_width="@dimen/scanner_bottom_verify_button_width"
             android:layout_height="@dimen/scanner_bottom_verify_button_height"
-            android:text="@string/scanner_verify_button"
-            android:fontFamily="@font/montserrat_bold"
-            android:textSize="@dimen/scanner_bottom_verify_button_text_size"
-            android:textColor="@android:color/white"
+            android:layout_marginBottom="@dimen/scanner_bottom_verify_button_bottom_margin"
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryBlue"
-            android:layout_marginBottom="@dimen/scanner_bottom_verify_button_bottom_margin"
-            app:layout_constraintStart_toStartOf="parent"
+            android:fontFamily="@font/montserrat_bold"
+            android:text="@string/scanner_verify_button"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/scanner_bottom_verify_button_text_size"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/button_open_gallery"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="24dp"
+            android:clickable="true"
+            android:backgroundTint="@color/bodyTransparent"
+            android:src="@drawable/ic_gallary"
+            app:layout_constraintBottom_toBottomOf="@+id/button_scanner_save"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/button_scanner_save" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
