@@ -39,7 +39,7 @@
         android:id="@+id/edit_text_scanner_input_content"
         android:layout_width="match_parent"
         android:layout_height="@dimen/scanner_bottom_content_height"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:layout_editor_absoluteX="0dp">
 
@@ -115,12 +115,13 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginStart="24dp"
-            android:clickable="true"
             android:backgroundTint="@color/bodyTransparent"
+            android:clickable="true"
             android:src="@drawable/ic_gallary"
             app:layout_constraintBottom_toBottomOf="@+id/button_scanner_save"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/button_scanner_save" />
+            app:layout_constraintTop_toTopOf="@+id/button_scanner_save"
+            android:contentDescription="TODO" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
