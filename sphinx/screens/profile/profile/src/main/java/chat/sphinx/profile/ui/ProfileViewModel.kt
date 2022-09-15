@@ -63,9 +63,9 @@ import kotlinx.coroutines.withContext
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
-import uniffi.crypter.deriveSharedSecret
-import uniffi.crypter.encrypt
-import uniffi.crypter.pubkeyFromSecretKey
+import uniffi.sphinxrs.deriveSharedSecret
+import uniffi.sphinxrs.encrypt
+import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 

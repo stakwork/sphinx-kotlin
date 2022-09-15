@@ -10,3 +10,9 @@
 !/src/main/jniLibs/armeabi-v7a/libcrypter.so
 !/src/main/jniLibs/x86/libcrypter.so
 !/src/main/jniLibs/x86_64/libcrypter.so
+
+!/src/main/jniLibs/arm64-v8a/libsphinxrs.so
+!/src/main/jniLibs/armeabi/libsphinxrs.so
+!/src/main/jniLibs/armeabi-v7a/libsphinxrs.so
+!/src/main/jniLibs/x86/libsphinxrs.so
+!/src/main/jniLibs/x86_64/libsphinxrs.so
