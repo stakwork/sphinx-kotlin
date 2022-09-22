@@ -3,11 +3,14 @@ package chat.sphinx.chat_common.model
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.chat_common.util.isSphinxUrl
-import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
+
+inline val String.isNodeUrl: Boolean
+    get() = isValidLightningNodePubKey ||
+            isValidVirtualNodeAddress
 
 sealed interface MessageLinkPreview {
     companion object {
@@ -19,46 +22,48 @@ sealed interface MessageLinkPreview {
                 return null
             }
 
-            val matcher = SphinxLinkify.SphinxPatterns.AUTOLINK_WEB_URL.matcher(
-                text.text ?: ""
-            )
-            val url = text.text!!
+            text.text?.let { url ->
 
-            return if (url.isSphinxUrl) {
 
-                url.toLightningNodePubKey()?.let { nnKey ->
+                val matcher = SphinxLinkify.SphinxPatterns.AUTOLINK_WEB_URL.matcher(url)
 
-                    NodeDescriptor(nnKey)
+                return if (url.isNodeUrl) {
 
-                } ?: url.toVirtualLightningNodeAddress()?.let { nnAddress ->
+                    url.toLightningNodePubKey()?.let { nnKey ->
 
-                    NodeDescriptor(nnAddress)
+                        NodeDescriptor(nnKey)
 
-                }
+                    } ?: url.toVirtualLightningNodeAddress()?.let { nnAddress ->
 
-            } else if (matcher.find()){
+                        NodeDescriptor(nnAddress)
 
-                val group = matcher.group()
+                    }
 
-                group.toTribeJoinLink()?.let { nnTribeLink ->
+                } else if (matcher.find()) {
 
-                    TribeLink(nnTribeLink)
+                    val group = matcher.group()
 
-                } ?: run {
-                    if (!urlLinkPreviewsEnabled) {
-                        null
-                    } else {
-                        when {
-                            group.startsWith("http://") || group.startsWith("https://") -> {
-                                UnspecifiedUrl(group)
-                            }
-                            else -> {
-                                UnspecifiedUrl("https://$group")
+                    group.toTribeJoinLink()?.let { nnTribeLink ->
+
+                        TribeLink(nnTribeLink)
+
+                    } ?: run {
+                        if (!urlLinkPreviewsEnabled) {
+                            null
+                        } else {
+                            when {
+                                group.startsWith("http://") || group.startsWith("https://") -> {
+                                    UnspecifiedUrl(group)
+                                }
+                                else -> {
+                                    UnspecifiedUrl("https://$group")
+                                }
                             }
                         }
                     }
-                }
-            } else null
+                } else null
+            }
+            return null
         }
     }
 }
