@@ -2,6 +2,7 @@ package chat.sphinx.chat_common.model
 
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.isSphinxUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
@@ -18,22 +19,28 @@ sealed interface MessageLinkPreview {
                 return null
             }
 
-            val matcher = SphinxLinkify.SphinxPatterns.LINK_PREVIEWS.matcher(
+            val matcher = SphinxLinkify.SphinxPatterns.AUTOLINK_WEB_URL.matcher(
                 text.text ?: ""
             )
-            return if (matcher.find()) {
+            val url = text.text!!
 
-                val group = matcher.group()
+            return if (url.isSphinxUrl) {
 
-                group.toLightningNodePubKey()?.let { nnKey ->
+                url.toLightningNodePubKey()?.let { nnKey ->
 
                     NodeDescriptor(nnKey)
 
-                } ?: group.toVirtualLightningNodeAddress()?.let { nnAddress ->
+                } ?: url.toVirtualLightningNodeAddress()?.let { nnAddress ->
 
                     NodeDescriptor(nnAddress)
 
-                } ?: group.toTribeJoinLink()?.let { nnTribeLink ->
+                }
+
+            } else if (matcher.find()){
+
+                val group = matcher.group()
+
+                group.toTribeJoinLink()?.let { nnTribeLink ->
 
                     TribeLink(nnTribeLink)
 
@@ -51,12 +58,7 @@ sealed interface MessageLinkPreview {
                         }
                     }
                 }
-
-            } else {
-
-                null
-
-            }
+            } else null
         }
     }
 }
