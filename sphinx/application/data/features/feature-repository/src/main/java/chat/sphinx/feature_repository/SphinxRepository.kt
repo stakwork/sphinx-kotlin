@@ -34,7 +34,6 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
@@ -53,6 +52,11 @@ import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.conceptcoredb.*
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboContentBoostPresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboContentConsumedPresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboMessagePresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboPodcastClipCommentPresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboFeedSearchPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedDboPresenterMapper
@@ -73,6 +77,8 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.notification.SphinxNotificationManager
+import chat.sphinx.wrapper_action_track.*
+import chat.sphinx.wrapper_action_track.action_wrappers.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -5869,5 +5875,94 @@ abstract class SphinxRepository(
         }
 
         return response
+    }
+
+    private val actionTrackDboMessagePresenterMapper: ActionTrackDboMessagePresenterMapper by lazy {
+        ActionTrackDboMessagePresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboFeedSearchPresenterMapper: ActionTrackDboFeedSearchPresenterMapper by lazy {
+        ActionTrackDboFeedSearchPresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboContentBoostPresenterMapper: ActionTrackDboContentBoostPresenterMapper by lazy {
+        ActionTrackDboContentBoostPresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboPodcastClipCommentPresenterMapper: ActionTrackDboPodcastClipCommentPresenterMapper by lazy {
+        ActionTrackDboPodcastClipCommentPresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboContentConsumedPresenterMapper: ActionTrackDboContentConsumedPresenterMapper by lazy {
+        ActionTrackDboContentConsumedPresenterMapper(dispatchers, moshi)
+    }
+
+    override suspend fun testActions() {
+
+        val queries = coreDB.getSphinxDatabaseQueries()
+        queries.actionTrackDeleteAll()
+
+//        val messageAction = MessageAction(
+//            arrayListOf("bitcoin", "lightning", "sphinx"),
+//            Date().time
+//        )
+
+//        val feedSearchAction = FeedSearchAction(
+//            1,
+//            "bitcoin",
+//            Date().time
+//        )
+
+//        val contentBoostAction = ContentBoostAction(
+//            100.toLong(),
+//            "FeedId1",
+//            FeedType.Podcast.value.toLong(),
+//            "https://google.com",
+//            "FeedItemId1",
+//            "https://google.com.ar",
+//            arrayListOf("bitcoin", "lightning", "sphinx"),
+//            Date().time
+//        )
+
+        val contentConsumedAction = ContentConsumedAction(
+            "FeedId1",
+            FeedType.Podcast.value.toLong(),
+            "https://google.com",
+            "FeedItemId1",
+            "https://google.com.ar",
+        )
+
+        val item1 = ContentConsumedHistoryItem(
+            arrayListOf("bitcoin", "lightning", "sphinx"),
+            Date().time,
+            Date().time,
+            Date().time
+        )
+
+        val item2 = ContentConsumedHistoryItem(
+            arrayListOf("lightning", "sphinx", "bitcoin"),
+            Date().time,
+            Date().time,
+            Date().time
+        )
+
+        contentConsumedAction.addHistoryItem(item1)
+        contentConsumedAction.addHistoryItem(item2)
+
+        queries.actionTrackUpsert(
+            ActionTrackType.ContentConsumed,
+            ActionTrackMetaData(contentConsumedAction.toJson(moshi)),
+            false.toActionTrackUploaded(),
+            ActionTrackId(Long.MAX_VALUE)
+        )
+
+
+        val actionsDboList = queries.actionTrackGetByType(ActionTrackType.ContentConsumed).executeAsList()
+
+        val messageActions = actionsDboList.map {
+            actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
+        }
+
+        LOG.d("SPHINX", messageActions.toString())
     }
 }
