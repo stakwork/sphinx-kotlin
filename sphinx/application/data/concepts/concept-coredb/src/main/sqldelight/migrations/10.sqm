@@ -1,0 +1,11 @@
+import chat.sphinx.wrapper_action_track.ActionTrackId;
+import chat.sphinx.wrapper_action_track.ActionTrackMetaData;
+import chat.sphinx.wrapper_action_track.ActionTrackType;
+import chat.sphinx.wrapper_action_track.ActionTrackUploaded;
+
+CREATE TABLE actionTrackDbo(
+    id                          INTEGER         AS ActionTrackId NOT NULL PRIMARY KEY AUTOINCREMENT,
+    type                        INTEGER         AS ActionTrackType NOT NULL,
+    meta_data                   TEXT            AS ActionTrackMetaData NOT NULL,
+    uploaded                    INTEGER         AS ActionTrackUploaded NOT NULL
+);
