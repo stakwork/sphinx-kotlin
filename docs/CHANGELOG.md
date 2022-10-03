@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha65 (2022-10-03)
+- Improvements on Signing Device setup
+- Disables tribe notification level feature
+- Fixes and improvements
+
 # Version 1.0.0-alpha64 (2022-09-09)
 - Improvements on Signing Device setup
 

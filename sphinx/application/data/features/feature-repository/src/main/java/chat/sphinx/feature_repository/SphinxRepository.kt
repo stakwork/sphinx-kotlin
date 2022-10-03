@@ -3501,6 +3501,53 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to pay for attachment"))
     }
 
+    override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted())
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            val currentMutedValue = chat.isMuted
+
+            chatLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        updateChatMuted(
+                            chat.id,
+                            if (currentMutedValue.isTrue()) ChatMuted.False else ChatMuted.True,
+                            queries
+                        )
+                    }
+                }
+            }
+
+            networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                    }
+                    is Response.Error -> {
+                        response = loadResponse
+
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    updateChatMuted(
+                                        chat.id,
+                                        currentMutedValue,
+                                        queries
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    is Response.Success -> {
+                    }
+                }
+            }
+        }.join()
+
+        return response
+    }
+
     override suspend fun setNotificationLevel(chat: Chat, level: NotificationLevel): Response<Boolean, ResponseError> {
         var response: Response<Boolean, ResponseError> = Response.Success(level.isMuteChat())
 
