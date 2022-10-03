@@ -221,15 +221,15 @@ internal class ChatTribeFragment: ChatFragment<
             )
         )
 
-        menuOptions.add(
-            MenuBottomOption(
-                text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_notification,
-                textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
-                onClick = {
-                    viewModel.navigateToNotificationLevel()
-                }
-            )
-        )
+//        menuOptions.add(
+//            MenuBottomOption(
+//                text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_notification,
+//                textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+//                onClick = {
+//                    viewModel.navigateToNotificationLevel()
+//                }
+//            )
+//        )
 
         if (viewModel.moreOptionsMenuStateFlow.value is MoreMenuOptionsViewState.OwnTribe) {
             menuOptions.add(
