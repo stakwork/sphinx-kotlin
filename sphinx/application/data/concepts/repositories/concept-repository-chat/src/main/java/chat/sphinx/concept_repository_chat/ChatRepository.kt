@@ -44,6 +44,7 @@ interface ChatRepository {
     val networkRefreshChats: Flow<LoadResponse<Boolean, ResponseError>>
 
     suspend fun getAllChatsByIds(chatIds: List<ChatId>): List<Chat>
+
     /**
      * Returns `true` if the user has muted the chat and there is a need
      * to notify them that they won't receive messages anymore.
@@ -53,6 +54,7 @@ interface ChatRepository {
      *
      * Returns error if something went wrong (networking)
      * */
+    suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError>
     suspend fun setNotificationLevel(chat: Chat, level: NotificationLevel): Response<Boolean, ResponseError>
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
