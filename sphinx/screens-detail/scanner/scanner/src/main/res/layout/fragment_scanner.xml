@@ -21,8 +21,7 @@
         app:layout_constraintTop_toBottomOf="@+id/include_scanner_header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/edit_text_scanner_input_content"
-        />
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_scanner_input_content" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="0dp"
@@ -36,15 +35,15 @@
         app:layout_constraintBottom_toBottomOf="@+id/previewView"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/edit_text_scanner_input_content"
+        android:id="@+id/layout_constraint_scanner_input_content"
         android:layout_width="match_parent"
         android:layout_height="@dimen/scanner_bottom_content_height"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="0dp">
+        tools:layout_editor_absoluteX="0dp"
+        tools:visibility="visible">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/new_contact_route_hint_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/scanner_bottom_text_view_top_margin"
@@ -58,7 +57,6 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_constraint_nickname_content"
             android:layout_width="match_parent"
             android:layout_height="65dp"
             android:layout_marginStart="@dimen/default_form_horizontal_margin"
@@ -68,7 +66,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/code_edit_text"
+                android:id="@+id/edit_text_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/default_edit_text_left_margin"
@@ -84,7 +82,6 @@
                 app:layout_constraintStart_toStartOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/layout_constraint_new_contact_nickname_bottom_border"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/lightDivider"
@@ -111,13 +108,13 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <ImageView
-            android:id="@+id/button_open_gallery"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="24dp"
+            android:id="@+id/image_view_gallery"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="30dp"
             android:backgroundTint="@color/bodyTransparent"
             android:clickable="true"
-            android:src="@drawable/ic_gallary"
+            android:src="@drawable/ic_media_library"
             app:layout_constraintBottom_toBottomOf="@+id/button_scanner_save"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/button_scanner_save"
