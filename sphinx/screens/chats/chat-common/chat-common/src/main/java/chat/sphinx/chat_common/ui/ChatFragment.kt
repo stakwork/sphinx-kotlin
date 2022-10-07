@@ -1720,7 +1720,7 @@ abstract class ChatFragment<
     }
 
     private fun startRecording() {
-        viewModel.audioRecorderController.startAudioRecording()
+        viewModel.audioRecorderController.startAudioRecording(binding.root.context)
     }
 
     override fun isActive(): Boolean {
