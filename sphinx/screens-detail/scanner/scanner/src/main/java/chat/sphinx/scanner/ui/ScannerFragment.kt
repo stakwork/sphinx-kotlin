@@ -95,7 +95,7 @@ internal class ScannerFragment: SideEffectFragment<
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
 
-        binding.buttonOpenGallery.setOnClickListener {
+        binding.imageViewGallery.setOnClickListener {
            openGalleryToReadQr.launch("image/*")
         }
 
@@ -111,7 +111,7 @@ internal class ScannerFragment: SideEffectFragment<
         }
 
         binding.buttonScannerSave.setOnClickListener {
-            val input = binding.codeEditText.text?.toString()
+            val input = binding.editTextCode.text?.toString()
             if (input != null && input.isNotEmpty()) {
                 viewModel.processResponse(ScannerResponse(input.trim()))
             }
@@ -124,9 +124,9 @@ internal class ScannerFragment: SideEffectFragment<
             when (viewState) {
                 is ScannerViewState.LayoutVisibility -> {
                     includeScannerHeader.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.showBackButton)
-                    editTextScannerInputContent.goneIfFalse(viewState.showBottomView)
+                    layoutConstraintScannerInputContent.goneIfFalse(viewState.showBottomView)
 
-                    codeEditText.hint = if (viewState.scannerModeLabel.isNotEmpty()) {
+                    editTextCode.hint = if (viewState.scannerModeLabel.isNotEmpty()) {
                         viewState.scannerModeLabel
                     } else {
                         getString(R.string.scanner_edit_text_hint)
@@ -229,16 +229,17 @@ internal class ScannerFragment: SideEffectFragment<
     private val openGalleryToReadQr = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         val image: InputImage
         try {
-            image = InputImage.fromFilePath(requireContext(), uri!!)
+            uri?.let {
+                image = InputImage.fromFilePath(requireContext(), it)
 
-            val scanner = BarcodeScanning.getClient()
-            scanner.process(image)
-                .addOnSuccessListener { barcodes ->
-                   barcodes.forEach {
-                       val result = it.rawValue?: ""
-                       retrieveCode(result)
-                   }
+                val scanner = BarcodeScanning.getClient()
+                scanner.process(image).addOnSuccessListener { barcodes ->
+                    barcodes.forEach { barcode ->
+                        val result = barcode.rawValue?: ""
+                        retrieveCode(result)
+                    }
                 }
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }
