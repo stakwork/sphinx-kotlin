@@ -33,6 +33,8 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
+    implementation files('libs/YouTubeAndroidPlayerApi.jar')
+
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
 
