@@ -100,6 +100,7 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
+import java.nio.file.Files.getOwner
 import kotlin.collections.ArrayList
 
 
@@ -1468,6 +1469,51 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    suspend fun confirmToggleBlockContactState() {
+
+        val alertConfirmCallback: () -> Unit = {
+
+            contactId?.let { contactId ->
+                viewModelScope.launch(mainImmediate) {
+                    contactRepository.getContactById(contactId).firstOrNull()?.let { contact ->
+                        contactRepository.toggleContactBlocked(contact)
+                    }
+                }
+            }
+        }
+
+        submitSideEffect(
+            ChatSideEffect.AlertConfirmBlockContact {
+                alertConfirmCallback().also {
+                    viewModelScope.launch(mainImmediate) {
+                        chatNavigator.popBackStack()
+                    }
+                }
+            }
+        )
+
+    }
+
+    suspend fun confirmDeleteContact() {
+        val alertConfirmDeleteContact: () -> Unit = {
+            contactId?.let { contactId ->
+                viewModelScope.launch(mainImmediate) {
+                    contactRepository.deleteContactById(contactId)
+                }
+            }
+        }
+
+        submitSideEffect(
+            ChatSideEffect.AlertConfirmDeleteContact {
+                alertConfirmDeleteContact().also {
+                    viewModelScope.launch(mainImmediate) {
+                        chatNavigator.popBackStack()
+                    }
+                }
+            }
+        )
     }
 
     fun sendCallInvite(audioOnly: Boolean) {

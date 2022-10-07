@@ -6,6 +6,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.view.HapticFeedbackConstants
+import androidx.fragment.app.FragmentActivity
 import chat.sphinx.chat_common.R
 import chat.sphinx.resources.SphinxToastUtils
 import io.matthewnelson.android_feature_toast_utils.show
@@ -36,6 +37,63 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
                     )
                 )
             } catch (e: ActivityNotFoundException) {}
+        }
+    }
+
+    class AlertConfirmDeleteContact(
+        private val callback: () -> Unit
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val successMessage = value.chatFragmentContext.getString(R.string.alert_confirm_delete_contact)
+
+            val builder = AlertDialog.Builder(value.chatFragmentContext, R.style.AlertDialogTheme)
+            builder.setTitle(value.chatFragmentContext.getString(R.string.alert_confirm_delete_contact_title))
+            builder.setMessage(successMessage)
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+
+    }
+
+    class AlertConfirmToggleBlockContact(
+        private val callback: () -> Unit,
+        private val title: String,
+        private val message: String,
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val builder = AlertDialog.Builder(value.chatFragmentContext, R.style.AlertDialogTheme)
+            builder.setTitle(title)
+            builder.setMessage(message)
+            builder.setNegativeButton(android.R.string.cancel) { _,_ -> }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback()
+            }
+            builder.show()
+        }
+    }
+
+    class AlertConfirmBlockContact(
+        private val callback: () -> Unit,
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val title = value.chatFragmentContext.getString(R.string.alert_confirm_block_contact_title)
+            val message = value.chatFragmentContext.getString(R.string.alert_confirm_block_contact)
+
+            AlertConfirmToggleBlockContact(callback, title, message).execute(value)
+        }
+    }
+
+    class AlertConfirmUnblockContact(
+        private val callback: () -> Unit,
+    ): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            val title = value.chatFragmentContext.getString(R.string.alert_confirm_unblock_contact_title)
+            val message = value.chatFragmentContext.getString(R.string.alert_confirm_unblock_contact)
+
+            AlertConfirmToggleBlockContact(callback, title, message).execute(value)
         }
     }
 
