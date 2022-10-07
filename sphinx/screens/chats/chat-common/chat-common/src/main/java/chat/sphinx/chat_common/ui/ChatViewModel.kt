@@ -204,8 +204,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     _viewStateFlow.value = ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatInfo()?.first?.value ?: "",
                         showLock = chat != null,
-                        isMuted = chat?.isMuted() == true,
-//                        isMuted = chat?.notify?.isMuteChat() == true,
+                        isMuted = chat?.notify?.isMuteChat() == true,
                     )
                     chat?.let { nnChat ->
                         if (nnChat.isPrivateTribe()) {
@@ -894,10 +893,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     fun toggleChatMuted() {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
 
-//            if (chat.isTribe()) {
-//                navigateToNotificationLevel()
-//                return@let
-//            }
+            if (chat.isTribe()) {
+                navigateToNotificationLevel()
+                return@let
+            }
 
             if (toggleChatMutedJob?.isActive == true) {
                 return
@@ -908,8 +907,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 submitSideEffect(ChatSideEffect.ProduceHapticFeedback)
 
                 val newLevel = if (chat.notify?.isMuteChat() == true) NotificationLevel.SeeAll else NotificationLevel.MuteChat
-//                val response = chatRepository.setNotificationLevel(chat, newLevel)
-                val response = chatRepository.toggleChatMuted(chat)
+                val response = chatRepository.setNotificationLevel(chat, newLevel)
 
                 @Exhaustive
                 when (response) {

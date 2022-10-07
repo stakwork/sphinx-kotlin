@@ -13,8 +13,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Chat.isMuted(): Boolean {
-//    return notify?.isMuteChat() == true
-    return isMuted?.isTrue()
+    return notify?.isMuteChat() == true
 }
 
 @Suppress("NOTHING_TO_INLINE")
