@@ -32,6 +32,7 @@ import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.video_screen.BuildConfig
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.isTrue
@@ -183,13 +184,15 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     }
 
     private fun setupYoutubePlayer(videoId: String) {
-        val GOOGLE_API_KEY = "AIzaSyCgjzFVYxS_a9bRrcUtUwISE9HpjzmcpF0"
+
         val youtubePlayerFragment = YouTubePlayerSupportFragment()
+
         childFragmentManager.beginTransaction()
-            .replace(R.id.fragmentYoutubePlayer, youtubePlayerFragment as Fragment)
+            .replace(binding.includeLayoutVideoPlayer.frameLayoutYoutubePlayer.id, youtubePlayerFragment as Fragment)
             .commit()
+
         youtubePlayerFragment.initialize(
-            GOOGLE_API_KEY,
+            BuildConfig.YOUTUBE_API_KEY,
             object : YouTubePlayer.OnInitializedListener {
 
                 override fun onInitializationSuccess(
@@ -210,7 +213,9 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 ) {}
 
                private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
-                    override fun onSeekTo(p0: Int) {}
+                    override fun onSeekTo(p0: Int) {
+                        Log.d("OnSeek", "Youtube has seek")
+                    }
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
@@ -224,32 +229,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                     }
                 }
             })
-    }
-
-    private fun setupYoutubeEventListener(){
-        val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
-            override fun onSeekTo(p0: Int) {
-            }
-
-            override fun onBuffering(p0: Boolean) {
-            }
-
-            override fun onPlaying() {
-                Log.d("OnPlaying", "Youtube is playing")
-
-            }
-
-            override fun onStopped() {
-                Log.d("OnPlaying", "Youtube has stopped")
-
-            }
-
-            override fun onPaused() {
-                Log.d("OnPlaying", "Youtube is on pause")
-
-
-            }
-        }
     }
 
 
@@ -384,30 +363,18 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                             if (viewState.url.isYoutubeVideo()) {
 
                                 layoutConstraintVideoViewContainer.gone
-                                fragmentYoutubePlayer.visible
+                                frameLayoutYoutubePlayer.visible
 
                                 if (youtubePlayer != null) {
                                     youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
                                 } else {
                                     setupYoutubePlayer(viewState.id.youtubeVideoId())
-                                    setupYoutubeEventListener()
-
                                 }
-//                                webViewYoutubeVideoPlayer.visible
-//                                webViewYoutubeVideoPlayer.settings.apply {
-//                                    javaScriptEnabled = true
-//                                }
-//
-//                                webViewYoutubeVideoPlayer.loadData(
-//                                    "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/${viewState.id.youtubeVideoId()}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
-//                                    YOUTUBE_WEB_VIEW_MIME_TYPE,
-//                                    YOUTUBE_WEB_VIEW_ENCODING
-//                                )
+
                             } else {
                                 layoutConstraintLoadingVideo.visible
                                 layoutConstraintVideoViewContainer.visible
-                                fragmentYoutubePlayer.gone
-//                                webViewYoutubeVideoPlayer.gone
+                                frameLayoutYoutubePlayer.gone
 
                                 val videoUri = if (viewState.localFile != null) {
                                     viewState.localFile.toUri()
