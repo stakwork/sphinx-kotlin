@@ -5,13 +5,11 @@ import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.MediaController
-import android.widget.TextView
+import android.widget.*
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -23,6 +21,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
@@ -50,6 +49,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -201,14 +201,55 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                         youtubePlayer = it
                     }
                     p1?.cueVideo(videoId)
+                    p1?.setPlaybackEventListener(playbackEventListener)
                 }
 
                 override fun onInitializationFailure(
                     p0: YouTubePlayer.Provider?,
                     p1: YouTubeInitializationResult?
-                ) {
+                ) {}
+
+               private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
+                    override fun onSeekTo(p0: Int) {}
+                    override fun onBuffering(p0: Boolean) {}
+
+                    override fun onPlaying() {
+                        Log.d("OnPlaying", "Youtube is playing")
+                    }
+                    override fun onStopped() {
+                        Log.d("OnStopped", "Youtube has stopped")
+                    }
+                    override fun onPaused() {
+                        Log.d("OnPaused", "Youtube is on pause")
+                    }
                 }
             })
+    }
+
+    private fun setupYoutubeEventListener(){
+        val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
+            override fun onSeekTo(p0: Int) {
+            }
+
+            override fun onBuffering(p0: Boolean) {
+            }
+
+            override fun onPlaying() {
+                Log.d("OnPlaying", "Youtube is playing")
+
+            }
+
+            override fun onStopped() {
+                Log.d("OnPlaying", "Youtube has stopped")
+
+            }
+
+            override fun onPaused() {
+                Log.d("OnPlaying", "Youtube is on pause")
+
+
+            }
+        }
     }
 
 
@@ -349,9 +390,9 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                     youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
                                 } else {
                                     setupYoutubePlayer(viewState.id.youtubeVideoId())
+                                    setupYoutubeEventListener()
+
                                 }
-
-
 //                                webViewYoutubeVideoPlayer.visible
 //                                webViewYoutubeVideoPlayer.settings.apply {
 //                                    javaScriptEnabled = true
