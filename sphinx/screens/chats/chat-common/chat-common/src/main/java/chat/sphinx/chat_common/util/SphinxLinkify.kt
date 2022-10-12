@@ -353,11 +353,11 @@ object SphinxLinkify {
         )
 
         val LINK_PREVIEWS: Pattern = Pattern.compile(
-            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${LightningNodePubKey.REGEX}|${VirtualLightningNodeAddress.REGEX})"
+            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
         )
             
         val COPYABLE_LINKS: Pattern = Pattern.compile(
-            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${LightningNodePubKey.REGEX}|${VirtualLightningNodeAddress.REGEX})"
+            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
         )
 
         val MENTION: Pattern = Pattern.compile(

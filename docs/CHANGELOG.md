@@ -1,5 +1,16 @@
 # ChangeLog
 
+# Version 1.0.0-alpha66 (2022-10-07)
+- Adds ability to set tribe notifications level
+- Adds mentions format on messages
+- Fixes audio format compatibility issue
+- Adds support for scanning qr code from gallery
+
+# Version 1.0.0-alpha65 (2022-10-03)
+- Improvements on Signing Device setup
+- Disables tribe notification level feature
+- Fixes and improvements
+
 # Version 1.0.0-alpha64 (2022-09-09)
 - Improvements on Signing Device setup
 

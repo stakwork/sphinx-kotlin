@@ -178,4 +178,12 @@
     <string name="recording_permission_required">Se requieren permisos de grabación</string>
 
     <string name="send_sats">Enviar Sats</string>
+    <string name="option_block_user">Bloquear</string>
+    <string name="option_delete_user">Borrar</string>
+    <string name="alert_confirm_delete_contact">¿Estás seguro que deseas eliminar este contacto?</string>
+    <string name="alert_confirm_delete_contact_title">Eliminar Contact</string>
+    <string name="alert_confirm_block_contact_title">Bloquear Contacto</string>
+    <string name="alert_confirm_block_contact">¿Estás seguro que deseas bloquear este contacto?</string>
+    <string name="alert_confirm_unblock_contact_title">Desbloquear Contacto</string>
+    <string name="alert_confirm_unblock_contact">¿Estás seguro que deseas desbloquear este contacto?</string>
 </resources>

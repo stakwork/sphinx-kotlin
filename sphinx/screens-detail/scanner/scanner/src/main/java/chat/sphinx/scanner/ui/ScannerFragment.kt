@@ -3,10 +3,14 @@ package chat.sphinx.scanner.ui
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.registerForActivityResult
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -32,6 +36,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -90,6 +95,10 @@ internal class ScannerFragment: SideEffectFragment<
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
 
+        binding.imageViewGallery.setOnClickListener {
+           openGalleryToReadQr.launch("image/*")
+        }
+
         binding.includeScannerHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.scanner_header_name)
 
@@ -102,7 +111,7 @@ internal class ScannerFragment: SideEffectFragment<
         }
 
         binding.buttonScannerSave.setOnClickListener {
-            val input = binding.codeEditText.text?.toString()
+            val input = binding.editTextCode.text?.toString()
             if (input != null && input.isNotEmpty()) {
                 viewModel.processResponse(ScannerResponse(input.trim()))
             }
@@ -115,9 +124,9 @@ internal class ScannerFragment: SideEffectFragment<
             when (viewState) {
                 is ScannerViewState.LayoutVisibility -> {
                     includeScannerHeader.textViewDetailScreenHeaderNavBack.goneIfFalse(viewState.showBackButton)
-                    editTextScannerInputContent.goneIfFalse(viewState.showBottomView)
+                    layoutConstraintScannerInputContent.goneIfFalse(viewState.showBottomView)
 
-                    codeEditText.hint = if (viewState.scannerModeLabel.isNotEmpty()) {
+                    editTextCode.hint = if (viewState.scannerModeLabel.isNotEmpty()) {
                         viewState.scannerModeLabel
                     } else {
                         getString(R.string.scanner_edit_text_hint)
@@ -215,6 +224,26 @@ internal class ScannerFragment: SideEffectFragment<
         ContextCompat.checkSelfPermission(
             requireContext(), it
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private val openGalleryToReadQr = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        val image: InputImage
+        try {
+            uri?.let {
+                image = InputImage.fromFilePath(requireContext(), it)
+
+                val scanner = BarcodeScanning.getClient()
+                scanner.process(image).addOnSuccessListener { barcodes ->
+                    barcodes.forEach { barcode ->
+                        val result = barcode.rawValue?: ""
+                        retrieveCode(result)
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
     }
 
     override fun onDestroy() {
