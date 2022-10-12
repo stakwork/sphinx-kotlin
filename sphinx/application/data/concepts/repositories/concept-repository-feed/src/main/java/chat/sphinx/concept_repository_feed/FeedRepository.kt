@@ -39,5 +39,7 @@ interface FeedRepository {
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
+    suspend fun updateFeedSearchAction(searchTerm: String)
+
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 }

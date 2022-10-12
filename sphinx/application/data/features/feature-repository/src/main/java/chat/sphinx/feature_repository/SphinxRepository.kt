@@ -5897,10 +5897,34 @@ abstract class SphinxRepository(
         ActionTrackDboContentConsumedPresenterMapper(dispatchers, moshi)
     }
 
+    override suspend fun updateFeedSearchAction(searchTerm: String) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val feedSearchAction = FeedSearchAction(
+            1,
+            searchTerm,
+            Date().time
+        )
+
+        queries.actionTrackUpsert(
+            ActionTrackType.FeedSearch,
+            ActionTrackMetaData(feedSearchAction.toJson(moshi)),
+            false.toActionTrackUploaded(),
+            ActionTrackId(Long.MAX_VALUE)
+        )
+
+        val actionsFeedSearchDboList = queries.actionTrackGetByType(ActionTrackType.FeedSearch).executeAsList()
+        val feedSearchActions = actionsFeedSearchDboList.map {
+            actionTrackDboFeedSearchPresenterMapper.mapFrom(it)
+        }
+
+        LOG.d("FeedSearch", feedSearchActions.toString())
+    }
+
     override suspend fun testActions() {
 
         val queries = coreDB.getSphinxDatabaseQueries()
-        queries.actionTrackDeleteAll()
+//        queries.actionTrackDeleteAll()
 
 //        val messageAction = MessageAction(
 //            arrayListOf("bitcoin", "lightning", "sphinx"),
@@ -5956,9 +5980,7 @@ abstract class SphinxRepository(
             ActionTrackId(Long.MAX_VALUE)
         )
 
-
         val actionsDboList = queries.actionTrackGetByType(ActionTrackType.ContentConsumed).executeAsList()
-
         val messageActions = actionsDboList.map {
             actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
         }

@@ -80,8 +80,9 @@ class FeedViewModel @Inject constructor(
         )
         
         viewModelScope.launch(mainImmediate) {
-            delay(500)
+            delay(1000)
 
+            feedRepository.updateFeedSearchAction(searchTerm)
             feedRepository.searchFeedsBy(
                 searchTerm,
                 feedType
