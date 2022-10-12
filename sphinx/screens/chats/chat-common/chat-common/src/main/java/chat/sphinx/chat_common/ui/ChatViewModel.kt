@@ -100,6 +100,7 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
+import java.nio.file.Files.getOwner
 import kotlin.collections.ArrayList
 
 
@@ -204,8 +205,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     _viewStateFlow.value = ChatHeaderViewState.Initialized(
                         chatHeaderName = chat?.name?.value ?: getChatInfo()?.first?.value ?: "",
                         showLock = chat != null,
-                        isMuted = chat?.isMuted() == true,
-//                        isMuted = chat?.notify?.isMuteChat() == true,
+                        isMuted = chat?.notify?.isMuteChat() == true,
                     )
                     chat?.let { nnChat ->
                         if (nnChat.isPrivateTribe()) {
@@ -894,10 +894,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     fun toggleChatMuted() {
         chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
 
-//            if (chat.isTribe()) {
-//                navigateToNotificationLevel()
-//                return@let
-//            }
+            if (chat.isTribe()) {
+                navigateToNotificationLevel()
+                return@let
+            }
 
             if (toggleChatMutedJob?.isActive == true) {
                 return
@@ -908,8 +908,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 submitSideEffect(ChatSideEffect.ProduceHapticFeedback)
 
                 val newLevel = if (chat.notify?.isMuteChat() == true) NotificationLevel.SeeAll else NotificationLevel.MuteChat
-//                val response = chatRepository.setNotificationLevel(chat, newLevel)
-                val response = chatRepository.toggleChatMuted(chat)
+                val response = chatRepository.setNotificationLevel(chat, newLevel)
 
                 @Exhaustive
                 when (response) {
@@ -1470,6 +1469,51 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 }
             }
         }
+    }
+
+    suspend fun confirmToggleBlockContactState() {
+
+        val alertConfirmCallback: () -> Unit = {
+
+            contactId?.let { contactId ->
+                viewModelScope.launch(mainImmediate) {
+                    contactRepository.getContactById(contactId).firstOrNull()?.let { contact ->
+                        contactRepository.toggleContactBlocked(contact)
+                    }
+                }
+            }
+        }
+
+        submitSideEffect(
+            ChatSideEffect.AlertConfirmBlockContact {
+                alertConfirmCallback().also {
+                    viewModelScope.launch(mainImmediate) {
+                        chatNavigator.popBackStack()
+                    }
+                }
+            }
+        )
+
+    }
+
+    suspend fun confirmDeleteContact() {
+        val alertConfirmDeleteContact: () -> Unit = {
+            contactId?.let { contactId ->
+                viewModelScope.launch(mainImmediate) {
+                    contactRepository.deleteContactById(contactId)
+                }
+            }
+        }
+
+        submitSideEffect(
+            ChatSideEffect.AlertConfirmDeleteContact {
+                alertConfirmDeleteContact().also {
+                    viewModelScope.launch(mainImmediate) {
+                        chatNavigator.popBackStack()
+                    }
+                }
+            }
+        )
     }
 
     fun sendCallInvite(audioOnly: Boolean) {

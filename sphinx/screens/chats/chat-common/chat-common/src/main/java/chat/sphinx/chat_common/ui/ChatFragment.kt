@@ -69,7 +69,6 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.asFormattedString
@@ -78,6 +77,7 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_common.util.getHHMMString
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -484,6 +484,7 @@ abstract class ChatFragment<
     }
 
     open fun setupMoreOptionsMenu() {
+
         bottomMenuMore.newBuilder(moreMenuBinding, viewLifecycleOwner)
             .setHeaderText(R.string.bottom_menu_more_header_text)
             .setOptions(
@@ -508,7 +509,25 @@ abstract class ChatFragment<
                                 viewModel.searchMessages(null)
                             }
                         }
-                    )
+                    ),
+                    MenuBottomOption(
+                        text = R.string.option_delete_user,
+                        textColor = R.color.primaryRed,
+                        onClick = {
+                            lifecycleScope.launch(viewModel.mainImmediate) {
+                                viewModel.confirmDeleteContact()
+                            }
+                        }
+                    ),
+                    MenuBottomOption(
+                        text = R.string.option_block_user,
+                        textColor = R.color.primaryRed,
+                        onClick = {
+                            lifecycleScope.launch(viewModel.mainImmediate) {
+                               viewModel.confirmToggleBlockContactState()
+                            }
+                        }
+                    ),
                 )
             ).build()
     }
@@ -1720,7 +1739,7 @@ abstract class ChatFragment<
     }
 
     private fun startRecording() {
-        viewModel.audioRecorderController.startAudioRecording()
+        viewModel.audioRecorderController.startAudioRecording(binding.root.context)
     }
 
     override fun isActive(): Boolean {

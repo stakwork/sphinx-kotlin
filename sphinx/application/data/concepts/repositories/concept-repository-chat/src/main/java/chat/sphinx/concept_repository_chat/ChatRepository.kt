@@ -54,7 +54,6 @@ interface ChatRepository {
      *
      * Returns error if something went wrong (networking)
      * */
-    suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError>
     suspend fun setNotificationLevel(chat: Chat, level: NotificationLevel): Response<Boolean, ResponseError>
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
