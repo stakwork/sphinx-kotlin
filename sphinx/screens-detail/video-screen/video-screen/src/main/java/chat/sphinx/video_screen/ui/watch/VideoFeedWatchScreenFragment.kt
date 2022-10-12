@@ -21,7 +21,6 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
@@ -44,13 +43,12 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
-import com.google.android.youtube.player.YouTubePlayerSupportFragment
+import com.google.android.youtube.player.YouTubePlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -79,11 +77,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     )
     override val viewModel: VideoFeedWatchScreenViewModel by viewModels()
     private var youtubePlayer: YouTubePlayer? = null
-
-    companion object {
-        const val YOUTUBE_WEB_VIEW_MIME_TYPE = "text/html"
-        const val YOUTUBE_WEB_VIEW_ENCODING = "utf-8"
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -185,7 +178,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     private fun setupYoutubePlayer(videoId: String) {
 
-        val youtubePlayerFragment = YouTubePlayerSupportFragment()
+        val youtubePlayerFragment = YouTubePlayerSupportFragmentXKt()
 
         childFragmentManager.beginTransaction()
             .replace(binding.includeLayoutVideoPlayer.frameLayoutYoutubePlayer.id, youtubePlayerFragment as Fragment)
