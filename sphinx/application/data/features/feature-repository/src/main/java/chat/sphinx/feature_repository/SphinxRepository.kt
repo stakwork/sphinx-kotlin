@@ -5914,11 +5914,42 @@ abstract class SphinxRepository(
         )
 
         val actionsFeedSearchDboList = queries.actionTrackGetByType(ActionTrackType.FeedSearch).executeAsList()
-        val feedSearchActions = actionsFeedSearchDboList.map {
+        val feedSearchActionsList = actionsFeedSearchDboList.map {
             actionTrackDboFeedSearchPresenterMapper.mapFrom(it)
         }
 
-        LOG.d("FeedSearch", feedSearchActions.toString())
+        LOG.d("FeedSearch", feedSearchActionsList.toString())
+    }
+
+    override suspend fun updateFeedBoostAction(
+        boost: Long,
+        feedId: String,
+        feedType: Long,
+        feedUrl: String,
+        feedItemId: String,
+        feedItemUrl: String,
+        topics: ArrayList<String>
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val contentBoostAction = ContentBoostAction(
+            boost, feedId, feedType, feedUrl, feedItemId, feedItemUrl, topics, Date().time
+        )
+
+        queries.actionTrackUpsert(
+            ActionTrackType.ContentBoost,
+            ActionTrackMetaData(contentBoostAction.toJson(moshi)),
+            false.toActionTrackUploaded(),
+            ActionTrackId(Long.MAX_VALUE)
+        )
+
+        val actionsContentBoostDboList = queries.actionTrackGetByType(ActionTrackType.ContentBoost).executeAsList()
+        val contentBoostActionsList = actionsContentBoostDboList.map {
+            actionTrackDboContentBoostPresenterMapper.mapFrom(it)
+        }
+
+        LOG.d("ContentBoost", contentBoostActionsList.toString())
+
     }
 
     override suspend fun testActions() {

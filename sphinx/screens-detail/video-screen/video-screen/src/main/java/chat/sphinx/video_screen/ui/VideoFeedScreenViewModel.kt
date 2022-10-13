@@ -17,10 +17,7 @@ import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.DashboardItemType
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.feed.isTrue
-import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
@@ -257,6 +254,16 @@ internal open class VideoFeedScreenViewModel(
                                         timeSeconds = 0,
                                         amount = amount
                                     )
+                                )
+
+                                feedRepository.updateFeedBoostAction(
+                                    amount.value,
+                                    videoFeed.id.value,
+                                    FeedType.VIDEO.toLong(),
+                                    getArgFeedUrl()?.value ?: "",
+                                    currentItem.id.value,
+                                    currentItem.enclosureUrl.value,
+                                    arrayListOf("")
                                 )
 
                                 videoFeed.destinations.let { destinations ->

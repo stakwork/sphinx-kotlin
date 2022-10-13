@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.feed.watch
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedWatchViewState
@@ -21,6 +22,7 @@ import javax.inject.Inject
 class FeedWatchViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val feedRepository: FeedRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
