@@ -15,6 +15,7 @@ import chat.sphinx.web_view.navigation.WebViewNavigator
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
@@ -212,6 +213,16 @@ internal class WebViewViewModel @Inject constructor(
                                         timeSeconds =0,
                                         amount = amount
                                     )
+                                )
+
+                                feedRepository.updateFeedBoostAction(
+                                    amount.value,
+                                    feed.id.value,
+                                    FeedType.NEWSLETTER.toLong(),
+                                    feed.feedUrl.value,
+                                    feedItem.id.value,
+                                    feedItem.enclosureUrl.value,
+                                    arrayListOf("")
                                 )
 
                                 feed.destinations.let { destinations ->
