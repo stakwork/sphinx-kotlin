@@ -34,6 +34,7 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
@@ -169,6 +170,7 @@ abstract class SphinxRepository(
     SubscriptionRepository,
     RepositoryDashboard,
     RepositoryMedia,
+    ActionsRepository,
     FeedRepository,
     CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener {
