@@ -79,6 +79,4 @@ interface RepositoryDashboard {
 
     fun getAndSaveTransportKey()
     fun getOrCreateHMacKey()
-
-    suspend fun testActions()
 }

@@ -215,13 +215,9 @@ internal class WebViewViewModel @Inject constructor(
                                     )
                                 )
 
-                                feedRepository.updateFeedBoostAction(
+                                feedRepository.trackFeedBoostAction(
                                     amount.value,
-                                    feed.id.value,
-                                    FeedType.NEWSLETTER.toLong(),
-                                    feed.feedUrl.value,
-                                    feedItem.id.value,
-                                    feedItem.enclosureUrl.value,
+                                    feedItem.id,
                                     arrayListOf("")
                                 )
 

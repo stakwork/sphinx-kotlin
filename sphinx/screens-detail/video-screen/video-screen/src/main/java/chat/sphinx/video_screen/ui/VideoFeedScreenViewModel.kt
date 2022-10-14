@@ -256,13 +256,9 @@ internal open class VideoFeedScreenViewModel(
                                     )
                                 )
 
-                                feedRepository.updateFeedBoostAction(
+                                feedRepository.trackFeedBoostAction(
                                     amount.value,
-                                    videoFeed.id.value,
-                                    FeedType.VIDEO.toLong(),
-                                    getArgFeedUrl()?.value ?: "",
-                                    currentItem.id.value,
-                                    currentItem.enclosureUrl.value,
+                                    currentItem.id,
                                     arrayListOf("")
                                 )
 

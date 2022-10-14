@@ -80,13 +80,17 @@ class FeedViewModel @Inject constructor(
         )
         
         viewModelScope.launch(mainImmediate) {
-            delay(1000)
+            delay(500L)
 
-            feedRepository.updateFeedSearchAction(searchTerm)
             feedRepository.searchFeedsBy(
                 searchTerm,
                 feedType
             ).collect { searchResults ->
+
+                feedRepository.trackFeedSearchAction(
+                    searchTerm.lowercase().trim()
+                )
+
                 if (searchResults.isEmpty()) {
                     updateViewState(
                         when (feedChipsViewStateContainer.value) {

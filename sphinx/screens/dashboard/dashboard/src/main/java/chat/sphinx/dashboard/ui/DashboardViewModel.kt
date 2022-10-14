@@ -143,10 +143,6 @@ internal class DashboardViewModel @Inject constructor(
 
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {
-            repositoryDashboard.testActions()
-        }
-
-        viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
                     filter = object : ScannerFilter() {

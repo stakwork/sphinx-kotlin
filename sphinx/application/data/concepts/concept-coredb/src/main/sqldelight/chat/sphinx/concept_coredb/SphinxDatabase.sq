@@ -1356,6 +1356,12 @@ actionTrackUpsert {
     );
 }
 
+feedSearchGetCount:
+SELECT COUNT(*)
+FROM actionTrackDbo
+WHERE type = 1
+AND meta_data LIKE :meta_data;
+
 actionTrackGetAll:
 SELECT *
 FROM actionTrackDbo;

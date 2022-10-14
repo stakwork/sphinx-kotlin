@@ -475,7 +475,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
                             fireworksCallback()
 
                             val metaData = podcast.getMetaData(amount)
-                            val podcastFeedUrl = podcast.feedUrl
 
                             messageRepository.sendBoost(
                                 args.chatId,
@@ -487,15 +486,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                 )
                             )
 
-                            feedRepository.updateFeedBoostAction(
+                            feedRepository.trackFeedBoostAction(
                                 amount.value,
-                                podcast.id.value,
-                                FeedType.PODCAST.toLong(),
-                                args.argFeedUrl.toFeedUrl()?.value ?: "",
-                                metaData.itemId.value,
-                                podcastFeedUrl.value,
+                                podcast.getCurrentEpisode().id,
                                 arrayListOf("")
-                                )
+                            )
 
                             if (podcast.hasDestinations) {
                                 mediaPlayerServiceController.submitAction(

@@ -5897,11 +5897,15 @@ abstract class SphinxRepository(
         ActionTrackDboContentConsumedPresenterMapper(dispatchers, moshi)
     }
 
-    override suspend fun updateFeedSearchAction(searchTerm: String) {
+    override suspend fun trackFeedSearchAction(searchTerm: String) {
         val queries = coreDB.getSphinxDatabaseQueries()
 
+        val searchTermCount = queries.feedSearchGetCount(
+            "%\"searchTerm\":\"$searchTerm\"%"
+        ).executeAsOneOrNull() ?: 0
+
         val feedSearchAction = FeedSearchAction(
-            1,
+            searchTermCount + 1,
             searchTerm,
             Date().time
         )
@@ -5913,109 +5917,48 @@ abstract class SphinxRepository(
             ActionTrackId(Long.MAX_VALUE)
         )
 
-        val actionsFeedSearchDboList = queries.actionTrackGetByType(ActionTrackType.FeedSearch).executeAsList()
-        val feedSearchActionsList = actionsFeedSearchDboList.map {
-            actionTrackDboFeedSearchPresenterMapper.mapFrom(it)
-        }
-
-        LOG.d("FeedSearch", feedSearchActionsList.toString())
+//        val actionsFeedSearchDboList = queries.actionTrackGetByType(ActionTrackType.FeedSearch).executeAsList()
+//        val feedSearchActionsList = actionsFeedSearchDboList.map {
+//            actionTrackDboFeedSearchPresenterMapper.mapFrom(it)
+//        }
+//
+//        LOG.d("FeedSearch", feedSearchActionsList.toString())
     }
 
-    override suspend fun updateFeedBoostAction(
+    override suspend fun trackFeedBoostAction(
         boost: Long,
-        feedId: String,
-        feedType: Long,
-        feedUrl: String,
-        feedItemId: String,
-        feedItemUrl: String,
+        feedItemId: FeedId,
         topics: ArrayList<String>
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
 
-        val contentBoostAction = ContentBoostAction(
-            boost, feedId, feedType, feedUrl, feedItemId, feedItemUrl, topics, Date().time
-        )
+        getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+            feedItem.feed?.let { feed ->
+                val contentBoostAction = ContentBoostAction(
+                    boost,
+                    feed.id.value,
+                    feed.feedType.value.toLong(),
+                    feed.feedUrl.value,
+                    feedItem.id.value,
+                    feedItem.enclosureUrl.value,
+                    topics,
+                    Date().time
+                )
 
-        queries.actionTrackUpsert(
-            ActionTrackType.ContentBoost,
-            ActionTrackMetaData(contentBoostAction.toJson(moshi)),
-            false.toActionTrackUploaded(),
-            ActionTrackId(Long.MAX_VALUE)
-        )
+                queries.actionTrackUpsert(
+                    ActionTrackType.ContentBoost,
+                    ActionTrackMetaData(contentBoostAction.toJson(moshi)),
+                    false.toActionTrackUploaded(),
+                    ActionTrackId(Long.MAX_VALUE)
+                )
 
-        val actionsContentBoostDboList = queries.actionTrackGetByType(ActionTrackType.ContentBoost).executeAsList()
-        val contentBoostActionsList = actionsContentBoostDboList.map {
-            actionTrackDboContentBoostPresenterMapper.mapFrom(it)
+//                val actionsContentBoostDboList = queries.actionTrackGetByType(ActionTrackType.ContentBoost).executeAsList()
+//                val contentBoostActionsList = actionsContentBoostDboList.map {
+//                    actionTrackDboContentBoostPresenterMapper.mapFrom(it)
+//                }
+//
+//                LOG.d("ContentBoost", contentBoostActionsList.toString())
+            }
         }
-
-        LOG.d("ContentBoost", contentBoostActionsList.toString())
-
-    }
-
-    override suspend fun testActions() {
-
-        val queries = coreDB.getSphinxDatabaseQueries()
-//        queries.actionTrackDeleteAll()
-
-//        val messageAction = MessageAction(
-//            arrayListOf("bitcoin", "lightning", "sphinx"),
-//            Date().time
-//        )
-
-//        val feedSearchAction = FeedSearchAction(
-//            1,
-//            "bitcoin",
-//            Date().time
-//        )
-
-//        val contentBoostAction = ContentBoostAction(
-//            100.toLong(),
-//            "FeedId1",
-//            FeedType.Podcast.value.toLong(),
-//            "https://google.com",
-//            "FeedItemId1",
-//            "https://google.com.ar",
-//            arrayListOf("bitcoin", "lightning", "sphinx"),
-//            Date().time
-//        )
-
-        val contentConsumedAction = ContentConsumedAction(
-            "FeedId1",
-            FeedType.Podcast.value.toLong(),
-            "https://google.com",
-            "FeedItemId1",
-            "https://google.com.ar",
-        )
-
-        val item1 = ContentConsumedHistoryItem(
-            arrayListOf("bitcoin", "lightning", "sphinx"),
-            Date().time,
-            Date().time,
-            Date().time
-        )
-
-        val item2 = ContentConsumedHistoryItem(
-            arrayListOf("lightning", "sphinx", "bitcoin"),
-            Date().time,
-            Date().time,
-            Date().time
-        )
-
-        contentConsumedAction.addHistoryItem(item1)
-        contentConsumedAction.addHistoryItem(item2)
-
-        queries.actionTrackUpsert(
-            ActionTrackType.ContentConsumed,
-            ActionTrackMetaData(contentConsumedAction.toJson(moshi)),
-            false.toActionTrackUploaded(),
-            ActionTrackId(Long.MAX_VALUE)
-        )
-
-        val actionsDboList = queries.actionTrackGetByType(ActionTrackType.ContentConsumed).executeAsList()
-        val messageActions = actionsDboList.map {
-            actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
-        }
-
-        LOG.d("SPHINX", messageActions.toString())
     }
 }
