@@ -39,17 +39,5 @@ interface FeedRepository {
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
-    suspend fun trackFeedBoostAction(
-        boost: Long,
-        feedItemId: FeedId,
-        topics: ArrayList<String>
-    )
-    suspend fun trackFeedSearchAction(searchTerm: String)
-    suspend fun trackPodcastClipComments(
-        feedItemId: FeedId,
-        timestamp: Long,
-        topics: ArrayList<String>
-    )
-
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 }

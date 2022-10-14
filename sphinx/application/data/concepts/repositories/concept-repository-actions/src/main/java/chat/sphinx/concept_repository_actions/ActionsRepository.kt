@@ -1,11 +1,20 @@
 package chat.sphinx.concept_repository_actions
 
+import chat.sphinx.wrapper_common.feed.FeedId
 import kotlinx.coroutines.flow.Flow
 
-/**
- * All [Chat]s are cached to the DB such that a network refresh will update
- * them, and thus proc any [Flow] being collected
- * */
 interface ActionsRepository {
+
+    suspend fun trackFeedBoostAction(
+        boost: Long,
+        feedItemId: FeedId,
+        topics: ArrayList<String>
+    )
+    suspend fun trackFeedSearchAction(searchTerm: String)
+    suspend fun trackPodcastClipComments(
+        feedItemId: FeedId,
+        timestamp: Long,
+        topics: ArrayList<String>
+    )
 
 }

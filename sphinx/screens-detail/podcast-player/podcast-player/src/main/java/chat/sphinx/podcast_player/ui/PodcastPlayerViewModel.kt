@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -73,6 +74,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val lightningRepository: LightningRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
@@ -261,7 +263,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         ts = podcast.currentTime / 1000
                     )
 
-                    feedRepository.trackPodcastClipComments(
+                    actionsRepository.trackPodcastClipComments(
                         podcast.getCurrentEpisode().id,
                         podcast.currentTime.toLong(),
                         arrayListOf("")
@@ -492,7 +494,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                 )
                             )
 
-                            feedRepository.trackFeedBoostAction(
+                            actionsRepository.trackFeedBoostAction(
                                 amount.value,
                                 podcast.getCurrentEpisode().id,
                                 arrayListOf("")

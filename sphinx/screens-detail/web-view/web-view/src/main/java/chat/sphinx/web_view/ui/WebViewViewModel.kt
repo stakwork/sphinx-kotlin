@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -46,6 +47,7 @@ internal class WebViewViewModel @Inject constructor(
     private val app: Application,
     private val chatRepository: ChatRepository,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val repositoryMedia: RepositoryMedia,
@@ -215,7 +217,7 @@ internal class WebViewViewModel @Inject constructor(
                                     )
                                 )
 
-                                feedRepository.trackFeedBoostAction(
+                                actionsRepository.trackFeedBoostAction(
                                     amount.value,
                                     feedItem.id,
                                     arrayListOf("")

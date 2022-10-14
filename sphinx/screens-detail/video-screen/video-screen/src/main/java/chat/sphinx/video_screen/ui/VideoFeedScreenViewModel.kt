@@ -3,6 +3,7 @@ package chat.sphinx.video_screen.ui
 import android.app.Application
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -43,6 +44,7 @@ internal open class VideoFeedScreenViewModel(
     private val chatRepository: ChatRepository,
     private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val lightningRepository: LightningRepository,
@@ -256,7 +258,7 @@ internal open class VideoFeedScreenViewModel(
                                     )
                                 )
 
-                                feedRepository.trackFeedBoostAction(
+                                actionsRepository.trackFeedBoostAction(
                                     amount.value,
                                     currentItem.id,
                                     arrayListOf("")
