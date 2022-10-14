@@ -5961,4 +5961,44 @@ abstract class SphinxRepository(
             }
         }
     }
+
+    override suspend fun trackPodcastClipComments(
+        feedItemId: FeedId,
+        timestamp: Long,
+        topics: ArrayList<String>
+    ) {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+            feedItem.feed?.let { feed ->
+                val podcastClipCommentAction = PodcastClipCommentAction(
+                    feed.id.value,
+                    feed.feedType.value.toLong(),
+                    feed.feedUrl.value,
+                    feedItem.id.value,
+                    feedItem.enclosureUrl.value,
+                    topics,
+                    timestamp,
+                    timestamp,
+                    Date().time
+                )
+
+                queries.actionTrackUpsert(
+                    ActionTrackType.PodcastClipComment,
+                    ActionTrackMetaData(podcastClipCommentAction.toJson(moshi)),
+                    false.toActionTrackUploaded(),
+                    ActionTrackId(Long.MAX_VALUE)
+                )
+
+                val actionsClipCommentDboList =
+                    queries.actionTrackGetByType(ActionTrackType.PodcastClipComment).executeAsList()
+                val clipCommentActionsList = actionsClipCommentDboList.map {
+                    actionTrackDboPodcastClipCommentPresenterMapper.mapFrom(it)
+                }
+
+                LOG.d("ClipComment", clipCommentActionsList.toString())
+
+            }
+        }
+    }
 }

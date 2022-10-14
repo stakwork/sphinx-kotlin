@@ -261,6 +261,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         ts = podcast.currentTime / 1000
                     )
 
+                    feedRepository.trackPodcastClipComments(
+                        podcast.getCurrentEpisode().id,
+                        podcast.currentTime.toLong(),
+                        arrayListOf("")
+                        )
+
                     try {
                         requestCatcher.getCaughtRequestStateFlow().collect { list ->
                             list.firstOrNull()?.let { requestHolder ->

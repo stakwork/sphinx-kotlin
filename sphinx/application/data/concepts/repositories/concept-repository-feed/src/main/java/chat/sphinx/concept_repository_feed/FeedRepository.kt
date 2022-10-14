@@ -45,6 +45,11 @@ interface FeedRepository {
         topics: ArrayList<String>
     )
     suspend fun trackFeedSearchAction(searchTerm: String)
+    suspend fun trackPodcastClipComments(
+        feedItemId: FeedId,
+        timestamp: Long,
+        topics: ArrayList<String>
+    )
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 }
