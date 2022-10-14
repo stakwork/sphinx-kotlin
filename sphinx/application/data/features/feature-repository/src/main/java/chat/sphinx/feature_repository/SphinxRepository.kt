@@ -5899,25 +5899,26 @@ abstract class SphinxRepository(
         ActionTrackDboContentConsumedPresenterMapper(dispatchers, moshi)
     }
 
-    override suspend fun trackFeedSearchAction(searchTerm: String) {
-        val queries = coreDB.getSphinxDatabaseQueries()
+    override fun trackFeedSearchAction(searchTerm: String) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-        val searchTermCount = queries.feedSearchGetCount(
-            "%\"searchTerm\":\"$searchTerm\"%"
-        ).executeAsOneOrNull() ?: 0
+            val searchTermCount = queries.feedSearchGetCount(
+                "%\"searchTerm\":\"$searchTerm\"%"
+            ).executeAsOneOrNull() ?: 0
 
-        val feedSearchAction = FeedSearchAction(
-            searchTermCount + 1,
-            searchTerm,
-            Date().time
-        )
+            val feedSearchAction = FeedSearchAction(
+                searchTermCount + 1,
+                searchTerm,
+                Date().time
+            )
 
-        queries.actionTrackUpsert(
-            ActionTrackType.FeedSearch,
-            ActionTrackMetaData(feedSearchAction.toJson(moshi)),
-            false.toActionTrackUploaded(),
-            ActionTrackId(Long.MAX_VALUE)
-        )
+            queries.actionTrackUpsert(
+                ActionTrackType.FeedSearch,
+                ActionTrackMetaData(feedSearchAction.toJson(moshi)),
+                false.toActionTrackUploaded(),
+                ActionTrackId(Long.MAX_VALUE)
+            )
 
 //        val actionsFeedSearchDboList = queries.actionTrackGetByType(ActionTrackType.FeedSearch).executeAsList()
 //        val feedSearchActionsList = actionsFeedSearchDboList.map {
@@ -5925,34 +5926,36 @@ abstract class SphinxRepository(
 //        }
 //
 //        LOG.d("FeedSearch", feedSearchActionsList.toString())
+        }
     }
 
-    override suspend fun trackFeedBoostAction(
+    override fun trackFeedBoostAction(
         boost: Long,
         feedItemId: FeedId,
         topics: ArrayList<String>
     ) {
-        val queries = coreDB.getSphinxDatabaseQueries()
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-        getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
-            getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
-                val contentBoostAction = ContentBoostAction(
-                    boost,
-                    feed.id.value,
-                    feed.feedType.value.toLong(),
-                    feed.feedUrl.value,
-                    feedItem.id.value,
-                    feedItem.enclosureUrl.value,
-                    topics,
-                    Date().time
-                )
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    val contentBoostAction = ContentBoostAction(
+                        boost,
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value,
+                        topics,
+                        Date().time
+                    )
 
-                queries.actionTrackUpsert(
-                    ActionTrackType.ContentBoost,
-                    ActionTrackMetaData(contentBoostAction.toJson(moshi)),
-                    false.toActionTrackUploaded(),
-                    ActionTrackId(Long.MAX_VALUE)
-                )
+                    queries.actionTrackUpsert(
+                        ActionTrackType.ContentBoost,
+                        ActionTrackMetaData(contentBoostAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
 
 //                val actionsContentBoostDboList = queries.actionTrackGetByType(ActionTrackType.ContentBoost).executeAsList()
 //                val contentBoostActionsList = actionsContentBoostDboList.map {
@@ -5960,46 +5963,50 @@ abstract class SphinxRepository(
 //                }
 //
 //                LOG.d("ContentBoost", contentBoostActionsList.toString())
+                }
             }
         }
     }
 
-    override suspend fun trackPodcastClipComments(
+    override fun trackPodcastClipComments(
         feedItemId: FeedId,
         timestamp: Long,
         topics: ArrayList<String>
     ) {
-        val queries = coreDB.getSphinxDatabaseQueries()
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-        getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
-            getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
-                val podcastClipCommentAction = PodcastClipCommentAction(
-                    feed.id.value,
-                    feed.feedType.value.toLong(),
-                    feed.feedUrl.value,
-                    feedItem.id.value,
-                    feedItem.enclosureUrl.value,
-                    topics,
-                    timestamp,
-                    timestamp,
-                    Date().time
-                )
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    val podcastClipCommentAction = PodcastClipCommentAction(
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value,
+                        topics,
+                        timestamp,
+                        timestamp,
+                        Date().time
+                    )
 
-                queries.actionTrackUpsert(
-                    ActionTrackType.PodcastClipComment,
-                    ActionTrackMetaData(podcastClipCommentAction.toJson(moshi)),
-                    false.toActionTrackUploaded(),
-                    ActionTrackId(Long.MAX_VALUE)
-                )
+                    queries.actionTrackUpsert(
+                        ActionTrackType.PodcastClipComment,
+                        ActionTrackMetaData(podcastClipCommentAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
 
-                val actionsClipCommentDboList =
-                    queries.actionTrackGetByType(ActionTrackType.PodcastClipComment).executeAsList()
-                val clipCommentActionsList = actionsClipCommentDboList.map {
-                    actionTrackDboPodcastClipCommentPresenterMapper.mapFrom(it)
+                    val actionsClipCommentDboList =
+                        queries.actionTrackGetByType(ActionTrackType.PodcastClipComment)
+                            .executeAsList()
+                    val clipCommentActionsList = actionsClipCommentDboList.map {
+                        actionTrackDboPodcastClipCommentPresenterMapper.mapFrom(it)
+                    }
+
+                    LOG.d("ClipComment", clipCommentActionsList.toString())
+
                 }
-
-                LOG.d("ClipComment", clipCommentActionsList.toString())
-
             }
         }
     }

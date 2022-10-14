@@ -1,7 +1,9 @@
 package chat.sphinx.dashboard.ui.feed
 
 import android.content.Context
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
@@ -34,6 +36,7 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -87,7 +90,7 @@ class FeedViewModel @Inject constructor(
                 feedType
             ).collect { searchResults ->
 
-                feedRepository.trackFeedSearchAction(
+                actionsRepository.trackFeedSearchAction(
                     searchTerm.lowercase().trim()
                 )
 
