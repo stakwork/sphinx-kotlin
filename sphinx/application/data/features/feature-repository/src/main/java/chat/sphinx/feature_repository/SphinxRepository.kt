@@ -5935,7 +5935,7 @@ abstract class SphinxRepository(
         val queries = coreDB.getSphinxDatabaseQueries()
 
         getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
-            feedItem.feed?.let { feed ->
+            getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
                 val contentBoostAction = ContentBoostAction(
                     boost,
                     feed.id.value,
@@ -5972,7 +5972,7 @@ abstract class SphinxRepository(
         val queries = coreDB.getSphinxDatabaseQueries()
 
         getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
-            feedItem.feed?.let { feed ->
+            getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
                 val podcastClipCommentAction = PodcastClipCommentAction(
                     feed.id.value,
                     feed.feedType.value.toLong(),
