@@ -94,6 +94,6 @@ internal class NewsletterDetailViewModel @Inject constructor(
                 item.id
             )
         }
-        actionsRepository.trackNewsletterConsumed(item.feedId)
+        actionsRepository.trackNewsletterConsumed(item.id)
     }
 }
