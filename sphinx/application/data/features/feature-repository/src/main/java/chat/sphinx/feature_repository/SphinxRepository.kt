@@ -6092,14 +6092,14 @@ abstract class SphinxRepository(
                         ActionTrackId(Long.MAX_VALUE)
                     )
 
-                    val newsletterConsumedList =
-                        queries.actionTrackGetByType(ActionTrackType.ContentConsumed)
-                            .executeAsList()
-                    val newsletterConsumedActionsList = newsletterConsumedList.map {
-                        actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
-                    }
-
-                    LOG.d("newsletterConsumed", newsletterConsumedActionsList.toString())
+//                    val newsletterConsumedList =
+//                        queries.actionTrackGetByType(ActionTrackType.ContentConsumed)
+//                            .executeAsList()
+//                    val newsletterConsumedActionsList = newsletterConsumedList.map {
+//                        actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
+//                    }
+//
+//                    LOG.d("newsletterConsumed", newsletterConsumedActionsList.toString())
                 }
             }
         }

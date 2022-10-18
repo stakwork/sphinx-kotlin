@@ -25,9 +25,9 @@ import javax.inject.Inject
 @HiltViewModel
 class FeedReadViewModel @Inject constructor(
     private val app: Application,
-    private val actionsRepository: ActionsRepository,
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val actionsRepository: ActionsRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
