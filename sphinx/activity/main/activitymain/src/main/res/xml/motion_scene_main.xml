@@ -89,6 +89,8 @@
             <Layout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
+            <PropertySet
+                android:visibility="visible" />
         </Constraint>
 
     </ConstraintSet>
@@ -150,6 +152,14 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/nav_host_fragment_detail" />
+        </Constraint>
+
+        <Constraint android:id="@+id/nav_host_fragment_authentication">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet
+                android:visibility="gone" />
         </Constraint>
 
     </ConstraintSet>

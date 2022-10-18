@@ -5,16 +5,13 @@ import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
+import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.MediaController
-import android.widget.TextView
+import android.widget.*
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
@@ -34,6 +31,7 @@ import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.video_screen.BuildConfig
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.isTrue
@@ -43,8 +41,10 @@ import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
+import com.google.android.youtube.player.YouTubeInitializationResult
+import com.google.android.youtube.player.YouTubePlayer
+import com.google.android.youtube.player.YouTubePlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -55,14 +55,13 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class VideoFeedWatchScreenFragment: SideEffectFragment<
+internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         FragmentActivity,
         VideoFeedScreenSideEffect,
         VideoFeedScreenViewState,
         VideoFeedWatchScreenViewModel,
         FragmentVideoWatchScreenBinding
-        >(R.layout.fragment_video_watch_screen)
-{
+        >(R.layout.fragment_video_watch_screen) {
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
@@ -73,13 +72,11 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
             .build()
     }
 
-    override val binding: FragmentVideoWatchScreenBinding by viewBinding(FragmentVideoWatchScreenBinding::bind)
+    override val binding: FragmentVideoWatchScreenBinding by viewBinding(
+        FragmentVideoWatchScreenBinding::bind
+    )
     override val viewModel: VideoFeedWatchScreenViewModel by viewModels()
-
-    companion object {
-        const val YOUTUBE_WEB_VIEW_MIME_TYPE = "text/html"
-        const val YOUTUBE_WEB_VIEW_ENCODING = "utf-8"
-    }
+    private var youtubePlayer: YouTubePlayer? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -90,6 +87,7 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
         setupBoost()
         setupItems()
         setupVideoPlayer()
+
     }
 
     override fun onDestroyView() {
@@ -102,7 +100,7 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
     private fun setupBoost() {
         binding.apply {
             includeLayoutBoostFireworks.apply {
-                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener {
                     override fun onAnimationEnd(animation: Animator?) {
                         root.gone
                     }
@@ -129,7 +127,7 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                                 setupBoostAnimation(null, amount)
 
-                                includeLayoutBoostFireworks.apply fireworks@ {
+                                includeLayoutBoostFireworks.apply fireworks@{
                                     this@fireworks.root.visible
                                     this@fireworks.lottieAnimationView.playAnimation()
                                 }
@@ -152,7 +150,8 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
                     viewModel,
                     viewModel
                 )
-                val videoListFooterAdapter = VideoFeedItemsFooterAdapter(requireActivity() as InsetterActivity)
+                val videoListFooterAdapter =
+                    VideoFeedItemsFooterAdapter(requireActivity() as InsetterActivity)
                 this.setHasFixedSize(false)
                 layoutManager = linearLayoutManager
                 adapter = ConcatAdapter(videoFeedItemsAdapter, videoListFooterAdapter)
@@ -176,6 +175,55 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
             }
         }
     }
+
+    private fun setupYoutubePlayer(videoId: String) {
+
+        val youtubePlayerFragment = YouTubePlayerSupportFragmentXKt()
+
+        childFragmentManager.beginTransaction()
+            .replace(binding.includeLayoutVideoPlayer.frameLayoutYoutubePlayer.id, youtubePlayerFragment as Fragment)
+            .commit()
+
+        youtubePlayerFragment.initialize(
+            BuildConfig.YOUTUBE_API_KEY,
+            object : YouTubePlayer.OnInitializedListener {
+
+                override fun onInitializationSuccess(
+                    p0: YouTubePlayer.Provider?,
+                    p1: YouTubePlayer?,
+                    p2: Boolean
+                ) {
+                    p1?.let {
+                        youtubePlayer = it
+                    }
+                    p1?.cueVideo(videoId)
+                    p1?.setPlaybackEventListener(playbackEventListener)
+                }
+
+                override fun onInitializationFailure(
+                    p0: YouTubePlayer.Provider?,
+                    p1: YouTubeInitializationResult?
+                ) {}
+
+               private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
+                    override fun onSeekTo(p0: Int) {
+                        Log.d("OnSeek", "Youtube has seek")
+                    }
+                    override fun onBuffering(p0: Boolean) {}
+
+                    override fun onPlaying() {
+                        Log.d("OnPlaying", "Youtube is playing")
+                    }
+                    override fun onStopped() {
+                        Log.d("OnStopped", "Youtube has stopped")
+                    }
+                    override fun onPaused() {
+                        Log.d("OnPaused", "Youtube is on pause")
+                    }
+                }
+            })
+    }
+
 
     private suspend fun setupBoostAnimation(
         photoUrl: PhotoUrl?,
@@ -207,7 +255,7 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
     }
 
     private fun removeFocusOnEnter(editText: EditText?) {
-        editText?.setOnEditorActionListener(object:
+        editText?.setOnEditorActionListener(object :
             TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
                 if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -233,7 +281,8 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
 
             is VideoFeedScreenViewState.FeedLoaded -> {
                 binding.apply {
-                    includeLayoutVideoItemsList.textViewVideosListCount.text = viewState.items.count().toString()
+                    includeLayoutVideoItemsList.textViewVideosListCount.text =
+                        viewState.items.count().toString()
 
                     includeLayoutVideoPlayer.apply {
                         textViewContributorName.text = viewState.title.value
@@ -248,7 +297,8 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
                     }
 
                     includeLayoutVideoPlayer.apply {
-                        val notLinkedToChat = viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
+                        val notLinkedToChat =
+                            viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
                         textViewSubscribeButton.goneIfFalse(notLinkedToChat)
 
                         textViewSubscribeButton.text = if (viewState.subscribed.isTrue()) {
@@ -257,10 +307,13 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
                             getString(R.string.subscribe)
                         }
 
-                        includeLayoutCustomBoost.apply customBoost@ {
-                            this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (viewState.hasDestinations) 1.0f else 0.3f
-                            this@customBoost.imageViewFeedBoostButton.isEnabled = viewState.hasDestinations
-                            this@customBoost.editTextCustomBoost.isEnabled = viewState.hasDestinations
+                        includeLayoutCustomBoost.apply customBoost@{
+                            this@customBoost.layoutConstraintBoostButtonContainer.alpha =
+                                if (viewState.hasDestinations) 1.0f else 0.3f
+                            this@customBoost.imageViewFeedBoostButton.isEnabled =
+                                viewState.hasDestinations
+                            this@customBoost.editTextCustomBoost.isEnabled =
+                                viewState.hasDestinations
                         }
                     }
                 }
@@ -303,28 +356,25 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
                             if (viewState.url.isYoutubeVideo()) {
 
                                 layoutConstraintVideoViewContainer.gone
-                                webViewYoutubeVideoPlayer.visible
+                                frameLayoutYoutubePlayer.visible
 
-                                webViewYoutubeVideoPlayer.settings.apply {
-                                    javaScriptEnabled = true
+                                if (youtubePlayer != null) {
+                                    youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
+                                } else {
+                                    setupYoutubePlayer(viewState.id.youtubeVideoId())
                                 }
 
-                                webViewYoutubeVideoPlayer.loadData(
-                                    "<iframe width=\"100%\" height=\"100%\" src=\"https://www.youtube-nocookie.com/embed/${viewState.id.youtubeVideoId()}\" title=\"YouTube video player\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>",
-                                    YOUTUBE_WEB_VIEW_MIME_TYPE,
-                                    YOUTUBE_WEB_VIEW_ENCODING
-                                )
                             } else {
                                 layoutConstraintLoadingVideo.visible
                                 layoutConstraintVideoViewContainer.visible
-                                webViewYoutubeVideoPlayer.gone
+                                frameLayoutYoutubePlayer.gone
 
                                 val videoUri = if (viewState.localFile != null) {
                                     viewState.localFile.toUri()
                                 } else {
                                     viewState.url.value.toUri()
                                 }
-                                
+
                                 viewModel.initializeVideo(
                                     videoUri,
                                     viewState.duration?.value?.toInt()
@@ -341,7 +391,7 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
                 binding.includeLayoutVideoPlayer.apply {
                     @Exhaustive
                     when (viewState) {
-                        is LoadingVideoViewState.Idle -> { }
+                        is LoadingVideoViewState.Idle -> {}
 
                         is LoadingVideoViewState.MetaDataLoaded -> {
                             layoutConstraintLoadingVideo.gone
@@ -359,7 +409,8 @@ internal class VideoFeedWatchScreenFragment: SideEffectFragment<
 
         binding.includeLayoutVideoPlayer.layoutConstraintVideoPlayers.apply {
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                layoutParams.height = binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+                layoutParams.height =
+                    binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
             } else {
                 layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
             }
