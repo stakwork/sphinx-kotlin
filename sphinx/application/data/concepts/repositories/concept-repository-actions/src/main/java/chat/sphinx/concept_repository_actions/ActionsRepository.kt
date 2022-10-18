@@ -18,4 +18,8 @@ interface ActionsRepository {
         topics: ArrayList<String>
     )
 
+    fun trackNewsletterConsumed(
+        feedItemId: FeedId
+    )
+
 }

@@ -3,6 +3,7 @@ package chat.sphinx.newsletter_detail.ui
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.newsletter_detail.R
@@ -31,6 +32,7 @@ internal class NewsletterDetailViewModel @Inject constructor(
     private val app: Application,
     private val chatRepository: ChatRepository,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     val navigator: NewsletterDetailNavigator
 ): BaseViewModel<NewsletterDetailViewState>(dispatchers, NewsletterDetailViewState.Idle)
 {
@@ -92,5 +94,6 @@ internal class NewsletterDetailViewModel @Inject constructor(
                 item.id
             )
         }
+        actionsRepository.trackNewsletterConsumed(item.feedId)
     }
 }

@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.dashboard.R
@@ -24,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FeedReadViewModel @Inject constructor(
     private val app: Application,
+    private val actionsRepository: ActionsRepository,
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     dispatchers: CoroutineDispatchers,
@@ -59,5 +61,6 @@ class FeedReadViewModel @Inject constructor(
                 item.id
             )
         }
+        actionsRepository.trackNewsletterConsumed(item.feedId)
     }
 }
