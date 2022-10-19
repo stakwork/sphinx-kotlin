@@ -14,6 +14,7 @@ import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.video_screen.ui.watch.VideoRecordConsumed
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -57,6 +58,7 @@ internal open class VideoFeedScreenViewModel(
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
 
+
     private val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
         getArgFeedId()?.let { feedId ->
             emitAll(feedRepository.getFeedById(feedId))
@@ -68,6 +70,8 @@ internal open class VideoFeedScreenViewModel(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    var videoRecordConsumed: VideoRecordConsumed? = null
 
     suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -318,5 +322,23 @@ internal open class VideoFeedScreenViewModel(
 
     fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
+    }
+
+    fun createVideoRecordConsumed(feedItemId: FeedId){
+        if (videoRecordConsumed?.feedItemId == feedItemId){
+            return
+        }
+        videoRecordConsumed = VideoRecordConsumed(feedItemId)
+    }
+
+    fun trackVideoConsumed(){
+        videoRecordConsumed?.let { record ->
+            if (record.history.isNotEmpty()) {
+                actionsRepository.trackVideoConsumed(
+                    record.feedItemId,
+                    record.history
+                )
+            }
+        }
     }
 }

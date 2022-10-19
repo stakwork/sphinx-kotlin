@@ -6104,4 +6104,43 @@ abstract class SphinxRepository(
             }
         }
     }
+
+    override fun trackVideoConsumed(
+        feedItemId: FeedId,
+        history: java.util.ArrayList<ContentConsumedHistoryItem>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+
+                    val videoConsumedAction = ContentConsumedAction(
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value
+                    )
+                    videoConsumedAction.history = history
+
+                    queries.actionTrackUpsert(
+                        ActionTrackType.ContentConsumed,
+                        ActionTrackMetaData(videoConsumedAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
+
+                    val newsletterConsumedList =
+                        queries.actionTrackGetByType(ActionTrackType.ContentConsumed)
+                            .executeAsList()
+                    val newsletterConsumedActionsList = newsletterConsumedList.map {
+                        actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
+                    }
+
+                    LOG.d("videoConsumed", newsletterConsumedActionsList.toString())
+                }
+            }
+        }
+    }
 }

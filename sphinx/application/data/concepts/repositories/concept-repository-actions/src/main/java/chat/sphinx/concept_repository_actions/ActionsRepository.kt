@@ -1,5 +1,6 @@
 package chat.sphinx.concept_repository_actions
 
+import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
 import chat.sphinx.wrapper_common.feed.FeedId
 
 interface ActionsRepository {
@@ -20,6 +21,11 @@ interface ActionsRepository {
 
     fun trackNewsletterConsumed(
         feedItemId: FeedId
+    )
+
+    fun trackVideoConsumed(
+        feedItemId: FeedId,
+        history: java.util.ArrayList<ContentConsumedHistoryItem>
     )
 
 }
