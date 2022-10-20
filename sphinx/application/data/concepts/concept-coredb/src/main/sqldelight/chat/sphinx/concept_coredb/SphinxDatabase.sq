@@ -691,6 +691,14 @@ WHERE sender != :ownerId
 AND seen = 0
 AND chat_id = ?;
 
+messageGetUnseenIncomingMentionsCountByChatId:
+SELECT COUNT(*)
+FROM messageDbo
+WHERE sender != :ownerId
+AND seen = 0
+AND push = 1
+AND chat_id = ?;
+
 messageGetUnseenIncomingMessageCountByChatType:
 SELECT COUNT(*)
 FROM messageDbo

@@ -210,6 +210,7 @@ internal class ChatListAdapter(
         private var disposable: Disposable? = null
         private var dChat: DashboardChat? = null
         private var badgeJob: Job? = null
+        private var mentionsJob: Job? = null
 
         init {
             binding.layoutConstraintChatHolder.setOnClickListener {
@@ -274,6 +275,7 @@ internal class ChatListAdapter(
                 dChat = dashboardChat
                 disposable?.dispose()
                 badgeJob?.cancel()
+                mentionsJob?.cancel()
 
                 // Set Defaults
                 layoutConstraintChatHolderBorder.goneIfFalse(position != dashboardChats.lastIndex)
@@ -365,6 +367,7 @@ internal class ChatListAdapter(
                 handleInviteLayouts()
 
                 handleUnseenMessageCount()
+                handleUnseenMentionsCount()
 
                 // Notification
                 if (dashboardChat is DashboardChat.Active) {
@@ -412,6 +415,7 @@ internal class ChatListAdapter(
             dChat?.let { nnDashboardChat ->
                 badgeJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     nnDashboardChat.unseenMessageFlow?.collect { unseen ->
+
                         binding.textViewDashboardChatHolderBadgeCount.apply {
                             if (unseen != null && unseen > 0) {
                                 text = unseen.toString()
@@ -430,7 +434,23 @@ internal class ChatListAdapter(
                                 )
                             }
 
-                            invisibleIfFalse(nnDashboardChat.hasUnseenMessages())
+                            goneIfFalse(nnDashboardChat.hasUnseenMessages())
+                        }
+                    }
+                }
+            }
+        }
+
+        private fun handleUnseenMentionsCount() {
+            dChat?.let { nnDashboardChat ->
+                mentionsJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    nnDashboardChat.unseenMentionsFlow?.collect { unseenMentions ->
+
+                        binding.textViewDashboardChatHolderMentionsCount.apply {
+                            if (unseenMentions != null && unseenMentions > 0) {
+                                text = "@ $unseenMentions"
+                            }
+                            goneIfFalse((unseenMentions ?: 0) > 0)
                         }
                     }
                 }
@@ -439,9 +459,16 @@ internal class ChatListAdapter(
 
         override fun onStart(owner: LifecycleOwner) {
             super.onStart(owner)
+
             badgeJob?.let {
                 if (!it.isActive) {
                     handleUnseenMessageCount()
+                }
+            }
+
+            mentionsJob?.let {
+                if (!it.isActive) {
+                    handleUnseenMentionsCount()
                 }
             }
         }

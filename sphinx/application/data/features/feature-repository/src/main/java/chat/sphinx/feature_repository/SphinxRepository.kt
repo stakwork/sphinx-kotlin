@@ -445,6 +445,33 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getUnseenMentionsByChatId(chatId: ChatId): Flow<Long?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect { contact ->
+                    if (contact != null) {
+                        ownerId = contact.id
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetUnseenIncomingMentionsCountByChatId(
+                    ownerId ?: ContactId(-1),
+                    chatId
+                )
+                .asFlow()
+                .mapToOneOrNull(io)
+                .distinctUntilChanged()
+        )
+    }
+
     override fun getUnseenActiveConversationMessagesCount(): Flow<Long?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
         var ownerId: ContactId? = accountOwner.value?.id

@@ -257,22 +257,51 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_dashboard_chat_holder_badge_count"
-            android:layout_width="wrap_content"
-            android:minWidth="@dimen/dashboard_badge_count_xy"
-            android:layout_height="@dimen/dashboard_badge_count_xy"
-            android:paddingVertical="@dimen/dashboard_badge_count_padding_vertical"
-            android:paddingHorizontal="@dimen/dashboard_badge_count_padding_horizontal"
-            android:fontFamily="@font/roboto_regular"
-            android:textSize="11sp"
-            android:textColor="@android:color/white"
-            tools:text="9999"
-            android:gravity="center"
-            android:background="@drawable/chat_initials_circle"
-            android:backgroundTint="@color/primaryBlue"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             app:layout_constraintEnd_toEndOf="@+id/text_view_chat_holder_time"
-            app:layout_constraintTop_toBottomOf="@+id/guide5"/>
+            app:layout_constraintTop_toBottomOf="@+id/guide5">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_dashboard_chat_holder_mentions_count"
+                android:layout_width="wrap_content"
+                android:minWidth="@dimen/dashboard_badge_count_xy"
+                android:layout_height="@dimen/dashboard_badge_count_xy"
+                android:paddingHorizontal="@dimen/dashboard_badge_count_padding_horizontal"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="11sp"
+                android:textColor="@android:color/white"
+                tools:text="9999"
+                android:gravity="center"
+                android:background="@drawable/chat_initials_circle"
+                android:backgroundTint="@color/primaryBlue"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_dashboard_chat_holder_badge_count"
+                android:layout_width="wrap_content"
+                android:minWidth="@dimen/dashboard_badge_count_xy"
+                android:layout_height="@dimen/dashboard_badge_count_xy"
+                android:paddingHorizontal="@dimen/dashboard_badge_count_padding_horizontal"
+                android:layout_marginStart="@dimen/dashboard_badge_count_padding_horizontal"
+                android:fontFamily="@font/roboto_regular"
+                android:textSize="11sp"
+                android:textColor="@android:color/white"
+                tools:text="9999"
+                android:gravity="center"
+                android:background="@drawable/chat_initials_circle"
+                android:backgroundTint="@color/primaryBlue"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/text_view_dashboard_chat_holder_mentions_count"
+                tools:visibility="visible"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
