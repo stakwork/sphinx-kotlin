@@ -94,8 +94,11 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
+        viewModel.createHistoryItem()
+        viewModel.trackVideoConsumed()
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
     }
 
     private fun setupBoost() {
@@ -105,7 +108,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                     override fun onAnimationEnd(animation: Animator?) {
                         root.gone
                     }
-
                     override fun onAnimationRepeat(animation: Animator?) {}
 
                     override fun onAnimationCancel(animation: Animator?) {}
@@ -207,23 +209,21 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                    private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
                     override fun onSeekTo(p0: Int) {
-                        val seconds = TimeUnit.MILLISECONDS.toSeconds(p0.toLong())
-                        viewModel.videoRecordConsumed?.setNewHistoryItem(seconds)
-                        Log.d("YouTubePlayer", "Youtube has seek $seconds")
+                        viewModel.setNewHistoryItem(p0.toLong())
+                        Log.d("YouTubePlayer", "Youtube has seek $p0")
                     }
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
-                        viewModel.videoRecordConsumed?.startTimer()
+                        viewModel.startTimer()
                         Log.d("YouTubePlayer", "Youtube is playing")
                     }
                     override fun onStopped() {
-                        viewModel.videoRecordConsumed?.createHistoryItem()
-                        viewModel.trackVideoConsumed()
+                        viewModel.stopTimer()
                         Log.d("YouTubePlayer", "Youtube has stopped")
                     }
                     override fun onPaused() {
-                        viewModel.videoRecordConsumed?.stopTimer()
+                        viewModel.stopTimer()
                         Log.d("YouTubePlayer", "Youtube is on pause")
                     }
                 }
@@ -364,6 +364,8 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 frameLayoutYoutubePlayer.visible
 
                                 if (youtubePlayer != null) {
+                                    viewModel.createHistoryItem()
+                                    viewModel.trackVideoConsumed()
                                     youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
                                     viewModel.createVideoRecordConsumed(viewState.id)
                                 } else {

@@ -1,5 +1,6 @@
 package chat.sphinx.video_screen.ui.watch
 
+import android.util.Log
 import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
 import chat.sphinx.wrapper_common.feed.FeedId
 import java.util.*
@@ -17,11 +18,13 @@ class VideoRecordConsumed(val feedItemId: FeedId) {
                 currentTimeWatched++
             }
         }
-        timer.scheduleAtFixedRate(timerTask, 0, 1000)
+        timer.scheduleAtFixedRate(timerTask, 0, 1)
     }
 
     fun stopTimer(){
-        timerTask.cancel()
+        if (this::timerTask.isInitialized) {
+            timerTask.cancel()
+        }
     }
 
     fun createHistoryItem(){

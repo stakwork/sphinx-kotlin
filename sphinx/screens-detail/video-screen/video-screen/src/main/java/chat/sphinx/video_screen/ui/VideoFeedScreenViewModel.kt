@@ -1,6 +1,7 @@
 package chat.sphinx.video_screen.ui
 
 import android.app.Application
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_actions.ActionsRepository
@@ -71,7 +72,7 @@ internal open class VideoFeedScreenViewModel(
         replay = 1,
     )
 
-    var videoRecordConsumed: VideoRecordConsumed? = null
+    private var videoRecordConsumed: VideoRecordConsumed? = null
 
     suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -341,4 +342,21 @@ internal open class VideoFeedScreenViewModel(
             }
         }
     }
+    fun setNewHistoryItem(videoPosition: Long){
+        videoRecordConsumed?.setNewHistoryItem(videoPosition)
+    }
+
+    fun startTimer() {
+        videoRecordConsumed?.startTimer()
+    }
+
+    fun createHistoryItem() {
+        videoRecordConsumed?.createHistoryItem()
+    }
+
+    fun stopTimer(){
+        videoRecordConsumed?.stopTimer()
+    }
+
+
 }
