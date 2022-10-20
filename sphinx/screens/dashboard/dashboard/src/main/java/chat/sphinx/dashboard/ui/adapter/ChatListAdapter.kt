@@ -107,7 +107,7 @@ internal class ChatListAdapter(
                     old is DashboardChat.Active && new is DashboardChat.Active -> {
                         old.chat.type               == new.chat.type                &&
                         old.chatName                == new.chatName                 &&
-                        old.chat.isMuted()          == new.chat.isMuted()             &&
+                        old.chat.notify             == new.chat.notify              &&
                         old.chat.seen               == new.chat.seen                &&
                         old.chat.photoUrl           == new.chat.photoUrl
                     }
@@ -418,8 +418,11 @@ internal class ChatListAdapter(
                             }
 
                             if (nnDashboardChat is DashboardChat.Active) {
-                                alpha = if (nnDashboardChat.chat.isMuted()) 0.2f else 1.0f
-                                backgroundTintList = binding.getColorStateList(if (nnDashboardChat.chat.isMuted()) {
+                                val chatIsMutedOrOnlyMentions = (nnDashboardChat.chat.isMuted() || nnDashboardChat.chat.isOnlyMentions())
+
+                                alpha = if (chatIsMutedOrOnlyMentions) 0.2f else 1.0f
+
+                                backgroundTintList = binding.getColorStateList(if (chatIsMutedOrOnlyMentions) {
                                         R.color.washedOutReceivedText
                                     } else {
                                         R.color.primaryBlue
