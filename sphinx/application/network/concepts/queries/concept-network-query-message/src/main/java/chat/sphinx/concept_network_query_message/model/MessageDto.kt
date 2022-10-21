@@ -40,7 +40,7 @@ data class MessageDto(
     val contact: ContactDto?,
     val recipient_alias: String?,
     val recipient_pic: String?,
-    val push: Any,
+    val push: Any?,
 ) {
     @Transient
     val seenActual: Boolean =
