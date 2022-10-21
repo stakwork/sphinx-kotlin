@@ -5,6 +5,7 @@ plugins {
     id 'androidx.navigation.safeargs'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
 android {
@@ -32,6 +33,8 @@ android {
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
+
+    implementation files('libs/YouTubeAndroidPlayerApi.jar')
 
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
@@ -64,4 +67,10 @@ dependencies {
     androidTestImplementation testDeps.androidx.core
     androidTestImplementation testDeps.androidx.espresso
     androidTestImplementation testDeps.androidx.junit
+}
+
+secrets {
+    // A properties file containing default secret values. This file can be checked in version
+    // control.
+    defaultPropertiesFileName = 'local.defaults.properties'
 }

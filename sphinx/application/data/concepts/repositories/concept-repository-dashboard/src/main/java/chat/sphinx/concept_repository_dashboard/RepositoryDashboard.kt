@@ -28,6 +28,7 @@ interface RepositoryDashboard {
     fun getConversationByContactId(contactId: ContactId): Flow<Chat?>
 
     fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
+    fun getUnseenMentionsByChatId(chatId: ChatId): Flow<Long?>
     fun getUnseenActiveConversationMessagesCount(): Flow<Long?>
     fun getUnseenTribeMessagesCount(): Flow<Long?>
 

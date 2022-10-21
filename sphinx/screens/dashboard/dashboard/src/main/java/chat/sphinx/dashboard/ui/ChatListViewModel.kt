@@ -160,7 +160,8 @@ internal class ChatListViewModel @Inject constructor(
                                         chat,
                                         message,
                                         accountOwnerStateFlow.value,
-                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id)
+                                        repositoryDashboard.getUnseenMessagesByChatId(chat.id),
+                                        repositoryDashboard.getUnseenMentionsByChatId(chat.id)
                                     )
                                 )
                             }

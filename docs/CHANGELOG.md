@@ -1,6 +1,11 @@
 # ChangeLog
 
 # Version 1.0.0-alpha66 (2022-10-07)
+- Fixes badge count issues
+- Adds mentions count badge on chats list
+- Improves feed video player
+
+# Version 1.0.0-alpha66 (2022-10-07)
 - Adds ability to set tribe notifications level
 - Adds mentions format on messages
 - Fixes audio format compatibility issue
