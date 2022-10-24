@@ -6049,14 +6049,14 @@ abstract class SphinxRepository(
                         ActionTrackId(Long.MAX_VALUE)
                     )
 
-                    val actionsClipCommentDboList =
-                        queries.actionTrackGetByType(ActionTrackType.PodcastClipComment)
-                            .executeAsList()
-                    val clipCommentActionsList = actionsClipCommentDboList.map {
-                        actionTrackDboPodcastClipCommentPresenterMapper.mapFrom(it)
-                    }
-
-                    LOG.d("ClipComment", clipCommentActionsList.toString())
+//                    val actionsClipCommentDboList =
+//                        queries.actionTrackGetByType(ActionTrackType.PodcastClipComment)
+//                            .executeAsList()
+//                    val clipCommentActionsList = actionsClipCommentDboList.map {
+//                        actionTrackDboPodcastClipCommentPresenterMapper.mapFrom(it)
+//                    }
+//
+//                    LOG.d("ClipComment", clipCommentActionsList.toString())
 
                 }
             }
@@ -6131,16 +6131,46 @@ abstract class SphinxRepository(
                         ActionTrackId(Long.MAX_VALUE)
                     )
 
-                    val newsletterConsumedList =
-                        queries.actionTrackGetByType(ActionTrackType.ContentConsumed)
-                            .executeAsList()
-                    val newsletterConsumedActionsList = newsletterConsumedList.map {
-                        actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
-                    }
-
-                    LOG.d("videoConsumed", newsletterConsumedActionsList.toString())
+//                    val videoConsumedList =
+//                        queries.actionTrackGetByType(ActionTrackType.ContentConsumed)
+//                            .executeAsList()
+//                    val videoConsumedActionsList = videoConsumedList.map {
+//                        actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
+//                    }
+//                    LOG.d("videoConsumed", videoConsumedActionsList.toString())
                 }
             }
         }
     }
+
+    override fun trackPodcastConsumed(
+        feedItemId: FeedId,
+        history: java.util.ArrayList<ContentConsumedHistoryItem>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+
+                    val podcastConsumedAction = ContentConsumedAction(
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value
+                    )
+                    podcastConsumedAction.history = history
+
+                    queries.actionTrackUpsert(
+                        ActionTrackType.ContentConsumed,
+                        ActionTrackMetaData(podcastConsumedAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
+                }
+            }
+        }
+    }
+
 }

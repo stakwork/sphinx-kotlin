@@ -28,4 +28,9 @@ interface ActionsRepository {
         history: java.util.ArrayList<ContentConsumedHistoryItem>
     )
 
+    fun trackPodcastConsumed(
+        feedItemId: FeedId,
+        history: java.util.ArrayList<ContentConsumedHistoryItem>
+    )
+
 }
