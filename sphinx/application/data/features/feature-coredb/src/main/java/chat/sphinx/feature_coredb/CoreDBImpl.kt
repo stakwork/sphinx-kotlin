@@ -87,7 +87,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
                     latest_message_idAdapter = MessageIdAdapter.getInstance(),
                     content_seen_atAdapter = DateTimeAdapter.getInstance(),
-                    notifyAdapter = NotifyAdapter()
+                    notifyAdapter = NotifyAdapter(),
                 ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),
@@ -151,6 +151,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     flaggedAdapter = FlaggedAdapter.getInstance(),
                     recipient_aliasAdapter = RecipientAliasAdapter(),
                     recipient_picAdapter = PhotoUrlAdapter.getInstance(),
+                    pushAdapter = PushAdapter()
                 ),
                 messageMediaDboAdapter = MessageMediaDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),

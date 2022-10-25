@@ -17,6 +17,16 @@ inline fun Chat.isMuted(): Boolean {
 }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun Chat.isOnlyMentions(): Boolean {
+    return notify?.isOnlyMentions() == true
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Chat.isSeeAll(): Boolean {
+    return notify?.isSeeAll() == true
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Chat.isUnlisted(): Boolean =
     unlisted.isTrue()
 
