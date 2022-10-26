@@ -17,6 +17,7 @@ buildscript {
         classpath plugin.kotlin.gradle
         classpath plugin.square.exhaustive
         classpath plugin.square.sqlDelight
+        classpath plugin.chaquo
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -30,6 +31,8 @@ allprojects {
         gradlePluginPortal()
         maven { url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases" }
         maven { url 'https://jitpack.io' }
+        maven { url "https://chaquo.com/maven" }
+
     }
 
     tasks.withType(Test) {
