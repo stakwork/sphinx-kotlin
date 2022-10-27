@@ -35,6 +35,8 @@ import chat.sphinx.feature_repository_android.SphinxRepositoryAndroid
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.notification.SphinxNotificationManager
 import chat.sphinx.wrapper_contact.Contact
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
@@ -234,5 +236,13 @@ object RepositoryModule {
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): ActionsRepository =
         sphinxRepositoryAndroid
+
+    @Provides
+    fun providePython(
+        @ApplicationContext appContext: Context
+    ): Python {
+        Python.start(AndroidPlatform(appContext))
+        return Python.getInstance()
+    }
 }
 
