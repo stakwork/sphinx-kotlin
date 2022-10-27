@@ -660,6 +660,10 @@ internal sealed class MessageHolderViewState(
                 list.add(MenuItemState.Flag)
             }
 
+            if(chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
+                list.add(MenuItemState.PinMessage)
+            }
+
             if (list.isEmpty()) {
                 null
             } else {

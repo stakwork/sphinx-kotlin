@@ -150,6 +150,11 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
                 textViewSelectedMessageMenuItem.text =
                     getString(R.string.selected_message_menu_item_flag)
             }
+            is MenuItemState.PinMessage -> {
+                textViewSelectedMessageMenuItemIcon.text =
+                    getString(R.string.material_icon_name_message_action_flag)
+                textViewSelectedMessageMenuItem.text = "Pin"
+            }
         }
     }
 }
