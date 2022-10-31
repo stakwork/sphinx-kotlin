@@ -12,7 +12,9 @@ import chat.sphinx.wrapper_chat.TribeData
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
+import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
@@ -61,6 +63,7 @@ interface ChatRepository {
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
+    suspend fun pinMessage(chatId: ChatId, message: Message): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
 
     suspend fun updateChatProfileInfo(

@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -57,6 +58,12 @@ abstract class NetworkQueryChat {
     abstract fun updateTribe(
         chatId: ChatId,
         postGroupDto: PostGroupDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<ChatDto, ResponseError>>
+
+    abstract fun pinMessage(
+        chatId: ChatId,
+        putPinMessageDto: PutPinMessageDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 

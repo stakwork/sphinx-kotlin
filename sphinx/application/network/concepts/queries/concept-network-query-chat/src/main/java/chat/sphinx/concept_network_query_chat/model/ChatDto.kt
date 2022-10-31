@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_chat.model
 
+import chat.sphinx.wrapper_common.message.MessageId
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -32,7 +33,8 @@ data class ChatDto(
     val meta: String?,
     val my_photo_url: String?,
     val my_alias: String?,
-    val pending_contact_ids: List<Long>?
+    val pending_contact_ids: List<Long>?,
+    val pin: String?
 ) {
     @Transient
     val isMutedActual: Boolean =

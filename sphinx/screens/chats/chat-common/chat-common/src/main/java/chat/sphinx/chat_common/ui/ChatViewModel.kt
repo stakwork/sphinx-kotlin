@@ -1647,6 +1647,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     open fun showMemberPopup(message: Message) {}
 
+    open fun pinMessage(message: Message) {}
+
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused
     }

@@ -28,6 +28,8 @@ import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
+import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.ItemId
@@ -44,7 +46,6 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -326,6 +327,19 @@ internal class ChatTribeViewModel @Inject constructor(
                         message.senderPic
                     )
                 )
+            }
+        }
+    }
+
+    override fun pinMessage(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            when(chatRepository.pinMessage(chatId, message)) {
+                is Response.Error -> {
+                    LOG.e("pinMessage", "Error", null)
+                }
+                is Response.Success -> {
+                    LOG.d("pinMessage", "Success")
+                }
             }
         }
     }

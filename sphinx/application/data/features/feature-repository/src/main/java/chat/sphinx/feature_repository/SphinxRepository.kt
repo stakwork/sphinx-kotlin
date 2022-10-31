@@ -34,7 +34,6 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
-import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -5057,6 +5056,48 @@ abstract class SphinxRepository(
             }
         }.join()
 
+        return response
+    }
+
+    override suspend fun pinMessage(
+        chatId: ChatId,
+        message: Message
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pin message"))
+
+        applicationScope.launch(mainImmediate) {
+
+            networkQueryChat.pinMessage(
+                chatId,
+                PutPinMessageDto(message.messageContentDecrypted?.value)
+            ).collect { loadResponse ->
+                @Exhaustive
+                when(loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        val queries = coreDB.getSphinxDatabaseQueries()
+                        response = Response.Success(loadResponse)
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertChat(
+                                        loadResponse.value,
+                                        moshi,
+                                        chatSeenMap,
+                                        queries,
+                                        null,
+                                        accountOwner.value?.nodePubKey
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
         return response
     }
 

@@ -69,7 +69,6 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.asFormattedString
@@ -782,6 +781,9 @@ abstract class ChatFragment<
                                 }
                                 is MenuItemState.Flag -> {
                                     viewModel.flagMessage(message)
+                                }
+                                is MenuItemState.PinMessage -> {
+                                    viewModel.pinMessage(message)
                                 }
                             }
                         }
