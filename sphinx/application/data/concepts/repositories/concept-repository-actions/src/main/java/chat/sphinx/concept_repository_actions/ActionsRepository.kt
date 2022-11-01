@@ -33,4 +33,8 @@ interface ActionsRepository {
         history: java.util.ArrayList<ContentConsumedHistoryItem>
     )
 
+    fun trackMessageContent(
+        keywords: ArrayList<String>
+    )
+
 }

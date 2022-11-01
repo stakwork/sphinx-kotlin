@@ -6,6 +6,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
+    id 'com.chaquo.python'
 }
 
 android {
@@ -18,6 +19,18 @@ android {
         targetSdkVersion versions.compileSdk
         versionCode VERSION_CODE.toInteger()
         versionName VERSION_NAME
+
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
+        python {
+            buildPython "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3"
+            pip {
+                install "transformers==4.11.3"
+                install "tokenizers"
+                install "keybert==0.6.0"
+            }
+        }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -54,6 +67,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:data:concepts:concept-media-cache')
     api project(path: ':sphinx:application:data:concepts:concept-meme-server')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')

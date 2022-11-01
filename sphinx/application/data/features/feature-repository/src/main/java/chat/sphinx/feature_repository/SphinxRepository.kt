@@ -6201,4 +6201,22 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun trackMessageContent(keywords: ArrayList<String>) {
+
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val messageAction = MessageAction(
+                keywords,
+                Date().time
+            )
+
+            queries.actionTrackUpsert(
+                ActionTrackType.Message,
+                ActionTrackMetaData(messageAction.toJson(moshi)),
+                false.toActionTrackUploaded(),
+                ActionTrackId(Long.MAX_VALUE)
+            )
+        }
+    }
 }
