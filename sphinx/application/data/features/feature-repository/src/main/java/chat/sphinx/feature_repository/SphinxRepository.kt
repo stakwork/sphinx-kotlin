@@ -5069,7 +5069,7 @@ abstract class SphinxRepository(
 
             networkQueryChat.pinMessage(
                 chatId,
-                PutPinMessageDto(message.messageContentDecrypted?.value)
+                PutPinMessageDto(message.id.value.toString())
             ).collect { loadResponse ->
                 @Exhaustive
                 when(loadResponse) {

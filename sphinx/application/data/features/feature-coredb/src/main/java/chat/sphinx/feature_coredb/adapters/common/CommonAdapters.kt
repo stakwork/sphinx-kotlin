@@ -80,6 +80,27 @@ internal class ContactIdsAdapter private constructor(): ColumnAdapter<List<Conta
     }
 }
 
+internal class PinMessageAdapter: ColumnAdapter<MessageId, Long> {
+
+    companion object {
+        @Volatile
+        private var instance: PinMessageAdapter? = null
+        fun getInstance(): PinMessageAdapter =
+            instance ?: synchronized(this) {
+                instance ?: PinMessageAdapter()
+                    .also { instance = it }
+            }
+    }
+    override fun decode(databaseValue: Long): MessageId {
+        return MessageId(databaseValue)
+    }
+
+    override fun encode(value: MessageId): Long {
+        return value.value
+    }
+
+}
+
 internal class DashboardIdAdapter: ColumnAdapter<DashboardItemId, String> {
     override fun decode(databaseValue: String): DashboardItemId {
         return databaseValue.toDashboardItemId()
