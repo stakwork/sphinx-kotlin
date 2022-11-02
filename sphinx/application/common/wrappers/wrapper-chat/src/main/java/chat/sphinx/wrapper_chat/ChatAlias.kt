@@ -16,3 +16,25 @@ value class ChatAlias(val value: String) {
         }
     }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.fixedAlias(): String {
+    var fixedAlias = ""
+
+    for (character in this.toCharArray()) {
+        if (Character.isSpaceChar(character)) {
+            fixedAlias += "_"
+            continue
+        }
+
+        if (!Character.isLetterOrDigit(character) &&
+            character.toString() != "_" &&
+            !character.isSurrogate()
+        ) {
+            continue
+        }
+        fixedAlias += character
+    }
+
+    return fixedAlias
+}

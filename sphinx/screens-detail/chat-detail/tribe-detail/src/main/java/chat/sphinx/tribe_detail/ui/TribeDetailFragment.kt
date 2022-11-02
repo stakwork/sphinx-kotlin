@@ -2,6 +2,8 @@ package chat.sphinx.tribe_detail.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.text.InputFilter
+import android.text.Spanned
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -26,6 +28,8 @@ import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.tribe.BottomMenuTribe
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.databinding.FragmentTribeDetailBinding
+import chat.sphinx.wrapper_chat.fixedAlias
+import chat.sphinx.wrapper_chat.isEmoji
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.eeemmddhmma
 import dagger.hilt.android.AndroidEntryPoint
@@ -148,10 +152,33 @@ internal class TribeDetailFragment: SideEffectFragment<
         )
     }
 
+    private fun addAliasFilter() {
+        val filter: InputFilter = object : InputFilter {
+            override fun filter(
+                source: CharSequence, start: Int,
+                end: Int, dest: Spanned?, dstart: Int, dend: Int
+            ): CharSequence? {
+                for (i in start until end) {
+                    if (!Character.isLetterOrDigit(source[i]) &&
+                        source[i].toString() != "_" &&
+                        !source[i].isSurrogate()
+                    ) {
+                        return ""
+                    }
+                }
+                return null
+            }
+        }
+
+        binding.editTextProfileAliasValue.filters = arrayOf(filter)
+    }
+
     private fun setupTribeDetail() {
         binding.apply {
             editTextProfileAliasValue.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus) {
+                    editTextProfileAliasValue.setText(editTextProfileAliasValue.text.toString().fixedAlias())
+                    addAliasFilter()
                     return@setOnFocusChangeListener
                 }
                 viewModel.updateProfileAlias(editTextProfileAliasValue.text.toString())
