@@ -29,7 +29,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
-import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.ItemId
@@ -333,13 +332,20 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override fun pinMessage(message: Message) {
         viewModelScope.launch(mainImmediate) {
-            when(chatRepository.pinMessage(chatId, message)) {
-                is Response.Error -> {
-                    LOG.e("pinMessage", "Error", null)
-                }
-                is Response.Success -> {
-                    LOG.d("pinMessage", "Success")
-                }
+            chatRepository.pinMessage(chatId, message)
+        }
+    }
+
+    override fun unPinMessage(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.unPinMessage(chatId, message)
+        }
+    }
+
+    override fun testPin(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(chatId).collect { result ->
+                LOG.d(TAG, "Pined result : " + result?.pinedMessage.toString())
             }
         }
     }

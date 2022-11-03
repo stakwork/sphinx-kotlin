@@ -5061,46 +5061,91 @@ abstract class SphinxRepository(
 
     override suspend fun pinMessage(
         chatId: ChatId,
-        message: Message
+        message: Message?
     ): Response<Any, ResponseError> {
         var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pin message"))
 
         applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-            networkQueryChat.pinMessage(
-                chatId,
-                PutPinMessageDto(message.id.value.toString())
-            ).collect { loadResponse ->
-                @Exhaustive
-                when(loadResponse) {
-                    is LoadResponse.Loading -> {}
-                    is Response.Error -> {
-                        response = loadResponse
-                    }
-                    is Response.Success -> {
-                        val queries = coreDB.getSphinxDatabaseQueries()
-                        response = Response.Success(loadResponse)
-                        chatLock.withLock {
-                            withContext(io) {
-                                queries.transaction {
-                                    upsertChat(
-                                        loadResponse.value,
-                                        moshi,
-                                        chatSeenMap,
-                                        queries,
-                                        null,
-                                        accountOwner.value?.nodePubKey
-                                    )
+                networkQueryChat.pinMessage(
+                    chatId,
+                    PutPinMessageDto(message?.id?.value.toString())
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when(loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            response = Response.Success(loadResponse)
+                            chatLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertChat(
+                                            loadResponse.value,
+                                            moshi,
+                                            chatSeenMap,
+                                            queries,
+                                            null,
+                                            accountOwner.value?.nodePubKey
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
             }
+
+
         }.join()
         return response
     }
 
+    override suspend fun unPinMessage(
+        chatId: ChatId,
+        message: Message?
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pin message"))
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+                networkQueryChat.pinMessage(
+                    chatId,
+                    PutPinMessageDto("")
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when(loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            response = Response.Success(loadResponse)
+                            chatLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertChat(
+                                            loadResponse.value,
+                                            moshi,
+                                            chatSeenMap,
+                                            queries,
+                                            null,
+                                            accountOwner.value?.nodePubKey
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }
+
+
+        }.join()
+        return response
+    }
     override suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,
