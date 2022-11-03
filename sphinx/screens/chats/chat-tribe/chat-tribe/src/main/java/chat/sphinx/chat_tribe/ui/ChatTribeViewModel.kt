@@ -12,6 +12,7 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
@@ -49,6 +50,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -116,6 +118,10 @@ internal class ChatTribeViewModel @Inject constructor(
 
     val tribePopupViewStateContainer: ViewStateContainer<TribePopupViewState> by lazy {
         ViewStateContainer(TribePopupViewState.Idle)
+    }
+
+    val pinedMessageViewState: ViewStateContainer<PinedMessageViewState> by lazy {
+        ViewStateContainer(PinedMessageViewState.Idle)
     }
 
     private suspend fun getPodcast(): Podcast? {
@@ -242,7 +248,7 @@ internal class ChatTribeViewModel @Inject constructor(
     val feedDataStateFlow: StateFlow<TribeFeedData>
         get() = _feedDataStateFlow.asStateFlow()
 
-
+    private var pinJob: Job? = null
     init {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
@@ -269,6 +275,25 @@ internal class ChatTribeViewModel @Inject constructor(
 
             } ?: run {
                 _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
+            }
+        }
+
+        pinJob?.cancel()
+        pinJob = viewModelScope.launch(mainImmediate) {
+            chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+                chat.pinedMessage?.let { messageId ->
+                    messageRepository.getMessageById(messageId).firstOrNull()?.let { message ->
+                        pinedMessageViewState.updateViewState(
+                            PinedMessageViewState.PinedMessageHeader(
+                                message
+                            )
+                        )
+                    }
+                } ?: run {
+                    pinedMessageViewState.updateViewState(
+                        PinedMessageViewState.Idle
+                    )
+                }
             }
         }
     }
@@ -333,12 +358,28 @@ internal class ChatTribeViewModel @Inject constructor(
     override fun pinMessage(message: Message) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.pinMessage(chatId, message)
+
+            delay(300)
+
+            pinedMessageViewState.updateViewState(
+                PinedMessageViewState.PinedMessageHeader(
+                    message
+                )
+            )
+
         }
+
     }
 
     override fun unPinMessage(message: Message) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.unPinMessage(chatId, message)
+
+            delay(300)
+
+            pinedMessageViewState.updateViewState(
+                PinedMessageViewState.Idle
+            )
         }
     }
 

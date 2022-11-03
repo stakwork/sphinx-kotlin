@@ -23,6 +23,7 @@ import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -91,6 +92,9 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutMenuBottomMore
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
+
+    private val layoutChatPinedMessageHeader: LayoutChatPinedMessageHeaderBinding
+        get() = binding.includeChatPinedMessageHeader
 
     override val menuEnablePayments: Boolean
         get() = false
@@ -353,6 +357,26 @@ internal class ChatTribeFragment: ChatFragment<
                         }
                     }
 
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageViewState.collect { viewState ->
+                layoutChatPinedMessageHeader.apply {
+
+                    @Exhaustive
+                    when(viewState) {
+                        is PinedMessageViewState.Idle -> {
+                            root.gone
+                        }
+
+                        is PinedMessageViewState.PinedMessageHeader -> {
+                            root.visible
+
+                            textViewChatHeaderName.text = viewState.message.messageContentDecrypted?.value
+                        }
+                    }
                 }
             }
         }

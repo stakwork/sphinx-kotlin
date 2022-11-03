@@ -152,7 +152,7 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
             }
             is MenuItemState.PinMessage -> {
                 textViewSelectedMessageMenuItemIcon.text =
-                    getString(R.string.material_icon_name_message_action_flag)
+                    getString(R.string.material_icon_name_message_action_copy_link)
                 textViewSelectedMessageMenuItem.text =
                     getString(R.string.selected_message_menu_item_pin)
             }
