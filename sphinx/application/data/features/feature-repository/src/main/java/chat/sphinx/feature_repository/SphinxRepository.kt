@@ -5,6 +5,9 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
+import chat.sphinx.concept_network_query_action_track.model.ActionTrackDto
+import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -147,6 +150,7 @@ abstract class SphinxRepository(
     private val mediaCacheHandler: MediaCacheHandler,
     private val memeInputStreamHandler: MemeInputStreamHandler,
     private val memeServerTokenHandler: MemeServerTokenHandler,
+    private val networkQueryActionTrack: NetworkQueryActionTrack,
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
@@ -6135,7 +6139,7 @@ abstract class SphinxRepository(
 
     override fun trackVideoConsumed(
         feedItemId: FeedId,
-        history: java.util.ArrayList<ContentConsumedHistoryItem>
+        history: ArrayList<ContentConsumedHistoryItem>
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6173,7 +6177,7 @@ abstract class SphinxRepository(
 
     override fun trackPodcastConsumed(
         feedItemId: FeedId,
-        history: java.util.ArrayList<ContentConsumedHistoryItem>
+        history: ArrayList<ContentConsumedHistoryItem>
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6217,6 +6221,34 @@ abstract class SphinxRepository(
                 false.toActionTrackUploaded(),
                 ActionTrackId(Long.MAX_VALUE)
             )
+        }
+    }
+
+    override fun syncActions() {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val actionsDboList = queries.actionTrackGetAllNotUploaded()
+                .executeAsList()
+                .toMutableSet()
+
+            val actionsDtoList = mutableListOf<ActionTrackDto>()
+            actionsDboList.forEach { action ->
+                actionsDtoList.add(
+                    ActionTrackDto(
+                        action.type.toString(),
+                        action.meta_data.value
+                    )
+                )
+            }
+            networkQueryActionTrack.sendActionsTracked(
+                SyncActionsDto(actionsDtoList.toList()),
+            ).collect { response ->
+                when (response) {
+                    is Response.Success -> {}
+                    is Response.Error -> {}
+                }
+            }
         }
     }
 }

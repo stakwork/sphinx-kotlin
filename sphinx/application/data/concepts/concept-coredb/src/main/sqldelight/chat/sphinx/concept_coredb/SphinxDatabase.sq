@@ -1387,3 +1387,9 @@ SELECT *
 FROM actionTrackDbo
 WHERE type = ?;
 
+actionTrackGetAllNotUploaded:
+SELECT *
+FROM actionTrackDbo
+WHERE uploaded = 0;
+
+

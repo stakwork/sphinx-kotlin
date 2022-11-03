@@ -4,6 +4,7 @@ import android.content.Context
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
@@ -134,6 +135,7 @@ object RepositoryModule {
         memeInputStreamHandler: MemeInputStreamHandler,
         memeServerTokenHandler: MemeServerTokenHandler,
         networkQueryMemeServer: NetworkQueryMemeServer,
+        networkQueryActionTrack: NetworkQueryActionTrack,
         networkQueryChat: NetworkQueryChat,
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
@@ -162,6 +164,7 @@ object RepositoryModule {
             mediaCacheHandler,
             memeInputStreamHandler,
             memeServerTokenHandler,
+            networkQueryActionTrack,
             networkQueryMemeServer,
             networkQueryChat,
             networkQueryContact,
