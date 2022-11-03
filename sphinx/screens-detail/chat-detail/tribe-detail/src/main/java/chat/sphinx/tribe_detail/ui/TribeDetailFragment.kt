@@ -29,13 +29,13 @@ import chat.sphinx.tribe.BottomMenuTribe
 import chat.sphinx.tribe_detail.R
 import chat.sphinx.tribe_detail.databinding.FragmentTribeDetailBinding
 import chat.sphinx.wrapper_chat.fixedAlias
-import chat.sphinx.wrapper_chat.isEmoji
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.eeemmddhmma
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
@@ -159,10 +159,14 @@ internal class TribeDetailFragment: SideEffectFragment<
                 end: Int, dest: Spanned?, dstart: Int, dend: Int
             ): CharSequence? {
                 for (i in start until end) {
+                    if (Character.isSpace(source[i])) {
+                        allowedCharactersToast()
+                        return "_"
+                    }
                     if (!Character.isLetterOrDigit(source[i]) &&
-                        source[i].toString() != "_" &&
-                        !source[i].isSurrogate()
+                        source[i].toString() != "_"
                     ) {
+                        allowedCharactersToast()
                         return ""
                     }
                 }
@@ -171,6 +175,14 @@ internal class TribeDetailFragment: SideEffectFragment<
         }
 
         binding.editTextProfileAliasValue.filters = arrayOf(filter)
+    }
+
+    private fun allowedCharactersToast() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.submitSideEffect(
+                TribeDetailSideEffect.AliasAllowedCharacters
+            )
+        }
     }
 
     private fun setupTribeDetail() {

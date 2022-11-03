@@ -20,10 +20,10 @@ import chat.sphinx.join_tribe.databinding.FragmentJoinTribeBinding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import chat.sphinx.wrapper_chat.fixedAlias
-import chat.sphinx.wrapper_chat.isEmoji
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -90,10 +90,14 @@ internal class JoinTribeFragment: SideEffectFragment<
                         end: Int, dest: Spanned?, dstart: Int, dend: Int
                     ): CharSequence? {
                         for (i in start until end) {
+                            if (Character.isSpaceChar(source[i])) {
+                                allowedCharactersToast()
+                                return "_"
+                            }
                             if (!Character.isLetterOrDigit(source[i]) &&
-                                source[i].toString() != "_" &&
-                                !source[i].isSurrogate()
+                                source[i].toString() != "_"
                             ) {
+                                allowedCharactersToast()
                                 return ""
                             }
                         }
@@ -118,6 +122,14 @@ internal class JoinTribeFragment: SideEffectFragment<
         }
 
         viewModel.loadTribeData()
+    }
+
+    private fun allowedCharactersToast() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.submitSideEffect(
+                JoinTribeSideEffect.Notify.AliasAllowedCharacters
+            )
+        }
     }
 
     private fun persistCustomAlias() {

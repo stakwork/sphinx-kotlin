@@ -24,16 +24,9 @@ inline fun String.fixedAlias(): String {
     for (character in this.toCharArray()) {
         if (Character.isSpaceChar(character)) {
             fixedAlias += "_"
-            continue
+        } else if (Character.isLetterOrDigit(character) || character.toString() == "_") {
+            fixedAlias += character
         }
-
-        if (!Character.isLetterOrDigit(character) &&
-            character.toString() != "_" &&
-            !character.isSurrogate()
-        ) {
-            continue
-        }
-        fixedAlias += character
     }
 
     return fixedAlias
