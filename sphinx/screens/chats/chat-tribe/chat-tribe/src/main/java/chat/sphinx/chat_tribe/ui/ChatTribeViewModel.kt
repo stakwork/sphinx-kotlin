@@ -12,6 +12,7 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.chat_tribe.ui.viewstate.PinMessageBottomViewState
 import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageHeaderViewState
 import chat.sphinx.chat_tribe.ui.viewstate.PinedMessagePopupViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
@@ -126,6 +127,10 @@ internal class ChatTribeViewModel @Inject constructor(
     }
     val pinedMessagePopupViewState: ViewStateContainer<PinedMessagePopupViewState> by lazy {
         ViewStateContainer(PinedMessagePopupViewState.Idle)
+    }
+
+    val pinedMessageBottomViewState: ViewStateContainer<PinMessageBottomViewState> by lazy {
+        ViewStateContainer(PinMessageBottomViewState.Closed)
     }
 
     private suspend fun getPodcast(): Podcast? {
@@ -292,11 +297,27 @@ internal class ChatTribeViewModel @Inject constructor(
                                 message
                             )
                         )
+
+                        /* pinedMessageBottomViewState.updateViewState(
+                            PinMessageBottomViewState.Initials(
+                                photoUrl = message.senderPic,
+                                userAlias = message.senderAlias,
+                                message = message.messageContentDecrypted
+                            )
+                        ) */
                     }
                 } ?: run {
                     pinedMessageHeaderViewState.updateViewState(
                         PinedMessageHeaderViewState.Idle
                     )
+
+                   /* pinedMessageBottomViewState.updateViewState(
+                        PinMessageBottomViewState.Initials(
+                            photoUrl = null,
+                            userAlias = null,
+                            message = null
+                        )
+                    )*/
                 }
             }
         }
@@ -409,13 +430,6 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    override fun testPin(message: Message) {
-        viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(chatId).collect { result ->
-                LOG.d(TAG, "Pined result : " + result?.pinedMessage.toString())
-            }
-        }
-    }
 
     fun goToPaymentSend() {
         viewModelScope.launch(mainImmediate) {

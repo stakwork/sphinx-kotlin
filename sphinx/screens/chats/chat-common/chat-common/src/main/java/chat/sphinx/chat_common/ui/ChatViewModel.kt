@@ -1651,7 +1651,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     open fun unPinMessage(message: Message) {}
 
-    open fun testPin(message: Message) {}
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused

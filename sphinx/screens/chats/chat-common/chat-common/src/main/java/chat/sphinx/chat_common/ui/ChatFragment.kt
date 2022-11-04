@@ -763,7 +763,6 @@ abstract class ChatFragment<
                                 }
                                 is MenuItemState.CopyText -> {
                                     viewModel.copyMessageText(message)
-                                    viewModel.testPin(message)
                                 }
                                 is MenuItemState.Delete -> {
                                     viewModel.deleteMessage(message)

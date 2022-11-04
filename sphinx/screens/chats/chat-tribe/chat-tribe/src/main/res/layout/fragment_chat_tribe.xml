@@ -33,6 +33,7 @@
         android:id="@+id/layout_constraint_chat_pined_message_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clickable="true"
         android:layout_marginTop="4dp"
         app:layout_constraintTop_toBottomOf="@id/layout_constraint_chat_header_container">
 
@@ -156,6 +157,7 @@
         layout="@layout/layout_menu_bottom"
         tools:visibility="gone" />
 
+
     <include
         android:id="@+id/include_layout_menu_bottom_more"
         layout="@layout/layout_menu_bottom"
@@ -181,5 +183,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_bottom_pinned"
+        layout="@layout/layout_bottom_pinned" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

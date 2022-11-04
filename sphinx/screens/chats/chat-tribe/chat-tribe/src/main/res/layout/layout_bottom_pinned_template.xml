@@ -101,6 +101,8 @@
             android:paddingHorizontal="24dp"
             android:background="@drawable/background_pin_bottom_unpin_message"
             android:clickable="true"
+            android:visibility="gone"
+            tools:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/layout_constraint_pinned_bottom_body">

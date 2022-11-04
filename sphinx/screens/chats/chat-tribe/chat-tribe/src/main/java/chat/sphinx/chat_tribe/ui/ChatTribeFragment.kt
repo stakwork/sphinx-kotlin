@@ -3,6 +3,7 @@ package chat.sphinx.chat_tribe.ui
 import android.animation.Animator
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -19,14 +20,9 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
-import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
-import chat.sphinx.chat_tribe.databinding.LayoutChatPinPopupBinding
-import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
+import chat.sphinx.chat_tribe.databinding.*
 import chat.sphinx.chat_tribe.model.TribeFeedData
-import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
-import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageHeaderViewState
-import chat.sphinx.chat_tribe.ui.viewstate.PinedMessagePopupViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
+import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -96,9 +92,10 @@ internal class ChatTribeFragment: ChatFragment<
 
     private val layoutChatPinedMessageHeader: LayoutChatPinedMessageHeaderBinding
         get() = binding.includeChatPinedMessageHeader
-
     private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
         get() = binding.includePinMessagePopup
+    private val layoutBottomPinned: LayoutBottomPinnedBinding
+        get() = binding.includeLayoutBottomPinned
 
     override val menuEnablePayments: Boolean
         get() = false
@@ -139,6 +136,14 @@ internal class ChatTribeFragment: ChatFragment<
                     }
                 }
             } catch (_: Exception) {}
+        }
+
+        layoutChatPinedMessageHeader.apply {
+            textViewChatHeaderName.setOnClickListener {
+                viewModel.pinedMessageBottomViewState.updateViewState(
+                    PinMessageBottomViewState.Open
+                )
+            }
         }
 
         podcastPlayerBinding.apply {
@@ -407,6 +412,21 @@ internal class ChatTribeFragment: ChatFragment<
                     }
                 }
 
+            }
+        }
+
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageBottomViewState.collect { viewState ->
+                layoutBottomPinned.apply {
+
+                    @Exhaustive
+                    when(viewState) {
+                        is PinMessageBottomViewState.Open -> { root.visible }
+                        is PinMessageBottomViewState.Closed -> { root.visible }
+
+                    }
+                }
             }
         }
 
