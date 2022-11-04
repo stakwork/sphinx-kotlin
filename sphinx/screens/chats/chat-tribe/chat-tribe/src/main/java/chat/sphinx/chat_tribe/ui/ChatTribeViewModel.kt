@@ -12,7 +12,8 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageViewState
+import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageHeaderViewState
+import chat.sphinx.chat_tribe.ui.viewstate.PinedMessagePopupViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
@@ -120,8 +121,11 @@ internal class ChatTribeViewModel @Inject constructor(
         ViewStateContainer(TribePopupViewState.Idle)
     }
 
-    val pinedMessageViewState: ViewStateContainer<PinedMessageViewState> by lazy {
-        ViewStateContainer(PinedMessageViewState.Idle)
+    val pinedMessageHeaderViewState: ViewStateContainer<PinedMessageHeaderViewState> by lazy {
+        ViewStateContainer(PinedMessageHeaderViewState.Idle)
+    }
+    val pinedMessagePopupViewState: ViewStateContainer<PinedMessagePopupViewState> by lazy {
+        ViewStateContainer(PinedMessagePopupViewState.Idle)
     }
 
     private suspend fun getPodcast(): Podcast? {
@@ -283,15 +287,15 @@ internal class ChatTribeViewModel @Inject constructor(
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
                 chat.pinedMessage?.let { messageId ->
                     messageRepository.getMessageById(messageId).firstOrNull()?.let { message ->
-                        pinedMessageViewState.updateViewState(
-                            PinedMessageViewState.PinedMessageHeader(
+                        pinedMessageHeaderViewState.updateViewState(
+                            PinedMessageHeaderViewState.PinedMessageHeader(
                                 message
                             )
                         )
                     }
                 } ?: run {
-                    pinedMessageViewState.updateViewState(
-                        PinedMessageViewState.Idle
+                    pinedMessageHeaderViewState.updateViewState(
+                        PinedMessageHeaderViewState.Idle
                     )
                 }
             }
@@ -359,12 +363,23 @@ internal class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.pinMessage(chatId, message)
 
-            delay(300)
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.PinnedMessage(
+                    "Pinned Message"
+                )
+            )
 
-            pinedMessageViewState.updateViewState(
-                PinedMessageViewState.PinedMessageHeader(
+            delay(1000)
+
+
+            pinedMessageHeaderViewState.updateViewState(
+                PinedMessageHeaderViewState.PinedMessageHeader(
                     message
                 )
+            )
+
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.Idle
             )
 
         }
@@ -375,10 +390,21 @@ internal class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             chatRepository.unPinMessage(chatId, message)
 
-            delay(300)
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.PinnedMessage(
+                    "Unpinned Message"
+                )
+            )
 
-            pinedMessageViewState.updateViewState(
-                PinedMessageViewState.Idle
+            delay(1000)
+
+
+            pinedMessageHeaderViewState.updateViewState(
+                PinedMessageHeaderViewState.Idle
+            )
+
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.Idle
             )
         }
     }

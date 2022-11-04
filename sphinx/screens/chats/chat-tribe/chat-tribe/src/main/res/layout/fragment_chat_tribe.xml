@@ -33,6 +33,7 @@
         android:id="@+id/layout_constraint_chat_pined_message_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         app:layout_constraintTop_toBottomOf="@id/layout_constraint_chat_header_container">
 
         <include
@@ -170,6 +171,13 @@
     <include
         android:id="@+id/include_layout_popup"
         layout="@layout/layout_chat_tribe_popup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_pin_message_popup"
+        layout="@layout/layout_chat_pin_popup"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"/>

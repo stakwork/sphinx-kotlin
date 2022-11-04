@@ -20,10 +20,12 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
+import chat.sphinx.chat_tribe.databinding.LayoutChatPinPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
-import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageViewState
+import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageHeaderViewState
+import chat.sphinx.chat_tribe.ui.viewstate.PinedMessagePopupViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -36,7 +38,6 @@ import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,6 +96,9 @@ internal class ChatTribeFragment: ChatFragment<
 
     private val layoutChatPinedMessageHeader: LayoutChatPinedMessageHeaderBinding
         get() = binding.includeChatPinedMessageHeader
+
+    private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
+        get() = binding.includePinMessagePopup
 
     override val menuEnablePayments: Boolean
         get() = false
@@ -362,22 +366,47 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.pinedMessageViewState.collect { viewState ->
+            viewModel.pinedMessageHeaderViewState.collect { viewState ->
                 layoutChatPinedMessageHeader.apply {
 
                     @Exhaustive
                     when(viewState) {
-                        is PinedMessageViewState.Idle -> {
-                            root.gone
+                        is PinedMessageHeaderViewState.Idle -> {
+                            root.goneIfFalse(false)
                         }
 
-                        is PinedMessageViewState.PinedMessageHeader -> {
-                            root.visible
+                        is PinedMessageHeaderViewState.PinedMessageHeader -> {
+                            root.goneIfFalse(true)
 
                             textViewChatHeaderName.text = viewState.message.messageContentDecrypted?.value
                         }
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessagePopupViewState.collect { viewState ->
+                layoutChatPinPopupBinding.apply {
+
+                    @Exhaustive
+                    when(viewState) {
+                        is PinedMessagePopupViewState.Idle -> {
+                            root.goneIfFalse(false)
+                        }
+                        is PinedMessagePopupViewState.PinnedMessage -> {
+                            root.goneIfFalse(true)
+
+                            includePinedMessagePopup.textViewPinedMessage.text =viewState.text
+                        }
+                        is PinedMessagePopupViewState.UnpinnedMessage -> {
+                            root.goneIfFalse(true)
+
+                            includePinedMessagePopup.textViewPinedMessage.text =viewState.text
+                        }
+                    }
+                }
+
             }
         }
 

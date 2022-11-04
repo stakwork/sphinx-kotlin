@@ -170,4 +170,11 @@
     <dimen name="chat_tribe_direct_payment_popup_button_width">171dp</dimen>
     <dimen name="chat_tribe_direct_payment_popup_button_text_size">16sp</dimen>
     <dimen name="chat_tribe_direct_payment_popup_initials_text_size">30sp</dimen>
+
+    <!-- Pin Message Popup -->
+    <dimen name="chat_tribe_pin_message_popup_width">280dp</dimen>
+    <dimen name="chat_tribe_pin_message_popup_height">280dp</dimen>
+    <dimen name="chat_tribe_pin_icon_width">94dp</dimen>
+    <dimen name="chat_tribe_pin_icon_height">94dp</dimen>
+    <dimen name="chat_tribe_pin_icon_margin_top">48dp</dimen>
 </resources>

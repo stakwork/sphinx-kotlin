@@ -178,4 +178,7 @@
 
     <string name="send_sats">Send Sats</string>
 
+    <string name="pined_message">Pinned Message</string>
+    <string name="unpined_message">Unpinned Message</string>
+
 </resources>
