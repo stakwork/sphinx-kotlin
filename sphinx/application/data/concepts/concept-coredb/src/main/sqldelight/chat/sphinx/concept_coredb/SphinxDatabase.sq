@@ -1392,4 +1392,10 @@ SELECT *
 FROM actionTrackDbo
 WHERE uploaded = 0;
 
+actionTrackUpdateUploadedItems:
+UPDATE actionTrackDbo
+SET uploaded = 1
+WHERE id IN :ids;
+
+
 

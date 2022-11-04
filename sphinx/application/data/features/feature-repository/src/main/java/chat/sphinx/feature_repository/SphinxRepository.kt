@@ -6233,20 +6233,29 @@ abstract class SphinxRepository(
                 .toMutableSet()
 
             val actionsDtoList = mutableListOf<ActionTrackDto>()
+            val actionsIds = mutableListOf<ActionTrackId>()
             actionsDboList.forEach { action ->
                 actionsDtoList.add(
                     ActionTrackDto(
-                        action.type.toString(),
+                        action.type.value.toString(),
                         action.meta_data.value
                     )
                 )
+                actionsIds.add(
+                    action.id
+                )
             }
-            networkQueryActionTrack.sendActionsTracked(
-                SyncActionsDto(actionsDtoList.toList()),
-            ).collect { response ->
-                when (response) {
-                    is Response.Success -> {}
-                    is Response.Error -> {}
+            if (actionsDtoList.isNotEmpty()) {
+                networkQueryActionTrack.sendActionsTracked(
+                    SyncActionsDto(actionsDtoList.toList()),
+                ).collect { response ->
+                    when (response) {
+                        is Response.Success -> {
+                            queries.actionTrackUpdateUploadedItems(actionsIds.toList())
+                        }
+                        is Response.Error -> {}
+                        else -> {}
+                    }
                 }
             }
         }
