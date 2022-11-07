@@ -6234,6 +6234,7 @@ abstract class SphinxRepository(
 
             val actionsDtoList = mutableListOf<ActionTrackDto>()
             val actionsIds = mutableListOf<ActionTrackId>()
+
             actionsDboList.forEach { action ->
                 actionsDtoList.add(
                     ActionTrackDto(
@@ -6245,19 +6246,27 @@ abstract class SphinxRepository(
                     action.id
                 )
             }
-            if (actionsDtoList.isNotEmpty()) {
-                networkQueryActionTrack.sendActionsTracked(
-                    SyncActionsDto(actionsDtoList.toList()),
-                ).collect { response ->
-                    when (response) {
-                        is Response.Success -> {
-                            queries.actionTrackUpdateUploadedItems(actionsIds.toList())
+
+            for (chuckedList in actionsDtoList.chunked(50)) {
+                for (actionsIdsChunked in actionsIds.chunked(50)) {
+                    if (chuckedList.size == 5) {
+                        networkQueryActionTrack.sendActionsTracked(
+                            SyncActionsDto(
+                                chuckedList.toList()
+                            )
+                        ).collect { response ->
+                            when (response) {
+                                is Response.Success -> {
+                                    queries.actionTrackUpdateUploadedItems(actionsIdsChunked)
+                                }
+                                is Response.Error -> {}
+                                else -> {}
+                            }
                         }
-                        is Response.Error -> {}
-                        else -> {}
                     }
                 }
             }
         }
     }
+
 }
