@@ -769,7 +769,6 @@ abstract class ChatFragment<
                                 }
                                 is MenuItemState.Reply -> {
                                     viewModel.replyToMessage(message)
-                                    viewModel.unPinMessage(message)
                                 }
                                 is MenuItemState.SaveFile -> {
                                     viewModel.saveFile(

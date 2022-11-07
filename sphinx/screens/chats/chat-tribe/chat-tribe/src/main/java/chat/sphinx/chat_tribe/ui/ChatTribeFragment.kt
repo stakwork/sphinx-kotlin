@@ -34,8 +34,10 @@ import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -43,6 +45,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -140,6 +143,16 @@ internal class ChatTribeFragment: ChatFragment<
 
         layoutChatPinedMessageHeader.apply {
             textViewChatHeaderName.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.updatePinMessageData.collect {  message ->
+                        viewModel.pinedMessageDataViewState.updateViewState(
+                            PinedMessageDataViewState.Data(
+                                message
+                            )
+                        )
+                    }
+                }
+
                 viewModel.pinedMessageBottomViewState.updateViewState(
                     PinMessageBottomViewState.Open
                 )
@@ -422,9 +435,85 @@ internal class ChatTribeFragment: ChatFragment<
 
                     @Exhaustive
                     when(viewState) {
-                        is PinMessageBottomViewState.Open -> { root.visible }
-                        is PinMessageBottomViewState.Closed -> { root.visible }
+                        is PinMessageBottomViewState.Open -> {
+                            layoutMotionBottomPinned.setTransitionDuration(150)
+                        }
 
+                        is PinMessageBottomViewState.Closed -> {
+                            layoutMotionBottomPinned.setTransitionDuration(150)
+                        }
+
+                    }
+
+                    viewState.transitionToEndSet(layoutMotionBottomPinned)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageDataViewState.collect { viewState ->
+                layoutBottomPinned.apply {
+
+                    viewPinBottomInputLock.setOnClickListener {
+                        viewModel.pinedMessageBottomViewState.updateViewState(
+                            PinMessageBottomViewState.Closed
+                        )
+                    }
+
+                    @Exhaustive
+                    when (viewState) {
+                        is PinedMessageDataViewState.Idle -> {}
+                        is PinedMessageDataViewState.Data -> {
+                            includeLayoutPinBottomTemplate.apply {
+                                val isOwner = viewModel.getChat().isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)
+                                if (isOwner) {
+                                    layoutConstraintPinnedBottomUnpinButton.apply {
+                                        visible
+                                        setOnClickListener {
+                                            viewModel.unPinMessage(viewState.message)
+                                        }
+                                    }
+
+                                    viewModel.getContactById(viewModel.getOwner().id).firstOrNull()?.let { owner ->
+                                        owner.photoUrl?.let { ownerPhoto ->
+                                            imageLoader.load(
+                                                messageHolderPinImageInitialHolder.imageViewChatPicture,
+                                                ownerPhoto.value,
+                                                ImageLoaderOptions.Builder()
+                                                    .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                    .transformation(Transformation.CircleCrop)
+                                                    .build()
+                                            )
+                                        }
+
+                                        owner.alias?.let { ownerAlias ->
+                                            textViewPinnedBottomBodyUsername.text = ownerAlias.value
+                                        }
+
+                                    }
+
+                                } else {
+
+                                    viewState.message.senderPic?.let { photoUrl ->
+                                        imageLoader.load(
+                                            messageHolderPinImageInitialHolder.imageViewChatPicture,
+                                            photoUrl.value,
+                                            ImageLoaderOptions.Builder()
+                                                .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                .transformation(Transformation.CircleCrop)
+                                                .build()
+                                        )
+
+                                    }
+
+                                    textViewPinnedBottomBodyUsername.text = viewState.message.senderAlias?.value
+                                }
+
+                                includePinnedBottomMessageHolder.apply {
+                                    textViewPinnedBottomHeaderText.text = viewState.message.messageContentDecrypted?.value
+                                }
+                            }
+                        }
                     }
                 }
             }

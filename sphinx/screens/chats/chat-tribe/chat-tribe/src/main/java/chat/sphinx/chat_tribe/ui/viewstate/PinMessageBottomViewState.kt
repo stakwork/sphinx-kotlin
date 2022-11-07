@@ -31,16 +31,4 @@ sealed class PinMessageBottomViewState: MotionLayoutViewState<PinMessageBottomVi
         }
 
     }
-
-    /* data class Initials(
-        val photoUrl: PhotoUrl?= null,
-        val userAlias: SenderAlias? = null,
-        val message: MessageContentDecrypted? = null
-    ): PinMessageBottomViewState() {
-        override val startSetId: Int
-            get() = TODO("Not yet implemented")
-        override val endSetId: Int?
-            get() = TODO("Not yet implemented")
-
-    } */
 }

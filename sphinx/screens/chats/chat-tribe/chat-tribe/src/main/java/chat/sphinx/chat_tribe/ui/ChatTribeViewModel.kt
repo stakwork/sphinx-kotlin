@@ -12,10 +12,7 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.PinMessageBottomViewState
-import chat.sphinx.chat_tribe.ui.viewstate.PinedMessageHeaderViewState
-import chat.sphinx.chat_tribe.ui.viewstate.PinedMessagePopupViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
+import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -118,6 +115,29 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
+    val updatePinMessageData: SharedFlow<Message> = flow{
+        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+            chat.pinedMessage?.let { pinedMessage ->
+                messageRepository.getMessageById(pinedMessage).firstOrNull()?.let { message ->
+                    emit(message)
+                }
+            }
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000)
+    )
+
+    fun getContactById(contactId: ContactId): SharedFlow<Contact> = flow {
+        contactRepository.getContactById(contactId).firstOrNull()?.let { contact ->
+            emit(contact)
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000)
+    )
+
+
     val tribePopupViewStateContainer: ViewStateContainer<TribePopupViewState> by lazy {
         ViewStateContainer(TribePopupViewState.Idle)
     }
@@ -131,6 +151,10 @@ internal class ChatTribeViewModel @Inject constructor(
 
     val pinedMessageBottomViewState: ViewStateContainer<PinMessageBottomViewState> by lazy {
         ViewStateContainer(PinMessageBottomViewState.Closed)
+    }
+
+    val pinedMessageDataViewState: ViewStateContainer<PinedMessageDataViewState> by lazy {
+        ViewStateContainer(PinedMessageDataViewState.Idle)
     }
 
     private suspend fun getPodcast(): Podcast? {
@@ -298,26 +322,11 @@ internal class ChatTribeViewModel @Inject constructor(
                             )
                         )
 
-                        /* pinedMessageBottomViewState.updateViewState(
-                            PinMessageBottomViewState.Initials(
-                                photoUrl = message.senderPic,
-                                userAlias = message.senderAlias,
-                                message = message.messageContentDecrypted
-                            )
-                        ) */
                     }
                 } ?: run {
                     pinedMessageHeaderViewState.updateViewState(
                         PinedMessageHeaderViewState.Idle
                     )
-
-                   /* pinedMessageBottomViewState.updateViewState(
-                        PinMessageBottomViewState.Initials(
-                            photoUrl = null,
-                            userAlias = null,
-                            message = null
-                        )
-                    )*/
                 }
             }
         }
@@ -416,9 +425,11 @@ internal class ChatTribeViewModel @Inject constructor(
                     "Unpinned Message"
                 )
             )
+            pinedMessageBottomViewState.updateViewState(
+                PinMessageBottomViewState.Closed
+            )
 
             delay(1000)
-
 
             pinedMessageHeaderViewState.updateViewState(
                 PinedMessageHeaderViewState.Idle
