@@ -6188,14 +6188,13 @@ abstract class SphinxRepository(
 
             val actionsDboList = queries.actionTrackGetAllNotUploaded()
                 .executeAsList()
-                .toMutableSet()
 
             for (chunk in actionsDboList.chunked(50)) {
                 val actionsIds = chunk.map { it.id }
 
                 val actionTrackDTOs = chunk.map {
                     ActionTrackDto(
-                        it.type.value.toString(),
+                        it.type.value,
                         it.meta_data.value
                     )
                 }

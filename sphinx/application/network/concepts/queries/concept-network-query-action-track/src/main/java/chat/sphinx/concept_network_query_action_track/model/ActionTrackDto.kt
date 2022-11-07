@@ -4,6 +4,6 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class ActionTrackDto(
-    val type: String,
+    val type: Int,
     val meta_data: String
 )
