@@ -6003,13 +6003,6 @@ abstract class SphinxRepository(
                 false.toActionTrackUploaded(),
                 ActionTrackId(Long.MAX_VALUE)
             )
-
-//        val actionsFeedSearchDboList = queries.actionTrackGetByType(ActionTrackType.FeedSearch).executeAsList()
-//        val feedSearchActionsList = actionsFeedSearchDboList.map {
-//            actionTrackDboFeedSearchPresenterMapper.mapFrom(it)
-//        }
-//
-//        LOG.d("FeedSearch", feedSearchActionsList.toString())
         }
     }
 
@@ -6040,13 +6033,6 @@ abstract class SphinxRepository(
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )
-
-//                val actionsContentBoostDboList = queries.actionTrackGetByType(ActionTrackType.ContentBoost).executeAsList()
-//                val contentBoostActionsList = actionsContentBoostDboList.map {
-//                    actionTrackDboContentBoostPresenterMapper.mapFrom(it)
-//                }
-//
-//                LOG.d("ContentBoost", contentBoostActionsList.toString())
                 }
             }
         }
@@ -6080,16 +6066,6 @@ abstract class SphinxRepository(
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )
-
-//                    val actionsClipCommentDboList =
-//                        queries.actionTrackGetByType(ActionTrackType.PodcastClipComment)
-//                            .executeAsList()
-//                    val clipCommentActionsList = actionsClipCommentDboList.map {
-//                        actionTrackDboPodcastClipCommentPresenterMapper.mapFrom(it)
-//                    }
-//
-//                    LOG.d("ClipComment", clipCommentActionsList.toString())
-
                 }
             }
         }
@@ -6123,15 +6099,6 @@ abstract class SphinxRepository(
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )
-
-//                    val newsletterConsumedList =
-//                        queries.actionTrackGetByType(ActionTrackType.ContentConsumed)
-//                            .executeAsList()
-//                    val newsletterConsumedActionsList = newsletterConsumedList.map {
-//                        actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
-//                    }
-//
-//                    LOG.d("newsletterConsumed", newsletterConsumedActionsList.toString())
                 }
             }
         }
@@ -6162,14 +6129,6 @@ abstract class SphinxRepository(
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )
-
-//                    val videoConsumedList =
-//                        queries.actionTrackGetByType(ActionTrackType.ContentConsumed)
-//                            .executeAsList()
-//                    val videoConsumedActionsList = videoConsumedList.map {
-//                        actionTrackDboContentConsumedPresenterMapper.mapFrom(it)
-//                    }
-//                    LOG.d("videoConsumed", videoConsumedActionsList.toString())
                 }
             }
         }
@@ -6206,7 +6165,6 @@ abstract class SphinxRepository(
     }
 
     override fun trackMessageContent(keywords: ArrayList<String>) {
-
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6232,37 +6190,25 @@ abstract class SphinxRepository(
                 .executeAsList()
                 .toMutableSet()
 
-            val actionsDtoList = mutableListOf<ActionTrackDto>()
-            val actionsIds = mutableListOf<ActionTrackId>()
+            for (chunk in actionsDboList.chunked(50)) {
+                val actionsIds = chunk.map { it.id }
 
-            actionsDboList.forEach { action ->
-                actionsDtoList.add(
+                val actionTrackDTOs = chunk.map {
                     ActionTrackDto(
-                        action.type.value.toString(),
-                        action.meta_data.value
+                        it.type.value.toString(),
+                        it.meta_data.value
                     )
-                )
-                actionsIds.add(
-                    action.id
-                )
-            }
+                }
 
-            for (chuckedList in actionsDtoList.chunked(50)) {
-                for (actionsIdsChunked in actionsIds.chunked(50)) {
-                    if (chuckedList.size == 5) {
-                        networkQueryActionTrack.sendActionsTracked(
-                            SyncActionsDto(
-                                chuckedList.toList()
-                            )
-                        ).collect { response ->
-                            when (response) {
-                                is Response.Success -> {
-                                    queries.actionTrackUpdateUploadedItems(actionsIdsChunked)
-                                }
-                                is Response.Error -> {}
-                                else -> {}
-                            }
+                networkQueryActionTrack.sendActionsTracked(
+                    SyncActionsDto(actionTrackDTOs)
+                ).collect { response ->
+                    when (response) {
+                        is Response.Success -> {
+                            queries.actionTrackUpdateUploadedItems(actionsIds)
                         }
+                        is Response.Error -> {}
+                        else -> {}
                     }
                 }
             }
