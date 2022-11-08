@@ -1,13 +1,10 @@
 package chat.sphinx.dashboard.ui.feed
 
 import android.content.Context
-import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_actions.ActionsRepository
-import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
-import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.wrapper_chat.ChatHost
