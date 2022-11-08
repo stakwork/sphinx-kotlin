@@ -15,8 +15,7 @@
     <string name="decryption_error">DECRYPTION ERROR...</string>
     <string name="null_name_error">ERROR: NULL NAME</string>
     <string name="public_key">Public Key</string>
-
-    <!--  Number Pad   -->
+    
     <string name="_1" translatable="false">1</string>
     <string name="_2" translatable="false">2</string>
     <string name="_3" translatable="false">3</string>
