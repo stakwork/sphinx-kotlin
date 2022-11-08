@@ -4,11 +4,11 @@ buildscript {
     apply from: rootProject.file('kotlin-android/gradle/dependencies.gradle')
 
     repositories {
-        maven { url 'https://jitpack.io' }
         mavenCentral()
         google()
         gradlePluginPortal()
         maven { url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases" }
+//        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
@@ -27,11 +27,11 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'https://jitpack.io' }
         mavenCentral()
         google()
         gradlePluginPortal()
         maven { url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases" }
+//        maven { url 'https://jitpack.io' }
     }
 
     tasks.withType(Test) {
