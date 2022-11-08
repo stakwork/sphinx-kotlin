@@ -1567,8 +1567,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         .setRoom(sphinxCallLink.callRoom)
                         .setAudioMuted(false)
                         .setVideoMuted(false)
+                        .setFeatureFlag("welcomepage.enabled", false)
                         .setAudioOnly(audioOnly)
-                        .setWelcomePageEnabled(false)
                         .setUserInfo(userInfo)
                         .build()
 
