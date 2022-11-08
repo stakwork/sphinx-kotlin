@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/body">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_tribe_profile_image"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp"
+        android:layout_marginStart="@dimen/default_double_layout_margin"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardCornerRadius="43dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_tribe_profile_picture"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_avatar_circle" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_tribe_user_type"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:layout_marginTop="14dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxLines="2"
+        android:textAllCaps="true"
+        android:textColor="@color/secondaryText"
+        android:textSize="9sp"
+        android:fontFamily="@font/montserrat_regular"
+        app:layout_constraintTop_toTopOf="@+id/card_view_tribe_profile_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/card_view_tribe_profile_image"
+        android:text="TEST NAME"
+        tools:text="MODERATOR"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_tribe_profile_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="Test name"
+        android:textColor="@color/text"
+        android:textSize="18sp"
+        android:fontFamily="@font/montserrat_regular"
+        android:layout_marginTop=""
+        app:layout_constraintStart_toStartOf="@+id/text_view_tribe_user_type"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_user_type"
+        tools:text="Stephanie" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_profile_sat_balance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="100 000"
+        android:textColor="@color/secondaryText"
+        android:textSize="12sp"
+        android:fontFamily="@font/montserrat_regular"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="@+id/text_view_tribe_user_type"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_profile_name"
+        tools:text="100,000,000" />
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
