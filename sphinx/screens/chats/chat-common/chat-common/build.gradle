@@ -23,14 +23,14 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
-        python {
+//        python {
 //            buildPython "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3"
 //            pip {
 //                install "transformers==4.11.3"
 //                install "tokenizers"
 //                install "keybert==0.6.0"
 //            }
-        }
+//        }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
