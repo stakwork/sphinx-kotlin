@@ -7,14 +7,6 @@ buildscript {
         mavenCentral()
         google()
         gradlePluginPortal()
-        maven { url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases" }
-        maven {
-            url 'https://jitpack.io'
-            content {
-                includeGroup("com.github.requery")
-            }
-        }
-//        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
@@ -37,13 +29,7 @@ allprojects {
         google()
         gradlePluginPortal()
         maven { url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases" }
-//        maven { url 'https://jitpack.io' }
-        maven {
-            url 'https://jitpack.io'
-            content {
-                includeGroup("com.github.requery")
-            }
-        }
+        maven { url 'https://jitpack.io' }
     }
 
     tasks.withType(Test) {
