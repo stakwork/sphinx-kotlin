@@ -25,11 +25,8 @@ jobs:
         with:
           java-version: 11.0.8
 
-      - name: Run Clean
-        run: ./gradlew clean
-
       - name: Run Android Linter
-        run: ./gradlew :sphinx:application:sphinx:lintDebug
+        run: ./gradlew :sphinx:application:sphinx:lintDebug --scan
 
       - name: Run Unit Tests
         run: ./gradlew :sphinx:application:sphinx:testDebugUnitTest
