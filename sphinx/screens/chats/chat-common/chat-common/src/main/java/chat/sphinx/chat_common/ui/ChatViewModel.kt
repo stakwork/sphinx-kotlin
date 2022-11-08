@@ -889,22 +889,34 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         } ?: msg.first?.let { message ->
             messageRepository.sendMessage(message)
 
-            if (message.text?.isNotEmpty() == true) {
-                val keywordList = extractKeywords(message.text.toString())
-                keywordList?.let { list ->
-                    actionsRepository.trackMessageContent(list)
-                }
-            }
+            trackMessage(message.text)
         }
 
         return msg.first
     }
 
-    private fun extractKeywords(text: String): ArrayList<String>? {
-        val pyobj = python.getModule("keyword_extractor")
-        val obj = pyobj.callAttr("extract_keywords", text)
+    private fun trackMessage(text: String?) {
+        viewModelScope.launch(io) {
+            if (text.isNullOrEmpty()) {
+                return@launch
+            }
 
-        return obj.asList().map { it.toString() } as ArrayList<String>
+            val keywordList = extractKeywords(text)
+            keywordList?.let { list ->
+                actionsRepository.trackMessageContent(list)
+            }
+        }
+    }
+
+    private fun extractKeywords(text: String): List<String>? {
+        val pyObj = python.getModule("keyword_extractor")
+        val obj = pyObj.callAttr("extract_keywords", text)
+
+        val keywords = obj.asList().map {
+            it.toString().substringAfter("(\'").substringBefore("',")
+        }
+
+        return keywords.take(5)
     }
 
     private fun initPython() {

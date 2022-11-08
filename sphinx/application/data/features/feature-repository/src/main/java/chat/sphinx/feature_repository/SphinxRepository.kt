@@ -6164,12 +6164,12 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun trackMessageContent(keywords: ArrayList<String>) {
+    override fun trackMessageContent(keywords: List<String>) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
             val messageAction = MessageAction(
-                keywords,
+                ArrayList(keywords),
                 Date().time
             )
 

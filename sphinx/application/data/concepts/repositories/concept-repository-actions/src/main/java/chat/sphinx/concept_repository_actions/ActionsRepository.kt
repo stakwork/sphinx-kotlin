@@ -34,7 +34,7 @@ interface ActionsRepository {
     )
 
     fun trackMessageContent(
-        keywords: ArrayList<String>
+        keywords: List<String>
     )
 
 }
