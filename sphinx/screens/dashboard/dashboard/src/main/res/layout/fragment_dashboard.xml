@@ -44,7 +44,7 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <com.chauthai.swipereveallayout.SwipeRevealLayout
+    <chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
         android:id="@+id/swipe_reveal_layout_player"
         android:layout_width="match_parent"
         android:layout_height="@dimen/player_bar_height_with_shadow"
@@ -94,7 +94,7 @@
 
         </FrameLayout>
 
-    </com.chauthai.swipereveallayout.SwipeRevealLayout>
+    </chat.sphinx.swipe_reveal_layout.SwipeRevealLayout>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_bottom_bar_shadow"

@@ -1568,7 +1568,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         .setAudioMuted(false)
                         .setVideoMuted(false)
                         .setAudioOnly(audioOnly)
-                        .setWelcomePageEnabled(false)
+                        .setFeatureFlag("welcomepage.enabled", false)
                         .setUserInfo(userInfo)
                         .build()
 

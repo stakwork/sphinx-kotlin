@@ -37,6 +37,7 @@ dependencies {
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
 
+    implementation project(path: ':sphinx:application:common:swipe-reveal-layout')
     implementation project(path: ':sphinx:application:common:menus:menu-bottom-picture')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
@@ -46,7 +47,6 @@ dependencies {
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
     implementation deps.androidx.recyclerView
-    implementation deps.swipeRevealLayout.sdk
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

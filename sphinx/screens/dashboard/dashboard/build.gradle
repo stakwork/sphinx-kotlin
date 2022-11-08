@@ -47,6 +47,7 @@ dependencies {
 
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:application:common:swipe-reveal-layout')
 
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
@@ -66,7 +67,6 @@ dependencies {
     implementation deps.androidx.swipeRefreshLayout
     implementation deps.androidx.recyclerView
     implementation deps.androidx.lifecycle.hilt
-    implementation deps.swipeRevealLayout.sdk
     implementation deps.google.hilt
     implementation deps.lottie.sdk
     kapt kaptDeps.google.hilt

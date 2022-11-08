@@ -7,7 +7,7 @@
     android:layout_height="@dimen/episode_list_item_holder_height"
     >
 
-    <com.chauthai.swipereveallayout.SwipeRevealLayout
+    <chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
         android:id="@+id/swipe_reveal_layout_podcast_feed_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -161,6 +161,6 @@
 
         </FrameLayout>
 
-    </com.chauthai.swipereveallayout.SwipeRevealLayout>
+    </chat.sphinx.swipe_reveal_layout.SwipeRevealLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
