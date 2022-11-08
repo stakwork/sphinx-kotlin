@@ -7,50 +7,277 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraint_layout_tribe_name_container"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_tribe_badges_container"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_badges"
             android:layout_width="match_parent"
-            android:layout_height="75dp"
-            android:layout_marginStart="@dimen/default_form_horizontal_margin"
-            android:layout_marginEnd="@dimen/default_form_horizontal_margin"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="Badges:"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Badges:" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_tribe_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hola"
-                android:textColor="@color/secondaryText"
-                android:fontFamily="@font/roboto_regular"
-                android:layout_marginTop="25dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:textSize="@dimen/default_form_text_view_text_size"
-                android:singleLine="true" />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_badge_one"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_avatar_circle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatEditText
-                android:id="@+id/edit_text_tribe_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text"
-                android:fontFamily="@font/roboto_regular"
-                app:backgroundTint="@android:color/transparent"
-                android:layout_marginLeft="@dimen/default_form_edit_text_left_margin"
-                android:textSize="@dimen/default_form_edit_view_text_size"
-                android:inputType="textCapWords"
-                android:singleLine="true"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_name"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:text="Tribey McSphinxy"/>
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_badge_two"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:layout_marginEnd="8dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_profile_avatar_circle"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_badge_one"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constraint_layout_tribe_name_bottom_border"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/lightDivider"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/text_view_tribe_name" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_tribe_name_badges_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_tribe_posts_container"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_badges_container">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_posts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="Posts:"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Posts:" />
+
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_post_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="0"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="150" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_tribe_name_posts_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_tribe_contributions_container"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_posts_container">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_contributions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="Contributions:"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Contributions:" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_contributions_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="0"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="9th" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_contributions_sats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="18dp"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="sats"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBaseline_toBaselineOf="@+id/edit_text_tribe_contributions"
+            app:layout_constraintEnd_toStartOf="@+id/edit_text_tribe_contributions_position"
+            tools:text="sats" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_contributions_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="0"
+            android:textColor="@color/primaryGreen"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBaseline_toBaselineOf="@+id/edit_text_tribe_contributions"
+            app:layout_constraintEnd_toStartOf="@+id/edit_text_tribe_contributions_sats"
+            tools:text="3000" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_tribe_name_contributions_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_tribe_earnings_container"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_contributions_container">
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_earnings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="Earnings:"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Earnings:" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_earnings_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="0"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="6th" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_earnings_sats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="18dp"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="sats"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBaseline_toBaselineOf="@+id/edit_text_tribe_earnings"
+            app:layout_constraintEnd_toStartOf="@+id/edit_text_tribe_earnings_position"
+            tools:text="sats" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/edit_text_tribe_earnings_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:fontFamily="@font/roboto_regular"
+            android:inputType="textCapWords"
+            android:singleLine="true"
+            android:text="0"
+            android:textColor="@color/primaryBlue"
+            android:textSize="@dimen/default_form_edit_view_text_size"
+            app:backgroundTint="@android:color/transparent"
+            app:layout_constraintBaseline_toBaselineOf="@+id/edit_text_tribe_earnings"
+            app:layout_constraintEnd_toStartOf="@+id/edit_text_tribe_earnings_sats"
+            tools:text="5000" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_tribe_name_earnings_border"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_chat_menu_options"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:background="@drawable/background_top_rounded_corners">
 
     <include
@@ -25,10 +25,19 @@
         android:id="@+id/include_layout_tribe_send_sats_bar"
         layout="@layout/layout_tribe_send_sats_bar"
         android:layout_width="match_parent"
-        android:layout_height="54dp"
+        android:layout_height="58dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         app:layout_constraintTop_toBottomOf="@id/include_layout_tribe_profile_picture_holder" />
+
+    <include
+        android:id="@+id/include_layout_tribe_profile_info_container"
+        layout="@layout/layout_tribe_profile_info_container"
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_tribe_send_sats_bar" />
 
 
 
