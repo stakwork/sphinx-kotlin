@@ -25,6 +25,9 @@ jobs:
         with:
           java-version: 11.0.8
 
+      - name: Run Gradle Clean
+        run: ./gradlew cleanBuildCache
+
       - name: Run Android Linter
         run: ./gradlew :sphinx:application:sphinx:lintDebug --scan
 
