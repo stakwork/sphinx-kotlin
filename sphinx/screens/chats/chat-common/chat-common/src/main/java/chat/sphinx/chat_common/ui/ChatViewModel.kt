@@ -79,8 +79,8 @@ import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
-//import com.chaquo.python.Python
-//import com.chaquo.python.android.AndroidPlatform
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import com.giphy.sdk.core.models.Media
 import com.giphy.sdk.ui.GPHContentType
 import com.giphy.sdk.ui.GPHSettings
@@ -164,7 +164,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         ViewStateContainer(MenuBottomViewState.Closed)
     }
 
-//    lateinit var python: Python
+    lateinit var python: Python
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
 
@@ -909,22 +909,21 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     private fun extractKeywords(text: String): List<String>? {
-//        val pyObj = python.getModule("keyword_extractor")
-//        val obj = pyObj.callAttr("extract_keywords", text)
-//
-//        val keywords = obj.asList().map {
-//            it.toString().substringAfter("(\'").substringBefore("',")
-//        }
-//
-//        return keywords.take(5)
-        return listOf()
+        val pyObj = python.getModule("keyword_extractor")
+        val obj = pyObj.callAttr("extract_keywords", text)
+
+        val keywords = obj.asList().map {
+            it.toString().substringAfter("(\'").substringBefore("',")
+        }
+
+        return keywords.take(5)
     }
 
     private fun initPython() {
-//        if (!Python.isStarted()) {
-//            Python.start(AndroidPlatform(app.applicationContext))
-//        }
-//        python = Python.getInstance()
+        if (!Python.isStarted()) {
+            Python.start(AndroidPlatform(app.applicationContext))
+        }
+        python = Python.getInstance()
     }
 
     /**
