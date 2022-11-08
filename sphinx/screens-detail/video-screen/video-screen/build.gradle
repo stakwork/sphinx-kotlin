@@ -47,6 +47,7 @@ dependencies {
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-feed')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-action-track')
     implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:application:common:swipe-reveal-layout')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
@@ -56,8 +57,6 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
-
-    implementation deps.swipeRevealLayout.sdk
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
