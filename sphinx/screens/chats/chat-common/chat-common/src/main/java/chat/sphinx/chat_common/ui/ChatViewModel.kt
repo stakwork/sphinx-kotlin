@@ -25,7 +25,7 @@ import androidx.navigation.NavArgs
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
-import chat.sphinx.chat_common.BuildConfig
+//import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.model.NodeDescriptor
@@ -1335,48 +1335,48 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     @JvmSynthetic
     internal fun chatMenuOptionGif(parentFragmentManager: FragmentManager) {
-        if (BuildConfig.GIPHY_API_KEY != CONFIG_PLACE_HOLDER) {
-            val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
-            settings.mediaTypeConfig =
-                arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
-
-            val giphyDialogFragment =
-                GiphyDialogFragment.newInstance(settings, BuildConfig.GIPHY_API_KEY)
-
-            giphyDialogFragment.gifSelectionListener =
-                object : GiphyDialogFragment.GifSelectionListener {
-                    override fun didSearchTerm(term: String) {}
-
-                    override fun onDismissed(selectedContentType: GPHContentType) {}
-
-                    override fun onGifSelected(
-                        media: Media,
-                        searchTerm: String?,
-                        selectedContentType: GPHContentType
-                    ) {
-                        updateViewState(ChatMenuViewState.Closed)
-                        val giphyData = GiphyData(
-                            media.id,
-                            "https://media.giphy.com/media/${media.id}/giphy.gif",
-                            media.aspectRatio.toDouble(),
-                            null
-                        )
-
-                        updateAttachmentSendViewState(
-                            AttachmentSendViewState.PreviewGiphy(giphyData)
-                        )
-
-                        updateFooterViewState(FooterViewState.Attachment)
-                    }
-                }
-            giphyDialogFragment.show(parentFragmentManager, "giphy_search")
-        } else {
-            viewModelScope.launch(mainImmediate) {
-                submitSideEffect(
-                    ChatSideEffect.Notify("Giphy search not available")
-                )
-            }
-        }
+//        if (BuildConfig.GIPHY_API_KEY != CONFIG_PLACE_HOLDER) {
+//            val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
+//            settings.mediaTypeConfig =
+//                arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
+//
+//            val giphyDialogFragment =
+//                GiphyDialogFragment.newInstance(settings, BuildConfig.GIPHY_API_KEY)
+//
+//            giphyDialogFragment.gifSelectionListener =
+//                object : GiphyDialogFragment.GifSelectionListener {
+//                    override fun didSearchTerm(term: String) {}
+//
+//                    override fun onDismissed(selectedContentType: GPHContentType) {}
+//
+//                    override fun onGifSelected(
+//                        media: Media,
+//                        searchTerm: String?,
+//                        selectedContentType: GPHContentType
+//                    ) {
+//                        updateViewState(ChatMenuViewState.Closed)
+//                        val giphyData = GiphyData(
+//                            media.id,
+//                            "https://media.giphy.com/media/${media.id}/giphy.gif",
+//                            media.aspectRatio.toDouble(),
+//                            null
+//                        )
+//
+//                        updateAttachmentSendViewState(
+//                            AttachmentSendViewState.PreviewGiphy(giphyData)
+//                        )
+//
+//                        updateFooterViewState(FooterViewState.Attachment)
+//                    }
+//                }
+//            giphyDialogFragment.show(parentFragmentManager, "giphy_search")
+//        } else {
+//            viewModelScope.launch(mainImmediate) {
+//                submitSideEffect(
+//                    ChatSideEffect.Notify("Giphy search not available")
+//                )
+//            }
+//        }
 
     }
 
