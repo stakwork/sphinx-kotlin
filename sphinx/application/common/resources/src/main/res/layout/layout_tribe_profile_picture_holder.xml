@@ -57,7 +57,6 @@
         android:textColor="@color/text"
         android:textSize="18sp"
         android:fontFamily="@font/montserrat_regular"
-        android:layout_marginTop=""
         app:layout_constraintStart_toStartOf="@+id/text_view_tribe_user_type"
         app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_user_type"
         tools:text="Stephanie" />
