@@ -22,7 +22,7 @@ ext.versions = [
     'okhttp': '4.9.1',
     'sqlDelight': '1.5.0',
     'toplAndroid': '2.1.2',
-    'bip39': '1.0.1',
+    'bip39': '1.0.2',
 ]
 
 /**
