@@ -6,7 +6,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'com.chaquo.python'
-//    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
+    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
 android {
@@ -23,14 +23,14 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
-//        python {
+        python {
 //            buildPython "/Library/Frameworks/Python.framework/Versions/3.10/bin/python3"
 //            pip {
 //                install "transformers==4.11.3"
 //                install "tokenizers"
 //                install "keybert==0.6.0"
 //            }
-//        }
+        }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -95,8 +95,8 @@ dependencies {
     implementation deps.jitsi.sdk
 }
 
-//secrets {
-//    // A properties file containing default secret values. This file can be checked in version
-//    // control.
-//    defaultPropertiesFileName = 'local.defaults.properties'
-//}
+secrets {
+    // A properties file containing default secret values. This file can be checked in version
+    // control.
+    defaultPropertiesFileName = 'local.defaults.properties'
+}
