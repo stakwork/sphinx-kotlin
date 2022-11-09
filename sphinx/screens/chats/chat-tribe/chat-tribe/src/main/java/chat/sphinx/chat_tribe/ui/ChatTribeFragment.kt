@@ -28,6 +28,8 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addKeyboardPadding
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
@@ -178,16 +180,18 @@ internal class ChatTribeFragment: ChatFragment<
 //            }
 //        }
 
-        tribeContactProfileBinding.includeLayoutTribeContactProfileDetails.apply {
-            includeLayoutTribeSendSatsBar.buttonSendSats.setOnClickListener {
-                viewModel.goToPaymentSend()
+        tribeContactProfileBinding.apply {
+            (requireActivity() as InsetterActivity).addKeyboardPadding(root)
+
+            includeLayoutTribeContactProfileDetails.apply {
+                includeLayoutTribeSendSatsBar.buttonSendSats.setOnClickListener {
+                    viewModel.goToPaymentSend()
+                }
+                includeLayoutTribeProfileHeader.textViewDetailScreenClose.setOnClickListener {
+                    viewModel.tribeContactProfileContainer.updateViewState(TribePopupViewState.Idle)
+
+                }
             }
-            includeLayoutTribeProfileHeader.textViewDetailScreenClose.setOnClickListener {
-                viewModel.tribeContactProfileContainer.updateViewState(TribePopupViewState.Idle)
-
-            }
-
-
         }
     }
 
