@@ -87,6 +87,13 @@
             app:layout_constraintBottom_toBottomOf="parent"
             android:visibility="gone"/>
 
+        <include
+            android:id="@+id/include_chat_recording_circle"
+            layout="@layout/layout_chat_recording_circle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteY="84dp" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -97,16 +104,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
-
-    <include
-        android:id="@+id/include_chat_recording_circle"
-        layout="@layout/layout_chat_recording_circle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/layout_constraint_recording_audio_container"
-        app:layout_constraintTop_toTopOf="@+id/layout_constraint_recording_audio_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <include
         android:id="@+id/include_chat_tribe_selected_message"
@@ -153,6 +150,13 @@
     <include
         android:id="@+id/include_layout_popup"
         layout="@layout/layout_chat_tribe_popup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_tribe_contact_profile"
+        layout="@layout/layout_tribe_contact_profile"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"/>

@@ -44,7 +44,6 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -114,7 +113,7 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    val tribePopupViewStateContainer: ViewStateContainer<TribePopupViewState> by lazy {
+    val tribeContactProfileContainer: ViewStateContainer<TribePopupViewState> by lazy {
         ViewStateContainer(TribePopupViewState.Idle)
     }
 
@@ -318,7 +317,7 @@ internal class ChatTribeViewModel @Inject constructor(
     private fun showMemberPopup(message: Message) {
         message.uuid?.let { messageUUID ->
             message.senderAlias?.let { senderAlias ->
-                tribePopupViewStateContainer.updateViewState(
+                tribeContactProfileContainer.updateViewState(
                     TribePopupViewState.TribeMemberPopup(
                         messageUUID,
                         senderAlias,
@@ -336,14 +335,14 @@ internal class ChatTribeViewModel @Inject constructor(
 
     fun goToPaymentSend() {
         viewModelScope.launch(mainImmediate) {
-            (tribePopupViewStateContainer.value as TribePopupViewState.TribeMemberPopup)?.let { viewState ->
+            (tribeContactProfileContainer.value as TribePopupViewState.TribeMemberPopup)?.let { viewState ->
                 chatNavigator.toPaymentSendDetail(
                     viewState.messageUUID,
                     chatId
                 )
             }
 
-            tribePopupViewStateContainer.updateViewState(
+            tribeContactProfileContainer.updateViewState(
                 TribePopupViewState.Idle
             )
         }
