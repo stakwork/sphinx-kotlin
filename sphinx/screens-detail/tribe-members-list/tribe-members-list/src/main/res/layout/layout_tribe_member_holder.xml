@@ -31,7 +31,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.chauthai.swipereveallayout.SwipeRevealLayout
+    <chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
         android:id="@+id/layout_constraint_tribe_member_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/members_list_member_holder_height"
@@ -246,7 +246,7 @@
 
         </FrameLayout>
 
-    </com.chauthai.swipereveallayout.SwipeRevealLayout>
+    </chat.sphinx.swipe_reveal_layout.SwipeRevealLayout>
 
     <include
         android:id="@+id/include_loading_more_members"
