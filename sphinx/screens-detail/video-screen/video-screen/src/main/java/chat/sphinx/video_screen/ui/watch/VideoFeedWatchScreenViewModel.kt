@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.VideoView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -42,6 +43,7 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     chatRepository: ChatRepository,
     repositoryMedia: RepositoryMedia,
     feedRepository: FeedRepository,
+    actionsRepository: ActionsRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     lightningRepository: LightningRepository,
@@ -51,6 +53,7 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     chatRepository,
     repositoryMedia,
     feedRepository,
+    actionsRepository,
     contactRepository,
     messageRepository,
     lightningRepository

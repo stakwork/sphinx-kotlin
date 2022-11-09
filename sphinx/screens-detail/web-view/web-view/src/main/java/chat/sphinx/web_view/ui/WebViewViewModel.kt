@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -15,6 +16,7 @@ import chat.sphinx.web_view.navigation.WebViewNavigator
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
@@ -45,6 +47,7 @@ internal class WebViewViewModel @Inject constructor(
     private val app: Application,
     private val chatRepository: ChatRepository,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val repositoryMedia: RepositoryMedia,
@@ -212,6 +215,12 @@ internal class WebViewViewModel @Inject constructor(
                                         timeSeconds =0,
                                         amount = amount
                                     )
+                                )
+
+                                actionsRepository.trackFeedBoostAction(
+                                    amount.value,
+                                    feedItem.id,
+                                    arrayListOf("")
                                 )
 
                                 feed.destinations.let { destinations ->

@@ -51,6 +51,8 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
+import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -92,9 +94,11 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
-
+        viewModel.createHistoryItem()
+        viewModel.trackVideoConsumed()
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
     }
 
     private fun setupBoost() {
@@ -104,7 +108,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                     override fun onAnimationEnd(animation: Animator?) {
                         root.gone
                     }
-
                     override fun onAnimationRepeat(animation: Animator?) {}
 
                     override fun onAnimationCancel(animation: Animator?) {}
@@ -187,7 +190,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         youtubePlayerFragment.initialize(
             BuildConfig.YOUTUBE_API_KEY,
             object : YouTubePlayer.OnInitializedListener {
-
                 override fun onInitializationSuccess(
                     p0: YouTubePlayer.Provider?,
                     p1: YouTubePlayer?,
@@ -204,26 +206,29 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                     p0: YouTubePlayer.Provider?,
                     p1: YouTubeInitializationResult?
                 ) {}
+                   private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
-               private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
                     override fun onSeekTo(p0: Int) {
-                        Log.d("OnSeek", "Youtube has seek")
+                        viewModel.setNewHistoryItem(p0.toLong())
+                        Log.d("YouTubePlayer", "Youtube has seek $p0")
                     }
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
-                        Log.d("OnPlaying", "Youtube is playing")
+                        viewModel.startTimer()
+                        Log.d("YouTubePlayer", "Youtube is playing")
                     }
                     override fun onStopped() {
-                        Log.d("OnStopped", "Youtube has stopped")
+                        viewModel.stopTimer()
+                        Log.d("YouTubePlayer", "Youtube has stopped")
                     }
                     override fun onPaused() {
-                        Log.d("OnPaused", "Youtube is on pause")
+                        viewModel.stopTimer()
+                        Log.d("YouTubePlayer", "Youtube is on pause")
                     }
                 }
             })
     }
-
 
     private suspend fun setupBoostAnimation(
         photoUrl: PhotoUrl?,
@@ -359,9 +364,13 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 frameLayoutYoutubePlayer.visible
 
                                 if (youtubePlayer != null) {
+                                    viewModel.createHistoryItem()
+                                    viewModel.trackVideoConsumed()
                                     youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
+                                    viewModel.createVideoRecordConsumed(viewState.id)
                                 } else {
                                     setupYoutubePlayer(viewState.id.youtubeVideoId())
+                                    viewModel.createVideoRecordConsumed(viewState.id)
                                 }
 
                             } else {

@@ -2,6 +2,8 @@ package chat.sphinx.join_tribe.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.text.InputFilter
+import android.text.Spanned
 import android.view.View
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
@@ -17,12 +19,15 @@ import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.databinding.FragmentJoinTribeBinding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
+import chat.sphinx.wrapper_chat.fixedAlias
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 internal class JoinTribeFragment: SideEffectFragment<
@@ -79,6 +84,29 @@ internal class JoinTribeFragment: SideEffectFragment<
                     persistCustomAlias()
                 }
 
+                val filter: InputFilter = object : InputFilter {
+                    override fun filter(
+                        source: CharSequence, start: Int,
+                        end: Int, dest: Spanned?, dstart: Int, dend: Int
+                    ): CharSequence? {
+                        for (i in start until end) {
+                            if (Character.isSpaceChar(source[i])) {
+                                allowedCharactersToast()
+                                return "_"
+                            }
+                            if (!Character.isLetterOrDigit(source[i]) &&
+                                source[i].toString() != "_"
+                            ) {
+                                allowedCharactersToast()
+                                return ""
+                            }
+                        }
+                        return null
+                    }
+                }
+
+                tribeMemberAliasEditText.filters = arrayOf(filter)
+
                 buttonProfilePicture.setOnClickListener {
                     viewModel.pictureMenuHandler.viewStateContainer.updateViewState(
                         MenuBottomViewState.Open
@@ -94,6 +122,14 @@ internal class JoinTribeFragment: SideEffectFragment<
         }
 
         viewModel.loadTribeData()
+    }
+
+    private fun allowedCharactersToast() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.submitSideEffect(
+                JoinTribeSideEffect.Notify.AliasAllowedCharacters
+            )
+        }
     }
 
     private fun persistCustomAlias() {
@@ -144,7 +180,7 @@ internal class JoinTribeFragment: SideEffectFragment<
 
             binding.includeTribeMemberInfo.apply {
                 val memberAlias = viewState.myAlias ?: owner?.alias?.value
-                tribeMemberAliasEditText.setText(memberAlias)
+                tribeMemberAliasEditText.setText(memberAlias?.fixedAlias())
 
                 val memberPhotoUrl = viewState.myPhotoUrl ?: owner?.photoUrl?.value
                 loadProfileImage(memberPhotoUrl)

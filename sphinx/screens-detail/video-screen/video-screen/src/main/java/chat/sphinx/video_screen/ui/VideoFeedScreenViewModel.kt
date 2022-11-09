@@ -1,8 +1,10 @@
 package chat.sphinx.video_screen.ui
 
 import android.app.Application
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -13,14 +15,12 @@ import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.video_screen.ui.watch.VideoRecordConsumed
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.DashboardItemType
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.feed.isTrue
-import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
@@ -46,6 +46,7 @@ internal open class VideoFeedScreenViewModel(
     private val chatRepository: ChatRepository,
     private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val lightningRepository: LightningRepository,
@@ -58,6 +59,7 @@ internal open class VideoFeedScreenViewModel(
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
 
+
     private val videoFeedSharedFlow: SharedFlow<Feed?> = flow {
         getArgFeedId()?.let { feedId ->
             emitAll(feedRepository.getFeedById(feedId))
@@ -69,6 +71,8 @@ internal open class VideoFeedScreenViewModel(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private var videoRecordConsumed: VideoRecordConsumed? = null
 
     suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -259,6 +263,12 @@ internal open class VideoFeedScreenViewModel(
                                     )
                                 )
 
+                                actionsRepository.trackFeedBoostAction(
+                                    amount.value,
+                                    currentItem.id,
+                                    arrayListOf("")
+                                )
+
                                 videoFeed.destinations.let { destinations ->
 
                                     repositoryMedia.streamFeedPayments(
@@ -314,4 +324,39 @@ internal open class VideoFeedScreenViewModel(
     fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
+
+    fun createVideoRecordConsumed(feedItemId: FeedId){
+        if (videoRecordConsumed?.feedItemId == feedItemId){
+            return
+        }
+        videoRecordConsumed = VideoRecordConsumed(feedItemId)
+    }
+
+    fun trackVideoConsumed(){
+        videoRecordConsumed?.let { record ->
+            if (record.history.isNotEmpty()) {
+                actionsRepository.trackVideoConsumed(
+                    record.feedItemId,
+                    record.history
+                )
+            }
+        }
+    }
+    fun setNewHistoryItem(videoPosition: Long){
+        videoRecordConsumed?.setNewHistoryItem(videoPosition)
+    }
+
+    fun startTimer() {
+        videoRecordConsumed?.startTimer()
+    }
+
+    fun createHistoryItem() {
+        videoRecordConsumed?.createHistoryItem()
+    }
+
+    fun stopTimer(){
+        videoRecordConsumed?.stopTimer()
+    }
+
+
 }

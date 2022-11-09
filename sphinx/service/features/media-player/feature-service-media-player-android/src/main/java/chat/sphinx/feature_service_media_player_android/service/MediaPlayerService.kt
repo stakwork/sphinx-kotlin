@@ -8,7 +8,9 @@ import android.net.wifi.WifiManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.PowerManager
+import android.util.Log
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -20,6 +22,7 @@ import chat.sphinx.feature_service_media_player_android.util.toServiceActionPlay
 import chat.sphinx.feature_sphinx_service.SphinxService
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
+import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -30,6 +33,8 @@ import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
+import java.util.*
+import kotlin.collections.ArrayList
 
 internal abstract class MediaPlayerService: SphinxService() {
 
@@ -47,6 +52,7 @@ internal abstract class MediaPlayerService: SphinxService() {
     protected abstract val LOG: SphinxLogger
     internal abstract val mediaServiceController: MediaPlayerServiceControllerImpl
     protected abstract val repositoryMedia: RepositoryMedia
+    protected abstract val actionsRepository: ActionsRepository
 
     @Suppress("DEPRECATION")
     private val wifiLock: WifiManager.WifiLock? by lazy {
@@ -72,6 +78,11 @@ internal abstract class MediaPlayerService: SphinxService() {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
                 .build()
         }
+
+        private var trackSecondsConsumed: Long = 0
+        private var startTimestamp: Long = 0
+        private var currentPauseTime: Int = 0
+        private var history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
 
         @Synchronized
         fun audioFocusLost() {
@@ -177,7 +188,6 @@ internal abstract class MediaPlayerService: SphinxService() {
                         episodeId = userAction.episodeId,
                         abandonAudioFocus = true
                     )
-
                 }
                 is UserAction.ServiceAction.Play -> {
 
@@ -186,6 +196,22 @@ internal abstract class MediaPlayerService: SphinxService() {
                     }
 
                     podData?.let { nnData ->
+                        if (nnData.episodeId != userAction.episodeId){
+                            createHistoryItem()
+                            val currentHistory = arrayListOf<ContentConsumedHistoryItem>()
+                                history.forEach(){
+                                    currentHistory.add(it)
+                            }
+                            nnData.episodeId.toFeedId()
+                                ?.let {
+                                    actionsRepository.trackPodcastConsumed(it, currentHistory)
+                                }
+                            history.clear()
+                            resetTrackSecondsConsumed()
+                        }
+                        if (currentPauseTime != nnData.currentTimeSeconds) {
+                            setStartTimestamp(nnData.currentTimeMilliSeconds.toLong())
+                        }
                         if (nnData.chatId != userAction.chatId) {
                             //Podcast has changed. Payments Destinations needs to be set again
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceConnected
@@ -253,7 +279,9 @@ internal abstract class MediaPlayerService: SphinxService() {
                             createMediaPlayer(userAction, nnData.mediaPlayer)
 
                         }
-                    } ?: createMediaPlayer(userAction, null)
+                    } ?: createMediaPlayer(userAction, null).also {
+                        setStartTimestamp(userAction.startTime.toLong())
+                    }
 
                     repositoryMedia.updateChatMetaData(
                         userAction.chatId,
@@ -266,7 +294,6 @@ internal abstract class MediaPlayerService: SphinxService() {
                             userAction.speed
                         )
                     )
-
                 }
                 is UserAction.ServiceAction.Seek -> {
                     podData?.let { nnPlayer ->
@@ -275,19 +302,22 @@ internal abstract class MediaPlayerService: SphinxService() {
                             nnPlayer.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
-                                nnPlayer.mediaPlayer.seekTo(userAction.chatMetaData.timeSeconds * 1000)
+                                val secondPosition = userAction.chatMetaData.timeSeconds * 1000
+                                nnPlayer.mediaPlayer.seekTo(secondPosition)
+                                createHistoryItem()
+                                setStartTimestamp(secondPosition.toLong())
+                                resetTrackSecondsConsumed()
                                 // TODO: Dispatch State
                             } catch (e: IllegalStateException) {
                                 LOG.e(
                                     TAG,
-                                    "Failed to seekTo ${userAction.chatMetaData.timeSeconds} for MediaPlayer",
+                                    "Failed to   seekTo ${userAction.chatMetaData.timeSeconds} for MediaPlayer",
                                     e
                                 )
                                 // TODO: Handle Error
                             }
                         }
                     }
-
                     repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 }
             }
@@ -328,6 +358,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                         )
                         mediaServiceController.dispatchState(currentState)
 
+                        setPauseTime(nnData.currentTimeSeconds)
+
                         repositoryMedia.updateChatMetaData(
                             chatId,
                             nnData.podcastId?.toFeedId(),
@@ -339,7 +371,6 @@ internal abstract class MediaPlayerService: SphinxService() {
                                 nnData.speed,
                             )
                         )
-
                     } catch (e: IllegalStateException) {
                         LOG.e(TAG, "Failed to pause MediaPlayer", e)
                         // TODO: Handle Error
@@ -431,6 +462,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                                 currentTimeMilliseconds,
                                 nnData.durationMilliSeconds
                             )
+                            trackSecondsConsumed++
                         } else {
 
                             val state = if (nnData.mediaPlayer.duration <= currentTimeMilliseconds) {
@@ -489,6 +521,27 @@ internal abstract class MediaPlayerService: SphinxService() {
                 )
                 data.mediaPlayer.release()
                 podData = null
+            }
+        }
+        private fun resetTrackSecondsConsumed(){
+            trackSecondsConsumed = 0
+        }
+        private fun setStartTimestamp(startTime: Long){
+            startTimestamp = startTime
+        }
+        private fun setPauseTime(pauseTime: Int){
+            currentPauseTime = pauseTime
+        }
+
+        private fun createHistoryItem() {
+            if (trackSecondsConsumed > 0) {
+                val item = ContentConsumedHistoryItem(
+                    arrayListOf(""),
+                    startTimestamp,
+                    startTimestamp + (trackSecondsConsumed * 1000),
+                    Date().time
+                )
+                history.add(item)
             }
         }
     }

@@ -2,10 +2,9 @@ package chat.sphinx.dashboard.ui.feed
 
 import android.content.Context
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
-import chat.sphinx.dashboard.ui.viewstates.DeepLinkPopupViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.wrapper_chat.ChatHost
@@ -34,6 +33,7 @@ import javax.inject.Inject
 class FeedViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -80,12 +80,17 @@ class FeedViewModel @Inject constructor(
         )
         
         viewModelScope.launch(mainImmediate) {
-            delay(500)
+            delay(500L)
 
             feedRepository.searchFeedsBy(
                 searchTerm,
                 feedType
             ).collect { searchResults ->
+
+                actionsRepository.trackFeedSearchAction(
+                    searchTerm.lowercase().trim()
+                )
+
                 if (searchResults.isEmpty()) {
                     updateViewState(
                         when (feedChipsViewStateContainer.value) {

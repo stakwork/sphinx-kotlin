@@ -1,6 +1,10 @@
 # ChangeLog
 
-# Version 1.0.0-alpha66 (2022-10-07)
+# Version 1.0.0-alpha68 (2022-11-09)
+- Adds alias rules validation
+- Adds actions tracking
+
+# Version 1.0.0-alpha67 (2022-10-21)
 - Fixes badge count issues
 - Adds mentions count badge on chats list
 - Improves feed video player

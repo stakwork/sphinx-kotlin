@@ -34,6 +34,12 @@ internal sealed class  TribeDetailSideEffect: SideEffect<Context>()  {
         }
     }
 
+    object AliasAllowedCharacters: TribeDetailSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(false).show(value, R.string.alias_allowed_characters)
+        }
+    }
+
     class AlertConfirmDeleteTribe(
         private val chat: Chat,
         private val callback: () -> Unit

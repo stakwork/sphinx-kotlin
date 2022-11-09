@@ -3,6 +3,10 @@ package chat.sphinx.feature_coredb
 import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_coredb.SphinxDatabase
 import chat.sphinx.conceptcoredb.*
+import chat.sphinx.feature_coredb.adapters.action_track.ActionTrackIdAdapter
+import chat.sphinx.feature_coredb.adapters.action_track.ActionTrackMetaDataAdapter
+import chat.sphinx.feature_coredb.adapters.action_track.ActionTrackTypeAdapter
+import chat.sphinx.feature_coredb.adapters.action_track.ActionTrackUploadedAdapter
 import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
@@ -18,6 +22,7 @@ import chat.sphinx.feature_coredb.adapters.message.*
 import chat.sphinx.feature_coredb.adapters.subscription.CronAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.EndNumberAdapter
 import chat.sphinx.feature_coredb.adapters.subscription.SubscriptionCountAdapter
+import chat.sphinx.wrapper_action_track.ActionTrackMetaData
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.db.SqlDriver
 import io.matthewnelson.concept_encryption_key.EncryptionKey
@@ -218,6 +223,12 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     splitAdapter = FeedDestinationSplitAdapter(),
                     typeAdapter = FeedDestinationTypeAdapter(),
                     feed_idAdapter = FeedIdAdapter()
+                ),
+                actionTrackDboAdapter = ActionTrackDbo.Adapter(
+                    idAdapter = ActionTrackIdAdapter(),
+                    typeAdapter = ActionTrackTypeAdapter(),
+                    meta_dataAdapter = ActionTrackMetaDataAdapter(),
+                    uploadedAdapter = ActionTrackUploadedAdapter()
                 )
             ).sphinxDatabaseQueries
         }

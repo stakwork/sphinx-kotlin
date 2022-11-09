@@ -91,7 +91,7 @@ internal class WebViewFragment: SideEffectFragment<
         setupFragmentLayout()
     }
 
-    fun setupFragmentLayout() {
+    private fun setupFragmentLayout() {
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.layoutConstraintWebViewLayout)
     }
