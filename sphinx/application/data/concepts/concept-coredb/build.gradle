@@ -19,5 +19,6 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-invite')
     api project(path: ':sphinx:application:common:wrappers:wrapper-message')
     api project(path: ':sphinx:application:common:wrappers:wrapper-feed')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-action-track')
     implementation deps.kotlin.coroutinesCore
 }
