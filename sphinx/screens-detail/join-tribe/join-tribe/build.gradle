@@ -36,6 +36,7 @@ dependencies {
     implementation project(path: ':android:features:android-feature-screens')
 
     // Sphinx
+    implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
@@ -46,6 +47,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     implementation project(path: ':sphinx:application:common:menus:menu-bottom-picture')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-chat')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
