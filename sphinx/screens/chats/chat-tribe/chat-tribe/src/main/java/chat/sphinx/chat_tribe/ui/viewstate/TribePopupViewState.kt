@@ -30,6 +30,11 @@ sealed class TribePopupViewState: MotionLayoutViewState<TribePopupViewState>() {
             get() = R.id.motion_scene_tribe_contact_profile_closed
         override val endSetId: Int?
             get() = R.id.motion_scene_tribe_contact_profile_open
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_tribe_contact_profile_closed_to_open)
+            motionLayout.setProgress(1F, 1F)
+        }
     }
 
 }
