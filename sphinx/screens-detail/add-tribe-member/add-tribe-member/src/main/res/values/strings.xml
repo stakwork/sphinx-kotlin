@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_member_header_name">ADD TRIBE MEMBER</string>
+    <string name="add_member">Add Member</string>
+    <string name="member_alias">Alias *</string>
+    <string name="member_image">Tribe member image</string>
+    <string name="member_public_key">Public Key *</string>
+    <string name="member_route_hint">Route Hint</string>
+    <string name="member_contact_key">Contact Key *</string>
+    <string name="bottom_menu_member_pic_header_text">Member Picture</string>
+    <string name="member_info_required">Alias, Public Key and Contact Key are required</string>
+    <string name="invalid_public_key">Invalid Public Key</string>
+    <string name="invalid_route_hint">Invalid Route Hint</string>
+    <string name="failed_to_add_member">Failed to add member</string>
+    <string name="failed_to_process_image">Failed to process image</string>
+</resources>

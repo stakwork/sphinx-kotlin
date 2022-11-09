@@ -1,6 +1,7 @@
 package chat.sphinx.chat_common.util
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
@@ -10,9 +11,11 @@ import android.text.util.Linkify
 import android.text.util.Linkify.MatchFilter
 import android.text.util.Linkify.TransformFilter
 import android.widget.TextView
+import androidx.annotation.ColorInt
 import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.util.PatternsCompat
+import chat.sphinx.chat_common.R
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.VirtualLightningNodeAddress
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -59,6 +62,12 @@ object SphinxLinkify {
     const val VIRTUAL_NODE_ADDRESS: Int = 0x16
 
     /**
+     * Bit field indicating that Tribe Member Mention should be matched in methods that
+     * take an options mask
+     */
+    const val MENTION: Int = 0x32
+
+    /**
      * Bit mask indicating that all available patterns should be matched in
      * methods that take an options mask
      *
@@ -66,9 +75,8 @@ object SphinxLinkify {
      * Use [android.view.textclassifier.TextClassifier.generateLinks]
      * instead and avoid it even when targeting API levels where no alternative is available.
      */
-    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLIC_KEY or VIRTUAL_NODE_ADDRESS
+    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLIC_KEY or VIRTUAL_NODE_ADDRESS or MENTION
 
-    private val EMPTY_STRING = arrayOfNulls<String>(0)
     private val COMPARATOR: Comparator<LinkSpec> = object : Comparator<LinkSpec> {
         override fun compare(a: LinkSpec, b: LinkSpec): Int {
             if (a.start < b.start) {
@@ -101,7 +109,9 @@ object SphinxLinkify {
     private fun addLinks(
         text: Spannable,
         @LinkifyMask mask: Int,
-        onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener): Boolean {
+        context: Context,
+        onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener,
+    ): Boolean {
         if (mask == 0) {
             return false
         }
@@ -142,13 +152,19 @@ object SphinxLinkify {
                 null, null
             )
         }
+        if (mask and MENTION != 0) {
+            gatherLinks(
+                links, text, SphinxPatterns.MENTION, arrayOf(),
+                null, null, false, context.getColor(R.color.primaryBlue)
+            )
+        }
         pruneOverlaps(links, text)
         if (links.size == 0) {
             return false
         }
         for (link in links) {
             if (link.frameworkAddedSpan == null) {
-                applyLink(link.url, link.start, link.end, text, onSphinxInteractionListener)
+                applyLink(link, text, context, onSphinxInteractionListener)
             }
         }
         return true
@@ -168,21 +184,23 @@ object SphinxLinkify {
     fun addLinks(
         text: TextView,
         @LinkifyMask mask: Int,
-        onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
+        context: Context,
+        onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener,
     ): Boolean {
         if (mask == 0) {
             return false
         }
+
         val t = text.text
         return if (t is Spannable) {
-            if (addLinks(t, mask, onSphinxInteractionListener)) {
+            if (addLinks(t, mask, context, onSphinxInteractionListener)) {
                 addLinkMovementMethod(text)
                 return true
             }
             false
         } else {
             val s = SpannableString.valueOf(t)
-            if (addLinks(s, mask, onSphinxInteractionListener)) {
+            if (addLinks(s, mask, context, onSphinxInteractionListener)) {
                 addLinkMovementMethod(text)
                 text.text = s
                 return true
@@ -233,7 +251,9 @@ object SphinxLinkify {
     private fun gatherLinks(
         links: ArrayList<LinkSpec>,
         s: Spannable, pattern: Pattern, schemes: Array<String?>,
-        matchFilter: MatchFilter?, transformFilter: TransformFilter?
+        matchFilter: MatchFilter?, transformFilter: TransformFilter?,
+        underline: Boolean = true,
+        @ColorInt color: Int? = null,
     ) {
         val m = pattern.matcher(s)
         while (m.find()) {
@@ -245,20 +265,21 @@ object SphinxLinkify {
                 spec.url = url
                 spec.start = start
                 spec.end = end
+                spec.underline = underline
+                spec.color = color
                 links.add(spec)
             }
         }
     }
 
     private fun applyLink(
-        url: String?,
-        start: Int,
-        end: Int,
+        linkSpec: LinkSpec,
         text: Spannable,
-        onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
+        context: Context,
+        onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener,
     ) {
-        val span = SphinxUrlSpan(url, onSphinxInteractionListener)
-        text.setSpan(span, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        val span = SphinxUrlSpan(linkSpec.url, linkSpec.underline, linkSpec.color ?: context.getColor(R.color.primaryBlue), onSphinxInteractionListener)
+        text.setSpan(span, linkSpec.start, linkSpec.end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
     private fun pruneOverlaps(links: ArrayList<LinkSpec>, text: Spannable) {
@@ -305,7 +326,7 @@ object SphinxLinkify {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     @IntDef(
         flag = true,
-        value = [WEB_URLS, EMAIL_ADDRESSES, PHONE_NUMBERS, LIGHTNING_NODE_PUBLIC_KEY, VIRTUAL_NODE_ADDRESS, ALL]
+        value = [WEB_URLS, EMAIL_ADDRESSES, PHONE_NUMBERS, LIGHTNING_NODE_PUBLIC_KEY, VIRTUAL_NODE_ADDRESS, MENTION, ALL]
     )
     @kotlin.annotation.Retention(AnnotationRetention.SOURCE)
     annotation class LinkifyMask
@@ -314,6 +335,8 @@ object SphinxLinkify {
         var url: String? = null
         var start = 0
         var end = 0
+        var underline = true
+        @ColorInt var color: Int? = null
     }
 
     object SphinxPatterns {
@@ -330,11 +353,15 @@ object SphinxLinkify {
         )
 
         val LINK_PREVIEWS: Pattern = Pattern.compile(
-            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${LightningNodePubKey.REGEX}|${VirtualLightningNodeAddress.REGEX})"
+            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
         )
             
         val COPYABLE_LINKS: Pattern = Pattern.compile(
-            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${LightningNodePubKey.REGEX}|${VirtualLightningNodeAddress.REGEX})"
+            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
+        )
+
+        val MENTION: Pattern = Pattern.compile(
+            "\\B@[^\\s]+"
         )
     }
 }

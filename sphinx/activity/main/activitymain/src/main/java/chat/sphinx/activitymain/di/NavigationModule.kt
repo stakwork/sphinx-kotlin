@@ -7,6 +7,7 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.navigation.navigators.detail.*
 import chat.sphinx.activitymain.navigation.navigators.primary.*
 import chat.sphinx.add_friend.navigation.AddFriendNavigator
+import chat.sphinx.add_tribe_member.navigation.AddTribeMemberNavigator
 import chat.sphinx.address_book.navigation.AddressBookNavigator
 import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
@@ -24,6 +25,7 @@ import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
+import chat.sphinx.notification_level.navigation.NotificationLevelNavigator
 import chat.sphinx.onboard_description.navigation.OnBoardDescriptionNavigator
 import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
@@ -311,6 +313,12 @@ internal object NavigationModule {
         tribeMembersListNavigatorImpl
 
     @Provides
+    fun provideAddTribeMemberNavigator(
+        addTribeMemberNavigatorImpl: AddTribeMemberNavigatorImpl
+    ): AddTribeMemberNavigator =
+        addTribeMemberNavigatorImpl
+
+    @Provides
     fun provideJoinTribeNavigator(
         joinTribeNavigatorImpl: JoinTribeNavigatorImpl
     ): JoinTribeNavigator =
@@ -351,5 +359,11 @@ internal object NavigationModule {
         newsletterDetailNavigatorImpl: NewsletterDetailNavigatorImpl
     ): NewsletterDetailNavigator =
         newsletterDetailNavigatorImpl
+
+    @Provides
+    fun provideNotificationLevelNavigator(
+        notificationLevelNavigatorImpl: NotificationLevelNavigatorImpl
+    ): NotificationLevelNavigator =
+        notificationLevelNavigatorImpl
 
 }

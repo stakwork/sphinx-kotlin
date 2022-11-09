@@ -18,6 +18,7 @@ import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -69,6 +70,7 @@ internal class ChatTribeViewModel @Inject constructor(
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
+    actionsRepository: ActionsRepository,
     networkQueryLightning: NetworkQueryLightning,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
@@ -85,6 +87,7 @@ internal class ChatTribeViewModel @Inject constructor(
     chatRepository,
     contactRepository,
     messageRepository,
+    actionsRepository,
     networkQueryLightning,
     mediaCacheHandler,
     savedStateHandle,
@@ -374,7 +377,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
-    override fun showMemberPopup(message: Message) {
+    private fun showMemberPopup(message: Message) {
         message.uuid?.let { messageUUID ->
             message.senderAlias?.let { senderAlias ->
                 tribePopupViewStateContainer.updateViewState(
@@ -442,6 +445,10 @@ internal class ChatTribeViewModel @Inject constructor(
     }
 
 
+    override fun onSmallProfileImageClick(message: Message) {
+        showMemberPopup(message)
+    }
+
     fun goToPaymentSend() {
         viewModelScope.launch(mainImmediate) {
             (tribePopupViewStateContainer.value as TribePopupViewState.TribeMemberPopup)?.let { viewState ->
@@ -471,5 +478,13 @@ internal class ChatTribeViewModel @Inject constructor(
         }
 
         moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
+    }
+
+    override fun navigateToNotificationLevel() {
+        moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
+
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toNotificationsLevel(chatId)
+        }
     }
 }

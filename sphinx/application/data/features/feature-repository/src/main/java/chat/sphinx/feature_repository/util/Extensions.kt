@@ -109,6 +109,15 @@ inline fun TransactionCallbacks.updateChatMuted(
     queries.dashboardUpdateMuted(muted, chatId)
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun TransactionCallbacks.updateChatNotificationLevel(
+    chatId: ChatId,
+    notificationLevel: NotificationLevel?,
+    queries: SphinxDatabaseQueries
+) {
+    queries.chatUpdateNotificationLevel(notificationLevel, chatId)
+}
+
 @Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
 inline fun TransactionCallbacks.updateChatTribeData(
     tribe: TribeDto,
@@ -174,6 +183,7 @@ inline fun TransactionCallbacks.upsertChat(
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },
         pinedMessage,
+        dto.notify?.toNotificationLevel(),
         chatId,
         ChatUUID(dto.uuid),
         chatType,
@@ -370,6 +380,7 @@ fun TransactionCallbacks.upsertMessage(
         dto.type.toMessageType(),
         dto.recipient_alias?.toRecipientAlias(),
         dto.recipient_pic?.toPhotoUrl(),
+        dto.pushActual.toPush(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,

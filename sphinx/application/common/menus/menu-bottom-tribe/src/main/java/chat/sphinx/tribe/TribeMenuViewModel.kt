@@ -12,6 +12,7 @@ interface TribeMenuViewModel {
     fun shareTribe()
     fun exitTribe()
     fun editTribe()
+    fun addTribeMember()
 }
 
 class TribeMenuHandler {

@@ -1,5 +1,34 @@
 # ChangeLog
 
+# Version 1.0.0-alpha68 (2022-11-09)
+- Adds alias rules validation
+- Adds actions tracking
+
+# Version 1.0.0-alpha67 (2022-10-21)
+- Fixes badge count issues
+- Adds mentions count badge on chats list
+- Improves feed video player
+
+# Version 1.0.0-alpha66 (2022-10-07)
+- Adds ability to set tribe notifications level
+- Adds mentions format on messages
+- Fixes audio format compatibility issue
+- Adds support for scanning qr code from gallery
+
+# Version 1.0.0-alpha65 (2022-10-03)
+- Improvements on Signing Device setup
+- Disables tribe notification level feature
+- Fixes and improvements
+
+# Version 1.0.0-alpha64 (2022-09-09)
+- Improvements on Signing Device setup
+
+# Version 1.0.0-alpha63 (2022-09-06)
+- Adds ability to add member to a tribe
+- Adds ability to set tribe notifications level
+- Adds mentions format on messages
+- Fixes and improvements
+
 # Version 1.0.0-alpha62 (2022-08-25)
 - Fix for tip amount automatically reset to 20
 - Support for Signing Device setup

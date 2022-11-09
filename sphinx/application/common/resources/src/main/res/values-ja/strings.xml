@@ -45,4 +45,6 @@
 
     <string name="balance_too_low">Balance too low</string>
     <string name="boost_amount_too_low">Boost amount must be greater than 0</string>
+
+    <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

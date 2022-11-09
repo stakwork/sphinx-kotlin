@@ -5,6 +5,9 @@ import chat.sphinx.concept_coredb.CoreDB
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
+import chat.sphinx.concept_network_query_action_track.model.ActionTrackDto
+import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -34,7 +37,9 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
+import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.concept_repository_chat.model.CreateTribe
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard.RepositoryDashboard
@@ -51,6 +56,11 @@ import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.conceptcoredb.*
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboContentBoostPresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboContentConsumedPresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboMessagePresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboPodcastClipCommentPresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboFeedSearchPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedDboPresenterMapper
@@ -71,6 +81,8 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.notification.SphinxNotificationManager
+import chat.sphinx.wrapper_action_track.*
+import chat.sphinx.wrapper_action_track.action_wrappers.*
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -138,6 +150,7 @@ abstract class SphinxRepository(
     private val mediaCacheHandler: MediaCacheHandler,
     private val memeInputStreamHandler: MemeInputStreamHandler,
     private val memeServerTokenHandler: MemeServerTokenHandler,
+    private val networkQueryActionTrack: NetworkQueryActionTrack,
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
@@ -161,6 +174,7 @@ abstract class SphinxRepository(
     SubscriptionRepository,
     RepositoryDashboard,
     RepositoryMedia,
+    ActionsRepository,
     FeedRepository,
     CoroutineDispatchers by dispatchers,
     SphinxSocketIOMessageListener {
@@ -396,7 +410,8 @@ abstract class SphinxRepository(
                         throw Exception()
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
             delay(25L)
         }
 
@@ -427,13 +442,41 @@ abstract class SphinxRepository(
                         throw Exception()
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
             delay(25L)
         }
 
         emitAll(
             coreDB.getSphinxDatabaseQueries()
                 .messageGetUnseenIncomingMessageCountByChatId(
+                    ownerId ?: ContactId(-1),
+                    chatId
+                )
+                .asFlow()
+                .mapToOneOrNull(io)
+                .distinctUntilChanged()
+        )
+    }
+
+    override fun getUnseenMentionsByChatId(chatId: ChatId): Flow<Long?> = flow {
+        var ownerId: ContactId? = accountOwner.value?.id
+
+        if (ownerId == null) {
+            try {
+                accountOwner.collect { contact ->
+                    if (contact != null) {
+                        ownerId = contact.id
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetUnseenIncomingMentionsCountByChatId(
                     ownerId ?: ContactId(-1),
                     chatId
                 )
@@ -455,7 +498,8 @@ abstract class SphinxRepository(
                         throw Exception()
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
             delay(25L)
         }
 
@@ -485,7 +529,8 @@ abstract class SphinxRepository(
                         throw Exception()
                     }
                 }
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
             delay(25L)
         }
 
@@ -558,7 +603,11 @@ abstract class SphinxRepository(
                             for (dto in chats) {
                                 if (dto.deletedActual) {
                                     LOG.d(TAG, "Removing Chats/Messages for ${ChatId(dto.id)}")
-                                    deleteChatById(ChatId(dto.id), queries, latestMessageUpdatedTimeMap)
+                                    deleteChatById(
+                                        ChatId(dto.id),
+                                        queries,
+                                        latestMessageUpdatedTimeMap
+                                    )
                                 } else {
                                     val contactDto: ContactDto? =
                                         if (dto.type == ChatType.CONVERSATION) {
@@ -688,7 +737,13 @@ abstract class SphinxRepository(
             }
 
             val streamSatsText =
-                StreamSatsText(podcastId, episodeId, metaData.timeSeconds.toLong(), metaData.speed, clipMessageUUID?.value)
+                StreamSatsText(
+                    podcastId,
+                    episodeId,
+                    metaData.timeSeconds.toLong(),
+                    metaData.speed,
+                    clipMessageUUID?.value
+                )
 
             val postStreamSatsDto = PostStreamSatsDto(
                 metaData.satsPerMinute.value,
@@ -928,7 +983,8 @@ abstract class SphinxRepository(
 
                             applicationScope.launch(io + handler) {
 
-                                val contactsToInsert = loadResponse.value.contacts.filter { dto -> !dto.deletedActual && !dto.fromGroupActual }
+                                val contactsToInsert =
+                                    loadResponse.value.contacts.filter { dto -> !dto.deletedActual && !dto.fromGroupActual }
                                 val contactMap: MutableMap<ContactId, ContactDto> =
                                     LinkedHashMap(contactsToInsert.size)
 
@@ -938,7 +994,10 @@ abstract class SphinxRepository(
                                             queries.transaction {
                                                 for (dto in loadResponse.value.contacts) {
                                                     if (dto.deletedActual || dto.fromGroupActual) {
-                                                        deleteContactById(ContactId(dto.id), queries)
+                                                        deleteContactById(
+                                                            ContactId(dto.id),
+                                                            queries
+                                                        )
                                                     } else {
                                                         upsertContact(dto, queries)
                                                         contactMap[ContactId(dto.id)] = dto
@@ -1287,9 +1346,9 @@ abstract class SphinxRepository(
                 ).collect { loadResponse ->
                     @Exhaustive
                     when (loadResponse) {
-                        is LoadResponse.Loading -> { }
-                        is Response.Error -> { }
-                        is Response.Success -> { }
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
+                        is Response.Success -> {}
                     }
                 }
             } catch (e: Exception) {
@@ -1566,7 +1625,7 @@ abstract class SphinxRepository(
                             @Exhaustive
                             when (loadResponse) {
                                 is LoadResponse.Loading -> {}
-                                
+
                                 is Response.Error -> {
                                     response = loadResponse
                                 }
@@ -2041,92 +2100,103 @@ abstract class SphinxRepository(
         return message
     }
 
-    override fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>> = flow {
-        val queries = coreDB.getSphinxDatabaseQueries()
+    override fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>> =
+        flow {
+            val queries = coreDB.getSphinxDatabaseQueries()
 
-        emitAll(
-            (
-                if (limit > 0) {
-                    queries.messageGetAllToShowByChatIdWithLimit(chatId, limit)
-                } else {
-                    queries.messageGetAllToShowByChatId(chatId)
-                }
-            )
-                .asFlow()
-                .mapToList(io)
-                .map { listMessageDbo ->
-                    withContext(default) {
-
-                        val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
-                            LinkedHashMap(listMessageDbo.size)
-
-                        val purchaseItemsMap: MutableMap<MessageMUID, ArrayList<Message>> =
-                            LinkedHashMap(listMessageDbo.size)
-
-                        for (dbo in listMessageDbo) {
-                            dbo.uuid?.let { uuid ->
-                                reactionsMap[uuid] = ArrayList(0)
-                            }
-                            dbo.muid?.let { muid ->
-                                purchaseItemsMap[muid] = ArrayList(0)
-                            }
+            emitAll(
+                (
+                        if (limit > 0) {
+                            queries.messageGetAllToShowByChatIdWithLimit(chatId, limit)
+                        } else {
+                            queries.messageGetAllToShowByChatId(chatId)
                         }
+                        )
+                    .asFlow()
+                    .mapToList(io)
+                    .map { listMessageDbo ->
+                        withContext(default) {
 
-                        val replyUUIDs = reactionsMap.keys.map { ReplyUUID(it.value) }
+                            val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
+                                LinkedHashMap(listMessageDbo.size)
 
-                        val purchaseItemsMUIDs = purchaseItemsMap.keys.map { MessageMUID(it.value) }
+                            val purchaseItemsMap: MutableMap<MessageMUID, ArrayList<Message>> =
+                                LinkedHashMap(listMessageDbo.size)
 
-                        replyUUIDs.chunked(500).forEach { chunkedIds ->
-                            queries.messageGetAllReactionsByUUID(
-                                chatId,
-                                chunkedIds,
-                            ).executeAsList()
-                                .let { response ->
-                                    response.forEach { dbo ->
-                                        dbo.reply_uuid?.let { uuid ->
-                                            reactionsMap[MessageUUID(uuid.value)]?.add(
-                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
-                                            )
+                            for (dbo in listMessageDbo) {
+                                dbo.uuid?.let { uuid ->
+                                    reactionsMap[uuid] = ArrayList(0)
+                                }
+                                dbo.muid?.let { muid ->
+                                    purchaseItemsMap[muid] = ArrayList(0)
+                                }
+                            }
+
+                            val replyUUIDs = reactionsMap.keys.map { ReplyUUID(it.value) }
+
+                            val purchaseItemsMUIDs =
+                                purchaseItemsMap.keys.map { MessageMUID(it.value) }
+
+                            replyUUIDs.chunked(500).forEach { chunkedIds ->
+                                queries.messageGetAllReactionsByUUID(
+                                    chatId,
+                                    chunkedIds,
+                                ).executeAsList()
+                                    .let { response ->
+                                        response.forEach { dbo ->
+                                            dbo.reply_uuid?.let { uuid ->
+                                                reactionsMap[MessageUUID(uuid.value)]?.add(
+                                                    mapMessageDboAndDecryptContentIfNeeded(
+                                                        queries,
+                                                        dbo
+                                                    )
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                        }
+                            }
 
-                        purchaseItemsMUIDs.chunked(500).forEach { chunkedMUIDs ->
-                            queries.messageGetAllPurchaseItemsByMUID(
-                                chatId,
-                                chunkedMUIDs,
-                            ).executeAsList()
-                                .let { response ->
-                                    response.forEach { dbo ->
-                                        dbo.muid?.let { muid ->
-                                            purchaseItemsMap[muid]?.add(
-                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
-                                            )
-                                        }
-                                        dbo.original_muid?.let { original_muid ->
-                                            purchaseItemsMap[original_muid]?.add(
-                                                mapMessageDboAndDecryptContentIfNeeded(queries, dbo)
-                                            )
+                            purchaseItemsMUIDs.chunked(500).forEach { chunkedMUIDs ->
+                                queries.messageGetAllPurchaseItemsByMUID(
+                                    chatId,
+                                    chunkedMUIDs,
+                                ).executeAsList()
+                                    .let { response ->
+                                        response.forEach { dbo ->
+                                            dbo.muid?.let { muid ->
+                                                purchaseItemsMap[muid]?.add(
+                                                    mapMessageDboAndDecryptContentIfNeeded(
+                                                        queries,
+                                                        dbo
+                                                    )
+                                                )
+                                            }
+                                            dbo.original_muid?.let { original_muid ->
+                                                purchaseItemsMap[original_muid]?.add(
+                                                    mapMessageDboAndDecryptContentIfNeeded(
+                                                        queries,
+                                                        dbo
+                                                    )
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                        }
+                            }
 
-                        listMessageDbo.reversed().map { dbo ->
-                            mapMessageDboAndDecryptContentIfNeeded(
-                                queries,
-                                dbo,
-                                dbo.uuid?.let { reactionsMap[it] },
-                                dbo.muid?.let { purchaseItemsMap[it] },
-                                dbo.reply_uuid,
-                            )
-                        }
+                            listMessageDbo.reversed().map { dbo ->
+                                mapMessageDboAndDecryptContentIfNeeded(
+                                    queries,
+                                    dbo,
+                                    dbo.uuid?.let { reactionsMap[it] },
+                                    dbo.muid?.let { purchaseItemsMap[it] },
+                                    dbo.reply_uuid,
+                                )
+                            }
 
+                        }
                     }
-                }
-        )
-    }
+            )
+        }
 
     override fun getMessageById(messageId: MessageId): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
@@ -2167,7 +2237,8 @@ abstract class SphinxRepository(
 
     override fun getTribeLastMemberRequestByContactId(
         contactId: ContactId,
-        chatId: ChatId, ): Flow<Message?> = flow {
+        chatId: ChatId,
+    ): Flow<Message?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
         emitAll(
@@ -2465,6 +2536,7 @@ abstract class SphinxRepository(
                                 messageType,
                                 null,
                                 null,
+                                Push.False,
                                 provisionalId,
                                 null,
                                 chatDbo.id,
@@ -2875,7 +2947,8 @@ abstract class SphinxRepository(
             getContactByPubKey(supportContactPubKey).firstOrNull()?.let { supportContact ->
                 val messageSender = getContactById(message.sender).firstOrNull()
 
-                var flagMessageContent = "Message Flagged\n- Message: ${message.uuid?.value ?: "Empty Message UUID"}\n- Sender: ${messageSender?.nodePubKey?.value ?: "Empty Sender"}"
+                var flagMessageContent =
+                    "Message Flagged\n- Message: ${message.uuid?.value ?: "Empty Message UUID"}\n- Sender: ${messageSender?.nodePubKey?.value ?: "Empty Sender"}"
 
                 if (chat.isTribe()) {
                     flagMessageContent += "\n- Tribe: ${chat.uuid.value}"
@@ -2886,9 +2959,10 @@ abstract class SphinxRepository(
 
                 messageBuilder.setContactId(supportContact.id)
 
-                getConversationByContactId(supportContact.id).firstOrNull()?.let { supportContactChat ->
-                    messageBuilder.setChatId(supportContactChat.id)
-                }
+                getConversationByContactId(supportContact.id).firstOrNull()
+                    ?.let { supportContactChat ->
+                        messageBuilder.setChatId(supportContactChat.id)
+                    }
 
                 sendMessage(
                     messageBuilder.build().first
@@ -3188,7 +3262,9 @@ abstract class SphinxRepository(
             networkQueryMessage.boostMessage(
                 boostMessageDto = PostBoostMessageDto(
                     chat_id = chatId.value,
-                    amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(20L)).value,
+                    amount = pricePerMessage.value + escrowAmount.value + (owner.tipAmount ?: Sat(
+                        20L
+                    )).value,
                     message_price = pricePerMessage.value + escrowAmount.value,
                     reply_uuid = messageUUID.value
                 )
@@ -3499,45 +3575,46 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError("Failed to pay for attachment"))
     }
 
-    override suspend fun toggleChatMuted(chat: Chat): Response<Boolean, ResponseError> {
-        var response: Response<Boolean, ResponseError> = Response.Success(!chat.isMuted())
+    override suspend fun setNotificationLevel(
+        chat: Chat,
+        level: NotificationLevel
+    ): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError> = Response.Success(level.isMuteChat())
 
         applicationScope.launch(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
-            val currentMutedValue = chat.isMuted
+            val currentNotificationLevel = chat.notify
 
             chatLock.withLock {
                 withContext(io) {
                     queries.transaction {
-                        updateChatMuted(
+                        updateChatNotificationLevel(
                             chat.id,
-                            if (currentMutedValue.isTrue()) ChatMuted.False else ChatMuted.True,
+                            level,
                             queries
                         )
                     }
                 }
             }
 
-            networkQueryChat.toggleMuteChat(chat.id, chat.isMuted).collect { loadResponse ->
+            networkQueryChat.setNotificationLevel(chat.id, level).collect { loadResponse ->
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-                    }
+                    is LoadResponse.Loading -> {}
+                    is Response.Success -> {}
                     is Response.Error -> {
                         response = loadResponse
 
                         chatLock.withLock {
                             withContext(io) {
                                 queries.transaction {
-                                    updateChatMuted(
+                                    updateChatNotificationLevel(
                                         chat.id,
-                                        currentMutedValue,
+                                        currentNotificationLevel,
                                         queries
                                     )
                                 }
                             }
                         }
-                    }
-                    is Response.Success -> {
                     }
                 }
             }
@@ -3743,7 +3820,7 @@ abstract class SphinxRepository(
                     is Response.Error -> {
                     }
                     is Response.Success -> {
-                        
+
                         var cId: ChatId = chatId
 
                         response.value.id.toFeedId()?.let { feedId ->
@@ -3933,7 +4010,9 @@ abstract class SphinxRepository(
         var sortedList: List<Feed>? = null
 
         withContext(dispatchers.default) {
-            sortedList = list.sortedByDescending { it.chat?.contentSeenAt?.time ?: it.lastItem?.datePublished?.time ?: 0 }
+            sortedList = list.sortedByDescending {
+                it.chat?.contentSeenAt?.time ?: it.lastItem?.datePublished?.time ?: 0
+            }
         }
 
         return sortedList ?: listOf()
@@ -4080,7 +4159,7 @@ abstract class SphinxRepository(
                 .feedGetAllByTitle("%${searchTerm.lowercase().trim()}%")
                 .executeAsList()
                 .map { it?.let { feedSearchResultDboPresenterMapper.mapFrom(it) } }
-        }  else {
+        } else {
             queries
                 .feedGetAllByTitleAndType("%${searchTerm.lowercase().trim()}%", feedType)
                 .executeAsList()
@@ -4338,17 +4417,26 @@ abstract class SphinxRepository(
                                                     val id: Long? = dto.chat_id
 
                                                     if (id != null &&
-                                                        chatIds.contains(ChatId(id))) {
+                                                        chatIds.contains(ChatId(id))
+                                                    ) {
 
                                                         if (dto.updateChatDboLatestMessage) {
-                                                            if (!latestMessageMap.containsKey(ChatId(id))) {
+                                                            if (!latestMessageMap.containsKey(
+                                                                    ChatId(
+                                                                        id
+                                                                    )
+                                                                )
+                                                            ) {
                                                                 latestMessageMap[ChatId(id)] = dto
                                                             } else {
-                                                                val lastMessage = latestMessageMap[ChatId(id)]
+                                                                val lastMessage =
+                                                                    latestMessageMap[ChatId(id)]
                                                                 if (lastMessage == null ||
-                                                                    dto.created_at.toDateTime().time > lastMessage.created_at.toDateTime().time) {
+                                                                    dto.created_at.toDateTime().time > lastMessage.created_at.toDateTime().time
+                                                                ) {
 
-                                                                    latestMessageMap[ChatId(id)] = dto
+                                                                    latestMessageMap[ChatId(id)] =
+                                                                        dto
                                                                 }
                                                             }
                                                         }
@@ -4430,12 +4518,14 @@ abstract class SphinxRepository(
 
             }.join()
 
-            emit(Response.Success(
-                RestoreProgress(
-                    false,
-                    100
+            emit(
+                Response.Success(
+                    RestoreProgress(
+                        false,
+                        100
+                    )
                 )
-            ))
+            )
         }
     }
 
@@ -4453,7 +4543,8 @@ abstract class SphinxRepository(
         val contactsRestoreProgressTotal = 4
         val messagesRestoreProgressTotal = 96
         val currentPage: Int = offset / MESSAGE_PAGINATION_LIMIT
-        val progress: Int = contactsRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
+        val progress: Int =
+            contactsRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
 
         return RestoreProgress(
             true,
@@ -4687,7 +4778,8 @@ abstract class SphinxRepository(
 
                         val sig = loadResponse.value.sig
                         val publicKey = accountOwner.value?.nodePubKey?.value ?: ""
-                        val urlString = "https://auth.sphinx.chat/oauth_verify?id=$id&sig=$sig&pubkey=$publicKey"
+                        val urlString =
+                            "https://auth.sphinx.chat/oauth_verify?id=$id&sig=$sig&pubkey=$publicKey"
 
                         response = Response.Success(urlString)
                     }
@@ -4838,7 +4930,7 @@ abstract class SphinxRepository(
                         }
 
                         is Response.Error -> {
-                            response = redeemBadgeTokenResponse 
+                            response = redeemBadgeTokenResponse
                         }
 
                         is Response.Success -> {
@@ -4851,7 +4943,6 @@ abstract class SphinxRepository(
 
         return response ?: Response.Error(ResponseError("Redeem Badge Token failed"))
     }
-
 
 
     override suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError> {
@@ -5198,6 +5289,67 @@ abstract class SphinxRepository(
                         }
                     }
                 }
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> =
+            Response.Error(ResponseError(("Failed to add Member")))
+        val memeServerHost = MediaHost.DEFAULT
+
+        applicationScope.launch(mainImmediate) {
+            try {
+                val imgUrl: String? = addMember.img?.let { imgFile ->
+                    // If an image file is provided we should upload it
+                    val token = memeServerTokenHandler.retrieveAuthenticationToken(memeServerHost)
+                        ?: throw RuntimeException("MemeServerAuthenticationToken retrieval failure")
+
+                    val networkResponse = networkQueryMemeServer.uploadAttachment(
+                        authenticationToken = token,
+                        mediaType = MediaType.Image("${MediaType.IMAGE}/${imgFile.extension}"),
+                        stream = object : InputStreamProvider() {
+                            override fun newInputStream(): InputStream = imgFile.inputStream()
+                        },
+                        fileName = imgFile.name,
+                        contentLength = imgFile.length(),
+                        memeServerHost = memeServerHost,
+                    )
+                    @Exhaustive
+                    when (networkResponse) {
+                        is Response.Error -> {
+                            LOG.e(TAG, "Failed to upload image: ", networkResponse.exception)
+                            response = networkResponse
+                            null
+                        }
+                        is Response.Success -> {
+                            "https://${memeServerHost.value}/public/${networkResponse.value.muid}"
+                        }
+                    }
+                }
+
+                networkQueryChat.addTribeMember(
+                    addMember.toTribeMemberDto(imgUrl)
+                ).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {
+                        }
+
+                        is Response.Error -> {
+                            response = loadResponse
+                            LOG.e(TAG, "Failed to create tribe: ", loadResponse.exception)
+                        }
+                        is Response.Success -> {
+                            response = Response.Success(true)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                response = Response.Error(
+                    ResponseError("Failed to add Tribe Member", e)
+                )
             }
         }.join()
 
@@ -5897,4 +6049,256 @@ abstract class SphinxRepository(
 
         return response
     }
+
+    private val actionTrackDboMessagePresenterMapper: ActionTrackDboMessagePresenterMapper by lazy {
+        ActionTrackDboMessagePresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboFeedSearchPresenterMapper: ActionTrackDboFeedSearchPresenterMapper by lazy {
+        ActionTrackDboFeedSearchPresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboContentBoostPresenterMapper: ActionTrackDboContentBoostPresenterMapper by lazy {
+        ActionTrackDboContentBoostPresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboPodcastClipCommentPresenterMapper: ActionTrackDboPodcastClipCommentPresenterMapper by lazy {
+        ActionTrackDboPodcastClipCommentPresenterMapper(dispatchers, moshi)
+    }
+
+    private val actionTrackDboContentConsumedPresenterMapper: ActionTrackDboContentConsumedPresenterMapper by lazy {
+        ActionTrackDboContentConsumedPresenterMapper(dispatchers, moshi)
+    }
+
+    override fun trackFeedSearchAction(searchTerm: String) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val searchTermCount = queries.feedSearchGetCount(
+                "%\"searchTerm\":\"$searchTerm\"%"
+            ).executeAsOneOrNull() ?: 0
+
+            val feedSearchAction = FeedSearchAction(
+                searchTermCount + 1,
+                searchTerm,
+                Date().time
+            )
+
+            queries.actionTrackUpsert(
+                ActionTrackType.FeedSearch,
+                ActionTrackMetaData(feedSearchAction.toJson(moshi)),
+                false.toActionTrackUploaded(),
+                ActionTrackId(Long.MAX_VALUE)
+            )
+        }
+    }
+
+    override fun trackFeedBoostAction(
+        boost: Long,
+        feedItemId: FeedId,
+        topics: ArrayList<String>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    val contentBoostAction = ContentBoostAction(
+                        boost,
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value,
+                        topics,
+                        Date().time
+                    )
+
+                    queries.actionTrackUpsert(
+                        ActionTrackType.ContentBoost,
+                        ActionTrackMetaData(contentBoostAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun trackPodcastClipComments(
+        feedItemId: FeedId,
+        timestamp: Long,
+        topics: ArrayList<String>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    val podcastClipCommentAction = PodcastClipCommentAction(
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value,
+                        topics,
+                        timestamp,
+                        timestamp,
+                        Date().time
+                    )
+
+                    queries.actionTrackUpsert(
+                        ActionTrackType.PodcastClipComment,
+                        ActionTrackMetaData(podcastClipCommentAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun trackNewsletterConsumed(feedItemId: FeedId) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    val newsletterConsumedAction = ContentConsumedAction(
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value
+                    )
+
+                    val contentConsumedHistoryItem = ContentConsumedHistoryItem(
+                        arrayListOf(""),
+                        0,
+                        0,
+                        Date().time
+                    )
+                    newsletterConsumedAction.addHistoryItem(contentConsumedHistoryItem)
+
+                    queries.actionTrackUpsert(
+                        ActionTrackType.ContentConsumed,
+                        ActionTrackMetaData(newsletterConsumedAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun trackVideoConsumed(
+        feedItemId: FeedId,
+        history: ArrayList<ContentConsumedHistoryItem>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+
+                    val videoConsumedAction = ContentConsumedAction(
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value
+                    )
+                    videoConsumedAction.history = history
+
+                    queries.actionTrackUpsert(
+                        ActionTrackType.ContentConsumed,
+                        ActionTrackMetaData(videoConsumedAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun trackPodcastConsumed(
+        feedItemId: FeedId,
+        history: ArrayList<ContentConsumedHistoryItem>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+
+                    val podcastConsumedAction = ContentConsumedAction(
+                        feed.id.value,
+                        feed.feedType.value.toLong(),
+                        feed.feedUrl.value,
+                        feedItem.id.value,
+                        feedItem.enclosureUrl.value
+                    )
+                    podcastConsumedAction.history = history
+
+                    queries.actionTrackUpsert(
+                        ActionTrackType.ContentConsumed,
+                        ActionTrackMetaData(podcastConsumedAction.toJson(moshi)),
+                        false.toActionTrackUploaded(),
+                        ActionTrackId(Long.MAX_VALUE)
+                    )
+                }
+            }
+        }
+    }
+
+    override fun trackMessageContent(keywords: List<String>) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val messageAction = MessageAction(
+                ArrayList(keywords),
+                Date().time
+            )
+
+            queries.actionTrackUpsert(
+                ActionTrackType.Message,
+                ActionTrackMetaData(messageAction.toJson(moshi)),
+                false.toActionTrackUploaded(),
+                ActionTrackId(Long.MAX_VALUE)
+            )
+        }
+    }
+
+    override fun syncActions() {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            val actionsDboList = queries.actionTrackGetAllNotUploaded()
+                .executeAsList()
+
+            for (chunk in actionsDboList.chunked(50)) {
+                val actionsIds = chunk.map { it.id }
+
+                val actionTrackDTOs = chunk.map {
+                    ActionTrackDto(
+                        it.type.value,
+                        it.meta_data.value
+                    )
+                }
+
+                networkQueryActionTrack.sendActionsTracked(
+                    SyncActionsDto(actionTrackDTOs)
+                ).collect { response ->
+                    when (response) {
+                        is Response.Success -> {
+                            queries.actionTrackUpdateUploadedItems(actionsIds)
+                        }
+                        is Response.Error -> {}
+                        else -> {}
+                    }
+                }
+            }
+        }
+    }
+
 }

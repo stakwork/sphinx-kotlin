@@ -26,6 +26,7 @@ git submodule update
 ## Building The App
 See [HERE](./docs/NOTIFICATIONS.md) to enable building Sphinx with FirebaseMessaging  
 See [HERE](./docs/GIPHY.md) to enable building Sphinx with the Giphy SDK
+See [HERE](./docs/YOUTUBE.md) to enable building Sphinx with the YouTube Player API
   
 Checkout branch `master`:
 ```bash

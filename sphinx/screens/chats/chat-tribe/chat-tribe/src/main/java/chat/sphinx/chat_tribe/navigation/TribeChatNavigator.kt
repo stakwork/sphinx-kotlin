@@ -19,4 +19,6 @@ abstract class TribeChatNavigator(
         viewTitle: String,
         description: String? = null,
     )
+
+    abstract suspend fun toNotificationsLevel(chatId: ChatId)
 }

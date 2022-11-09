@@ -63,9 +63,9 @@ import kotlinx.coroutines.withContext
 import okio.base64.encodeBase64
 import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
-import uniffi.crypter.deriveSharedSecret
-import uniffi.crypter.encrypt
-import uniffi.crypter.pubkeyFromSecretKey
+import uniffi.sphinxrs.deriveSharedSecret
+import uniffi.sphinxrs.encrypt
+import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 
@@ -94,6 +94,9 @@ internal class ProfileViewModel @Inject constructor(
     companion object {
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
         const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
+
+        const val BITCOIN_NETWORK_REG_TEST = "regtest"
+        const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
@@ -567,7 +570,17 @@ internal class ProfileViewModel @Inject constructor(
 
                                                     seedDto.lightningNodePort = lightningNodePort
 
-                                                    linkSigningDevice()
+                                                    submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
+                                                        regTestCallback = {
+                                                            seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                                        }, mainNetCallback = {
+                                                            seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                                        }, callback = {
+                                                            viewModelScope.launch(mainImmediate) {
+                                                                linkSigningDevice()
+                                                            }
+                                                        }
+                                                    ))
                                                 }
                                             })
                                         }

@@ -23,7 +23,6 @@ data class MessageDto(
     val message_content: String?,
     val remote_message_content: String?,
     val status: Int?,
-//    val status_map: Map<Long, Int?>?, // contact_id : their message's 'status'
     val parent_id: Long?,
     val subscription_id: Long?,
     val media_key: String?,
@@ -41,6 +40,7 @@ data class MessageDto(
     val contact: ContactDto?,
     val recipient_alias: String?,
     val recipient_pic: String?,
+    val push: Any?,
 ) {
     @Transient
     val seenActual: Boolean =
@@ -50,6 +50,20 @@ data class MessageDto(
             }
             is Double -> {
                 seen.toInt() == 1
+            }
+            else -> {
+                false
+            }
+        }
+
+    @Transient
+    val pushActual: Boolean =
+        when (push) {
+            is Boolean -> {
+                push
+            }
+            is Double -> {
+                push.toInt() == 1
             }
             else -> {
                 false

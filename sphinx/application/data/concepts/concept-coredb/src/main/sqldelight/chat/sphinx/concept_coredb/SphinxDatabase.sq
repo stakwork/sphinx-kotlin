@@ -1,3 +1,7 @@
+import chat.sphinx.wrapper_action_track.ActionTrackId;
+import chat.sphinx.wrapper_action_track.ActionTrackMetaData;
+import chat.sphinx.wrapper_action_track.ActionTrackType;
+import chat.sphinx.wrapper_action_track.ActionTrackUploaded;
 import chat.sphinx.wrapper_chat.ChatAlias;
 import chat.sphinx.wrapper_chat.ChatGroupKey;
 import chat.sphinx.wrapper_chat.ChatHost;
@@ -8,8 +12,10 @@ import chat.sphinx.wrapper_chat.ChatPrivate;
 import chat.sphinx.wrapper_chat.ChatStatus;
 import chat.sphinx.wrapper_chat.ChatType;
 import chat.sphinx.wrapper_chat.ChatUnlisted;
+import chat.sphinx.wrapper_chat.NotificationLevel;
 import chat.sphinx.wrapper_common.DateTime;
 import chat.sphinx.wrapper_common.PhotoUrl;
+import chat.sphinx.wrapper_common.Push;
 import chat.sphinx.wrapper_common.Seen;
 import chat.sphinx.wrapper_common.chat.ChatUUID;
 import chat.sphinx.wrapper_common.contact.Blocked;
@@ -98,7 +104,8 @@ CREATE TABLE chatDbo(
     pending_contact_ids         TEXT            AS List<ContactId>,
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL,
     content_seen_at             INTEGER         AS DateTime,
-    pin_message                 INTEGER            AS MessageId DEFAULT NULL
+    pin_message                 INTEGER         AS MessageId DEFAULT NULL,
+    notify                      INTEGER         AS NotificationLevel
 );
 
 chatUpdateLatestMessage:
@@ -109,6 +116,11 @@ WHERE id = ?;
 chatUpdateMuted:
 UPDATE chatDbo
 SET is_muted = :muted
+WHERE id = ?;
+
+chatUpdateNotificationLevel:
+UPDATE chatDbo
+SET notify = :notify
 WHERE id = ?;
 
 chatUpdateContentSeenAt:
@@ -164,8 +176,6 @@ chatUpsert {
         is_muted = :is_muted,
         group_key = :group_key,
         host = :host,
---         price_per_message = :price_per_message,
---         escrow_amount = :escrow_amount,
         unlisted = :unlisted,
         private_tribe = :private_tribe,
         owner_pub_key = :owner_pub_key,
@@ -174,7 +184,8 @@ chatUpsert {
         my_photo_url = :my_photo_url,
         my_alias = :my_alias,
         pending_contact_ids = :pending_contact_ids,
-        pin_message = :pin_message
+        pin_message = :pin_message,
+        notify = :notify
     WHERE id = :id;
 
     INSERT OR IGNORE INTO chatDbo(
@@ -199,7 +210,8 @@ chatUpsert {
         my_photo_url,
         my_alias,
         pending_contact_ids,
-        pin_message
+        pin_message,
+        notify
     )
     VALUES (
         :id,
@@ -223,7 +235,8 @@ chatUpsert {
         :my_photo_url,
         :my_alias,
         :pending_contact_ids,
-        :pin_message
+        :pin_message,
+        :notify
     );
 }
 
@@ -577,7 +590,8 @@ CREATE TABLE messageDbo(
     muid                        TEXT            AS MessageMUID,
     flagged                     INTEGER         AS Flagged NOT NULL DEFAULT 0,
     recipient_alias             TEXT            AS RecipientAlias,
-    recipient_pic               TEXT            AS PhotoUrl
+    recipient_pic               TEXT            AS PhotoUrl,
+    push                        INTEGER         AS Push DEFAULT 0
 );
 
 messageGetAllReactionsByUUID:
@@ -685,6 +699,14 @@ WHERE sender != :ownerId
 AND seen = 0
 AND chat_id = ?;
 
+messageGetUnseenIncomingMentionsCountByChatId:
+SELECT COUNT(*)
+FROM messageDbo
+WHERE sender != :ownerId
+AND seen = 0
+AND push = 1
+AND chat_id = ?;
+
 messageGetUnseenIncomingMessageCountByChatType:
 SELECT COUNT(*)
 FROM messageDbo
@@ -746,7 +768,8 @@ messageUpsert {
         reply_uuid = :reply_uuid,
         type = :type,
         recipient_alias = :recipient_alias,
-        recipient_pic = :recipient_pic
+        recipient_pic = :recipient_pic,
+        push = :push
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(
@@ -772,7 +795,8 @@ messageUpsert {
         muid,
         flagged,
         recipient_alias,
-        recipient_pic
+        recipient_pic,
+        push
     )
     VALUES (
         :id,
@@ -797,7 +821,8 @@ messageUpsert {
         :muid,
         :flagged,
         :recipient_alias,
-        :recipient_pic
+        :recipient_pic,
+        :push
     );
 }
 
@@ -1321,3 +1346,60 @@ feedDestinationsGetByFeedId:
 SELECT *
 FROM feedDestinationDbo
 WHERE feed_id = ?;
+
+CREATE TABLE actionTrackDbo(
+    id                          INTEGER         AS ActionTrackId NOT NULL PRIMARY KEY AUTOINCREMENT,
+    type                        INTEGER         AS ActionTrackType NOT NULL,
+    meta_data                   TEXT            AS ActionTrackMetaData NOT NULL,
+    uploaded                    INTEGER         AS ActionTrackUploaded NOT NULL
+);
+
+actionTrackUpsert {
+    UPDATE actionTrackDbo
+        SET type = :type,
+            meta_data = :meta_data,
+            uploaded = :uploaded
+        WHERE id = :id;
+
+    INSERT OR IGNORE INTO actionTrackDbo(
+        type,
+        meta_data,
+        uploaded
+    )
+    VALUES (
+        :type,
+        :meta_data,
+        :uploaded
+    );
+}
+
+feedSearchGetCount:
+SELECT COUNT(*)
+FROM actionTrackDbo
+WHERE type = 1
+AND meta_data LIKE :meta_data;
+
+actionTrackGetAll:
+SELECT *
+FROM actionTrackDbo;
+
+actionTrackDeleteAll:
+DELETE FROM chatDbo;
+
+actionTrackGetByType:
+SELECT *
+FROM actionTrackDbo
+WHERE type = ?;
+
+actionTrackGetAllNotUploaded:
+SELECT *
+FROM actionTrackDbo
+WHERE uploaded = 0;
+
+actionTrackUpdateUploadedItems:
+UPDATE actionTrackDbo
+SET uploaded = 1
+WHERE id IN :ids;
+
+
+

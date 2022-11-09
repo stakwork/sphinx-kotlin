@@ -1,6 +1,6 @@
 package chat.sphinx.chat_common.util
 
-import android.media.MediaRecorder
+import android.content.Context
 import androidx.navigation.NavArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
@@ -16,13 +16,13 @@ internal class AudioRecorderController<ARGS : NavArgs>(
     private val dispatchers: CoroutineDispatchers,
 ): CoroutineDispatchers by dispatchers {
     private val lock = Mutex()
-    var recorderAndFile: Pair<MediaRecorder, File>? = null
+    var recorderAndFile: Pair<WavRecorder, File>? = null
 
     val recordingTempFile: File?
         get() = recorderAndFile?.second
 
     private var dispatchStateJob: Job? = null
-    fun startAudioRecording() {
+    fun startAudioRecording(context: Context) {
         // TODO: Pause other media playing
         viewModelScope.launch(dispatchers.mainImmediate) {
             lock.withLock {
@@ -30,23 +30,16 @@ internal class AudioRecorderController<ARGS : NavArgs>(
                     return@launch
                 }
 
-                MediaRecorder().apply {
+                WavRecorder(context).apply {
                     val recordingTempFile = mediaCacheHandler.createAudioFile(
                         AUDIO_FORMAT_EXTENSION
-                    ).also { file ->
-                        setAudioSource(MediaRecorder.AudioSource.MIC)
-                        setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
-                        setOutputFile(file.absolutePath)
-                        setAudioEncoder(MediaRecorder.AudioEncoder.HE_AAC)
-                    }
+                    )
                     recorderAndFile = Pair(
                         this,
                         recordingTempFile
                     )
 
-                    prepare()
-
-                    start()
+                    startRecording(recordingTempFile)
 
                     dispatchStateJob = viewModelScope.launch(mainImmediate) {
                         var duration = 0L
@@ -67,13 +60,12 @@ internal class AudioRecorderController<ARGS : NavArgs>(
     }
 
     fun stopAudioRecording() {
-        recorderAndFile?.first?.stop()
+        recorderAndFile?.first?.stopRecording()
         cancelDispatchJob()
     }
 
     fun stopAndDeleteAudioRecording() {
-        recorderAndFile?.first?.stop()
-        // TODO: Delete audio recording
+        recorderAndFile?.first?.stopRecording()
         clear()
     }
 
@@ -90,15 +82,13 @@ internal class AudioRecorderController<ARGS : NavArgs>(
         viewModelScope.launch(mainImmediate) {
             lock.withLock {
                 cancelDispatchJob()
-                recorderAndFile?.first?.release()
-
                 recorderAndFile = null
             }
         }
     }
 
     companion object {
-        const val AUDIO_FORMAT_EXTENSION = "m4a"
-        const val AUDIO_FORMAT_MIME_TYPE = "audio/m4a"
+        const val AUDIO_FORMAT_EXTENSION = "wav"
+        const val AUDIO_FORMAT_MIME_TYPE = "audio/wav"
     }
 }

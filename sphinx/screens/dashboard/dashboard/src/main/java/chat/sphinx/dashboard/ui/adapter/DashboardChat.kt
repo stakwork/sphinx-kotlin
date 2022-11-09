@@ -30,6 +30,8 @@ sealed class DashboardChat {
 
     abstract val unseenMessageFlow: Flow<Long?>?
 
+    abstract val unseenMentionsFlow: Flow<Long?>?
+
     abstract fun getDisplayTime(today00: DateTime): String
 
     abstract fun getMessageText(context: Context): String
@@ -292,6 +294,9 @@ sealed class DashboardChat {
                 }
             }
 
+            override val unseenMentionsFlow: Flow<Long?>?
+                get() = null
+
             override val chatName: String?
                 get() = contact.alias?.value
 
@@ -318,6 +323,7 @@ sealed class DashboardChat {
             override val message: Message?,
             override val owner: Contact?,
             override val unseenMessageFlow: Flow<Long?>,
+            override val unseenMentionsFlow: Flow<Long?>
         ): Active() {
 
             override val chatName: String?
@@ -369,6 +375,9 @@ sealed class DashboardChat {
             override val unseenMessageFlow: Flow<Long?>?
                 get() = null
 
+            override val unseenMentionsFlow: Flow<Long?>?
+                get() = null
+
             override fun getMessageText(context: Context): String {
                 return ""
             }
@@ -402,6 +411,9 @@ sealed class DashboardChat {
                 get() = Long.MAX_VALUE
 
             override val unseenMessageFlow: Flow<Long?>?
+                get() = null
+
+            override val unseenMentionsFlow: Flow<Long?>?
                 get() = null
 
             fun getChatName(context: Context): String {

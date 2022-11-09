@@ -40,6 +40,8 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
     api project(path: ':sphinx:service:features:feature-sphinx-service')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-action-track')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
 
     implementation deps.google.hilt
     kapt kaptDeps.google.hilt

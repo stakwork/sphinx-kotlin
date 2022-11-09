@@ -28,6 +28,7 @@ interface RepositoryDashboard {
     fun getConversationByContactId(contactId: ContactId): Flow<Chat?>
 
     fun getUnseenMessagesByChatId(chatId: ChatId): Flow<Long?>
+    fun getUnseenMentionsByChatId(chatId: ChatId): Flow<Long?>
     fun getUnseenActiveConversationMessagesCount(): Flow<Long?>
     fun getUnseenTribeMessagesCount(): Flow<Long?>
 
@@ -39,6 +40,8 @@ interface RepositoryDashboard {
 
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getInviteById(inviteId: InviteId): Flow<Invite?>
+
+    fun syncActions()
 
     suspend fun payForInvite(invite: Invite)
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>

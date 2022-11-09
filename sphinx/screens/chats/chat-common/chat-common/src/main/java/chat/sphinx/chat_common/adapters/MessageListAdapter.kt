@@ -1,7 +1,5 @@
 package chat.sphinx.chat_common.adapters
 
-import android.os.Parcelable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
@@ -25,21 +23,21 @@ import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.wrapper_chat.isConversation
+import chat.sphinx.wrapper_chat.isPrivateTribe
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
-import chat.sphinx.wrapper_message_media.isPdf
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.notifyAll
 
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
@@ -368,7 +366,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 root.setOnLongClickListener(onSphinxInteractionListener)
 
-                SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, onSphinxInteractionListener)
+                SphinxLinkify.addLinks(textViewMessageText, SphinxLinkify.ALL, binding.root.context, onSphinxInteractionListener)
+
                 textViewMessageText.setOnLongClickListener(onSphinxInteractionListener)
 
                 includeMessageTypeBotResponse.webViewMessageTypeBotResponse.setOnLongClickListener(onSphinxInteractionListener)
@@ -509,7 +508,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
             binding.includeMessageHolderChatImageInitialHolder.root.setOnClickListener {
                 currentViewState?.message?.let { nnMessage ->
-                    viewModel.showMemberPopup(nnMessage)
+                    viewModel.onSmallProfileImageClick(nnMessage)
                 }
             }
         }

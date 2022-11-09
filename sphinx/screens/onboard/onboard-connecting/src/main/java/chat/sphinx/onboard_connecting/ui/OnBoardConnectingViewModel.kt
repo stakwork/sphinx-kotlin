@@ -225,6 +225,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                 is LoadResponse.Loading -> {}
                 is Response.Error -> {
                     submitSideEffect(OnBoardConnectingSideEffect.InvalidInvite)
+                    navigator.popBackStack()
                 }
                 is Response.Success -> {
                     val inviteResponse = loadResponse.value.response

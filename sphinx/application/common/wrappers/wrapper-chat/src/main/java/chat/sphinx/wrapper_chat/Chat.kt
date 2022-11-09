@@ -12,8 +12,19 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Chat.isMuted(): Boolean =
-    isMuted.isTrue()
+inline fun Chat.isMuted(): Boolean {
+    return notify?.isMuteChat() == true
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Chat.isOnlyMentions(): Boolean {
+    return notify?.isOnlyMentions() == true
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Chat.isSeeAll(): Boolean {
+    return notify?.isSeeAll() == true
+}
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Chat.isUnlisted(): Boolean =
@@ -77,4 +88,5 @@ data class Chat(
     val latestMessageId: MessageId?,
     val contentSeenAt: DateTime?,
     val pinedMessage: MessageId?,
+    val notify: NotificationLevel?,
 )

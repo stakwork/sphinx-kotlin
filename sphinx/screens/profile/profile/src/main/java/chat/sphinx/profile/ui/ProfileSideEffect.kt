@@ -4,16 +4,19 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.text.InputType
+import android.content.DialogInterface
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import chat.sphinx.profile.R
+import chat.sphinx.profile.ui.ProfileViewModel.Companion.BITCOIN_NETWORK_MAIN_NET
+import chat.sphinx.profile.ui.ProfileViewModel.Companion.BITCOIN_NETWORK_REG_TEST
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.wrapper_relay.RelayUrl
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.sideeffect.SideEffect
+import java.util.*
 
 internal sealed class ProfileSideEffect: SideEffect<Context>() {
 
@@ -280,6 +283,38 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
         }
     }
 
+    class CheckBitcoinNetwork(
+        private val regTestCallback: () -> Unit,
+        private val mainNetCallback: () -> Unit,
+        private val callback: () -> Unit,
+    ): ProfileSideEffect() {
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(value.getString(R.string.select_bitcoin_network))
+
+            val items = arrayOf(BITCOIN_NETWORK_REG_TEST.toCapitalized(), BITCOIN_NETWORK_MAIN_NET.toCapitalized())
+            builder.setSingleChoiceItems(items, 0
+            ) { _, p1 ->
+                when (p1) {
+                    0 -> {
+                        regTestCallback.invoke()
+                    }
+                    1 -> {
+                        mainNetCallback.invoke()
+                    }
+                    else -> {}
+                }
+            }
+            builder.setNegativeButton(android.R.string.cancel) { dialog, _ ->
+                dialog.dismiss()
+            }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback.invoke()
+            }
+            builder.show()
+        }
+    }
+
     object SendingSeedToHardware: ProfileSideEffect() {
         override suspend fun execute(value: Context) {
             SphinxToastUtils().show(value, R.string.sending_seed)
@@ -301,5 +336,14 @@ internal sealed class ProfileSideEffect: SideEffect<Context>() {
                 value.getString(R.string.error_setting_up_signing_device, errorMessage)
             )
         }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toCapitalized(): String {
+    return this.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString()
     }
 }

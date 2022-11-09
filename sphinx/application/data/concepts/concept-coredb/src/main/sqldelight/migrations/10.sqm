@@ -1,0 +1,3 @@
+import chat.sphinx.wrapper_common.Push;
+
+ALTER TABLE messageDbo ADD COLUMN push INTEGER AS Push DEFAULT 0;

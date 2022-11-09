@@ -3,6 +3,14 @@
     <string name="edit_text_message_hint">Message...</string>
     <string name="edit_text_optional_message_hint">Optional Message...</string>
     <string name="text_view_loading_attachment">Loading/Decrypting...</string>
+    <string name="option_block_user">Block</string>
+    <string name="option_delete_user">Delete</string>
+    <string name="alert_confirm_delete_contact">Are you sure you want to delete this contact?</string>
+    <string name="alert_confirm_delete_contact_title">Delete Contact</string>
+    <string name="alert_confirm_block_contact_title">Block Contact</string>
+    <string name="alert_confirm_block_contact">Are you sure you want to block this contact?</string>
+    <string name="alert_confirm_unblock_contact_title">Unblock Contact</string>
+    <string name="alert_confirm_unblock_contact">Are you sure you want to unblock this contact?</string>
 
     <string name="chat_muted_message"> Chat is now muted. You won\'t get push notifications for incoming messages on this chat</string>
     <string name="chat_muted_waiting_on_network">Waiting on network…</string>
@@ -168,6 +176,7 @@
     <string name="bottom_menu_more_option_call">Create Call</string>
     <string name="bottom_menu_more_option_share">Share Tribe Link</string>
     <string name="bottom_menu_more_option_search">Search Messages</string>
+    <string name="bottom_menu_more_option_notification">Notifications</string>
 
     <string name="searching_messages">Searching...</string>
     <string name="results_found">%d Results Found</string>

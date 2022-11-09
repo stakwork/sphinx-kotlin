@@ -205,7 +205,6 @@
                     android:textColor="@color/text"
                     android:fontFamily="@font/roboto_regular"
                     android:textSize="@dimen/default_form_edit_view_text_size"
-                    android:inputType="textVisiblePassword|textCapWords"
                     android:layout_marginStart="@dimen/default_form_edit_text_left_margin"
                     android:imeOptions="actionDone"
                     android:singleLine="true"

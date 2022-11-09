@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -242,6 +243,16 @@ internal class ChatTribeFragment: ChatFragment<
                     viewModel.callMenuHandler.updateViewState(
                         MenuBottomViewState.Open
                     )
+                }
+            )
+        )
+
+        menuOptions.add(
+            MenuBottomOption(
+                text = chat.sphinx.chat_common.R.string.bottom_menu_more_option_notification,
+                textColor = chat.sphinx.chat_common.R.color.primaryBlueFontColor,
+                onClick = {
+                    viewModel.navigateToNotificationLevel()
                 }
             )
         )
