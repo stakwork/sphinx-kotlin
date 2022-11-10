@@ -45,4 +45,6 @@
 
     <string name="balance_too_low">Balance demasiado bajo</string>
     <string name="boost_amount_too_low">El monto del Boost debe ser mayor a 0</string>
+
+    <string name="tribe_member_profile_send_sats">Enviar Sats</string>
 </resources>

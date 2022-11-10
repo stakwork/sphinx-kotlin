@@ -2,48 +2,45 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_tribe_send_sats_bar"
-    android:layout_width="match_parent"
-    android:layout_height="50dp"
-
     android:background="@color/body"
-    android:descendantFocusability="beforeDescendants"
-    android:focusableInTouchMode="true">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="5dp"
+        android:id="@+id/layout_constraint_send_sats_button"
+        android:layout_width="@dimen/tribe_member_send_sats_button_width"
+        android:layout_height="@dimen/tribe_member_send_sats_button_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:background="@drawable/button_background_white_rad_48"
-        android:backgroundTint="@color/black">
-
-        <EditText
-            android:id="@+id/edit_text_sats_amount"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginStart="24dp"
-            android:background="@null"
-            android:fontFamily="@font/roboto_regular"
-            android:hint="0"
-            android:imeOptions="actionDone"
-            android:importantForAutofill="no"
-            android:inputType="text"
-            android:singleLine="true"
-            android:textColor="@color/text"
-            android:textColorHighlight="@color/primaryBlue"
-            android:textColorHint="@color/placeholderText"
-            android:textSize="14sp"
-            app:layout_constraintStart_toStartOf="parent" />
+        android:backgroundTint="@color/text">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/button_send_sats"
             style="@style/RoundedBlueButton"
-            android:layout_width="130dp"
-            android:layout_height="36dp"
-            android:layout_margin="@dimen/default_layout_margin"
-            android:background="@drawable/button_background_white_rad_48"
-            android:text="Send sats"
-            android:textColor="@android:color/background_dark"
-            android:textSize="12sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:text="@string/tribe_member_profile_send_sats"
+            android:textColor="@color/textInverted"
+            android:textSize="@dimen/default_form_text_view_size"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            android:textColor="@color/textInverted"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="@dimen/default_form_edit_view_size"
+            android:text="@string/material_icon_name_nav_forward"
+            android:alpha="0.7"
+            android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

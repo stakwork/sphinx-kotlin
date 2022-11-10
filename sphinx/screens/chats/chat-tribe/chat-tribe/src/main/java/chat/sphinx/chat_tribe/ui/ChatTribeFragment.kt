@@ -184,12 +184,11 @@ internal class ChatTribeFragment: ChatFragment<
             (requireActivity() as InsetterActivity).addKeyboardPadding(root)
 
             includeLayoutTribeMemberProfileDetails.apply {
-                includeLayoutTribeSendSatsBar.buttonSendSats.setOnClickListener {
+                includeLayoutTribeSendSatsBar.layoutConstraintSendSatsButton.setOnClickListener {
                     viewModel.goToPaymentSend()
                 }
-                includeLayoutTribeProfileHeader.textViewDetailScreenClose.setOnClickListener {
+                layoutConstraintDismissLine.setOnClickListener {
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
-
                 }
             }
         }
