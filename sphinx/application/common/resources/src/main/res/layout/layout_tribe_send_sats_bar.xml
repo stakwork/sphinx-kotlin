@@ -24,7 +24,7 @@
             android:text="@string/tribe_member_profile_send_sats"
             android:textColor="@color/textInverted"
             android:textSize="@dimen/default_form_text_view_size"
-            android:clickable="true"
+            android:clickable="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -40,7 +40,7 @@
             android:textSize="@dimen/default_form_edit_view_size"
             android:text="@string/material_icon_name_nav_forward"
             android:alpha="0.7"
-            android:clickable="true"
+            android:clickable="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
