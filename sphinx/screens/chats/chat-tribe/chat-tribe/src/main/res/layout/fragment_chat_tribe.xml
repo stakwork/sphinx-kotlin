@@ -155,8 +155,8 @@
         android:visibility="gone"/>
 
     <include
-        android:id="@+id/include_layout_tribe_contact_profile"
-        layout="@layout/layout_tribe_contact_profile"
+        android:id="@+id/include_layout_tribe_member_profile"
+        layout="@layout/layout_tribe_member_profile"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:visibility="gone"/>

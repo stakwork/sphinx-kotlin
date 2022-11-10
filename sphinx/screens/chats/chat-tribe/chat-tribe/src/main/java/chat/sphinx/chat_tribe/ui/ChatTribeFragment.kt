@@ -23,7 +23,8 @@ import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -35,7 +36,7 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.resources.databinding.LayoutTribeContactProfileBinding
+import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -64,8 +65,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutBoostFireworks
     private val tribePopupBinding: LayoutChatTribePopupBinding
         get() = binding.includeLayoutPopup
-    private val tribeContactProfileBinding: LayoutTribeContactProfileBinding
-        get() = binding.includeLayoutTribeContactProfile
+    private val tribeMemberProfileBinding: LayoutTribeMemberProfileBinding
+        get() = binding.includeLayoutTribeMemberProfile
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
@@ -170,25 +171,24 @@ internal class ChatTribeFragment: ChatFragment<
             )
         }
 
-//        tribePopupBinding.layoutChatTribePopup.apply {
-//            buttonSendSats.setOnClickListener {
-//                viewModel.goToPaymentSend()
-//            }
-//
-//            textViewDirectPaymentPopupClose.setOnClickListener {
-//                viewModel.tribeContactProfileContainer.updateViewState(TribePopupViewState.Idle)
-//            }
-//        }
+        tribePopupBinding.layoutChatTribePopup.apply {
+            buttonSendSats.setOnClickListener {
+                viewModel.goToPaymentSend()
+            }
+            textViewDirectPaymentPopupClose.setOnClickListener {
+                viewModel.tribeMemberDataViewStateContainer.updateViewState(TribeMemberDataViewState.Idle)
+            }
+        }
 
-        tribeContactProfileBinding.apply {
+        tribeMemberProfileBinding.apply {
             (requireActivity() as InsetterActivity).addKeyboardPadding(root)
 
-            includeLayoutTribeContactProfileDetails.apply {
+            includeLayoutTribeMemberProfileDetails.apply {
                 includeLayoutTribeSendSatsBar.buttonSendSats.setOnClickListener {
                     viewModel.goToPaymentSend()
                 }
                 includeLayoutTribeProfileHeader.textViewDetailScreenClose.setOnClickListener {
-                    viewModel.tribeContactProfileContainer.updateViewState(TribePopupViewState.Idle)
+                    viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
 
                 }
             }
@@ -210,8 +210,8 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.tribeContactProfileContainer.value is TribePopupViewState.TribeMemberPopup) {
-                viewModel.tribeContactProfileContainer.updateViewState(TribePopupViewState.Idle)
+            if (viewModel.tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
+                viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
             } else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.handleCommonChatOnBackPressed()
@@ -386,21 +386,25 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.tribeContactProfileContainer.collect { viewState ->
-                tribeContactProfileBinding.apply {
-                    @Exhaustive
-                    when (viewState) {
-                        is TribePopupViewState.Idle -> {
-                            tribeContactProfileBinding.root.setTransitionDuration(250)
-                        }
+            viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->
+                tribeMemberProfileBinding.root.setTransitionDuration(250)
+                viewState.transitionToEndSet(tribeMemberProfileBinding.root)
+            }
+        }
 
-                        is TribePopupViewState.TribeMemberPopup -> {
-//                            root.goneIfFalse(true)
-                            tribeContactProfileBinding.root.setTransitionDuration(400)
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.tribeMemberDataViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is TribeMemberDataViewState.Idle -> {
+                        tribePopupBinding.root.gone
+                    }
+                    is TribeMemberDataViewState.TribeMemberPopup -> {
+                        tribePopupBinding.apply {
+                            root.visible
 
-                            includeLayoutTribeContactProfileDetails.
-                            includeLayoutTribeProfilePictureHolder.apply {
-                                textViewProfileInitials.apply {
+                            layoutChatTribePopup.apply {
+                                textViewInitials.apply {
                                     text = viewState.memberName.value.getInitials()
                                     setBackgroundRandomColor(
                                         chat.sphinx.chat_common.R.drawable.chat_initials_circle,
@@ -414,12 +418,10 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
 
                                 viewState.memberPic?.let { photoUrl ->
-                                    imageViewTribeProfilePicture.visible
-//                                    imageViewMemberProfilePicture.visible
+                                    imageViewMemberProfilePicture.visible
 
                                     imageLoader.load(
-                                        imageViewTribeProfilePicture,
-//                                        imageViewMemberProfilePicture,
+                                        imageViewMemberProfilePicture,
                                         photoUrl.value,
                                         ImageLoaderOptions.Builder()
                                             .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
@@ -428,11 +430,28 @@ internal class ChatTribeFragment: ChatFragment<
                                     )
                                 }
 
-                                textViewTribeProfileName.text = viewState.memberName.value
+                                textViewMemberName.text = viewState.memberName.value
                             }
                         }
                     }
-                    viewState.transitionToEndSet(tribeContactProfileBinding.root)
+                    is TribeMemberDataViewState.LoadingTribeMemberProfile -> {
+                        tribePopupBinding.root.gone
+
+                        tribeMemberProfileBinding.apply {
+                            includeLayoutTribeMemberProfileDetails.apply {
+                                layoutConstraintProgressBarContainer.visible
+                            }
+                        }
+                    }
+                    is TribeMemberDataViewState.TribeMemberProfile -> {
+                        tribePopupBinding.root.gone
+
+                        tribeMemberProfileBinding.apply {
+                            includeLayoutTribeMemberProfileDetails.apply {
+                                layoutConstraintProgressBarContainer.gone
+                            }
+                        }
+                    }
                 }
             }
         }
