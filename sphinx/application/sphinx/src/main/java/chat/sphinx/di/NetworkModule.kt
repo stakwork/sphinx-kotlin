@@ -18,7 +18,7 @@ import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
@@ -39,7 +39,7 @@ import chat.sphinx.feature_network_query_message.NetworkQueryMessageImpl
 import chat.sphinx.feature_network_query_podcast_search.NetworkQueryFeedSearchImpl
 import chat.sphinx.feature_network_query_subscription.NetworkQuerySubscriptionImpl
 import chat.sphinx.feature_network_query_verify_external.NetworkQueryAuthorizeExternalImpl
-import chat.sphinx.feature_network_query_save_profile.NetworkQuerySaveProfileImpl
+import chat.sphinx.feature_network_query_people.NetworkQueryPeopleImpl
 import chat.sphinx.feature_network_query_redeem_badge_token.NetworkQueryRedeemBadgeTokenImpl
 import chat.sphinx.feature_network_query_transport_key.NetworkQueryRelayKeysImpl
 import chat.sphinx.feature_network_query_version.NetworkQueryVersionImpl
@@ -390,16 +390,16 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideNetworkQuerySaveProfileImpl(
+    fun provideNetworkQueryPeopleImpl(
         networkRelayCall: NetworkRelayCall
-    ): NetworkQuerySaveProfileImpl =
-        NetworkQuerySaveProfileImpl(networkRelayCall)
+    ): NetworkQueryPeopleImpl =
+        NetworkQueryPeopleImpl(networkRelayCall)
 
     @Provides
-    fun provideNetworkQuerySaveProfile(
-        networkQuerySaveProfileImpl: NetworkQuerySaveProfileImpl
-    ): NetworkQuerySaveProfile =
-        networkQuerySaveProfileImpl
+    fun provideNetworkQueryPeople(
+        networkQueryPeopleImpl: NetworkQueryPeopleImpl
+    ): NetworkQueryPeople =
+        networkQueryPeopleImpl
 
     @Provides
     @Singleton

@@ -1,7 +1,7 @@
-package chat.sphinx.feature_network_query_save_profile
+package chat.sphinx.feature_network_query_people
 
 import app.cash.exhaustive.Exhaustive
-import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
+import chat.sphinx.concept_network_query_people.model.PeopleProfileDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.exception
@@ -18,7 +18,7 @@ import org.junit.Test
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 
-class NetworkQuerySaveProfileImplUnitTest: NetworkQueryTestHelper() {
+class NetworkQueryPeopleImplUnitTest: NetworkQueryTestHelper() {
 
     @Test
     fun `verifyExternal returns success`() =

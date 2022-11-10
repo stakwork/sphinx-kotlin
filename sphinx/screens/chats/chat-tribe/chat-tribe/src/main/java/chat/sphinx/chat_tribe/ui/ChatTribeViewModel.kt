@@ -19,6 +19,7 @@ import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -28,6 +29,7 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
@@ -45,6 +47,7 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -69,6 +72,7 @@ internal class ChatTribeViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     networkQueryLightning: NetworkQueryLightning,
+    networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -85,6 +89,7 @@ internal class ChatTribeViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     networkQueryLightning,
+    networkQueryPeople,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
@@ -353,15 +358,24 @@ internal class ChatTribeViewModel @Inject constructor(
     private fun loadPersonData(message: Message) {
         viewModelScope.launch(mainImmediate) {
             message.person?.let { person ->
-                delay(2000L)
-                //Call endpoint and get data
+                networkQueryPeople.getTribeMemberProfile(person).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
 
-                tribeMemberDataViewStateContainer.updateViewState(
-                    TribeMemberDataViewState.TribeMemberProfile(
-                        message.uuid,
-                        person
-                    )
-                )
+                        is Response.Error -> {
+                            submitSideEffect(ChatSideEffect.Notify(loadResponse.message))
+                            tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
+                        }
+                        is Response.Success -> {
+                            tribeMemberDataViewStateContainer.updateViewState(
+                                TribeMemberDataViewState.TribeMemberProfile(
+                                    message.uuid,
+                                    person
+                                )
+                            )
+                        }
+                    }
+                }
             }
         }
     }

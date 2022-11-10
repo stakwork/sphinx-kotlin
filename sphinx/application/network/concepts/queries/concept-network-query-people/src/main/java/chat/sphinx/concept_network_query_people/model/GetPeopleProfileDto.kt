@@ -1,4 +1,4 @@
-package chat.sphinx.concept_network_query_save_profile.model
+package chat.sphinx.concept_network_query_people.model
 
 import com.squareup.moshi.JsonClass
 

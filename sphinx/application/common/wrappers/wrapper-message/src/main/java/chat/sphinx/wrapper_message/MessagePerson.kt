@@ -10,3 +10,24 @@ inline fun String.toMessagePerson(): MessagePerson? =
 
 @JvmInline
 value class MessagePerson(val value: String)
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessagePerson.uuid(): String {
+    this.value.split("/")?.let { elements ->
+        if (elements.isNotEmpty()) {
+            return elements.last()
+        }
+    }
+    return ""
+}
+
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessagePerson.host(): String? {
+    this.uuid()?.let { uuid ->
+        return this.value.replace("/$uuid", "")
+    }
+    return ""
+}
+
+
