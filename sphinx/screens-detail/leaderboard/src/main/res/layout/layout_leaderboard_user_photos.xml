@@ -8,14 +8,16 @@
     android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/second_user_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_second_user_name"
+        app:layout_constraintEnd_toStartOf="@+id/first_user_container">
 
         <androidx.cardview.widget.CardView
-            android:id="@+id/card_view_profile_image"
+            android:id="@+id/card_view_second_profile_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/primaryText"
@@ -27,8 +29,8 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_second_profile_picture"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="77dp"
+                android:layout_height="75dp"
                 android:padding="3dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_avatar_circle" />
@@ -36,24 +38,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/second_number"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
-            android:background="@drawable/button_background_white_rad_48"
-            android:elevation="8dp"
-            android:fontFamily="@font/roboto_medium"
-            android:gravity="center"
-            android:singleLine="true"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:text="2" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/second_user_name"
+            android:id="@+id/text_view_second_number"
             android:layout_width="26dp"
             android:layout_height="26dp"
             android:background="@drawable/button_background_white_rad_48"
@@ -73,40 +58,224 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/appCompatTextView"
+        android:id="@+id/text_view_second_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:elevation="8dp"
         android:fontFamily="@font/roboto_regular"
         android:gravity="center"
         android:singleLine="true"
         android:textColor="@color/primaryText"
         android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="@+id/constraintLayout"
-        app:layout_constraintStart_toStartOf="@+id/constraintLayout"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/second_user_container"
+        app:layout_constraintStart_toStartOf="@+id/second_user_container"
         tools:text="Gladys" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/status_up"
+        android:id="@+id/second_status_up"
         android:layout_width="10dp"
         android:layout_height="8dp"
         android:layout_marginStart="8dp"
         android:src="@drawable/ic_polygon_up"
-        app:layout_constraintBottom_toBottomOf="@+id/appCompatTextView"
-        app:layout_constraintStart_toEndOf="@+id/appCompatTextView"
-        app:layout_constraintTop_toTopOf="@+id/appCompatTextView" />
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_second_user_name"
+        app:layout_constraintStart_toEndOf="@+id/text_view_second_user_name"
+        app:layout_constraintTop_toTopOf="@+id/text_view_second_user_name" />
 
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/status_down"
+        android:id="@+id/second_status_down"
         android:layout_width="10dp"
         android:layout_height="8dp"
         android:layout_marginStart="8dp"
         android:src="@drawable/ic_polygon_down"
-        app:layout_constraintBottom_toBottomOf="@+id/appCompatTextView"
-        app:layout_constraintStart_toEndOf="@+id/appCompatTextView"
-        app:layout_constraintTop_toTopOf="@+id/appCompatTextView" />
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_second_user_name"
+        app:layout_constraintStart_toEndOf="@+id/text_view_second_user_name"
+        app:layout_constraintTop_toTopOf="@+id/text_view_second_user_name" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/first_user_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_first_user_name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_first_profile_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/primaryText"
+            app:cardCornerRadius="200dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_first_profile_picture"
+                android:layout_width="111dp"
+                android:layout_height="111dp"
+                android:padding="4dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_avatar_circle" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_first_number"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:background="@drawable/button_background_white_rad_48"
+            android:elevation="8dp"
+            android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:singleLine="true"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="1" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_first_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:elevation="8dp"
+        android:fontFamily="@font/roboto_medium"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@color/primaryText"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/first_user_container"
+        app:layout_constraintStart_toStartOf="@+id/first_user_container"
+        tools:text="Jacqueline" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/first_status_up"
+        android:layout_width="10dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_polygon_up"
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_first_user_name"
+        app:layout_constraintStart_toEndOf="@+id/text_view_first_user_name"
+        app:layout_constraintTop_toTopOf="@+id/text_view_first_user_name" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/first_status_down"
+        android:layout_width="10dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_polygon_down"
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_first_user_name"
+        app:layout_constraintStart_toEndOf="@+id/text_view_first_user_name"
+        app:layout_constraintTop_toTopOf="@+id/text_view_first_user_name" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/drawable_crown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/first_user_container"
+        app:layout_constraintEnd_toEndOf="@+id/first_user_container"
+        app:layout_constraintStart_toStartOf="@+id/first_user_container"
+        app:srcCompat="@drawable/ic_crown" />
+
+    <!--    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/third_user_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="18dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/text_view_third_user_name"
+        app:layout_constraintStart_toEndOf="@+id/first_user_container">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_third_profile_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:cardBackgroundColor="@color/primaryText"
+            app:cardCornerRadius="200dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_third_profile_picture"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:padding="3dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_avatar_circle" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_third_number"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:background="@drawable/button_background_white_rad_48"
+            android:elevation="8dp"
+            android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:singleLine="true"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="3" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_third_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:elevation="8dp"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@color/primaryText"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/third_user_container"
+        app:layout_constraintStart_toStartOf="@+id/third_user_container"
+        tools:text="Robert" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/third_status_up"
+        android:layout_width="10dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_polygon_up"
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_third_user_name"
+        app:layout_constraintStart_toEndOf="@+id/text_view_third_user_name"
+        app:layout_constraintTop_toTopOf="@+id/text_view_third_user_name" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/third_status_down"
+        android:layout_width="10dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_polygon_down"
+        app:layout_constraintBottom_toBottomOf="@+id/text_view_third_user_name"
+        app:layout_constraintStart_toEndOf="@+id/text_view_third_user_name"
+        app:layout_constraintTop_toTopOf="@+id/text_view_third_user_name" />
+
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
