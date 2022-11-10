@@ -118,10 +118,10 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    val updatePinMessageData: SharedFlow<Message> = flow{
+    val updatePinMessageData: SharedFlow<Message> = flow {
         chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-            chat.pinedMessage?.let { pinedMessage ->
-                messageRepository.getMessageById(pinedMessage).firstOrNull()?.let { message ->
+            chat.pinedMessage?.let { messageUUID ->
+                messageRepository.getMessageByUUID(messageUUID).firstOrNull()?.let { message ->
                     emit(message)
                 }
             }
@@ -317,8 +317,8 @@ internal class ChatTribeViewModel @Inject constructor(
         pinJob?.cancel()
         pinJob = viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-                chat.pinedMessage?.let { messageId ->
-                    messageRepository.getMessageById(messageId).firstOrNull()?.let { message ->
+                chat.pinedMessage?.let { messageUUID ->
+                    messageRepository.getMessageByUUID(messageUUID).firstOrNull()?.let { message ->
                         pinedMessageHeaderViewState.updateViewState(
                             PinedMessageHeaderViewState.PinedMessageHeader(
                                 message

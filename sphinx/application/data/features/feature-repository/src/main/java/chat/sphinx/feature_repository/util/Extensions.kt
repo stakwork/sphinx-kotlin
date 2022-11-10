@@ -164,7 +164,7 @@ inline fun TransactionCallbacks.upsertChat(
     val escrowAmount = dto.escrow_amount?.toSat()
     val chatName = dto.name?.toChatName()
     val adminPubKey = dto.owner_pub_key?.toLightningNodePubKey()
-    val pinedMessage = dto.pin?.toMessageId()
+    val pinedMessage = dto.pin?.toMessageUUID()
 
     queries.chatUpsert(
         chatName,
@@ -182,14 +182,14 @@ inline fun TransactionCallbacks.upsertChat(
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },
-        pinedMessage,
         dto.notify?.toNotificationLevel(),
+        pinedMessage,
         chatId,
         ChatUUID(dto.uuid),
         chatType,
         createdAt,
         pricePerMessage,
-        escrowAmount,
+        escrowAmount
     )
 
     if (chatType.isTribe() && (ownerPubKey == adminPubKey) && (pricePerMessage != null || escrowAmount != null)) {

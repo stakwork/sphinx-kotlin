@@ -104,8 +104,8 @@ CREATE TABLE chatDbo(
     pending_contact_ids         TEXT            AS List<ContactId>,
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL,
     content_seen_at             INTEGER         AS DateTime,
-    pin_message                 INTEGER         AS MessageId DEFAULT NULL,
-    notify                      INTEGER         AS NotificationLevel
+    notify                      INTEGER         AS NotificationLevel,
+    pin_message                 TEXT            AS MessageUUID DEFAULT NULL
 );
 
 chatUpdateLatestMessage:
@@ -184,8 +184,8 @@ chatUpsert {
         my_photo_url = :my_photo_url,
         my_alias = :my_alias,
         pending_contact_ids = :pending_contact_ids,
-        pin_message = :pin_message,
-        notify = :notify
+        notify = :notify,
+        pin_message = :pin_message
     WHERE id = :id;
 
     INSERT OR IGNORE INTO chatDbo(
@@ -210,8 +210,8 @@ chatUpsert {
         my_photo_url,
         my_alias,
         pending_contact_ids,
-        pin_message,
-        notify
+        notify,
+        pin_message
     )
     VALUES (
         :id,
@@ -235,8 +235,8 @@ chatUpsert {
         :my_photo_url,
         :my_alias,
         :pending_contact_ids,
-        :pin_message,
-        :notify
+        :notify,
+        :pin_message
     );
 }
 

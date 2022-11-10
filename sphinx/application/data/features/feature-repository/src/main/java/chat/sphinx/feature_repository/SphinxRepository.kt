@@ -5161,7 +5161,7 @@ abstract class SphinxRepository(
 
                 networkQueryChat.pinMessage(
                     chatId,
-                    PutPinMessageDto(message?.id?.value.toString())
+                    PutPinMessageDto(message?.uuid?.value)
                 ).collect { loadResponse ->
                     @Exhaustive
                     when(loadResponse) {
