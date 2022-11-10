@@ -40,6 +40,7 @@ import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
@@ -448,6 +449,35 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeMemberProfileBinding.apply {
                             includeLayoutTribeMemberProfileDetails.apply {
                                 layoutConstraintProgressBarContainer.gone
+
+                                includeLayoutTribeProfilePictureHolder.apply {
+                                    textViewTribeProfileName.text = viewState.profile.owner_alias
+                                    textViewTribeProfileDescription.text = viewState.profile.description
+
+                                    viewState.profile.img.let { photoUrl ->
+                                        imageViewTribeProfilePicture.goneIfFalse(photoUrl.isNotEmpty())
+                                        textViewTribeProfileInitials.goneIfFalse(photoUrl.isEmpty())
+
+                                        imageLoader.load(
+                                            imageViewTribeProfilePicture,
+                                            photoUrl,
+                                            ImageLoaderOptions.Builder()
+                                                .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                .transformation(Transformation.CircleCrop)
+                                                .build()
+                                        )
+                                    }
+                                }
+
+                                includeLayoutTribeProfileInfoContainer.apply {
+                                    textViewCodingLanguages.text = viewState.profile.extras?.coding_languages?.map {
+                                        it.value
+                                    }?.joinToString(",") ?: "-"
+                                    textViewPriceToMeet.text = viewState.profile.price_to_meet.toLong().toSat()?.asFormattedString() ?: "0"
+                                    textViewPosts.text = (viewState.profile.extras?.post?.size ?: 0).toString()
+                                    textViewTwitterAccount.text = viewState.profile.extras?.twitter?.first()?.value ?: "-"
+                                    textViewGithubAccount.text = viewState.profile.extras?.github?.first()?.value ?: "-"
+                                }
                             }
                         }
                     }

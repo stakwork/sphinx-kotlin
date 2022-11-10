@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/body">
+    android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view_tribe_profile_image"
@@ -17,7 +16,7 @@
         app:cardCornerRadius="@dimen/tribe_member_image_corner_radius">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_profile_initials"
+            android:id="@+id/text_view_tribe_profile_initials"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/primaryBlue"
@@ -40,7 +39,7 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_tribe_user_type"
+        android:id="@+id/text_view_tribe_profile_role"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_header_margin_horizontal"
@@ -77,20 +76,20 @@
         tools:text="Stephanie" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_profile_sat_balance"
+        android:id="@+id/text_view_tribe_profile_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_header_margin_horizontal"
         android:layout_marginEnd="@dimen/default_layout_margin"
         android:ellipsize="end"
-        android:singleLine="true"
         android:text=""
         android:textColor="@color/mainBottomIcons"
         android:textSize="@dimen/default_header_text_size"
+        android:maxLines="2"
         android:fontFamily="@font/roboto_medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/card_view_tribe_profile_image"
         app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_profile_name"
-        tools:text="100,000,000" />
+        tools:text="This is the description for a tribe member profile. How it looks?" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -370,7 +370,8 @@ internal class ChatTribeViewModel @Inject constructor(
                             tribeMemberDataViewStateContainer.updateViewState(
                                 TribeMemberDataViewState.TribeMemberProfile(
                                     message.uuid,
-                                    person
+                                    person,
+                                    loadResponse.value
                                 )
                             )
                         }

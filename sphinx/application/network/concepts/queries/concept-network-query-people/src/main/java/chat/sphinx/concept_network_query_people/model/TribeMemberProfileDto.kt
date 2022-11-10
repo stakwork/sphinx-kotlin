@@ -18,17 +18,24 @@ data class TribeMemberProfileDto(
 
 @JsonClass(generateAdapter = true)
 data class TribeMemberProfileExtrasDto(
-    val coding_languages: List<TribeMemberProfileCodingLanguageDto>,
-    val github: List<ProfileAttributeDto>,
-    val twitter: List<ProfileAttributeDto>,
-    val repos: List<ProfileAttributeDto>,
-    val tribes: List<ProfileAttributeDto>,
+    val coding_languages: List<TribeMemberProfileCodingLanguageDto>?,
+    val github: List<ProfileAttributeDto>?,
+    val twitter: List<ProfileAttributeDto>?,
+    val post: List<TribeMemberProfilePostDto>?,
+    val tribes: List<ProfileAttributeDto>?,
 )
 
 @JsonClass(generateAdapter = true)
 data class TribeMemberProfileCodingLanguageDto(
     val label: String,
     val value: String
+)
+
+@JsonClass(generateAdapter = true)
+data class TribeMemberProfilePostDto(
+    val content: String,
+    val title: String,
+    val created: Int
 )
 
 @JsonClass(generateAdapter = true)

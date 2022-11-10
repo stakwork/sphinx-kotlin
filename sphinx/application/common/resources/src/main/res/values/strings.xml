@@ -128,4 +128,9 @@
     <string name="boost_amount_too_low">Boost amount must be greater than 0</string>
 
     <string name="tribe_member_profile_send_sats">Send Sats</string>
+    <string name="tribe_member_profile_price_to_meet">Price to Meet:</string>
+    <string name="tribe_member_profile_coding_languages">Coding Languages:</string>
+    <string name="tribe_member_profile_post">Posts:</string>
+    <string name="tribe_member_profile_twitter">Twitter:</string>
+    <string name="tribe_member_profile_github">Github:</string>
 </resources>
