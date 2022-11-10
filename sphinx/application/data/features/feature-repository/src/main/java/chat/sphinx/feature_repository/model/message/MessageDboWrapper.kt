@@ -57,6 +57,9 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
         get() = messageDbo.recipient_alias
     override val recipientPic: PhotoUrl?
         get() = messageDbo.recipient_pic
+    override val person: MessagePerson?
+        get() = messageDbo.person
+
 
     @Volatile
     @Suppress("PropertyName")
