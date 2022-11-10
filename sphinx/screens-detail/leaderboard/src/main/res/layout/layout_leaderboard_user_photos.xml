@@ -5,6 +5,7 @@
     android:id="@+id/layout_leaderboard_user_photos"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="34dp"
     android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
