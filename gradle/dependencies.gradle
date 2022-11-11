@@ -171,7 +171,6 @@ ext.plugin = [
         exhaustive: "app.cash.exhaustive:exhaustive-gradle:0.2.0",
         sqlDelight: "com.squareup.sqldelight:gradle-plugin:${versions.sqlDelight}"
     ],
-    chaquo: "com.chaquo.python:gradle:13.0.0",
 ]
 
 /**

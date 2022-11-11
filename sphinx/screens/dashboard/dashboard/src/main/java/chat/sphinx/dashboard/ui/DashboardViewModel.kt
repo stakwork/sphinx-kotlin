@@ -11,11 +11,11 @@ import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
-import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
-import chat.sphinx.concept_network_query_save_profile.model.isClaimOnLiquidPath
-import chat.sphinx.concept_network_query_save_profile.model.isDeleteMethod
-import chat.sphinx.concept_network_query_save_profile.model.isProfilePath
-import chat.sphinx.concept_network_query_save_profile.model.isSaveMethod
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
+import chat.sphinx.concept_network_query_people.model.isClaimOnLiquidPath
+import chat.sphinx.concept_network_query_people.model.isDeleteMethod
+import chat.sphinx.concept_network_query_people.model.isProfilePath
+import chat.sphinx.concept_network_query_people.model.isSaveMethod
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -79,7 +79,7 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
-    private val networkQuerySaveProfile: NetworkQuerySaveProfile,
+    private val networkQueryPeople: NetworkQueryPeople,
 
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
@@ -312,7 +312,7 @@ internal class DashboardViewModel @Inject constructor(
             DeepLinkPopupViewState.LoadingExternalRequestPopup
         )
 
-        networkQuerySaveProfile.getExternalRequestByKey(
+        networkQueryPeople.getExternalRequestByKey(
             link.host,
             link.key
         ).collect { loadResponse ->

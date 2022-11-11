@@ -40,7 +40,7 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-feed-search')
-    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-save-profile')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
 
