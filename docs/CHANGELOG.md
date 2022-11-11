@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha69 (2022-11-11)
+- Adds actions tracking
+- Adds alias rules validation
+- Adds tribe member profile view
+
 # Version 1.0.0-alpha68 (2022-11-09)
 - Adds alias rules validation
 - Adds actions tracking
