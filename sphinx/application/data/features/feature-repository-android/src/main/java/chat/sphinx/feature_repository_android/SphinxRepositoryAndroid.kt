@@ -14,7 +14,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
-import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
@@ -62,7 +62,7 @@ class SphinxRepositoryAndroid(
     networkQueryMessage: NetworkQueryMessage,
     networkQueryInvite: NetworkQueryInvite,
     networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
-    networkQuerySaveProfile: NetworkQuerySaveProfile,
+    networkQueryPeople: NetworkQueryPeople,
     networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     networkQuerySubscription: NetworkQuerySubscription,
     networkQueryFeedSearch: NetworkQueryFeedSearch,
@@ -91,7 +91,7 @@ class SphinxRepositoryAndroid(
     networkQueryMessage,
     networkQueryInvite,
     networkQueryAuthorizeExternal,
-    networkQuerySaveProfile,
+    networkQueryPeople,
     networkQueryRedeemBadgeToken,
     networkQuerySubscription,
     networkQueryFeedSearch,

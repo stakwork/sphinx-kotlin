@@ -132,4 +132,10 @@
     <dimen name="custom_boost_margin">4dp</dimen>
     <dimen name="custom_boost_button_padding">2dp</dimen>
     <dimen name="custom_boost_button_xy">32dp</dimen>
+
+    <!-- Tribe Member Profile -->
+    <dimen name="tribe_member_image_section_height">112dp</dimen>
+    <dimen name="tribe_member_image_corner_radius">56dp</dimen>
+    <dimen name="tribe_member_send_sats_button_width">147dp</dimen>
+    <dimen name="tribe_member_send_sats_button_height">40dp</dimen>
 </resources>

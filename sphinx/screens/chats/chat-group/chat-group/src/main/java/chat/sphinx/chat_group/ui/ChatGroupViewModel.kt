@@ -12,6 +12,7 @@ import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -59,6 +60,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
     networkQueryLightning: NetworkQueryLightning,
+    networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -76,6 +78,7 @@ class ChatGroupViewModel @Inject constructor(
     messageRepository,
     actionsRepository,
     networkQueryLightning,
+    networkQueryPeople,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,

@@ -44,9 +44,9 @@
                     android:fontFamily="@font/montserrat_regular"
                     android:gravity="center"
                     android:singleLine="true"
+                    android:textAllCaps="true"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/chat_tribe_direct_payment_popup_initials_text_size"
-                    android:textAllCaps="true"
                     tools:text="tt" />
 
                 <androidx.appcompat.widget.AppCompatImageView

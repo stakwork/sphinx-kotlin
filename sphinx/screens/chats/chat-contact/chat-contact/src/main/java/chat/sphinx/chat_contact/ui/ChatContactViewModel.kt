@@ -14,6 +14,7 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -72,6 +73,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
     networkQueryLightning: NetworkQueryLightning,
+    networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -89,6 +91,7 @@ internal class ChatContactViewModel @Inject constructor(
     messageRepository,
     actionsRepository,
     networkQueryLightning,
+    networkQueryPeople,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,

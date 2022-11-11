@@ -67,6 +67,7 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:concept-link-preview')
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
 
     implementation project(path: ':sphinx:screens-detail:contact:new-contact')
     implementation project(path: ':sphinx:screens-detail:join-tribe:join-tribe')

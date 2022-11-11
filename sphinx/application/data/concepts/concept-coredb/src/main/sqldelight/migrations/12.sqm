@@ -1,0 +1,3 @@
+import chat.sphinx.wrapper_message.MessagePerson;
+
+ALTER TABLE messageDbo ADD COLUMN person TEXT AS MessagePerson;

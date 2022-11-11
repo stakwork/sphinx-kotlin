@@ -66,6 +66,7 @@ import chat.sphinx.wrapper_message.Flagged;
 import chat.sphinx.wrapper_message.MessageContent;
 import chat.sphinx.wrapper_message.MessageContentDecrypted;
 import chat.sphinx.wrapper_message.MessageMUID;
+import chat.sphinx.wrapper_message.MessagePerson;
 import chat.sphinx.wrapper_message.MessageStatus;
 import chat.sphinx.wrapper_message.MessageType;
 import chat.sphinx.wrapper_message.RecipientAlias;
@@ -587,7 +588,8 @@ CREATE TABLE messageDbo(
     flagged                     INTEGER         AS Flagged NOT NULL DEFAULT 0,
     recipient_alias             TEXT            AS RecipientAlias,
     recipient_pic               TEXT            AS PhotoUrl,
-    push                        INTEGER         AS Push DEFAULT 0
+    push                        INTEGER         AS Push DEFAULT 0,
+    person                      TEXT            AS MessagePerson
 );
 
 messageGetAllReactionsByUUID:
@@ -752,8 +754,6 @@ UPDATE messageDbo
 SET flagged = :flagged
 WHERE id = ?;
 
--- If the message exists in the DB, it will update all fields _except_
--- for message_content_decrypted as to not overwrite it.
 messageUpsert {
     UPDATE messageDbo
     SET status = :status,
@@ -765,7 +765,8 @@ messageUpsert {
         type = :type,
         recipient_alias = :recipient_alias,
         recipient_pic = :recipient_pic,
-        push = :push
+        push = :push,
+        person = :person
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(
@@ -792,7 +793,8 @@ messageUpsert {
         flagged,
         recipient_alias,
         recipient_pic,
-        push
+        push,
+        person
     )
     VALUES (
         :id,
@@ -818,7 +820,8 @@ messageUpsert {
         :flagged,
         :recipient_alias,
         :recipient_pic,
-        :push
+        :push,
+        :person
     );
 }
 

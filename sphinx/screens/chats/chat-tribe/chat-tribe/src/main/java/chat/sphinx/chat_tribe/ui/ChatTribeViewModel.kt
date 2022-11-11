@@ -12,12 +12,14 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -28,6 +30,7 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
@@ -64,13 +67,14 @@ internal class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
-    private val tribeChatNavigator: TribeChatNavigator,
+    tribeChatNavigator: TribeChatNavigator,
     private val repositoryMedia: RepositoryMedia,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
     networkQueryLightning: NetworkQueryLightning,
+    networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
     savedStateHandle: SavedStateHandle,
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
@@ -88,6 +92,7 @@ internal class ChatTribeViewModel @Inject constructor(
     messageRepository,
     actionsRepository,
     networkQueryLightning,
+    networkQueryPeople,
     mediaCacheHandler,
     savedStateHandle,
     cameraViewModelCoordinator,
@@ -117,8 +122,12 @@ internal class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    val tribePopupViewStateContainer: ViewStateContainer<TribePopupViewState> by lazy {
-        ViewStateContainer(TribePopupViewState.Idle)
+    val tribeMemberProfileViewStateContainer: ViewStateContainer<TribeMemberProfileViewState> by lazy {
+        ViewStateContainer(TribeMemberProfileViewState.Closed)
+    }
+
+    val tribeMemberDataViewStateContainer: ViewStateContainer<TribeMemberDataViewState> by lazy {
+        ViewStateContainer(TribeMemberDataViewState.Idle)
     }
 
     private suspend fun getPodcast(): Podcast? {
@@ -318,11 +327,27 @@ internal class ChatTribeViewModel @Inject constructor(
         }.join()
     }
 
+    override fun onSmallProfileImageClick(message: Message) {
+        showMemberPopup(message)
+    }
+
     private fun showMemberPopup(message: Message) {
-        message.uuid?.let { messageUUID ->
+        message.person?.let { _ ->
+            tribeMemberDataViewStateContainer.updateViewState(
+                TribeMemberDataViewState.LoadingTribeMemberProfile
+            )
+
+            tribeMemberProfileViewStateContainer.updateViewState(
+                TribeMemberProfileViewState.Open
+            )
+
+            loadPersonData(message)
+
+        } ?: message.uuid?.let { messageUUID ->
             message.senderAlias?.let { senderAlias ->
-                tribePopupViewStateContainer.updateViewState(
-                    TribePopupViewState.TribeMemberPopup(
+
+                tribeMemberDataViewStateContainer.updateViewState(
+                    TribeMemberDataViewState.TribeMemberPopup(
                         messageUUID,
                         senderAlias,
                         message.getColorKey(),
@@ -333,22 +358,55 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    override fun onSmallProfileImageClick(message: Message) {
-        showMemberPopup(message)
+    private fun loadPersonData(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            message.person?.let { person ->
+                networkQueryPeople.getTribeMemberProfile(person).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+
+                        is Response.Error -> {
+                            submitSideEffect(ChatSideEffect.Notify(loadResponse.message))
+                            tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
+                        }
+                        is Response.Success -> {
+                            tribeMemberDataViewStateContainer.updateViewState(
+                                TribeMemberDataViewState.TribeMemberProfile(
+                                    message.uuid,
+                                    person,
+                                    loadResponse.value
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fun goToPaymentSend() {
         viewModelScope.launch(mainImmediate) {
-            (tribePopupViewStateContainer.value as TribePopupViewState.TribeMemberPopup)?.let { viewState ->
+            val messageUUID = (tribeMemberDataViewStateContainer.value as? TribeMemberDataViewState.TribeMemberPopup)?.messageUUID ?:
+                (tribeMemberDataViewStateContainer.value as? TribeMemberDataViewState.TribeMemberProfile)?.messageUUID
+
+            messageUUID?.let { nnMessageUUID ->
                 chatNavigator.toPaymentSendDetail(
-                    viewState.messageUUID,
+                    nnMessageUUID,
                     chatId
                 )
             }
 
-            tribePopupViewStateContainer.updateViewState(
-                TribePopupViewState.Idle
-            )
+            if (tribeMemberDataViewStateContainer.value !is TribeMemberDataViewState.Idle) {
+                tribeMemberDataViewStateContainer.updateViewState(
+                    TribeMemberDataViewState.Idle
+                )
+            }
+
+            if (tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
+                tribeMemberProfileViewStateContainer.updateViewState(
+                    TribeMemberProfileViewState.Closed
+                )
+            }
         }
     }
 

@@ -11,7 +11,6 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -24,20 +23,24 @@ import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribePopupViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addKeyboardPadding
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
+import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
@@ -63,6 +66,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutBoostFireworks
     private val tribePopupBinding: LayoutChatTribePopupBinding
         get() = binding.includeLayoutPopup
+    private val tribeMemberProfileBinding: LayoutTribeMemberProfileBinding
+        get() = binding.includeLayoutTribeMemberProfile
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
@@ -171,9 +176,21 @@ internal class ChatTribeFragment: ChatFragment<
             buttonSendSats.setOnClickListener {
                 viewModel.goToPaymentSend()
             }
-
             textViewDirectPaymentPopupClose.setOnClickListener {
-                viewModel.tribePopupViewStateContainer.updateViewState(TribePopupViewState.Idle)
+                viewModel.tribeMemberDataViewStateContainer.updateViewState(TribeMemberDataViewState.Idle)
+            }
+        }
+
+        tribeMemberProfileBinding.apply {
+            (requireActivity() as InsetterActivity).addKeyboardPadding(root)
+
+            includeLayoutTribeMemberProfileDetails.apply {
+                includeLayoutTribeSendSatsBar.layoutConstraintSendSatsButton.setOnClickListener {
+                    viewModel.goToPaymentSend()
+                }
+                layoutConstraintDismissLine.setOnClickListener {
+                    viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
+                }
             }
         }
     }
@@ -193,8 +210,8 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.tribePopupViewStateContainer.value is TribePopupViewState.TribeMemberPopup) {
-                viewModel.tribePopupViewStateContainer.updateViewState(TribePopupViewState.Idle)
+            if (viewModel.tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
+                viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
             } else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.handleCommonChatOnBackPressed()
@@ -369,16 +386,22 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.tribePopupViewStateContainer.collect { viewState ->
-                tribePopupBinding.apply {
-                    @Exhaustive
-                    when (viewState) {
-                        is TribePopupViewState.Idle -> {
-                            root.goneIfFalse(false)
-                        }
+            viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->
+                tribeMemberProfileBinding.root.setTransitionDuration(250)
+                viewState.transitionToEndSet(tribeMemberProfileBinding.root)
+            }
+        }
 
-                        is TribePopupViewState.TribeMemberPopup -> {
-                            root.goneIfFalse(true)
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.tribeMemberDataViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is TribeMemberDataViewState.Idle -> {
+                        tribePopupBinding.root.gone
+                    }
+                    is TribeMemberDataViewState.TribeMemberPopup -> {
+                        tribePopupBinding.apply {
+                            root.visible
 
                             layoutChatTribePopup.apply {
                                 textViewInitials.apply {
@@ -408,6 +431,51 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
 
                                 textViewMemberName.text = viewState.memberName.value
+                            }
+                        }
+                    }
+                    is TribeMemberDataViewState.LoadingTribeMemberProfile -> {
+                        tribePopupBinding.root.gone
+
+                        tribeMemberProfileBinding.apply {
+                            includeLayoutTribeMemberProfileDetails.apply {
+                                layoutConstraintProgressBarContainer.visible
+                            }
+                        }
+                    }
+                    is TribeMemberDataViewState.TribeMemberProfile -> {
+                        tribePopupBinding.root.gone
+
+                        tribeMemberProfileBinding.apply {
+                            includeLayoutTribeMemberProfileDetails.apply {
+                                layoutConstraintProgressBarContainer.gone
+
+                                includeLayoutTribeProfilePictureHolder.apply {
+                                    textViewTribeProfileName.text = viewState.profile.owner_alias
+                                    textViewTribeProfileDescription.text = viewState.profile.description
+
+                                    viewState.profile.img.let { photoUrl ->
+                                        imageViewTribeProfilePicture.goneIfFalse(photoUrl.isNotEmpty())
+                                        textViewTribeProfileInitials.goneIfFalse(photoUrl.isEmpty())
+
+                                        imageLoader.load(
+                                            imageViewTribeProfilePicture,
+                                            photoUrl,
+                                            ImageLoaderOptions.Builder()
+                                                .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                .transformation(Transformation.CircleCrop)
+                                                .build()
+                                        )
+                                    }
+                                }
+
+                                includeLayoutTribeProfileInfoContainer.apply {
+                                    textViewCodingLanguages.text = viewState.profile.extras?.codingLanguages ?: "-"
+                                    textViewPriceToMeet.text = viewState.profile.price_to_meet.toLong().toSat()?.asFormattedString() ?: "0"
+                                    textViewPosts.text = (viewState.profile.extras?.post?.size ?: 0).toString()
+                                    textViewTwitterAccount.text = viewState.profile.extras?.twitter?.first()?.formattedValue ?: "-"
+                                    textViewGithubAccount.text = viewState.profile.extras?.github?.first()?.formattedValue ?: "-"
+                                }
                             }
                         }
                     }

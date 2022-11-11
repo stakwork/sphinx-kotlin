@@ -24,10 +24,10 @@ import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadDto
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
-import chat.sphinx.concept_network_query_save_profile.NetworkQuerySaveProfile
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
-import chat.sphinx.concept_network_query_save_profile.model.DeletePeopleProfileDto
-import chat.sphinx.concept_network_query_save_profile.model.PeopleProfileDto
+import chat.sphinx.concept_network_query_people.model.DeletePeopleProfileDto
+import chat.sphinx.concept_network_query_people.model.PeopleProfileDto
 import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
@@ -158,7 +158,7 @@ abstract class SphinxRepository(
     private val networkQueryMessage: NetworkQueryMessage,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
-    private val networkQuerySaveProfile: NetworkQuerySaveProfile,
+    private val networkQueryPeople: NetworkQueryPeople,
     private val networkQueryRedeemBadgeToken: NetworkQueryRedeemBadgeToken,
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
@@ -2537,6 +2537,7 @@ abstract class SphinxRepository(
                                 null,
                                 null,
                                 Push.False,
+                                null,
                                 provisionalId,
                                 null,
                                 chatDbo.id,
@@ -4867,7 +4868,7 @@ abstract class SphinxRepository(
         applicationScope.launch(mainImmediate) {
             moshi.adapter(DeletePeopleProfileDto::class.java).fromJson(body)
                 ?.let { deletePeopleProfileDto ->
-                    networkQuerySaveProfile.deletePeopleProfile(
+                    networkQueryPeople.deletePeopleProfile(
                         deletePeopleProfileDto
                     ).collect { loadResponse ->
                         when (loadResponse) {
@@ -4893,7 +4894,7 @@ abstract class SphinxRepository(
 
         applicationScope.launch(mainImmediate) {
             moshi.adapter(PeopleProfileDto::class.java).fromJson(body)?.let { profile ->
-                networkQuerySaveProfile.savePeopleProfile(
+                networkQueryPeople.savePeopleProfile(
                     profile
                 ).collect { saveProfileResponse ->
                     when (saveProfileResponse) {
