@@ -52,4 +52,6 @@
     <string name="tribe_member_profile_post">Publicaciones:</string>
     <string name="tribe_member_profile_twitter">Twitter:</string>
     <string name="tribe_member_profile_github">Github:</string>
+
+    <string name="alias_allowed_characters">Solo se permiten letras, números y\nguiones bajos en el alias de la tribu</string>
 </resources>

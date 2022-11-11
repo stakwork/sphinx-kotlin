@@ -20,6 +20,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:concept-media-cache')
     api project(path: ':sphinx:application:data:concepts:concept-meme-server')
     api project(path: ':sphinx:application:data:concepts:concept-sphinx-notification-manager')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard')
@@ -31,6 +32,7 @@ dependencies {
 
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-action-track')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')

@@ -4,6 +4,7 @@ import android.content.Context
 import chat.sphinx.concept_crypto_rsa.RSA
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
+import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
@@ -17,6 +18,7 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
@@ -133,6 +135,7 @@ object RepositoryModule {
         memeInputStreamHandler: MemeInputStreamHandler,
         memeServerTokenHandler: MemeServerTokenHandler,
         networkQueryMemeServer: NetworkQueryMemeServer,
+        networkQueryActionTrack: NetworkQueryActionTrack,
         networkQueryChat: NetworkQueryChat,
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
@@ -161,6 +164,7 @@ object RepositoryModule {
             mediaCacheHandler,
             memeInputStreamHandler,
             memeServerTokenHandler,
+            networkQueryActionTrack,
             networkQueryMemeServer,
             networkQueryChat,
             networkQueryContact,
@@ -227,4 +231,11 @@ object RepositoryModule {
         sphinxRepositoryAndroid: SphinxRepositoryAndroid
     ): RepositoryMedia =
         sphinxRepositoryAndroid
+
+    @Provides
+    fun provideActionsRepository(
+        sphinxRepositoryAndroid: SphinxRepositoryAndroid
+    ): ActionsRepository =
+        sphinxRepositoryAndroid
 }
+

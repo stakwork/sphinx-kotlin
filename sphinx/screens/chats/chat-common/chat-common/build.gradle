@@ -13,6 +13,7 @@ android {
     buildToolsVersion versions.buildTools
 
     buildFeatures.viewBinding = true
+
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
@@ -54,6 +55,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:data:concepts:concept-media-cache')
     api project(path: ':sphinx:application:data:concepts:concept-meme-server')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')

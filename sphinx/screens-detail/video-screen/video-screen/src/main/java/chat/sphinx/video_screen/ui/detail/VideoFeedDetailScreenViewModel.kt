@@ -2,6 +2,7 @@ package chat.sphinx.video_screen.ui.detail
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -38,6 +39,7 @@ internal class VideoFeedDetailScreenViewModel @Inject constructor(
     chatRepository: ChatRepository,
     repositoryMedia: RepositoryMedia,
     feedRepository: FeedRepository,
+    actionsRepository: ActionsRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     lightningRepository: LightningRepository,
@@ -47,6 +49,7 @@ internal class VideoFeedDetailScreenViewModel @Inject constructor(
     chatRepository,
     repositoryMedia,
     feedRepository,
+    actionsRepository,
     contactRepository,
     messageRepository,
     lightningRepository

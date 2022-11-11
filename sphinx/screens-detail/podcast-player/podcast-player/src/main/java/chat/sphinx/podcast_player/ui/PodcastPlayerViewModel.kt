@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -28,10 +29,7 @@ import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.isTrue
-import chat.sphinx.wrapper_common.feed.toFeedUrl
-import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
@@ -76,6 +74,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val lightningRepository: LightningRepository,
     savedStateHandle: SavedStateHandle,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
@@ -263,6 +262,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         itemID = podcast.getCurrentEpisode().id,
                         ts = podcast.currentTime / 1000
                     )
+
+                    actionsRepository.trackPodcastClipComments(
+                        podcast.getCurrentEpisode().id,
+                        podcast.currentTime.toLong(),
+                        arrayListOf("")
+                        )
 
                     try {
                         requestCatcher.getCaughtRequestStateFlow().collect { list ->
@@ -487,6 +492,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                     timeSeconds = metaData.timeSeconds,
                                     amount = amount
                                 )
+                            )
+
+                            actionsRepository.trackFeedBoostAction(
+                                amount.value,
+                                podcast.getCurrentEpisode().id,
+                                arrayListOf("")
                             )
 
                             if (podcast.hasDestinations) {

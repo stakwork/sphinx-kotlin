@@ -38,7 +38,6 @@ import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
-import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
@@ -55,6 +54,7 @@ import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -101,16 +101,15 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
-import java.nio.file.Files.getOwner
 import kotlin.collections.ArrayList
 
 
 @JvmSynthetic
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun <ARGS: NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
+internal inline fun <ARGS : NavArgs> ChatViewModel<ARGS>.isMessageSelected(): Boolean =
     getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage
 
-abstract class ChatViewModel<ARGS: NavArgs>(
+abstract class ChatViewModel<ARGS : NavArgs>(
     protected val app: Application,
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
@@ -119,6 +118,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
+    protected val actionsRepository: ActionsRepository,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val networkQueryPeople: NetworkQueryPeople,
     val mediaCacheHandler: MediaCacheHandler,
@@ -127,13 +127,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     protected val linkPreviewHandler: LinkPreviewHandler,
     private val memeInputStreamHandler: MemeInputStreamHandler,
     protected val LOG: SphinxLogger,
-): MotionLayoutViewModel<
+) : MotionLayoutViewModel<
         Nothing,
         ChatSideEffectFragment,
         ChatSideEffect,
         ChatMenuViewState,
-        >(dispatchers, ChatMenuViewState.Closed)
-{
+        >(dispatchers, ChatMenuViewState.Closed) {
     companion object {
         const val TAG = "ChatViewModel"
         const val CONFIG_PLACE_HOLDER = "PLACE_HOLDER"
@@ -173,7 +172,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
     abstract suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?)
 
-    private inner class ChatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
+    private inner class ChatHeaderViewStateContainer :
+        ViewStateContainer<ChatHeaderViewState>(ChatHeaderViewState.Idle) {
 
         private var contactCollectionJob: Job? = null
         private var chatCollectionJob: Job? = null
@@ -250,7 +250,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     throw Exception()
                 }
             }
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
         delay(25L)
 
         return chat!!
@@ -316,19 +317,26 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         val groupingMinutesLimit = 5.0
         var date = groupingDate ?: message.date
 
-        val shouldAvoidGroupingWithPrevious = (previousMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
-        val isGroupedBySenderWithPrevious = previousMessage?.hasSameSenderThanMessage(message) ?: false
-        val isGroupedByDateWithPrevious = message.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit
+        val shouldAvoidGroupingWithPrevious =
+            (previousMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
+        val isGroupedBySenderWithPrevious =
+            previousMessage?.hasSameSenderThanMessage(message) ?: false
+        val isGroupedByDateWithPrevious =
+            message.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit
 
-        val groupedWithPrevious = (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious)
+        val groupedWithPrevious =
+            (!shouldAvoidGroupingWithPrevious && isGroupedBySenderWithPrevious && isGroupedByDateWithPrevious)
 
         date = if (groupedWithPrevious) date else message.date
 
-        val shouldAvoidGroupingWithNext = (nextMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
+        val shouldAvoidGroupingWithNext =
+            (nextMessage?.shouldAvoidGrouping() ?: true) || message.shouldAvoidGrouping()
         val isGroupedBySenderWithNext = nextMessage?.hasSameSenderThanMessage(message) ?: false
-        val isGroupedByDateWithNext = if (nextMessage != null) nextMessage.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit else false
+        val isGroupedByDateWithNext =
+            if (nextMessage != null) nextMessage.date.getMinutesDifferenceWithDateTime(date) < groupingMinutesLimit else false
 
-        val groupedWithNext = (!shouldAvoidGroupingWithNext && isGroupedBySenderWithNext && isGroupedByDateWithNext)
+        val groupedWithNext =
+            (!shouldAvoidGroupingWithNext && isGroupedBySenderWithNext && isGroupedByDateWithNext)
 
         when {
             (!groupedWithPrevious && !groupedWithNext) -> {
@@ -348,7 +356,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         return Pair(date, BubbleBackground.First.Isolated)
     }
 
-    private suspend fun getMessageHolderViewStateList(messages: List<Message>) : List<MessageHolderViewState> {
+    private suspend fun getMessageHolderViewStateList(messages: List<Message>): List<MessageHolderViewState> {
         val chat = getChat()
 
         val chatInfo = getChatInfo()
@@ -375,7 +383,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             for ((index, message) in messages.withIndex()) {
 
                 val previousMessage: Message? = if (index > 0) messages[index - 1] else null
-                val nextMessage: Message? = if (index < messages.size - 1) messages[index + 1] else null
+                val nextMessage: Message? =
+                    if (index < messages.size - 1) messages[index + 1] else null
 
                 val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
                     message,
@@ -444,7 +453,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             message,
                             chat,
                             tribeAdmin,
-                            background =  when {
+                            background = when {
                                 isDeleted -> {
                                     BubbleBackground.Gone(setSpacingEqual = false)
                                 }
@@ -490,8 +499,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             accountOwner = { owner },
                             urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
                             previewProvider = { handleLinkPreview(it) },
-                            paidTextMessageContentProvider = {
-                                    messageCallback -> handlePaidTextMessageContent(messageCallback)
+                            paidTextMessageContentProvider = { messageCallback ->
+                                handlePaidTextMessageContent(messageCallback)
                             },
                             onBindDownloadMedia = {
                                 repositoryMedia.downloadMediaIfApplicable(message, sent)
@@ -607,7 +616,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     }
 
                     if (pubKey != null) {
-                        val existingContact: Contact? = contactRepository.getContactByPubKey(pubKey).firstOrNull()
+                        val existingContact: Contact? =
+                            contactRepository.getContactByPubKey(pubKey).firstOrNull()
 
                         if (existingContact != null) {
 
@@ -638,38 +648,42 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         val thisChat = getChat()
                         if (thisChat.uuid == uuid) {
 
-                            preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
-                                name = TribePreviewName(thisChat.name?.value ?: ""),
-                                description = null,
-                                imageUrl = thisChat.photoUrl?.toPreviewImageUrlOrNull(),
-                                showBanner = true,
-                                joinLink = link.tribeJoinLink,
-                            )
+                            preview =
+                                LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                    name = TribePreviewName(thisChat.name?.value ?: ""),
+                                    description = null,
+                                    imageUrl = thisChat.photoUrl?.toPreviewImageUrlOrNull(),
+                                    showBanner = true,
+                                    joinLink = link.tribeJoinLink,
+                                )
 
                         } else {
                             val existingChat = chatRepository.getChatByUUID(uuid).firstOrNull()
                             if (existingChat != null) {
 
-                                preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
-                                    name = TribePreviewName(existingChat.name?.value ?: ""),
-                                    description = null,
-                                    imageUrl = existingChat.photoUrl?.toPreviewImageUrlOrNull(),
-                                    showBanner = false,
-                                    joinLink = link.tribeJoinLink,
-                                )
+                                preview =
+                                    LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                        name = TribePreviewName(existingChat.name?.value ?: ""),
+                                        description = null,
+                                        imageUrl = existingChat.photoUrl?.toPreviewImageUrlOrNull(),
+                                        showBanner = false,
+                                        joinLink = link.tribeJoinLink,
+                                    )
 
                             } else {
 
-                                val tribePreview = linkPreviewHandler.retrieveTribeLinkPreview(link.tribeJoinLink)
+                                val tribePreview =
+                                    linkPreviewHandler.retrieveTribeLinkPreview(link.tribeJoinLink)
 
                                 if (tribePreview != null) {
-                                    preview = LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
-                                        name = tribePreview.name,
-                                        description = tribePreview.description,
-                                        imageUrl = tribePreview.imageUrl,
-                                        showBanner = true,
-                                        joinLink = link.tribeJoinLink,
-                                    )
+                                    preview =
+                                        LayoutState.Bubble.ContainerThird.LinkPreview.TribeLinkPreview(
+                                            name = tribePreview.name,
+                                            description = tribePreview.description,
+                                            imageUrl = tribePreview.imageUrl,
+                                            showBanner = true,
+                                            joinLink = link.tribeJoinLink,
+                                        )
                                 } // else do nothing
                             }
                         }
@@ -707,7 +721,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
 
         val appContext: Context = app.applicationContext
-        val serverUrlsSharedPreferences = appContext.getSharedPreferences(PreviewsEnabled.LINK_PREVIEWS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences(
+            PreviewsEnabled.LINK_PREVIEWS_SHARED_PREFERENCES,
+            Context.MODE_PRIVATE
+        )
 
         urlLinkPreviewsEnabled = serverUrlsSharedPreferences.getBoolean(
             PreviewsEnabled.LINK_PREVIEWS_ENABLED_KEY,
@@ -735,7 +752,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                             var text: String? = null
 
                             viewModelScope.launch(io) {
-                                text = streamAndFileName?.first?.bufferedReader().use { it?.readText() }
+                                text = streamAndFileName?.first?.bufferedReader()
+                                    .use { it?.readText() }
                             }.join()
 
                             text?.let { nnText ->
@@ -773,7 +791,6 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         val setupViewStateContainerJob = viewModelScope.launch(mainImmediate) {
             viewStateContainer.viewStateFlow.firstOrNull()
         }
-
         forceKeyExchange()
 
         viewModelScope.launch(mainImmediate) {
@@ -800,14 +817,16 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     var messagesLoadJob: Job? = null
     fun screenInit() {
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
-                messageHolderViewStateFlow.value =
-                    getMessageHolderViewStateList(messages).toList()
-            }
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()
+                ?.let { messages ->
+                    messageHolderViewStateFlow.value =
+                        getMessageHolderViewStateList(messages).toList()
+                }
 
             delay(1000L)
 
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000)
+                .distinctUntilChanged().collect { messages ->
                 messageHolderViewStateFlow.value =
                     getMessageHolderViewStateList(messages).toList()
             }
@@ -857,17 +876,46 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             }
 
             viewModelScope.launch(mainImmediate) {
-                submitSideEffect(ChatSideEffect.Notify(
-                    app.getString(errorMessageRes)
-                ))
+                submitSideEffect(
+                    ChatSideEffect.Notify(
+                        app.getString(errorMessageRes)
+                    )
+                )
             }
 
         } ?: msg.first?.let { message ->
             messageRepository.sendMessage(message)
+
+//            trackMessage(message.text)
         }
 
         return msg.first
     }
+
+//    private fun trackMessage(text: String?) {
+//        viewModelScope.launch(io) {
+//            if (text.isNullOrEmpty()) {
+//                return@launch
+//            }
+//
+//            val keywordList = extractKeywords(text)
+//            keywordList?.let { list ->
+//                actionsRepository.trackMessageContent(list)
+//            }
+//        }
+//    }
+
+//    private fun extractKeywords(text: String): List<String>? {
+//        val pyObj = python.getModule("keyword_extractor")
+//        val obj = pyObj.callAttr("extract_keywords", text)
+//
+//        val keywords = obj.asList().map {
+//            it.toString().substringAfter("(\'").substringBefore("',")
+//        }
+//
+//        return keywords.take(5)
+//    }
+
 
     /**
      * Remotely and locally Deletes a [Message] through the [MessageRepository]
@@ -909,7 +957,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                 submitSideEffect(ChatSideEffect.ProduceHapticFeedback)
 
-                val newLevel = if (chat.notify?.isMuteChat() == true) NotificationLevel.SeeAll else NotificationLevel.MuteChat
+                val newLevel =
+                    if (chat.notify?.isMuteChat() == true) NotificationLevel.SeeAll else NotificationLevel.MuteChat
                 val response = chatRepository.setNotificationLevel(chat, newLevel)
 
                 @Exhaustive
@@ -957,11 +1006,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                     messagesSearchJob = viewModelScope.launch(io) {
                         delay(500L)
 
-                        messageRepository.searchMessagesBy(nnChatId, nnText).firstOrNull()?.let { messages ->
-                            messagesSearchViewStateContainer.updateViewState(
-                                MessagesSearchViewState.Searching(messages, 0, true)
-                            )
-                        }
+                        messageRepository.searchMessagesBy(nnChatId, nnText).firstOrNull()
+                            ?.let { messages ->
+                                messagesSearchViewStateContainer.updateViewState(
+                                    MessagesSearchViewState.Searching(messages, 0, true)
+                                )
+                            }
                     }
                     return
                 }
@@ -1029,7 +1079,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         footerViewStateContainer.updateViewState(viewState)
     }
 
-    private inner class AttachmentSendStateContainer: ViewStateContainer<AttachmentSendViewState>(AttachmentSendViewState.Idle) {
+    private inner class AttachmentSendStateContainer :
+        ViewStateContainer<AttachmentSendViewState>(AttachmentSendViewState.Idle) {
         override fun updateViewState(viewState: AttachmentSendViewState) {
             if (viewState is AttachmentSendViewState.Preview) {
 
@@ -1081,7 +1132,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         viewModelScope.launch(io) {
             try {
                 viewState.file?.delete()
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
         }
     }
 
@@ -1276,30 +1328,38 @@ abstract class ChatViewModel<ARGS: NavArgs>(
     internal fun chatMenuOptionGif(parentFragmentManager: FragmentManager) {
         if (BuildConfig.GIPHY_API_KEY != CONFIG_PLACE_HOLDER) {
             val settings = GPHSettings(GridType.waterfall, GPHTheme.Dark)
-            settings.mediaTypeConfig = arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
+            settings.mediaTypeConfig =
+                arrayOf(GPHContentType.gif, GPHContentType.sticker, GPHContentType.recents)
 
-            val giphyDialogFragment = GiphyDialogFragment.newInstance(settings, BuildConfig.GIPHY_API_KEY)
+            val giphyDialogFragment =
+                GiphyDialogFragment.newInstance(settings, BuildConfig.GIPHY_API_KEY)
 
-            giphyDialogFragment.gifSelectionListener = object: GiphyDialogFragment.GifSelectionListener {
-                override fun didSearchTerm(term: String) { }
+            giphyDialogFragment.gifSelectionListener =
+                object : GiphyDialogFragment.GifSelectionListener {
+                    override fun didSearchTerm(term: String) {}
 
-                override fun onDismissed(selectedContentType: GPHContentType) {}
+                    override fun onDismissed(selectedContentType: GPHContentType) {}
 
-                override fun onGifSelected(
-                    media: Media,
-                    searchTerm: String?,
-                    selectedContentType: GPHContentType
-                ) {
-                    updateViewState(ChatMenuViewState.Closed)
-                    val giphyData = GiphyData(media.id, "https://media.giphy.com/media/${media.id}/giphy.gif", media.aspectRatio.toDouble(), null)
+                    override fun onGifSelected(
+                        media: Media,
+                        searchTerm: String?,
+                        selectedContentType: GPHContentType
+                    ) {
+                        updateViewState(ChatMenuViewState.Closed)
+                        val giphyData = GiphyData(
+                            media.id,
+                            "https://media.giphy.com/media/${media.id}/giphy.gif",
+                            media.aspectRatio.toDouble(),
+                            null
+                        )
 
-                    updateAttachmentSendViewState(
-                        AttachmentSendViewState.PreviewGiphy(giphyData)
-                    )
+                        updateAttachmentSendViewState(
+                            AttachmentSendViewState.PreviewGiphy(giphyData)
+                        )
 
-                    updateFooterViewState(FooterViewState.Attachment)
+                        updateFooterViewState(FooterViewState.Attachment)
+                    }
                 }
-            }
             giphyDialogFragment.show(parentFragmentManager, "giphy_search")
         } else {
             viewModelScope.launch(mainImmediate) {
@@ -1308,31 +1368,32 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 )
             }
         }
-
     }
 
     @JvmSynthetic
-    internal val onIMEContent = InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
-        val lacksPermission = (flags and InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
+    internal val onIMEContent =
+        InputConnectionCompat.OnCommitContentListener { inputContentInfo, flags, _ ->
+            val lacksPermission =
+                (flags and InputConnectionCompat.INPUT_CONTENT_GRANT_READ_URI_PERMISSION) != 0
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
-            try {
-                inputContentInfo.requestPermission()
-            } catch (e: java.lang.Exception) {
-                Log.e(TAG, "Failed to get content from IME", e)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1 && lacksPermission) {
+                try {
+                    inputContentInfo.requestPermission()
+                } catch (e: java.lang.Exception) {
+                    Log.e(TAG, "Failed to get content from IME", e)
 
-                viewModelScope.launch(mainImmediate) {
-                    submitSideEffect(
-                        ChatSideEffect.Notify("Require permission for this content")
-                    )
+                    viewModelScope.launch(mainImmediate) {
+                        submitSideEffect(
+                            ChatSideEffect.Notify("Require permission for this content")
+                        )
+                    }
+                    return@OnCommitContentListener false
                 }
-                return@OnCommitContentListener false
             }
+            handleActivityResultUri(inputContentInfo.contentUri)
+            inputContentInfo.releasePermission()
+            true
         }
-        handleActivityResultUri(inputContentInfo.contentUri)
-        inputContentInfo.releasePermission()
-        true
-    }
 
     @JvmSynthetic
     internal fun chatMenuOptionFileLibrary() {
@@ -1443,11 +1504,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
                     newFile?.let { nnNewFile ->
 
-                        val fileName: String? = cr.query(uri, null, null, null, null)?.use { cursor ->
-                            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                            cursor.moveToFirst()
-                            cursor.getString(nameIndex)
-                        } ?: null
+                        val fileName: String? =
+                            cr.query(uri, null, null, null, null)?.use { cursor ->
+                                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                                cursor.moveToFirst()
+                                cursor.getString(nameIndex)
+                            } ?: null
 
                         viewModelScope.launch(mainImmediate) {
                             try {
@@ -1456,7 +1518,12 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                                 updateFooterViewState(FooterViewState.Attachment)
 
                                 attachmentSendStateContainer.updateViewState(
-                                    AttachmentSendViewState.Preview(nnNewFile, mType, fileName?.toFileName(), null)
+                                    AttachmentSendViewState.Preview(
+                                        nnNewFile,
+                                        mType,
+                                        fileName?.toFileName(),
+                                        null
+                                    )
                                 )
                             } catch (e: Exception) {
                                 nnNewFile.delete()
@@ -1524,7 +1591,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         )
 
         val appContext: Context = app.applicationContext
-        val serverUrlsSharedPreferences = appContext.getSharedPreferences("server_urls", Context.MODE_PRIVATE)
+        val serverUrlsSharedPreferences =
+            appContext.getSharedPreferences("server_urls", Context.MODE_PRIVATE)
 
         val meetingServerUrl = serverUrlsSharedPreferences.getString(
             SphinxCallLink.CALL_SERVER_URL_KEY,
@@ -1569,8 +1637,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                         .setRoom(sphinxCallLink.callRoom)
                         .setAudioMuted(false)
                         .setVideoMuted(false)
+                        .setFeatureFlag("welcomepage.enabled", false)
                         .setAudioOnly(audioOnly)
-                        .setWelcomePageEnabled(false)
                         .setUserInfo(userInfo)
                         .build()
 
@@ -1598,9 +1666,9 @@ abstract class ChatViewModel<ARGS: NavArgs>(
             viewModelScope = viewModelScope,
             mediaCacheHandler = mediaCacheHandler,
             updateDurationCallback = { duration ->
-                  updateFooterViewState(
-                      FooterViewState.RecordingAudioAttachment(duration)
-                  )
+                updateFooterViewState(
+                    FooterViewState.RecordingAudioAttachment(duration)
+                )
             },
             dispatchers
         )
@@ -1666,7 +1734,10 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         }
     }
 
-    private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
+    private suspend fun handleContactLink(
+        pubKey: LightningNodePubKey,
+        routeHint: LightningRouteHint?
+    ) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
 
             chatRepository.getConversationByContactId(contact.id).firstOrNull().let { chat ->
@@ -1682,7 +1753,8 @@ abstract class ChatViewModel<ARGS: NavArgs>(
         contactId: ContactId,
         messageId: MessageId,
         type: MessageType,
-    ) {}
+    ) {
+    }
 
     open suspend fun deleteTribe() {}
 
@@ -1708,53 +1780,65 @@ abstract class ChatViewModel<ARGS: NavArgs>(
 
 
                 mediaUrlAndMessageMedia?.second?.let { messageMedia ->
-                    originalMessageMessageMedia?.retrieveContentValues(message)?.let { mediaContentValues ->
-                        originalMessageMessageMedia?.retrieveMediaStorageUri()?.let { mediaStorageUri ->
-                            app.contentResolver.insert(mediaStorageUri, mediaContentValues)?.let { savedFileUri ->
-                                val inputStream: InputStream? = when {
-                                    (drawable != null) -> {
-                                        drawable?.drawableToBitmap()?.toInputStream()
-                                    }
-                                    (originalMessageMessageMedia?.localFile != null) -> {
-                                        FileInputStream(originalMessageMessageMedia?.localFile)
-                                    }
-                                    else -> {
-                                        messageMedia.retrieveRemoteMediaInputStream(
-                                            mediaUrlAndMessageMedia.first,
-                                            memeServerTokenHandler,
-                                            memeInputStreamHandler
-                                        )
-                                    }
-                                }
+                    originalMessageMessageMedia?.retrieveContentValues(message)
+                        ?.let { mediaContentValues ->
+                            originalMessageMessageMedia?.retrieveMediaStorageUri()
+                                ?.let { mediaStorageUri ->
+                                    app.contentResolver.insert(mediaStorageUri, mediaContentValues)
+                                        ?.let { savedFileUri ->
+                                            val inputStream: InputStream? = when {
+                                                (drawable != null) -> {
+                                                    drawable?.drawableToBitmap()?.toInputStream()
+                                                }
+                                                (originalMessageMessageMedia?.localFile != null) -> {
+                                                    FileInputStream(originalMessageMessageMedia?.localFile)
+                                                }
+                                                else -> {
+                                                    messageMedia.retrieveRemoteMediaInputStream(
+                                                        mediaUrlAndMessageMedia.first,
+                                                        memeServerTokenHandler,
+                                                        memeInputStreamHandler
+                                                    )
+                                                }
+                                            }
 
-                                try {
-                                    inputStream?.use { nnInputStream ->
-                                        app.contentResolver.openOutputStream(savedFileUri).use { savedFileOutputStream ->
-                                            if (savedFileOutputStream != null) {
-                                                nnInputStream.copyTo(savedFileOutputStream, 1024)
+                                            try {
+                                                inputStream?.use { nnInputStream ->
+                                                    app.contentResolver.openOutputStream(
+                                                        savedFileUri
+                                                    ).use { savedFileOutputStream ->
+                                                        if (savedFileOutputStream != null) {
+                                                            nnInputStream.copyTo(
+                                                                savedFileOutputStream,
+                                                                1024
+                                                            )
 
-                                                submitSideEffect(
-                                                    ChatSideEffect.Notify(app.getString(R.string.saved_attachment_successfully))
-                                                )
-                                                return@launch
+                                                            submitSideEffect(
+                                                                ChatSideEffect.Notify(
+                                                                    app.getString(
+                                                                        R.string.saved_attachment_successfully
+                                                                    )
+                                                                )
+                                                            )
+                                                            return@launch
+                                                        }
+                                                    }
+                                                }
+                                            } catch (e: Exception) {
+                                                LOG.e(TAG, "Failed to store file: ", e)
+                                            }
+
+                                            submitSideEffect(
+                                                ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
+                                            )
+                                            try {
+                                                app.contentResolver.delete(savedFileUri, null, null)
+                                            } catch (fileE: Exception) {
+                                                LOG.e(TAG, "Failed to delete file: ", fileE)
                                             }
                                         }
-                                    }
-                                } catch (e: Exception) {
-                                    LOG.e(TAG, "Failed to store file: ", e)
                                 }
-
-                                submitSideEffect(
-                                    ChatSideEffect.Notify(app.getString(R.string.failed_to_save_file))
-                                )
-                                try {
-                                    app.contentResolver.delete(savedFileUri, null, null)
-                                } catch (fileE: Exception) {
-                                    LOG.e(TAG, "Failed to delete file: ", fileE)
-                                }
-                            }
                         }
-                    }
                 }
             }
         }
@@ -1791,7 +1875,7 @@ abstract class ChatViewModel<ARGS: NavArgs>(
                 )
             )
         } else {
-            if(message?.messageMedia?.mediaType?.isPdf == true) {
+            if (message?.messageMedia?.mediaType?.isPdf == true) {
                 message.messageMedia?.localFile?.let { localFile ->
 
                     val pfd = ParcelFileDescriptor.open(localFile, MODE_READ_ONLY)

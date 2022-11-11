@@ -15,6 +15,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
@@ -70,6 +71,7 @@ internal class ChatContactViewModel @Inject constructor(
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
+    actionsRepository: ActionsRepository,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
@@ -87,6 +89,7 @@ internal class ChatContactViewModel @Inject constructor(
     chatRepository,
     contactRepository,
     messageRepository,
+    actionsRepository,
     networkQueryLightning,
     networkQueryPeople,
     mediaCacheHandler,
