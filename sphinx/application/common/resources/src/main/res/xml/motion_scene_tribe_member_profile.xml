@@ -54,6 +54,8 @@
         android:id="@+id/transition_tribe_member_profile_closed_to_open"
         app:constraintSetEnd="@+id/motion_scene_tribe_member_profile_open"
         app:constraintSetStart="@+id/motion_scene_tribe_member_profile_closed"
-        app:duration="300"/>
+        app:duration="300"
+        app:motionInterpolator="cubic(0.41,0.39,0,1)">
+    </Transition>
 
 </MotionScene>

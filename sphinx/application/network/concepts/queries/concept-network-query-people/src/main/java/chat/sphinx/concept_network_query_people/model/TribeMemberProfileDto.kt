@@ -23,7 +23,17 @@ data class TribeMemberProfileExtrasDto(
     val twitter: List<ProfileAttributeDto>?,
     val post: List<TribeMemberProfilePostDto>?,
     val tribes: List<ProfileAttributeDto>?,
-)
+) {
+    val codingLanguages: String
+        get() {
+            if (coding_languages?.isNotEmpty() == true) {
+                return coding_languages?.joinToString(",") {
+                    it.value
+                }
+            }
+            return "-"
+        }
+}
 
 @JsonClass(generateAdapter = true)
 data class TribeMemberProfileCodingLanguageDto(
@@ -41,4 +51,12 @@ data class TribeMemberProfilePostDto(
 @JsonClass(generateAdapter = true)
 data class ProfileAttributeDto(
     val value: String
-)
+) {
+    val formattedValue: String
+        get() {
+            if (value.isEmpty()) {
+                return "-"
+            }
+            return value
+        }
+}
