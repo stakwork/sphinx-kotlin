@@ -12,8 +12,8 @@
         android:id="@+id/second_user_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="18dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="@dimen/leaderboard_profile_margin_end"
+        android:layout_marginBottom="@dimen/leaderboard_profile_small_margin_bottom"
         app:layout_constraintBottom_toTopOf="@+id/text_view_second_user_name"
         app:layout_constraintEnd_toStartOf="@+id/first_user_container">
 
@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/primaryText"
-            app:cardCornerRadius="200dp"
+            app:cardCornerRadius="@dimen/leaderboard_profile_corner_radius"
             app:cardElevation="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -30,8 +30,8 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_second_profile_picture"
-                android:layout_width="77dp"
-                android:layout_height="75dp"
+                android:layout_width="@dimen/leaderboard_profile_small_width"
+                android:layout_height="@dimen/leaderboard_profile_small_height"
                 android:padding="3dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_avatar_circle" />
@@ -40,22 +40,20 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_second_number"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="@dimen/leaderboard_profile_position_width"
+            android:layout_height="@dimen/leaderboard_profile_position_height"
             android:background="@drawable/button_background_white_rad_48"
             android:elevation="8dp"
             android:fontFamily="@font/roboto_medium"
             android:gravity="center"
             android:singleLine="true"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="@dimen/leaderboard_position_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="2" />
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -67,7 +65,7 @@
         android:gravity="center"
         android:singleLine="true"
         android:textColor="@color/primaryText"
-        android:textSize="16sp"
+        android:textSize="@dimen/leaderboard_profile_small_text_name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/second_user_container"
         app:layout_constraintStart_toStartOf="@+id/second_user_container"
@@ -75,9 +73,9 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/second_status_up"
-        android:layout_width="10dp"
-        android:layout_height="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/leaderboard_status_icon_width"
+        android:layout_height="@dimen/leaderboard_status_icon_height"
+        android:layout_marginStart="@dimen/leaderboard_status_icon_margin_start"
         android:src="@drawable/ic_polygon_up"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_second_user_name"
         app:layout_constraintStart_toEndOf="@+id/text_view_second_user_name"
@@ -85,9 +83,9 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/second_status_down"
-        android:layout_width="10dp"
-        android:layout_height="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/leaderboard_status_icon_width"
+        android:layout_height="@dimen/leaderboard_status_icon_height"
+        android:layout_marginStart="@dimen/leaderboard_status_icon_margin_start"
         android:src="@drawable/ic_polygon_down"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_second_user_name"
         app:layout_constraintStart_toEndOf="@+id/text_view_second_user_name"
@@ -97,7 +95,7 @@
         android:id="@+id/first_user_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="@dimen/leaderboard_profile_small_margin_bottom"
         app:layout_constraintBottom_toTopOf="@+id/text_view_first_user_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -107,7 +105,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/primaryText"
-            app:cardCornerRadius="200dp"
+            app:cardCornerRadius="@dimen/leaderboard_profile_corner_radius"
             app:cardElevation="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -115,8 +113,8 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_first_profile_picture"
-                android:layout_width="111dp"
-                android:layout_height="111dp"
+                android:layout_width="@dimen/leaderboard_profile_big_width"
+                android:layout_height="@dimen/leaderboard_profile_big_height"
                 android:padding="4dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_avatar_circle" />
@@ -125,21 +123,20 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_first_number"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="@dimen/leaderboard_profile_position_width"
+            android:layout_height="@dimen/leaderboard_profile_position_height"
             android:background="@drawable/button_background_white_rad_48"
             android:elevation="8dp"
             android:fontFamily="@font/roboto_medium"
             android:gravity="center"
             android:singleLine="true"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="@dimen/leaderboard_position_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="1" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -147,13 +144,13 @@
         android:id="@+id/text_view_first_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="40dp"
+        android:layout_marginBottom="@dimen/leaderboard_profile_big_margin_bottom"
         android:elevation="8dp"
         android:fontFamily="@font/roboto_medium"
         android:gravity="center"
         android:singleLine="true"
         android:textColor="@color/primaryText"
-        android:textSize="16sp"
+        android:textSize="@dimen/leaderboard_profile_big_text_name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/first_user_container"
         app:layout_constraintStart_toStartOf="@+id/first_user_container"
@@ -161,9 +158,9 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/first_status_up"
-        android:layout_width="10dp"
-        android:layout_height="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/leaderboard_status_icon_width"
+        android:layout_height="@dimen/leaderboard_status_icon_height"
+        android:layout_marginStart="@dimen/leaderboard_status_icon_margin_start"
         android:src="@drawable/ic_polygon_up"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_first_user_name"
         app:layout_constraintStart_toEndOf="@+id/text_view_first_user_name"
@@ -171,9 +168,9 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/first_status_down"
-        android:layout_width="10dp"
-        android:layout_height="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/leaderboard_status_icon_width"
+        android:layout_height="@dimen/leaderboard_status_icon_height"
+        android:layout_marginStart="@dimen/leaderboard_status_icon_margin_start"
         android:src="@drawable/ic_polygon_down"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_first_user_name"
         app:layout_constraintStart_toEndOf="@+id/text_view_first_user_name"
@@ -188,14 +185,12 @@
         app:layout_constraintStart_toStartOf="@+id/first_user_container"
         app:srcCompat="@drawable/ic_crown" />
 
-    <!--    >>>>>>>>>>>>>>>>>>>>>>>>>>>>>-->
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/third_user_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="18dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginStart="@dimen/leaderboard_profile_margin_start"
+        android:layout_marginBottom="@dimen/leaderboard_profile_small_margin_bottom"
         app:layout_constraintBottom_toTopOf="@+id/text_view_third_user_name"
         app:layout_constraintStart_toEndOf="@+id/first_user_container">
 
@@ -204,7 +199,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardBackgroundColor="@color/primaryText"
-            app:cardCornerRadius="200dp"
+            app:cardCornerRadius="@dimen/leaderboard_profile_corner_radius"
             app:cardElevation="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -212,8 +207,8 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_third_profile_picture"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
+                android:layout_width="@dimen/leaderboard_profile_small_width"
+                android:layout_height="@dimen/leaderboard_profile_small_height"
                 android:padding="3dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_profile_avatar_circle" />
@@ -222,22 +217,20 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_third_number"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="@dimen/leaderboard_profile_position_width"
+            android:layout_height="@dimen/leaderboard_profile_position_height"
             android:background="@drawable/button_background_white_rad_48"
             android:elevation="8dp"
             android:fontFamily="@font/roboto_medium"
             android:gravity="center"
             android:singleLine="true"
             android:textColor="@color/black"
-            android:textSize="18sp"
+            android:textSize="@dimen/leaderboard_position_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="3" />
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
@@ -249,7 +242,7 @@
         android:gravity="center"
         android:singleLine="true"
         android:textColor="@color/primaryText"
-        android:textSize="16sp"
+        android:textSize="@dimen/leaderboard_profile_small_text_name"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/third_user_container"
         app:layout_constraintStart_toStartOf="@+id/third_user_container"
@@ -257,9 +250,9 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/third_status_up"
-        android:layout_width="10dp"
-        android:layout_height="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/leaderboard_status_icon_width"
+        android:layout_height="@dimen/leaderboard_status_icon_height"
+        android:layout_marginStart="@dimen/leaderboard_status_icon_margin_start"
         android:src="@drawable/ic_polygon_up"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_third_user_name"
         app:layout_constraintStart_toEndOf="@+id/text_view_third_user_name"
@@ -267,16 +260,13 @@
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/third_status_down"
-        android:layout_width="10dp"
-        android:layout_height="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/leaderboard_status_icon_width"
+        android:layout_height="@dimen/leaderboard_status_icon_height"
+        android:layout_marginStart="@dimen/leaderboard_status_icon_margin_start"
         android:src="@drawable/ic_polygon_down"
         app:layout_constraintBottom_toBottomOf="@+id/text_view_third_user_name"
         app:layout_constraintStart_toEndOf="@+id/text_view_third_user_name"
         app:layout_constraintTop_toTopOf="@+id/text_view_third_user_name" />
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

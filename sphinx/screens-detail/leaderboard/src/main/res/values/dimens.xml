@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="leaderboard_profile_corner_radius">200dp</dimen>
+    <dimen name="leaderboard_profile_small_width">77dp</dimen>
+    <dimen name="leaderboard_profile_small_height">75dp</dimen>
+    <dimen name="leaderboard_profile_big_width">111dp</dimen>
+    <dimen name="leaderboard_profile_big_height">111dp</dimen>
+    <dimen name="leaderboard_profile_position_width">26dp</dimen>
+    <dimen name="leaderboard_profile_position_height">26dp</dimen>
+    <dimen name="leaderboard_profile_small_margin_bottom">16dp</dimen>
+    <dimen name="leaderboard_profile_margin_end">18dp</dimen>
+    <dimen name="leaderboard_profile_margin_start">18dp</dimen>
+    <dimen name="leaderboard_profile_small_text_name">16sp</dimen>
+    <dimen name="leaderboard_profile_big_text_name">16sp</dimen>
+    <dimen name="leaderboard_position_text_size">18sp</dimen>
+    <dimen name="leaderboard_status_icon_width">10dp</dimen>
+    <dimen name="leaderboard_status_icon_height">8dp</dimen>
+    <dimen name="leaderboard_status_icon_margin_start">8dp</dimen>
+    <dimen name="leaderboard_profile_big_margin_bottom">8dp</dimen>
+    <dimen name="leaderboard_card_elevation">8dp</dimen>
+
+    <dimen name="leaderboard_row_height">71dp</dimen>
+    <dimen name="leaderboard_row_profile_width">78dp</dimen>
+    <dimen name="leaderboard_row_profile_height">90dp</dimen>
+    <dimen name="leaderboard_row_name_constraint_margin_end">16dp</dimen>
+    <dimen name="leaderboard_row_name_size">17sp</dimen>
+    <dimen name="leaderboard_row_name_constraint_numbers_width">115dp</dimen>
+    <dimen name="leaderboard_row_name_constraint_numbers_height">70dp</dimen>
+    <dimen name="leaderboard_row_position_margin_end">12dp</dimen>
+    <dimen name="leaderboard_row_position_text_size">17sp</dimen>
+    <dimen name="leaderboard_row_sats_text_size">17sp</dimen>
+    <dimen name="leaderboard_row_sats_margin_end">32dp</dimen>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</resources>
