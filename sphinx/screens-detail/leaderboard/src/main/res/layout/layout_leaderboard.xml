@@ -5,22 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/headerBG"
-    android:elevation="4dp">
+    android:elevation="4dp"
+    tools:context=".ui.LeaderboardFragment">
 
     <include
-        android:id="@+id/layout_leaderboard_user_photos"
+        android:id="@+id/include_layout_leaderboard_user_photos"
+        layout="@layout/layout_leaderboard_user_photos"
         android:layout_width="match_parent"
         android:layout_height="@dimen/layout_leaderboard_user_photos_height"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp" />
 
     <include
-        android:id="@+id/layout_leaderboard_list"
+        android:id="@+id/include_layout_leaderboard_list"
         layout="@layout/layout_leaderboard_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_leaderboard_user_photos" />
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_leaderboard_user_photos" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

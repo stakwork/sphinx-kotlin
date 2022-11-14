@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/layout_leaderboard_user_photos"
+    android:id="@+id/include_layout_leaderboard_user_photos"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="34dp"
