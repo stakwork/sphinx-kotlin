@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="layout_leaderboard_user_photos_height">300dp</dimen>
     <dimen name="leaderboard_profile_corner_radius">200dp</dimen>
     <dimen name="leaderboard_profile_small_width">77dp</dimen>
     <dimen name="leaderboard_profile_small_height">75dp</dimen>

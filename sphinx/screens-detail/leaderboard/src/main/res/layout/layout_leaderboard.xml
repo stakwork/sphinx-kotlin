@@ -9,9 +9,8 @@
 
     <include
         android:id="@+id/layout_leaderboard_user_photos"
-        layout="@layout/layout_leaderboard_user_photos"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="@dimen/layout_leaderboard_user_photos_height"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp" />
 
