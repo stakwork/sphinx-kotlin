@@ -393,6 +393,117 @@ internal class ChatTribeViewModel @Inject constructor(
         showMemberPopup(message)
     }
 
+    override fun pinMessage(message: Message) {
+
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.pinMessage(chatId, message)
+
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.PinnedMessage(
+                    "Pinned Message"
+                )
+            )
+
+            delay(1000)
+
+
+            pinedMessageHeaderViewState.updateViewState(
+                PinedMessageHeaderViewState.PinedMessageHeader(
+                    message
+                )
+            )
+
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.Idle
+            )
+
+        }
+
+    }
+
+
+    override fun unPinMessage(message: Message) {
+        viewModelScope.launch(mainImmediate) {
+            chatRepository.unPinMessage(chatId, message)
+
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.PinnedMessage(
+                    "Unpinned Message"
+                )
+            )
+            pinedMessageBottomViewState.updateViewState(
+                PinMessageBottomViewState.Closed
+            )
+
+            delay(1000)
+
+            pinedMessageHeaderViewState.updateViewState(
+                PinedMessageHeaderViewState.Idle
+            )
+
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.Idle
+            )
+        }
+    }
+
+    override fun navigateToNotificationLevel() {
+        moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
+
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toNotificationsLevel(chatId)
+        }
+    }
+
+    override fun navigateToChatDetailScreen() {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
+        }
+    }
+
+    fun goToPaymentSend() {
+        viewModelScope.launch(mainImmediate) {
+            val messageUUID =
+                (tribeMemberDataViewStateContainer.value as? TribeMemberDataViewState.TribeMemberPopup)?.messageUUID
+                    ?: (tribeMemberDataViewStateContainer.value as? TribeMemberDataViewState.TribeMemberProfile)?.messageUUID
+
+            messageUUID?.let { nnMessageUUID ->
+                chatNavigator.toPaymentSendDetail(
+                    nnMessageUUID,
+                    chatId
+                )
+            }
+
+            if (tribeMemberDataViewStateContainer.value !is TribeMemberDataViewState.Idle) {
+                tribeMemberDataViewStateContainer.updateViewState(
+                    TribeMemberDataViewState.Idle
+                )
+            }
+
+            if (tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
+                tribeMemberProfileViewStateContainer.updateViewState(
+                    TribeMemberProfileViewState.Closed
+                )
+            }
+        }
+    }
+
+    fun navigateToTribeShareScreen() {
+        viewModelScope.launch(mainImmediate) {
+            val chat = getChat()
+            val shareTribeURL =
+                "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
+            (chatNavigator as TribeChatNavigator).toShareTribeScreen(
+                shareTribeURL,
+                app.getString(R.string.qr_code_title)
+            )
+        }
+
+        moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
+    }
+
+
+
     private fun showMemberPopup(message: Message) {
         message.person?.let { _ ->
             tribeMemberDataViewStateContainer.updateViewState(
@@ -444,117 +555,6 @@ internal class ChatTribeViewModel @Inject constructor(
                         }
                     }
                 }
-            }
-        }
-        override fun pinMessage(message: Message) {
-            viewModelScope.launch(mainImmediate) {
-                chatRepository.pinMessage(chatId, message)
-
-                pinedMessagePopupViewState.updateViewState(
-                    PinedMessagePopupViewState.PinnedMessage(
-                        "Pinned Message"
-                    )
-                )
-
-                delay(1000)
-
-
-                pinedMessageHeaderViewState.updateViewState(
-                    PinedMessageHeaderViewState.PinedMessageHeader(
-                        message
-                    )
-                )
-
-                pinedMessagePopupViewState.updateViewState(
-                    PinedMessagePopupViewState.Idle
-                )
-
-            }
-
-        }
-
-        override fun unPinMessage(message: Message) {
-            viewModelScope.launch(mainImmediate) {
-                chatRepository.unPinMessage(chatId, message)
-
-                pinedMessagePopupViewState.updateViewState(
-                    PinedMessagePopupViewState.PinnedMessage(
-                        "Unpinned Message"
-                    )
-                )
-                pinedMessageBottomViewState.updateViewState(
-                    PinMessageBottomViewState.Closed
-                )
-
-                delay(1000)
-
-                pinedMessageHeaderViewState.updateViewState(
-                    PinedMessageHeaderViewState.Idle
-                )
-
-                pinedMessagePopupViewState.updateViewState(
-                    PinedMessagePopupViewState.Idle
-                )
-            }
-        }
-
-
-        override fun onSmallProfileImageClick(message: Message) {
-            showMemberPopup(message)
-        }
-
-        fun goToPaymentSend() {
-            viewModelScope.launch(mainImmediate) {
-                val messageUUID =
-                    (tribeMemberDataViewStateContainer.value as? TribeMemberDataViewState.TribeMemberPopup)?.messageUUID
-                        ?: (tribeMemberDataViewStateContainer.value as? TribeMemberDataViewState.TribeMemberProfile)?.messageUUID
-
-                messageUUID?.let { nnMessageUUID ->
-                    chatNavigator.toPaymentSendDetail(
-                        nnMessageUUID,
-                        chatId
-                    )
-                }
-
-                if (tribeMemberDataViewStateContainer.value !is TribeMemberDataViewState.Idle) {
-                    tribeMemberDataViewStateContainer.updateViewState(
-                        TribeMemberDataViewState.Idle
-                    )
-                }
-
-                if (tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
-                    tribeMemberProfileViewStateContainer.updateViewState(
-                        TribeMemberProfileViewState.Closed
-                    )
-                }
-            }
-        }
-
-        override fun navigateToChatDetailScreen() {
-            viewModelScope.launch(mainImmediate) {
-                (chatNavigator as TribeChatNavigator).toTribeDetailScreen(chatId)
-            }
-        }
-
-        fun navigateToTribeShareScreen() {
-            viewModelScope.launch(mainImmediate) {
-                val chat = getChat()
-                val shareTribeURL =
-                    "sphinx.chat://?action=tribe&uuid=${chat.uuid.value}&host=${chat.host?.value}"
-                (chatNavigator as TribeChatNavigator).toShareTribeScreen(
-                    shareTribeURL,
-                    app.getString(R.string.qr_code_title)
-                )
-            }
-
-            moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
-        }
-
-        override fun navigateToNotificationLevel() {
-            moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
-
-            viewModelScope.launch(mainImmediate) {
-                (chatNavigator as TribeChatNavigator).toNotificationsLevel(chatId)
             }
         }
     }
