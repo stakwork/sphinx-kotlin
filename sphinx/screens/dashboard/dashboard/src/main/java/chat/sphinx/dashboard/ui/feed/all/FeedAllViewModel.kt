@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
+import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -30,7 +31,7 @@ internal class FeedAllViewModel @Inject constructor(
         Context,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.Idle), FeedFollowingViewModel
+        >(dispatchers, FeedAllViewState.Idle), FeedFollowingViewModel, FeedRecommendationsViewModel
 {
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
@@ -82,4 +83,22 @@ internal class FeedAllViewModel @Inject constructor(
             dashboardNavigator.toVideoWatchScreen(chatId, feedId, feedUrl)
         }
     }
+
+    override val feedRecommendationsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
+        // Get recommendations list
+
+        repositoryDashboard.getAllFeeds().collect { feeds ->
+            emit(feeds.toList())
+        }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        emptyList()
+    )
+
+
+    override fun feedRecommendationSelected(feed: Feed) {
+        // Navigate to recommendation fragment and set the screen depending the item type
+    }
+
 }

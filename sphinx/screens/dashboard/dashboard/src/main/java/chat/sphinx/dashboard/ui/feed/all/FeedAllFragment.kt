@@ -11,6 +11,7 @@ import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedAllBinding
 import chat.sphinx.dashboard.ui.adapter.FeedFollowingAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedListenNowAdapter
+import chat.sphinx.dashboard.ui.adapter.FeedRecommendationsAdapter
 import chat.sphinx.dashboard.ui.feed.listen.FeedListenFragment
 import chat.sphinx.dashboard.ui.feed.listen.FeedListenSideEffect
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
@@ -41,12 +42,29 @@ internal class FeedAllFragment : SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupRecommendationsAdapter()
         setupFollowingAdapter()
     }
 
     private fun setupFollowingAdapter() {
         binding.recyclerViewFollowing.apply {
             val listenNowAdapter = FeedFollowingAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+                viewModel
+            )
+
+            this.setHasFixedSize(false)
+            adapter = listenNowAdapter
+            itemAnimator = null
+        }
+    }
+
+    private fun setupRecommendationsAdapter() {
+        binding.recyclerViewRecommendations.apply {
+            val listenNowAdapter = FeedRecommendationsAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
