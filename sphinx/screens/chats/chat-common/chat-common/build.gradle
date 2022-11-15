@@ -5,7 +5,6 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
     id 'kotlin-kapt'
-    id 'com.chaquo.python'
     id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
@@ -14,23 +13,12 @@ android {
     buildToolsVersion versions.buildTools
 
     buildFeatures.viewBinding = true
+
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.compileSdk
         versionCode VERSION_CODE.toInteger()
         versionName VERSION_NAME
-
-        ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
-        }
-        python {
-//            buildPython "/usr/bin/python3"
-            pip {
-                install "transformers==4.11.3"
-                install "tokenizers"
-                install "keybert==0.6.0"
-            }
-        }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -79,6 +67,7 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:concept-link-preview')
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
 
     implementation project(path: ':sphinx:screens-detail:contact:new-contact')
     implementation project(path: ':sphinx:screens-detail:join-tribe:join-tribe')

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_tribe_send_sats_bar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_send_sats_button"
+        android:layout_width="@dimen/tribe_member_send_sats_button_width"
+        android:layout_height="@dimen/tribe_member_send_sats_button_height"
+        android:clickable="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/text">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            style="@style/RoundedBlueButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:text="@string/tribe_member_profile_send_sats"
+            android:textColor="@color/textInverted"
+            android:textSize="@dimen/default_form_text_view_size"
+            android:clickable="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            android:textColor="@color/textInverted"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="@dimen/default_form_edit_view_size"
+            android:text="@string/material_icon_name_nav_forward"
+            android:alpha="0.7"
+            android:clickable="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

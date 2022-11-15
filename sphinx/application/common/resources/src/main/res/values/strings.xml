@@ -38,6 +38,7 @@
     <string name="material_icon_name_close" translatable="false">close</string>
     <string name="material_icon_name_nav_back" translatable="false">arrow_back</string>
     <string name="material_icon_name_nav_forward" translatable="false">arrow_forward</string>
+    <string name="material_icon_name_arrow_outward" translatable="false">arrow_outward</string>
     <string name="material_icon_name_file_attachment" translatable="false">insert_drive_file</string>
     <string name="material_icon_name_file_pdf" translatable="false">picture_as_pdf</string>
     <string name="material_icon_name_file_download" translatable="false">file_download</string>
@@ -125,6 +126,13 @@
 
     <string name="balance_too_low">Balance too low</string>
     <string name="boost_amount_too_low">Boost amount must be greater than 0</string>
+
+    <string name="tribe_member_profile_send_sats">Send Sats</string>
+    <string name="tribe_member_profile_price_to_meet">Price to Meet:</string>
+    <string name="tribe_member_profile_coding_languages">Coding Languages:</string>
+    <string name="tribe_member_profile_post">Posts:</string>
+    <string name="tribe_member_profile_twitter">Twitter:</string>
+    <string name="tribe_member_profile_github">Github:</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

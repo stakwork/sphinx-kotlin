@@ -323,6 +323,7 @@ abstract class Message {
     abstract val flagged: Flagged
     abstract val recipientAlias: RecipientAlias?
     abstract val recipientPic: PhotoUrl?
+    abstract val person: MessagePerson?
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
     abstract val messageDecryptionError: Boolean
@@ -365,6 +366,7 @@ abstract class Message {
                 other.giphyData                     == giphyData                    &&
                 other.recipientAlias                == recipientAlias               &&
                 other.recipientPic                  == recipientPic                 &&
+                other.person                        == person                       &&
                 other.reactions.let { a ->
                     reactions.let { b ->
                         (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
@@ -417,6 +419,7 @@ abstract class Message {
         result = _31 * result + giphyData.hashCode()
         result = _31 * result + recipientAlias.hashCode()
         result = _31 * result + recipientPic.hashCode()
+        result = _31 * result + person.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
         result = _31 * result + replyMessage.hashCode()
@@ -436,6 +439,6 @@ abstract class Message {
                 "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
                 "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
-                "recipientPic=$recipientPic"
+                "recipientPic=$recipientPic,person=$person"
     }
 }

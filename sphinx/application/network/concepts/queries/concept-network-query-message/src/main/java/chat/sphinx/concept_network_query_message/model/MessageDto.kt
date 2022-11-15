@@ -41,6 +41,7 @@ data class MessageDto(
     val recipient_alias: String?,
     val recipient_pic: String?,
     val push: Any?,
+    val person: String?,
 ) {
     @Transient
     val seenActual: Boolean =
