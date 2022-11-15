@@ -22,16 +22,53 @@
             android:paddingBottom="@dimen/feed_fragment_bottom_padding">
 
             <TextView
-                android:id="@+id/text_view_listen_following_header"
+                android:id="@+id/text_view_listen_recommendations_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/default_layout_margin"
-                android:text="@string/following"
+                android:text="@string/recommendations"
                 android:textSize="@dimen/default_text_size_large_title"
                 android:textColor="@color/text"
                 android:fontFamily="@font/roboto_bold"
                 android:gravity="center"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/material_icons_regular"
+                android:text="@string/material_icon_name_chevron_right_button"
+                android:textColor="@color/text"
+                android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_recommendations_header"
+                app:layout_constraintStart_toEndOf="@+id/text_view_listen_recommendations_header" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_recommendations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                android:paddingStart="@dimen/default_half_layout_margin"
+                android:paddingEnd="@dimen/default_half_layout_margin"
+                android:clipToPadding="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_listen_recommendations_header"
+                tools:listitem="@layout/layout_feed_recommendation_row_holder" />
+
+            <TextView
+                android:id="@+id/text_view_listen_following_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:text="@string/following"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                android:textSize="@dimen/default_text_size_large_title"
+                android:textColor="@color/text"
+                android:fontFamily="@font/roboto_bold"
+                android:gravity="center"
+                app:layout_constraintTop_toBottomOf="@id/recycler_view_recommendations"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
