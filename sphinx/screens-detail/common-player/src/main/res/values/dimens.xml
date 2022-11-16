@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="player_details_episode_title_section_height">52dp</dimen>
+    <dimen name="player_details_episode_title_margin">32dp</dimen>
+    <dimen name="player_slider_control_margin">14dp</dimen>
+    <dimen name="video_player_height">200dp</dimen>
+
+    <dimen name="include_layout_custom_boost_margin_end">16dp</dimen>
+    <dimen name="include_layout_custom_boost_margin_bottom">24dp</dimen>
+
+    <dimen name="player_details_subscribe_button_margin_top">22dp</dimen>
+
+    <dimen name="recommended_list_item_holder_height">64dp</dimen>
+    <dimen name="recommended_list_item_divider_margin_x">30dp</dimen>
+    <dimen name="recommended_list_item_cover_image_xy">72dp</dimen>
+    <dimen name="recommended_list_item_download_button_container_xy">40dp</dimen>
+    <dimen name="recommended_list_item_download_button_xy">25dp</dimen>
+    <dimen name="recommended_list_item_delete_download_icon_xy">20dp</dimen>
+
+    <dimen name="player_details_small_control_button_xy">32dp</dimen>
+    <dimen name="player_details_large_control_button_xy">58dp</dimen>
+    <dimen name="player_time_labels_horizontal_margin">18dp</dimen>
+
+    <dimen name="video_list_item_holder_height">90dp</dimen>
+    <dimen name="video_list_item_divider_margin_x">30dp</dimen>
+    <dimen name="video_list_item_cover_image_width">120dp</dimen>
+    <dimen name="video_list_item_cover_image_height">80dp</dimen>
+    <dimen name="video_list_item_download_button_xy">25sp</dimen>
+
+    <dimen name="recycler_view_holder_height">85dp</dimen>
+    <dimen name="recycler_view_holder_end_margin">30dp</dimen>
+    <dimen name="recycler_view_header_holder_height">45dp</dimen>
+
+    <dimen name="delete_download_holder_button_icon_xy">20dp</dimen>
+</resources>
