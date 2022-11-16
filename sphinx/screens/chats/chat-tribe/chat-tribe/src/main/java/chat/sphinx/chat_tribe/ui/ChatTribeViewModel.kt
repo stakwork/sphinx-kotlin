@@ -413,6 +413,12 @@ internal class ChatTribeViewModel @Inject constructor(
                 )
             )
 
+            pinedMessageDataViewState.updateViewState(
+                PinedMessageDataViewState.Data(
+                    message
+                )
+            )
+
             pinedMessagePopupViewState.updateViewState(
                 PinedMessagePopupViewState.Idle
             )
