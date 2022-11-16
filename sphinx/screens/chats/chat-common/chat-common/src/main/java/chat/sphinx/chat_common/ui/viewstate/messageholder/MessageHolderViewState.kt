@@ -662,7 +662,15 @@ internal sealed class MessageHolderViewState(
 
             if(chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
                 list.add(MenuItemState.PinMessage)
+
+                chat.pinedMessage?.let { pinedMessage ->
+                    if (pinedMessage == nnMessage.uuid) {
+                        list.add(MenuItemState.UnpinMessage)
+                        list.remove(MenuItemState.PinMessage)
+                    }
+                }
             }
+
 
             if (list.isEmpty()) {
                 null

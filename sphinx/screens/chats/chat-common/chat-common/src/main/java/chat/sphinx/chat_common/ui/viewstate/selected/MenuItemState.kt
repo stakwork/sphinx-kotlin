@@ -19,6 +19,7 @@ sealed class MenuItemState(
         const val PRIORITY_8 = 8
         const val PRIORITY_9 = 9
         const val PRIORITY_10 = 10
+        const val PRIORITY_11 = 11
     }
 
     val showTextIcon: Boolean
@@ -32,6 +33,8 @@ sealed class MenuItemState(
     object SaveFile: MenuItemState(FALSE, PRIORITY_6)
     object Resend: MenuItemState(FALSE, PRIORITY_7)
     object PinMessage: MenuItemState(FALSE, PRIORITY_8)
-    object Flag: MenuItemState(FALSE, PRIORITY_9)
-    object Delete: MenuItemState(FALSE, PRIORITY_10)
+    object UnpinMessage: MenuItemState(FALSE, PRIORITY_9)
+    object Flag: MenuItemState(FALSE, PRIORITY_10)
+    object Delete: MenuItemState(FALSE, PRIORITY_11)
+
 }

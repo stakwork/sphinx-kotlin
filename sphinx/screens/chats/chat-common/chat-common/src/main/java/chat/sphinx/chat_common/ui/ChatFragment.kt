@@ -805,6 +805,9 @@ abstract class ChatFragment<
                                 is MenuItemState.PinMessage -> {
                                     viewModel.pinMessage(message)
                                 }
+                                is MenuItemState.UnpinMessage -> {
+                                    viewModel.unPinMessage(message)
+                                }
                             }
                         }
                     }
