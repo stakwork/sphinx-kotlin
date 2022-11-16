@@ -87,8 +87,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),
                     latest_message_idAdapter = MessageIdAdapter.getInstance(),
                     content_seen_atAdapter = DateTimeAdapter.getInstance(),
-                    pin_messageAdapter = PinMessageAdapter.getInstance(),
                     notifyAdapter = NotifyAdapter(),
+                    pin_messageAdapter = PinMessageAdapter.getInstance(),
                 ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),
