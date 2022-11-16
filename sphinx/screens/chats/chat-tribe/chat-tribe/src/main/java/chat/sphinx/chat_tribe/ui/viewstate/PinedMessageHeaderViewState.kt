@@ -1,5 +1,6 @@
 package chat.sphinx.chat_tribe.ui.viewstate
 
+import android.transition.Visibility
 import chat.sphinx.wrapper_message.Message
 import io.matthewnelson.concept_views.viewstate.ViewState
 

@@ -3,6 +3,7 @@ package chat.sphinx.chat_tribe.ui
 import android.animation.Animator
 import android.graphics.Color
 import android.os.Bundle
+import android.system.Os.bind
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
@@ -102,7 +103,7 @@ internal class ChatTribeFragment: ChatFragment<
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
 
-    private val layoutChatPinedMessageHeader: LayoutChatPinedMessageHeaderBinding
+    override val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
         get() = binding.includeChatPinedMessageHeader
     private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
         get() = binding.includePinMessagePopup
@@ -150,7 +151,7 @@ internal class ChatTribeFragment: ChatFragment<
             } catch (_: Exception) {}
         }
 
-        layoutChatPinedMessageHeader.apply {
+        pinedMessageHeader.apply {
             textViewChatHeaderName.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.updatePinMessageData.collect {  message ->
@@ -416,7 +417,7 @@ internal class ChatTribeFragment: ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.pinedMessageHeaderViewState.collect { viewState ->
-                layoutChatPinedMessageHeader.apply {
+                pinedMessageHeader.apply {
 
                     @Exhaustive
                     when(viewState) {
