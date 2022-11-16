@@ -118,7 +118,7 @@
     <string name="watch_now">Watch Now</string>
 
     <string name="recommendations">Recommendations</string>
-
+    <string name="refresh">Refresh</string>
 
     <string name="all_place_holder">No \"Feed\" Results Found</string>
     <string name="listen_place_holder">No \"Listen\" Results Found</string>
