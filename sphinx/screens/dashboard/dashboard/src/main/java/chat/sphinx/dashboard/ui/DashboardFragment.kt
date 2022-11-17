@@ -86,6 +86,12 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupRestorePopup()
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        dashboardPodcastViewModel.trackPodcastConsumed()
+    }
+
     override fun onResume() {
         super.onResume()
 
@@ -260,6 +266,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
             override fun onOpened(view: SwipeRevealLayout?) {
                 dashboardPodcastViewModel.forcePodcastStop()
+                dashboardPodcastViewModel.trackPodcastConsumed()
 
                 podcastPlayerBinding.root.gone
                 binding.swipeRevealLayoutPlayer.gone
