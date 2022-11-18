@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha70 (2022-11-18)
+- Improves actions tracking
+- Fixes crash on podcast clip comment
+
 # Version 1.0.0-alpha69 (2022-11-11)
 - Adds actions tracking
 - Adds alias rules validation
