@@ -517,6 +517,16 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
+    fun trackPodcastConsumed() {
+        viewModelScope.launch(mainImmediate) {
+            mediaPlayerServiceController.submitAction(
+                UserAction.TrackPodcastConsumed(
+                    args.chatId
+                )
+            )
+        }
+    }
+
     fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
         localFile?.let {
             return Uri.fromFile(it).getMediaDuration(true)

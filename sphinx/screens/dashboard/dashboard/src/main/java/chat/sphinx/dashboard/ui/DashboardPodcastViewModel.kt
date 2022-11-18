@@ -2,7 +2,6 @@ package chat.sphinx.dashboard.ui
 
 import android.app.Application
 import android.media.MediaMetadataRetriever
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.viewModelScope
@@ -11,7 +10,6 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
-import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.dashboard.ui.viewstates.DashboardPodcastViewState
@@ -26,6 +24,7 @@ import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -268,6 +267,22 @@ internal class DashboardPodcastViewModel @Inject constructor(
         }
 
         playingPodcastViewStateContainer.updateViewState(PlayingPodcastViewState.NoPodcast)
+    }
+
+    fun trackPodcastConsumed() {
+        viewModelScope.launch(mainImmediate) {
+            (currentServiceState as? MediaPlayerServiceState.ServiceActive.MediaState)?.let {
+                it.podcastId.toFeedId()?.let { feedId ->
+                    feedRepository.getPodcastById(feedId).firstOrNull()?.let { podcast ->
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.TrackPodcastConsumed(
+                                podcast.chatId
+                            )
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun requestPodcastPlayer(

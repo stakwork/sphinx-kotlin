@@ -128,6 +128,24 @@ internal abstract class MediaPlayerService: SphinxService() {
             }
         }
 
+        private fun trackPodcastConsumed(episodeId: String) {
+            createHistoryItem()
+
+            val currentHistory = arrayListOf<ContentConsumedHistoryItem>()
+
+            history.forEach(){
+                currentHistory.add(it)
+            }
+
+            episodeId.toFeedId()?.let {
+                actionsRepository.trackPodcastConsumed(it, currentHistory)
+            }
+
+            history.clear()
+
+            resetTrackSecondsConsumed()
+        }
+
         @Synchronized
         fun processUserAction(userAction: UserAction) {
             @Exhaustive
@@ -197,17 +215,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                     podData?.let { nnData ->
                         if (nnData.episodeId != userAction.episodeId){
-                            createHistoryItem()
-                            val currentHistory = arrayListOf<ContentConsumedHistoryItem>()
-                                history.forEach(){
-                                    currentHistory.add(it)
-                            }
-                            nnData.episodeId.toFeedId()
-                                ?.let {
-                                    actionsRepository.trackPodcastConsumed(it, currentHistory)
-                                }
-                            history.clear()
-                            resetTrackSecondsConsumed()
+                            trackPodcastConsumed(nnData.episodeId)
                         }
                         if (currentPauseTime != nnData.currentTimeSeconds) {
                             setStartTimestamp(nnData.currentTimeMilliSeconds.toLong())
@@ -319,6 +327,13 @@ internal abstract class MediaPlayerService: SphinxService() {
                         }
                     }
                     repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+                }
+                is UserAction.TrackPodcastConsumed -> {
+                    podData?.let { nnData ->
+                        if (!nnData.mediaPlayer.isPlaying) {
+                            trackPodcastConsumed(nnData.episodeId)
+                        }
+                    }
                 }
             }
         }

@@ -55,4 +55,8 @@ sealed class UserAction(val chatId: ChatId) {
         chatId: ChatId,
         val destinations: List<FeedDestination>
     ): UserAction(chatId)
+
+    class TrackPodcastConsumed(
+        chatId: ChatId
+    ): UserAction(chatId)
 }

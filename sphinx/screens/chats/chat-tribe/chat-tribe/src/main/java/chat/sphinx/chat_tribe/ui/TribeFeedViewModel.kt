@@ -133,6 +133,16 @@ internal class TribeFeedViewModel @Inject constructor(
         mediaPlayerServiceController.addListener(this@TribeFeedViewModel)
     }
 
+    fun trackPodcastConsumed() {
+        viewModelScope.launch(mainImmediate) {
+            mediaPlayerServiceController.submitAction(
+                UserAction.TrackPodcastConsumed(
+                    args.chatId
+                )
+            )
+        }
+    }
+
     private var currentServiceState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceInactive
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {

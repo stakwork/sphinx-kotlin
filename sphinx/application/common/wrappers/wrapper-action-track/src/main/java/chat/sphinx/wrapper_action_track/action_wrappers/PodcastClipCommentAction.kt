@@ -23,7 +23,7 @@ internal data class PodcastClipCommentActionMoshi(
     val feedUrl: String,
     val feedItemId: String,
     val feedItemUrl: String,
-    val topics: ArrayList<String>,
+    val topics: List<String>,
     val startTimestamp: Long,
     val endTimestamp: Long,
     val currentTimestamp: Long
@@ -51,7 +51,7 @@ fun String.toPodcastClipCommentAction(moshi: Moshi): PodcastClipCommentAction =
                 it.feedUrl,
                 it.feedItemId,
                 it.feedItemUrl,
-                it.topics,
+                ArrayList(it.topics),
                 it.startTimestamp,
                 it.endTimestamp,
                 it.currentTimestamp
