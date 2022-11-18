@@ -389,24 +389,13 @@ class NetworkRelayCallImpl(
         useExtendedNetworkCallClient: Boolean,
     ): Flow<LoadResponse<T, ResponseError>> = flow {
 
-        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
-            val nnRelayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl> = relayData
-                ?: relayDataHandler.retrieveRelayData(
-                    method = "GET",
-                    path = relayEndpoint,
-                    bodyJsonString = ""
-                )
-
-            get(
-                nnRelayData.third.value + relayEndpoint,
-                responseJsonClass,
-                mapRelayHeaders(nnRelayData, additionalHeaders),
-                useExtendedNetworkCallClient
-            )
-        } catch (e: Exception) {
-            emit(handleException(LOG, GET, relayEndpoint, e))
-            null
-        }
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = relayCommonGet(
+            responseJsonClass,
+            relayEndpoint,
+            additionalHeaders,
+            relayData,
+            useExtendedNetworkCallClient
+        )
 
         responseFlow?.let {
             emitAll(validateRelayResponse(it, GET, relayEndpoint))
@@ -414,9 +403,6 @@ class NetworkRelayCallImpl(
 
     }
 
-    ////////////////////////
-    /// NetworkRelayCall ///
-    ////////////////////////
     override fun <T : Any, V : RelayListResponse<T>> relayGetList(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
@@ -424,6 +410,27 @@ class NetworkRelayCallImpl(
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?,
         useExtendedNetworkCallClient: Boolean
     ): Flow<LoadResponse<List<T>, ResponseError>> = flow {
+
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = relayCommonGet(
+            responseJsonClass,
+            relayEndpoint,
+            additionalHeaders,
+            relayData,
+            useExtendedNetworkCallClient
+        )
+
+        responseFlow?.let {
+            emitAll(validateRelayListResponse(it, GET, relayEndpoint))
+        }
+    }
+
+    private suspend fun <V : Any> relayCommonGet(
+        responseJsonClass: Class<V>,
+        relayEndpoint: String,
+        additionalHeaders: Map<String, String>?,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?,
+        useExtendedNetworkCallClient: Boolean
+    ): Flow<LoadResponse<V, ResponseError>> = flow {
 
         val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
             val nnRelayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl> = relayData
@@ -447,9 +454,8 @@ class NetworkRelayCallImpl(
         }
 
         responseFlow?.let {
-            emitAll(validateRelayListResponse(it, GET, relayEndpoint))
+            emitAll(it)
         }
-
     }
 
     override fun <T: Any, V: RelayResponse<T>> relayUnauthenticatedGet(
