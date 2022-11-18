@@ -341,7 +341,7 @@ class RelayDataHandlerImpl(
         transportKey: RsaPublicKey?
     ): TransportToken? {
         (transportKey ?: retrieveRelayTransportKey())?.let { key ->
-            val unixTime = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+            val unixTime = System.currentTimeMillis()
             val tokenAndTime = "${authorizationToken.value}|${unixTime}"
 
             val response = rsa.encrypt(
