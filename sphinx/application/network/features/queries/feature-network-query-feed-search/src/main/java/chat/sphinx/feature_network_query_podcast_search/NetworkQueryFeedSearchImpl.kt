@@ -1,6 +1,7 @@
 package chat.sphinx.feature_network_query_podcast_search
 
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_search.model.FeedRecommendationsDto
 import chat.sphinx.concept_network_query_feed_search.model.FeedRecommendationsResponse
 import chat.sphinx.concept_network_query_feed_search.model.FeedSearchResultDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -25,13 +26,11 @@ class NetworkQueryFeedSearchImpl(
         private const val ENDPOINT_PODCAST_SEARCH = "$TRIBES_DEFAULT_SERVER_URL/search_podcasts?q=%s"
         private const val ENDPOINT_YOUTUBE_SEARCH = "$TRIBES_DEFAULT_SERVER_URL/search_youtube?q=%s"
         private const val ENDPOINT_FEED_RECOMMENDATIONS = "/feeds"
-
     }
 
     override fun searchFeeds(
         searchTerm: String,
         feedType: FeedType,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<List<FeedSearchResultDto>, ResponseError>> =
         networkRelayCall.getList(
             url = String.format(
@@ -43,13 +42,14 @@ class NetworkQueryFeedSearchImpl(
             responseJsonClass = FeedSearchResultDto::class.java,
         )
 
-    override fun getFeedRecommendations(relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<FeedRecommendationsResponse, ResponseError>> =
-        networkRelayCall.relayGet(
+    override fun getFeedRecommendations(
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<List<FeedRecommendationsDto>, ResponseError>> =
+        networkRelayCall.relayGetList(
             responseJsonClass = GetFeedRecommendationsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_FEED_RECOMMENDATIONS,
             relayData = relayData,
-            useExtendedNetworkCallClient = true,
+            useExtendedNetworkCallClient = true
         )
 
 

@@ -5,6 +5,7 @@ import chat.sphinx.concept_network_call.buildRequest
 import chat.sphinx.concept_network_client.NetworkClient
 import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.concept_network_relay_call.RelayListResponse
 import chat.sphinx.concept_network_relay_call.RelayResponse
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
@@ -413,6 +414,44 @@ class NetworkRelayCallImpl(
 
     }
 
+    ////////////////////////
+    /// NetworkRelayCall ///
+    ////////////////////////
+    override fun <T : Any, V : RelayListResponse<T>> relayGetList(
+        responseJsonClass: Class<V>,
+        relayEndpoint: String,
+        additionalHeaders: Map<String, String>?,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?,
+        useExtendedNetworkCallClient: Boolean
+    ): Flow<LoadResponse<List<T>, ResponseError>> = flow {
+
+        val responseFlow: Flow<LoadResponse<V, ResponseError>>? = try {
+            val nnRelayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl> = relayData
+                ?: relayDataHandler.retrieveRelayData(
+                    method = "GET",
+                    path = relayEndpoint,
+                    bodyJsonString = ""
+                )
+
+            print(nnRelayData)
+
+            get(
+                nnRelayData.third.value + relayEndpoint,
+                responseJsonClass,
+                mapRelayHeaders(nnRelayData, additionalHeaders),
+                useExtendedNetworkCallClient
+            )
+        } catch (e: Exception) {
+            emit(handleException(LOG, GET, relayEndpoint, e))
+            null
+        }
+
+        responseFlow?.let {
+            emitAll(validateRelayListResponse(it, GET, relayEndpoint))
+        }
+
+    }
+
     override fun <T: Any, V: RelayResponse<T>> relayUnauthenticatedGet(
         responseJsonClass: Class<V>,
         relayEndpoint: String,
@@ -635,14 +674,60 @@ class NetworkRelayCallImpl(
                         """.trimIndent()
 
                         emit(handleException(LOG, callMethod, endpoint, Exception(msg)))
-
                     }
                 }
-
             }
-
         }
-
     }
 
+    @Throws(NullPointerException::class, AssertionError::class)
+    private fun <T: Any, V: RelayListResponse<T>> validateRelayListResponse(
+        flow: Flow<LoadResponse<V, ResponseError>>,
+        callMethod: String,
+        endpoint: String,
+    ): Flow<LoadResponse<List<T>, ResponseError>> = flow {
+
+        flow.collect { loadResponse ->
+
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {
+                    emit(loadResponse)
+                }
+                is Response.Error -> {
+                    emit(loadResponse)
+                }
+                is Response.Success -> {
+
+                    if (loadResponse.value.success) {
+
+                        loadResponse.value.response?.let { nnResponse ->
+
+                            emit(Response.Success(nnResponse))
+
+                        } ?: let {
+
+                            val msg = """
+                                RelayResponse.success: true
+                                RelayResponse.response: >>> null <<<
+                                RelayResponse.error: ${loadResponse.value.error}
+                            """.trimIndent()
+
+                            emit(handleException(LOG, callMethod, endpoint, NullPointerException(msg)))
+
+                        }
+
+                    } else {
+
+                        val msg = """
+                            RelayResponse.success: false
+                            RelayResponse.error: ${loadResponse.value.error}
+                        """.trimIndent()
+
+                        emit(handleException(LOG, callMethod, endpoint, Exception(msg)))
+                    }
+                }
+            }
+        }
+    }
 }
