@@ -86,7 +86,7 @@ internal class FeedAllViewModel @Inject constructor(
 
     override val feedRecommendationsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         // Get recommendations list
-
+        repositoryDashboard.getRecommendedFeeds()
         repositoryDashboard.getAllFeeds().collect { feeds ->
             emit(feeds.toList())
         }

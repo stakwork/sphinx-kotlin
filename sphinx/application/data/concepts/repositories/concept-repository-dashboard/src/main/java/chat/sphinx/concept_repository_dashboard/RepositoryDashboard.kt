@@ -48,6 +48,7 @@ interface RepositoryDashboard {
 
     fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>>
     fun getAllFeeds(): Flow<List<Feed>>
+    fun getRecommendedFeeds()
 
     suspend fun authorizeExternal(
         relayUrl: String,

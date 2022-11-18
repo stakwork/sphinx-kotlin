@@ -3957,6 +3957,19 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getRecommendedFeeds() {
+        applicationScope.launch {
+            networkQueryFeedSearch.getFeedRecommendations().collect { response ->
+                @Exhaustive
+                when (response) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {}
+                }
+            }
+        }
+    }
+
     private suspend fun mapFeedDboList(
         listFeedDbo: List<FeedDbo>,
         queries: SphinxDatabaseQueries

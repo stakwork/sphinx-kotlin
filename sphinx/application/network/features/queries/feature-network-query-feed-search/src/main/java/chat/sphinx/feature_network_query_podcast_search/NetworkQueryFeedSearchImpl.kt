@@ -48,7 +48,9 @@ class NetworkQueryFeedSearchImpl(
         networkRelayCall.relayGet(
             responseJsonClass = GetFeedRecommendationsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_FEED_RECOMMENDATIONS,
-            relayData = relayData
+            relayData = relayData,
+            useExtendedNetworkCallClient = true,
         )
+
 
 }
