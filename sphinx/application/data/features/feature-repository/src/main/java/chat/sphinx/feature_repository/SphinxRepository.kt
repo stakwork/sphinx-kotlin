@@ -3958,7 +3958,7 @@ abstract class SphinxRepository(
     }
 
     override fun getRecommendedFeeds() {
-        applicationScope.launch {
+        applicationScope.launch(mainImmediate) {
             networkQueryFeedSearch.getFeedRecommendations().collect { response ->
                 @Exhaustive
                 when (response) {
