@@ -7,7 +7,9 @@ import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
 import chat.sphinx.concept_network_query_action_track.model.ActionTrackDto
+import chat.sphinx.concept_network_query_action_track.model.ActionTrackMetaDataDto
 import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
+import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
@@ -6193,11 +6195,17 @@ abstract class SphinxRepository(
             for (chunk in actionsDboList.chunked(50)) {
                 val actionsIds = chunk.map { it.id }
 
-                val actionTrackDTOs = chunk.map {
-                    ActionTrackDto(
-                        it.type.value,
-                        it.meta_data.value
-                    )
+                val actionTrackDTOs: MutableList<ActionTrackDto> = mutableListOf()
+
+                chunk.forEach {
+                    it.meta_data.value.toActionTrackMetaDataDtoOrNull(moshi)?.let { metaDataDto ->
+                        actionTrackDTOs.add(
+                            ActionTrackDto(
+                                it.type.value,
+                                metaDataDto
+                            )
+                        )
+                    }
                 }
 
                 networkQueryActionTrack.sendActionsTracked(

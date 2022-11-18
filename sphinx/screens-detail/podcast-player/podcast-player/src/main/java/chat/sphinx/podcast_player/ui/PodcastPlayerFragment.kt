@@ -72,6 +72,11 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
     private val args: PodcastPlayerFragmentArgs by navArgs()
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.trackPodcastConsumed()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

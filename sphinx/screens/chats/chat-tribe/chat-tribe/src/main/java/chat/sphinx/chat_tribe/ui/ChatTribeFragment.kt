@@ -195,6 +195,12 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        tribeFeedViewModel.trackPodcastConsumed()
+    }
+
     private inner class BackPressHandler(
         owner: LifecycleOwner,
         activity: FragmentActivity,
