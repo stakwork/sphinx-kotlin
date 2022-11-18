@@ -89,7 +89,6 @@ class FeedRecommendationsAdapter(
                 false
             }
         }
-
     }
 
     private val recommendations = ArrayList<Feed>(listOf())

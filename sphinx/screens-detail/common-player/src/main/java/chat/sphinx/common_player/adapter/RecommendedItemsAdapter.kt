@@ -5,14 +5,18 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.common_player.databinding.LayoutRecommendedListItemHolderBinding
 import chat.sphinx.common_player.ui.CommonPlayerScreenViewModel
+import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 internal class RecommendedItemsAdapter (
     private val imageLoader: ImageLoader<ImageView>,
@@ -79,12 +83,26 @@ internal class RecommendedItemsAdapter (
         }
 
     }
-
     private val recommendedItems = ArrayList<FeedItem>(listOf())
 
     inner class RecommendedItemViewHolder(
         private val binding: LayoutRecommendedListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
+
+        private val holderJobs: ArrayList<Job> = ArrayList(2)
+        private val disposables: ArrayList<Disposable> = ArrayList(2)
+
+        private var recommendedItem: FeedItem? = null
+
+        init {
+            binding.layoutConstraintRecommendedHolder.setOnClickListener {
+                recommendedItem?.let { nnRecommendedItem->
+                    lifecycleOwner.lifecycleScope.launch {
+                        // Evaluate which type of item, and set the correct player for it.
+                    }
+                }
+            }
+        }
 
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecommendedItemViewHolder {

@@ -5,6 +5,7 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_contact.navigation.ToChatContactScreen
 import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
+import chat.sphinx.common_player.navigation.ToCommonPlayerScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
@@ -86,6 +87,10 @@ internal class DashboardNavigatorImpl @Inject constructor(
 
     override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, currentEpisodeDuration: Long) {
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration, true))
+    }
+
+    override suspend fun toCommonPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(ToCommonPlayerScreen(chatId, feedId, feedUrl, true))
     }
 
     override suspend fun toVideoFeedScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {

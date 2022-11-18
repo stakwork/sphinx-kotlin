@@ -98,7 +98,9 @@ internal class FeedAllViewModel @Inject constructor(
 
 
     override fun feedRecommendationSelected(feed: Feed) {
-        // Navigate to recommendation fragment and set the screen depending the item type
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toCommonPlayerScreen(feed.chatId, feed.id, feed.feedUrl)
+        }
     }
 
 }
