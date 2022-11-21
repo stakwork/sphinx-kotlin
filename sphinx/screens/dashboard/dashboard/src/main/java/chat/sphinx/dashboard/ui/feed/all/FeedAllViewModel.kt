@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedRecommendations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -84,11 +85,9 @@ internal class FeedAllViewModel @Inject constructor(
         }
     }
 
-    override val feedRecommendationsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        // Get recommendations list
-        repositoryDashboard.getRecommendedFeeds()
-        repositoryDashboard.getAllFeeds().collect { feeds ->
-            emit(feeds.toList())
+    override val feedRecommendationsHolderViewStateFlow: StateFlow<List<FeedRecommendations>> = flow {
+        repositoryDashboard.getRecommendedFeeds().collect{ feedRecommended ->
+            emit(feedRecommended.toList())
         }
     }.stateIn(
         viewModelScope,
@@ -97,9 +96,9 @@ internal class FeedAllViewModel @Inject constructor(
     )
 
 
-    override fun feedRecommendationSelected(feed: Feed) {
+    override fun feedRecommendationSelected(feed: FeedRecommendations) {
         viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toCommonPlayerScreen(feed.chatId, feed.id, feed.feedUrl)
+//            dashboardNavigator.toCommonPlayerScreen(feed.chatId, feed.id, feed.feedUrl)
         }
     }
 

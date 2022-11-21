@@ -29,7 +29,7 @@
             android:layout_height="32dp"
             android:layout_marginStart="@dimen/default_half_layout_margin"
             android:layout_marginBottom="@dimen/default_half_layout_margin"
-            android:background="@color/blackSemiTransparent"
+            android:background="@drawable/background_recommended_small"
             android:layout_gravity="bottom">
 
             <androidx.appcompat.widget.AppCompatImageView

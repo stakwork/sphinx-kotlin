@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedRecommendations
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
@@ -48,7 +49,7 @@ interface RepositoryDashboard {
 
     fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>>
     fun getAllFeeds(): Flow<List<Feed>>
-    fun getRecommendedFeeds()
+    fun getRecommendedFeeds(): Flow<List<FeedRecommendations>>
 
     suspend fun authorizeExternal(
         relayUrl: String,

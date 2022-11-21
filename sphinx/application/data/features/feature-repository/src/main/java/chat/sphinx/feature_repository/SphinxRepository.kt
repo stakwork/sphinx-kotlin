@@ -3957,17 +3957,48 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getRecommendedFeeds() {
+    override fun getRecommendedFeeds(): Flow<List<FeedRecommendations>> = flow {
+
+        var results: MutableList<FeedRecommendations> = mutableListOf()
+
         applicationScope.launch(mainImmediate) {
             networkQueryFeedSearch.getFeedRecommendations().collect { response ->
                 @Exhaustive
                 when (response) {
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {}
-                    is Response.Success -> {}
+                    is Response.Success -> {
+                        response.value.forEach { feedRecommendation ->
+
+                            results.add(
+                                FeedRecommendations(
+                                    pubKey = feedRecommendation.pub_key,
+                                    feedType = feedRecommendation.type,
+                                    refId = feedRecommendation.ref_id,
+                                    topics = feedRecommendation.topics,
+                                    weight = feedRecommendation.weight,
+                                    description = FeedDescription(feedRecommendation.description),
+                                    date = feedRecommendation.date,
+                                    title = FeedTitle(feedRecommendation.show_title),
+                                    boost = feedRecommendation.boost,
+                                    keyword = feedRecommendation.keyword,
+                                    imageUrl = PhotoUrl(feedRecommendation.image_url),
+                                    nodeType = feedRecommendation.node_type,
+                                    hosts =  feedRecommendation.hosts.map { Hosts(it.name, it.twitter_handle, it.profile_picture) },
+                                    guests = feedRecommendation.guests,
+                                    text = feedRecommendation.text,
+                                    timestamp = feedRecommendation.timestamp,
+                                    episodeTitle = feedRecommendation.episode_title,
+                                    guestProfiles = feedRecommendation.guest_profiles,
+                                    link = feedRecommendation.link
+                                )
+                            )
+                        }
+                    }
                 }
             }
-        }
+        }.join()
+        emit(results)
     }
 
     private suspend fun mapFeedDboList(

@@ -13,11 +13,13 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
+import chat.sphinx.dashboard.databinding.LayoutFeedRecommendationRowHolderBinding
 import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedRecommendations
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
@@ -34,8 +36,8 @@ class FeedRecommendationsAdapter(
 ): RecyclerView.Adapter<FeedRecommendationsAdapter.RecommendationViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<Feed>,
-        private val newList: List<Feed>,
+        private val oldList: List<FeedRecommendations>,
+        private val newList: List<FeedRecommendations>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -55,7 +57,7 @@ class FeedRecommendationsAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.id                 == new.id
+                    old.refId                 == new.refId
 
 
                 if (sameList) {
@@ -75,9 +77,10 @@ class FeedRecommendationsAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.title                   == new.title                &&
-                            old.itemsCount              == new.itemsCount      &&
-                            old.lastItem?.id            == new.lastItem?.id
+                            old.title                   == new.title
+//                                    &&
+//                            old.itemsCount              == new.itemsCount      &&
+//                            old.lastItem?.id            == new.lastItem?.id
 
                 if (sameList) {
                     sameList = same
@@ -91,7 +94,7 @@ class FeedRecommendationsAdapter(
         }
     }
 
-    private val recommendations = ArrayList<Feed>(listOf())
+    private val recommendations = ArrayList<FeedRecommendations>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -126,7 +129,7 @@ class FeedRecommendationsAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedRecommendationsAdapter.RecommendationViewHolder {
-        val binding = LayoutFeedSquaredRowHolderBinding.inflate(
+        val binding = LayoutFeedRecommendationRowHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -157,15 +160,15 @@ class FeedRecommendationsAdapter(
             .build()
     }
 
-    private fun getImageLoaderOptions(feed: Feed): ImageLoaderOptions {
+    private fun getImageLoaderOptions(feed: FeedRecommendations): ImageLoaderOptions {
         when (feed.feedType) {
-            is FeedType.Podcast -> {
+            "podcast" -> {
                 return imagePodcastLoaderOptions
             }
-            is FeedType.Video -> {
+            "youtube" -> {
                 return imageVideoLoaderOptions
             }
-            is FeedType.Newsletter -> {
+            "newsletter" -> {
                 return imageNewsletterLoaderOptions
             }
             else -> {}
@@ -174,16 +177,16 @@ class FeedRecommendationsAdapter(
     }
 
     inner class RecommendationViewHolder(
-        private val binding: LayoutFeedSquaredRowHolderBinding
+        private val binding: LayoutFeedRecommendationRowHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var holderJob: Job? = null
         private var disposable: Disposable? = null
 
-        private var feed: Feed? = null
+        private var feed: FeedRecommendations? = null
 
         init {
-            binding.layoutConstraintFeedHolder.setOnClickListener {
+            binding.layoutConstraintFeedRecommendationHolder.setOnClickListener {
                 feed?.let { nnFeed ->
                     lifecycleOwner.lifecycleScope.launch {
                         viewModel.feedRecommendationSelected(nnFeed)
@@ -194,7 +197,7 @@ class FeedRecommendationsAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-                val f: Feed = recommendations.getOrNull(position) ?: let {
+                val f: FeedRecommendations = recommendations.getOrNull(position) ?: let {
                     feed = null
                     return
                 }
@@ -205,7 +208,7 @@ class FeedRecommendationsAdapter(
                 f.imageUrlToShow?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
                         imageLoader.load(
-                            imageViewItemImage,
+                            imageViewItemRecommendationImage,
                             imageUrl.value,
                             getImageLoaderOptions(f)
                         ).also {
@@ -215,20 +218,20 @@ class FeedRecommendationsAdapter(
                         holderJob = job
                     }
                 } ?: run {
-                    imageViewItemImage.setImageDrawable(
+                    imageViewItemRecommendationImage.setImageDrawable(
                         ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
                     )
                 }
 
-                textViewItemName.text = f.titleToShow
-                textViewItemDescription.text = f.descriptionToShow
+
+                textViewRecommendationItemName.text = f.title.value
+                textViewRecommendationItemDescription.text = f.description?.value
             }
         }
 
         init {
             lifecycleOwner.lifecycle.addObserver(this)
         }
-
     }
 
     init {
@@ -236,3 +239,19 @@ class FeedRecommendationsAdapter(
     }
 
 }
+
+inline fun FeedRecommendations.getPlaceHolderImageRes(): Int =
+    when (feedType) {
+        "podcast" -> {
+            R.drawable.ic_podcast_placeholder
+        }
+        "youtube" -> {
+            R.drawable.ic_video_placeholder
+        }
+        "newsletter" -> {
+            R.drawable.ic_newsletter_placeholder
+        }
+        else -> {
+            R.drawable.ic_podcast_placeholder
+        }
+    }
