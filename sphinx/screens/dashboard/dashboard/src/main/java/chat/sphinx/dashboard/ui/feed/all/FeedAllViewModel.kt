@@ -7,6 +7,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
+import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
@@ -16,7 +17,9 @@ import chat.sphinx.wrapper_feed.FeedRecommendations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -34,6 +37,9 @@ internal class FeedAllViewModel @Inject constructor(
         FeedAllViewState
         >(dispatchers, FeedAllViewState.Idle), FeedFollowingViewModel, FeedRecommendationsViewModel
 {
+    val feedAllViewStateContainer: ViewStateContainer<FeedAllViewState> by lazy {
+        ViewStateContainer(FeedAllViewState.Idle)
+    }
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         repositoryDashboard.getAllFeeds().collect { feeds ->
@@ -88,6 +94,9 @@ internal class FeedAllViewModel @Inject constructor(
     override val feedRecommendationsHolderViewStateFlow: StateFlow<List<FeedRecommendations>> = flow {
         repositoryDashboard.getRecommendedFeeds().collect{ feedRecommended ->
             emit(feedRecommended.toList())
+            if(feedRecommended.isNotEmpty()){
+                updateViewState(FeedAllViewState.RecommendedList)
+            }
         }
     }.stateIn(
         viewModelScope,

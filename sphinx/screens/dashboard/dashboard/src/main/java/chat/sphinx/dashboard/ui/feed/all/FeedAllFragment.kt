@@ -18,7 +18,9 @@ import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -89,7 +91,22 @@ internal class FeedAllFragment : SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: FeedAllViewState) {
-        // TODO("Not yet implemented")
+        binding.apply {
+            when(viewState){
+                is FeedAllViewState.Idle -> {
+                    textViewListenRecommendationsHeader.gone
+                    textViewRefreshRecommendations.gone
+                    refreshButtonIcon.gone
+                    recyclerViewRecommendations.gone
+                }
+                is FeedAllViewState.RecommendedList -> {
+                    textViewListenRecommendationsHeader.visible
+                    textViewRefreshRecommendations.visible
+                    refreshButtonIcon.visible
+                    recyclerViewRecommendations.visible
+                }
+            }
+        }
     }
 
     override fun subscribeToViewStateFlow() {
