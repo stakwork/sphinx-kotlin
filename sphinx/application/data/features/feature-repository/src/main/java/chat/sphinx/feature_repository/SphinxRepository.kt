@@ -3957,9 +3957,9 @@ abstract class SphinxRepository(
         )
     }
 
-    override fun getRecommendedFeeds(): Flow<List<FeedRecommendations>> = flow {
+    override fun getRecommendedFeeds(): Flow<List<FeedRecommendation>> = flow {
 
-        var results: MutableList<FeedRecommendations> = mutableListOf()
+        var results: MutableList<FeedRecommendation> = mutableListOf()
 
         applicationScope.launch(mainImmediate) {
             networkQueryFeedSearch.getFeedRecommendations().collect { response ->
@@ -3971,26 +3971,13 @@ abstract class SphinxRepository(
                         response.value.forEach { feedRecommendation ->
 
                             results.add(
-                                FeedRecommendations(
-                                    pubKey = feedRecommendation.pub_key,
+                                FeedRecommendation(
+                                    id = feedRecommendation.ref_id,
                                     feedType = feedRecommendation.type,
-                                    refId = feedRecommendation.ref_id,
-                                    topics = feedRecommendation.topics,
-                                    weight = feedRecommendation.weight,
-                                    description = FeedDescription(feedRecommendation.description),
-                                    date = feedRecommendation.date,
-                                    title = FeedTitle(feedRecommendation.show_title),
-                                    boost = feedRecommendation.boost,
-                                    keyword = feedRecommendation.keyword,
+                                    description = feedRecommendation.description,
                                     imageUrl = PhotoUrl(feedRecommendation.image_url),
-                                    nodeType = feedRecommendation.node_type,
-                                    hosts =  feedRecommendation.hosts.map { Hosts(it.name, it.twitter_handle, it.profile_picture) },
-                                    guests = feedRecommendation.guests,
-                                    text = feedRecommendation.text,
-                                    timestamp = feedRecommendation.timestamp,
-                                    episodeTitle = feedRecommendation.episode_title,
-                                    guestProfiles = feedRecommendation.guest_profiles,
-                                    link = feedRecommendation.link
+                                    link = feedRecommendation.link,
+                                    title = feedRecommendation.episode_title
                                 )
                             )
                         }

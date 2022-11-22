@@ -14,12 +14,8 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedRecommendationRowHolderBinding
-import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
-import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
-import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedRecommendations
+import chat.sphinx.wrapper_feed.FeedRecommendation
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
@@ -36,8 +32,8 @@ class FeedRecommendationsAdapter(
 ): RecyclerView.Adapter<FeedRecommendationsAdapter.RecommendationViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<FeedRecommendations>,
-        private val newList: List<FeedRecommendations>,
+        private val oldList: List<FeedRecommendation>,
+        private val newList: List<FeedRecommendation>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -57,7 +53,7 @@ class FeedRecommendationsAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.refId                 == new.refId
+                    old.id                 == new.id
 
 
                 if (sameList) {
@@ -94,7 +90,7 @@ class FeedRecommendationsAdapter(
         }
     }
 
-    private val recommendations = ArrayList<FeedRecommendations>(listOf())
+    private val recommendations = ArrayList<FeedRecommendation>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -160,7 +156,7 @@ class FeedRecommendationsAdapter(
             .build()
     }
 
-    private fun getImageLoaderOptions(feed: FeedRecommendations): ImageLoaderOptions {
+    private fun getImageLoaderOptions(feed: FeedRecommendation): ImageLoaderOptions {
         when (feed.feedType) {
             "podcast" -> {
                 return imagePodcastLoaderOptions
@@ -183,7 +179,7 @@ class FeedRecommendationsAdapter(
         private var holderJob: Job? = null
         private var disposable: Disposable? = null
 
-        private var feed: FeedRecommendations? = null
+        private var feed: FeedRecommendation? = null
 
         init {
             binding.layoutConstraintFeedRecommendationHolder.setOnClickListener {
@@ -197,7 +193,7 @@ class FeedRecommendationsAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-                val f: FeedRecommendations = recommendations.getOrNull(position) ?: let {
+                val f: FeedRecommendation = recommendations.getOrNull(position) ?: let {
                     feed = null
                     return
                 }
@@ -240,7 +236,7 @@ class FeedRecommendationsAdapter(
 
 }
 
-inline fun FeedRecommendations.getPlaceHolderImageRes(): Int =
+inline fun FeedRecommendation.getPlaceHolderImageRes(): Int =
     when (feedType) {
         "podcast" -> {
             R.drawable.ic_podcast_placeholder
