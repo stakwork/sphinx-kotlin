@@ -6,7 +6,7 @@ data class FeedRecommendation(
     val id: String,
     val feedType: String,
     val description: String,
-    val imageUrl: PhotoUrl,
+    val imageUrl: String,
     val link: String,
     val title: String
 )
