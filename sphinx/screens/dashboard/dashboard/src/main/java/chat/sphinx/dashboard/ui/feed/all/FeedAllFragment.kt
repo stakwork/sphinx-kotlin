@@ -96,26 +96,22 @@ internal class FeedAllFragment : SideEffectFragment<
         binding.apply {
             when(viewState){
                 is FeedAllViewState.Loading -> {
-                    loadingProgressBar.visible
-                    textViewLoadingRecommendations.visible
-                    textViewRefreshRecommendations.invisible
-                    refreshButtonIcon.invisible
-                    recyclerViewRecommendations.invisible
+                    layoutConstraintLoading.visible
+                    layoutConstraintRefresh.gone
+                    recyclerViewRecommendations.gone
+                    textViewNoRecommendations.gone
                 }
                 is FeedAllViewState.NoRecommendations -> {
-                    refreshButtonIcon.visible
-                    textViewRefreshRecommendations.visible
+                    layoutConstraintLoading.gone
+                    layoutConstraintRefresh.visible
                     recyclerViewRecommendations.invisible
                     textViewNoRecommendations.visible
-                    loadingProgressBar.invisible
                 }
                 is FeedAllViewState.RecommendedList -> {
-                    textViewRefreshRecommendations.visible
-                    refreshButtonIcon.visible
+                    layoutConstraintLoading.gone
+                    layoutConstraintRefresh.visible
                     recyclerViewRecommendations.visible
-                    textViewNoRecommendations.invisible
-                    loadingProgressBar.invisible
-                    textViewLoadingRecommendations.invisible
+                    textViewNoRecommendations.gone
                 }
             }
         }
@@ -142,7 +138,7 @@ internal class FeedAllFragment : SideEffectFragment<
 
     private fun setupRefreshButton() {
         binding.apply {
-            constraintLayoutRefresh.setOnClickListener {
+            layoutConstraintRefresh.setOnClickListener {
                 viewModel.loadFeedRecommendations()
             }
         }

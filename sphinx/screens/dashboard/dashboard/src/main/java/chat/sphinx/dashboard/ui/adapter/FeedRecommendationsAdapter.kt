@@ -255,10 +255,10 @@ inline fun FeedRecommendation.getPlaceHolderImageRes(): Int =
 inline fun FeedRecommendation.getIconType(): Int =
     when(feedType) {
         "podcast" -> {
-            R.drawable.ic_podcast
+            R.drawable.ic_podcast_type
         }
         "youtube" -> {
-            R.drawable.ic_youtube
+            R.drawable.ic_youtube_type
         }
         else -> {
             R.drawable.ic_podcast_placeholder
