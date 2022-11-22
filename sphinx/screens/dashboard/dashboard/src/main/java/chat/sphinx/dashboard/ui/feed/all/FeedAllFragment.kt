@@ -142,7 +142,7 @@ internal class FeedAllFragment : SideEffectFragment<
 
     private fun setupRefreshButton() {
         binding.apply {
-            textViewRefreshRecommendations.setOnClickListener {
+            constraintLayoutRefresh.setOnClickListener {
                 viewModel.loadFeedRecommendations()
             }
         }
