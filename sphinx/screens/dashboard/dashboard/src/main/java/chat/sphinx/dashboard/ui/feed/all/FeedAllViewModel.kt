@@ -35,10 +35,27 @@ internal class FeedAllViewModel @Inject constructor(
         Context,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.Idle), FeedFollowingViewModel, FeedRecommendationsViewModel
+        >(dispatchers, FeedAllViewState.NoRecommendations), FeedFollowingViewModel, FeedRecommendationsViewModel
 {
-    val feedAllViewStateContainer: ViewStateContainer<FeedAllViewState> by lazy {
-        ViewStateContainer(FeedAllViewState.Idle)
+
+    override val feedRecommendationsHolderViewStateFlow: MutableStateFlow<List<FeedRecommendation>> = MutableStateFlow(emptyList())
+
+    init {
+        loadFeedRecommendations()
+    }
+
+    override fun loadFeedRecommendations() {
+        viewModelScope.launch(mainImmediate) {
+            updateViewState(FeedAllViewState.Loading)
+
+            repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->
+                feedRecommendationsHolderViewStateFlow.value = feedRecommended.toList()
+
+                if (feedRecommended.isNotEmpty()) {
+                    updateViewState(FeedAllViewState.RecommendedList)
+                } else updateViewState(FeedAllViewState.NoRecommendations)
+            }
+        }
     }
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
@@ -90,22 +107,6 @@ internal class FeedAllViewModel @Inject constructor(
             dashboardNavigator.toVideoWatchScreen(chatId, feedId, feedUrl)
         }
     }
-
-    override val feedRecommendationsHolderViewStateFlow: StateFlow<List<FeedRecommendation>> = flow {
-        repositoryDashboard.getRecommendedFeeds().collect{ feedRecommended ->
-            emit(feedRecommended.toList())
-
-            if(feedRecommended.isNotEmpty()){
-                updateViewState(FeedAllViewState.RecommendedList)
-            }
-            else updateViewState(FeedAllViewState.Idle)
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
-    )
-
 
     override fun feedRecommendationSelected(feed: FeedRecommendation) {
         viewModelScope.launch(mainImmediate) {

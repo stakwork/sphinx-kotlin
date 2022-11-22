@@ -93,7 +93,10 @@ internal class FeedAllFragment : SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: FeedAllViewState) {
         binding.apply {
             when(viewState){
-                is FeedAllViewState.Idle -> {
+                is FeedAllViewState.Loading -> {
+
+                }
+                is FeedAllViewState.NoRecommendations -> {
                     textViewListenRecommendationsHeader.gone
                     textViewRefreshRecommendations.gone
                     refreshButtonIcon.gone
