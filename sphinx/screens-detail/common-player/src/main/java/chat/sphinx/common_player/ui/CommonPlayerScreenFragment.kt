@@ -5,15 +5,21 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.common_player.R
 import chat.sphinx.common_player.adapter.RecommendedItemsAdapter
+import chat.sphinx.common_player.adapter.RecommendedItemsFooterAdapter
 import chat.sphinx.common_player.databinding.FragmentCommonPlayerScreenBinding
 import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.insetter_activity.InsetterActivity
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -36,33 +42,49 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        binding.apply {
+//            textViewDismissButton.setOnClickListener {
+//                lifecycleScope.launch(viewModel.mainImmediate) {
+//                    viewModel.navigator.closeDetailScreen()
+//                }
+//            }
+        }
+
         setupItems()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: CommonPlayerScreenViewState) {
+        @Exhaustive
+        when(viewState) {
+            is CommonPlayerScreenViewState.Idle -> {
+                print("test")
+            }
+            is CommonPlayerScreenViewState.FeedRecommendations -> {
+                print("test")
+            }
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CommonPlayerScreenSideEffect) {
     }
 
     private fun setupItems() {
-        binding.includeRecommendedItemsList.let {
-            it.recyclerViewVideoList.apply {
-                val linearLayoutManager = LinearLayoutManager(context)
-                val recommendedItemsAdapter = RecommendedItemsAdapter(
-                    imageLoader,
-                    viewLifecycleOwner,
-                    onStopSupervisor,
-                    viewModel,
-                    viewModel
-                )
-//                val recommendedListFooterAdapter =
-//                    RecommendedItemsFooterAdapter(requireActivity() as InsetterActivity)
-//                this.setHasFixedSize(false)
-                layoutManager = linearLayoutManager
-                adapter = recommendedItemsAdapter
-                itemAnimator = null
-            }
+        binding.includeRecommendedItemsList.recyclerViewList.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            val recommendedItemsAdapter = RecommendedItemsAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+            )
+            val recommendedListFooterAdapter =
+                RecommendedItemsFooterAdapter(requireActivity() as InsetterActivity)
+            this.setHasFixedSize(false)
+
+            layoutManager = linearLayoutManager
+            adapter = ConcatAdapter(recommendedItemsAdapter, recommendedListFooterAdapter)
+            itemAnimator = null
         }
     }
 

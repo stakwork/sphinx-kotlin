@@ -73,10 +73,9 @@ class FeedRecommendationsAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                            old.title                   == new.title
-//                                    &&
-//                            old.itemsCount              == new.itemsCount      &&
-//                            old.lastItem?.id            == new.lastItem?.id
+                    old.title                == new.title                &&
+                    old.description          == new.description          &&
+                    old.link                 == new.link
 
                 if (sameList) {
                     sameList = same
@@ -124,7 +123,7 @@ class FeedRecommendationsAdapter(
         return recommendations.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedRecommendationsAdapter.RecommendationViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecommendationViewHolder {
         val binding = LayoutFeedRecommendationRowHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -134,7 +133,7 @@ class FeedRecommendationsAdapter(
         return RecommendationViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: FeedRecommendationsAdapter.RecommendationViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: RecommendationViewHolder, position: Int) {
         holder.bind(position)
     }
 
@@ -179,13 +178,13 @@ class FeedRecommendationsAdapter(
         private var holderJob: Job? = null
         private var disposable: Disposable? = null
 
-        private var feed: FeedRecommendation? = null
+        private var feedRecommendation: FeedRecommendation? = null
 
         init {
             binding.layoutConstraintFeedRecommendationHolder.setOnClickListener {
-                feed?.let { nnFeed ->
+                feedRecommendation?.let { nnFeedRecommendation ->
                     lifecycleOwner.lifecycleScope.launch {
-                        viewModel.feedRecommendationSelected(nnFeed)
+                        viewModel.feedRecommendationSelected(nnFeedRecommendation)
                     }
                 }
             }
@@ -194,10 +193,10 @@ class FeedRecommendationsAdapter(
         fun bind(position: Int) {
             binding.apply {
                 val f: FeedRecommendation = recommendations.getOrNull(position) ?: let {
-                    feed = null
+                    feedRecommendation = null
                     return
                 }
-                feed = f
+                feedRecommendation = f
                 disposable?.dispose()
                 holderJob?.cancel()
 

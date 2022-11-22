@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class CommonPlayerScreenViewModel @Inject constructor(
+class CommonPlayerScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val navigator: CommonPlayerNavigator,
     private val moshi: Moshi,
