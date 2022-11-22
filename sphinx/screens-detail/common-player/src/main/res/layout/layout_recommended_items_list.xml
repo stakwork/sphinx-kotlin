@@ -16,10 +16,10 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_videos_list_count"
+            android:id="@+id/text_view_list_count"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/video_list_item_divider_margin_x"
+            android:layout_marginStart="@dimen/default_layout_margin"
             android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
             android:fontFamily="@font/montserrat_regular"
             android:gravity="start|center"
@@ -28,34 +28,8 @@
             app:layout_constraintStart_toStartOf="parent"
             tools:text="37" />
 
-        <TextView
-            android:id="@+id/text_view_refresh_recommendations"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:fontFamily="@font/roboto_medium"
-            android:gravity="center"
-            android:text="@string/refresh"
-            android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_header_text_size"
-            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_videos_list_header_title"
-            app:layout_constraintEnd_toStartOf="@+id/textView" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:fontFamily="@font/material_icons_regular"
-            android:text="@string/refresh_icon"
-            android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_text_size_large_title_chevron_icon"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_videos_list_header_title"
+            android:id="@+id/text_view_list_header_title"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
@@ -63,11 +37,36 @@
             android:gravity="start|center"
             android:text="@string/recommendations"
             android:textAlignment="textStart"
-            android:textAllCaps="true"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_list_row_headline"
             android:elevation="8dp"
-            app:layout_constraintStart_toEndOf="@+id/text_view_videos_list_count" />
+            app:layout_constraintStart_toEndOf="@+id/text_view_list_count" />
+
+<!--        <TextView-->
+<!--            android:id="@+id/text_view_refresh_recommendations"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginEnd="8dp"-->
+<!--            android:fontFamily="@font/roboto_medium"-->
+<!--            android:gravity="center"-->
+<!--            android:text="@string/refresh"-->
+<!--            android:textColor="@color/secondaryText"-->
+<!--            android:textSize="@dimen/default_header_text_size"-->
+<!--            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_videos_list_header_title"-->
+<!--            app:layout_constraintEnd_toStartOf="@+id/textView" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/textView"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginEnd="16dp"-->
+<!--            android:fontFamily="@font/material_icons_regular"-->
+<!--            android:text="@string/refresh_icon"-->
+<!--            android:textColor="@color/secondaryText"-->
+<!--            android:textSize="@dimen/default_text_size_large_title_chevron_icon"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

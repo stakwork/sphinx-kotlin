@@ -139,4 +139,6 @@
 
     <string name="dashboard_restore_progress">Restaurando: %s</string>
     <string name="dashboard_stop_restore">Continuar más tarde</string>
+
+    <string name="loading_recommendations">Cargando Recomendaciones...</string>
 </resources>

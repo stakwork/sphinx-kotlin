@@ -7,8 +7,26 @@ sealed class CommonPlayerScreenViewState: ViewState<CommonPlayerScreenViewState>
 
     object Idle: CommonPlayerScreenViewState()
 
-    class FeedRecommendations(
+    sealed class FeedRecommendations(
         val recommendations: List<FeedRecommendation>,
-        val selectedRecommendation: FeedRecommendation,
-    ): CommonPlayerScreenViewState()
+        val selectedItem: FeedRecommendation,
+    ): CommonPlayerScreenViewState() {
+
+        class PodcastSelected(
+            recommendations: List<FeedRecommendation>,
+            selectedPodcast: FeedRecommendation,
+        ) : FeedRecommendations(
+            recommendations,
+            selectedPodcast
+        )
+
+        class YouTubeVideoSelected(
+            recommendations: List<FeedRecommendation>,
+            selectedYouTubeVideo: FeedRecommendation,
+        ) : FeedRecommendations(
+            recommendations,
+            selectedYouTubeVideo
+        )
+
+    }
 }

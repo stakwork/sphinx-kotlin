@@ -52,10 +52,19 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
         selectedRecommendation?.let {
             updateViewState(
-                CommonPlayerScreenViewState.FeedRecommendations(
-                    feedRecommendationList,
-                    it
-                )
+                if (it.isPodcast) {
+                    CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected(
+                        feedRecommendationList,
+                        it
+                    )
+                } else if (it.isYouTubeVideo) {
+                    CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected(
+                        feedRecommendationList,
+                        it
+                    )
+                } else {
+                    CommonPlayerScreenViewState.Idle
+                }
             )
         } ?: run {
             viewModelScope.launch(mainImmediate) {

@@ -155,18 +155,15 @@ class FeedRecommendationsAdapter(
             .build()
     }
 
-    private fun getImageLoaderOptions(feed: FeedRecommendation): ImageLoaderOptions {
-        when (feed.feedType) {
-            "podcast" -> {
-                return imagePodcastLoaderOptions
-            }
-            "youtube" -> {
-                return imageVideoLoaderOptions
-            }
-            "newsletter" -> {
-                return imageNewsletterLoaderOptions
-            }
-            else -> {}
+    private fun getImageLoaderOptions(feedRecommendation: FeedRecommendation): ImageLoaderOptions {
+        if (feedRecommendation.isPodcast) {
+            return imagePodcastLoaderOptions
+        }
+        if (feedRecommendation.isYouTubeVideo) {
+            return imageVideoLoaderOptions
+        }
+        if (feedRecommendation.isNewsletter) {
+            return imageNewsletterLoaderOptions
         }
         return imagePodcastLoaderOptions
     }
@@ -219,6 +216,7 @@ class FeedRecommendationsAdapter(
                 }
                 textViewRecommendationItemName.text = f.title
                 textViewRecommendationItemDescription.text = f.description
+
                 imageViewItemRecommendationType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, f.getIconType())
                 )
@@ -236,31 +234,28 @@ class FeedRecommendationsAdapter(
 
 }
 
-inline fun FeedRecommendation.getPlaceHolderImageRes(): Int =
-    when (feedType) {
-        "podcast" -> {
-            R.drawable.ic_podcast_placeholder
-        }
-        "youtube" -> {
-            R.drawable.ic_video_placeholder
-        }
-        "newsletter" -> {
-            R.drawable.ic_newsletter_placeholder
-        }
-        else -> {
-            R.drawable.ic_podcast_placeholder
-        }
+inline fun FeedRecommendation.getPlaceHolderImageRes(): Int {
+    if (isPodcast) {
+        return R.drawable.ic_podcast_placeholder
     }
+    if (isYouTubeVideo) {
+        return R.drawable.ic_video_placeholder
+    }
+    if (isNewsletter) {
+        return R.drawable.ic_newsletter_placeholder
+    }
+    return R.drawable.ic_podcast_placeholder
+}
 
-inline fun FeedRecommendation.getIconType(): Int =
-    when(feedType) {
-        "podcast" -> {
-            R.drawable.ic_podcast_type
-        }
-        "youtube" -> {
-            R.drawable.ic_youtube_type
-        }
-        else -> {
-            R.drawable.ic_podcast_placeholder
-        }
+inline fun FeedRecommendation.getIconType(): Int {
+    if (isPodcast) {
+        return R.drawable.ic_podcast_type
     }
+    if (isYouTubeVideo) {
+        return R.drawable.ic_youtube_type
+    }
+    if (isNewsletter) {
+        return R.drawable.ic_youtube_type
+    }
+    return R.drawable.ic_podcast_type
+}

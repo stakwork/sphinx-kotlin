@@ -11,7 +11,23 @@ data class FeedRecommendation(
     val imageUrl: String,
     val link: String,
     val title: String,
-)
+) {
+
+    companion object {
+        const val PODCAST_TYPE = "podcast"
+        const val YOUTUBE_VIDEO_TYPE = "youtube"
+        const val NEWSLETTER_TYPE = "newsletter"
+    }
+
+    val isPodcast: Boolean
+        get() = feedType == PODCAST_TYPE
+
+    val isYouTubeVideo: Boolean
+        get() = feedType == YOUTUBE_VIDEO_TYPE
+
+    val isNewsletter: Boolean
+        get() = feedType == NEWSLETTER_TYPE
+}
 
 @JsonClass(generateAdapter = true)
 internal data class FeedRecommendationMoshi(

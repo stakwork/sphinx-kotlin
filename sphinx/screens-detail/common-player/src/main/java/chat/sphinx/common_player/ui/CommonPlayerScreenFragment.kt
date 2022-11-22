@@ -61,7 +61,21 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
                 print("test")
             }
             is CommonPlayerScreenViewState.FeedRecommendations -> {
-                print("test")
+                binding.apply {
+                    includeLayoutCommonPlayerDescription.apply {
+                        textViewItemTitle.text = viewState.selectedItem.title
+                        textViewItemDescription.text = viewState.selectedItem.description
+                    }
+                }
+
+                when(viewState) {
+                    is CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected -> {
+
+                    }
+                    is CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected -> {
+
+                    }
+                }
             }
         }
     }
