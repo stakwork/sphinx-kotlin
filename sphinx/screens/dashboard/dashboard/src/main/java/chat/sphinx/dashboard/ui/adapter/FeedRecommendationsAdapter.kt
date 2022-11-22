@@ -217,9 +217,11 @@ class FeedRecommendationsAdapter(
                         ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
                     )
                 }
-
                 textViewRecommendationItemName.text = f.title
                 textViewRecommendationItemDescription.text = f.description
+                imageViewItemRecommendationType.setImageDrawable(
+                    ContextCompat.getDrawable(root.context, f.getIconType())
+                )
             }
         }
 
@@ -244,6 +246,19 @@ inline fun FeedRecommendation.getPlaceHolderImageRes(): Int =
         }
         "newsletter" -> {
             R.drawable.ic_newsletter_placeholder
+        }
+        else -> {
+            R.drawable.ic_podcast_placeholder
+        }
+    }
+
+inline fun FeedRecommendation.getIconType(): Int =
+    when(feedType) {
+        "podcast" -> {
+            R.drawable.ic_podcast
+        }
+        "youtube" -> {
+            R.drawable.ic_youtube
         }
         else -> {
             R.drawable.ic_podcast_placeholder

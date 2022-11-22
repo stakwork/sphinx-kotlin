@@ -20,6 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -46,6 +47,7 @@ internal class FeedAllFragment : SideEffectFragment<
 
         setupRecommendationsAdapter()
         setupFollowingAdapter()
+        setupRefreshButton()
     }
 
     private fun setupFollowingAdapter() {
@@ -94,19 +96,26 @@ internal class FeedAllFragment : SideEffectFragment<
         binding.apply {
             when(viewState){
                 is FeedAllViewState.Loading -> {
-
+                    loadingProgressBar.visible
+                    textViewLoadingRecommendations.visible
+                    textViewRefreshRecommendations.invisible
+                    refreshButtonIcon.invisible
+                    recyclerViewRecommendations.invisible
                 }
                 is FeedAllViewState.NoRecommendations -> {
-                    textViewListenRecommendationsHeader.gone
-                    textViewRefreshRecommendations.gone
-                    refreshButtonIcon.gone
-                    recyclerViewRecommendations.gone
+                    refreshButtonIcon.visible
+                    textViewRefreshRecommendations.visible
+                    recyclerViewRecommendations.invisible
+                    textViewNoRecommendations.visible
+                    loadingProgressBar.invisible
                 }
                 is FeedAllViewState.RecommendedList -> {
-                    textViewListenRecommendationsHeader.visible
                     textViewRefreshRecommendations.visible
                     refreshButtonIcon.visible
                     recyclerViewRecommendations.visible
+                    textViewNoRecommendations.invisible
+                    loadingProgressBar.invisible
+                    textViewLoadingRecommendations.invisible
                 }
             }
         }
@@ -128,6 +137,14 @@ internal class FeedAllFragment : SideEffectFragment<
         binding.apply {
             scrollViewContent.goneIfFalse(contentAvailable)
             textViewPlaceholder.goneIfFalse(!contentAvailable)
+        }
+    }
+
+    private fun setupRefreshButton() {
+        binding.apply {
+            textViewRefreshRecommendations.setOnClickListener {
+                viewModel.loadFeedRecommendations()
+            }
         }
     }
 }
