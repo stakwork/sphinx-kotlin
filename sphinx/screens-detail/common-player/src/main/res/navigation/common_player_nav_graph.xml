@@ -10,17 +10,11 @@
         android:name="chat.sphinx.common_player.ui.CommonPlayerScreenFragment"
         tools:layout="@layout/fragment_common_player_screen">
         <argument
-            android:name="argChatId"
-            app:argType="long" />
+            android:name="argRecommendations"
+            app:argType="string[]" />
         <argument
-            android:name="argFeedId"
+            android:name="argRecommendationId"
             app:argType="string" />
-        <argument
-            android:name="argFeedUrl"
-            app:argType="string" />
-        <argument
-            android:name="argFromFeed"
-            app:argType="boolean" />
     </fragment>
 
 </navigation>

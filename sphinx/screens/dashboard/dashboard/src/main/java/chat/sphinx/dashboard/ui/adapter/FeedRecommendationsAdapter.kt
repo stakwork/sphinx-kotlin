@@ -201,11 +201,11 @@ class FeedRecommendationsAdapter(
                 disposable?.dispose()
                 holderJob?.cancel()
 
-                if (f.imageUrl.value.isNotEmpty()) {
+                if (f.imageUrl.isNotEmpty()) {
                     onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
                         imageLoader.load(
                             imageViewItemRecommendationImage,
-                            f.imageUrl.value,
+                            f.imageUrl,
                             getImageLoaderOptions(f)
                         ).also {
                             disposable = it

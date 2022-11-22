@@ -13,15 +13,6 @@ abstract class CommonPlayerNavigator(
 ): Navigator<NavController>(detailNavigationDriver) {
 
     @JvmSynthetic
-    internal suspend fun toCommonPlayerScreen(
-        chatId: ChatId,
-        feedId: FeedId,
-        feedUrl: FeedUrl,
-    ) {
-        navigationDriver.submitNavigationRequest(ToCommonPlayerScreen(chatId, feedId, feedUrl, false))
-    }
-
-    @JvmSynthetic
     internal suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }

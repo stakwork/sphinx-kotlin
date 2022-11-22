@@ -7,19 +7,18 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
-import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_feed.toJson
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
@@ -30,6 +29,7 @@ import javax.inject.Inject
 internal class FeedAllViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    val moshi: Moshi,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
@@ -110,7 +110,21 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun feedRecommendationSelected(feed: FeedRecommendation) {
         viewModelScope.launch(mainImmediate) {
-//            dashboardNavigator.toCommonPlayerScreen(feed.chatId, feed.id, feed.feedUrl)
+            val recommendations = feedRecommendationsHolderViewStateFlow.value
+
+            if (recommendations.isEmpty()) {
+                return@launch
+            }
+
+            var feedRecommendationParamsList: MutableList<String> = mutableListOf()
+
+            for (r in recommendations) {
+                feedRecommendationParamsList.add(
+                    r.toJson(moshi)
+                )
+            }
+
+            dashboardNavigator.toCommonPlayerScreen(feedRecommendationParamsList, feed.id)
         }
     }
 
