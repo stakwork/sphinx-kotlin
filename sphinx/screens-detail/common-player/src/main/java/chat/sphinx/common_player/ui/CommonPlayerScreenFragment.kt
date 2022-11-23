@@ -1,15 +1,19 @@
 package chat.sphinx.common_player.ui
 
+import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.common_player.BuildConfig
 import chat.sphinx.common_player.R
 import chat.sphinx.common_player.adapter.RecommendedItemsAdapter
 import chat.sphinx.common_player.adapter.RecommendedItemsFooterAdapter
@@ -17,12 +21,14 @@ import chat.sphinx.common_player.databinding.FragmentCommonPlayerScreenBinding
 import chat.sphinx.common_player.viewstate.BoostAnimationViewState
 import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import com.google.android.youtube.player.YouTubeInitializationResult
+import com.google.android.youtube.player.YouTubePlayer
+import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -50,8 +56,13 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
     )
     override val viewModel: CommonPlayerScreenViewModel by viewModels()
 
+    private var youtubePlayer: YouTubePlayer? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val a: Activity? = activity
+        a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
         binding.apply {
 
@@ -84,6 +95,8 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
                         textViewItemPublishedDate.text = viewState.selectedItem.dateString
                     }
 
+                    includeRecommendedItemsList.textViewListCount.text = viewState.recommendations.size.toString()
+
                     when(viewState) {
                         is CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected -> {
                             includeLayoutPlayersContainer.apply {
@@ -99,6 +112,8 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
                                 textViewPlaybackSpeedButton.visible
                                 imageViewPlayPauseButton.visible
                             }
+
+                            youtubePlayer?.pause()
                         }
                         is CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected -> {
                             includeLayoutPlayersContainer.apply {
@@ -113,6 +128,12 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
                                 textViewPlayPauseButton.invisible
                                 textViewPlaybackSpeedButton.invisible
                                 imageViewPlayPauseButton.invisible
+                            }
+
+                            if (youtubePlayer != null) {
+                                youtubePlayer?.cueVideo(viewState.selectedItem.link.youTubeVideoId())
+                            } else {
+                                setupYoutubePlayer(viewState.selectedItem.link.youTubeVideoId())
                             }
                         }
                     }
@@ -171,9 +192,6 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
         }
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: CommonPlayerScreenSideEffect) {
-    }
-
     private fun setupItems() {
         binding.includeRecommendedItemsList.recyclerViewList.apply {
             val linearLayoutManager = LinearLayoutManager(context)
@@ -193,4 +211,59 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
         }
     }
 
+    private fun setupYoutubePlayer(videoId: String) {
+
+        val youtubePlayerFragment = YouTubeCommonPlayerSupportFragmentXKt()
+
+        childFragmentManager.beginTransaction()
+            .replace(binding.includeLayoutPlayersContainer.frameLayoutYoutubePlayer.id, youtubePlayerFragment as Fragment)
+            .commit()
+
+        youtubePlayerFragment.initialize(
+            BuildConfig.YOUTUBE_API_KEY,
+            object : YouTubePlayer.OnInitializedListener {
+                override fun onInitializationSuccess(
+                    p0: YouTubePlayer.Provider?,
+                    p1: YouTubePlayer?,
+                    p2: Boolean
+                ) {
+                    p1?.let {
+                        youtubePlayer = it
+                    }
+                    p1?.cueVideo(videoId)
+                    p1?.setPlaybackEventListener(playbackEventListener)
+                }
+
+                override fun onInitializationFailure(
+                    p0: YouTubePlayer.Provider?,
+                    p1: YouTubeInitializationResult?
+                ) {}
+                private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
+
+                    override fun onSeekTo(p0: Int) {
+                        Log.d("YouTubePlayer", "Youtube has seek $p0")
+                    }
+                    override fun onBuffering(p0: Boolean) {}
+
+                    override fun onPlaying() {
+                        Log.d("YouTubePlayer", "Youtube is playing")
+                    }
+                    override fun onStopped() {
+                        Log.d("YouTubePlayer", "Youtube has stopped")
+                    }
+                    override fun onPaused() {
+                        Log.d("YouTubePlayer", "Youtube is on pause")
+                    }
+                }
+            })
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: CommonPlayerScreenSideEffect) {
+    }
+
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.youTubeVideoId(): String {
+    return this.substringAfterLast("v/").substringAfterLast("v=").substringBefore("?")
 }
