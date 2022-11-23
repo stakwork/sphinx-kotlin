@@ -3977,7 +3977,8 @@ abstract class SphinxRepository(
                                     description = feedRecommendation.description,
                                     imageUrl = feedRecommendation.image_url,
                                     link = feedRecommendation.link,
-                                    title = feedRecommendation.episode_title
+                                    title = feedRecommendation.episode_title,
+                                    date = feedRecommendation.date
                                 )
                             )
                         }

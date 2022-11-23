@@ -78,7 +78,7 @@
         app:layout_constraintTop_toBottomOf="@+id/card_view_image_recommendation_wrapper"
         app:layout_constraintStart_toStartOf="@+id/card_view_image_recommendation_wrapper"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_recommendation_wrapper"
-        tools:text="Show Title" />
+        tools:text="Show large Title of at least 2 lines" />
 
     <TextView
         android:id="@+id/text_view_recommendation_item_description"

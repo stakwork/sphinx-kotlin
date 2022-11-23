@@ -1,5 +1,8 @@
 package chat.sphinx.wrapper_feed
 
+import chat.sphinx.wrapper_common.DateTime
+import chat.sphinx.wrapper_common.chatTimeFormat
+import chat.sphinx.wrapper_common.toDateTime
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -11,6 +14,7 @@ data class FeedRecommendation(
     val imageUrl: String,
     val link: String,
     val title: String,
+    val date: Long,
 ) {
 
     companion object {
@@ -27,6 +31,9 @@ data class FeedRecommendation(
 
     val isNewsletter: Boolean
         get() = feedType == NEWSLETTER_TYPE
+
+    val dateString: String
+        get() = date.toDateTime().chatTimeFormat()
 }
 
 @JsonClass(generateAdapter = true)
@@ -36,7 +43,8 @@ internal data class FeedRecommendationMoshi(
     val description: String,
     val imageUrl: String,
     val link: String,
-    val title: String
+    val title: String,
+    val date: Long,
 )
 
 @Suppress("NOTHING_TO_INLINE")
@@ -62,6 +70,7 @@ fun String.toFeedRecommendation(moshi: Moshi): FeedRecommendation =
                 it.imageUrl,
                 it.link,
                 it.title,
+                it.date,
             )
         }
         ?: throw IllegalArgumentException("Provided Json was invalid")
@@ -76,7 +85,8 @@ fun FeedRecommendation.toJson(moshi: Moshi): String =
                 description,
                 imageUrl,
                 link,
-                title
+                title,
+                date
             )
         )
 

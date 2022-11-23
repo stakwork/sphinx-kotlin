@@ -4,7 +4,10 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.common_player.navigation.CommonPlayerNavigator
+import chat.sphinx.common_player.viewstate.BoostAnimationViewState
 import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
+import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.FeedRecommendation
 import chat.sphinx.wrapper_feed.toFeedRecommendationOrNull
 import com.squareup.moshi.Moshi
@@ -14,6 +17,9 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,6 +27,7 @@ import javax.inject.Inject
 class CommonPlayerScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val navigator: CommonPlayerNavigator,
+    private val contactRepository: ContactRepository,
     private val moshi: Moshi,
     savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -32,8 +39,23 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
     private val args: CommonPlayerScreenFragmentArgs by savedStateHandle.navArgs()
 
+    val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
+        ViewStateContainer(BoostAnimationViewState.Idle)
+    }
+
     init {
         loadRecommendations()
+
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+
+            boostAnimationViewStateContainer.updateViewState(
+                BoostAnimationViewState.BoosAnimationInfo(
+                    owner.photoUrl,
+                    owner.tipAmount
+                )
+            )
+        }
     }
 
     private fun loadRecommendations() {
@@ -73,6 +95,28 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 )
 
                 navigator.closeDetailScreen()
+            }
+        }
+    }
+
+    private suspend fun getOwner(): Contact {
+        return contactRepository.accountOwner.value.let { contact ->
+            if (contact != null) {
+                contact
+            } else {
+                var resolvedOwner: Contact? = null
+                try {
+                    contactRepository.accountOwner.collect { ownerContact ->
+                        if (ownerContact != null) {
+                            resolvedOwner = ownerContact
+                            throw Exception()
+                        }
+                    }
+                } catch (e: Exception) {
+                }
+                delay(25L)
+
+                resolvedOwner!!
             }
         }
     }
