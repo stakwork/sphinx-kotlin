@@ -14,6 +14,7 @@ import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -73,21 +74,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
 
         selectedRecommendation?.let {
-            updateViewState(
-                if (it.isPodcast) {
-                    CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected(
-                        feedRecommendationList,
-                        it
-                    )
-                } else if (it.isYouTubeVideo) {
-                    CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected(
-                        feedRecommendationList,
-                        it
-                    )
-                } else {
-                    CommonPlayerScreenViewState.Idle
-                }
-            )
+            itemSelected(it, feedRecommendationList)
         } ?: run {
             viewModelScope.launch(mainImmediate) {
                 submitSideEffect(
@@ -98,6 +85,39 @@ class CommonPlayerScreenViewModel @Inject constructor(
             }
         }
     }
+
+    fun itemSelected(
+        feedRecommendation: FeedRecommendation,
+        recommendations: List<FeedRecommendation>? = null
+    ) {
+        var feedRecommendationList: MutableList<FeedRecommendation> = mutableListOf()
+
+        recommendations?.let {
+            feedRecommendationList.addAll(it)
+        } ?: run {
+            (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations)?.let {
+                feedRecommendationList.addAll(it.recommendations)
+            }
+        }
+
+        updateViewState(
+            if (feedRecommendation.isPodcast) {
+                CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected(
+                    feedRecommendationList,
+                    feedRecommendation
+                )
+            } else if (feedRecommendation.isYouTubeVideo) {
+                CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected(
+                    feedRecommendationList,
+                    feedRecommendation
+                )
+            } else {
+                CommonPlayerScreenViewState.Idle
+            }
+        )
+    }
+
+
 
     private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->

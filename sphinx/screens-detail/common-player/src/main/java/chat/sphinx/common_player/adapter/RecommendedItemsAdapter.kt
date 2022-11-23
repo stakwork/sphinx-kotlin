@@ -6,6 +6,7 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.common_player.R
@@ -186,13 +187,13 @@ class RecommendedItemsAdapter (
         private var feedRecommendation: FeedRecommendation? = null
 
         init {
-//            binding.layoutConstraintRecommendedHolder.setOnClickListener {
-//                feedRecommendation?.let { nnFeedRecommendation->
-//                    lifecycleOwner.lifecycleScope.launch {
-//
-//                    }
-//                }
-//            }
+            binding.layoutConstraintRecommendedHolder.setOnClickListener {
+                feedRecommendation?.let { nnFeedRecommendation ->
+                    lifecycleOwner.lifecycleScope.launch {
+                        viewModel.itemSelected(nnFeedRecommendation)
+                    }
+                }
+            }
         }
 
         fun bind(position: Int) {

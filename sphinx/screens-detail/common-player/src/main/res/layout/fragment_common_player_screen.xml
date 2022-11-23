@@ -20,7 +20,7 @@
         android:id="@+id/include_layout_player_description_and_controls"
         layout="@layout/layout_player_description_and_controls"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/item_details_controls_height"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_layout_players_container" />

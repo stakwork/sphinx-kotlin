@@ -104,7 +104,7 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/layout_constraint_loading"
                     android:layout_width="wrap_content"
-                    android:layout_height="270dp"
+                    android:layout_height="@dimen/feed_all_loading_height"
                     android:layout_marginEnd="@dimen/default_layout_margin"
                     android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"

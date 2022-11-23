@@ -12,7 +12,6 @@ import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
-import chat.sphinx.video_screen.navigation.ToVideoFeedDetailScreen
 import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.web_view.navigation.ToWebViewDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -95,14 +94,6 @@ internal class DashboardNavigatorImpl @Inject constructor(
     ) {
         detailDriver.submitNavigationRequest(
             ToCommonPlayerScreen(recommendations, recommendationId)
-        )
-    }
-
-    override suspend fun toVideoFeedScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
-        detailDriver.submitNavigationRequest(
-            ToVideoFeedDetailScreen(
-                chatId, feedId, feedUrl
-            )
         )
     }
 
