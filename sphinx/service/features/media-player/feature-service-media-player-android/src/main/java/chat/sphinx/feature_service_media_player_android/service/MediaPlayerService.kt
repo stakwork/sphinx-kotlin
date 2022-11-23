@@ -354,7 +354,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                             nnData.podcastId,
                             nnData.episodeId,
                             currentTime,
-                            nnData.durationMilliSeconds
+                            nnData.durationMilliSeconds,
+                            nnData.mediaPlayer.playbackParams.speed.toDouble()
                         )
                         mediaServiceController.dispatchState(currentState)
 
@@ -460,7 +461,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                                 nnData.podcastId,
                                 nnData.episodeId,
                                 currentTimeMilliseconds,
-                                nnData.durationMilliSeconds
+                                nnData.durationMilliSeconds,
+                                nnData.mediaPlayer.playbackParams.speed.toDouble()
                             )
                             trackSecondsConsumed++
                         } else {
@@ -471,7 +473,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                                     nnData.podcastId,
                                     nnData.episodeId,
                                     currentTimeMilliseconds,
-                                    nnData.durationMilliSeconds
+                                    nnData.durationMilliSeconds,
+                                    nnData.mediaPlayer.playbackParams.speed.toDouble()
                                 )
                             } else {
                                 MediaPlayerServiceState.ServiceActive.MediaState.Paused(
@@ -479,7 +482,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                                     nnData.podcastId,
                                     nnData.episodeId,
                                     currentTimeMilliseconds,
-                                    nnData.durationMilliSeconds
+                                    nnData.durationMilliSeconds,
+                                    nnData.mediaPlayer.playbackParams.speed.toDouble()
                                 )
                             }
 

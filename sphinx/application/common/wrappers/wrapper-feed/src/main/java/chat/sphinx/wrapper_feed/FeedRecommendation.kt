@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_common.toDateTime
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import java.io.File
 
 data class FeedRecommendation(
     val id: String,
@@ -34,6 +35,49 @@ data class FeedRecommendation(
 
     val dateString: String
         get() = date.toDateTime().chatTimeFormat()
+
+    var duration: Long? = null
+
+    private var currentTimeMilliseconds: Int? = null
+
+    val currentTime: Int
+        get() = currentTimeMilliseconds ?: 0
+
+    var isPlaying: Boolean = false
+
+    fun resetPlayerData() {
+        isPlaying = false
+        currentTimeMilliseconds = 0
+    }
+
+    fun getDuration(
+        durationRetrieverHandler: (url: String, localFile: File?) -> Long
+    ): Long {
+        if (duration == null) {
+
+            duration = durationRetrieverHandler(
+                link,
+                null
+            )
+        }
+
+        return duration ?: 0
+    }
+
+    fun playingItemUpdate(time: Int, duration: Long) {
+        this.duration = if (duration > 0) duration else this.duration
+        this.currentTimeMilliseconds = time
+        this.isPlaying = true
+    }
+
+    fun pauseItemUpdate() {
+        this.isPlaying = false
+    }
+
+    fun endEpisodeUpdate() {
+        this.isPlaying = false
+        this.currentTimeMilliseconds = 0
+    }
 }
 
 @JsonClass(generateAdapter = true)

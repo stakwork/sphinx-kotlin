@@ -5,10 +5,16 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
+import android.view.ContextThemeWrapper
+import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.PopupMenu
+import android.widget.SeekBar
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -20,26 +26,33 @@ import chat.sphinx.common_player.adapter.RecommendedItemsFooterAdapter
 import chat.sphinx.common_player.databinding.FragmentCommonPlayerScreenBinding
 import chat.sphinx.common_player.viewstate.BoostAnimationViewState
 import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
+import chat.sphinx.common_player.viewstate.EpisodePlayerViewState
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.wrapper_common.PhotoUrl
-import chat.sphinx.wrapper_common.feed.youtubeVideoId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.util.getHHMMSSString
+import chat.sphinx.wrapper_feed.FeedRecommendation
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
 import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 @AndroidEntryPoint
-internal class CommonPlayerScreenFragment() : SideEffectFragment<
+internal class CommonPlayerScreenFragment : SideEffectFragment<
         Context,
         CommonPlayerScreenSideEffect,
         CommonPlayerScreenViewState,
@@ -81,6 +94,292 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
         setupItems()
     }
 
+    private fun toggleLoadingWheel(show: Boolean) {
+        binding.apply {
+            includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply layoutEpisodesSlider@ {
+                this@layoutEpisodesSlider.progressBarAudioLoading.goneIfFalse(show)
+            }
+            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply layoutPlaybackControls@ {
+                this@layoutPlaybackControls.textViewPlayPauseButton.isEnabled = !show
+            }
+        }
+    }
+
+    private fun togglePlayPauseButton(playing: Boolean) {
+        binding.apply {
+            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
+                textViewPlayPauseButton.background =
+                    ContextCompat.getDrawable(root.context,
+                        if (playing) R.drawable.ic_podcast_pause_circle else R.drawable.ic_podcast_play_circle
+                    )
+            }
+        }
+    }
+
+    private suspend fun loadingEpisode(feedRecommendation: FeedRecommendation) {
+        binding.apply {
+            includeLayoutPlayerDescriptionAndControls.apply {
+                textViewItemTitle.text = feedRecommendation.title
+            }
+
+            togglePlayPauseButton(true)
+
+            includeLayoutPlayersContainer.apply {
+                imageLoader.load(
+                    imageViewPodcastImage,
+                    feedRecommendation.imageUrl,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_podcast_placeholder)
+                        .build()
+                )
+
+                includeLayoutEpisodeSliderControl.apply {
+                    val currentTime = feedRecommendation.currentTime.toLong()
+                    val duration = (feedRecommendation.duration ?: 0).toLong()
+
+                    textViewCurrentEpisodeDuration.text = duration.getHHMMSSString()
+                    textViewCurrentEpisodeProgress.text = currentTime.getHHMMSSString()
+
+                    val progress: Int =
+                        try {
+                            ((currentTime * 100) / duration).toInt()
+                        } catch (e: ArithmeticException) {
+                            0
+                        }
+
+                    seekBarCurrentEpisodeProgress.progress = progress
+
+                    toggleLoadingWheel(true)
+                }
+            }
+        }
+    }
+
+    private suspend fun seekTo(
+        feedRecommendation: FeedRecommendation,
+        progress: Int,
+        speed: Double
+    ) {
+        val duration = withContext(viewModel.io) {
+            feedRecommendation.getDuration(viewModel::retrieveItemDuration)
+        }
+        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
+        viewModel.seekTo(seekTime, speed)
+    }
+
+    private fun updateViewAfterSeek(feedRecommendation: FeedRecommendation) {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            setTimeLabelsAndProgressBar(feedRecommendation)
+        }
+    }
+
+    private suspend fun setTimeLabelsAndProgressBar(
+        feedRecommendation: FeedRecommendation,
+        currentTime: Long? = null,
+        duration: Long? = null
+    ) {
+        val currentTime: Long = currentTime ?: feedRecommendation.currentTime.toLong()
+
+        val duration = duration ?: withContext(viewModel.io) {
+            feedRecommendation.getDuration(viewModel::retrieveItemDuration)
+        }
+        val progress: Int =
+            try {
+                ((currentTime * 100) / duration).toInt()
+            } catch (e: ArithmeticException) {
+                0
+            }
+
+        setTimeLabelsAndProgressBarTo(duration, currentTime, progress)
+    }
+
+    private fun setTimeLabelsAndProgressBarTo(
+        duration: Long,
+        currentTime: Long? = null,
+        progress: Int
+    ) {
+        binding.includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply {
+            val currentT: Double = currentTime?.toDouble() ?: (duration.toDouble() * (progress.toDouble()) / 100)
+
+            textViewCurrentEpisodeDuration.text = duration.getHHMMSSString()
+            textViewCurrentEpisodeProgress.text = currentT.toLong().getHHMMSSString()
+
+            seekBarCurrentEpisodeProgress.progress = progress
+        }
+    }
+
+    private suspend fun showFeedRecommendationInfo(
+        feedRecommendation: FeedRecommendation,
+        state: MediaPlayerServiceState.ServiceActive.MediaState? = null
+    ) {
+        binding.apply {
+
+            includeLayoutPlayerDescriptionAndControls.apply {
+                textViewItemTitle.text = feedRecommendation.title
+
+                includeLayoutEpisodePlaybackControls.apply {
+                    textViewPlaybackSpeedButton.text = (state?.speed ?: 1.0).getSpeedString()
+                }
+            }
+
+            includeLayoutPlayersContainer.apply {
+                imageLoader.load(
+                    imageViewPodcastImage,
+                    feedRecommendation.link,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_podcast_placeholder)
+                        .build()
+                )
+            }
+
+            val playing = state is MediaPlayerServiceState.ServiceActive.MediaState.Playing
+            togglePlayPauseButton(playing || feedRecommendation.isPlaying)
+
+            (state as? MediaPlayerServiceState.ServiceActive.MediaState.Playing)?.let {
+                if (!dragging)
+                    setTimeLabelsAndProgressBar(
+                        feedRecommendation,
+                        it.currentTime.toLong(),
+                        it.episodeDuration.toLong()
+                    )
+            } ?: run {
+                if (!dragging) setTimeLabelsAndProgressBar(feedRecommendation)
+            }
+
+            toggleLoadingWheel(false)
+            addPlayerOnClickListeners(feedRecommendation)
+        }
+    }
+
+    private var dragging: Boolean = false
+    private fun addPlayerOnClickListeners(
+        feedRecommendation: FeedRecommendation
+    ) {
+        binding.apply {
+            val speed = includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.textViewPlaybackSpeedButton.text.toString().toDoubleOrNull() ?: 1.0
+
+            includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply {
+                seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
+                    object : SeekBar.OnSeekBarChangeListener {
+
+                        override fun onProgressChanged(
+                            seekBar: SeekBar?,
+                            progress: Int,
+                            fromUser: Boolean
+                        ) {
+                            if (fromUser) {
+                                val duration = feedRecommendation.getDuration(viewModel::retrieveItemDuration)
+                                setTimeLabelsAndProgressBarTo(duration, null, progress)
+                            }
+                        }
+
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                            dragging = true
+                        }
+
+                        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                val speed = includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.textViewPlaybackSpeedButton.text.toString().toDoubleOrNull() ?: 1.0
+                                seekTo(feedRecommendation, seekBar?.progress ?: 0, speed)
+                            }
+                            dragging = false
+                        }
+                    }
+                )
+            }
+
+            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
+                textViewPlaybackSpeedButton.setOnClickListener {
+                    showSpeedPopup()
+                }
+
+//                textViewShareClipButton.setOnClickListener {
+//                    viewModel.shouldShareClip()
+//                }
+
+                textViewReplay15Button.setOnClickListener {
+                    viewModel.seekTo(feedRecommendation.currentTime - 15000, speed)
+                    updateViewAfterSeek(feedRecommendation)
+                }
+
+                textViewPlayPauseButton.setOnClickListener {
+                    if (feedRecommendation.isPlaying) {
+                        viewModel.pauseEpisode(feedRecommendation)
+                    } else {
+                        viewModel.playEpisode(feedRecommendation, feedRecommendation.currentTime, speed)
+                    }
+                }
+
+                textViewForward30Button.setOnClickListener {
+                    viewModel.seekTo(feedRecommendation.currentTime + 30000, speed)
+                    updateViewAfterSeek(feedRecommendation)
+                }
+
+//                includeLayoutCustomBoost.apply customBoost@ {
+//                    this@customBoost.imageViewFeedBoostButton.setOnClickListener {
+//                        val amount = editTextCustomBoost.text.toString()
+//                            .replace(" ", "")
+//                            .toLongOrNull()?.toSat() ?: Sat(0)
+//
+//                        viewModel.sendPodcastBoost(
+//                            amount,
+//                            fireworksCallback = {
+//                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//                                    setupBoostAnimation(null, amount)
+//
+//                                    includeLayoutBoostFireworks.apply fireworks@ {
+//                                        this@fireworks.root.visible
+//                                        this@fireworks.lottieAnimationView.playAnimation()
+//                                    }
+//                                }
+//                            }
+//                        )
+//                    }
+//                }
+            }
+        }
+    }
+
+    private fun showSpeedPopup() {
+        binding.includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
+            val wrapper: Context = ContextThemeWrapper(context, R.style.speedMenu)
+            val popup = PopupMenu(wrapper, textViewPlaybackSpeedButton)
+            popup.inflate(R.menu.speed_menu)
+
+            popup.setOnMenuItemClickListener { item: MenuItem? ->
+                when (item!!.itemId) {
+                    R.id.speed0_5 -> {
+                        textViewPlaybackSpeedButton.text = "0.5x"
+                        viewModel.adjustSpeed(0.5)
+                    }
+                    R.id.speed0_8 -> {
+                        textViewPlaybackSpeedButton.text = "0.8x"
+                        viewModel.adjustSpeed(0.8)
+                    }
+                    R.id.speed1 -> {
+                        textViewPlaybackSpeedButton.text = "1x"
+                        viewModel.adjustSpeed(1.0)
+                    }
+                    R.id.speed1_2 -> {
+                        textViewPlaybackSpeedButton.text = "1.2x"
+                        viewModel.adjustSpeed(1.2)
+                    }
+                    R.id.speed1_5 -> {
+                        textViewPlaybackSpeedButton.text = "1.5x"
+                        viewModel.adjustSpeed(1.5)
+                    }
+                    R.id.speed2_1 -> {
+                        textViewPlaybackSpeedButton.text = "2.1x"
+                        viewModel.adjustSpeed(2.1)
+                    }
+                }
+                true
+            }
+
+            popup.show()
+        }
+    }
+
     override suspend fun onViewStateFlowCollect(viewState: CommonPlayerScreenViewState) {
         @Exhaustive
         when(viewState) {
@@ -112,6 +411,7 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
                                 textViewPlaybackSpeedButton.visible
                                 imageViewPlayPauseButton.visible
                             }
+                            showFeedRecommendationInfo(viewState.selectedItem)
 
                             youtubePlayer?.pause()
                         }
@@ -155,6 +455,44 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
                         setupBoostAnimation(
                             viewState.photoUrl,
                             viewState.amount
+                        )
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.episodePlayerViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is EpisodePlayerViewState.Idle -> {}
+
+                    is EpisodePlayerViewState.ServiceLoading -> {
+                        toggleLoadingWheel(true)
+                    }
+                    is EpisodePlayerViewState.ServiceInactive -> {
+                        togglePlayPauseButton(false)
+                    }
+
+                    is EpisodePlayerViewState.EpisodeLoaded -> {
+                        toggleLoadingWheel(true)
+                        showFeedRecommendationInfo(viewState.feedRecommendation)
+                    }
+
+                    is EpisodePlayerViewState.LoadingEpisode -> {
+                        loadingEpisode(viewState.feedRecommendation)
+                    }
+
+                    is EpisodePlayerViewState.EpisodePlayed -> {
+                        showFeedRecommendationInfo(viewState.feedRecommendation)
+                    }
+
+                    is EpisodePlayerViewState.MediaStateUpdate -> {
+                        toggleLoadingWheel(false)
+
+                        showFeedRecommendationInfo(
+                            viewState.feedRecommendation,
+                            viewState.state
                         )
                     }
                 }
@@ -266,4 +604,14 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
 @Suppress("NOTHING_TO_INLINE")
 inline fun String.youTubeVideoId(): String {
     return this.substringAfterLast("v/").substringAfterLast("v=").substringBefore("?")
+}
+
+inline fun Double.getSpeedString(): String {
+    if (this == 0.0) {
+        return "1x"
+    }
+    if (this.roundToInt().toDouble() == this) {
+        return "${this.toInt()}x"
+    }
+    return "${this}x"
 }
