@@ -5,7 +5,6 @@
     android:id="@+id/layout_constraint_episode_slider_control"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/headerBG"
     android:paddingVertical="@dimen/default_layout_margin">
 
 

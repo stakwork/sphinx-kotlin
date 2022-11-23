@@ -45,31 +45,14 @@
         app:layout_constraintTop_toBottomOf="@+id/text_view_item_published_date"
         tools:text="This video about setting up layouts on the Android view and all the jazz. This video about setting up layouts on the Android view and all the jazz." />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint_common_podcast_and_video_player"
-        android:layout_width="match_parent"
+    <include
+        android:id="@+id/include_layout_podcast_player_common_controls"
+        layout="@layout/layout_episode_playback_controls"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_item_description">
-
-        <include
-            android:id="@+id/include_layout_podcast_player_common_controls"
-            layout="@layout/layout_podcast_player_common_controls"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:visibility="visible"/>
-
-        <include
-            android:id="@+id/include_layout_custom_boost"
-            layout="@layout/layout_custom_boost"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/custom_boost_height"
-            android:layout_marginEnd="@dimen/include_layout_custom_boost_margin_end"
-            android:layout_marginBottom="@dimen/include_layout_custom_boost_margin_bottom"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_description"
+        android:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

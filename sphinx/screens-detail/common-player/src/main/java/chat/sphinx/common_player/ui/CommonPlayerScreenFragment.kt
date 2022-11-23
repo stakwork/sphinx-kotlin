@@ -62,7 +62,7 @@ internal class CommonPlayerScreenFragment() : SideEffectFragment<
             }
             is CommonPlayerScreenViewState.FeedRecommendations -> {
                 binding.apply {
-                    includeLayoutCommonPlayerDescription.apply {
+                    includeLayoutPlayerDescriptionAndControls.apply {
                         textViewItemTitle.text = viewState.selectedItem.title
                         textViewItemDescription.text = viewState.selectedItem.description
                     }

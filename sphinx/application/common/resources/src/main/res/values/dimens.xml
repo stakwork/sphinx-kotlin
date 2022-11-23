@@ -135,10 +135,9 @@
     <dimen name="custom_boost_button_padding">2dp</dimen>
     <dimen name="custom_boost_button_xy">32dp</dimen>
 
-    <dimen name="common_player_details_small_control_button_xy">32dp</dimen>
-    <dimen name="common_player_details_large_control_button_xy">58dp</dimen>
-    <dimen name="common_player_time_labels_horizontal_margin">18dp</dimen>
-
+    <dimen name="player_details_small_control_button_xy">32dp</dimen>
+    <dimen name="player_details_large_control_button_xy">58dp</dimen>
+    <dimen name="player_time_labels_horizontal_margin">18dp</dimen>
 
     <!-- Tribe Member Profile -->
     <dimen name="tribe_member_image_section_height">112dp</dimen>

@@ -8,23 +8,22 @@
     android:background="@color/headerBG"
     tools:context=".ui.CommonPlayerScreenFragment">
 
-
     <include
-        android:id="@+id/include_layout_current_player"
-        layout="@layout/layout_current_player"
+        android:id="@+id/include_layout_players_container"
+        layout="@layout/layout_players_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <include
-        android:id="@+id/include_layout_common_player_description"
-        layout="@layout/layout_common_player_description"
+        android:id="@+id/include_layout_player_description_and_controls"
+        layout="@layout/layout_player_description_and_controls"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include_layout_current_player" />
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_players_container" />
 
     <include
         android:id="@+id/include_recommended_items_list"
@@ -34,7 +33,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include_layout_common_player_description" />
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_player_description_and_controls" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
