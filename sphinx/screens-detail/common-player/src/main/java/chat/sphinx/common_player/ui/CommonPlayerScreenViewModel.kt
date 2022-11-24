@@ -121,8 +121,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
             feedRecommendationList.addAll(it)
         }
 
-        feedRecommendation.isSelected = true
-
         (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations)?.let {
             stopPlayingEpisode(it.selectedItem)
 
@@ -152,9 +150,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
     private fun stopPlayingEpisode(feedRecommendation: FeedRecommendation) {
         viewModelScope.launch(mainImmediate) {
-
-            feedRecommendation.isSelected = false
-
             if (feedRecommendation.isPodcast) {
                 feedRecommendation.resetPlayerData()
 

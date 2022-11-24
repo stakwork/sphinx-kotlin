@@ -232,7 +232,7 @@ class RecommendedItemsAdapter (
 
                 root.setBackgroundColor(
                     root.context.getColor(
-                        if (f.isSelected) R.color.semiTransparentPrimaryBlue else R.color.headerBG
+                        if (f.isPlaying) R.color.semiTransparentPrimaryBlue else R.color.headerBG
                     )
                 )
             }

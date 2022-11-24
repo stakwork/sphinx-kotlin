@@ -3968,7 +3968,7 @@ abstract class SphinxRepository(
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {}
                     is Response.Success -> {
-                        response.value.forEach { feedRecommendation ->
+                        response.value.forEachIndexed { index, feedRecommendation ->
 
                             results.add(
                                 FeedRecommendation(
@@ -3980,7 +3980,8 @@ abstract class SphinxRepository(
                                     largeImageUrl = feedRecommendation.l_image_url,
                                     link = feedRecommendation.link,
                                     title = feedRecommendation.episode_title,
-                                    date = feedRecommendation.date
+                                    date = feedRecommendation.date,
+                                    position = index
                                 )
                             )
                         }

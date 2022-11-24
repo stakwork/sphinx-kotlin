@@ -250,6 +250,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             togglePlayPauseButton(playing || feedRecommendation.isPlaying)
 
             (state as? MediaPlayerServiceState.ServiceActive.MediaState.Playing)?.let {
+
                 if (!dragging)
                     setTimeLabelsAndProgressBar(
                         feedRecommendation,
@@ -259,6 +260,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             } ?: run {
                 if (!dragging) setTimeLabelsAndProgressBar(feedRecommendation)
             }
+
+            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(feedRecommendation.position)
 
             toggleLoadingWheel(false)
             addPlayerOnClickListeners(feedRecommendation)
@@ -597,12 +600,20 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
+                        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
+                            it.selectedItem.isPlaying = true
+                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
+                        }
                         Log.d("YouTubePlayer", "Youtube is playing")
                     }
                     override fun onStopped() {
                         Log.d("YouTubePlayer", "Youtube has stopped")
                     }
                     override fun onPaused() {
+                        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
+                            it.selectedItem.isPlaying = false
+                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
+                        }
                         Log.d("YouTubePlayer", "Youtube is on pause")
                     }
                 }

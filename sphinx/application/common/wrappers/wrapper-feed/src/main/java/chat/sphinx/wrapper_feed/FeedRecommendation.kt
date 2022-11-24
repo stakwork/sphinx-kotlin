@@ -1,6 +1,5 @@
 package chat.sphinx.wrapper_feed
 
-import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.toDateTime
 import com.squareup.moshi.JsonClass
@@ -18,6 +17,7 @@ data class FeedRecommendation(
     val link: String,
     val title: String,
     val date: Long,
+    val position: Int,
 ) {
 
     companion object {
@@ -52,8 +52,6 @@ data class FeedRecommendation(
         get() = currentTimeMilliseconds ?: 0
 
     var isPlaying: Boolean = false
-
-    var isSelected: Boolean = false
 
     fun resetPlayerData() {
         isPlaying = false
@@ -101,6 +99,7 @@ internal data class FeedRecommendationMoshi(
     val link: String,
     val title: String,
     val date: Long,
+    val position: Int
 )
 
 @Suppress("NOTHING_TO_INLINE")
@@ -129,6 +128,7 @@ fun String.toFeedRecommendation(moshi: Moshi): FeedRecommendation =
                 it.link,
                 it.title,
                 it.date,
+                it.position
             )
         }
         ?: throw IllegalArgumentException("Provided Json was invalid")
@@ -146,7 +146,8 @@ fun FeedRecommendation.toJson(moshi: Moshi): String =
                 largeImageUrl,
                 link,
                 title,
-                date
+                date,
+                position
             )
         )
 
