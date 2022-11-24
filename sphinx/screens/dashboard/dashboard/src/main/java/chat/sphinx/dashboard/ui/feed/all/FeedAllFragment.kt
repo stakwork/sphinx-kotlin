@@ -99,19 +99,19 @@ internal class FeedAllFragment : SideEffectFragment<
                     layoutConstraintLoading.visible
                     layoutConstraintRefresh.gone
                     recyclerViewRecommendations.invisible
-                    textViewNoRecommendations.gone
+                    layoutConstraintNoRecommendations.gone
                 }
                 is FeedAllViewState.NoRecommendations -> {
                     layoutConstraintLoading.gone
                     layoutConstraintRefresh.visible
                     recyclerViewRecommendations.invisible
-                    textViewNoRecommendations.visible
+                    layoutConstraintNoRecommendations.visible
                 }
                 is FeedAllViewState.RecommendedList -> {
                     layoutConstraintLoading.gone
                     layoutConstraintRefresh.visible
                     recyclerViewRecommendations.visible
-                    textViewNoRecommendations.gone
+                    layoutConstraintNoRecommendations.gone
                 }
             }
         }

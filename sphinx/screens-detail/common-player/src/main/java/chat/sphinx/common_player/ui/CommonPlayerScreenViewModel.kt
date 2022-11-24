@@ -119,8 +119,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
         recommendations?.let {
             feedRecommendationList.addAll(it)
-        } ?: run {
-            (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations)?.let {
+        }
+
+        feedRecommendation.isSelected = true
+
+        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations)?.let {
+            stopPlayingEpisode(it.selectedItem)
+
+            if (feedRecommendationList.isEmpty()) {
                 feedRecommendationList.addAll(it.recommendations)
             }
         }
@@ -144,7 +150,23 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
+    private fun stopPlayingEpisode(feedRecommendation: FeedRecommendation) {
+        viewModelScope.launch(mainImmediate) {
 
+            feedRecommendation.isSelected = false
+
+            if (feedRecommendation.isPodcast) {
+                feedRecommendation.resetPlayerData()
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Pause(
+                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        feedRecommendation.id
+                    )
+                )
+            }
+        }
+    }
 
     private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -181,6 +203,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 @Exhaustive
                 when (serviceState) {
                     is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+
                         viewState.recommendations.first {
                             it.id == serviceState.episodeId
                         }?.let { feedRecommendation ->
@@ -193,6 +216,13 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                 EpisodePlayerViewState.MediaStateUpdate(
                                     feedRecommendation,
                                     serviceState
+                                )
+                            )
+
+                            updateViewState(
+                                CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected(
+                                    viewState.recommendations,
+                                    feedRecommendation
                                 )
                             )
                         }
@@ -259,12 +289,10 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 )
             )
 
-            withContext(io) {
-                feedRecommendation.playingItemUpdate(
-                    startTime,
-                    0
-                )
-            }
+            feedRecommendation.playingItemUpdate(
+                startTime,
+                0
+            )
 
             episodePlayerViewStateContainer.updateViewState(
                 EpisodePlayerViewState.EpisodePlayed(

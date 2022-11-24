@@ -1,8 +1,7 @@
 package chat.sphinx.feature_network_query_podcast_search
 
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
-import chat.sphinx.concept_network_query_feed_search.model.FeedRecommendationsDto
-import chat.sphinx.concept_network_query_feed_search.model.FeedRecommendationsResponse
+import chat.sphinx.concept_network_query_feed_search.model.FeedRecommendationDto
 import chat.sphinx.concept_network_query_feed_search.model.FeedSearchResultDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_podcast_search.model.GetFeedRecommendationsRelayResponse
@@ -44,7 +43,7 @@ class NetworkQueryFeedSearchImpl(
 
     override fun getFeedRecommendations(
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<List<FeedRecommendationsDto>, ResponseError>> =
+    ): Flow<LoadResponse<List<FeedRecommendationDto>, ResponseError>> =
         networkRelayCall.relayGetList(
             responseJsonClass = GetFeedRecommendationsRelayResponse::class.java,
             relayEndpoint = ENDPOINT_FEED_RECOMMENDATIONS,

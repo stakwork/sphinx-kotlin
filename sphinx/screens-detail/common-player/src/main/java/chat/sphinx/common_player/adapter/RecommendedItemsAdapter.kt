@@ -75,7 +75,8 @@ class RecommendedItemsAdapter (
                 val same: Boolean =
                     old.title                == new.title                &&
                     old.description          == new.description          &&
-                    old.link                 == new.link
+                    old.link                 == new.link                 &&
+                    old.isPlaying            == new.isPlaying
 
                 if (sameList) {
                     sameList = same
@@ -186,18 +187,16 @@ class RecommendedItemsAdapter (
 
         private var feedRecommendation: FeedRecommendation? = null
 
-        init {
-            binding.layoutConstraintRecommendedHolder.setOnClickListener {
-                feedRecommendation?.let { nnFeedRecommendation ->
-                    lifecycleOwner.lifecycleScope.launch {
-                        viewModel.itemSelected(nnFeedRecommendation)
-                    }
-                }
-            }
-        }
-
         fun bind(position: Int) {
             binding.apply {
+
+                layoutConstraintRecommendedHolder.setOnClickListener {
+                    feedRecommendation?.let { nnFeedRecommendation ->
+                        viewModel.itemSelected(nnFeedRecommendation)
+                        notifyDataSetChanged()
+                    }
+                }
+
                 val f: FeedRecommendation = recommendations.getOrNull(position) ?: let {
                     feedRecommendation = null
                     return
@@ -206,11 +205,11 @@ class RecommendedItemsAdapter (
                 disposable?.dispose()
                 holderJob?.cancel()
 
-                if (f.imageUrl.isNotEmpty()) {
+                f.smallImageUrl?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
                             imageViewRecommendedImage,
-                            f.imageUrl,
+                            imageUrl,
                             getImageLoaderOptions(f)
                         ).also {
                             disposable = it
@@ -218,7 +217,7 @@ class RecommendedItemsAdapter (
                     }.let { job ->
                         holderJob = job
                     }
-                } else {
+                } ?: run {
                     imageViewRecommendedImage.setImageDrawable(
                         ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
                     )
@@ -229,6 +228,12 @@ class RecommendedItemsAdapter (
 
                 imageViewItemRowRecommendationType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, f.getIconType())
+                )
+
+                root.setBackgroundColor(
+                    root.context.getColor(
+                        if (f.isSelected) R.color.semiTransparentPrimaryBlue else R.color.headerBG
+                    )
                 )
             }
         }

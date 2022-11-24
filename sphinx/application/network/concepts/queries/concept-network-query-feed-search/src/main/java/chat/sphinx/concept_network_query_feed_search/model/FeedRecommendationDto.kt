@@ -3,7 +3,7 @@ package chat.sphinx.concept_network_query_feed_search.model
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
-data class FeedRecommendationsDto(
+data class FeedRecommendationDto(
     val pub_key: String,
     val type: String,
     val ref_id: String,
@@ -14,7 +14,9 @@ data class FeedRecommendationsDto(
     val show_title: String,
     val boost: Long,
     val keyword: Any?,
-    val image_url: String,
+    val s_image_url: String?,
+    val m_image_url: String?,
+    val l_image_url: String?,
     val node_type: String,
     val hosts: List<Hosts>,
     val guests: List<String>,

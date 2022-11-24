@@ -12,7 +12,9 @@ data class FeedRecommendation(
     val id: String,
     val feedType: String,
     val description: String,
-    val imageUrl: String,
+    val smallImageUrl: String?,
+    val mediumImageUrl: String?,
+    val largeImageUrl: String?,
     val link: String,
     val title: String,
     val date: Long,
@@ -23,6 +25,12 @@ data class FeedRecommendation(
         const val YOUTUBE_VIDEO_TYPE = "youtube"
         const val NEWSLETTER_TYPE = "newsletter"
     }
+
+    val largestImageUrl: String?
+        get() = largeImageUrl ?: mediumImageUrl ?: smallImageUrl
+
+    val smallestImageUrl: String?
+        get() = smallImageUrl ?: mediumImageUrl ?: largeImageUrl
 
     val isPodcast: Boolean
         get() = feedType == PODCAST_TYPE
@@ -44,6 +52,8 @@ data class FeedRecommendation(
         get() = currentTimeMilliseconds ?: 0
 
     var isPlaying: Boolean = false
+
+    var isSelected: Boolean = false
 
     fun resetPlayerData() {
         isPlaying = false
@@ -85,7 +95,9 @@ internal data class FeedRecommendationMoshi(
     val id: String,
     val feedType: String,
     val description: String,
-    val imageUrl: String,
+    val smallImageUrl: String?,
+    val mediumImageUrl: String?,
+    val largeImageUrl: String?,
     val link: String,
     val title: String,
     val date: Long,
@@ -111,7 +123,9 @@ fun String.toFeedRecommendation(moshi: Moshi): FeedRecommendation =
                 it.id,
                 it.feedType,
                 it.description,
-                it.imageUrl,
+                it.smallImageUrl,
+                it.mediumImageUrl,
+                it.largeImageUrl,
                 it.link,
                 it.title,
                 it.date,
@@ -127,7 +141,9 @@ fun FeedRecommendation.toJson(moshi: Moshi): String =
                 id,
                 feedType,
                 description,
-                imageUrl,
+                smallImageUrl,
+                mediumImageUrl,
+                largeImageUrl,
                 link,
                 title,
                 date

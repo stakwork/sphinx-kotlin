@@ -3,6 +3,7 @@ package chat.sphinx.common_player.ui
 import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -45,6 +46,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -125,13 +127,19 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             togglePlayPauseButton(true)
 
             includeLayoutPlayersContainer.apply {
-                imageLoader.load(
-                    imageViewPodcastImage,
-                    feedRecommendation.imageUrl,
-                    ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_podcast_placeholder)
-                        .build()
-                )
+                feedRecommendation.largestImageUrl?.let { imageUrl ->
+                    imageLoader.load(
+                        imageViewPodcastImage,
+                        imageUrl,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(feedRecommendation.getPlaceHolderImageRes())
+                            .build()
+                    )
+                } ?: run {
+                    imageViewPodcastImage.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, feedRecommendation.getPlaceHolderImageRes())
+                    )
+                }
 
                 includeLayoutEpisodeSliderControl.apply {
                     val currentTime = feedRecommendation.currentTime.toLong()
@@ -223,13 +231,19 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             }
 
             includeLayoutPlayersContainer.apply {
-                imageLoader.load(
-                    imageViewPodcastImage,
-                    feedRecommendation.link,
-                    ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_podcast_placeholder)
-                        .build()
-                )
+                feedRecommendation.largestImageUrl?.let { imageUrl ->
+                    imageLoader.load(
+                        imageViewPodcastImage,
+                        imageUrl,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(feedRecommendation.getPlaceHolderImageRes())
+                            .build()
+                    )
+                } ?: run {
+                    imageViewPodcastImage.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, feedRecommendation.getPlaceHolderImageRes())
+                    )
+                }
             }
 
             val playing = state is MediaPlayerServiceState.ServiceActive.MediaState.Playing
@@ -393,7 +407,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         textViewItemDescription.text = viewState.selectedItem.description
                         textViewItemPublishedDate.text = viewState.selectedItem.dateString
                     }
-
                     includeRecommendedItemsList.textViewListCount.text = viewState.recommendations.size.toString()
 
                     when(viewState) {
@@ -401,7 +414,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                             includeLayoutPlayersContainer.apply {
                                 frameLayoutYoutubePlayer.gone
                                 imageViewPodcastImage.visible
-                                includeLayoutEpisodeSliderControl.root.visible
+                                layoutConstraintSliderContainer.visible
                             }
                             includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
                                 textViewShareClipButton.visible
@@ -419,7 +432,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                             includeLayoutPlayersContainer.apply {
                                 frameLayoutYoutubePlayer.visible
                                 imageViewPodcastImage.gone
-                                includeLayoutEpisodeSliderControl.root.gone
+                                layoutConstraintSliderContainer.gone
                             }
                             includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
                                 textViewShareClipButton.invisible
@@ -596,6 +609,24 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             })
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let { viewState ->
+            val currentOrientation = resources.configuration.orientation
+
+            binding.includeLayoutPlayersContainer.layoutConstraintPlayers.apply {
+                if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+                    layoutParams.height =
+                        binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+                } else {
+                    layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
+                }
+                requestLayout()
+            }
+        }
+    }
+
     override suspend fun onSideEffectCollect(sideEffect: CommonPlayerScreenSideEffect) {
     }
 
@@ -614,4 +645,17 @@ inline fun Double.getSpeedString(): String {
         return "${this.toInt()}x"
     }
     return "${this}x"
+}
+
+inline fun FeedRecommendation.getPlaceHolderImageRes(): Int {
+    if (isPodcast) {
+        return R.drawable.ic_podcast_placeholder
+    }
+    if (isYouTubeVideo) {
+        return R.drawable.ic_video_placeholder
+    }
+    if (isNewsletter) {
+        return R.drawable.ic_newsletter_placeholder
+    }
+    return R.drawable.ic_podcast_placeholder
 }

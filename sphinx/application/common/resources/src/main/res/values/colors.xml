@@ -30,6 +30,7 @@
     <color name="placeholderText">#556171</color>
 
     <color name="primaryBlue">#618AFF</color>
+    <color name="semiTransparentPrimaryBlue">#1A618AFF</color>
     <color name="primaryBlueFocused">#B7C9FF</color>
     <color name="primaryBlueBorder">#5078F2</color>
     <color name="primaryBlueFontColor">#A3C1FF</color>

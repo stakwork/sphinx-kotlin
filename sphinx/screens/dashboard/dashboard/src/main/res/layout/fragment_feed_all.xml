@@ -139,19 +139,33 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <TextView
-                    android:id="@+id/text_view_no_recommendations"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/roboto_bold"
-                    android:gravity="center"
-                    android:text="@string/no_recommendations"
-                    android:textColor="@color/secondaryText"
-                    android:textSize="@dimen/default_text_size_body"
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_no_recommendations"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/feed_all_loading_height"
+                    android:layout_marginEnd="@dimen/default_layout_margin"
+                    android:visibility="visible"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/text_view_no_recommendations"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_bold"
+                        android:gravity="center"
+                        android:text="@string/no_recommendations"
+                        android:textColor="@color/secondaryText"
+                        android:textSize="@dimen/default_header_text_size"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

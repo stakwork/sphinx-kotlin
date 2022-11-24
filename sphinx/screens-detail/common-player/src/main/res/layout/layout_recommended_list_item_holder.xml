@@ -17,11 +17,11 @@
             android:layout_width="@dimen/recommended_list_item_cover_image_xy"
             android:layout_height="@dimen/recommended_list_item_cover_image_xy"
             android:layout_marginBottom="4dp"
-            android:scaleType="centerInside"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@drawable/sphinx_white_logo" />
+            tools:srcCompat="@drawable/ic_podcast_placeholder" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_item_row_recommendation_type"
@@ -45,6 +45,7 @@
             android:textColor="@color/secondaryText"
             android:textSize="12sp"
             app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/image_view_recommended_image"
             tools:text="Show title" />
 
@@ -60,6 +61,7 @@
             android:textColor="@color/text"
             android:textSize="14sp"
             app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_title"
             tools:text="Who Will Build the Roads?" />
 

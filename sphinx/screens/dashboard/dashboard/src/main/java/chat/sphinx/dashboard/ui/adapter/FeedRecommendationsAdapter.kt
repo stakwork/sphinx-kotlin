@@ -197,11 +197,11 @@ class FeedRecommendationsAdapter(
                 disposable?.dispose()
                 holderJob?.cancel()
 
-                if (f.imageUrl.isNotEmpty()) {
+                (f.mediumImageUrl ?: f.smallImageUrl)?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
                         imageLoader.load(
                             imageViewItemRecommendationImage,
-                            f.imageUrl,
+                            imageUrl,
                             getImageLoaderOptions(f)
                         ).also {
                             disposable = it
@@ -209,7 +209,7 @@ class FeedRecommendationsAdapter(
                     }.let { job ->
                         holderJob = job
                     }
-                } else {
+                } ?: run {
                     imageViewItemRecommendationImage.setImageDrawable(
                         ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
                     )

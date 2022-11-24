@@ -97,5 +97,5 @@
     <dimen name="dashboard_feed_placeholder_text_size">20sp</dimen>
     <dimen name="feed_row_text_point_divider">4sp</dimen>
 
-    <dimen name="feed_all_loading_height">280dp</dimen>
+    <dimen name="feed_all_loading_height">285dp</dimen>
 </resources>
