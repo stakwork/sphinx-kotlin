@@ -36,6 +36,8 @@
     <dimen name="default_text_size_action_button_label">12sp</dimen>
     <dimen name="default_text_size_sub_headline">11sp</dimen>
     <dimen name="default_text_size_list_row_headline">13sp</dimen>
+    <dimen name="default_text_size_list_row_headline_variation">15sp</dimen>
+    <dimen name="default_text_size_list_recommendation_row_headline">12sp</dimen>
     <dimen name="default_text_size_caption1">10sp</dimen>
     <dimen name="default_text_size_caption2">9sp</dimen>
     <dimen name="default_text_size_tab">16sp</dimen>
@@ -132,6 +134,10 @@
     <dimen name="custom_boost_margin">4dp</dimen>
     <dimen name="custom_boost_button_padding">2dp</dimen>
     <dimen name="custom_boost_button_xy">32dp</dimen>
+
+    <dimen name="player_details_small_control_button_xy">32dp</dimen>
+    <dimen name="player_details_large_control_button_xy">58dp</dimen>
+    <dimen name="player_time_labels_horizontal_margin">18dp</dimen>
 
     <!-- Tribe Member Profile -->
     <dimen name="tribe_member_image_section_height">112dp</dimen>

@@ -41,6 +41,7 @@
     <string name="unsubscribe">UNSUBSCRIBE</string>
     <string name="feed_search_following_section">FOLLOWING</string>
     <string name="feed_search_directory_section">DIRECTORY</string>
+    <string name="recommendations">Recommendations</string>
 
     <string name="balance_too_low">Balance too low</string>
     <string name="boost_amount_too_low">Boost amount must be greater than 0</string>

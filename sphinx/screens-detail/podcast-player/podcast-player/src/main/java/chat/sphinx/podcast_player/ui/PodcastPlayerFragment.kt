@@ -3,7 +3,6 @@ package chat.sphinx.podcast_player.ui
 import android.animation.Animator
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.view.MenuItem
@@ -28,6 +27,7 @@ import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
+import chat.sphinx.podcast_player.ui.viewstates.BoostAnimationViewState
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl

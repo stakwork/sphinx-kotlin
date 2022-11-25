@@ -13,6 +13,7 @@ import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.common_player.navigation.CommonPlayerNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -359,6 +360,12 @@ internal object NavigationModule {
         newsletterDetailNavigatorImpl: NewsletterDetailNavigatorImpl
     ): NewsletterDetailNavigator =
         newsletterDetailNavigatorImpl
+
+    @Provides
+    fun provideCommonPlayerScreenNavigator(
+        commonPlayerNavigatorImpl: CommonPlayerNavigatorImpl
+    ): CommonPlayerNavigator =
+        commonPlayerNavigatorImpl
 
     @Provides
     fun provideNotificationLevelNavigator(

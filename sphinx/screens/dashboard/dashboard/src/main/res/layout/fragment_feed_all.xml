@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view_content"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:background="@color/headerBG">
+        tools:background="@color/headerBG"
+        tools:layout_editor_absoluteX="109dp"
+        tools:layout_editor_absoluteY="16dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -22,17 +20,168 @@
             android:paddingBottom="@dimen/feed_fragment_bottom_padding">
 
             <TextView
+                android:id="@+id/text_view_listen_recommendations_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_bold"
+                android:gravity="center"
+                android:text="@string/recommendations"
+                android:textColor="@color/text"
+                android:textSize="@dimen/default_text_size_large_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/material_icons_regular"
+                android:text="@string/material_icon_name_chevron_right_button"
+                android:textColor="@color/text"
+                android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_recommendations_header"
+                app:layout_constraintStart_toEndOf="@+id/text_view_listen_recommendations_header" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_refresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_listen_recommendations_header"
+                app:layout_constraintTop_toTopOf="@+id/text_view_listen_recommendations_header"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_medium"
+                    android:gravity="center"
+                    android:text="@string/refresh"
+                    android:textColor="@color/secondaryText"
+                    android:textSize="@dimen/default_header_text_size"
+                    android:layout_marginEnd="@dimen/default_small_layout_margin"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/refresh_button_icon" />
+
+                <TextView
+                    android:id="@+id/refresh_button_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:text="@string/refresh_icon"
+                    android:textColor="@color/secondaryText"
+                    android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_recommendations_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_listen_recommendations_header">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_recommendations"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_layout_margin"
+                    android:clipToPadding="false"
+                    android:orientation="horizontal"
+                    android:paddingStart="@dimen/default_half_layout_margin"
+                    android:paddingEnd="@dimen/default_half_layout_margin"
+                    android:visibility="visible"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:layout_editor_absoluteX="0dp"
+                    tools:listitem="@layout/layout_feed_recommendation_row_holder" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_loading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/feed_all_loading_height"
+                    android:layout_marginEnd="@dimen/default_layout_margin"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_medium"
+                        android:gravity="center"
+                        android:text="@string/loading_recommendations"
+                        android:textColor="@color/secondaryText"
+                        android:textSize="@dimen/default_header_text_size"
+                        android:layout_marginEnd="@dimen/default_small_layout_margin"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/loading_progress_bar" />
+
+                    <ProgressBar
+                        android:id="@+id/loading_progress_bar"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="@dimen/default_header_margin_horizontal"
+                        android:layout_height="@dimen/default_header_margin_horizontal"
+                        android:fontFamily="@font/material_icons_regular"
+                        android:indeterminate="true"
+                        android:indeterminateTint="@color/secondaryText"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_constraint_no_recommendations"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/feed_all_loading_height"
+                    android:layout_marginEnd="@dimen/default_layout_margin"
+                    android:visibility="visible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/text_view_no_recommendations"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/roboto_bold"
+                        android:gravity="center"
+                        android:text="@string/no_recommendations"
+                        android:textColor="@color/secondaryText"
+                        android:textSize="@dimen/default_header_text_size"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
                 android:id="@+id/text_view_listen_following_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/default_layout_margin"
-                android:text="@string/following"
-                android:textSize="@dimen/default_text_size_large_title"
-                android:textColor="@color/text"
+                android:layout_marginTop="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_bold"
                 android:gravity="center"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                android:text="@string/following"
+                android:textColor="@color/text"
+                android:textSize="@dimen/default_text_size_large_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/layout_constraint_recommendations_container" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -48,11 +197,11 @@
                 android:id="@+id/recycler_view_following"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginTop="@dimen/default_layout_margin"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
                 android:paddingStart="@dimen/default_half_layout_margin"
                 android:paddingEnd="@dimen/default_half_layout_margin"
-                android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_listen_following_header"
                 tools:listitem="@layout/layout_feed_squared_row_holder" />
@@ -65,14 +214,14 @@
         android:id="@+id/text_view_placeholder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/all_place_holder"
         android:fontFamily="@font/roboto_medium"
-        android:textSize="@dimen/dashboard_feed_placeholder_text_size"
+        android:text="@string/all_place_holder"
         android:textColor="@color/text"
+        android:textSize="@dimen/dashboard_feed_placeholder_text_size"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

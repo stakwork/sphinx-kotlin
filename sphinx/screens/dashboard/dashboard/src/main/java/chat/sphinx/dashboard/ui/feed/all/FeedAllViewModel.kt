@@ -5,15 +5,19 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
+import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_feed.toJson
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -25,13 +29,34 @@ import javax.inject.Inject
 internal class FeedAllViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    val moshi: Moshi,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         Context,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.Idle), FeedFollowingViewModel
+        >(dispatchers, FeedAllViewState.NoRecommendations), FeedFollowingViewModel, FeedRecommendationsViewModel
 {
+
+    override val feedRecommendationsHolderViewStateFlow: MutableStateFlow<List<FeedRecommendation>> = MutableStateFlow(emptyList())
+
+    init {
+        loadFeedRecommendations()
+    }
+
+    override fun loadFeedRecommendations() {
+        viewModelScope.launch(mainImmediate) {
+            updateViewState(FeedAllViewState.Loading)
+
+            repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->
+                feedRecommendationsHolderViewStateFlow.value = feedRecommended.toList()
+
+                if (feedRecommended.isNotEmpty()) {
+                    updateViewState(FeedAllViewState.RecommendedList)
+                } else updateViewState(FeedAllViewState.NoRecommendations)
+            }
+        }
+    }
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         repositoryDashboard.getAllFeeds().collect { feeds ->
@@ -82,4 +107,25 @@ internal class FeedAllViewModel @Inject constructor(
             dashboardNavigator.toVideoWatchScreen(chatId, feedId, feedUrl)
         }
     }
+
+    override fun feedRecommendationSelected(feed: FeedRecommendation) {
+        viewModelScope.launch(mainImmediate) {
+            val recommendations = feedRecommendationsHolderViewStateFlow.value
+
+            if (recommendations.isEmpty()) {
+                return@launch
+            }
+
+            var feedRecommendationParamsList: MutableList<String> = mutableListOf()
+
+            for (r in recommendations) {
+                feedRecommendationParamsList.add(
+                    r.toJson(moshi)
+                )
+            }
+
+            dashboardNavigator.toCommonPlayerScreen(feedRecommendationParamsList, feed.id)
+        }
+    }
+
 }

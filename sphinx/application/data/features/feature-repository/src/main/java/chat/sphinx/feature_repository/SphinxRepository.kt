@@ -3959,6 +3959,41 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getRecommendedFeeds(): Flow<List<FeedRecommendation>> = flow {
+
+        var results: MutableList<FeedRecommendation> = mutableListOf()
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryFeedSearch.getFeedRecommendations().collect { response ->
+                @Exhaustive
+                when (response) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        response.value.forEachIndexed { index, feedRecommendation ->
+
+                            results.add(
+                                FeedRecommendation(
+                                    id = feedRecommendation.ref_id,
+                                    feedType = feedRecommendation.type,
+                                    description = feedRecommendation.description,
+                                    smallImageUrl = feedRecommendation.s_image_url,
+                                    mediumImageUrl = feedRecommendation.m_image_url,
+                                    largeImageUrl = feedRecommendation.l_image_url,
+                                    link = feedRecommendation.link,
+                                    title = feedRecommendation.episode_title,
+                                    date = feedRecommendation.date,
+                                    position = index
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }.join()
+        emit(results)
+    }
+
     private suspend fun mapFeedDboList(
         listFeedDbo: List<FeedDbo>,
         queries: SphinxDatabaseQueries

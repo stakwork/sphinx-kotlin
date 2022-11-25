@@ -74,6 +74,7 @@ dependencies {
     api project(path: ':sphinx:screens-detail:payments:payment-send:payment-send')
     api project(path: ':sphinx:screens-detail:payments:payment-template:payment-template')
     api project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
+    api project(path: ':sphinx:screens-detail:common-player')
     api project(path: ':sphinx:screens-detail:qr-code:qr-code')
     api project(path: ':sphinx:screens-detail:scanner:scanner')
     api project(path: ':sphinx:screens-detail:subscription:subscription')

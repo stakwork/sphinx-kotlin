@@ -42,6 +42,7 @@ dependencies {
   implementation project(path: ':sphinx:screens-detail:common:detail-resources')
   implementation project(path: ':sphinx:application:common:logger')
   implementation project(path: ':sphinx:application:common:swipe-reveal-layout')
+  implementation project(path: ':sphinx:application:common:resources')
   implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
   implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
   implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')

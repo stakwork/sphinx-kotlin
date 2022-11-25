@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha71 (2022-11-25)
+- Adds feed recommendations
+
 # Version 1.0.0-alpha70 (2022-11-18)
 - Improves actions tracking
 - Fixes crash on podcast clip comment

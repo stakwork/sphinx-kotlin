@@ -117,6 +117,9 @@
     <string name="read_now">Read Now</string>
     <string name="watch_now">Watch Now</string>
 
+    <string name="recommendations">Recomendaciones</string>
+    <string name="refresh">Refresh</string>
+
     <string name="all_place_holder">No se encontraron resultados</string>
     <string name="listen_place_holder">No se encontraron resultados para \"Escuchar\"</string>
     <string name="watch_place_holder">No se encontraron resultados para \"Mirar\"</string>
@@ -136,4 +139,6 @@
 
     <string name="dashboard_restore_progress">Restaurando: %s</string>
     <string name="dashboard_stop_restore">Continuar más tarde</string>
+
+    <string name="loading_recommendations">Cargando Recomendaciones...</string>
 </resources>

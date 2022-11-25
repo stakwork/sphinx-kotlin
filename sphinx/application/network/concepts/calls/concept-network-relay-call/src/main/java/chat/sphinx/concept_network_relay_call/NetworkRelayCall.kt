@@ -47,6 +47,25 @@ abstract class NetworkRelayCall: NetworkCall() {
      * @param [responseJsonClass] the class to serialize the response json into
      * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
      * @param [additionalHeaders] any additional headers to add to the call
+     * @param [relayData] if not `null`, will override the auto-fetching of persisted user data
+     * */
+    abstract fun <
+            T: Any,
+            V: RelayListResponse<T>
+            > relayGetList(
+        responseJsonClass: Class<V>,
+        relayEndpoint: String,
+        additionalHeaders: Map<String, String>? = null,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
+        useExtendedNetworkCallClient: Boolean = false,
+    ): Flow<LoadResponse<List<T>, ResponseError>>
+
+    /**
+     * GET
+     *
+     * @param [responseJsonClass] the class to serialize the response json into
+     * @param [relayEndpoint] the endpoint to append to the [RelayUrl], ex: /contacts
+     * @param [additionalHeaders] any additional headers to add to the call
      * @param [relayUrl] unauthenticated relay URL
      * */
     abstract fun <

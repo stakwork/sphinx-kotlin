@@ -1,4 +1,4 @@
-package chat.sphinx.podcast_player.ui
+package chat.sphinx.common_player.viewstate
 
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat

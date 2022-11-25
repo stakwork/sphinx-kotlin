@@ -5,13 +5,13 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.chat_contact.navigation.ToChatContactScreen
 import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
+import chat.sphinx.common_player.navigation.ToCommonPlayerScreen
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
-import chat.sphinx.video_screen.navigation.ToVideoFeedDetailScreen
 import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.web_view.navigation.ToWebViewDetail
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -88,11 +88,12 @@ internal class DashboardNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration, true))
     }
 
-    override suspend fun toVideoFeedScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+    override suspend fun toCommonPlayerScreen(
+        recommendations: List<String>,
+        recommendationId: String,
+    ) {
         detailDriver.submitNavigationRequest(
-            ToVideoFeedDetailScreen(
-                chatId, feedId, feedUrl
-            )
+            ToCommonPlayerScreen(recommendations, recommendationId)
         )
     }
 
