@@ -150,9 +150,9 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
     private fun stopPlayingEpisode(feedRecommendation: FeedRecommendation) {
         viewModelScope.launch(mainImmediate) {
-            if (feedRecommendation.isPodcast) {
-                feedRecommendation.resetPlayerData()
+            feedRecommendation.resetPlayerData()
 
+            if (feedRecommendation.isPodcast) {
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Pause(
                         ChatId(ChatId.NULL_CHAT_ID.toLong()),

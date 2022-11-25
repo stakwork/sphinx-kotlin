@@ -414,6 +414,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
                     when(viewState) {
                         is CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected -> {
+                            youtubePlayer?.pause()
+
                             includeLayoutPlayersContainer.apply {
                                 frameLayoutYoutubePlayer.gone
                                 imageViewPodcastImage.visible
@@ -428,8 +430,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                                 imageViewPlayPauseButton.visible
                             }
                             showFeedRecommendationInfo(viewState.selectedItem)
-
-                            youtubePlayer?.pause()
                         }
                         is CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected -> {
                             includeLayoutPlayersContainer.apply {
@@ -600,24 +600,32 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
-                        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
-                            it.selectedItem.isPlaying = true
-                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
-                        }
+                        playingVideoUpdate()
                         Log.d("YouTubePlayer", "Youtube is playing")
                     }
                     override fun onStopped() {
                         Log.d("YouTubePlayer", "Youtube has stopped")
                     }
                     override fun onPaused() {
-                        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
-                            it.selectedItem.isPlaying = false
-                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
-                        }
+                        playingVideoDidPause()
                         Log.d("YouTubePlayer", "Youtube is on pause")
                     }
                 }
             })
+    }
+
+    private fun playingVideoDidPause() {
+        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
+            it.selectedItem.isPlaying = false
+            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
+        }
+    }
+
+    private fun playingVideoUpdate() {
+        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
+            it.selectedItem.isPlaying = true
+            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
