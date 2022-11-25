@@ -70,6 +70,7 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.lottie.sdk
+    implementation deps.square.moshi
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

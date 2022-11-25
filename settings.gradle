@@ -318,3 +318,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
 include ':sphinx:application:network:concepts:queries:concept-network-query-action-track'
 include ':sphinx:application:network:features:queries:feature-network-query-action-track'
+include ':sphinx:screens-detail:common-player'

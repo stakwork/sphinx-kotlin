@@ -43,7 +43,7 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
-import com.google.android.youtube.player.YouTubePlayerSupportFragmentXKt
+import com.google.android.youtube.player.YouTubeVideoPlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -51,8 +51,6 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
-import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
@@ -181,7 +179,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     private fun setupYoutubePlayer(videoId: String) {
 
-        val youtubePlayerFragment = YouTubePlayerSupportFragmentXKt()
+        val youtubePlayerFragment = YouTubeVideoPlayerSupportFragmentXKt()
 
         childFragmentManager.beginTransaction()
             .replace(binding.includeLayoutVideoPlayer.frameLayoutYoutubePlayer.id, youtubePlayerFragment as Fragment)

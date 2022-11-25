@@ -15,6 +15,7 @@
     <include app:graph="@navigation/payment_send_nav_graph" />
     <include app:graph="@navigation/payment_template_nav_graph" />
     <include app:graph="@navigation/podcast_player_nav_graph" />
+    <include app:graph="@navigation/common_player_nav_graph" />
     <include app:graph="@navigation/qr_code_nav_graph" />
     <include app:graph="@navigation/scanner_nav_graph" />
     <include app:graph="@navigation/subscription_nav_graph" />

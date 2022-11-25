@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.google.android.youtube.player.internal.ab
 
-open class YouTubePlayerSupportFragmentXKt : Fragment(), YouTubePlayer.Provider {
+open class YouTubeCommonPlayerSupportFragmentXKt : Fragment(), YouTubePlayer.Provider {
 
     private val a: A = A()
 
@@ -94,8 +94,8 @@ open class YouTubePlayerSupportFragmentXKt : Fragment(), YouTubePlayer.Provider 
     }
 
     companion object {
-        fun newInstance(): YouTubePlayerSupportFragmentXKt {
-            return YouTubePlayerSupportFragmentXKt()
+        fun newInstance(): YouTubeCommonPlayerSupportFragmentXKt {
+            return YouTubeCommonPlayerSupportFragmentXKt()
         }
     }
 
