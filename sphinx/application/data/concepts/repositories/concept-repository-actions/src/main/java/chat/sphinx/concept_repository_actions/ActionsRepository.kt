@@ -37,4 +37,5 @@ interface ActionsRepository {
         keywords: List<String>
     )
 
+    fun syncActions()
 }

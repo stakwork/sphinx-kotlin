@@ -131,8 +131,7 @@ internal class FeedAllFragment : SideEffectFragment<
 
     private fun toggleElements(contentAvailable: Boolean) {
         binding.apply {
-            scrollViewContent.goneIfFalse(contentAvailable)
-            textViewPlaceholder.goneIfFalse(!contentAvailable)
+            layoutConstraintFollowing.goneIfFalse(contentAvailable)
         }
     }
 
