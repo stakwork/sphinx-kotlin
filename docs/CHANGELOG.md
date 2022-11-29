@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha72 (2022-11-29)
+- Improves feed recommendations
+
 # Version 1.0.0-alpha71 (2022-11-25)
 - Adds feed recommendations
 
