@@ -6,6 +6,7 @@ import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDrive
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.dashboard.navigation.ToDashboardScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_activity.NavigationViewModel
@@ -27,6 +28,7 @@ internal class MainViewModel @Inject constructor(
     val detailDriver: DetailNavigationDriver,
     dispatchers: CoroutineDispatchers,
     override val navigationDriver: PrimaryNavigationDriver,
+    private val actionsRepository: ActionsRepository,
 ): BaseViewModel<MainViewState>(dispatchers, MainViewState.DetailScreenInactive), NavigationViewModel<PrimaryNavigationDriver>
 {
     init {
@@ -61,6 +63,10 @@ internal class MainViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun syncActions() {
+        actionsRepository.syncActions()
     }
 
 }

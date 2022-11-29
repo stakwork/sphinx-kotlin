@@ -19,6 +19,7 @@ import chat.sphinx.concept_network_query_people.model.isSaveMethod
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
@@ -75,6 +76,7 @@ internal class DashboardViewModel @Inject constructor(
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
+    private val actionsRepository: ActionsRepository,
 
     private val networkQueryLightning: NetworkQueryLightning,
     private val networkQueryVersion: NetworkQueryVersion,
@@ -114,7 +116,8 @@ internal class DashboardViewModel @Inject constructor(
         getRelayKeys()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
-        repositoryDashboard.syncActions()
+
+        actionsRepository.syncActions()
     }
     
     private fun getRelayKeys() {
