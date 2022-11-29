@@ -233,6 +233,12 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+
+        viewModel.syncActions()
+    }
+
     override var isKeyboardVisible: Boolean = false
     private fun addWindowInsetChangeListener() {
         ViewCompat.setOnApplyWindowInsetsListener(window.decorView) { _, windowInsets ->
