@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha73 (2022-11-30)
+- Fixes feed search for videos and podcasts
+
 # Version 1.0.0-alpha72 (2022-11-29)
 - Improves feed recommendations
 
