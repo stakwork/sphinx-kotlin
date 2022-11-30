@@ -294,7 +294,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     private fun updateFeedContentInBackground() {
-        viewModelScope.launch(mainImmediate) {
+        viewModelScope.launch(io) {
             val chat = chatRepository.getChatById(args.chatId).firstOrNull()
             val podcast = getPodcast()
             val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)

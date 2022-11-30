@@ -1,24 +1,24 @@
 package chat.sphinx.dashboard.ui.feed
 
-import android.content.Context
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_common.feed.toFeedId
-import chat.sphinx.wrapper_common.feed.toFeedUrl
-import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -26,6 +26,7 @@ import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,7 +37,7 @@ class FeedViewModel @Inject constructor(
     private val actionsRepository: ActionsRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
-        Context,
+        FragmentActivity,
         FeedSideEffect,
         FeedViewState
         >(dispatchers, FeedViewState.Idle)
@@ -155,19 +156,8 @@ class FeedViewModel @Inject constructor(
         }
 
         searchResultSelectedJob = viewModelScope.launch(mainImmediate) {
-            searchResult.id.toFeedId()?.let { feedId ->
-                feedRepository.getFeedById(feedId).collect { feed ->
-                    feed?.let { nnFeed ->
-                        goToFeedDetailView(nnFeed)
-                        callback()
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch(mainImmediate) {
             searchResult.url.toFeedUrl()?.let { feedUrl ->
-                feedRepository.updateFeedContent(
+                val response = feedRepository.updateFeedContent(
                     chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
                     feedUrl = feedUrl,
@@ -177,6 +167,25 @@ class FeedViewModel @Inject constructor(
                     subscribed = false.toSubscribed(),
                     currentEpisodeId = null
                 )
+
+                @Exhaustive
+                when (response) {
+                    is Response.Success -> {
+                        feedRepository.getFeedById(response.value).firstOrNull()?.let { feed ->
+                            feed?.let { nnFeed ->
+                                goToFeedDetailView(nnFeed)
+                                callback()
+                            }
+                        }
+                    }
+                    is Response.Error -> {
+                        submitSideEffect(FeedSideEffect.FailedToLoadFeed)
+                        callback()
+                    }
+                }
+            } ?: run {
+                submitSideEffect(FeedSideEffect.FailedToLoadFeed)
+                callback()
             }
         }
     }

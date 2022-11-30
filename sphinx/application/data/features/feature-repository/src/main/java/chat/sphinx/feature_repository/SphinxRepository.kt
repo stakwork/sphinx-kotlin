@@ -3748,10 +3748,8 @@ abstract class SphinxRepository(
                 networkQueryChat.getTribeInfo(chatHost, chatUUID).collect { loadResponse ->
                     when (loadResponse) {
 
-                        is LoadResponse.Loading -> {
-                        }
-                        is Response.Error -> {
-                        }
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {}
 
                         is Response.Success -> {
                             val tribeDto = loadResponse.value
@@ -3807,55 +3805,67 @@ abstract class SphinxRepository(
         chatUUID: ChatUUID?,
         subscribed: Subscribed,
         currentItemId: FeedId?
-    ) {
-        withContext(io) {
-            val queries = coreDB.getSphinxDatabaseQueries()
+    ): Response<FeedId, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
 
-            networkQueryChat.getFeedContent(
-                host,
-                feedUrl,
-                chatUUID
-            ).collect { response ->
-                @Exhaustive
-                when (response) {
-                    is LoadResponse.Loading -> {
-                    }
-                    is Response.Error -> {
-                    }
-                    is Response.Success -> {
+        var updateResponse: Response<FeedId, ResponseError> = Response.Error(ResponseError("Feed content update failed"))
 
-                        var cId: ChatId = chatId
+        networkQueryChat.getFeedContent(
+            host,
+            feedUrl,
+            chatUUID
+        ).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
 
-                        response.value.id.toFeedId()?.let { feedId ->
-                            queries.feedGetByIds(
-                                feedId.youtubeFeedIds()
-                            ).executeAsOneOrNull()
-                                ?.let { existingFeed ->
-                                    //If feed already exists linked to a chat, do not override with NULL CHAT ID
-                                    if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-                                        cId = existingFeed.chat_id
-                                    }
+                is Response.Error -> {
+                    updateResponse = response
+                }
+                is Response.Success -> {
+
+                    var cId: ChatId = chatId
+                    val feedId = response.value.id.toFeedId()
+
+                    feedId?.let { feedId ->
+                        queries.feedGetByIds(
+                            feedId.youtubeFeedIds()
+                        ).executeAsOneOrNull()
+                            ?.let { existingFeed ->
+                                //If feed already exists linked to a chat, do not override with NULL CHAT ID
+                                if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+                                    cId = existingFeed.chat_id
                                 }
-                        }
-
-                        podcastLock.withLock {
-                            queries.transaction {
-                                upsertFeed(
-                                    response.value,
-                                    feedUrl,
-                                    searchResultDescription,
-                                    searchResultImageUrl,
-                                    cId,
-                                    currentItemId,
-                                    subscribed,
-                                    queries
-                                )
                             }
+                    }
+
+                    podcastLock.withLock {
+                        queries.transaction {
+                            upsertFeed(
+                                response.value,
+                                feedUrl,
+                                searchResultDescription,
+                                searchResultImageUrl,
+                                cId,
+                                currentItemId,
+                                subscribed,
+                                queries
+                            )
                         }
+                    }
+
+                    delay(500L)
+
+                    updateResponse = feedId?.let {
+                        Response.Success(it)
+                    } ?: run {
+                       Response.Error(ResponseError("Feed content update failed"))
                     }
                 }
             }
         }
+
+        return updateResponse
     }
 
     override fun getFeedByChatId(chatId: ChatId): Flow<Feed?> = flow {
@@ -3971,7 +3981,6 @@ abstract class SphinxRepository(
                     is Response.Error -> {}
                     is Response.Success -> {
                         response.value.forEachIndexed { index, feedRecommendation ->
-
                             results.add(
                                 FeedRecommendation(
                                     id = feedRecommendation.ref_id,
@@ -3991,6 +4000,7 @@ abstract class SphinxRepository(
                 }
             }
         }.join()
+
         emit(results)
     }
 

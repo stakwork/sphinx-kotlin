@@ -7,8 +7,8 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -17,10 +17,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedBinding
 import chat.sphinx.dashboard.ui.DashboardFragment
-import chat.sphinx.dashboard.ui.DashboardFragmentsAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedSearchAdapter
-import chat.sphinx.dashboard.ui.viewstates.DashboardMotionViewState
-import chat.sphinx.dashboard.ui.viewstates.DashboardTabsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.resources.SphinxToastUtils
@@ -45,7 +42,7 @@ private inline fun FragmentFeedBinding.searchBarClearFocus() {
 
 @AndroidEntryPoint
 internal class FeedFragment : SideEffectFragment<
-        Context,
+        FragmentActivity,
         FeedSideEffect,
         FeedViewState,
         FeedViewModel,
@@ -223,10 +220,6 @@ internal class FeedFragment : SideEffectFragment<
         binding.searchBarClearFocus()
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: FeedSideEffect) {
-        sideEffect.execute(binding.root.context)
-    }
-
     companion object {
         fun newInstance(): FeedFragment {
             return FeedFragment()
@@ -315,5 +308,9 @@ internal class FeedFragment : SideEffectFragment<
                 }
             }
         }
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: FeedSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }

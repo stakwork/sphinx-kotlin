@@ -1,5 +1,7 @@
 package chat.sphinx.wrapper_podcast
 
+import chat.sphinx.wrapper_common.feed.*
+
 data class FeedSearchResult(
     val id: String,
     val feedType: Long,
