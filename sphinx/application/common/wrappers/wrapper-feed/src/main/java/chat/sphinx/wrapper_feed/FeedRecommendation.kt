@@ -16,7 +16,7 @@ data class FeedRecommendation(
     val largeImageUrl: String?,
     val link: String,
     val title: String,
-    val date: Long,
+    val date: Long?,
     val position: Int,
 ) {
 
@@ -42,7 +42,7 @@ data class FeedRecommendation(
         get() = feedType == NEWSLETTER_TYPE
 
     val dateString: String
-        get() = date.toDateTime().chatTimeFormat()
+        get() = date?.toDateTime()?.chatTimeFormat() ?: "-"
 
     var duration: Long? = null
 
@@ -98,7 +98,7 @@ internal data class FeedRecommendationMoshi(
     val largeImageUrl: String?,
     val link: String,
     val title: String,
-    val date: Long,
+    val date: Long?,
     val position: Int
 )
 

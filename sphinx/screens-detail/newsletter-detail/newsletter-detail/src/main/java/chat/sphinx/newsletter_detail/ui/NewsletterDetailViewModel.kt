@@ -66,7 +66,7 @@ internal class NewsletterDetailViewModel @Inject constructor(
     }
 
     private fun updateFeedContentInBackground() {
-        viewModelScope.launch(mainImmediate) {
+        viewModelScope.launch(io) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
                 chat.host?.let { chatHost ->
                     args.argFeedUrl.toFeedUrl()?.let { feedUrl ->

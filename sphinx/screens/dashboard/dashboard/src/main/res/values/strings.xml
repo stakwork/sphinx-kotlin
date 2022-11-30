@@ -128,6 +128,8 @@
     <string name="feed_search_placeholder_1">Search over</string>
     <string name="feed_search_placeholder_2">your subscribed feeds</string>
 
+    <string name="feed_search_result_load_error">Something went wrong while loading feed content, please try again later</string>
+
     <string name="video_search_placeholder_1">Search over</string>
     <string name="video_search_placeholder_2">thousand of videos</string>
     <string name="video_search_placeholder_3">on Youtube</string>
