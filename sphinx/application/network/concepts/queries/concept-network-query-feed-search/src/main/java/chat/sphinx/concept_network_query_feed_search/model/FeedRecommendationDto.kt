@@ -10,7 +10,7 @@ data class FeedRecommendationDto(
     val topics: List<String>,
     val weight: Float,
     val description: String,
-    val date: Long,
+    val date: Long?,
     val show_title: String,
     val boost: Long,
     val keyword: Any?,

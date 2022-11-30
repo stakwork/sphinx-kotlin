@@ -482,7 +482,7 @@ fun TransactionCallbacks.upsertFeed(
     queries: SphinxDatabaseQueries
 ) {
 
-    if (feedDto.items.count() == 0) {
+    if (feedDto.items.isEmpty()) {
         return
     }
 

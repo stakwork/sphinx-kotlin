@@ -165,7 +165,7 @@ internal open class VideoFeedScreenViewModel(
     }
 
     private fun updateFeedContentInBackground() {
-        viewModelScope.launch(mainImmediate) {
+        viewModelScope.launch(io) {
             chatRepository.getChatById(getArgChatId()).firstOrNull()?.let { chat ->
                 chat.host?.let { chatHost ->
                     getArgFeedUrl()?.let { feedUrl ->
