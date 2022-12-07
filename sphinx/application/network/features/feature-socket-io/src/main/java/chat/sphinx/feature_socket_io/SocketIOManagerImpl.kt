@@ -228,9 +228,13 @@ class SocketIOManagerImpl(
                 @Exhaustive
                 when (response) {
                     is Response.Error -> {
-                        response.exception?.let {
-                            LOG.e(TAG, response.message, it)
-                        } ?: LOG.w(TAG, response.message)
+                        try {
+                            response.exception?.let {
+                                LOG.e(TAG, response.message, it)
+                            } ?: LOG.w(TAG, response.message)
+                        } catch (e: Exception) {
+                            e.message?.let { LOG.e(TAG, it, e) }
+                        }
                         return response
                     }
                     is Response.Success -> {
