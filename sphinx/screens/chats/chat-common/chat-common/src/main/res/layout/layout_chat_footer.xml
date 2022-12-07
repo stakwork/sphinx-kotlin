@@ -27,6 +27,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/edit_text_chat_footer" />
 
+    <ListView
+        android:id="@+id/listview_mention_tribe_members"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/edit_text_chat_footer"
+        app:layout_constraintBottom_toTopOf="@+id/edit_text_chat_footer"
+        android:visibility="gone"/>
+
     <chat.sphinx.chat_common.ui.widgets.SphinxEditText
         android:id="@+id/edit_text_chat_footer"
         android:layout_width="0dp"

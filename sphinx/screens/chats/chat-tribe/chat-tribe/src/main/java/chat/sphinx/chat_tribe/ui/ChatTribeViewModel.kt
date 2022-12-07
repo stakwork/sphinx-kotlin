@@ -48,7 +48,6 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -105,6 +104,7 @@ internal class ChatTribeViewModel @Inject constructor(
     override val chatId: ChatId = args.chatId
     override val contactId: ContactId?
         get() = null
+    val tribeMemberAliases = mutableSetOf<String>()
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
@@ -212,6 +212,9 @@ internal class ChatTribeViewModel @Inject constructor(
         message: Message,
         owner: Contact
     ): InitialHolderViewState {
+        // populate tribe member aliases list
+        message.senderAlias?.let { tribeMemberAliases.add("@${it.value}") }
+
         return message.senderPic?.let { url ->
             InitialHolderViewState.Url(url)
         } ?: message.senderAlias?.let { alias ->
