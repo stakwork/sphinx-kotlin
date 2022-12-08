@@ -104,7 +104,7 @@ internal class ChatTribeViewModel @Inject constructor(
     override val chatId: ChatId = args.chatId
     override val contactId: ContactId?
         get() = null
-    val tribeMemberAliases = mutableSetOf<String>()
+    private val tribeMemberAliases = mutableSetOf<String>()
 
     override val chatSharedFlow: SharedFlow<Chat?> = flow {
         emitAll(chatRepository.getChatById(chatId))
@@ -286,6 +286,21 @@ internal class ChatTribeViewModel @Inject constructor(
                 _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
             }
         }
+    }
+
+    internal fun processMemberMention(s: CharSequence?): Array<String> {
+        // when '@' + additional character typed, populate matching member aliases array
+        val lastWord = s?.split(" ")?.last().toString()
+        // populate list of matching aliases
+        val matchingAliases = mutableListOf<String>()
+        if (lastWord.startsWith("@") && lastWord.length > 1) {
+            for (member in tribeMemberAliases) {
+                if (member.startsWith(lastWord, false))
+                    matchingAliases.add(member)
+            }
+        }
+        // return sorted array of matching aliases
+        return matchingAliases.toSortedSet().toTypedArray()
     }
 
     override suspend fun processMemberRequest(

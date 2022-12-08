@@ -7,7 +7,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ListView
 import androidx.activity.OnBackPressedCallback
@@ -23,6 +22,7 @@ import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.widgets.SphinxEditText
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
@@ -102,6 +102,10 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutMenuBottomMore
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
+    val listViewMentionTribeMembers: ListView
+        get() = binding.listviewMentionTribeMembers
+    val editTextTribeChatFooter: SphinxEditText
+        get() = footerBinding.editTextChatFooter
 
     override val menuEnablePayments: Boolean
         get() = false
@@ -111,8 +115,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
-    private lateinit var tribeMembersMentionListView: ListView
-    private lateinit var tribeChatFooterEditText: EditText
+
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -201,56 +204,36 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
-        // assign handle to tribe members mention popup list view
-        tribeMembersMentionListView = activity?.findViewById(R.id.listview_mention_tribe_members) as ListView
-        tribeChatFooterEditText = activity?.findViewById(R.id.edit_text_chat_footer) as EditText
-
         footerBinding.editTextChatFooter.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // when '@' typed, show matching member aliases popup
-                val lastWord = s?.split(" ")?.last()
-                if (lastWord?.startsWith("@") == true) {
-                    if (handleMentionPopup(lastWord))
-                        tribeMembersMentionListView.visibility = View.VISIBLE
-                } else tribeMembersMentionListView.visibility = View.GONE
+                // get processed member mention from viewModel
+                val matchingAliases = viewModel.processMemberMention(s)
+                // hide or construct and show mention popup if there are matching members
+                if (matchingAliases.isNotEmpty()) {
+                    listViewMentionTribeMembers.visibility = View.VISIBLE
+                    // get, set mention popup array adapter
+                    val mentionPopupArrayAdapter: ArrayAdapter<String>? = context?.let {
+                        ArrayAdapter<String>(it, android.R.layout.simple_spinner_item, matchingAliases)
+                    }
+                    listViewMentionTribeMembers.adapter = mentionPopupArrayAdapter
+                    listViewMentionTribeMembers.setOnItemClickListener { parent, view, position, id ->
+                        val selectedAlias = mentionPopupArrayAdapter?.getItem(position)
+
+                        // replace partially typed alias with selected alias from popup
+                        val oldText: String = editTextTribeChatFooter.text.toString()
+                        val oldWords = oldText.split(" ").toTypedArray()
+                        val newWords = oldText.replace(oldWords[oldWords.size - 1], "")
+                        editTextTribeChatFooter.setText(newWords + selectedAlias)
+                        // set cursor to end
+                        editTextTribeChatFooter.setSelection(editTextTribeChatFooter.length())
+                    }
+                }
+                else listViewMentionTribeMembers.visibility = View.GONE
             }
 
             override fun afterTextChanged(s: Editable?) {}
-
-            fun handleMentionPopup(lastWord: CharSequence): Boolean {
-                // get list of matching aliases
-                val matchingAliases = mutableListOf<String>()
-                for (member in viewModel.tribeMemberAliases) {
-                    if (member.startsWith(lastWord, false))
-                        matchingAliases.add(member)
-                }
-                // convert to sorted array
-                val tribeMembersSortedArray = matchingAliases.toSortedSet().toTypedArray()
-                // get, set mention popup array adapter
-                val mentionPopupArrayAdapter: ArrayAdapter<String>? = context?.let {
-                    ArrayAdapter<String>(it, android.R.layout.simple_spinner_item, tribeMembersSortedArray)
-                }
-                tribeMembersMentionListView.adapter = mentionPopupArrayAdapter
-                tribeMembersMentionListView.setOnItemClickListener { parent, view, position, id ->
-                    val selectedAlias = mentionPopupArrayAdapter?.getItem(position)
-
-                    // replace partially typed alias with selected alias from popup
-                    val s: String = tribeChatFooterEditText.text.toString()
-                    val oldWords = s.split(" ").toTypedArray()
-                    val newWords = s.replace(oldWords[oldWords.size - 1], "")
-                    tribeChatFooterEditText.setText(newWords + selectedAlias)
-                    // and set cursor to end
-                    tribeChatFooterEditText.setSelection(tribeChatFooterEditText.length())
-                    
-                    // and hide mention popup
-                    tribeMembersMentionListView.visibility = View.GONE
-                }
-
-                //println("populated tribe members array: ${tribeMembersSortedArray.contentToString()}")
-                return tribeMembersSortedArray.isNotEmpty()
-            }
         })
     }
 
