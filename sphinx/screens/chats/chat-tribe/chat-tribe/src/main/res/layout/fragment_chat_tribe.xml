@@ -69,14 +69,15 @@
             android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer" />
 
-        <ListView
-            android:id="@+id/listview_mention_tribe_members"
-            android:layout_width="wrap_content"
+        <include
+            android:id="@+id/include_chat_tribe_members_mention_popup"
+            layout="@layout/layout_chat_tribe_member_mention_popup"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             app:layout_constraintHeight_max="100sp"
             app:layout_constraintStart_toStartOf="@id/include_chat_tribe_footer"
-            app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer"
-            android:visibility="gone"/>
+            app:layout_constraintBottom_toTopOf="@+id/include_chat_tribe_footer" />
 
         <include
             android:id="@+id/include_chat_tribe_footer"

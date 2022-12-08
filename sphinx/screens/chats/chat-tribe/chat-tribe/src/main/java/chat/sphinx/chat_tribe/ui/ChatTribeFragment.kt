@@ -25,6 +25,7 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.widgets.SphinxEditText
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
+import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
@@ -102,8 +103,10 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutMenuBottomMore
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
+    val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
+        get() = binding.includeChatTribeMembersMentionPopup
     val listViewMentionTribeMembers: ListView
-        get() = binding.listviewMentionTribeMembers
+        get() = mentionMembersPopup.listviewMentionTribeMembers
     val editTextTribeChatFooter: SphinxEditText
         get() = footerBinding.editTextChatFooter
 
@@ -210,27 +213,29 @@ internal class ChatTribeFragment: ChatFragment<
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // get processed member mention from viewModel
                 val matchingAliases = viewModel.processMemberMention(s)
-                // hide or construct and show mention popup if there are matching members
+                // construct and show mention popup if there are matching members
                 if (matchingAliases.isNotEmpty()) {
-                    listViewMentionTribeMembers.visibility = View.VISIBLE
                     // get, set mention popup array adapter
                     val mentionPopupArrayAdapter: ArrayAdapter<String>? = context?.let {
-                        ArrayAdapter<String>(it, android.R.layout.simple_spinner_item, matchingAliases)
+                        ArrayAdapter<String>(it, android.R.layout.simple_list_item_1, matchingAliases)
                     }
                     listViewMentionTribeMembers.adapter = mentionPopupArrayAdapter
+                    mentionMembersPopup.root.visible
+
                     listViewMentionTribeMembers.setOnItemClickListener { parent, view, position, id ->
                         val selectedAlias = mentionPopupArrayAdapter?.getItem(position)
 
                         // replace partially typed alias with selected alias from popup
                         val oldText: String = editTextTribeChatFooter.text.toString()
-                        val oldWords = oldText.split(" ").toTypedArray()
-                        val newWords = oldText.replace(oldWords[oldWords.size - 1], "")
-                        editTextTribeChatFooter.setText(newWords + selectedAlias)
-                        // set cursor to end
+                        val partialTypedAlias = oldText.split(" ").last()
+                        val newText = oldText.dropLast(partialTypedAlias.length) + selectedAlias
+                        editTextTribeChatFooter.setText(newText)
+                        // and adjust cursor position
                         editTextTribeChatFooter.setSelection(editTextTribeChatFooter.length())
+                        mentionMembersPopup.root.gone
                     }
                 }
-                else listViewMentionTribeMembers.visibility = View.GONE
+                else mentionMembersPopup.root.gone
             }
 
             override fun afterTextChanged(s: Editable?) {}
