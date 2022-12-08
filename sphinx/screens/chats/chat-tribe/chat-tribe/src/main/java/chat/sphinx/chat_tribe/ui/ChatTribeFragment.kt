@@ -7,6 +7,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.ListView
 import androidx.activity.OnBackPressedCallback
@@ -111,6 +112,7 @@ internal class ChatTribeFragment: ChatFragment<
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
     private lateinit var tribeMembersMentionListView: ListView
+    private lateinit var tribeChatFooterEditText: EditText
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -201,6 +203,7 @@ internal class ChatTribeFragment: ChatFragment<
 
         // assign handle to tribe members mention popup list view
         tribeMembersMentionListView = activity?.findViewById(R.id.listview_mention_tribe_members) as ListView
+        tribeChatFooterEditText = activity?.findViewById(R.id.edit_text_chat_footer) as EditText
 
         footerBinding.editTextChatFooter.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -209,18 +212,18 @@ internal class ChatTribeFragment: ChatFragment<
                 // when '@' typed, show matching member aliases popup
                 val lastWord = s?.split(" ")?.last()
                 if (lastWord?.startsWith("@") == true) {
-                    if (populateMentionPopup(lastWord))
+                    if (handleMentionPopup(lastWord))
                         tribeMembersMentionListView.visibility = View.VISIBLE
                 } else tribeMembersMentionListView.visibility = View.GONE
             }
 
             override fun afterTextChanged(s: Editable?) {}
 
-            fun populateMentionPopup(lastWord: CharSequence): Boolean {
+            fun handleMentionPopup(lastWord: CharSequence): Boolean {
                 // get list of matching aliases
                 val matchingAliases = mutableListOf<String>()
                 for (member in viewModel.tribeMemberAliases) {
-                    if (member.startsWith(lastWord, true))
+                    if (member.startsWith(lastWord, false))
                         matchingAliases.add(member)
                 }
                 // convert to sorted array
@@ -230,6 +233,21 @@ internal class ChatTribeFragment: ChatFragment<
                     ArrayAdapter<String>(it, android.R.layout.simple_spinner_item, tribeMembersSortedArray)
                 }
                 tribeMembersMentionListView.adapter = mentionPopupArrayAdapter
+                tribeMembersMentionListView.setOnItemClickListener { parent, view, position, id ->
+                    val selectedAlias = mentionPopupArrayAdapter?.getItem(position)
+
+                    // replace partially typed alias with selected alias from popup
+                    val s: String = tribeChatFooterEditText.text.toString()
+                    val oldWords = s.split(" ").toTypedArray()
+                    val newWords = s.replace(oldWords[oldWords.size - 1], "")
+                    tribeChatFooterEditText.setText(newWords + selectedAlias)
+                    // and set cursor to end
+                    tribeChatFooterEditText.setSelection(tribeChatFooterEditText.length())
+                    
+                    // and hide mention popup
+                    tribeMembersMentionListView.visibility = View.GONE
+                }
+
                 //println("populated tribe members array: ${tribeMembersSortedArray.contentToString()}")
                 return tribeMembersSortedArray.isNotEmpty()
             }
