@@ -44,6 +44,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        android:elevation="8dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container" />
 
     <androidx.appcompat.widget.AppCompatImageView

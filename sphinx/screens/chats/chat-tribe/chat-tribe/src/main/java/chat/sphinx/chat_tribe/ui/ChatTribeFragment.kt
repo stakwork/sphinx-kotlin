@@ -8,7 +8,6 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import android.widget.ListView
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentActivity
@@ -20,10 +19,11 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
-import chat.sphinx.chat_common.ui.widgets.SphinxEditText
 import chat.sphinx.chat_tribe.R
+import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
@@ -105,10 +105,6 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeChatTribeAttachmentFullscreen
     val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
-    val listViewMentionTribeMembers: ListView
-        get() = mentionMembersPopup.listviewMentionTribeMembers
-    val editTextTribeChatFooter: SphinxEditText
-        get() = footerBinding.editTextChatFooter
 
     override val menuEnablePayments: Boolean
         get() = false
@@ -211,35 +207,29 @@ internal class ChatTribeFragment: ChatFragment<
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // get processed member mention from viewModel
-                val matchingAliases = viewModel.processMemberMention(s)
-                // construct and show mention popup if there are matching members
-                if (matchingAliases.isNotEmpty()) {
-                    // get, set mention popup array adapter
-                    val mentionPopupArrayAdapter: ArrayAdapter<String>? = context?.let {
-                        ArrayAdapter<String>(it, android.R.layout.simple_list_item_1, matchingAliases)
-                    }
-                    listViewMentionTribeMembers.adapter = mentionPopupArrayAdapter
-                    mentionMembersPopup.root.visible
-
-                    listViewMentionTribeMembers.setOnItemClickListener { parent, view, position, id ->
-                        val selectedAlias = mentionPopupArrayAdapter?.getItem(position)
-
-                        // replace partially typed alias with selected alias from popup
-                        val oldText: String = editTextTribeChatFooter.text.toString()
-                        val partialTypedAlias = oldText.split(" ").last()
-                        val newText = oldText.dropLast(partialTypedAlias.length) + selectedAlias
-                        editTextTribeChatFooter.setText(newText)
-                        // and adjust cursor position
-                        editTextTribeChatFooter.setSelection(editTextTribeChatFooter.length())
-                        mentionMembersPopup.root.gone
-                    }
-                }
-                else mentionMembersPopup.root.gone
+                viewModel.processMemberMention(s)
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        mentionMembersPopup.listviewMentionTribeMembers.setOnItemClickListener { parent, _, position, _ ->
+            (parent.adapter as? ArrayAdapter<String>?)?.let {
+                it.getItem(position)?.let { selectedAlias ->
+                    footerBinding.editTextChatFooter.apply {
+
+                        val newText = text.toString().messageWithMention(selectedAlias)
+
+                        setText(newText)
+                        setSelection(length())
+                    }
+
+                    mentionMembersPopup.root.gone
+                }
+            }
+        }
+
+        mentionMembersPopup.listviewMentionTribeMembers.adapter = MessageMentionsAdapter(binding.root.context, mutableListOf())
     }
 
     override fun onDestroyView() {
@@ -433,7 +423,6 @@ internal class ChatTribeFragment: ChatFragment<
                             textViewChatHeaderContributions.gone
                         }
                     }
-
                 }
             }
         }
@@ -535,5 +524,44 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.messageMentionsViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is MessageMentionsViewState.MessageMentions -> {
+                        if (viewState.mentions.isNotEmpty()) {
+
+                            val itemHeight = resources.getDimensionPixelSize(R.dimen.message_mention_item_height)
+                            val listHeight = viewState.mentions.size.coerceAtMost(4) * itemHeight
+
+                            mentionMembersPopup.listviewMentionTribeMembers.apply {
+                                layoutParams.height = listHeight
+                                requestLayout()
+
+                                (adapter as? MessageMentionsAdapter)?.let {
+                                    it.clear()
+                                    it.addAll(viewState.mentions)
+                                    it.notifyDataSetChanged()
+                                }
+
+                                this.smoothScrollToPosition(viewState.mentions.size)
+                            }
+
+                            mentionMembersPopup.root.visible
+                        }
+                        else mentionMembersPopup.root.gone
+                    }
+                }
+            }
+        }
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.messageWithMention(mention: String): String {
+    this.split(" ").last()?.let { partialTypedAlias ->
+        return this.dropLast(partialTypedAlias.length) + "@$mention "
+    }
+    return this
 }
