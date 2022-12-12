@@ -168,7 +168,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         podcast.playingEpisodeUpdate(
                             serviceState.episodeId,
                             serviceState.currentTime,
-                            serviceState.episodeDuration.toLong()
+                            serviceState.episodeDuration.toLong(),
+                            serviceState.speed
                         )
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.MediaStateUpdate(

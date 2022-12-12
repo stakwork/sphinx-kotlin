@@ -3972,7 +3972,7 @@ abstract class SphinxRepository(
     }
 
     private val recommendationsPodcast: MutableStateFlow<Podcast?> by lazy {
-        MutableStateFlow<Podcast?>(null)
+        MutableStateFlow(null)
     }
 
     override fun getRecommendedFeeds(): Flow<List<FeedRecommendation>> = flow {

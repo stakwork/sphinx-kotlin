@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui.feed.all
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
@@ -29,6 +30,7 @@ import javax.inject.Inject
 internal class FeedAllViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val feedRepository: FeedRepository,
     val moshi: Moshi,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
@@ -116,15 +118,13 @@ internal class FeedAllViewModel @Inject constructor(
                 return@launch
             }
 
-            var feedRecommendationParamsList: MutableList<String> = mutableListOf()
+            feedRepository.getPodcastById(
+                FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID)
+            ).firstOrNull()?.let { podcast ->
+                podcast.setCurrentEpisodeWith(feed.id)
 
-            for (r in recommendations) {
-                feedRecommendationParamsList.add(
-                    r.toJson(moshi)
-                )
+                dashboardNavigator.toCommonPlayerScreen(podcast.id, podcast.episodeDuration ?: 0)
             }
-
-            dashboardNavigator.toCommonPlayerScreen(feedRecommendationParamsList, feed.id)
         }
     }
 

@@ -19,6 +19,7 @@ import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState.NoPodcast.cli
 import chat.sphinx.dashboard.ui.viewstates.adjustState
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -73,7 +74,8 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 vs.podcast.playingEpisodeUpdate(
                     serviceState.episodeId,
                     serviceState.currentTime,
-                    serviceState.episodeDuration.toLong()
+                    serviceState.episodeDuration.toLong(),
+                    serviceState.speed
                 )
 
                 vs.adjustState(
@@ -289,12 +291,19 @@ internal class DashboardPodcastViewModel @Inject constructor(
         vs: PlayingPodcastViewState.PodcastVS
     ) {
         viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toPodcastPlayerScreen(
-                vs.podcast.chatId,
-                vs.podcast.id,
-                vs.podcast.feedUrl,
-                vs.podcast.episodeDuration ?: 0
-            )
+            if (vs.podcast.id.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                dashboardNavigator.toCommonPlayerScreen(
+                    vs.podcast.id,
+                    vs.podcast.episodeDuration ?: 0
+                )
+            } else {
+                dashboardNavigator.toPodcastPlayerScreen(
+                    vs.podcast.chatId,
+                    vs.podcast.id,
+                    vs.podcast.feedUrl,
+                    vs.podcast.episodeDuration ?: 0
+                )
+            }
         }
     }
 
