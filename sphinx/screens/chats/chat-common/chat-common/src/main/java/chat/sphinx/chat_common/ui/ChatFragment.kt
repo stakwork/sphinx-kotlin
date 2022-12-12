@@ -1757,23 +1757,25 @@ abstract class ChatFragment<
     override fun onInteractionComplete() {
         viewModel.audioRecorderController.stopAudioRecording()
         viewModel.audioRecorderController.recordingTempFile?.let {
-            sendMessageBuilder.setAttachmentInfo(
-                AttachmentInfo(
-                    file = it,
-                    mediaType = MediaType.Audio(AudioRecorderController.AUDIO_FORMAT_MIME_TYPE),
-                    fileName = null,
-                    isLocalFile = true,
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                sendMessageBuilder.setAttachmentInfo(
+                    AttachmentInfo(
+                        file = it,
+                        mediaType = MediaType.Audio(AudioRecorderController.AUDIO_FORMAT_MIME_TYPE),
+                        fileName = null,
+                        isLocalFile = true,
+                    )
                 )
-            )
 
-            viewModel.sendMessage(sendMessageBuilder)?.let {
-                // if it did not return null that means it was valid
-                viewModel.updateFooterViewState(FooterViewState.Default)
+                viewModel.sendMessage(sendMessageBuilder)?.let {
+                    // if it did not return null that means it was valid
+                    viewModel.updateFooterViewState(FooterViewState.Default)
 
-                sendMessageBuilder.clear()
-                viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+                    sendMessageBuilder.clear()
+                    viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+                }
+                viewModel.audioRecorderController.clear()
             }
-            viewModel.audioRecorderController.clear()
         }
     }
 }

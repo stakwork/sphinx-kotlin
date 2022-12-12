@@ -186,4 +186,5 @@
     <string name="alert_confirm_block_contact">¿Estás seguro que deseas bloquear este contacto?</string>
     <string name="alert_confirm_unblock_contact_title">Desbloquear Contacto</string>
     <string name="alert_confirm_unblock_contact">¿Estás seguro que deseas desbloquear este contacto?</string>
+    <string name="alert_not_encrypted_contact">No puedes mandar un mensaje a un contacto no encriptado</string>
 </resources>

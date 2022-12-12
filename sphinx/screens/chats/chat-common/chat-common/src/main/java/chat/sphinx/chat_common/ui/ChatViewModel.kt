@@ -859,7 +859,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
      * then passes it off to the [MessageRepository] for processing.
      * */
     @CallSuper
-    open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+    open suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         val msg = builder.build()
 
         msg.second?.let { validationError ->
@@ -1602,7 +1602,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         SphinxCallLink.newCallInvite(meetingServerUrl, audioOnly)?.value?.let { newCallLink ->
             val messageBuilder = SendMessage.Builder()
             messageBuilder.setText(newCallLink)
-            sendMessage(messageBuilder)
+
+            viewModelScope.launch(mainImmediate) {
+                sendMessage(messageBuilder)
+            }
         }
     }
 

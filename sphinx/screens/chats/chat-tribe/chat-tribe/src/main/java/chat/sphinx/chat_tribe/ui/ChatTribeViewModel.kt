@@ -242,7 +242,7 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+    override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(chatId)
         return super.sendMessage(builder)
     }
