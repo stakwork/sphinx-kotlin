@@ -1,4 +1,4 @@
-package chat.sphinx.wrapper_feed
+package chat.sphinx.wrapper_podcast
 
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.toDateTime
@@ -24,6 +24,11 @@ data class FeedRecommendation(
         const val PODCAST_TYPE = "podcast"
         const val YOUTUBE_VIDEO_TYPE = "youtube"
         const val NEWSLETTER_TYPE = "newsletter"
+        const val TWITTER_TYPE = "twitter_space"
+
+        const val RECOMMENDATION_PODCAST_ID = "Recommendations-Feed"
+        const val RECOMMENDATION_PODCAST_TITLE = "Recommendations"
+        const val RECOMMENDATION_PODCAST_DESCRIPTION = "Feed Recommendations"
     }
 
     val largestImageUrl: String?
@@ -33,7 +38,7 @@ data class FeedRecommendation(
         get() = smallImageUrl ?: mediumImageUrl ?: largeImageUrl
 
     val isPodcast: Boolean
-        get() = feedType == PODCAST_TYPE
+        get() = feedType == PODCAST_TYPE || feedType == TWITTER_TYPE
 
     val isYouTubeVideo: Boolean
         get() = feedType == YOUTUBE_VIDEO_TYPE

@@ -15,7 +15,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedRecommendationRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
-import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job

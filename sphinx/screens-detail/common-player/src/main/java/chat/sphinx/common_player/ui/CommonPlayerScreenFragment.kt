@@ -36,7 +36,7 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getHHMMSSString
-import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
 import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt

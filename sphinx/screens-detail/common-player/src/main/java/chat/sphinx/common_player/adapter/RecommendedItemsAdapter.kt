@@ -16,7 +16,7 @@ import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job

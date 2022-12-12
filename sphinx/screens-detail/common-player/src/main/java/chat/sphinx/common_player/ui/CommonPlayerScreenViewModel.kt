@@ -23,9 +23,9 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.FeedRecommendation
-import chat.sphinx.wrapper_feed.toFeedRecommendationOrNull
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import chat.sphinx.wrapper_podcast.toFeedRecommendationOrNull
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -275,7 +275,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
             mediaPlayerServiceController.submitAction(
                 UserAction.ServiceAction.Play(
                     ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                    "feed-recommendation-podcast",
+                    FeedRecommendation.RECOMMENDATION_PODCAST_ID,
                     feedRecommendation.id,
                     feedRecommendation.link,
                     Sat(0),

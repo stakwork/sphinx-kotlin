@@ -1,6 +1,6 @@
 package chat.sphinx.common_player.viewstate
 
-import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class CommonPlayerScreenViewState: ViewState<CommonPlayerScreenViewState>() {

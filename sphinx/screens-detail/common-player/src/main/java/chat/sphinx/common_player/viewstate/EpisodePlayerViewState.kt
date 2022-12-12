@@ -1,9 +1,7 @@
 package chat.sphinx.common_player.viewstate
 
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
-import chat.sphinx.wrapper_feed.FeedRecommendation
-import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastEpisode
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class EpisodePlayerViewState: ViewState<EpisodePlayerViewState>() {

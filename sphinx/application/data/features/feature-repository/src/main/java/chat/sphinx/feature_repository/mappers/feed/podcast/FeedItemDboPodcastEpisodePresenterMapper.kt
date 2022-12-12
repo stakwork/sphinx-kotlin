@@ -19,7 +19,8 @@ internal class FeedItemDboPodcastEpisodePresenterMapper(
             enclosureLength = value.enclosure_length,
             enclosureType =  value.enclosure_type,
             podcastId = value.feed_id,
-            localFile = value.local_file
+            localFile = value.local_file,
+            date = value.date_published
         )
     }
 

@@ -109,8 +109,10 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -3969,6 +3971,10 @@ abstract class SphinxRepository(
         )
     }
 
+    private val recommendationsPodcast: MutableStateFlow<Podcast?> by lazy {
+        MutableStateFlow<Podcast?>(null)
+    }
+
     override fun getRecommendedFeeds(): Flow<List<FeedRecommendation>> = flow {
 
         var results: MutableList<FeedRecommendation> = mutableListOf()
@@ -4001,7 +4007,50 @@ abstract class SphinxRepository(
             }
         }.join()
 
+        recommendationsPodcast.value = mapRecommendationsPodcast(results)
+
         emit(results)
+    }
+
+    private fun mapRecommendationsPodcast(
+        recommendations: List<FeedRecommendation>
+    ): Podcast? {
+        val podcast = Podcast(
+            FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID),
+            FeedTitle(FeedRecommendation.RECOMMENDATION_PODCAST_TITLE),
+            FeedDescription(FeedRecommendation.RECOMMENDATION_PODCAST_DESCRIPTION),
+            null,
+            null,
+            null,
+            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+            FeedUrl("-"),
+            Subscribed.False
+        )
+
+        val episodes: MutableList<PodcastEpisode> = mutableListOf()
+
+        for (item in recommendations) {
+            val episode = PodcastEpisode(
+                FeedId(item.id),
+                FeedTitle(item.title),
+                FeedDescription(item.description),
+                (item.mediumImageUrl ?: item.smallImageUrl)?.toPhotoUrl(),
+                FeedUrl(item.link),
+                podcast.id,
+                FeedUrl(item.link),
+                null,
+                null,
+                null,
+                item.date?.toDateTime(),
+                item.feedType
+            )
+
+            episodes.add(episode)
+        }
+
+        podcast.episodes = episodes
+
+        return podcast
     }
 
     private suspend fun mapFeedDboList(
@@ -4152,6 +4201,11 @@ abstract class SphinxRepository(
     }
 
     override fun getPodcastById(feedId: FeedId): Flow<Podcast?> = flow {
+        if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+            emit(recommendationsPodcast.value)
+            return@flow
+        }
+
         val queries = coreDB.getSphinxDatabaseQueries()
 
         queries.feedGetById(feedId)
