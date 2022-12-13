@@ -39,9 +39,9 @@ import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
-import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -101,6 +101,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
 
         setupItems()
+
+        viewModel.startPlaying()
     }
 
     private fun setupItems() {
@@ -221,7 +223,9 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             var currentEpisode: PodcastEpisode = podcast.getCurrentEpisode()
 
             includeLayoutPlayerDescriptionAndControls.apply {
-                textViewItemTitle.text = currentEpisode.title?.value ?: ""
+                textViewItemTitle.text = currentEpisode.title.value
+                textViewItemDescription.text = currentEpisode.description?.value ?: "-"
+                textViewItemPublishedDate.text = currentEpisode.dateString
             }
 
             includeLayoutPlayersContainer.apply {
@@ -313,8 +317,9 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         binding.apply {
             includeLayoutPlayerDescriptionAndControls.apply {
                 textViewItemTitle.text = episode.title.value
+                textViewItemDescription.text = episode.description?.value ?: "-"
+                textViewItemPublishedDate.text = episode.dateString
             }
-
 
             includeLayoutPlayersContainer.apply {
 

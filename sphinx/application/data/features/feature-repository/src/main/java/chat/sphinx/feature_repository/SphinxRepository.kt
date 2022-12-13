@@ -666,6 +666,10 @@ abstract class SphinxRepository(
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
+            if (podcastId?.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
+
             if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
                 //Podcast with no chat. Updating current item id
                 podcastId?.let { nnPodcastId ->
@@ -4012,43 +4016,21 @@ abstract class SphinxRepository(
         emit(results)
     }
 
+    private val feedRecommendationPodcastPresenterMapper: FeedRecommendationPodcastPresenterMapper by lazy {
+        FeedRecommendationPodcastPresenterMapper()
+    }
+
     private fun mapRecommendationsPodcast(
         recommendations: List<FeedRecommendation>
     ): Podcast? {
-        val podcast = Podcast(
-            FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID),
-            FeedTitle(FeedRecommendation.RECOMMENDATION_PODCAST_TITLE),
-            FeedDescription(FeedRecommendation.RECOMMENDATION_PODCAST_DESCRIPTION),
-            null,
-            null,
-            null,
-            ChatId(ChatId.NULL_CHAT_ID.toLong()),
-            FeedUrl("-"),
-            Subscribed.False
-        )
+        val podcast = feedRecommendationPodcastPresenterMapper.getRecommendationsPodcast()
 
-        val episodes: MutableList<PodcastEpisode> = mutableListOf()
-
-        for (item in recommendations) {
-            val episode = PodcastEpisode(
-                FeedId(item.id),
-                FeedTitle(item.title),
-                FeedDescription(item.description),
-                (item.mediumImageUrl ?: item.smallImageUrl)?.toPhotoUrl(),
-                FeedUrl(item.link),
-                podcast.id,
-                FeedUrl(item.link),
-                null,
-                null,
-                null,
-                item.date?.toDateTime(),
-                item.feedType
+        podcast.episodes = recommendations.map {
+            feedRecommendationPodcastPresenterMapper.mapFrom(
+                it,
+                podcast.id
             )
-
-            episodes.add(episode)
         }
-
-        podcast.episodes = episodes
 
         return podcast
     }

@@ -2,8 +2,10 @@ package chat.sphinx.wrapper_podcast
 
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.PODCAST_TYPE
 import java.io.File
@@ -32,6 +34,9 @@ data class PodcastEpisode(
             }
             return null
         }
+
+    val dateString: String
+        get() = date?.chatTimeFormat() ?: "-"
 
     val downloaded: Boolean
         get()= localFile != null

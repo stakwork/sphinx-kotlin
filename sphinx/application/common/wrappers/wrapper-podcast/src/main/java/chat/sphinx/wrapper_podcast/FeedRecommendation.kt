@@ -2,6 +2,7 @@ package chat.sphinx.wrapper_podcast
 
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.toDateTime
+import chat.sphinx.wrapper_common.toPhotoUrl
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
@@ -35,7 +36,15 @@ data class FeedRecommendation(
         get() = largeImageUrl ?: mediumImageUrl ?: smallImageUrl
 
     val smallestImageUrl: String?
-        get() = smallImageUrl ?: mediumImageUrl ?: largeImageUrl
+        get() {
+            if (!smallImageUrl.isNullOrEmpty()) {
+                return smallImageUrl
+            }
+            if (!mediumImageUrl.isNullOrEmpty()) {
+                return mediumImageUrl
+            }
+            return largeImageUrl
+        }
 
     val isPodcast: Boolean
         get() = feedType == PODCAST_TYPE || feedType == TWITTER_TYPE
@@ -45,9 +54,6 @@ data class FeedRecommendation(
 
     val isNewsletter: Boolean
         get() = feedType == NEWSLETTER_TYPE
-
-    val dateString: String
-        get() = date?.toDateTime()?.chatTimeFormat() ?: "-"
 
     var duration: Long? = null
 

@@ -134,6 +134,20 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 )
             )
         }
+
+//        startPlaying()
+    }
+
+    fun startPlaying() {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                podcast.getCurrentEpisode()?.let { currentEpisode ->
+                    if (!currentEpisode.playing) {
+                        playEpisode(currentEpisode, podcast.currentTime)
+                    }
+                }
+            }
+        }
     }
 
     private fun loadRecommendationsPodcast() {
