@@ -88,12 +88,9 @@ internal class DashboardNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration, true))
     }
 
-    override suspend fun toCommonPlayerScreen(
-        recommendations: List<String>,
-        recommendationId: String,
-    ) {
+    override suspend fun toCommonPlayerScreen(podcastId: FeedId, currentEpisodeDuration: Long) {
         detailDriver.submitNavigationRequest(
-            ToCommonPlayerScreen(recommendations, recommendationId)
+            ToCommonPlayerScreen(podcastId, currentEpisodeDuration)
         )
     }
 

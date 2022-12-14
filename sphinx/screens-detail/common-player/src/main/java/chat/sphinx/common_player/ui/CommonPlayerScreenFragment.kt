@@ -10,12 +10,14 @@ import android.view.ContextThemeWrapper
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.SeekBar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
@@ -26,38 +28,38 @@ import chat.sphinx.common_player.adapter.RecommendedItemsAdapter
 import chat.sphinx.common_player.adapter.RecommendedItemsFooterAdapter
 import chat.sphinx.common_player.databinding.FragmentCommonPlayerScreenBinding
 import chat.sphinx.common_player.viewstate.BoostAnimationViewState
-import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
-import chat.sphinx.common_player.viewstate.EpisodePlayerViewState
+import chat.sphinx.common_player.viewstate.PlayerViewState
+import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
+import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getHHMMSSString
-import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
+import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt
 import com.google.android.youtube.player.YouTubeInitializationResult
 import com.google.android.youtube.player.YouTubePlayer
-import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 internal class CommonPlayerScreenFragment : SideEffectFragment<
         Context,
         CommonPlayerScreenSideEffect,
-        CommonPlayerScreenViewState,
+        RecommendationsPodcastPlayerViewState,
         CommonPlayerScreenViewModel,
         FragmentCommonPlayerScreenBinding
         >(R.layout.fragment_common_player_screen) {
@@ -65,6 +67,12 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var connectivityHelper: ConnectivityHelper
+
+    private val args: CommonPlayerScreenFragmentArgs by navArgs()
 
     override val binding: FragmentCommonPlayerScreenBinding by viewBinding(
         FragmentCommonPlayerScreenBinding::bind
@@ -94,12 +102,183 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
 
         setupItems()
+
+        viewModel.startPlaying()
+    }
+
+    private fun setupItems() {
+        binding.includeRecommendedItemsList.recyclerViewList.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            val recommendedItemsAdapter = RecommendedItemsAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+                connectivityHelper
+            )
+            val recommendedListFooterAdapter =
+                RecommendedItemsFooterAdapter(requireActivity() as InsetterActivity)
+            this.setHasFixedSize(false)
+
+            layoutManager = linearLayoutManager
+            adapter = ConcatAdapter(recommendedItemsAdapter, recommendedListFooterAdapter)
+            itemAnimator = null
+        }
+    }
+
+    private var dragging: Boolean = false
+    private fun addPodcastOnClickListeners(podcast: Podcast) {
+        binding.apply {
+            includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply {
+                seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
+                    object : SeekBar.OnSeekBarChangeListener {
+
+                        override fun onProgressChanged(
+                            seekBar: SeekBar?,
+                            progress: Int,
+                            fromUser: Boolean
+                        ) {
+                            if (fromUser) {
+                                val duration = podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
+                                setTimeLabelsAndProgressBarTo(duration, null, progress)
+                            }
+                        }
+
+                        override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                            dragging = true
+                        }
+
+                        override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                seekTo(podcast, seekBar?.progress ?: 0)
+                            }
+                            dragging = false
+                        }
+                    }
+                )
+            }
+
+            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
+                textViewPlaybackSpeedButton.setOnClickListener {
+                    showSpeedPopup()
+                }
+
+                textViewReplay15Button.setOnClickListener {
+                    viewModel.seekTo(podcast.currentTime - 15000)
+                    updateViewAfterSeek(podcast)
+                }
+
+                textViewPlayPauseButton.setOnClickListener {
+                    val currentEpisode = podcast.getCurrentEpisode()
+
+                    if (currentEpisode.playing) {
+                        viewModel.pauseEpisode(currentEpisode)
+                    } else {
+                        viewModel.playEpisode(currentEpisode, podcast.currentTime)
+                    }
+                }
+
+                textViewForward30Button.setOnClickListener {
+                    viewModel.seekTo(podcast.currentTime + 30000)
+                    updateViewAfterSeek(podcast)
+                }
+            }
+        }
+    }
+
+    override suspend fun onViewStateFlowCollect(viewState: RecommendationsPodcastPlayerViewState) {
+        @Exhaustive
+        when (viewState) {
+            is RecommendationsPodcastPlayerViewState.Idle -> {}
+
+            is RecommendationsPodcastPlayerViewState.ServiceLoading -> {
+                toggleLoadingWheel(true)
+            }
+            is RecommendationsPodcastPlayerViewState.ServiceInactive -> {
+                togglePlayPauseButton(false)
+            }
+
+            is RecommendationsPodcastPlayerViewState.PodcastLoaded -> {
+                toggleLoadingWheel(true)
+                showPodcastInfo(viewState.podcast)
+            }
+
+            is RecommendationsPodcastPlayerViewState.LoadingEpisode -> {
+                loadingEpisode(viewState.episode)
+            }
+
+            is RecommendationsPodcastPlayerViewState.EpisodePlayed -> {
+                showPodcastInfo(viewState.podcast)
+            }
+
+            is RecommendationsPodcastPlayerViewState.MediaStateUpdate -> {
+                toggleLoadingWheel(false)
+                showPodcastInfo(viewState.podcast)
+            }
+        }
+    }
+
+    private suspend fun showPodcastInfo(podcast: Podcast) {
+        binding.apply {
+
+            var currentEpisode: PodcastEpisode = podcast.getCurrentEpisode()
+
+            includeLayoutPlayerDescriptionAndControls.apply {
+                textViewItemTitle.text = currentEpisode.title.value
+                textViewItemDescription.text = currentEpisode.description?.value ?: "-"
+                textViewItemPublishedDate.text = currentEpisode.dateString
+            }
+
+            includeLayoutPlayersContainer.apply {
+                podcast.imageToShow?.value?.let { podcastImage ->
+                    imageLoader.load(
+                        imageViewPodcastImage,
+                        podcastImage,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(currentEpisode.getPlaceHolderImageRes())
+                            .build()
+                    )
+                }
+            }
+
+            includeRecommendedItemsList.textViewListCount.text = podcast.episodesCount.toString()
+
+            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
+                textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
+
+                includeLayoutCustomBoost.apply customBoost@ {
+                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
+                    this@customBoost.imageViewFeedBoostButton.isEnabled = podcast.hasDestinations
+                    this@customBoost.editTextCustomBoost.isEnabled = podcast.hasDestinations
+                }
+            }
+
+            togglePlayPauseButton(podcast.isPlaying)
+
+            if (!dragging && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
+
+            toggleLoadingWheel(false)
+            addPodcastOnClickListeners(podcast)
+        }
+    }
+
+    private fun setupBoostAnimation(
+        amount: Sat?
+    ) {
+
+        binding.apply {
+            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
+                editTextCustomBoost.setText(
+                    (amount ?: Sat(100)).asFormattedString()
+                )
+            }
+        }
     }
 
     private fun toggleLoadingWheel(show: Boolean) {
         binding.apply {
-            includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply layoutEpisodesSlider@ {
-                this@layoutEpisodesSlider.progressBarAudioLoading.goneIfFalse(show)
+            includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply layoutRecommendationSlider@ {
+                this@layoutRecommendationSlider.progressBarAudioLoading.goneIfFalse(show)
             }
             includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply layoutPlaybackControls@ {
                 this@layoutPlaybackControls.textViewPlayPauseButton.isEnabled = !show
@@ -118,44 +297,33 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    private suspend fun loadingEpisode(feedRecommendation: FeedRecommendation) {
+    private suspend fun loadingEpisode(episode: PodcastEpisode) {
         binding.apply {
             includeLayoutPlayerDescriptionAndControls.apply {
-                textViewItemTitle.text = feedRecommendation.title
+                textViewItemTitle.text = episode.title.value
+                textViewItemDescription.text = episode.description?.value ?: "-"
+                textViewItemPublishedDate.text = episode.dateString
             }
 
-            togglePlayPauseButton(true)
-
             includeLayoutPlayersContainer.apply {
-                feedRecommendation.largestImageUrl?.let { imageUrl ->
+
+                episode.image?.value?.let { podcastImage ->
                     imageLoader.load(
                         imageViewPodcastImage,
-                        imageUrl,
+                        podcastImage,
                         ImageLoaderOptions.Builder()
-                            .placeholderResId(feedRecommendation.getPlaceHolderImageRes())
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
                             .build()
-                    )
-                } ?: run {
-                    imageViewPodcastImage.setImageDrawable(
-                        ContextCompat.getDrawable(root.context, feedRecommendation.getPlaceHolderImageRes())
                     )
                 }
 
-                includeLayoutEpisodeSliderControl.apply {
-                    val currentTime = feedRecommendation.currentTime.toLong()
-                    val duration = (feedRecommendation.duration ?: 0).toLong()
+                includeLayoutRecommendationSliderControl.apply {
+                    textViewCurrentEpisodeDuration.text = 0.toLong().getHHMMSSString()
+                    textViewCurrentEpisodeProgress.text = 0.toLong().getHHMMSSString()
 
-                    textViewCurrentEpisodeDuration.text = duration.getHHMMSSString()
-                    textViewCurrentEpisodeProgress.text = currentTime.getHHMMSSString()
+                    seekBarCurrentEpisodeProgress.progress = 0
 
-                    val progress: Int =
-                        try {
-                            ((currentTime * 100) / duration).toInt()
-                        } catch (e: ArithmeticException) {
-                            0
-                        }
-
-                    seekBarCurrentEpisodeProgress.progress = progress
+                    setClipView(0F, 0F)
 
                     toggleLoadingWheel(true)
                 }
@@ -163,33 +331,27 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    private suspend fun seekTo(
-        feedRecommendation: FeedRecommendation,
-        progress: Int,
-        speed: Double
-    ) {
+    private suspend fun seekTo(podcast: Podcast, progress: Int) {
         val duration = withContext(viewModel.io) {
-            feedRecommendation.getDuration(viewModel::retrieveItemDuration)
+            podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
         val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
-        viewModel.seekTo(seekTime, speed)
+        viewModel.seekTo(seekTime)
     }
 
-    private fun updateViewAfterSeek(feedRecommendation: FeedRecommendation) {
+    private fun updateViewAfterSeek(podcast: Podcast) {
         lifecycleScope.launch(viewModel.mainImmediate) {
-            setTimeLabelsAndProgressBar(feedRecommendation)
+            setTimeLabelsAndProgressBar(podcast)
         }
     }
 
-    private suspend fun setTimeLabelsAndProgressBar(
-        feedRecommendation: FeedRecommendation,
-        currentTime: Long? = null,
-        duration: Long? = null
-    ) {
-        val currentTime: Long = currentTime ?: feedRecommendation.currentTime.toLong()
+    private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
+        podcast.setInitialEpisodeDuration(args.argEpisodeDuration)
 
-        val duration = duration ?: withContext(viewModel.io) {
-            feedRecommendation.getDuration(viewModel::retrieveItemDuration)
+        val currentTime = podcast.currentTime.toLong()
+
+        val duration = withContext(viewModel.io) {
+            podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
         val progress: Int =
             try {
@@ -199,161 +361,55 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             }
 
         setTimeLabelsAndProgressBarTo(duration, currentTime, progress)
+
+        setClipView(
+            duration,
+            (podcast.getCurrentEpisode().clipStartTime ?: 0).toLong(),
+            (podcast.getCurrentEpisode().clipEndTime ?: 0).toLong()
+        )
     }
 
-    private fun setTimeLabelsAndProgressBarTo(
-        duration: Long,
-        currentTime: Long? = null,
-        progress: Int
-    ) {
-        binding.includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply {
+    private fun setClipView(duration: Long, clipStartTime: Long, clipEndTime: Long) {
+        val startTimeProgress: Int =
+            try {
+                ((clipStartTime * 100) / duration).toInt()
+            } catch (e: ArithmeticException) {
+                0
+            }
+
+        val durationProgress: Int =
+            try {
+                (((clipEndTime - clipStartTime) * 100) / duration).toInt()
+            } catch (e: ArithmeticException) {
+                0
+            }
+
+        setClipView(
+            startTimeProgress.toFloat(),
+            durationProgress.toFloat()
+        )
+    }
+
+    private fun setClipView(startTimeProgress: Float, durationProgress: Float) {
+        binding.includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply {
+            val startTimeParams: LinearLayout.LayoutParams = viewClipStart.layoutParams as LinearLayout.LayoutParams
+            startTimeParams.weight = startTimeProgress
+            viewClipStart.layoutParams = startTimeParams
+
+            val endTimeParams: LinearLayout.LayoutParams = viewClipDuration.layoutParams as LinearLayout.LayoutParams
+            endTimeParams.weight = durationProgress
+            viewClipDuration.layoutParams = endTimeParams
+        }
+    }
+
+    private fun setTimeLabelsAndProgressBarTo(duration: Long, currentTime: Long? = null, progress: Int) {
+        binding.includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply {
             val currentT: Double = currentTime?.toDouble() ?: (duration.toDouble() * (progress.toDouble()) / 100)
 
             textViewCurrentEpisodeDuration.text = duration.getHHMMSSString()
             textViewCurrentEpisodeProgress.text = currentT.toLong().getHHMMSSString()
 
             seekBarCurrentEpisodeProgress.progress = progress
-        }
-    }
-
-    private suspend fun showFeedRecommendationInfo(
-        feedRecommendation: FeedRecommendation,
-        state: MediaPlayerServiceState.ServiceActive.MediaState? = null
-    ) {
-        binding.apply {
-
-            includeLayoutPlayerDescriptionAndControls.apply {
-                textViewItemTitle.text = feedRecommendation.title
-
-                includeLayoutEpisodePlaybackControls.apply {
-                    textViewPlaybackSpeedButton.text = (state?.speed ?: 1.0).getSpeedString()
-                }
-            }
-
-            includeLayoutPlayersContainer.apply {
-                feedRecommendation.largestImageUrl?.let { imageUrl ->
-                    imageLoader.load(
-                        imageViewPodcastImage,
-                        imageUrl,
-                        ImageLoaderOptions.Builder()
-                            .placeholderResId(feedRecommendation.getPlaceHolderImageRes())
-                            .build()
-                    )
-                } ?: run {
-                    imageViewPodcastImage.setImageDrawable(
-                        ContextCompat.getDrawable(root.context, feedRecommendation.getPlaceHolderImageRes())
-                    )
-                }
-            }
-
-            val playing = state is MediaPlayerServiceState.ServiceActive.MediaState.Playing
-            togglePlayPauseButton(playing || feedRecommendation.isPlaying)
-
-            (state as? MediaPlayerServiceState.ServiceActive.MediaState.Playing)?.let {
-
-                if (!dragging)
-                    setTimeLabelsAndProgressBar(
-                        feedRecommendation,
-                        it.currentTime.toLong(),
-                        it.episodeDuration.toLong()
-                    )
-            } ?: run {
-                if (!dragging) setTimeLabelsAndProgressBar(feedRecommendation)
-            }
-
-            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(feedRecommendation.position)
-
-            toggleLoadingWheel(false)
-            addPlayerOnClickListeners(feedRecommendation)
-        }
-    }
-
-    private var dragging: Boolean = false
-    private fun addPlayerOnClickListeners(
-        feedRecommendation: FeedRecommendation
-    ) {
-        binding.apply {
-            val speed = includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.textViewPlaybackSpeedButton.text.toString().toDoubleOrNull() ?: 1.0
-
-            includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply {
-                seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
-                    object : SeekBar.OnSeekBarChangeListener {
-
-                        override fun onProgressChanged(
-                            seekBar: SeekBar?,
-                            progress: Int,
-                            fromUser: Boolean
-                        ) {
-                            if (fromUser) {
-                                val duration = feedRecommendation.getDuration(viewModel::retrieveItemDuration)
-                                setTimeLabelsAndProgressBarTo(duration, null, progress)
-                            }
-                        }
-
-                        override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                            dragging = true
-                        }
-
-                        override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                val speed = includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.textViewPlaybackSpeedButton.text.toString().toDoubleOrNull() ?: 1.0
-                                seekTo(feedRecommendation, seekBar?.progress ?: 0, speed)
-                            }
-                            dragging = false
-                        }
-                    }
-                )
-            }
-
-            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
-                textViewPlaybackSpeedButton.setOnClickListener {
-                    showSpeedPopup()
-                }
-
-//                textViewShareClipButton.setOnClickListener {
-//                    viewModel.shouldShareClip()
-//                }
-
-                textViewReplay15Button.setOnClickListener {
-                    viewModel.seekTo(feedRecommendation.currentTime - 15000, speed)
-                    updateViewAfterSeek(feedRecommendation)
-                }
-
-                textViewPlayPauseButton.setOnClickListener {
-                    if (feedRecommendation.isPlaying) {
-                        viewModel.pauseEpisode(feedRecommendation)
-                    } else {
-                        viewModel.playEpisode(feedRecommendation, feedRecommendation.currentTime, speed)
-                    }
-                }
-
-                textViewForward30Button.setOnClickListener {
-                    viewModel.seekTo(feedRecommendation.currentTime + 30000, speed)
-                    updateViewAfterSeek(feedRecommendation)
-                }
-
-//                includeLayoutCustomBoost.apply customBoost@ {
-//                    this@customBoost.imageViewFeedBoostButton.setOnClickListener {
-//                        val amount = editTextCustomBoost.text.toString()
-//                            .replace(" ", "")
-//                            .toLongOrNull()?.toSat() ?: Sat(0)
-//
-//                        viewModel.sendPodcastBoost(
-//                            amount,
-//                            fireworksCallback = {
-//                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                                    setupBoostAnimation(null, amount)
-//
-//                                    includeLayoutBoostFireworks.apply fireworks@ {
-//                                        this@fireworks.root.visible
-//                                        this@fireworks.lottieAnimationView.playAnimation()
-//                                    }
-//                                }
-//                            }
-//                        )
-//                    }
-//                }
-            }
         }
     }
 
@@ -397,23 +453,32 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: CommonPlayerScreenViewState) {
-        @Exhaustive
-        when(viewState) {
-            is CommonPlayerScreenViewState.Idle -> {
-                print("test")
-            }
-            is CommonPlayerScreenViewState.FeedRecommendations -> {
-                binding.apply {
-                    includeLayoutPlayerDescriptionAndControls.apply {
-                        textViewItemTitle.text = viewState.selectedItem.title
-                        textViewItemDescription.text = viewState.selectedItem.description
-                        textViewItemPublishedDate.text = viewState.selectedItem.dateString
-                    }
-                    includeRecommendedItemsList.textViewListCount.text = viewState.recommendations.size.toString()
+    override fun subscribeToViewStateFlow() {
+        super.subscribeToViewStateFlow()
 
-                    when(viewState) {
-                        is CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected -> {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.boostAnimationViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is BoostAnimationViewState.Idle -> {}
+
+                    is BoostAnimationViewState.BoosAnimationInfo -> {
+                        setupBoostAnimation(
+                            viewState.amount
+                        )
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.playerViewStateContainer.collect { viewState ->
+                binding.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is PlayerViewState.Idle -> {}
+
+                        is PlayerViewState.PodcastEpisodeSelected -> {
                             youtubePlayer?.pause()
 
                             includeLayoutPlayersContainer.apply {
@@ -429,9 +494,9 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                                 textViewPlaybackSpeedButton.visible
                                 imageViewPlayPauseButton.visible
                             }
-                            showFeedRecommendationInfo(viewState.selectedItem)
                         }
-                        is CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected -> {
+
+                        is PlayerViewState.YouTubeVideoSelected -> {
                             includeLayoutPlayersContainer.apply {
                                 frameLayoutYoutubePlayer.visible
                                 imageViewPodcastImage.gone
@@ -446,10 +511,14 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                                 imageViewPlayPauseButton.invisible
                             }
 
+                            didSeekToStartTime = false
+
                             if (youtubePlayer != null) {
-                                youtubePlayer?.cueVideo(viewState.selectedItem.link.youTubeVideoId())
+                                youtubePlayer?.cueVideo(viewState.episode.enclosureUrl.value.youTubeVideoId())
                             } else {
-                                setupYoutubePlayer(viewState.selectedItem.link.youTubeVideoId())
+                                setupYoutubePlayer(
+                                    viewState.episode.enclosureUrl.value.youTubeVideoId(),
+                                )
                             }
                         }
                     }
@@ -458,115 +527,23 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
-
+    private var didSeekToStartTime = false
+    private fun seekToStartTime() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.boostAnimationViewStateContainer.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is BoostAnimationViewState.Idle -> {}
-
-                    is BoostAnimationViewState.BoosAnimationInfo -> {
-                        setupBoostAnimation(
-                            viewState.photoUrl,
-                            viewState.amount
-                        )
+            (viewModel.playerViewStateContainer.value as? PlayerViewState.YouTubeVideoSelected)?.let { viewState ->
+                viewState.episode.clipStartTime?.let {
+                    if (!didSeekToStartTime) {
+                        youtubePlayer?.seekToMillis(it)
                     }
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.episodePlayerViewStateContainer.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is EpisodePlayerViewState.Idle -> {}
-
-                    is EpisodePlayerViewState.ServiceLoading -> {
-                        toggleLoadingWheel(true)
-                    }
-                    is EpisodePlayerViewState.ServiceInactive -> {
-                        togglePlayPauseButton(false)
-                    }
-
-                    is EpisodePlayerViewState.EpisodeLoaded -> {
-                        toggleLoadingWheel(true)
-                        showFeedRecommendationInfo(viewState.feedRecommendation)
-                    }
-
-                    is EpisodePlayerViewState.LoadingEpisode -> {
-                        loadingEpisode(viewState.feedRecommendation)
-                    }
-
-                    is EpisodePlayerViewState.EpisodePlayed -> {
-                        showFeedRecommendationInfo(viewState.feedRecommendation)
-                    }
-
-                    is EpisodePlayerViewState.MediaStateUpdate -> {
-                        toggleLoadingWheel(false)
-
-                        showFeedRecommendationInfo(
-                            viewState.feedRecommendation,
-                            viewState.state
-                        )
-                    }
+                    didSeekToStartTime = true
                 }
             }
         }
     }
 
-    private suspend fun setupBoostAnimation(
-        photoUrl: PhotoUrl?,
-        amount: Sat?
+    private fun setupYoutubePlayer(
+        videoId: String
     ) {
-
-        binding.apply {
-            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
-                editTextCustomBoost.setText(
-                    (amount ?: Sat(100)).asFormattedString()
-                )
-            }
-
-//            includeLayoutBoostFireworks.apply {
-//
-//                photoUrl?.let { photoUrl ->
-//                    imageLoader.load(
-//                        imageViewProfilePicture,
-//                        photoUrl.value,
-//                        ImageLoaderOptions.Builder()
-//                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
-//                            .transformation(Transformation.CircleCrop)
-//                            .build()
-//                    )
-//                }
-//
-//                textViewSatsAmount.text = amount?.asFormattedString()
-//            }
-        }
-    }
-
-    private fun setupItems() {
-        binding.includeRecommendedItemsList.recyclerViewList.apply {
-            val linearLayoutManager = LinearLayoutManager(context)
-            val recommendedItemsAdapter = RecommendedItemsAdapter(
-                imageLoader,
-                viewLifecycleOwner,
-                onStopSupervisor,
-                viewModel,
-            )
-            val recommendedListFooterAdapter =
-                RecommendedItemsFooterAdapter(requireActivity() as InsetterActivity)
-            this.setHasFixedSize(false)
-
-            layoutManager = linearLayoutManager
-            adapter = ConcatAdapter(recommendedItemsAdapter, recommendedListFooterAdapter)
-            itemAnimator = null
-        }
-    }
-
-    private fun setupYoutubePlayer(videoId: String) {
-
         val youtubePlayerFragment = YouTubeCommonPlayerSupportFragmentXKt()
 
         childFragmentManager.beginTransaction()
@@ -594,44 +571,34 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 ) {}
                 private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
-                    override fun onSeekTo(p0: Int) {
-                        Log.d("YouTubePlayer", "Youtube has seek $p0")
-                    }
+                    override fun onSeekTo(p0: Int) {}
+
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
-                        playingVideoUpdate()
-                        Log.d("YouTubePlayer", "Youtube is playing")
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            viewModel.playingVideoUpdate()
+                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
+                        }
+
+                        seekToStartTime()
                     }
-                    override fun onStopped() {
-                        Log.d("YouTubePlayer", "Youtube has stopped")
-                    }
+                    override fun onStopped() {}
+
                     override fun onPaused() {
-                        playingVideoDidPause()
-                        Log.d("YouTubePlayer", "Youtube is on pause")
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            viewModel.playingVideoDidPause()
+                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
+                        }
                     }
                 }
             })
     }
 
-    private fun playingVideoDidPause() {
-        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
-            it.selectedItem.isPlaying = false
-            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
-        }
-    }
-
-    private fun playingVideoUpdate() {
-        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let {
-            it.selectedItem.isPlaying = true
-            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyItemChanged(it.selectedItem.position)
-        }
-    }
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
-        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected)?.let { viewState ->
+        (viewModel.playerViewStateContainer.value as? PlayerViewState.YouTubeVideoSelected)?.let {
             val currentOrientation = resources.configuration.orientation
 
             binding.includeLayoutPlayersContainer.layoutConstraintPlayers.apply {
@@ -648,7 +615,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: CommonPlayerScreenSideEffect) {
     }
-
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -656,25 +622,12 @@ inline fun String.youTubeVideoId(): String {
     return this.substringAfterLast("v/").substringAfterLast("v=").substringBefore("?")
 }
 
-inline fun Double.getSpeedString(): String {
-    if (this == 0.0) {
-        return "1x"
-    }
-    if (this.roundToInt().toDouble() == this) {
-        return "${this.toInt()}x"
-    }
-    return "${this}x"
-}
-
-inline fun FeedRecommendation.getPlaceHolderImageRes(): Int {
-    if (isPodcast) {
+inline fun PodcastEpisode.getPlaceHolderImageRes(): Int {
+    if (isMusicClip) {
         return R.drawable.ic_podcast_placeholder
     }
     if (isYouTubeVideo) {
         return R.drawable.ic_video_placeholder
-    }
-    if (isNewsletter) {
-        return R.drawable.ic_newsletter_placeholder
     }
     return R.drawable.ic_podcast_placeholder
 }

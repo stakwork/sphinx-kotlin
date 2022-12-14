@@ -185,4 +185,5 @@
     <string name="alert_confirm_block_contact_title">Block Contact</string>
     <string name="alert_confirm_unblock_contact_title">Unblock Contact</string>
     <string name="alert_confirm_unblock_contact">Are you sure you want to unblock this contact?</string>
+    <string name="alert_not_encrypted_contact">You can\'t send a message to an unencrypted contact</string>
 </resources>

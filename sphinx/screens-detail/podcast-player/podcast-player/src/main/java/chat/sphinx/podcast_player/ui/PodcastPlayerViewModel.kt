@@ -168,7 +168,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         podcast.playingEpisodeUpdate(
                             serviceState.episodeId,
                             serviceState.currentTime,
-                            serviceState.episodeDuration.toLong()
+                            serviceState.episodeDuration.toLong(),
+                            serviceState.speed
                         )
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.MediaStateUpdate(
@@ -268,7 +269,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         podcast.getCurrentEpisode().id,
                         podcast.currentTime.toLong(),
                         arrayListOf("")
-                        )
+                    )
 
                     try {
                         requestCatcher.getCaughtRequestStateFlow().collect { list ->

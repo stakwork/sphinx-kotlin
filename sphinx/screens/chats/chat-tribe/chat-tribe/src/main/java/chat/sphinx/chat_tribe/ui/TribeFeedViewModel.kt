@@ -164,7 +164,8 @@ internal class TribeFeedViewModel @Inject constructor(
                 vs.podcast.playingEpisodeUpdate(
                     serviceState.episodeId,
                     serviceState.currentTime,
-                    serviceState.episodeDuration.toLong()
+                    serviceState.episodeDuration.toLong(),
+                    serviceState.speed
                 )
 
                 vs.adjustState(

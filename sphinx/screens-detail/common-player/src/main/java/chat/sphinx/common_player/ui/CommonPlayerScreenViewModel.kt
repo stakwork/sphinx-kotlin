@@ -9,52 +9,51 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.common_player.navigation.CommonPlayerNavigator
 import chat.sphinx.common_player.viewstate.BoostAnimationViewState
-import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
-import chat.sphinx.common_player.viewstate.EpisodePlayerViewState
+import chat.sphinx.common_player.viewstate.PlayerViewState
+import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
-import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
-import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.FeedRecommendation
-import chat.sphinx.wrapper_feed.toFeedRecommendationOrNull
+import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
+
+internal inline val CommonPlayerScreenFragmentArgs.podcastId: FeedId
+    get() = FeedId(argPodcastId)
 
 @HiltViewModel
 class CommonPlayerScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val navigator: CommonPlayerNavigator,
     private val contactRepository: ContactRepository,
+    private val feedRepository: FeedRepository,
     private val moshi: Moshi,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
         CommonPlayerScreenSideEffect,
-        CommonPlayerScreenViewState,
-        >(dispatchers, CommonPlayerScreenViewState.Idle), MediaPlayerServiceController.MediaServiceListener
+        RecommendationsPodcastPlayerViewState,
+        >(dispatchers, RecommendationsPodcastPlayerViewState.Idle), MediaPlayerServiceController.MediaServiceListener
 {
 
     private val args: CommonPlayerScreenFragmentArgs by savedStateHandle.navArgs()
@@ -63,105 +62,17 @@ class CommonPlayerScreenViewModel @Inject constructor(
         ViewStateContainer(BoostAnimationViewState.Idle)
     }
 
-    val episodePlayerViewStateContainer: ViewStateContainer<EpisodePlayerViewState> by lazy {
-        ViewStateContainer(EpisodePlayerViewState.Idle)
+    val playerViewStateContainer: ViewStateContainer<PlayerViewState> by lazy {
+        ViewStateContainer(PlayerViewState.Idle)
     }
 
-    init {
-        mediaPlayerServiceController.addListener(this)
-
-        loadRecommendations()
-
-        viewModelScope.launch(mainImmediate) {
-            val owner = getOwner()
-
-            boostAnimationViewStateContainer.updateViewState(
-                BoostAnimationViewState.BoosAnimationInfo(
-                    owner.photoUrl,
-                    owner.tipAmount
-                )
-            )
-        }
-    }
-
-    private fun loadRecommendations() {
-        var feedRecommendationList: MutableList<FeedRecommendation> = mutableListOf()
-        var selectedRecommendation: FeedRecommendation? = null
-
-        for (r in args.argRecommendations) {
-            r.toFeedRecommendationOrNull(moshi)?.let { feedRecommendation ->
-                feedRecommendationList.add(feedRecommendation)
-
-                if (feedRecommendation.id == args.argRecommendationId) {
-                    selectedRecommendation = feedRecommendation
-                }
-            }
-        }
-
-        selectedRecommendation?.let {
-            itemSelected(it, feedRecommendationList)
-        } ?: run {
-            viewModelScope.launch(mainImmediate) {
-                submitSideEffect(
-                    CommonPlayerScreenSideEffect.Notify.ErrorLoadingRecommendations
-                )
-
-                navigator.closeDetailScreen()
-            }
-        }
-    }
-
-    fun itemSelected(
-        feedRecommendation: FeedRecommendation,
-        recommendations: List<FeedRecommendation>? = null
-    ) {
-        var feedRecommendationList: MutableList<FeedRecommendation> = mutableListOf()
-
-        recommendations?.let {
-            feedRecommendationList.addAll(it)
-        }
-
-        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations)?.let {
-            stopPlayingEpisode(it.selectedItem)
-
-            if (feedRecommendationList.isEmpty()) {
-                feedRecommendationList.addAll(it.recommendations)
-            }
-        }
-
-        if (feedRecommendation.isPodcast) {
-            updateViewState(
-                CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected(
-                    feedRecommendationList,
-                    feedRecommendation
-                )
-            )
-        } else if (feedRecommendation.isYouTubeVideo) {
-            updateViewState(
-                CommonPlayerScreenViewState.FeedRecommendations.YouTubeVideoSelected(
-                    feedRecommendationList,
-                    feedRecommendation
-                )
-            )
-        } else {
-            CommonPlayerScreenViewState.Idle
-        }
-    }
-
-    private fun stopPlayingEpisode(feedRecommendation: FeedRecommendation) {
-        viewModelScope.launch(mainImmediate) {
-            feedRecommendation.resetPlayerData()
-
-            if (feedRecommendation.isPodcast) {
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Pause(
-                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        feedRecommendation.id
-                    )
-                )
-            }
-        }
-    }
+    private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
+        emitAll(feedRepository.getPodcastById(args.podcastId))
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000),
+        replay = 1,
+    )
 
     private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -185,147 +96,241 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
-        if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
-            if (serviceState.chatId.value.toInt() != ChatId.NULL_CHAT_ID) {
-                return
-            }
+    private suspend fun getPodcast(): Podcast? {
+        podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
+            return podcast
         }
 
-        (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations)?.let { viewState ->
+        podcastSharedFlow.firstOrNull()?.let { podcast ->
+            return podcast
+        }
 
-            viewModelScope.launch(mainImmediate) {
-                @Exhaustive
-                when (serviceState) {
-                    is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+        var podcast: Podcast? = null
 
-                        viewState.recommendations.first {
-                            it.id == serviceState.episodeId
-                        }?.let { feedRecommendation ->
-                            feedRecommendation.playingItemUpdate(
-                                serviceState.currentTime,
-                                serviceState.episodeDuration.toLong()
-                            )
+        try {
+            podcastSharedFlow.collect {
+                if (it != null) {
+                    podcast = it
+                    throw Exception()
+                }
+            }
+        } catch (e: Exception) {}
+        delay(25L)
+        return podcast
+    }
 
-                            episodePlayerViewStateContainer.updateViewState(
-                                EpisodePlayerViewState.MediaStateUpdate(
-                                    feedRecommendation,
-                                    serviceState
-                                )
-                            )
+    init {
+        mediaPlayerServiceController.addListener(this)
 
-                            updateViewState(
-                                CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected(
-                                    viewState.recommendations,
-                                    feedRecommendation
-                                )
-                            )
-                        }
-                    }
-                    is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
-                        viewState.recommendations.first {
-                            it.id == serviceState.episodeId
-                        }?.let { feedRecommendation ->
-                            feedRecommendation.pauseItemUpdate()
+        loadRecommendationsPodcast()
 
-                            episodePlayerViewStateContainer.updateViewState(
-                                EpisodePlayerViewState.MediaStateUpdate(
-                                    feedRecommendation,
-                                    serviceState
-                                )
-                            )
-                        }
-                    }
-                    is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
-                        viewState.recommendations.first {
-                            it.id == serviceState.episodeId
-                        }?.let { feedRecommendation ->
-                            feedRecommendation.endEpisodeUpdate()
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
 
-                            episodePlayerViewStateContainer.updateViewState(
-                                EpisodePlayerViewState.MediaStateUpdate(
-                                    feedRecommendation,
-                                    serviceState
-                                )
-                            )
-                        }
-                    }
-                    is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {}
-                    is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
-                        episodePlayerViewStateContainer.updateViewState(EpisodePlayerViewState.ServiceLoading)
-                    }
-                    is MediaPlayerServiceState.ServiceInactive -> {
-                        episodePlayerViewStateContainer.updateViewState(EpisodePlayerViewState.ServiceInactive)
+            boostAnimationViewStateContainer.updateViewState(
+                BoostAnimationViewState.BoosAnimationInfo(
+                    owner.photoUrl,
+                    owner.tipAmount
+                )
+            )
+        }
+    }
+
+    fun startPlaying() {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                podcast.getCurrentEpisode()?.let { currentEpisode ->
+                    if (!currentEpisode.playing) {
+                        playEpisode(currentEpisode, currentEpisode.clipStartTime ?: podcast.currentTime)
                     }
                 }
             }
         }
     }
 
-    fun playEpisode(
-        feedRecommendation: FeedRecommendation,
-        startTime: Int,
-        speed: Double
-    ) {
+    private fun loadRecommendationsPodcast() {
         viewModelScope.launch(mainImmediate) {
-            episodePlayerViewStateContainer.updateViewState(EpisodePlayerViewState.LoadingEpisode(feedRecommendation))
-
-            delay(50L)
-
-            mediaPlayerServiceController.submitAction(
-                UserAction.ServiceAction.Play(
-                    ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                    "feed-recommendation-podcast",
-                    feedRecommendation.id,
-                    feedRecommendation.link,
-                    Sat(0),
-                    speed,
-                    startTime,
+            feedRepository.getPodcastById(
+                FeedId(args.argPodcastId)
+            ).firstOrNull()?.let { podcast ->
+                podcastLoaded(podcast)
+            } ?: run {
+                submitSideEffect(
+                    CommonPlayerScreenSideEffect.Notify.ErrorLoadingRecommendations
                 )
+
+                navigator.closeDetailScreen()
+            }
+        }
+    }
+
+    private fun podcastLoaded(podcast: Podcast) {
+        viewModelScope.launch(mainImmediate) {
+
+            viewStateContainer.updateViewState(
+                RecommendationsPodcastPlayerViewState.PodcastLoaded(podcast)
             )
 
-            feedRecommendation.playingItemUpdate(
-                startTime,
-                0
-            )
-
-            episodePlayerViewStateContainer.updateViewState(
-                EpisodePlayerViewState.EpisodePlayed(
-                    feedRecommendation
-                )
+            playerViewStateContainer.updateViewState(
+                if (podcast.getCurrentEpisode().isYouTubeVideo) {
+                    PlayerViewState.YouTubeVideoSelected(podcast.getCurrentEpisode())
+                } else {
+                    PlayerViewState.PodcastEpisodeSelected
+                }
             )
         }
     }
 
-    fun pauseEpisode(feedRecommendation: FeedRecommendation) {
-        viewModelScope.launch(mainImmediate) {
-            feedRecommendation.pauseItemUpdate()
+    override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
+        if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
+            if (serviceState.podcastId != args.podcastId.value) {
+                return
+            }
+        }
 
-            mediaPlayerServiceController.submitAction(
-                UserAction.ServiceAction.Pause(
-                    ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                    feedRecommendation.id
-                )
-            )
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                @Exhaustive
+                when (serviceState) {
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+                        podcast.playingEpisodeUpdate(
+                            serviceState.episodeId,
+                            serviceState.currentTime,
+                            serviceState.episodeDuration.toLong(),
+                            serviceState.speed
+                        )
+                        viewStateContainer.updateViewState(
+                            RecommendationsPodcastPlayerViewState.MediaStateUpdate(
+                                podcast,
+                                serviceState
+                            )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
+                        podcast.pauseEpisodeUpdate()
+                        viewStateContainer.updateViewState(
+                            RecommendationsPodcastPlayerViewState.MediaStateUpdate(
+                                podcast,
+                                serviceState
+                            )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
+                        podcast.endEpisodeUpdate(
+                            serviceState.episodeId,
+                            ::retrieveEpisodeDuration
+                        )
+                        viewStateContainer.updateViewState(
+                            RecommendationsPodcastPlayerViewState.MediaStateUpdate(
+                                podcast,
+                                serviceState
+                            )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {}
+
+                    is MediaPlayerServiceState.ServiceActive.ServiceLoading -> {
+                        viewStateContainer.updateViewState(RecommendationsPodcastPlayerViewState.ServiceLoading)
+                    }
+                    is MediaPlayerServiceState.ServiceInactive -> {
+                        podcast.pauseEpisodeUpdate()
+                        viewStateContainer.updateViewState(RecommendationsPodcastPlayerViewState.ServiceInactive)
+                    }
+                }
+            }
         }
     }
 
-    fun seekTo(
-        time: Int,
-        speed: Double
-    ) {
+    fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected)?.let { viewState ->
+            viewStateContainer.updateViewState(RecommendationsPodcastPlayerViewState.LoadingEpisode(episode))
+
+            if (episode.isMusicClip) {
+                playerViewStateContainer.updateViewState(
+                    PlayerViewState.PodcastEpisodeSelected
+                )
+
+                delay(50L)
+
+                playEpisode(
+                    episode,
+                    episode.clipStartTime ?: 0
+                )
+            } else if (episode.isYouTubeVideo) {
+                playerViewStateContainer.updateViewState(
+                    PlayerViewState.YouTubeVideoSelected(episode)
+                )
+
+                getPodcast()?.let { podcast ->
+                    podcast.getCurrentEpisode()?.let { episode ->
+                        pauseEpisode(episode)
+                    }
+                    podcast.setCurrentEpisodeWith(episode.id.value)
+                }
+            }
+        }
+    }
+
+    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                viewModelScope.launch(mainImmediate) {
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Play(
+                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                            podcast.id.value,
+                            episode.id.value,
+                            episode.episodeUrl,
+                            Sat(podcast.satsPerMinute),
+                            podcast.speed,
+                            startTime,
+                        )
+                    )
+
+                    withContext(io) {
+                        podcast.didStartPlayingEpisode(
+                            episode,
+                            startTime,
+                            ::retrieveEpisodeDuration
+                        )
+                    }
+
+                    viewStateContainer.updateViewState(
+                        RecommendationsPodcastPlayerViewState.EpisodePlayed(
+                            podcast
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    fun pauseEpisode(episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                podcast.didPausePlayingEpisode(episode)
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Pause(
+                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        episode.id.value
+                    )
+                )
+            }
+        }
+    }
+
+    fun seekTo(time: Int) {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                podcast.didSeekTo(time)
+
+                val metaData = podcast.getMetaData()
+
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(
                         ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        ChatMetaData(
-                            FeedId(viewState.selectedItem.id),
-                            ItemId(ChatId.NULL_CHAT_ID.toLong()),
-                            Sat(0),
-                            time / 1000,
-                            speed,
-                        )
+                        metaData
                     )
                 )
             }
@@ -334,28 +339,36 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
     fun adjustSpeed(speed: Double) {
         viewModelScope.launch(mainImmediate) {
-            (currentViewState as? CommonPlayerScreenViewState.FeedRecommendations.PodcastSelected)?.let { viewState ->
+            getPodcast()?.let { podcast ->
+                podcast.speed = speed
+
                 mediaPlayerServiceController.submitAction(
                     UserAction.AdjustSpeed(
                         ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        ChatMetaData(
-                            FeedId(viewState.selectedItem.id),
-                            ItemId(ChatId.NULL_CHAT_ID.toLong()),
-                            Sat(0),
-                            0,
-                            speed,
-                        )
+                        podcast.getMetaData()
                     )
                 )
             }
         }
     }
 
-    fun retrieveItemDuration(episodeUrl: String, localFile: File?): Long {
+    fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
         localFile?.let {
             return Uri.fromFile(it).getMediaDuration(true)
         } ?: run {
             return Uri.parse(episodeUrl).getMediaDuration(false)
+        }
+    }
+
+    suspend fun playingVideoDidPause() {
+        (playerViewStateContainer.value as? PlayerViewState.YouTubeVideoSelected)?.let {
+            getPodcast()?.getCurrentEpisode()?.playing = false
+        }
+    }
+
+    suspend fun playingVideoUpdate() {
+        (playerViewStateContainer.value as? PlayerViewState.YouTubeVideoSelected)?.let {
+            getPodcast()?.getCurrentEpisode()?.playing = true
         }
     }
 

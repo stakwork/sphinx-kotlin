@@ -1,6 +1,5 @@
 package chat.sphinx.video_screen.ui.watch
 
-import android.util.Log
 import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
 import chat.sphinx.wrapper_common.feed.FeedId
 import java.util.*

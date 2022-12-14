@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha74 (2022-12-14)
+- Improves podcast and video search
+- Improves recommendations player
+- Adds mentions autocomplete on tribes
+
 # Version 1.0.0-alpha73 (2022-11-30)
 - Fixes feed search for videos and podcasts
 
