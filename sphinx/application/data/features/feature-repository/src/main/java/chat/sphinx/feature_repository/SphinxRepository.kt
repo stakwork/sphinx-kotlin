@@ -109,8 +109,10 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -663,6 +665,10 @@ abstract class SphinxRepository(
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (podcastId?.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
 
             if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
                 //Podcast with no chat. Updating current item id
@@ -3969,6 +3975,10 @@ abstract class SphinxRepository(
         )
     }
 
+    private val recommendationsPodcast: MutableStateFlow<Podcast?> by lazy {
+        MutableStateFlow(null)
+    }
+
     override fun getRecommendedFeeds(): Flow<List<FeedRecommendation>> = flow {
 
         var results: MutableList<FeedRecommendation> = mutableListOf()
@@ -3992,7 +4002,8 @@ abstract class SphinxRepository(
                                     link = feedRecommendation.link,
                                     title = feedRecommendation.episode_title,
                                     date = feedRecommendation.date,
-                                    position = index
+                                    timestamp = feedRecommendation.timestamp,
+                                    position = index + 1
                                 )
                             )
                         }
@@ -4001,7 +4012,28 @@ abstract class SphinxRepository(
             }
         }.join()
 
+        recommendationsPodcast.value = mapRecommendationsPodcast(results)
+
         emit(results)
+    }
+
+    private val feedRecommendationPodcastPresenterMapper: FeedRecommendationPodcastPresenterMapper by lazy {
+        FeedRecommendationPodcastPresenterMapper()
+    }
+
+    private fun mapRecommendationsPodcast(
+        recommendations: List<FeedRecommendation>
+    ): Podcast? {
+        val podcast = feedRecommendationPodcastPresenterMapper.getRecommendationsPodcast()
+
+        podcast.episodes = recommendations.map {
+            feedRecommendationPodcastPresenterMapper.mapFrom(
+                it,
+                podcast.id
+            )
+        }
+
+        return podcast
     }
 
     private suspend fun mapFeedDboList(
@@ -4152,6 +4184,11 @@ abstract class SphinxRepository(
     }
 
     override fun getPodcastById(feedId: FeedId): Flow<Podcast?> = flow {
+        if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+            emit(recommendationsPodcast.value)
+            return@flow
+        }
+
         val queries = coreDB.getSphinxDatabaseQueries()
 
         queries.feedGetById(feedId)

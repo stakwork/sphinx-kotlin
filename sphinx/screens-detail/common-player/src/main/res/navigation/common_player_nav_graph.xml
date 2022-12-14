@@ -10,11 +10,11 @@
         android:name="chat.sphinx.common_player.ui.CommonPlayerScreenFragment"
         tools:layout="@layout/fragment_common_player_screen">
         <argument
-            android:name="argRecommendations"
-            app:argType="string[]" />
-        <argument
-            android:name="argRecommendationId"
+            android:name="argPodcastId"
             app:argType="string" />
+        <argument
+            android:name="argEpisodeDuration"
+            app:argType="long" />
     </fragment>
 
 </navigation>

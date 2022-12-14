@@ -15,7 +15,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedRecommendationRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
-import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
@@ -156,14 +156,11 @@ class FeedRecommendationsAdapter(
     }
 
     private fun getImageLoaderOptions(feedRecommendation: FeedRecommendation): ImageLoaderOptions {
-        if (feedRecommendation.isPodcast) {
+        if (feedRecommendation.isMusicClip) {
             return imagePodcastLoaderOptions
         }
         if (feedRecommendation.isYouTubeVideo) {
             return imageVideoLoaderOptions
-        }
-        if (feedRecommendation.isNewsletter) {
-            return imageNewsletterLoaderOptions
         }
         return imagePodcastLoaderOptions
     }
@@ -235,26 +232,23 @@ class FeedRecommendationsAdapter(
 }
 
 inline fun FeedRecommendation.getPlaceHolderImageRes(): Int {
-    if (isPodcast) {
+    if (isMusicClip) {
         return R.drawable.ic_podcast_placeholder
     }
     if (isYouTubeVideo) {
         return R.drawable.ic_video_placeholder
     }
-    if (isNewsletter) {
-        return R.drawable.ic_newsletter_placeholder
-    }
     return R.drawable.ic_podcast_placeholder
 }
 
 inline fun FeedRecommendation.getIconType(): Int {
+    if (isTwitterSpace) {
+        return R.drawable.ic_twitter_space_type
+    }
     if (isPodcast) {
         return R.drawable.ic_podcast_type
     }
     if (isYouTubeVideo) {
-        return R.drawable.ic_youtube_type
-    }
-    if (isNewsletter) {
         return R.drawable.ic_youtube_type
     }
     return R.drawable.ic_podcast_type

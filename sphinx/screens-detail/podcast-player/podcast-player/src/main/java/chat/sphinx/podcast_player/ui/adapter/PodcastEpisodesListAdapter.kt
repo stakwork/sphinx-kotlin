@@ -144,7 +144,6 @@ internal class PodcastEpisodesListAdapter(
                                     recyclerView.scrollToPosition(0)
                                 }
                             }
-
                         }
                     }
                 }

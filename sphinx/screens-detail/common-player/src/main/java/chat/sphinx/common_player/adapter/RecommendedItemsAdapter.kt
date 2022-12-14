@@ -6,35 +6,35 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.common_player.R
 import chat.sphinx.common_player.databinding.LayoutRecommendedListItemHolderBinding
 import chat.sphinx.common_player.ui.CommonPlayerScreenViewModel
-import chat.sphinx.common_player.viewstate.CommonPlayerScreenViewState
+import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
+import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.wrapper_feed.FeedRecommendation
+import chat.sphinx.concept_service_media.MediaPlayerServiceState
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.annotation.meta.Exhaustive
 
 class RecommendedItemsAdapter (
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: CommonPlayerScreenViewModel,
+    private val connectivityHelper: ConnectivityHelper,
 ): RecyclerView.Adapter<RecommendedItemsAdapter.RecommendedItemViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<FeedRecommendation>,
-        private val newList: List<FeedRecommendation>,
+        private val oldList: List<PodcastEpisode>,
+        private val newList: List<PodcastEpisode>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -53,8 +53,7 @@ class RecommendedItemsAdapter (
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                val same: Boolean =
-                    old.id                 == new.id
+                val same: Boolean = old.id == new.id
 
                 if (sameList) {
                     sameList = same
@@ -72,11 +71,7 @@ class RecommendedItemsAdapter (
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                val same: Boolean =
-                    old.title                == new.title                &&
-                    old.description          == new.description          &&
-                    old.link                 == new.link                 &&
-                    old.isPlaying            == new.isPlaying
+                val same: Boolean = old.playing == new.playing
 
                 if (sameList) {
                     sameList = same
@@ -91,36 +86,48 @@ class RecommendedItemsAdapter (
 
     }
 
-    private val recommendations = ArrayList<FeedRecommendation>(listOf())
+    private val podcastEpisodes = ArrayList<PodcastEpisode>()
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
-                @Exhaustive
-                when(viewState) {
-                    is CommonPlayerScreenViewState.Idle -> {
-                        recommendations.removeAll(listOf())
-                        this@RecommendedItemsAdapter.notifyDataSetChanged()
+
+                var episodes = ArrayList<PodcastEpisode>()
+
+                if (viewState is RecommendationsPodcastPlayerViewState.PodcastLoaded) {
+                    episodes = viewState.podcast.getEpisodesListCopy()
+                }
+
+                if (viewState is RecommendationsPodcastPlayerViewState.EpisodePlayed) {
+                    episodes = viewState.podcast.getEpisodesListCopy()
+                }
+
+                if (viewState is RecommendationsPodcastPlayerViewState.MediaStateUpdate) {
+                    if (viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Paused ||
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended)
+                    {
+                        episodes = viewState.podcast.getEpisodesListCopy()
                     }
-                    is CommonPlayerScreenViewState.FeedRecommendations -> {
-                        if (recommendations.isEmpty()) {
-                            recommendations.addAll(viewState.recommendations)
-                            this@RecommendedItemsAdapter.notifyDataSetChanged()
-                        } else {
+                }
 
-                            val diff = Diff(recommendations, viewState.recommendations)
+                if (episodes.isNotEmpty()) {
+                    if (podcastEpisodes.isEmpty()) {
+                        podcastEpisodes.addAll(episodes)
+                        this@RecommendedItemsAdapter.notifyDataSetChanged()
+                    } else {
 
-                            withContext(viewModel.default) {
-                                DiffUtil.calculateDiff(diff)
-                            }.let { result ->
+                        val diff = Diff(podcastEpisodes, episodes)
 
-                                if (!diff.sameList) {
-                                    recommendations.clear()
-                                    recommendations.addAll(viewState.recommendations)
-                                    result.dispatchUpdatesTo(this@RecommendedItemsAdapter)
-                                }
+                        withContext(viewModel.dispatchers.default) {
+                            DiffUtil.calculateDiff(diff)
+                        }.let { result ->
+
+                            if (!diff.sameList) {
+                                podcastEpisodes.clear()
+                                podcastEpisodes.addAll(episodes)
+                                result.dispatchUpdatesTo(this@RecommendedItemsAdapter)
                             }
                         }
                     }
@@ -130,7 +137,7 @@ class RecommendedItemsAdapter (
     }
 
     override fun getItemCount(): Int {
-        return recommendations.size
+        return podcastEpisodes.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecommendedItemViewHolder {
@@ -165,15 +172,12 @@ class RecommendedItemsAdapter (
             .build()
     }
 
-    private fun getImageLoaderOptions(feedRecommendation: FeedRecommendation): ImageLoaderOptions {
-        if (feedRecommendation.isPodcast) {
+    private fun getImageLoaderOptions(episode: PodcastEpisode): ImageLoaderOptions {
+        if (episode.isMusicClip) {
             return imagePodcastLoaderOptions
         }
-        if (feedRecommendation.isYouTubeVideo) {
+        if (episode.isYouTubeVideo) {
             return imageVideoLoaderOptions
-        }
-        if (feedRecommendation.isNewsletter) {
-            return imageNewsletterLoaderOptions
         }
         return imagePodcastLoaderOptions
     }
@@ -185,32 +189,35 @@ class RecommendedItemsAdapter (
         private var holderJob: Job? = null
         private var disposable: Disposable? = null
 
-        private var feedRecommendation: FeedRecommendation? = null
+        private var episode: PodcastEpisode? = null
+
+        init {
+            binding.layoutConstraintRecommendedHolder.setOnClickListener {
+                episode?.let { podcastEpisode ->
+                    if (connectivityHelper.isNetworkConnected()) {
+                        viewModel.playEpisodeFromList(podcastEpisode)
+                    }
+                }
+            }
+        }
 
         fun bind(position: Int) {
             binding.apply {
 
-                layoutConstraintRecommendedHolder.setOnClickListener {
-                    feedRecommendation?.let { nnFeedRecommendation ->
-                        viewModel.itemSelected(nnFeedRecommendation)
-                        notifyDataSetChanged()
-                    }
-                }
-
-                val f: FeedRecommendation = recommendations.getOrNull(position) ?: let {
-                    feedRecommendation = null
+                val podcastEpisode: PodcastEpisode = podcastEpisodes.getOrNull(position) ?: let {
+                    episode = null
                     return
                 }
-                feedRecommendation = f
+                episode = podcastEpisode
                 disposable?.dispose()
                 holderJob?.cancel()
 
-                f.smallImageUrl?.let { imageUrl ->
+                podcastEpisode.image?.value?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
                             imageViewRecommendedImage,
                             imageUrl,
-                            getImageLoaderOptions(f)
+                            getImageLoaderOptions(podcastEpisode)
                         ).also {
                             disposable = it
                         }
@@ -219,20 +226,20 @@ class RecommendedItemsAdapter (
                     }
                 } ?: run {
                     imageViewRecommendedImage.setImageDrawable(
-                        ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
+                        ContextCompat.getDrawable(root.context, podcastEpisode.getPlaceHolderImageRes())
                     )
                 }
 
-                textViewRecommendedTitle.text = f.title
-                textViewRecommendedDescription.text = f.description
+                textViewRecommendedTitle.text = podcastEpisode.title.value
+                textViewRecommendedDescription.text = podcastEpisode.description?.value ?: "-"
 
                 imageViewItemRowRecommendationType.setImageDrawable(
-                    ContextCompat.getDrawable(root.context, f.getIconType())
+                    ContextCompat.getDrawable(root.context, podcastEpisode.getIconType())
                 )
 
                 root.setBackgroundColor(
                     root.context.getColor(
-                        if (f.isPlaying) R.color.semiTransparentPrimaryBlue else R.color.headerBG
+                        if (podcastEpisode.playing) R.color.semiTransparentPrimaryBlue else R.color.headerBG
                     )
                 )
             }
@@ -244,27 +251,24 @@ class RecommendedItemsAdapter (
     }
 }
 
-inline fun FeedRecommendation.getPlaceHolderImageRes(): Int {
-    if (isPodcast) {
+inline fun PodcastEpisode.getPlaceHolderImageRes(): Int {
+    if (isMusicClip) {
         return R.drawable.ic_podcast_placeholder
     }
     if (isYouTubeVideo) {
         return R.drawable.ic_video_placeholder
     }
-    if (isNewsletter) {
-        return R.drawable.ic_newsletter_placeholder
-    }
     return R.drawable.ic_podcast_placeholder
 }
 
-inline fun FeedRecommendation.getIconType(): Int {
+inline fun PodcastEpisode.getIconType(): Int {
+    if (isTwitterSpace) {
+        return R.drawable.ic_twitter_space_type
+    }
     if (isPodcast) {
         return R.drawable.ic_podcast_type
     }
     if (isYouTubeVideo) {
-        return R.drawable.ic_youtube_type
-    }
-    if (isNewsletter) {
         return R.drawable.ic_youtube_type
     }
     return R.drawable.ic_podcast_type

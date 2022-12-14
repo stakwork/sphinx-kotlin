@@ -5,11 +5,12 @@ import androidx.navigation.NavOptions
 import chat.sphinx.common_player.R
 import chat.sphinx.common_player.ui.CommonPlayerScreenFragmentArgs
 import chat.sphinx.detail_resources.DetailNavOptions
+import chat.sphinx.wrapper_common.feed.FeedId
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToCommonPlayerScreen(
-    private val recommendations: List<String>,
-    private val recommendationId: String,
+    private val podcastId: FeedId,
+    private val currentEpisodeDuration: Long,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
 
@@ -17,8 +18,8 @@ class ToCommonPlayerScreen(
         controller.navigate(
             R.id.common_player_nav_graph,
             CommonPlayerScreenFragmentArgs.Builder(
-                recommendations.toTypedArray(),
-                recommendationId
+                podcastId.value,
+                currentEpisodeDuration
             ).build().toBundle(),
             options
         )

@@ -96,6 +96,10 @@ data class Podcast(
         playingEpisode = getEpisodeWithId(metaData.itemId.value)
     }
 
+    fun setCurrentEpisodeWith(episodeId: String) {
+        this.playingEpisode = getEpisodeWithId(episodeId)
+    }
+
     fun getMetaData(
         customAmount: Sat? = null
     ): ChatMetaData =
@@ -225,7 +229,14 @@ data class Podcast(
         this.timeMilliSeconds = time
     }
 
-    fun playingEpisodeUpdate(episodeId: String, time: Int, duration: Long) {
+    fun playingEpisodeUpdate(
+        episodeId: String,
+        time: Int,
+        duration: Long,
+        speed: Double
+    ) {
+        this.speed = speed
+
         if (playingEpisode == null) {
             this.episodeId?.let { currentEpisodeId ->
                 this.playingEpisode = getEpisodeWithId(currentEpisodeId)
