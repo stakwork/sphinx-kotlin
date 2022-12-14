@@ -38,8 +38,8 @@
             android:background="@color/blackSemiTransparent">
 
             <include
-                android:id="@+id/include_layout_episode_slider_control"
-                layout="@layout/layout_episode_slider_control"
+                android:id="@+id/include_layout_recommendation_slider_control"
+                layout="@layout/layout_recommendation_slider_control"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/player_slider_control_margin"

@@ -10,6 +10,7 @@ import android.view.ContextThemeWrapper
 import android.view.MenuItem
 import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.SeekBar
 import androidx.core.content.ContextCompat
@@ -128,7 +129,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     private var dragging: Boolean = false
     private fun addPodcastOnClickListeners(podcast: Podcast) {
         binding.apply {
-            includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply {
+            includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply {
                 seekBarCurrentEpisodeProgress.setOnSeekBarChangeListener(
                     object : SeekBar.OnSeekBarChangeListener {
 
@@ -261,8 +262,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    private suspend fun setupBoostAnimation(
-        photoUrl: PhotoUrl?,
+    private fun setupBoostAnimation(
         amount: Sat?
     ) {
 
@@ -272,29 +272,13 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                     (amount ?: Sat(100)).asFormattedString()
                 )
             }
-
-//            includeLayoutBoostFireworks.apply {
-//
-//                photoUrl?.let { photoUrl ->
-//                    imageLoader.load(
-//                        imageViewProfilePicture,
-//                        photoUrl.value,
-//                        ImageLoaderOptions.Builder()
-//                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
-//                            .transformation(Transformation.CircleCrop)
-//                            .build()
-//                    )
-//                }
-//
-//                textViewSatsAmount.text = amount?.asFormattedString()
-//            }
         }
     }
 
     private fun toggleLoadingWheel(show: Boolean) {
         binding.apply {
-            includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply layoutEpisodesSlider@ {
-                this@layoutEpisodesSlider.progressBarAudioLoading.goneIfFalse(show)
+            includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply layoutRecommendationSlider@ {
+                this@layoutRecommendationSlider.progressBarAudioLoading.goneIfFalse(show)
             }
             includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply layoutPlaybackControls@ {
                 this@layoutPlaybackControls.textViewPlayPauseButton.isEnabled = !show
@@ -333,11 +317,13 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                     )
                 }
 
-                includeLayoutEpisodeSliderControl.apply {
+                includeLayoutRecommendationSliderControl.apply {
                     textViewCurrentEpisodeDuration.text = 0.toLong().getHHMMSSString()
                     textViewCurrentEpisodeProgress.text = 0.toLong().getHHMMSSString()
 
                     seekBarCurrentEpisodeProgress.progress = 0
+
+                    setClipView(0F, 0F)
 
                     toggleLoadingWheel(true)
                 }
@@ -375,10 +361,49 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             }
 
         setTimeLabelsAndProgressBarTo(duration, currentTime, progress)
+
+        setClipView(
+            duration,
+            (podcast.getCurrentEpisode().clipStartTime ?: 0).toLong(),
+            (podcast.getCurrentEpisode().clipEndTime ?: 0).toLong()
+        )
+    }
+
+    private fun setClipView(duration: Long, clipStartTime: Long, clipEndTime: Long) {
+        val startTimeProgress: Int =
+            try {
+                ((clipStartTime * 100) / duration).toInt()
+            } catch (e: ArithmeticException) {
+                0
+            }
+
+        val durationProgress: Int =
+            try {
+                (((clipEndTime - clipStartTime) * 100) / duration).toInt()
+            } catch (e: ArithmeticException) {
+                0
+            }
+
+        setClipView(
+            startTimeProgress.toFloat(),
+            durationProgress.toFloat()
+        )
+    }
+
+    private fun setClipView(startTimeProgress: Float, durationProgress: Float) {
+        binding.includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply {
+            val startTimeParams: LinearLayout.LayoutParams = viewClipStart.layoutParams as LinearLayout.LayoutParams
+            startTimeParams.weight = startTimeProgress
+            viewClipStart.layoutParams = startTimeParams
+
+            val endTimeParams: LinearLayout.LayoutParams = viewClipDuration.layoutParams as LinearLayout.LayoutParams
+            endTimeParams.weight = durationProgress
+            viewClipDuration.layoutParams = endTimeParams
+        }
     }
 
     private fun setTimeLabelsAndProgressBarTo(duration: Long, currentTime: Long? = null, progress: Int) {
-        binding.includeLayoutPlayersContainer.includeLayoutEpisodeSliderControl.apply {
+        binding.includeLayoutPlayersContainer.includeLayoutRecommendationSliderControl.apply {
             val currentT: Double = currentTime?.toDouble() ?: (duration.toDouble() * (progress.toDouble()) / 100)
 
             textViewCurrentEpisodeDuration.text = duration.getHHMMSSString()
@@ -439,7 +464,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
                     is BoostAnimationViewState.BoosAnimationInfo -> {
                         setupBoostAnimation(
-                            viewState.photoUrl,
                             viewState.amount
                         )
                     }
@@ -487,10 +511,14 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                                 imageViewPlayPauseButton.invisible
                             }
 
+                            didSeekToStartTime = false
+
                             if (youtubePlayer != null) {
                                 youtubePlayer?.cueVideo(viewState.episode.enclosureUrl.value.youTubeVideoId())
                             } else {
-                                setupYoutubePlayer(viewState.episode.enclosureUrl.value.youTubeVideoId())
+                                setupYoutubePlayer(
+                                    viewState.episode.enclosureUrl.value.youTubeVideoId(),
+                                )
                             }
                         }
                     }
@@ -499,8 +527,23 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupYoutubePlayer(videoId: String) {
+    private var didSeekToStartTime = false
+    private fun seekToStartTime() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            (viewModel.playerViewStateContainer.value as? PlayerViewState.YouTubeVideoSelected)?.let { viewState ->
+                viewState.episode.clipStartTime?.let {
+                    if (!didSeekToStartTime) {
+                        youtubePlayer?.seekToMillis(it)
+                    }
+                    didSeekToStartTime = true
+                }
+            }
+        }
+    }
 
+    private fun setupYoutubePlayer(
+        videoId: String
+    ) {
         val youtubePlayerFragment = YouTubeCommonPlayerSupportFragmentXKt()
 
         childFragmentManager.beginTransaction()
@@ -528,9 +571,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 ) {}
                 private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
-                    override fun onSeekTo(p0: Int) {
-                        Log.d("YouTubePlayer", "Youtube has seek $p0")
-                    }
+                    override fun onSeekTo(p0: Int) {}
+
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
@@ -538,17 +580,16 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                             viewModel.playingVideoUpdate()
                             binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
                         }
-                        Log.d("YouTubePlayer", "Youtube is playing")
+
+                        seekToStartTime()
                     }
-                    override fun onStopped() {
-                        Log.d("YouTubePlayer", "Youtube has stopped")
-                    }
+                    override fun onStopped() {}
+
                     override fun onPaused() {
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             viewModel.playingVideoDidPause()
                             binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
                         }
-                        Log.d("YouTubePlayer", "Youtube is on pause")
                     }
                 }
             })
