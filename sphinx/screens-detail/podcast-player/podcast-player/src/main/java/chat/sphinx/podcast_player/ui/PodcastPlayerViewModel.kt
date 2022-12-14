@@ -268,7 +268,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         podcast.getCurrentEpisode().id,
                         podcast.currentTime.toLong(),
                         arrayListOf("")
-                        )
+                    )
 
                     try {
                         requestCatcher.getCaughtRequestStateFlow().collect { list ->

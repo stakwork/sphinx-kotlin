@@ -25,12 +25,12 @@ interface ActionsRepository {
 
     fun trackVideoConsumed(
         feedItemId: FeedId,
-        history: java.util.ArrayList<ContentConsumedHistoryItem>
+        history: ArrayList<ContentConsumedHistoryItem>
     )
 
     fun trackPodcastConsumed(
         feedItemId: FeedId,
-        history: java.util.ArrayList<ContentConsumedHistoryItem>
+        history: ArrayList<ContentConsumedHistoryItem>
     )
 
     fun trackMessageContent(
