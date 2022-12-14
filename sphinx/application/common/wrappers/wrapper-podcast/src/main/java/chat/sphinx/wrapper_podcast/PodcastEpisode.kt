@@ -7,7 +7,10 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.NEWSLETTER_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.PODCAST_TYPE
+import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.TWITTER_TYPE
+import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.YOUTUBE_VIDEO_TYPE
 import java.io.File
 
 data class PodcastEpisode(
@@ -44,12 +47,15 @@ data class PodcastEpisode(
     val episodeUrl: String
         get()= localFile?.toString() ?: enclosureUrl.value
 
+    val isTwitterSpace: Boolean
+        get() = feedType == TWITTER_TYPE
+
     val isPodcast: Boolean
-        get() = feedType == PODCAST_TYPE || feedType == FeedRecommendation.TWITTER_TYPE
+        get() = feedType == PODCAST_TYPE
 
     val isYouTubeVideo: Boolean
-        get() = feedType == FeedRecommendation.YOUTUBE_VIDEO_TYPE
+        get() = feedType == YOUTUBE_VIDEO_TYPE
 
-    val isNewsletter: Boolean
-        get() = feedType == FeedRecommendation.NEWSLETTER_TYPE
+    val isMusicClip: Boolean
+        get() = feedType == PODCAST_TYPE || feedType == TWITTER_TYPE
 }

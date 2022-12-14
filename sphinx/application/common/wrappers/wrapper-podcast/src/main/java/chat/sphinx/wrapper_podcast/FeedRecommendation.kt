@@ -46,14 +46,17 @@ data class FeedRecommendation(
             return largeImageUrl
         }
 
+    val isTwitterSpace: Boolean
+        get() = feedType == TWITTER_TYPE
+
     val isPodcast: Boolean
-        get() = feedType == PODCAST_TYPE || feedType == TWITTER_TYPE
+        get() = feedType == PODCAST_TYPE
 
     val isYouTubeVideo: Boolean
         get() = feedType == YOUTUBE_VIDEO_TYPE
 
-    val isNewsletter: Boolean
-        get() = feedType == NEWSLETTER_TYPE
+    val isMusicClip: Boolean
+        get() = feedType == PODCAST_TYPE || feedType == TWITTER_TYPE
 
     var duration: Long? = null
 

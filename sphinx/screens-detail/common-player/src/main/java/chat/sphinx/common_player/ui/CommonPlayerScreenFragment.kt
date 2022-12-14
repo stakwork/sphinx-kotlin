@@ -582,14 +582,11 @@ inline fun String.youTubeVideoId(): String {
 }
 
 inline fun PodcastEpisode.getPlaceHolderImageRes(): Int {
-    if (isPodcast) {
+    if (isMusicClip) {
         return R.drawable.ic_podcast_placeholder
     }
     if (isYouTubeVideo) {
         return R.drawable.ic_video_placeholder
-    }
-    if (isNewsletter) {
-        return R.drawable.ic_newsletter_placeholder
     }
     return R.drawable.ic_podcast_placeholder
 }

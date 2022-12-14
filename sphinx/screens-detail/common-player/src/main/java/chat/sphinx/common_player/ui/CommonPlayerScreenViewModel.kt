@@ -172,6 +172,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
             viewStateContainer.updateViewState(
                 RecommendationsPodcastPlayerViewState.PodcastLoaded(podcast)
             )
+
+            playerViewStateContainer.updateViewState(
+                if (podcast.getCurrentEpisode().isYouTubeVideo) {
+                    PlayerViewState.YouTubeVideoSelected(podcast.getCurrentEpisode())
+                } else {
+                    PlayerViewState.PodcastEpisodeSelected
+                }
+            )
         }
     }
 
@@ -239,8 +247,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(RecommendationsPodcastPlayerViewState.LoadingEpisode(episode))
 
-            if (episode.isPodcast) {
-
+            if (episode.isMusicClip) {
                 playerViewStateContainer.updateViewState(
                     PlayerViewState.PodcastEpisodeSelected
                 )

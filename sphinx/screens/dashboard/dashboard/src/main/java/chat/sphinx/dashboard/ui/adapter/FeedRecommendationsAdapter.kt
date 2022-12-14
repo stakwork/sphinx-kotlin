@@ -156,14 +156,11 @@ class FeedRecommendationsAdapter(
     }
 
     private fun getImageLoaderOptions(feedRecommendation: FeedRecommendation): ImageLoaderOptions {
-        if (feedRecommendation.isPodcast) {
+        if (feedRecommendation.isMusicClip) {
             return imagePodcastLoaderOptions
         }
         if (feedRecommendation.isYouTubeVideo) {
             return imageVideoLoaderOptions
-        }
-        if (feedRecommendation.isNewsletter) {
-            return imageNewsletterLoaderOptions
         }
         return imagePodcastLoaderOptions
     }
@@ -235,26 +232,23 @@ class FeedRecommendationsAdapter(
 }
 
 inline fun FeedRecommendation.getPlaceHolderImageRes(): Int {
-    if (isPodcast) {
+    if (isMusicClip) {
         return R.drawable.ic_podcast_placeholder
     }
     if (isYouTubeVideo) {
         return R.drawable.ic_video_placeholder
     }
-    if (isNewsletter) {
-        return R.drawable.ic_newsletter_placeholder
-    }
     return R.drawable.ic_podcast_placeholder
 }
 
 inline fun FeedRecommendation.getIconType(): Int {
+    if (isTwitterSpace) {
+        return R.drawable.ic_twitter_space_type
+    }
     if (isPodcast) {
         return R.drawable.ic_podcast_type
     }
     if (isYouTubeVideo) {
-        return R.drawable.ic_youtube_type
-    }
-    if (isNewsletter) {
         return R.drawable.ic_youtube_type
     }
     return R.drawable.ic_podcast_type

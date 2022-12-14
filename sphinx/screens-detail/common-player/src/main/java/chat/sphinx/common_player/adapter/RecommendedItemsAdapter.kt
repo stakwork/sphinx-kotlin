@@ -173,14 +173,11 @@ class RecommendedItemsAdapter (
     }
 
     private fun getImageLoaderOptions(episode: PodcastEpisode): ImageLoaderOptions {
-        if (episode.isPodcast) {
+        if (episode.isMusicClip) {
             return imagePodcastLoaderOptions
         }
         if (episode.isYouTubeVideo) {
             return imageVideoLoaderOptions
-        }
-        if (episode.isNewsletter) {
-            return imageNewsletterLoaderOptions
         }
         return imagePodcastLoaderOptions
     }
@@ -255,26 +252,23 @@ class RecommendedItemsAdapter (
 }
 
 inline fun PodcastEpisode.getPlaceHolderImageRes(): Int {
-    if (isPodcast) {
+    if (isMusicClip) {
         return R.drawable.ic_podcast_placeholder
     }
     if (isYouTubeVideo) {
         return R.drawable.ic_video_placeholder
     }
-    if (isNewsletter) {
-        return R.drawable.ic_newsletter_placeholder
-    }
     return R.drawable.ic_podcast_placeholder
 }
 
 inline fun PodcastEpisode.getIconType(): Int {
+    if (isTwitterSpace) {
+        return R.drawable.ic_twitter_space_type
+    }
     if (isPodcast) {
         return R.drawable.ic_podcast_type
     }
     if (isYouTubeVideo) {
-        return R.drawable.ic_youtube_type
-    }
-    if (isNewsletter) {
         return R.drawable.ic_youtube_type
     }
     return R.drawable.ic_podcast_type
