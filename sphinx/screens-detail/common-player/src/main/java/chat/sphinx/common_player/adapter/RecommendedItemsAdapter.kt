@@ -195,7 +195,7 @@ class RecommendedItemsAdapter (
             binding.layoutConstraintRecommendedHolder.setOnClickListener {
                 episode?.let { podcastEpisode ->
                     if (connectivityHelper.isNetworkConnected()) {
-                        viewModel.playEpisodeFromList(podcastEpisode, 0)
+                        viewModel.playEpisodeFromList(podcastEpisode)
                     }
                 }
             }

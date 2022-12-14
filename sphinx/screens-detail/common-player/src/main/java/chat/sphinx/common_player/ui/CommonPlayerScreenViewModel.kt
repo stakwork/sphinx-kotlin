@@ -134,8 +134,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 )
             )
         }
-
-//        startPlaying()
     }
 
     fun startPlaying() {
@@ -143,7 +141,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.getCurrentEpisode()?.let { currentEpisode ->
                     if (!currentEpisode.playing) {
-                        playEpisode(currentEpisode, podcast.currentTime)
+                        playEpisode(currentEpisode, currentEpisode.clipStartTime ?: podcast.currentTime)
                     }
                 }
             }
@@ -243,7 +241,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun playEpisodeFromList(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(RecommendationsPodcastPlayerViewState.LoadingEpisode(episode))
 
@@ -253,7 +251,11 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 )
 
                 delay(50L)
-                playEpisode(episode, startTime)
+
+                playEpisode(
+                    episode,
+                    episode.clipStartTime ?: 0
+                )
             } else if (episode.isYouTubeVideo) {
                 playerViewStateContainer.updateViewState(
                     PlayerViewState.YouTubeVideoSelected(episode)

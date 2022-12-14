@@ -5,9 +5,7 @@ import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_feed.*
-import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.NEWSLETTER_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.PODCAST_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.TWITTER_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.YOUTUBE_VIDEO_TYPE
@@ -25,7 +23,9 @@ data class PodcastEpisode(
     override val enclosureType: FeedEnclosureType?,
     override var localFile: File?,
     val date: DateTime?,
-    val feedType: String = PODCAST_TYPE
+    val feedType: String = PODCAST_TYPE,
+    val clipStartTime: Int? = null,
+    val clipEndTime: Int? = null,
 ): DownloadableFeedItem {
 
     var playing: Boolean = false

@@ -1,13 +1,5 @@
 package chat.sphinx.wrapper_podcast
 
-import chat.sphinx.wrapper_common.chatTimeFormat
-import chat.sphinx.wrapper_common.toDateTime
-import chat.sphinx.wrapper_common.toPhotoUrl
-import com.squareup.moshi.JsonClass
-import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
-import java.io.File
-
 data class FeedRecommendation(
     val id: String,
     val feedType: String,
@@ -18,13 +10,13 @@ data class FeedRecommendation(
     val link: String,
     val title: String,
     val date: Long?,
-    val position: Int,
+    val timestamp: String,
+    val position: Int
 ) {
 
     companion object {
         const val PODCAST_TYPE = "podcast"
         const val YOUTUBE_VIDEO_TYPE = "youtube"
-        const val NEWSLETTER_TYPE = "newsletter"
         const val TWITTER_TYPE = "twitter_space"
 
         const val RECOMMENDATION_PODCAST_ID = "Recommendations-Feed"
@@ -34,17 +26,6 @@ data class FeedRecommendation(
 
     val largestImageUrl: String?
         get() = largeImageUrl ?: mediumImageUrl ?: smallImageUrl
-
-    val smallestImageUrl: String?
-        get() {
-            if (!smallImageUrl.isNullOrEmpty()) {
-                return smallImageUrl
-            }
-            if (!mediumImageUrl.isNullOrEmpty()) {
-                return mediumImageUrl
-            }
-            return largeImageUrl
-        }
 
     val isTwitterSpace: Boolean
         get() = feedType == TWITTER_TYPE
@@ -58,112 +39,30 @@ data class FeedRecommendation(
     val isMusicClip: Boolean
         get() = feedType == PODCAST_TYPE || feedType == TWITTER_TYPE
 
-    var duration: Long? = null
 
-    private var currentTimeMilliseconds: Int? = null
-
-    val currentTime: Int
-        get() = currentTimeMilliseconds ?: 0
-
-    var isPlaying: Boolean = false
-
-    fun resetPlayerData() {
-        isPlaying = false
-        currentTimeMilliseconds = 0
-    }
-
-    fun getDuration(
-        durationRetrieverHandler: (url: String, localFile: File?) -> Long
-    ): Long {
-        if (duration == null) {
-
-            duration = durationRetrieverHandler(
-                link,
-                null
-            )
+    val startMilliseconds: Int
+        get() {
+            return timestamp.split("-").firstOrNull()?.toMilliseconds() ?: 0
         }
 
-        return duration ?: 0
-    }
-
-    fun playingItemUpdate(time: Int, duration: Long) {
-        this.duration = if (duration > 0) duration else this.duration
-        this.currentTimeMilliseconds = time
-        this.isPlaying = true
-    }
-
-    fun pauseItemUpdate() {
-        this.isPlaying = false
-    }
-
-    fun endEpisodeUpdate() {
-        this.isPlaying = false
-        this.currentTimeMilliseconds = 0
-    }
+    val endMilliseconds: Int
+        get() {
+            return timestamp.split("-").lastOrNull()?.toMilliseconds() ?: 0
+        }
 }
 
-@JsonClass(generateAdapter = true)
-internal data class FeedRecommendationMoshi(
-    val id: String,
-    val feedType: String,
-    val description: String,
-    val smallImageUrl: String?,
-    val mediumImageUrl: String?,
-    val largeImageUrl: String?,
-    val link: String,
-    val title: String,
-    val date: Long?,
-    val position: Int
-)
-
 @Suppress("NOTHING_TO_INLINE")
-inline fun String.toFeedRecommendationOrNull(moshi: Moshi): FeedRecommendation? =
-    try {
-        this.toFeedRecommendation(moshi)
-    } catch (e: Exception) {
-        null
+inline fun String.toMilliseconds(): Int {
+    val elements = this.split(":")
+    if (elements.size == 3) {
+        val hours = elements[0].toIntOrNull() ?: 0
+        val minutes = elements[1].toIntOrNull() ?: 0
+        val seconds = elements[2].toIntOrNull() ?: 0
+        return (seconds * 1000) + (minutes * 60 * 1000) + (hours * 60 * 60 * 1000)
     }
+    return 0
+}
 
-@Throws(
-    IllegalArgumentException::class,
-    JsonDataException::class
-)
-fun String.toFeedRecommendation(moshi: Moshi): FeedRecommendation =
-    moshi.adapter(FeedRecommendationMoshi::class.java)
-        .fromJson(this)
-        ?.let {
-            FeedRecommendation(
-                it.id,
-                it.feedType,
-                it.description,
-                it.smallImageUrl,
-                it.mediumImageUrl,
-                it.largeImageUrl,
-                it.link,
-                it.title,
-                it.date,
-                it.position
-            )
-        }
-        ?: throw IllegalArgumentException("Provided Json was invalid")
-
-@Throws(AssertionError::class)
-fun FeedRecommendation.toJson(moshi: Moshi): String =
-    moshi.adapter(FeedRecommendationMoshi::class.java)
-        .toJson(
-            FeedRecommendationMoshi(
-                id,
-                feedType,
-                description,
-                smallImageUrl,
-                mediumImageUrl,
-                largeImageUrl,
-                link,
-                title,
-                date,
-                position
-            )
-        )
 
 
 

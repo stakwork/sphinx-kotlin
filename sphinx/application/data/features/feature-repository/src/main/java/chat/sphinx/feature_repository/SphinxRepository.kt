@@ -4002,7 +4002,8 @@ abstract class SphinxRepository(
                                     link = feedRecommendation.link,
                                     title = feedRecommendation.episode_title,
                                     date = feedRecommendation.date,
-                                    position = index
+                                    timestamp = feedRecommendation.timestamp,
+                                    position = index + 1
                                 )
                             )
                         }

@@ -26,7 +26,9 @@ internal class FeedRecommendationPodcastPresenterMapper() {
             null,
             null,
             value.date?.toDateTime(),
-            value.feedType
+            value.feedType,
+            value.startMilliseconds,
+            value.endMilliseconds
         )
     }
 
