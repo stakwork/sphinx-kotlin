@@ -38,6 +38,15 @@
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
         tools:listitem="@layout/layout_message_holder" />
 
+    <include
+        android:id="@+id/include_chat_tribe_members_mention_popup"
+        layout="@layout/layout_chat_tribe_member_mention_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container" />
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_chat_footer_shadow"
         android:layout_width="match_parent"

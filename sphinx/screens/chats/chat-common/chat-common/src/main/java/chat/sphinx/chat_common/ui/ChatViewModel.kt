@@ -37,6 +37,7 @@ import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewS
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
@@ -162,6 +163,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     val moreOptionsMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
         ViewStateContainer(MenuBottomViewState.Closed)
+    }
+
+    val messageMentionsViewStateContainer: ViewStateContainer<MessageMentionsViewState> by lazy {
+        ViewStateContainer(MessageMentionsViewState.MessageMentions(listOf()))
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
@@ -1950,6 +1955,30 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(sideEffect)
         }
+    }
+
+    fun processMemberMention(s: CharSequence?) {
+        val lastWord = s?.split(" ")?.last()?.toString() ?: ""
+
+        if (lastWord.startsWith("@") && lastWord.length > 1) {
+            val matchingMessages = messageHolderViewStateFlow.value.filter { messageHolder ->
+                messageHolder.message?.senderAlias?.value?.let { member ->
+                    (member.startsWith(lastWord.replace("@", ""), true))
+                } ?: false
+            }
+
+            val matchingAliases = matchingMessages.map { it.message?.senderAlias?.value ?: "" }.distinct()
+
+            messageMentionsViewStateContainer.updateViewState(
+                MessageMentionsViewState.MessageMentions(matchingAliases)
+            )
+
+        } else {
+            messageMentionsViewStateContainer.updateViewState(
+                MessageMentionsViewState.MessageMentions(listOf())
+            )
+        }
+
     }
 
     override fun onCleared() {
