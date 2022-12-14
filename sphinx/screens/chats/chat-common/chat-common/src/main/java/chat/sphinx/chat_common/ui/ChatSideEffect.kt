@@ -97,6 +97,15 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         }
     }
 
+    object NotEncryptedContact : ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            SphinxToastUtils(toastLengthLong = false).show(
+                value.chatFragmentContext,
+                value.chatFragmentContext.getString(R.string.alert_not_encrypted_contact)
+            )
+        }
+    }
+
     class Notify(
         private val msg: String,
         private val notificationLengthLong: Boolean = true
