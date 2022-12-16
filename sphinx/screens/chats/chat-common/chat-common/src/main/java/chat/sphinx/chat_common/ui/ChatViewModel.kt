@@ -40,9 +40,6 @@ import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
-import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -98,11 +95,11 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import org.jitsi.meet.sdk.JitsiMeet
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
-import kotlin.collections.ArrayList
 
 
 @JvmSynthetic
@@ -1650,11 +1647,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                         .setUserInfo(userInfo)
                         .build()
 
-                    val intent = Intent(app, JitsiMeetActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    intent.action = "org.jitsi.meet.CONFERENCE"
-                    intent.putExtra("JitsiMeetConferenceOptions", options)
-                    app.startActivity(intent)
+                    JitsiMeetActivity.launch(app, options)
                 }
             }
         }
