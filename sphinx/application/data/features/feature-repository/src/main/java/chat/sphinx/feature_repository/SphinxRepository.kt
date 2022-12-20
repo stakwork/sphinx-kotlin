@@ -6267,6 +6267,11 @@ abstract class SphinxRepository(
         }
     }
 
+    @Suppress("RemoveExplicitTypeArguments")
+    override val recommendationsToggle: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow<Boolean>(false)
+    }
+
     override fun syncActions() {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()

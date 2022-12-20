@@ -225,6 +225,14 @@ internal class ProfileFragment: SideEffectFragment<
                         )
                     }
                 }
+
+                switchProfileBasicContainerRecommendations.setOnCheckedChangeListener { _, isChecked ->
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.updateFeedRecommendationsToggle(
+                            isChecked
+                        )
+                    }
+                }
             }
 
             includeProfileAdvancedContainerHolder.apply {
@@ -353,6 +361,15 @@ internal class ProfileFragment: SideEffectFragment<
                 binding
                     .includeProfileBasicContainerHolder
                     .switchProfileBasicContainerLinkPreview
+                    .isChecked = enabled
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.feedRecommendationsStateFlow.collect { enabled ->
+                binding
+                    .includeProfileBasicContainerHolder
+                    .switchProfileBasicContainerRecommendations
                     .isChecked = enabled
             }
         }

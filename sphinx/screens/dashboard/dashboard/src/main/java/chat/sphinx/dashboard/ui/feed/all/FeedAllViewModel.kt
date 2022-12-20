@@ -47,6 +47,7 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun loadFeedRecommendations() {
         viewModelScope.launch(mainImmediate) {
+            // if set recommendations
             updateViewState(FeedAllViewState.Loading)
 
             repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->

@@ -30,7 +30,9 @@ import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
+import chat.sphinx.wrapper_common.FeedRecommendationsToggle
 import chat.sphinx.wrapper_common.PreviewsEnabled
+import chat.sphinx.wrapper_common.isFalse
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
@@ -258,6 +260,24 @@ internal class ProfileViewModel @Inject constructor(
         }
     }
 
+    suspend fun updateFeedRecommendationsToggle(enabled: Boolean) {
+        _feedRecommendationsStateFlow.value = enabled
+
+        delay(50L)
+
+        val appContext: Context = app.applicationContext
+        val generalSettingsSharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            generalSettingsSharedPreferences.edit().putBoolean(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, enabled)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                }
+        }
+    }
+
     suspend fun updateRelayUrl(url: String?)  {
         if (url == null || url.isEmpty() || url == _relayUrlStateFlow.value) {
             return
@@ -457,6 +477,10 @@ internal class ProfileViewModel @Inject constructor(
         MutableStateFlow(true)
     }
 
+    private val _feedRecommendationsStateFlow: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(false)
+    }
+
     val relayUrlStateFlow: StateFlow<String?>
         get() = _relayUrlStateFlow.asStateFlow()
     val pinTimeoutStateFlow: StateFlow<Int?>
@@ -467,6 +491,8 @@ internal class ProfileViewModel @Inject constructor(
         get() = contactRepository.accountOwner
     val linkPreviewsEnabledStateFlow: StateFlow<Boolean>
         get() = _linkPreviewsEnabledStateFlow.asStateFlow()
+    val feedRecommendationsStateFlow: StateFlow<Boolean>
+        get() = _feedRecommendationsStateFlow.asStateFlow()
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -475,6 +501,7 @@ internal class ProfileViewModel @Inject constructor(
 
             setServerUrls()
             setLinkPreviewsEnabled()
+            setFeedRecommendationsToggle()
         }
     }
 
@@ -500,6 +527,18 @@ internal class ProfileViewModel @Inject constructor(
         )
 
         _linkPreviewsEnabledStateFlow.value = linkPreviewsEnabled
+    }
+
+    private fun setFeedRecommendationsToggle() {
+        val appContext: Context = app.applicationContext
+        val serverUrlsSharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        val feedRecommendationsToggle = serverUrlsSharedPreferences.getBoolean(
+            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY,
+            FeedRecommendationsToggle.False.isFalse()
+        )
+
+        _feedRecommendationsStateFlow.value = feedRecommendationsToggle
     }
 
     private var setupSigningDeviceJob: Job? = null
