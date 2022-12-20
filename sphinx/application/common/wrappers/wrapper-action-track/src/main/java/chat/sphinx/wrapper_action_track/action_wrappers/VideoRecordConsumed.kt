@@ -1,10 +1,11 @@
-package chat.sphinx.video_screen.ui.watch
+package chat.sphinx.wrapper_action_track.action_wrappers
 
-import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
 import chat.sphinx.wrapper_common.feed.FeedId
 import java.util.*
 
-class VideoRecordConsumed(val feedItemId: FeedId) {
+class VideoRecordConsumed(
+    val feedItemId: FeedId
+) {
     private val timer = Timer()
     private lateinit var timerTask: TimerTask
     private var currentTimeWatched: Long = 0

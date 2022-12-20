@@ -96,7 +96,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         viewModel.trackVideoConsumed()
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-
     }
 
     private fun setupBoost() {
@@ -362,9 +361,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 frameLayoutYoutubePlayer.visible
 
                                 if (youtubePlayer != null) {
+                                    youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
+
                                     viewModel.createHistoryItem()
                                     viewModel.trackVideoConsumed()
-                                    youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
                                     viewModel.createVideoRecordConsumed(viewState.id)
                                 } else {
                                     setupYoutubePlayer(viewState.id.youtubeVideoId())
