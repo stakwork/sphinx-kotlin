@@ -9,7 +9,11 @@ data class ContentConsumedAction(
     val feedType: Long,
     val feedUrl: String,
     val feedItemId: String,
-    val feedItemUrl: String
+    val feedItemUrl: String,
+    val title: String,
+    val description: String,
+    val people: ArrayList<String>,
+    val publishedDate: Long,
 ) {
     var history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
 
@@ -25,6 +29,10 @@ internal data class ContentConsumedActionMoshi(
     val feedUrl: String,
     val feedItemId: String,
     val feedItemUrl: String,
+    val title: String,
+    val description: String,
+    val people: List<String>,
+    val publishedDate: Long,
     val history: List<ContentConsumedHistoryItemMoshi>
 )
 
@@ -49,7 +57,11 @@ fun String.toContentConsumedAction(moshi: Moshi): ContentConsumedAction {
                 it.feedType,
                 it.feedUrl,
                 it.feedItemId,
-                it.feedItemUrl
+                it.feedItemUrl,
+                it.title,
+                it.description,
+                ArrayList(it.people),
+                it.publishedDate
             )
 
             val history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
@@ -97,6 +109,10 @@ fun ContentConsumedAction.toJson(moshi: Moshi): String {
                 feedUrl,
                 feedItemId,
                 feedItemUrl,
+                title,
+                description,
+                people,
+                publishedDate,
                 history
             )
         )

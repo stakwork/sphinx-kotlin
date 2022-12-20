@@ -6108,7 +6108,11 @@ abstract class SphinxRepository(
                         feed.feedUrl.value,
                         feedItem.id.value,
                         feedItem.enclosureUrl.value,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
                         topics,
+                        feedItem.people,
+                        feedItem.datePublishedTime,
                         Date().time
                     )
 
@@ -6139,7 +6143,11 @@ abstract class SphinxRepository(
                         feed.feedUrl.value,
                         feedItem.id.value,
                         feedItem.enclosureUrl.value,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
                         topics,
+                        feedItem.people,
+                        feedItem.datePublishedTime,
                         timestamp,
                         timestamp,
                         Date().time
@@ -6167,7 +6175,11 @@ abstract class SphinxRepository(
                         feed.feedType.value.toLong(),
                         feed.feedUrl.value,
                         feedItem.id.value,
-                        feedItem.enclosureUrl.value
+                        feedItem.enclosureUrl.value,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
+                        feedItem.people,
+                        feedItem.datePublishedTime
                     )
 
                     val contentConsumedHistoryItem = ContentConsumedHistoryItem(
@@ -6203,8 +6215,12 @@ abstract class SphinxRepository(
                         feed.id.value,
                         feed.feedType.value.toLong(),
                         feed.feedUrl.value,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
                         feedItem.id.value,
-                        feedItem.enclosureUrl.value
+                        feedItem.enclosureUrl.value,
+                        feedItem.people,
+                        feedItem.datePublishedTime
                     )
                     videoConsumedAction.history = history
 
@@ -6234,7 +6250,11 @@ abstract class SphinxRepository(
                         feed.feedType.value.toLong(),
                         feed.feedUrl.value,
                         feedItem.id.value,
-                        feedItem.enclosureUrl.value
+                        feedItem.enclosureUrl.value,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
+                        feedItem.people,
+                        feedItem.datePublishedTime
                     )
                     podcastConsumedAction.history = history
 
