@@ -4,7 +4,9 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.PODCAST_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.TWITTER_TYPE
@@ -24,9 +26,23 @@ data class PodcastEpisode(
     override var localFile: File?,
     val date: DateTime?,
     val feedType: String = PODCAST_TYPE,
+    val showTitle: FeedTitle? = null,
     val clipStartTime: Int? = null,
     val clipEndTime: Int? = null,
+    val topics: List<String> = listOf(),
+    val people: List<String> = listOf()
 ): DownloadableFeedItem {
+
+    var titleToShow: String = ""
+        get() = title.value.trim()
+
+    var showTitleToShow: String = ""
+        get() = showTitle?.value?.trim() ?: ""
+
+    var descriptionToShow: String = ""
+        get() {
+            return (description?.value ?: "").htmlToPlainText().trim()
+        }
 
     var playing: Boolean = false
 
@@ -58,4 +74,22 @@ data class PodcastEpisode(
 
     val isMusicClip: Boolean
         get() = feedType == PODCAST_TYPE || feedType == TWITTER_TYPE
+
+    val longType: Long
+        get() {
+            when {
+                isMusicClip -> {
+                    return FeedType.PODCAST.toLong()
+                }
+                isYouTubeVideo -> {
+                    return FeedType.VIDEO.toLong()
+                }
+            }
+            return FeedType.PODCAST.toLong()
+        }
+
+    var datePublishedTime: Long = 0
+        get() {
+            return date?.time ?: 0
+        }
 }

@@ -4001,8 +4001,11 @@ abstract class SphinxRepository(
                                     largeImageUrl = feedRecommendation.l_image_url,
                                     link = feedRecommendation.link,
                                     title = feedRecommendation.episode_title,
+                                    showTitle = feedRecommendation.show_title,
                                     date = feedRecommendation.date,
                                     timestamp = feedRecommendation.timestamp,
+                                    topics = feedRecommendation.topics,
+                                    guests = feedRecommendation.guests,
                                     position = index + 1
                                 )
                             )
@@ -6101,6 +6104,8 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
+
                     val contentBoostAction = ContentBoostAction(
                         boost,
                         feed.id.value,
@@ -6108,7 +6113,12 @@ abstract class SphinxRepository(
                         feed.feedUrl.value,
                         feedItem.id.value,
                         feedItem.enclosureUrl.value,
+                        feed.titleToShow,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
                         topics,
+                        feedItem.people,
+                        feedItem.datePublishedTime,
                         Date().time
                     )
 
@@ -6133,13 +6143,20 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
+
                     val podcastClipCommentAction = PodcastClipCommentAction(
                         feed.id.value,
                         feed.feedType.value.toLong(),
                         feed.feedUrl.value,
                         feedItem.id.value,
                         feedItem.enclosureUrl.value,
+                        feed.titleToShow,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
                         topics,
+                        feedItem.people,
+                        feedItem.datePublishedTime,
                         timestamp,
                         timestamp,
                         Date().time
@@ -6162,12 +6179,21 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
+
                     val newsletterConsumedAction = ContentConsumedAction(
                         feed.id.value,
                         feed.feedType.value.toLong(),
                         feed.feedUrl.value,
                         feedItem.id.value,
-                        feedItem.enclosureUrl.value
+                        feedItem.enclosureUrl.value,
+                        feed.titleToShow,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
+                        0,
+                        arrayListOf(),
+                        feedItem.people,
+                        feedItem.datePublishedTime
                     )
 
                     val contentConsumedHistoryItem = ContentConsumedHistoryItem(
@@ -6189,7 +6215,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun trackVideoConsumed(
+    override fun trackMediaContentConsumed(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
@@ -6198,19 +6224,36 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
 
-                    val videoConsumedAction = ContentConsumedAction(
+                    val contentConsumedAction = ContentConsumedAction(
                         feed.id.value,
                         feed.feedType.value.toLong(),
                         feed.feedUrl.value,
                         feedItem.id.value,
-                        feedItem.enclosureUrl.value
+                        feedItem.enclosureUrl.value,
+                        feed.titleToShow,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
+                        0,
+                        arrayListOf(),
+                        feedItem.people,
+                        feedItem.datePublishedTime
                     )
-                    videoConsumedAction.history = history
+
+                    contentConsumedAction.history = ArrayList(
+                        history.filter {
+                            (it.endTimestamp - it.startTimestamp) > 2000.toLong()
+                        }
+                    )
+
+                    if (contentConsumedAction.history.isEmpty()) {
+                        return@launch
+                    }
 
                     queries.actionTrackUpsert(
                         ActionTrackType.ContentConsumed,
-                        ActionTrackMetaData(videoConsumedAction.toJson(moshi)),
+                        ActionTrackMetaData(contentConsumedAction.toJson(moshi)),
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )
@@ -6219,28 +6262,45 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun trackPodcastConsumed(
+    override fun trackRecommendationsConsumed(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
-            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
-                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+            recommendationsPodcast.value?.let { recommendationsPodcast ->
+                recommendationsPodcast.getEpisodeWithId(feedItemId.value)?.let { recommendation ->
+                    val clipRank = recommendationsPodcast.getItemRankForEpisodeWithId(feedItemId.value).toLong()
 
-                    val podcastConsumedAction = ContentConsumedAction(
-                        feed.id.value,
-                        feed.feedType.value.toLong(),
-                        feed.feedUrl.value,
-                        feedItem.id.value,
-                        feedItem.enclosureUrl.value
+                    val contentConsumedAction = ContentConsumedAction(
+                        recommendationsPodcast.id.value,
+                        recommendation.longType,
+                        recommendationsPodcast.feedUrl.value,
+                        recommendation.id.value,
+                        recommendation.enclosureUrl.value,
+                        recommendation.showTitleToShow,
+                        recommendation.titleToShow,
+                        recommendation.descriptionToShow,
+                        clipRank,
+                        ArrayList(recommendation.topics),
+                        ArrayList(recommendation.people),
+                        recommendation.datePublishedTime
                     )
-                    podcastConsumedAction.history = history
+
+                    contentConsumedAction.history = ArrayList(
+                        history.filter {
+                            (it.endTimestamp - it.startTimestamp) > 2000.toLong()
+                        }
+                    )
+
+                    if (contentConsumedAction.history.isEmpty()) {
+                        return@launch
+                    }
 
                     queries.actionTrackUpsert(
                         ActionTrackType.ContentConsumed,
-                        ActionTrackMetaData(podcastConsumedAction.toJson(moshi)),
+                        ActionTrackMetaData(contentConsumedAction.toJson(moshi)),
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )

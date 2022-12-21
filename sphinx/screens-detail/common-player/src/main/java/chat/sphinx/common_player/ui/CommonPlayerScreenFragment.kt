@@ -106,6 +106,15 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         viewModel.startPlaying()
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.trackPodcastConsumed()
+        viewModel.createHistoryItem()
+        viewModel.trackVideoConsumed()
+        val a: Activity? = activity
+        a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
     private fun setupItems() {
         binding.includeRecommendedItemsList.recyclerViewList.apply {
             val linearLayoutManager = LinearLayoutManager(context)
@@ -515,10 +524,15 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
                             if (youtubePlayer != null) {
                                 youtubePlayer?.cueVideo(viewState.episode.enclosureUrl.value.youTubeVideoId())
+
+                                viewModel.createHistoryItem()
+                                viewModel.trackVideoConsumed()
+                                viewModel.createVideoRecordConsumed(viewState.episode.id)
                             } else {
                                 setupYoutubePlayer(
                                     viewState.episode.enclosureUrl.value.youTubeVideoId(),
                                 )
+                                viewModel.createVideoRecordConsumed(viewState.episode.id)
                             }
                         }
                     }
@@ -571,7 +585,9 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 ) {}
                 private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
-                    override fun onSeekTo(p0: Int) {}
+                    override fun onSeekTo(p0: Int) {
+                        viewModel.setNewHistoryItem(p0.toLong())
+                    }
 
                     override fun onBuffering(p0: Boolean) {}
 
@@ -582,14 +598,18 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         }
 
                         seekToStartTime()
+                        viewModel.startTimer()
                     }
-                    override fun onStopped() {}
+                    override fun onStopped() {
+                        viewModel.stopTimer()
+                    }
 
                     override fun onPaused() {
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             viewModel.playingVideoDidPause()
                             binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
                         }
+                        viewModel.stopTimer()
                     }
                 }
             })

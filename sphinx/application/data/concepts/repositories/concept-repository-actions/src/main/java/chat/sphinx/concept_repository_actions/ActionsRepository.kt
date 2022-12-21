@@ -23,12 +23,12 @@ interface ActionsRepository {
         feedItemId: FeedId
     )
 
-    fun trackVideoConsumed(
+    fun trackMediaContentConsumed(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     )
 
-    fun trackPodcastConsumed(
+    fun trackRecommendationsConsumed(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     )
