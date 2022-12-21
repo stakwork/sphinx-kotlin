@@ -113,6 +113,16 @@ internal class FeedAllFragment : SideEffectFragment<
                     recyclerViewRecommendations.visible
                     layoutConstraintNoRecommendations.gone
                 }
+                is FeedAllViewState.Disabled -> {
+                    textViewListenRecommendationsHeader.gone
+                    textView2.gone
+                    layoutConstraintRefresh.gone
+                    refreshButtonIcon.gone
+                    layoutConstraintLoading.gone
+                    layoutConstraintRefresh.gone
+                    recyclerViewRecommendations.gone
+                    layoutConstraintNoRecommendations.gone
+                }
             }
         }
     }

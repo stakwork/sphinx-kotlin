@@ -6071,7 +6071,19 @@ abstract class SphinxRepository(
         ActionTrackDboContentConsumedPresenterMapper(dispatchers, moshi)
     }
 
+    @Suppress("RemoveExplicitTypeArguments")
+    override val recommendationsToggleStateFlow: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow<Boolean>(false)
+    }
+
+    override fun setRecommendationsToggle(enabled: Boolean) {
+        recommendationsToggleStateFlow.value = enabled
+    }
+
     override fun trackFeedSearchAction(searchTerm: String) {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6099,6 +6111,9 @@ abstract class SphinxRepository(
         feedItemId: FeedId,
         topics: ArrayList<String>
     ) {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6138,6 +6153,9 @@ abstract class SphinxRepository(
         timestamp: Long,
         topics: ArrayList<String>
     ) {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6174,6 +6192,9 @@ abstract class SphinxRepository(
     }
 
     override fun trackNewsletterConsumed(feedItemId: FeedId) {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6219,6 +6240,9 @@ abstract class SphinxRepository(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6266,6 +6290,9 @@ abstract class SphinxRepository(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6310,6 +6337,9 @@ abstract class SphinxRepository(
     }
 
     override fun trackMessageContent(keywords: List<String>) {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6328,6 +6358,9 @@ abstract class SphinxRepository(
     }
 
     override fun syncActions() {
+        if (!recommendationsToggleStateFlow.value) {
+            return
+        }
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6364,5 +6397,4 @@ abstract class SphinxRepository(
             }
         }
     }
-
 }

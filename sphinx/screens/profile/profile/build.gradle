@@ -38,6 +38,7 @@ dependencies {
 
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
 
     api project(path: ':sphinx:application:common:menus:menu-bottom-picture')
     implementation project(path: ':sphinx:application:common:logger')
