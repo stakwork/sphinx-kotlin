@@ -73,6 +73,9 @@ data class FeedItem(
             author?.let {
                 return arrayListOf(it.value)
             }
+            feed?.author?.let {
+                return arrayListOf(it.value)
+            }
             return arrayListOf()
         }
 

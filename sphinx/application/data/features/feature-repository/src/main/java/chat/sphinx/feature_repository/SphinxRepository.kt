@@ -6104,6 +6104,8 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
+
                     val contentBoostAction = ContentBoostAction(
                         boost,
                         feed.id.value,
@@ -6141,6 +6143,8 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
+
                     val podcastClipCommentAction = PodcastClipCommentAction(
                         feed.id.value,
                         feed.feedType.value.toLong(),
@@ -6175,6 +6179,8 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
+
                     val newsletterConsumedAction = ContentConsumedAction(
                         feed.id.value,
                         feed.feedType.value.toLong(),
@@ -6218,6 +6224,7 @@ abstract class SphinxRepository(
 
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
+                    feedItem.feed = feed
 
                     val contentConsumedAction = ContentConsumedAction(
                         feed.id.value,
