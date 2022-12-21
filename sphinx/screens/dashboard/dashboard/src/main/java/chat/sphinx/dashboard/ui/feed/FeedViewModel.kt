@@ -137,6 +137,10 @@ class FeedViewModel @Inject constructor(
         searchFeedsTerm.clear()
     }
 
+    fun syncActions() {
+        actionsRepository.syncActions()
+    }
+
     fun toggleSearchState(searchFieldActive: Boolean) {
         val viewState = currentViewState
 
