@@ -29,6 +29,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.toItemId
+import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
 import kotlinx.coroutines.*
@@ -128,17 +129,18 @@ internal abstract class MediaPlayerService: SphinxService() {
             }
         }
 
-        private fun trackPodcastConsumed(episodeId: String) {
+        private fun trackPodcastConsumed(
+            podcastId: String,
+            episodeId: String
+        ) {
             createHistoryItem()
 
-            val currentHistory = arrayListOf<ContentConsumedHistoryItem>()
-
-            history.forEach(){
-                currentHistory.add(it)
-            }
-
             episodeId.toFeedId()?.let {
-                actionsRepository.trackPodcastConsumed(it, currentHistory)
+                if (podcastId == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                    actionsRepository.trackRecommendationsConsumed(it, history)
+                } else {
+                    actionsRepository.trackMediaContentConsumed(it, history)
+                }
             }
 
             history.clear()
@@ -215,7 +217,10 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                     podData?.let { nnData ->
                         if (nnData.episodeId != userAction.episodeId){
-                            trackPodcastConsumed(nnData.episodeId)
+                            trackPodcastConsumed(
+                                nnData.podcastId,
+                                nnData.episodeId
+                            )
                         }
                         if (currentPauseTime != nnData.currentTimeSeconds) {
                             setStartTimestamp(nnData.currentTimeMilliSeconds.toLong())
@@ -331,7 +336,10 @@ internal abstract class MediaPlayerService: SphinxService() {
                 is UserAction.TrackPodcastConsumed -> {
                     podData?.let { nnData ->
                         if (!nnData.mediaPlayer.isPlaying) {
-                            trackPodcastConsumed(nnData.episodeId)
+                            trackPodcastConsumed(
+                                nnData.podcastId,
+                                nnData.episodeId
+                            )
                         }
                     }
                 }

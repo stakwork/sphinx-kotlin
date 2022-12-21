@@ -397,7 +397,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
     fun trackVideoConsumed(){
         videoRecordConsumed?.let { record ->
             if (record.history.isNotEmpty()) {
-                actionsRepository.trackVideoConsumed(
+                actionsRepository.trackMediaContentConsumed(
                     record.feedItemId,
                     record.history
                 )

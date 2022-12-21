@@ -11,6 +11,8 @@ data class FeedRecommendation(
     val title: String,
     val date: Long?,
     val timestamp: String,
+    val topics: List<String>,
+    val guests: List<String>,
     val position: Int
 ) {
 

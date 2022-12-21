@@ -4003,6 +4003,8 @@ abstract class SphinxRepository(
                                     title = feedRecommendation.episode_title,
                                     date = feedRecommendation.date,
                                     timestamp = feedRecommendation.timestamp,
+                                    topics = feedRecommendation.topics,
+                                    guests = feedRecommendation.guests,
                                     position = index + 1
                                 )
                             )
@@ -6178,6 +6180,8 @@ abstract class SphinxRepository(
                         feedItem.enclosureUrl.value,
                         feedItem.titleToShow,
                         feedItem.descriptionToShow,
+                        0,
+                        arrayListOf(),
                         feedItem.people,
                         feedItem.datePublishedTime
                     )
@@ -6201,7 +6205,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun trackVideoConsumed(
+    override fun trackMediaContentConsumed(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
@@ -6211,22 +6215,24 @@ abstract class SphinxRepository(
             getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
                 getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
 
-                    val videoConsumedAction = ContentConsumedAction(
+                    val contentConsumedAction = ContentConsumedAction(
                         feed.id.value,
                         feed.feedType.value.toLong(),
                         feed.feedUrl.value,
-                        feedItem.titleToShow,
-                        feedItem.descriptionToShow,
                         feedItem.id.value,
                         feedItem.enclosureUrl.value,
+                        feedItem.titleToShow,
+                        feedItem.descriptionToShow,
+                        0,
+                        arrayListOf(),
                         feedItem.people,
                         feedItem.datePublishedTime
                     )
-                    videoConsumedAction.history = history
+                    contentConsumedAction.history = history
 
                     queries.actionTrackUpsert(
                         ActionTrackType.ContentConsumed,
-                        ActionTrackMetaData(videoConsumedAction.toJson(moshi)),
+                        ActionTrackMetaData(contentConsumedAction.toJson(moshi)),
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )
@@ -6235,32 +6241,33 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun trackPodcastConsumed(
+    override fun trackRecommendationsConsumed(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
-            getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
-                getFeedById(feedItem.feedId).firstOrNull()?.let { feed ->
-
-                    val podcastConsumedAction = ContentConsumedAction(
-                        feed.id.value,
-                        feed.feedType.value.toLong(),
-                        feed.feedUrl.value,
-                        feedItem.id.value,
-                        feedItem.enclosureUrl.value,
-                        feedItem.titleToShow,
-                        feedItem.descriptionToShow,
-                        feedItem.people,
-                        feedItem.datePublishedTime
+            recommendationsPodcast.value?.let { recommendationsPodcast ->
+                recommendationsPodcast.getEpisodeWithId(feedItemId.value)?.let { recommendation ->
+                    val contentConsumedAction = ContentConsumedAction(
+                        recommendationsPodcast.id.value,
+                        recommendation.longType,
+                        recommendationsPodcast.feedUrl.value,
+                        recommendation.id.value,
+                        recommendation.enclosureUrl.value,
+                        recommendation.titleToShow,
+                        recommendation.descriptionToShow,
+                        recommendationsPodcast.getItemRankForEpisodeWithId(feedItemId.value),
+                        ArrayList(recommendation.topics),
+                        ArrayList(recommendation.people),
+                        recommendation.datePublishedTime
                     )
-                    podcastConsumedAction.history = history
+                    contentConsumedAction.history = history
 
                     queries.actionTrackUpsert(
                         ActionTrackType.ContentConsumed,
-                        ActionTrackMetaData(podcastConsumedAction.toJson(moshi)),
+                        ActionTrackMetaData(contentConsumedAction.toJson(moshi)),
                         false.toActionTrackUploaded(),
                         ActionTrackId(Long.MAX_VALUE)
                     )
