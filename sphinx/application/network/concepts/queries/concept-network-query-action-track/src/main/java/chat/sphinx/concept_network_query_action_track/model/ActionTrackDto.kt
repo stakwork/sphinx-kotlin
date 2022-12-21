@@ -27,6 +27,7 @@ data class ActionTrackMetaDataDto(
     val feed_item_id: String? = null,
     val feed_item_url: String? = null,
     val topics: List<String>? = null,
+    val people: List<String>? = null,
 
     //Podcast Clip
     val start_timestamp: Long? = null,
@@ -35,7 +36,13 @@ data class ActionTrackMetaDataDto(
     //Content Consumed
     val history: List<ActionTrackHistoryItemDto>? = null,
 
+    //Recommendations
+    val clip_rank: Long? = null,
+
     //General
+    val title: String? = null,
+    val description: String? = null,
+    val publish_date: Long? = null,
     val current_timestamp: Long? = null,
 )
 
@@ -69,7 +76,11 @@ inline fun String.toActionTrackMetaDataDtoOrNull(
             feed_url = podcastClipAction.feedUrl,
             feed_item_id = podcastClipAction.feedItemId,
             feed_item_url = podcastClipAction.feedItemUrl,
+            title = podcastClipAction.title,
+            description = podcastClipAction.description,
+            people = podcastClipAction.people,
             topics = podcastClipAction.topics,
+            publish_date = podcastClipAction.publishDate,
             start_timestamp = podcastClipAction.startTimestamp,
             endTimestamp = podcastClipAction.endTimestamp,
             current_timestamp = podcastClipAction.currentTimestamp
@@ -82,10 +93,14 @@ inline fun String.toActionTrackMetaDataDtoOrNull(
             feed_url = contentBoost.feedUrl,
             feed_item_id = contentBoost.feedItemId,
             feed_item_url = contentBoost.feedItemUrl,
+            title = contentBoost.title,
+            description = contentBoost.description,
+            people = contentBoost.people,
             topics = contentBoost.topics,
+            publish_date = contentBoost.publishDate,
             current_timestamp = contentBoost.currentTimestamp
         )
-    } ?: this.toContentConsumedAction(moshi)?.let { contentConsumed ->
+    } ?: this.toContentConsumedActionOrNull(moshi)?.let { contentConsumed ->
 
         val items: MutableList<ActionTrackHistoryItemDto> = mutableListOf()
 
@@ -106,6 +121,12 @@ inline fun String.toActionTrackMetaDataDtoOrNull(
             feed_url = contentConsumed.feedUrl,
             feed_item_id = contentConsumed.feedItemId,
             feed_item_url = contentConsumed.feedItemUrl,
+            title = contentConsumed.title,
+            description = contentConsumed.description,
+            people = contentConsumed.people,
+            topics = contentConsumed.topics,
+            publish_date = contentConsumed.publishedDate,
+            clip_rank = contentConsumed.clipRank,
             history = items
         )
     }

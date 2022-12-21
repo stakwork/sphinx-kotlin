@@ -135,16 +135,20 @@ internal abstract class MediaPlayerService: SphinxService() {
         ) {
             createHistoryItem()
 
-            episodeId.toFeedId()?.let {
-                if (podcastId == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
-                    actionsRepository.trackRecommendationsConsumed(it, history)
-                } else {
-                    actionsRepository.trackMediaContentConsumed(it, history)
+            val currentHistory: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
+            currentHistory.addAll(history)
+
+            if (currentHistory.isNotEmpty()) {
+                episodeId.toFeedId()?.let {
+                    if (podcastId == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                        actionsRepository.trackRecommendationsConsumed(it, currentHistory)
+                    } else {
+                        actionsRepository.trackMediaContentConsumed(it, currentHistory)
+                    }
                 }
             }
-
+            
             history.clear()
-
             resetTrackSecondsConsumed()
         }
 

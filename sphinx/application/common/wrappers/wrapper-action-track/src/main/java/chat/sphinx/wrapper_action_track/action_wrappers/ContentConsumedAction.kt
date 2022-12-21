@@ -12,7 +12,7 @@ data class ContentConsumedAction(
     val feedItemUrl: String,
     val title: String,
     val description: String,
-    val itemRank: Int,
+    val clipRank: Long,
     val topics: ArrayList<String>,
     val people: ArrayList<String>,
     val publishedDate: Long,
@@ -33,7 +33,7 @@ internal data class ContentConsumedActionMoshi(
     val feedItemUrl: String,
     val title: String,
     val description: String,
-    val itemRank: Int,
+    val clipRank: Long,
     val people: List<String>,
     val publishedDate: Long,
     val history: List<ContentConsumedHistoryItemMoshi>
@@ -63,7 +63,7 @@ fun String.toContentConsumedAction(moshi: Moshi): ContentConsumedAction {
                 it.feedItemUrl,
                 it.title,
                 it.description,
-                it.itemRank,
+                it.clipRank,
                 arrayListOf(),
                 ArrayList(it.people),
                 it.publishedDate
@@ -116,7 +116,7 @@ fun ContentConsumedAction.toJson(moshi: Moshi): String {
                 feedItemUrl,
                 title,
                 description,
-                itemRank,
+                clipRank,
                 people,
                 publishedDate,
                 history

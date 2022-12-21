@@ -6250,6 +6250,8 @@ abstract class SphinxRepository(
 
             recommendationsPodcast.value?.let { recommendationsPodcast ->
                 recommendationsPodcast.getEpisodeWithId(feedItemId.value)?.let { recommendation ->
+                    val clipRank = recommendationsPodcast.getItemRankForEpisodeWithId(feedItemId.value).toLong()
+
                     val contentConsumedAction = ContentConsumedAction(
                         recommendationsPodcast.id.value,
                         recommendation.longType,
@@ -6258,7 +6260,7 @@ abstract class SphinxRepository(
                         recommendation.enclosureUrl.value,
                         recommendation.titleToShow,
                         recommendation.descriptionToShow,
-                        recommendationsPodcast.getItemRankForEpisodeWithId(feedItemId.value),
+                        clipRank,
                         ArrayList(recommendation.topics),
                         ArrayList(recommendation.people),
                         recommendation.datePublishedTime
