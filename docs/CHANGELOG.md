@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha75 (2022-12-21)
+- Improves actions tracking
+- Improves recommendations player
+- Recommendations off by default
+- Fixes crash on Jitsi Meet call
+
 # Version 1.0.0-alpha74 (2022-12-14)
 - Improves podcast and video search
 - Improves recommendations player
