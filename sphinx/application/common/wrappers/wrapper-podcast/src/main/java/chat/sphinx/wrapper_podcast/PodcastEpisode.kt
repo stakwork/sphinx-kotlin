@@ -26,6 +26,7 @@ data class PodcastEpisode(
     override var localFile: File?,
     val date: DateTime?,
     val feedType: String = PODCAST_TYPE,
+    val showTitle: FeedTitle? = null,
     val clipStartTime: Int? = null,
     val clipEndTime: Int? = null,
     val topics: List<String> = listOf(),
@@ -34,6 +35,9 @@ data class PodcastEpisode(
 
     var titleToShow: String = ""
         get() = title.value.trim()
+
+    var showTitleToShow: String = ""
+        get() = showTitle?.value?.trim() ?: ""
 
     var descriptionToShow: String = ""
         get() {
