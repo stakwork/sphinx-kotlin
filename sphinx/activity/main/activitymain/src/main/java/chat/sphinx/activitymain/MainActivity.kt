@@ -1,7 +1,10 @@
 package chat.sphinx.activitymain
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.ViewCompat
@@ -54,6 +57,14 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
         private var keyboardInsets: InsetPadding? = null
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        if (currentFocus != null){
+            val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
