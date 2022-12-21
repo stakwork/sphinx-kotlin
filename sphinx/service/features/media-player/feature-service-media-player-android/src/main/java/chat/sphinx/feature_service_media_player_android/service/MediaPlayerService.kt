@@ -147,7 +147,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                     }
                 }
             }
-            
+
             history.clear()
             resetTrackSecondsConsumed()
         }

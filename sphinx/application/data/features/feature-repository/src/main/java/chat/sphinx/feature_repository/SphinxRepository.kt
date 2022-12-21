@@ -6228,7 +6228,16 @@ abstract class SphinxRepository(
                         feedItem.people,
                         feedItem.datePublishedTime
                     )
-                    contentConsumedAction.history = history
+
+                    contentConsumedAction.history = ArrayList(
+                        history.filter {
+                            (it.endTimestamp - it.startTimestamp) > 2000.toLong()
+                        }
+                    )
+
+                    if (contentConsumedAction.history.isEmpty()) {
+                        return@launch
+                    }
 
                     queries.actionTrackUpsert(
                         ActionTrackType.ContentConsumed,
@@ -6265,7 +6274,16 @@ abstract class SphinxRepository(
                         ArrayList(recommendation.people),
                         recommendation.datePublishedTime
                     )
-                    contentConsumedAction.history = history
+
+                    contentConsumedAction.history = ArrayList(
+                        history.filter {
+                            (it.endTimestamp - it.startTimestamp) > 2000.toLong()
+                        }
+                    )
+
+                    if (contentConsumedAction.history.isEmpty()) {
+                        return@launch
+                    }
 
                     queries.actionTrackUpsert(
                         ActionTrackType.ContentConsumed,
