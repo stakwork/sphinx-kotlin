@@ -141,14 +141,24 @@ data class Podcast(
         return null
     }
 
-    private fun getEpisodeWithId(id: String): PodcastEpisode? {
+    fun getEpisodeWithId(id: String): PodcastEpisode? {
         for (episode in episodes) {
             if (episode.id.value == id) {
                 return episode
             }
         }
 
-        return episodes[0]
+        return null
+    }
+
+    fun getItemRankForEpisodeWithId(id: String): Int {
+        episodes.forEachIndexed { index, episode ->
+            if (episode.id.value == id) {
+                return index + 1
+            }
+        }
+
+        return 0
     }
 
     private fun getNextEpisode(id: String): PodcastEpisode {

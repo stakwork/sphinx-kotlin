@@ -42,7 +42,20 @@ internal class FeedAllViewModel @Inject constructor(
     override val feedRecommendationsHolderViewStateFlow: MutableStateFlow<List<FeedRecommendation>> = MutableStateFlow(emptyList())
 
     init {
-        loadFeedRecommendations()
+        setRecommendationsVisibility()
+    }
+
+    private fun setRecommendationsVisibility() {
+        viewModelScope.launch(mainImmediate) {
+            feedRepository.recommendationsToggleStateFlow.collect { enabled ->
+                if (enabled) {
+                    loadFeedRecommendations()
+                } else {
+                    feedRecommendationsHolderViewStateFlow.value = listOf()
+                    updateViewState(FeedAllViewState.Disabled)
+                }
+            }
+        }
     }
 
     override fun loadFeedRecommendations() {

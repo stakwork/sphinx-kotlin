@@ -9,8 +9,11 @@ data class FeedRecommendation(
     val largeImageUrl: String?,
     val link: String,
     val title: String,
+    val showTitle: String,
     val date: Long?,
     val timestamp: String,
+    val topics: List<String>,
+    val guests: List<String>,
     val position: Int
 ) {
 

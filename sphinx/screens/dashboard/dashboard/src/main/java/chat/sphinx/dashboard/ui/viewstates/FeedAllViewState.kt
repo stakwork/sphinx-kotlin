@@ -7,4 +7,5 @@ sealed class FeedAllViewState: ViewState<FeedAllViewState>() {
     object Loading: FeedAllViewState()
     object RecommendedList : FeedAllViewState()
     object NoRecommendations: FeedAllViewState()
+    object Disabled : FeedAllViewState()
 }

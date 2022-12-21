@@ -11,11 +11,13 @@ import chat.sphinx.common_player.navigation.CommonPlayerNavigator
 import chat.sphinx.common_player.viewstate.BoostAnimationViewState
 import chat.sphinx.common_player.viewstate.PlayerViewState
 import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
+import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -46,6 +48,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
     private val navigator: CommonPlayerNavigator,
     private val contactRepository: ContactRepository,
     private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val moshi: Moshi,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     savedStateHandle: SavedStateHandle,
@@ -65,6 +68,8 @@ class CommonPlayerScreenViewModel @Inject constructor(
     val playerViewStateContainer: ViewStateContainer<PlayerViewState> by lazy {
         ViewStateContainer(PlayerViewState.Idle)
     }
+
+    private var videoRecordConsumed: VideoRecordConsumed? = null
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
         emitAll(feedRepository.getPodcastById(args.podcastId))
@@ -370,6 +375,49 @@ class CommonPlayerScreenViewModel @Inject constructor(
         (playerViewStateContainer.value as? PlayerViewState.YouTubeVideoSelected)?.let {
             getPodcast()?.getCurrentEpisode()?.playing = true
         }
+    }
+
+    fun trackPodcastConsumed() {
+        viewModelScope.launch(mainImmediate) {
+            mediaPlayerServiceController.submitAction(
+                UserAction.TrackPodcastConsumed(
+                    ChatId(ChatId.NULL_CHAT_ID.toLong())
+                )
+            )
+        }
+    }
+
+    fun createVideoRecordConsumed(feedItemId: FeedId){
+        if (videoRecordConsumed?.feedItemId == feedItemId){
+            return
+        }
+        videoRecordConsumed = VideoRecordConsumed(feedItemId)
+    }
+
+    fun trackVideoConsumed(){
+        videoRecordConsumed?.let { record ->
+            if (record.history.isNotEmpty()) {
+                actionsRepository.trackMediaContentConsumed(
+                    record.feedItemId,
+                    record.history
+                )
+            }
+        }
+    }
+    fun setNewHistoryItem(videoPosition: Long){
+        videoRecordConsumed?.setNewHistoryItem(videoPosition)
+    }
+
+    fun startTimer() {
+        videoRecordConsumed?.startTimer()
+    }
+
+    fun createHistoryItem() {
+        videoRecordConsumed?.createHistoryItem()
+    }
+
+    fun stopTimer(){
+        videoRecordConsumed?.stopTimer()
     }
 
     override fun onCleared() {

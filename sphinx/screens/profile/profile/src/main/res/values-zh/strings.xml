@@ -22,6 +22,7 @@
     <string name="profile_export_keys_pin_message">"請輸入加密私鏈PIN. 您備份恢復將需要它."</string>
     <string name="profile_keys_copied_clipboard">私鏈已複製到剪貼板. 請保留 &amp; 警告! 請刪除APP之前記住私鏈PIN 免得資料損失.</string>
     <string name="profile_link_previews">Link Previews enabled</string>
+    <string name="profile_recommendations">Feed Recommendations</string>
     <string name="side_effect_backup_keys_exported">私鏈已複製到剪貼板</string>
     <string name="side_effect_wrong_pin">密碼錯誤</string>
     <string name="side_effect_backup_keys_failed">備份私鏈失敗</string>

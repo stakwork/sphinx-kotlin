@@ -1,7 +1,6 @@
 package chat.sphinx.video_screen.ui
 
 import android.app.Application
-import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_actions.ActionsRepository
@@ -15,11 +14,10 @@ import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
-import chat.sphinx.video_screen.ui.watch.VideoRecordConsumed
+import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.dashboard.DashboardItemType
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
@@ -27,8 +25,6 @@ import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
-import chat.sphinx.wrapper_podcast.Podcast
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -335,7 +331,7 @@ internal open class VideoFeedScreenViewModel(
     fun trackVideoConsumed(){
         videoRecordConsumed?.let { record ->
             if (record.history.isNotEmpty()) {
-                actionsRepository.trackVideoConsumed(
+                actionsRepository.trackMediaContentConsumed(
                     record.feedItemId,
                     record.history
                 )
