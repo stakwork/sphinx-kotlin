@@ -6078,7 +6078,7 @@ abstract class SphinxRepository(
     }
 
     override fun trackFeedSearchAction(searchTerm: String) {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6108,7 +6108,7 @@ abstract class SphinxRepository(
         feedItemId: FeedId,
         topics: ArrayList<String>
     ) {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6143,7 +6143,7 @@ abstract class SphinxRepository(
         timestamp: Long,
         topics: ArrayList<String>
     ) {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6175,7 +6175,7 @@ abstract class SphinxRepository(
     }
 
     override fun trackNewsletterConsumed(feedItemId: FeedId) {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6214,7 +6214,7 @@ abstract class SphinxRepository(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6247,7 +6247,7 @@ abstract class SphinxRepository(
         feedItemId: FeedId,
         history: ArrayList<ContentConsumedHistoryItem>
     ) {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6277,7 +6277,7 @@ abstract class SphinxRepository(
     }
 
     override fun trackMessageContent(keywords: List<String>) {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6298,7 +6298,7 @@ abstract class SphinxRepository(
     }
 
     override fun syncActions() {
-        if (!recommendationsToggleStateFlow.asStateFlow().value) {
+        if (!recommendationsToggleStateFlow.value) {
             return
         }
         applicationScope.launch(io) {
@@ -6337,5 +6337,4 @@ abstract class SphinxRepository(
             }
         }
     }
-
 }

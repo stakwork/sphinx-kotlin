@@ -77,7 +77,7 @@ internal class DashboardViewModel @Inject constructor(
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
-//    private val feedRepository: FeedRepository,
+    private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
     private val networkQueryLightning: NetworkQueryLightning,
 
@@ -114,9 +114,8 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
-//        viewModelScope.launch(mainImmediate) {
-//            syncFeedRecommendationsState()
-//        }
+
+        syncFeedRecommendationsState()
 
         getRelayKeys()
         checkAppVersion()
@@ -150,16 +149,15 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-//    private fun syncFeedRecommendationsState() {
-//        val appContext: Context = app.applicationContext
-//        val serverUrlsSharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
-//
-//        val feedRecommendationsToggle = serverUrlsSharedPreferences.getBoolean(
-//            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY,
-//            FeedRecommendationsToggle.False.isFalse()
-//        )
-//        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
-//    }
+    private fun syncFeedRecommendationsState() {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        val feedRecommendationsToggle = sharedPreferences.getBoolean(
+            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, false
+        )
+        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
+    }
 
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {

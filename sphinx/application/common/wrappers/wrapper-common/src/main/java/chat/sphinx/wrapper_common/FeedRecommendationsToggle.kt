@@ -1,10 +1,5 @@
 package chat.sphinx.wrapper_common
 
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun FeedRecommendationsToggle.isFalse(): Boolean =
-    this is FeedRecommendationsToggle.False
-
 sealed class FeedRecommendationsToggle {
 
     companion object {

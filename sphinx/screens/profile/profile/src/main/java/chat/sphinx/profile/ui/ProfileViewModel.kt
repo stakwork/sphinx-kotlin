@@ -33,7 +33,6 @@ import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
 import chat.sphinx.wrapper_common.FeedRecommendationsToggle
 import chat.sphinx.wrapper_common.PreviewsEnabled
-import chat.sphinx.wrapper_common.isFalse
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
@@ -534,11 +533,10 @@ internal class ProfileViewModel @Inject constructor(
 
     private fun setFeedRecommendationsToggle() {
         val appContext: Context = app.applicationContext
-        val serverUrlsSharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+        val sharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
-        val feedRecommendationsToggle = serverUrlsSharedPreferences.getBoolean(
-            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY,
-            FeedRecommendationsToggle.False.isFalse()
+        val feedRecommendationsToggle = sharedPreferences.getBoolean(
+            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, false
         )
         feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
         _feedRecommendationsStateFlow.value = feedRecommendationsToggle
