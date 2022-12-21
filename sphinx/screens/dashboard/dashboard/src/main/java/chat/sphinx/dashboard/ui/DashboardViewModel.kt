@@ -23,6 +23,7 @@ import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
@@ -76,18 +77,19 @@ internal class DashboardViewModel @Inject constructor(
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
+//    private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
-
     private val networkQueryLightning: NetworkQueryLightning,
+
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQueryPeople: NetworkQueryPeople,
-
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
     private val relayDataHandler: RelayDataHandler,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+
     private val socketIOManager: SocketIOManager,
 ) : MotionLayoutViewModel<
         Any,
@@ -112,6 +114,9 @@ internal class DashboardViewModel @Inject constructor(
                 backgroundLoginHandler.updateLoginTime()
             }
         }
+//        viewModelScope.launch(mainImmediate) {
+//            syncFeedRecommendationsState()
+//        }
 
         getRelayKeys()
         checkAppVersion()
@@ -144,6 +149,17 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
     }
+
+//    private fun syncFeedRecommendationsState() {
+//        val appContext: Context = app.applicationContext
+//        val serverUrlsSharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+//
+//        val feedRecommendationsToggle = serverUrlsSharedPreferences.getBoolean(
+//            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY,
+//            FeedRecommendationsToggle.False.isFalse()
+//        )
+//        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
+//    }
 
     fun toScanner() {
         viewModelScope.launch(mainImmediate) {

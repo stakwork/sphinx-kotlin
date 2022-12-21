@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -80,6 +81,7 @@ internal class ProfileViewModel @Inject constructor(
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
+    private val feedRepository: FeedRepository,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val networkQueryCrypter: NetworkQueryCrypter,
     private val relayDataHandler: RelayDataHandler,
@@ -262,6 +264,7 @@ internal class ProfileViewModel @Inject constructor(
 
     suspend fun updateFeedRecommendationsToggle(enabled: Boolean) {
         _feedRecommendationsStateFlow.value = enabled
+        feedRepository.setRecommendationsToggle(enabled)
 
         delay(50L)
 
@@ -537,7 +540,7 @@ internal class ProfileViewModel @Inject constructor(
             FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY,
             FeedRecommendationsToggle.False.isFalse()
         )
-
+        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
         _feedRecommendationsStateFlow.value = feedRecommendationsToggle
     }
 

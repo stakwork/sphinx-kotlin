@@ -44,7 +44,8 @@ interface FeedRepository {
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
-    val recommendationsToggle: MutableStateFlow<Boolean>
+    val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
+    fun setRecommendationsToggle(enabled: Boolean)
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 }

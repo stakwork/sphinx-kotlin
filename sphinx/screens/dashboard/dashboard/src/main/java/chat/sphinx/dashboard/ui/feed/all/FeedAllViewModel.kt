@@ -47,16 +47,23 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun loadFeedRecommendations() {
         viewModelScope.launch(mainImmediate) {
-            // if set recommendations
-            updateViewState(FeedAllViewState.Loading)
+            feedRepository.recommendationsToggleStateFlow.collect { enabled ->
+                if (enabled) {
+                    updateViewState(FeedAllViewState.Loading)
 
-            repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->
-                feedRecommendationsHolderViewStateFlow.value = feedRecommended.toList()
+                    repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->
+                        feedRecommendationsHolderViewStateFlow.value = feedRecommended.toList()
 
-                if (feedRecommended.isNotEmpty()) {
-                    updateViewState(FeedAllViewState.RecommendedList)
-                } else updateViewState(FeedAllViewState.NoRecommendations)
+                        if (feedRecommended.isNotEmpty()) {
+                            updateViewState(FeedAllViewState.RecommendedList)
+                        } else updateViewState(FeedAllViewState.NoRecommendations)
+                    }
+                }
+                else {
+                    updateViewState(FeedAllViewState.Disabled)
+                }
             }
+
         }
     }
 
