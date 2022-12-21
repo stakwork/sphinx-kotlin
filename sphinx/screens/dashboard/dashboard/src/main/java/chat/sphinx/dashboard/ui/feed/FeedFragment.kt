@@ -232,6 +232,7 @@ internal class FeedFragment : SideEffectFragment<
             when (viewState) {
                 is FeedViewState.Idle -> {
                     root.gone
+                    binding.viewPagerFeedFragments.visible
                 }
                 is FeedViewState.SearchPlaceHolder -> {
                     root.visible
@@ -240,6 +241,7 @@ internal class FeedFragment : SideEffectFragment<
                     layoutConstraintFeedSearchPlaceholder.visible
                     layoutConstraintLoadingSearchResults.gone
                     recyclerViewFeedSearchResults.gone
+                    binding.viewPagerFeedFragments.gone
                 }
                 is FeedViewState.SearchPodcastPlaceHolder -> {
                     root.visible
@@ -248,6 +250,7 @@ internal class FeedFragment : SideEffectFragment<
                     layoutConstraintFeedSearchPlaceholder.gone
                     layoutConstraintLoadingSearchResults.gone
                     recyclerViewFeedSearchResults.gone
+                    binding.viewPagerFeedFragments.gone
                 }
                 is FeedViewState.SearchVideoPlaceHolder -> {
                     root.visible
@@ -256,6 +259,7 @@ internal class FeedFragment : SideEffectFragment<
                     layoutConstraintFeedSearchPlaceholder.gone
                     layoutConstraintLoadingSearchResults.gone
                     recyclerViewFeedSearchResults.gone
+                    binding.viewPagerFeedFragments.gone
                 }
                 is FeedViewState.LoadingSearchResults -> {
                     root.visible
@@ -264,6 +268,7 @@ internal class FeedFragment : SideEffectFragment<
                     layoutConstraintFeedSearchPlaceholder.gone
                     layoutConstraintLoadingSearchResults.visible
                     recyclerViewFeedSearchResults.gone
+                    binding.viewPagerFeedFragments.gone
                 }
                 is FeedViewState.SearchResults -> {
                     root.visible
@@ -272,6 +277,7 @@ internal class FeedFragment : SideEffectFragment<
                     layoutConstraintFeedSearchPlaceholder.gone
                     layoutConstraintLoadingSearchResults.gone
                     recyclerViewFeedSearchResults.visible
+                    binding.viewPagerFeedFragments.gone
                 }
             }
         }
