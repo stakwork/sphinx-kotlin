@@ -42,6 +42,7 @@ abstract class DashboardNavigator(
 
     abstract suspend fun toCommonPlayerScreen(
         podcastId: FeedId,
+        episodeId: FeedId,
         currentEpisodeDuration: Long
     )
 

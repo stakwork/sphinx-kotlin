@@ -294,6 +294,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
             if (vs.podcast.id.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
                 dashboardNavigator.toCommonPlayerScreen(
                     vs.podcast.id,
+                    vs.podcast.getCurrentEpisode().id,
                     vs.podcast.episodeDuration ?: 0
                 )
             } else {

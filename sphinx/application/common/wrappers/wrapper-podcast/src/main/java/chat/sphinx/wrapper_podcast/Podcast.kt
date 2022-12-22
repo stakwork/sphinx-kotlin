@@ -97,7 +97,11 @@ data class Podcast(
     }
 
     fun setCurrentEpisodeWith(episodeId: String) {
+        this.playingEpisode?.playing = false
+
         this.playingEpisode = getEpisodeWithId(episodeId)
+        this.episodeDuration = null
+        this.timeMilliSeconds = 0
     }
 
     fun getMetaData(
@@ -147,7 +151,6 @@ data class Podcast(
                 return episode
             }
         }
-
         return null
     }
 
