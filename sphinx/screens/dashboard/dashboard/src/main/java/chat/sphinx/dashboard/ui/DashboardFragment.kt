@@ -2,6 +2,7 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
@@ -394,6 +395,8 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onStart() {
         super.onStart()
 
+        var timeTrackerStart: Long = 0
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.newVersionAvailable.asStateFlow().collect { newVersionAvailable ->
                 binding.layoutDashboardHeader.textViewDashboardHeaderUpgradeApp.goneIfFalse(
@@ -429,6 +432,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                         is LoadResponse.Loading -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(true)
                             dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(false)
+                            timeTrackerStart = System.currentTimeMillis()
                         }
                         is Response.Error -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
@@ -449,6 +453,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                     R.color.primaryGreen
                                 )
                             )
+                            Log.d("TimeTracker", "Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
                         }
                     }
                 }

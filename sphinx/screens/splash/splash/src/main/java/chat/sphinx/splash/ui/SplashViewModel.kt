@@ -1,5 +1,6 @@
 package chat.sphinx.splash.ui
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
@@ -18,7 +19,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 internal class SplashViewModel @Inject constructor(
     private val authenticationCoordinator: AuthenticationCoordinator,
@@ -31,6 +31,7 @@ internal class SplashViewModel @Inject constructor(
         SplashViewState
         >(dispatchers, SplashViewState.Idle)
 {
+    private val timeTrackerStart = System.currentTimeMillis()
 
     private var screenInit: Boolean = false
     fun screenInit() {
@@ -105,6 +106,8 @@ internal class SplashViewModel @Inject constructor(
                                     }
                                     null -> {
                                         navigator.toDashboardScreen(updateBackgroundLoginTime = true)
+                                        Log.d("TimeTracker", "Dashboard screen was call in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+
                                     }
                                 }
                             }
@@ -141,3 +144,4 @@ internal class SplashViewModel @Inject constructor(
         }
     }
 }
+
