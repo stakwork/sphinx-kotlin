@@ -1977,6 +1977,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     }
 
+    fun sendAppLog(appLog: String) {
+        actionsRepository.setAppLog(appLog)
+    }
+
     override fun onCleared() {
         super.onCleared()
         (audioPlayerController as AudioPlayerControllerImpl).onCleared()

@@ -454,6 +454,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                 )
                             )
                             Log.d("TimeTracker", "Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+                            viewModel.sendAppLog("Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
                         }
                     }
                 }

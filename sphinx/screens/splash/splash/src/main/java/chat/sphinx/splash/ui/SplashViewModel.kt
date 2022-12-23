@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.onboard_common.OnBoardStepHandler
 import chat.sphinx.onboard_common.model.OnBoardStep
@@ -25,6 +26,7 @@ internal class SplashViewModel @Inject constructor(
     private val backgroundLoginHandler: BackgroundLoginHandler,
     dispatchers: CoroutineDispatchers,
     private val lightningRepository: LightningRepository,
+    private val actionsRepository: ActionsRepository,
     private val navigator: SplashNavigator,
     private val onBoardStepHandler: OnBoardStepHandler,
 ): BaseViewModel<
@@ -107,6 +109,7 @@ internal class SplashViewModel @Inject constructor(
                                     null -> {
                                         navigator.toDashboardScreen(updateBackgroundLoginTime = true)
                                         Log.d("TimeTracker", "Dashboard screen was call in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+                                        actionsRepository.setAppLog("Dashboard screen was call in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
 
                                     }
                                 }
@@ -143,5 +146,6 @@ internal class SplashViewModel @Inject constructor(
             }
         }
     }
+
 }
 

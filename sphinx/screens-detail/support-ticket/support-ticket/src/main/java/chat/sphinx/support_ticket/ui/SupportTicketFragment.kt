@@ -88,8 +88,11 @@ internal class SupportTicketFragment: SideEffectFragment<
                     includeSupportTicketLogText.textViewSupportTicketLogs.text = viewState.logs
                     progressBarSupportTicketLogs.gone
                 }
-                SupportTicketViewState.LoadingLogs -> {
+                is SupportTicketViewState.LoadingLogs -> {
                     progressBarSupportTicketLogs.visible
+                }
+                is SupportTicketViewState.AppLogsFetched -> {
+                    includeSupportTicketLogApp.textViewSupportTicketLogs.text = viewState.appLogs
                 }
             }
         }

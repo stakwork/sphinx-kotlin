@@ -42,6 +42,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
 
     api project(path: ':sphinx:screens:onboard:onboard-common')
 
