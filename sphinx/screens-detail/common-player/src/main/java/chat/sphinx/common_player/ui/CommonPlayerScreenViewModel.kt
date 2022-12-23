@@ -42,6 +42,9 @@ import javax.inject.Inject
 internal inline val CommonPlayerScreenFragmentArgs.podcastId: FeedId
     get() = FeedId(argPodcastId)
 
+internal inline val CommonPlayerScreenFragmentArgs.episodeId: FeedId
+    get() = FeedId(argEpisodeId)
+
 @HiltViewModel
 class CommonPlayerScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
@@ -141,18 +144,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun startPlaying() {
-        viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
-                podcast.getCurrentEpisode()?.let { currentEpisode ->
-                    if (!currentEpisode.playing) {
-                        playEpisode(currentEpisode, currentEpisode.clipStartTime ?: podcast.currentTime)
-                    }
-                }
-            }
-        }
-    }
-
     private fun loadRecommendationsPodcast() {
         viewModelScope.launch(mainImmediate) {
             feedRepository.getPodcastById(
@@ -173,16 +164,40 @@ class CommonPlayerScreenViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
 
             viewStateContainer.updateViewState(
-                RecommendationsPodcastPlayerViewState.PodcastLoaded(podcast)
+                RecommendationsPodcastPlayerViewState.PodcastViewState.PodcastLoaded(podcast)
             )
 
-            playerViewStateContainer.updateViewState(
-                if (podcast.getCurrentEpisode().isYouTubeVideo) {
-                    PlayerViewState.YouTubeVideoSelected(podcast.getCurrentEpisode())
-                } else {
-                    PlayerViewState.PodcastEpisodeSelected
+            val currentEpisode = podcast.getCurrentEpisode()
+
+            if (!currentEpisode.playing) {
+                podcast.setCurrentEpisodeWith(args.episodeId.value)
+                val newEpisode = podcast.getCurrentEpisode()
+
+                playerViewStateContainer.updateViewState(
+                    if (newEpisode.isYouTubeVideo) {
+                        PlayerViewState.YouTubeVideoSelected(podcast.getCurrentEpisode())
+                    } else {
+                        PlayerViewState.PodcastEpisodeSelected
+                    }
+                )
+
+                if (newEpisode.isMusicClip) {
+                    viewStateContainer.updateViewState(
+                        RecommendationsPodcastPlayerViewState.PodcastViewState.LoadingEpisode(podcast, newEpisode)
+                    )
+
+                    delay(300L)
+                    playEpisode(newEpisode, newEpisode.clipStartTime ?: podcast.currentTime)
                 }
-            )
+            } else {
+                playerViewStateContainer.updateViewState(
+                    if (currentEpisode.isYouTubeVideo) {
+                        PlayerViewState.YouTubeVideoSelected(currentEpisode)
+                    } else {
+                        PlayerViewState.PodcastEpisodeSelected
+                    }
+                )
+            }
         }
     }
 
@@ -205,7 +220,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                             serviceState.speed
                         )
                         viewStateContainer.updateViewState(
-                            RecommendationsPodcastPlayerViewState.MediaStateUpdate(
+                            RecommendationsPodcastPlayerViewState.PodcastViewState.MediaStateUpdate(
                                 podcast,
                                 serviceState
                             )
@@ -214,7 +229,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                     is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
                         podcast.pauseEpisodeUpdate()
                         viewStateContainer.updateViewState(
-                            RecommendationsPodcastPlayerViewState.MediaStateUpdate(
+                            RecommendationsPodcastPlayerViewState.PodcastViewState.MediaStateUpdate(
                                 podcast,
                                 serviceState
                             )
@@ -226,10 +241,15 @@ class CommonPlayerScreenViewModel @Inject constructor(
                             ::retrieveEpisodeDuration
                         )
                         viewStateContainer.updateViewState(
-                            RecommendationsPodcastPlayerViewState.MediaStateUpdate(
+                            RecommendationsPodcastPlayerViewState.PodcastViewState.MediaStateUpdate(
                                 podcast,
                                 serviceState
                             )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Failed -> {
+                        submitSideEffect(
+                            CommonPlayerScreenSideEffect.Notify.ErrorPlayingClip
                         )
                     }
                     is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {}
@@ -248,29 +268,33 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
     fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            viewStateContainer.updateViewState(RecommendationsPodcastPlayerViewState.LoadingEpisode(episode))
-
-            if (episode.isMusicClip) {
-                playerViewStateContainer.updateViewState(
-                    PlayerViewState.PodcastEpisodeSelected
+            getPodcast()?.let { podcast ->
+                viewStateContainer.updateViewState(
+                    RecommendationsPodcastPlayerViewState.PodcastViewState.LoadingEpisode(podcast, episode)
                 )
 
-                delay(50L)
+                if (episode.isMusicClip) {
+                    playerViewStateContainer.updateViewState(
+                        PlayerViewState.PodcastEpisodeSelected
+                    )
 
-                playEpisode(
-                    episode,
-                    episode.clipStartTime ?: 0
-                )
-            } else if (episode.isYouTubeVideo) {
-                playerViewStateContainer.updateViewState(
-                    PlayerViewState.YouTubeVideoSelected(episode)
-                )
+                    delay(50L)
 
-                getPodcast()?.let { podcast ->
-                    podcast.getCurrentEpisode()?.let { episode ->
-                        pauseEpisode(episode)
+                    playEpisode(
+                        episode,
+                        episode.clipStartTime ?: 0
+                    )
+                } else if (episode.isYouTubeVideo) {
+                    playerViewStateContainer.updateViewState(
+                        PlayerViewState.YouTubeVideoSelected(episode)
+                    )
+
+                    getPodcast()?.let { podcast ->
+                        podcast.getCurrentEpisode()?.let { episode ->
+                            pauseEpisode(episode)
+                        }
+                        podcast.setCurrentEpisodeWith(episode.id.value)
                     }
-                    podcast.setCurrentEpisodeWith(episode.id.value)
                 }
             }
         }
@@ -301,7 +325,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                     }
 
                     viewStateContainer.updateViewState(
-                        RecommendationsPodcastPlayerViewState.EpisodePlayed(
+                        RecommendationsPodcastPlayerViewState.PodcastViewState.EpisodePlayed(
                             podcast
                         )
                     )

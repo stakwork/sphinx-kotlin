@@ -11,20 +11,26 @@ sealed class RecommendationsPodcastPlayerViewState: ViewState<RecommendationsPod
     object ServiceLoading: RecommendationsPodcastPlayerViewState()
     object ServiceInactive: RecommendationsPodcastPlayerViewState()
 
-    class PodcastLoaded(
+    sealed class PodcastViewState(
         val podcast: Podcast,
-    ): RecommendationsPodcastPlayerViewState()
+    ) : RecommendationsPodcastPlayerViewState() {
 
-    class LoadingEpisode(
-        val episode: PodcastEpisode
-    ): RecommendationsPodcastPlayerViewState()
+        class PodcastLoaded(
+            podcast: Podcast
+        ): PodcastViewState(podcast)
 
-    class EpisodePlayed(
-        val podcast: Podcast
-    ): RecommendationsPodcastPlayerViewState()
+        class LoadingEpisode(
+            podcast: Podcast,
+            val episode: PodcastEpisode
+        ): PodcastViewState(podcast)
 
-    class MediaStateUpdate(
-        val podcast: Podcast,
-        val state: MediaPlayerServiceState.ServiceActive.MediaState
-    ): RecommendationsPodcastPlayerViewState()
+        class EpisodePlayed(
+            podcast: Podcast
+        ): PodcastViewState(podcast)
+
+        class MediaStateUpdate(
+            podcast: Podcast,
+            val state: MediaPlayerServiceState.ServiceActive.MediaState
+        ): PodcastViewState(podcast)
+    }
 }

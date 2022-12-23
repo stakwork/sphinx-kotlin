@@ -28,6 +28,11 @@ sealed class CommonPlayerScreenSideEffect: SideEffect<Context>() {
             ).show(value, stringRes)
         }
 
+        object ErrorPlayingClip : Notify() {
+            override val stringRes: Int
+                get() = R.string.error_playing_clip
+        }
+
         object ErrorLoadingRecommendations : Notify() {
             override val stringRes: Int
                 get() = R.string.error_loading_recommendations

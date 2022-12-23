@@ -29,6 +29,26 @@ data class Podcast(
     val subscribed: Subscribed
 ) {
 
+    companion object {
+        @Suppress("ObjectPropertyName")
+        private const val _17 = 17
+        @Suppress("ObjectPropertyName")
+        private const val _31 = 31
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is Podcast) {
+            return episodes == other.episodes
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var result = _17
+        result = _31 * result + episodes.hashCode()
+        return result
+    }
+
     var model: PodcastModel? = null
     var destinations: List<PodcastDestination> = arrayListOf()
     var episodes: List<PodcastEpisode> = arrayListOf()
@@ -97,7 +117,11 @@ data class Podcast(
     }
 
     fun setCurrentEpisodeWith(episodeId: String) {
+        this.playingEpisode?.playing = false
+
         this.playingEpisode = getEpisodeWithId(episodeId)
+        this.episodeDuration = null
+        this.timeMilliSeconds = 0
     }
 
     fun getMetaData(
@@ -147,7 +171,6 @@ data class Podcast(
                 return episode
             }
         }
-
         return null
     }
 

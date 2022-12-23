@@ -10,6 +10,7 @@ import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToCommonPlayerScreen(
     private val podcastId: FeedId,
+    private val episodeId: FeedId,
     private val currentEpisodeDuration: Long,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
@@ -19,6 +20,7 @@ class ToCommonPlayerScreen(
             R.id.common_player_nav_graph,
             CommonPlayerScreenFragmentArgs.Builder(
                 podcastId.value,
+                episodeId.value,
                 currentEpisodeDuration
             ).build().toBundle(),
             options

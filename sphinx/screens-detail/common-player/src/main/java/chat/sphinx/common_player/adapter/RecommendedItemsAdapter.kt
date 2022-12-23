@@ -96,20 +96,8 @@ class RecommendedItemsAdapter (
 
                 var episodes = ArrayList<PodcastEpisode>()
 
-                if (viewState is RecommendationsPodcastPlayerViewState.PodcastLoaded) {
+                if (viewState is RecommendationsPodcastPlayerViewState.PodcastViewState) {
                     episodes = viewState.podcast.getEpisodesListCopy()
-                }
-
-                if (viewState is RecommendationsPodcastPlayerViewState.EpisodePlayed) {
-                    episodes = viewState.podcast.getEpisodesListCopy()
-                }
-
-                if (viewState is RecommendationsPodcastPlayerViewState.MediaStateUpdate) {
-                    if (viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Paused ||
-                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended)
-                    {
-                        episodes = viewState.podcast.getEpisodesListCopy()
-                    }
                 }
 
                 if (episodes.isNotEmpty()) {

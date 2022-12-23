@@ -68,6 +68,22 @@ sealed class MediaPlayerServiceState {
                 episodeDuration,
                 speed
             )
+
+            class Failed(
+                chatId: ChatId,
+                podcastId: String,
+                episodeId: String,
+                currentTime: Int,
+                episodeDuration: Int,
+                speed: Double
+            ): MediaState(
+                chatId,
+                podcastId,
+                episodeId,
+                currentTime,
+                episodeDuration,
+                speed
+            )
         }
     }
 }

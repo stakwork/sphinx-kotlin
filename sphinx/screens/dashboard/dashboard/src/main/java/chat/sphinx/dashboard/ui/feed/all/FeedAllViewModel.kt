@@ -1,9 +1,11 @@
 package chat.sphinx.dashboard.ui.feed.all
 
-import android.content.Context
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
@@ -14,9 +16,11 @@ import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_podcast.FeedRecommendation
+import chat.sphinx.wrapper_podcast.Podcast
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
@@ -30,10 +34,11 @@ internal class FeedAllViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     private val feedRepository: FeedRepository,
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
     val moshi: Moshi,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
-        Context,
+        FragmentActivity,
         FeedAllSideEffect,
         FeedAllViewState
         >(dispatchers, FeedAllViewState.NoRecommendations), FeedFollowingViewModel, FeedRecommendationsViewModel
@@ -60,6 +65,15 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun loadFeedRecommendations() {
         viewModelScope.launch(mainImmediate) {
+            feedRepository.getPodcastById(
+                FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID)
+            )?.firstOrNull()?.let { podcast ->
+                if (podcast.isPlaying) {
+                    submitSideEffect(FeedAllSideEffect.RefreshWhilePlaying)
+                    return@launch
+                }
+            }
+
             updateViewState(FeedAllViewState.Loading)
 
             repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->
@@ -133,9 +147,37 @@ internal class FeedAllViewModel @Inject constructor(
             feedRepository.getPodcastById(
                 FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID)
             ).firstOrNull()?.let { podcast ->
-                podcast.setCurrentEpisodeWith(feed.id)
 
-                dashboardNavigator.toCommonPlayerScreen(podcast.id, podcast.episodeDuration ?: 0)
+                pauseEpisodeIfNeeded(
+                    podcast,
+                    FeedId(feed.id)
+                )
+
+                dashboardNavigator.toCommonPlayerScreen(
+                    podcast.id,
+                    FeedId(feed.id),
+                    podcast.episodeDuration ?: 0
+                )
+            }
+        }
+    }
+
+    private fun pauseEpisodeIfNeeded(
+        podcast: Podcast,
+        episodeId: FeedId
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            val currentEpisode = podcast.getCurrentEpisode()
+
+            if (currentEpisode.playing && currentEpisode.id != episodeId) {
+                podcast.didPausePlayingEpisode(currentEpisode)
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Pause(
+                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        currentEpisode.id.value
+                    )
+                )
             }
         }
     }

@@ -263,17 +263,21 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun onPodcastBarDismissed() {
+        dashboardPodcastViewModel.forcePodcastStop()
+        dashboardPodcastViewModel.trackPodcastConsumed()
+
+        podcastPlayerBinding.root.gone
+        binding.swipeRevealLayoutPlayer.gone
+        binding.imageViewBottomBarShadow.visible
+    }
+
     private fun setupPodcastPlayerFooter() {
         binding.swipeRevealLayoutPlayer.setSwipeListener(object: SwipeRevealLayout.SwipeListener {
             override fun onClosed(view: SwipeRevealLayout?) {}
 
             override fun onOpened(view: SwipeRevealLayout?) {
-                dashboardPodcastViewModel.forcePodcastStop()
-                dashboardPodcastViewModel.trackPodcastConsumed()
-
-                podcastPlayerBinding.root.gone
-                binding.swipeRevealLayoutPlayer.gone
-                binding.imageViewBottomBarShadow.visible
+                onPodcastBarDismissed()
             }
 
             override fun onSlide(view: SwipeRevealLayout?, slideOffset: Float) {}

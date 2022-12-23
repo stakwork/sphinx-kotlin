@@ -1,6 +1,5 @@
 package chat.sphinx.concept_repository_feed
 
-import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_chat.ChatHost
@@ -46,6 +45,7 @@ interface FeedRepository {
 
     val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
     fun setRecommendationsToggle(enabled: Boolean)
+    val recommendationsPodcast: MutableStateFlow<Podcast?>
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
 }
