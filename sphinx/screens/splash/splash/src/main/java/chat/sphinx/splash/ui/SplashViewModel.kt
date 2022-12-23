@@ -108,9 +108,9 @@ internal class SplashViewModel @Inject constructor(
                                     }
                                     null -> {
                                         navigator.toDashboardScreen(updateBackgroundLoginTime = true)
-                                        Log.d("TimeTracker", "Dashboard screen was call in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
-                                        actionsRepository.setAppLog("Dashboard screen was call in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
 
+                                        Log.d("TimeTracker", "Dashboard screen was call in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+                                        actionsRepository.setAppLog("- Dashboard screen was call in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
                                     }
                                 }
                             }

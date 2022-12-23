@@ -81,18 +81,24 @@ internal class SupportTicketFragment: SideEffectFragment<
             @Exhaustive
             when(viewState) {
                 is SupportTicketViewState.Empty -> {
-                    includeSupportTicketLogText.textViewSupportTicketLogs.text = ""
+                    logsDivider.gone
+                    includeSupportTicketLogText.root.gone
+                    includeSupportTicketLogApp.root.gone
                     progressBarSupportTicketLogs.gone
                 }
                 is SupportTicketViewState.Fetched -> {
+                    logsDivider.visible
+                    includeSupportTicketLogText.root.visible
+                    includeSupportTicketLogApp.root.visible
                     includeSupportTicketLogText.textViewSupportTicketLogs.text = viewState.logs
+                    includeSupportTicketLogApp.textViewSupportTicketLogs.text = viewState.appLogs
                     progressBarSupportTicketLogs.gone
                 }
                 is SupportTicketViewState.LoadingLogs -> {
+                    logsDivider.gone
+                    includeSupportTicketLogText.root.gone
+                    includeSupportTicketLogApp.root.gone
                     progressBarSupportTicketLogs.visible
-                }
-                is SupportTicketViewState.AppLogsFetched -> {
-                    includeSupportTicketLogApp.textViewSupportTicketLogs.text = viewState.appLogs
                 }
             }
         }

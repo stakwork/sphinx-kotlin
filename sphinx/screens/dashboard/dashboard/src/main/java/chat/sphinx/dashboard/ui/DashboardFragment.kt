@@ -72,6 +72,8 @@ internal class DashboardFragment : MotionLayoutFragment<
     private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
         get() = binding.layoutPodcastPlayerFooter
 
+    var timeTrackerStart: Long = 0
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -395,8 +397,6 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onStart() {
         super.onStart()
 
-        var timeTrackerStart: Long = 0
-
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.newVersionAvailable.asStateFlow().collect { newVersionAvailable ->
                 binding.layoutDashboardHeader.textViewDashboardHeaderUpgradeApp.goneIfFalse(
@@ -454,7 +454,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                                 )
                             )
                             Log.d("TimeTracker", "Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
-                            viewModel.sendAppLog("Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+                            viewModel.sendAppLog("- Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
                         }
                     }
                 }

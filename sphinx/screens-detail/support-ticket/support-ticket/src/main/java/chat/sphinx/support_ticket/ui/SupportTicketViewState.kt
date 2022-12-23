@@ -7,7 +7,8 @@ internal sealed class SupportTicketViewState: ViewState<SupportTicketViewState>(
 
     object LoadingLogs: SupportTicketViewState()
 
-    data class Fetched(val logs: String): SupportTicketViewState()
-
-    data class AppLogsFetched(val appLogs: String): SupportTicketViewState()
+    data class Fetched(
+        val logs: String,
+        val appLogs: String
+    ): SupportTicketViewState()
 }

@@ -36,21 +36,23 @@ internal class SupportTicketViewModel @Inject constructor(
     fun loadLogs() {
         viewModelScope.launch(mainImmediate) {
             networkQueryLightning.getLogs().collect { loadedResponse ->
-                actionsRepository.appLogsStateFlow.collect { appLog ->
-                    @Exhaustive
-                    when (loadedResponse) {
-                        is LoadResponse.Loading -> {
-                            updateViewState(SupportTicketViewState.LoadingLogs)
-                        }
-                        is Response.Error -> {
-                            submitSideEffect(SupportTicketSideEffect.FailedToFetchLogs)
-                            updateViewState(SupportTicketViewState.Empty)
-                        }
-                        is Response.Success -> {
-                            updateViewState(SupportTicketViewState.Fetched(loadedResponse.value))
-                        }
+                @Exhaustive
+                when (loadedResponse) {
+                    is LoadResponse.Loading -> {
+                        updateViewState(SupportTicketViewState.LoadingLogs)
                     }
-                    updateViewState(SupportTicketViewState.AppLogsFetched(appLog))
+                    is Response.Error -> {
+                        submitSideEffect(SupportTicketSideEffect.FailedToFetchLogs)
+                        updateViewState(SupportTicketViewState.Empty)
+                    }
+                    is Response.Success -> {
+                        updateViewState(
+                            SupportTicketViewState.Fetched(
+                                loadedResponse.value,
+                                actionsRepository.appLogsStateFlow.value
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -72,12 +74,11 @@ internal class SupportTicketViewModel @Inject constructor(
                     null
                 }
                 is SupportTicketViewState.Fetched -> {
-                    logsViewState.logs
+                    "${logsViewState.logs}" +
+                    "\n\n\n" +
+                    "${actionsRepository.appLogsStateFlow.value}"
                 }
                 is SupportTicketViewState.LoadingLogs -> {
-                    null
-                }
-                is SupportTicketViewState.AppLogsFetched -> {
                     null
                 }
             }
@@ -97,10 +98,6 @@ internal class SupportTicketViewModel @Inject constructor(
                     is SupportTicketViewState.Fetched -> {
                         "$text\n\n\n${logsViewState.logs}"
                     }
-                    is SupportTicketViewState.AppLogsFetched -> {
-                        null
-                    }
-
                 }
 
                 Intent(Intent.ACTION_SENDTO).apply {

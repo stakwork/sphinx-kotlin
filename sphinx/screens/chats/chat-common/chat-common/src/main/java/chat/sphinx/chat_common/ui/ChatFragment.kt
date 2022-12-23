@@ -847,6 +847,7 @@ abstract class ChatFragment<
             })
         }
         Log.d("TimeTracker", "Chat messages were displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+        viewModel.sendAppLog("- Chat messages were displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
     }
 
     protected fun scrollToBottom(
@@ -1066,7 +1067,7 @@ abstract class ChatFragment<
                             textViewChatHeaderLock.goneIfFalse(viewState.showLock)
 
                             Log.d("TimeTracker", "Chat contact/tribe name was displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
-                            viewModel.sendAppLog("Chat contact/tribe name was displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+                            viewModel.sendAppLog("- Chat contact/tribe name was displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
 
                             imageViewChatHeaderMuted.apply {
                                 viewState.isMuted?.let { muted ->
