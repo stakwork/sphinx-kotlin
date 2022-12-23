@@ -162,7 +162,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                @Exhaustive
                 when (serviceState) {
                     is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
                         podcast.playingEpisodeUpdate(
@@ -209,6 +208,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         podcast.pauseEpisodeUpdate()
                         viewStateContainer.updateViewState(PodcastPlayerViewState.ServiceInactive)
                     }
+                    else -> {}
                 }
             }
         }

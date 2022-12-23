@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha76 (2022-12-23)
+- Improves actions tracking
+- Improves recommendations player
+
 # Version 1.0.0-alpha75 (2022-12-21)
 - Improves actions tracking
 - Improves recommendations player

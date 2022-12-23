@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -28,7 +29,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class FeedAllFragment : SideEffectFragment<
-        Context,
+        FragmentActivity,
         FeedAllSideEffect,
         FeedAllViewState,
         FeedAllViewModel,
@@ -83,7 +84,7 @@ internal class FeedAllFragment : SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: FeedAllSideEffect) {
-        sideEffect.execute(binding.root.context)
+        sideEffect.execute(requireActivity())
     }
 
     companion object {

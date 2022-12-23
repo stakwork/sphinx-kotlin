@@ -100,8 +100,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
 
         setupItems()
-
-        viewModel.startPlaying()
     }
 
     override fun onDestroyView() {
@@ -205,20 +203,20 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 togglePlayPauseButton(false)
             }
 
-            is RecommendationsPodcastPlayerViewState.PodcastLoaded -> {
+            is RecommendationsPodcastPlayerViewState.PodcastViewState.PodcastLoaded -> {
                 toggleLoadingWheel(true)
                 showPodcastInfo(viewState.podcast)
             }
 
-            is RecommendationsPodcastPlayerViewState.LoadingEpisode -> {
+            is RecommendationsPodcastPlayerViewState.PodcastViewState.LoadingEpisode -> {
                 loadingEpisode(viewState.episode)
             }
 
-            is RecommendationsPodcastPlayerViewState.EpisodePlayed -> {
+            is RecommendationsPodcastPlayerViewState.PodcastViewState.EpisodePlayed -> {
                 showPodcastInfo(viewState.podcast)
             }
 
-            is RecommendationsPodcastPlayerViewState.MediaStateUpdate -> {
+            is RecommendationsPodcastPlayerViewState.PodcastViewState.MediaStateUpdate -> {
                 toggleLoadingWheel(false)
                 showPodcastInfo(viewState.podcast)
             }
@@ -330,6 +328,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
                     seekBarCurrentEpisodeProgress.progress = 0
 
+                    setTimeLabelsAndProgressBarTo(0, 0, 0)
                     setClipView(0F, 0F)
 
                     toggleLoadingWheel(true)

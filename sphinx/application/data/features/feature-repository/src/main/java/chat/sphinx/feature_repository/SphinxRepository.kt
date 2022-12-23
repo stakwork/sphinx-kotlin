@@ -3975,7 +3975,7 @@ abstract class SphinxRepository(
         )
     }
 
-    private val recommendationsPodcast: MutableStateFlow<Podcast?> by lazy {
+    override val recommendationsPodcast: MutableStateFlow<Podcast?> by lazy {
         MutableStateFlow(null)
     }
 
@@ -4034,6 +4034,10 @@ abstract class SphinxRepository(
                 it,
                 podcast.id
             )
+        }
+
+        if (podcast.episodes.isEmpty()) {
+            return null
         }
 
         return podcast
@@ -6396,5 +6400,13 @@ abstract class SphinxRepository(
                 }
             }
         }
+    }
+
+    override val appLogsStateFlow: MutableStateFlow<String> by lazy {
+        MutableStateFlow("")
+    }
+
+    override fun setAppLog(log: String) {
+        appLogsStateFlow.value = appLogsStateFlow.value + log + "\n"
     }
 }

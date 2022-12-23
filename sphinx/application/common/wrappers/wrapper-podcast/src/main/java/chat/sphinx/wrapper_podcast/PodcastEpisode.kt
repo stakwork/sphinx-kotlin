@@ -33,6 +33,26 @@ data class PodcastEpisode(
     val people: List<String> = listOf()
 ): DownloadableFeedItem {
 
+    companion object {
+        @Suppress("ObjectPropertyName")
+        private const val _17 = 17
+        @Suppress("ObjectPropertyName")
+        private const val _31 = 31
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other is PodcastEpisode) {
+            return other.id == id
+        }
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var result = _17
+        result = _31 * result + id.hashCode()
+        return result
+    }
+
     var titleToShow: String = ""
         get() = title.value.trim()
 

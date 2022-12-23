@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_actions
 
 import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
 import chat.sphinx.wrapper_common.feed.FeedId
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface ActionsRepository {
 
@@ -38,4 +39,7 @@ interface ActionsRepository {
     )
 
     fun syncActions()
+
+    val appLogsStateFlow: MutableStateFlow<String>
+    fun setAppLog(log: String)
 }
