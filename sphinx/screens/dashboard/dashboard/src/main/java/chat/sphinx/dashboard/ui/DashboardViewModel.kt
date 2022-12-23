@@ -998,5 +998,9 @@ internal class DashboardViewModel @Inject constructor(
             )
         }
     }
+
+    fun sendAppLog(appLog: String) {
+        actionsRepository.setAppLog(appLog)
+    }
 }
 

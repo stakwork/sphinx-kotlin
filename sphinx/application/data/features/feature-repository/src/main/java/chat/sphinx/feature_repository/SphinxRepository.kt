@@ -6397,4 +6397,12 @@ abstract class SphinxRepository(
             }
         }
     }
+
+    override val appLogsStateFlow: MutableStateFlow<String> by lazy {
+        MutableStateFlow("")
+    }
+
+    override fun setAppLog(log: String) {
+        appLogsStateFlow.value = appLogsStateFlow.value + log + "\n"
+    }
 }

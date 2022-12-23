@@ -32,12 +32,33 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:layout_marginTop="@dimen/default_layout_margin"
-        android:layout_marginBottom="@dimen/default_double_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_support_ticket_message"
+        android:layout_marginVertical="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toTopOf="@+id/include_support_ticket_log_app"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_support_ticket_message" />
+
+    <View
+        android:id="@+id/logs_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/text"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/include_support_ticket_log_text"
+        app:layout_constraintBottom_toTopOf="@+id/include_support_ticket_log_app"></View>
+
+    <include
+        android:id="@+id/include_support_ticket_log_app"
+        layout="@layout/layout_support_ticket_logs_text"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginBottom="@dimen/default_layout_margin"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_support_ticket_buttons"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_support_ticket_log_text" />
+
 
     <ProgressBar
         android:id="@+id/progress_bar_support_ticket_logs"
@@ -47,8 +68,8 @@
         android:indeterminateTint="@android:color/white"
         android:indeterminate="true"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="@+id/include_support_ticket_log_text"
-        app:layout_constraintBottom_toBottomOf="@+id/include_support_ticket_log_text"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/include_support_ticket_log_text"
         app:layout_constraintStart_toStartOf="@+id/include_support_ticket_log_text"
         tools:visibility="visible"/>
