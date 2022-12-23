@@ -1,6 +1,6 @@
 package chat.sphinx.dashboard.ui.feed.all
 
-import android.content.Context
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -14,14 +14,13 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.*
@@ -39,7 +38,7 @@ internal class FeedAllViewModel @Inject constructor(
     val moshi: Moshi,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
-        Context,
+        FragmentActivity,
         FeedAllSideEffect,
         FeedAllViewState
         >(dispatchers, FeedAllViewState.NoRecommendations), FeedFollowingViewModel, FeedRecommendationsViewModel
@@ -66,6 +65,15 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun loadFeedRecommendations() {
         viewModelScope.launch(mainImmediate) {
+            feedRepository.getPodcastById(
+                FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID)
+            )?.firstOrNull()?.let { podcast ->
+                if (podcast.isPlaying) {
+                    submitSideEffect(FeedAllSideEffect.RefreshWhilePlaying)
+                    return@launch
+                }
+            }
+
             updateViewState(FeedAllViewState.Loading)
 
             repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->

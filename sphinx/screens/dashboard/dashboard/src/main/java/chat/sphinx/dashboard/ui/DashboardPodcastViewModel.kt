@@ -49,6 +49,16 @@ internal class DashboardPodcastViewModel @Inject constructor(
 
     init {
         mediaPlayerServiceController.addListener(this@DashboardPodcastViewModel)
+
+        viewModelScope.launch(mainImmediate) {
+            feedRepository.recommendationsPodcast.collect {
+                (playingPodcastViewStateContainer.value as? PlayingPodcastViewState.PodcastVS)?.let { viewState ->
+                    if (viewState.podcast.id?.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                        playingPodcastViewStateContainer.updateViewState(PlayingPodcastViewState.NoPodcast)
+                    }
+                }
+            }
+        }
     }
 
     private var currentServiceState: MediaPlayerServiceState = MediaPlayerServiceState.ServiceInactive
@@ -246,7 +256,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 showLoading = false,
                 showPlayButton = !isPlaying,
                 title = podcast.getCurrentEpisode().title.value,
-                subtitle = podcast.author?.value ?: podcast.title.value,
+                subtitle = podcast.author?.value ?: podcast.getCurrentEpisode().showTitle?.value ?: podcast.title.value,
                 imageUrl = podcast.imageToShow?.value,
                 playingProgress = playingProgress,
                 clickPlayPause = clickPlayPause,

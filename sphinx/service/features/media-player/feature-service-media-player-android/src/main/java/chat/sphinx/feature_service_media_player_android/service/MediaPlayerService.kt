@@ -446,6 +446,18 @@ internal abstract class MediaPlayerService: SphinxService() {
                     mp,
                     userAction.speed
                 )
+
+                if (mp.duration == 0) {
+                    currentState = MediaPlayerServiceState.ServiceActive.MediaState.Failed(
+                        userAction.chatId,
+                        userAction.podcastId,
+                        userAction.episodeId,
+                        0,
+                        0,
+                        userAction.speed
+                    )
+                    mediaServiceController.dispatchState(currentState)
+                }
             }
         }
 

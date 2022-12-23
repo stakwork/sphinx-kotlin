@@ -158,7 +158,6 @@ internal class TribeFeedViewModel @Inject constructor(
             return
         }
 
-        @Exhaustive
         when (serviceState) {
             is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
                 vs.podcast.playingEpisodeUpdate(
@@ -231,6 +230,7 @@ internal class TribeFeedViewModel @Inject constructor(
                     podcastViewStateContainer.updateViewState(it)
                 }
             }
+            else -> {}
         }
     }
 
@@ -426,7 +426,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 showLoading = true,
                 showPlayButton = true,
                 title = podcast.getCurrentEpisode().title.value,
-                subtitle = podcast.author?.value ?: podcast.title.value,
+                subtitle = podcast.author?.value ?: podcast.getCurrentEpisode().showTitle?.value ?: podcast.title.value,
                 imageUrl = podcast.imageToShow?.value,
                 playingProgress = 0,
                 clickPlayPause = clickPlayPause,
@@ -451,7 +451,7 @@ internal class TribeFeedViewModel @Inject constructor(
             showLoading = false,
             showPlayButton = !isPlaying,
             title = podcast.getCurrentEpisode().title.value,
-            subtitle = podcast.author?.value ?: podcast.title.value,
+            subtitle = podcast.author?.value ?: podcast.getCurrentEpisode().showTitle?.value ?: podcast.title.value,
             imageUrl = podcast.imageToShow?.value,
             playingProgress = playingProgress,
             clickPlayPause = clickPlayPause,

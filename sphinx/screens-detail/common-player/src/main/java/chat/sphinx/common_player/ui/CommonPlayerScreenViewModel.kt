@@ -167,26 +167,36 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 RecommendationsPodcastPlayerViewState.PodcastViewState.PodcastLoaded(podcast)
             )
 
-            playerViewStateContainer.updateViewState(
-                if (podcast.getCurrentEpisode().isYouTubeVideo) {
-                    PlayerViewState.YouTubeVideoSelected(podcast.getCurrentEpisode())
-                } else {
-                    PlayerViewState.PodcastEpisodeSelected
-                }
-            )
-
             val currentEpisode = podcast.getCurrentEpisode()
 
             if (!currentEpisode.playing) {
                 podcast.setCurrentEpisodeWith(args.episodeId.value)
                 val newEpisode = podcast.getCurrentEpisode()
 
-                viewStateContainer.updateViewState(
-                    RecommendationsPodcastPlayerViewState.PodcastViewState.LoadingEpisode(podcast, newEpisode)
+                playerViewStateContainer.updateViewState(
+                    if (newEpisode.isYouTubeVideo) {
+                        PlayerViewState.YouTubeVideoSelected(podcast.getCurrentEpisode())
+                    } else {
+                        PlayerViewState.PodcastEpisodeSelected
+                    }
                 )
 
-                delay(300L)
-                playEpisode(newEpisode, newEpisode.clipStartTime ?: podcast.currentTime)
+                if (newEpisode.isMusicClip) {
+                    viewStateContainer.updateViewState(
+                        RecommendationsPodcastPlayerViewState.PodcastViewState.LoadingEpisode(podcast, newEpisode)
+                    )
+
+                    delay(300L)
+                    playEpisode(newEpisode, newEpisode.clipStartTime ?: podcast.currentTime)
+                }
+            } else {
+                playerViewStateContainer.updateViewState(
+                    if (currentEpisode.isYouTubeVideo) {
+                        PlayerViewState.YouTubeVideoSelected(currentEpisode)
+                    } else {
+                        PlayerViewState.PodcastEpisodeSelected
+                    }
+                )
             }
         }
     }
@@ -235,6 +245,11 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                 podcast,
                                 serviceState
                             )
+                        )
+                    }
+                    is MediaPlayerServiceState.ServiceActive.MediaState.Failed -> {
+                        submitSideEffect(
+                            CommonPlayerScreenSideEffect.Notify.ErrorPlayingClip
                         )
                     }
                     is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {}
