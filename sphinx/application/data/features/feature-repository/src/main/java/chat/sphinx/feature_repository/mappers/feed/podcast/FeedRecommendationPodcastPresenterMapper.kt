@@ -1,5 +1,6 @@
 package chat.sphinx.feature_repository.mappers.feed.podcast
 
+import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
@@ -11,6 +12,7 @@ import chat.sphinx.wrapper_feed.FeedTitle
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import okio.base64.decodeBase64ToArray
 
 internal class FeedRecommendationPodcastPresenterMapper() {
     fun mapFrom(value: FeedRecommendation, podcastId: FeedId): PodcastEpisode {
@@ -25,7 +27,7 @@ internal class FeedRecommendationPodcastPresenterMapper() {
             null,
             null,
             null,
-            value.date?.toDateTime(),
+            value.date?.toDateTimeOrNull(),
             value.feedType,
             FeedTitle(value.showTitle),
             value.startMilliseconds,
@@ -47,5 +49,14 @@ internal class FeedRecommendationPodcastPresenterMapper() {
             FeedUrl("-"),
             Subscribed.False
         )
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Long.toDateTimeOrNull(): DateTime? {
+    return if (this > 0) {
+        (this * 1000).toDateTime()
+    } else {
+        null
     }
 }
