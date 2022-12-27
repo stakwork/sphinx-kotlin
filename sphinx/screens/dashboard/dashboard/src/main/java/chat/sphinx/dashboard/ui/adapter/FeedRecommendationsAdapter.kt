@@ -211,8 +211,9 @@ class FeedRecommendationsAdapter(
                         ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
                     )
                 }
-                textViewRecommendationItemName.text = f.title
-                textViewRecommendationItemDescription.text = f.description
+                textViewRecommendationItemName.text = f.description
+                textViewRecommendationItemDescription.text = f.title
+                textViewRecommendationItemDate.text = f.daysAgo
 
                 imageViewItemRecommendationType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, f.getIconType())

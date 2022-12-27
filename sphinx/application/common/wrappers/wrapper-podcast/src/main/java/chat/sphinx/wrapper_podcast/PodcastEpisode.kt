@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.PODCAST_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.TWITTER_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.YOUTUBE_VIDEO_TYPE
 import java.io.File
+import java.util.*
 
 data class PodcastEpisode(
     override val id: FeedId,
@@ -75,7 +76,13 @@ data class PodcastEpisode(
         }
 
     val dateString: String
-        get() = date?.chatTimeFormat() ?: "-"
+        get() {
+            return date?.value?.let {
+                DateTime.getFormatMMMddyyyy(
+                    TimeZone.getTimeZone(DateTime.UTC)
+                ).format(it)
+            } ?: "-"
+        }
 
     val downloaded: Boolean
         get()= localFile != null
