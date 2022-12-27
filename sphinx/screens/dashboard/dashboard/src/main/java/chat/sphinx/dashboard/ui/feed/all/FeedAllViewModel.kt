@@ -41,7 +41,7 @@ internal class FeedAllViewModel @Inject constructor(
         FragmentActivity,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.NoRecommendations), FeedFollowingViewModel, FeedRecommendationsViewModel
+        >(dispatchers, FeedAllViewState.Disabled), FeedFollowingViewModel, FeedRecommendationsViewModel
 {
 
     override val feedRecommendationsHolderViewStateFlow: MutableStateFlow<List<FeedRecommendation>> = MutableStateFlow(emptyList())
@@ -64,6 +64,10 @@ internal class FeedAllViewModel @Inject constructor(
     }
 
     override fun loadFeedRecommendations() {
+        if (!feedRepository.recommendationsToggleStateFlow.value) {
+            return
+        }
+
         viewModelScope.launch(mainImmediate) {
             feedRepository.getPodcastById(
                 FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID)

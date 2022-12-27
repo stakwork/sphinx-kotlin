@@ -122,10 +122,12 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun addSearchTerm(searchTerm: String) {
-        for (st in searchFeedsTerm) {
+        searchFeedsTerm.lastOrNull()?.let { st ->
             if (searchTerm.contains(st)) {
-              searchFeedsTerm.remove(st)
-            }
+                searchFeedsTerm.remove(st)
+            } else if (st.contains(searchTerm)) {
+                return
+            } else {}
         }
         searchFeedsTerm.add(searchTerm)
     }

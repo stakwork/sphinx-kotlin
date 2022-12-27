@@ -229,8 +229,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             var currentEpisode: PodcastEpisode = podcast.getCurrentEpisode()
 
             includeLayoutPlayerDescriptionAndControls.apply {
-                textViewItemTitle.text = currentEpisode.title.value
-                textViewItemDescription.text = currentEpisode.description?.value ?: "-"
+                textViewItemTitle.text = currentEpisode.description?.value ?: "-"
+                textViewItemDescription.text = currentEpisode.title.value
                 textViewItemPublishedDate.text = currentEpisode.dateString
             }
 
@@ -305,8 +305,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     private suspend fun loadingEpisode(episode: PodcastEpisode) {
         binding.apply {
             includeLayoutPlayerDescriptionAndControls.apply {
-                textViewItemTitle.text = episode.title.value
-                textViewItemDescription.text = episode.description?.value ?: "-"
+                textViewItemTitle.text = episode.description?.value ?: "-"
+                textViewItemDescription.text = episode.title.value
                 textViewItemPublishedDate.text = episode.dateString
             }
 
