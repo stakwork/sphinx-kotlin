@@ -14,5 +14,64 @@
         android:layout_height="@dimen/default_header_height"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_tribe_badges_select"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@+id/include_tribe_detail_header"
+        tools:layout_editor_absoluteX="0dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/icon_tribe_badges"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:padding="2dp"
+            android:layout_marginStart="12dp"
+            android:src="@drawable/ic_icon_badges_select"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:track="@drawable/switch_track_selector" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_tribe_badges_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:layout_marginTop="12dp"
+            android:maxLines="2"
+            android:text="Select and customize"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/badges_select_medium_text_view_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/icon_tribe_badges" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_tribe_badges_your_badges"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_light"
+            android:maxLines="2"
+            android:text="your tribe badges"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/badges_select_light_text_view_size"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_badges_select" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_list"
+        android:layout_marginTop="32dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/body"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_badges_select"
+        tools:listitem="@layout/layout_badges_list_item_holder" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

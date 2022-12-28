@@ -82,6 +82,9 @@
     <dimen name="pin_pad_backspace_text_size">24sp</dimen>
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>
+    <dimen name="badges_select_medium_text_view_size">20sp</dimen>
+    <dimen name="badges_select_light_text_view_size">19sp</dimen>
+
 
     <!-- Menu option input lock -->
     <item name="options_menu_input_lock_alpha" type="dimen" format="float">.5</item>
