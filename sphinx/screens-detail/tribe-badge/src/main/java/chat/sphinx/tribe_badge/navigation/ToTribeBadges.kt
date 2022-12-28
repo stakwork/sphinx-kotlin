@@ -1,16 +1,15 @@
 package chat.sphinx.tribe_badge.navigation
 
 import androidx.navigation.NavController
-import androidx.navigation.NavOptions
 import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.tribe_badge.R
 import chat.sphinx.tribe_badge.ui.TribeBadgesFragmentArgs
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_navigation.NavigationRequest
+import io.matthewnelson.android_feature_navigation.R as nav_R
 
 class ToTribeBadges(
     private val chatId: ChatId,
-    private val options: NavOptions = DetailNavOptions.defaultBuilt
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
 
@@ -19,7 +18,10 @@ class ToTribeBadges(
             TribeBadgesFragmentArgs
                 .Builder(chatId.value)
                 .build().toBundle(),
-            options
+            DetailNavOptions.default
+                .setEnterAnim(nav_R.anim.slide_in_left)
+                .setPopExitAnim(nav_R.anim.slide_out_right)
+                .build()
 
         )
     }
