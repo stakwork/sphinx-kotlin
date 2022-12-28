@@ -15,8 +15,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_recommended_image"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="@dimen/badges_icon_row_size"
+            android:layout_height="@dimen/badges_icon_row_size"
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -106,7 +106,7 @@
         android:layout_width="0dp"
         android:layout_height="1dp"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:background="@color/black"
+        android:background="@color/blackSemiTransparent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

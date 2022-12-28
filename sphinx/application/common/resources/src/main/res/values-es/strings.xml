@@ -44,6 +44,12 @@
     <string name="feed_search_directory_section">DIRECTORIO</string>
     <string name="recommendations">Recomendaciones</string>
 
+    <string name="select_badges">Selecciona y customiza</string>
+    <string name="your_badges">tus tribe badges</string>
+
+
+
+
     <string name="balance_too_low">Balance demasiado bajo</string>
     <string name="boost_amount_too_low">El monto del Boost debe ser mayor a 0</string>
 

@@ -129,6 +129,10 @@
     <string name="refresh_icon" translatable="false">refresh</string>
     <string name="no_recommendations" translatable="false">No recommendations to show</string>
 
+    <string name="select_badges">Select and customize</string>
+    <string name="your_badges">your tribe badges</string>
+
+
     <string name="balance_too_low">Balance too low</string>
     <string name="boost_amount_too_low">Boost amount must be greater than 0</string>
 

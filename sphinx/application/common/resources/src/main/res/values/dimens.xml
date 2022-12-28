@@ -84,6 +84,7 @@
     <dimen name="pin_text_view_size">17sp</dimen>
     <dimen name="badges_select_medium_text_view_size">20sp</dimen>
     <dimen name="badges_select_light_text_view_size">19sp</dimen>
+    <dimen name="badges_icon_row_size">32dp</dimen>
 
 
     <!-- Menu option input lock -->
