@@ -257,6 +257,12 @@ internal class TribeDetailViewModel @Inject constructor(
         }
     }
 
+    fun goToTribeBadgesScreen() {
+        viewModelScope.launch(mainImmediate) {
+            navigator.toTribeBadgesScreen(chatId)
+        }
+    }
+
     fun updateProfileAlias(alias: String?) {
         viewModelScope.launch(mainImmediate) {
             val response = chatRepository.updateChatProfileInfo(

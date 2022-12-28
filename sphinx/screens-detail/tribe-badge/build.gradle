@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    buildFeatures.viewBinding = true
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    // KotlinAndroid
+    implementation project(path: ':android:features:android-feature-screens')
+    // Sphinx
+    api project(path: ':sphinx:activity:insetter-activity')
+    api project(path: ':sphinx:application:common:menus:menu-bottom-tribe')
+    api project(path: ':sphinx:application:common:menus:menu-bottom-picture')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-common')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-meme-server')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-chat')
+    api project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
+    api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+    api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
+    api project(path: ':sphinx:screens-detail:common:detail-resources')
+    api project(path: ':sphinx:service:concepts:concept-service-media-player')
+
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
+    implementation project(path: ':sphinx:application:common:logger')
+    kapt kaptDeps.google.hilt
+}

@@ -254,6 +254,10 @@ internal class TribeDetailFragment: SideEffectFragment<
             buttonAdminViewMembers.setOnClickListener {
                 viewModel.toTribeMemberList()
             }
+
+            layoutConstraintTribeBadges.setOnClickListener {
+                viewModel.goToTribeBadgesScreen()
+            }
         }
     }
 
