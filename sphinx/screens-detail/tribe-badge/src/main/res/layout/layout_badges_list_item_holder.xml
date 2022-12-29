@@ -23,7 +23,7 @@
             tools:srcCompat="@drawable/ic_icon_badges_crown" />
 
         <TextView
-            android:id="@+id/text_view_recommended_title"
+            android:id="@+id/text_view_badge_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -38,33 +38,33 @@
             tools:text="Badge Name" />
 
         <TextView
-            android:id="@+id/text_view_recommended_description"
+            android:id="@+id/text_view_badge_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="2"
             android:textColor="@color/secondaryTextInverted"
-            android:textSize="13sp"
+            android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_title"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badge_title"
             tools:text="Post 1000 non-consecutive\n messages in the tribe" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_dashboard_chat_holder_badge_count"
-            android:layout_width="45dp"
-            android:layout_height="25dp"
-            android:layout_marginTop="8dp"
+            android:id="@+id/text_view_badges_row_count"
+            android:layout_width="@dimen/badges_row_count_width"
+            android:layout_height="@dimen/badges_row_count_height"
+            android:layout_marginTop="@dimen/default_half_layout_margin"
             android:background="@drawable/chat_initials_circle"
             android:backgroundTint="@color/lightDivider"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center"
             android:textColor="@android:color/white"
-            android:textSize="13sp"
-            app:layout_constraintStart_toStartOf="@+id/text_view_recommended_description"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintStart_toStartOf="@+id/text_view_badge_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badge_description"
             tools:text="650"
             tools:visibility="visible" />
 
@@ -78,24 +78,24 @@
             android:text="@string/material_icon_name_chevron_right_button"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/add_buttons_icon_xy"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_recommended_description"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_badge_description"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/text_view_recommended_description"
+            app:layout_constraintTop_toTopOf="@+id/text_view_badge_description"
             app:track="@drawable/switch_track_selector" />
 
         <TextView
             android:id="@+id/text_view_recommended_descriptioan"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/default_half_layout_margin"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="2"
             android:textColor="@color/secondaryText"
-            android:textSize="13sp"
+            android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_dashboard_chat_holder_badge_count"
-            app:layout_constraintTop_toTopOf="@+id/text_view_dashboard_chat_holder_badge_count"
+            app:layout_constraintStart_toEndOf="@+id/text_view_badges_row_count"
+            app:layout_constraintTop_toTopOf="@+id/text_view_badges_row_count"
             tools:text="of 100 Badges left" />
 
 
