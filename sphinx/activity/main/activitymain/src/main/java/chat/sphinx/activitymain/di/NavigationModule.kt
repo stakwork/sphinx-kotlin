@@ -49,6 +49,7 @@ import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
+import chat.sphinx.tribe_badge.adapter.TribeBadgesNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
@@ -318,6 +319,12 @@ internal object NavigationModule {
         addTribeMemberNavigatorImpl: AddTribeMemberNavigatorImpl
     ): AddTribeMemberNavigator =
         addTribeMemberNavigatorImpl
+
+    @Provides
+    fun provideTribeBadgesNavigator(
+        tribeBadgesNavigatorImpl: TribeBadgesNavigatorImpl
+    ): TribeBadgesNavigator =
+        tribeBadgesNavigatorImpl
 
     @Provides
     fun provideJoinTribeNavigator(

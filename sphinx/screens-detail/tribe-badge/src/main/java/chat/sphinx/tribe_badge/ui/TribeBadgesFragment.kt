@@ -75,6 +75,12 @@ internal class TribeBadgesFragment: SideEffectFragment<
             textViewDetailScreenHeaderNavBack.visible
             textViewDetailScreenHeaderName.text = "Tribe Badges"
             textViewDetailScreenClose.gone
+            textViewDetailScreenHeaderNavBack.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
+            }
+
         }
 
     }
