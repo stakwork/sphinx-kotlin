@@ -5,7 +5,7 @@
     android:id="@+id/layout_constraint_badges_holder"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp"
+    android:padding="@dimen/default_list_row_padding_vertical"
     android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,7 +14,7 @@
         android:padding="@dimen/default_layout_margin">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_recommended_image"
+            android:id="@+id/image_view_badge_image"
             android:layout_width="@dimen/badges_icon_row_size"
             android:layout_height="@dimen/badges_icon_row_size"
             android:scaleType="centerCrop"
@@ -31,10 +31,10 @@
             android:fontFamily="@font/roboto_bold"
             android:maxLines="1"
             android:textColor="@color/text"
-            android:textSize="16sp"
+            android:textSize="@dimen/default_text_size_tab"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
-            app:layout_constraintTop_toTopOf="@+id/image_view_recommended_image"
+            app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
+            app:layout_constraintTop_toTopOf="@+id/image_view_badge_image"
             tools:text="Badge Name" />
 
         <TextView
@@ -48,7 +48,7 @@
             android:maxLines="2"
             android:textColor="@color/secondaryTextInverted"
             android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
             app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_title"
             tools:text="Post 1000 non-consecutive\n messages in the tribe" />
 

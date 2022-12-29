@@ -27,7 +27,7 @@
             app:layout_constraintTop_toBottomOf="@+id/include_tribe_detail_header">
 
             <EditText
-                android:id="@+id/edit_text_dashboard_search"
+                android:id="@+id/edit_text_badges_name"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:background="@null"
@@ -48,7 +48,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_recommended_image"
+            android:id="@+id/image_view_badge_image"
             android:layout_width="@dimen/badges_icon_create_size"
             android:layout_height="@dimen/badges_icon_create_size"
             android:layout_marginTop="@dimen/default_double_layout_margin"
@@ -61,15 +61,15 @@
             tools:srcCompat="@drawable/ic_icon_badges_crown" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_button_add_friend"
+        android:id="@+id/layout_constraint_button_upload_edit_icon"
         android:layout_width="@dimen/badges_icon_upload_button_width"
         android:layout_height="@dimen/badges_icon_upload_button_height"
         android:layout_marginTop="@dimen/player_time_labels_horizontal_margin"
         android:background="@drawable/button_badges_background"
         android:paddingHorizontal="@dimen/default_inner_spacing_list_item_title"
-        app:layout_constraintEnd_toEndOf="@+id/image_view_recommended_image"
-        app:layout_constraintStart_toStartOf="@+id/image_view_recommended_image"
-        app:layout_constraintTop_toBottomOf="@+id/image_view_recommended_image">
+        app:layout_constraintEnd_toEndOf="@+id/image_view_badge_image"
+        app:layout_constraintStart_toStartOf="@+id/image_view_badge_image"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_badge_image">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_upload_image"
@@ -100,7 +100,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <TextView
-        android:id="@+id/text_view_recommended_descriptioan"
+        android:id="@+id/text_view_badges_dimen_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_medium_layout_margin"
@@ -113,7 +113,7 @@
         android:textSize="@dimen/default_text_size_list_row_headline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_button_add_friend" />
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_button_upload_edit_icon" />
 
     <View
         android:id="@+id/divider_bottom"
@@ -124,10 +124,10 @@
         android:background="@color/blackSemiTransparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_descriptioan" />
+        app:layout_constraintTop_toBottomOf="@+id/text_view_badges_dimen_description" />
 
     <TextView
-        android:id="@+id/text_view_recommended_descriptiaoan"
+        android:id="@+id/text_view_badges_requirement"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/default_medium_layout_margin"
@@ -143,7 +143,7 @@
         app:layout_constraintTop_toBottomOf="@+id/divider_bottom" />
 
     <TextView
-        android:id="@+id/text_view_recommended_description"
+        android:id="@+id/text_view_barges_requirement_description"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_double_layout_margin"
@@ -154,7 +154,7 @@
         android:textColor="@color/primaryText"
         android:textSize="@dimen/default_text_size_list_row_headline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_descriptiaoan"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_badges_requirement"
         tools:text="Post 1000 non-consecutive messages\nin the tribe" />
 
     <View
@@ -166,7 +166,7 @@
         android:background="@color/blackSemiTransparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description" />
+        app:layout_constraintTop_toBottomOf="@+id/text_view_barges_requirement_description" />
 
     <TextView
         android:id="@+id/text_view_quantity"
@@ -185,7 +185,7 @@
         app:layout_constraintTop_toBottomOf="@+id/divider_bottom2" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_quantity"
+        android:id="@+id/layout_constraint_badges_quantity"
         android:layout_width="160dp"
         android:layout_height="40dp"
         android:layout_marginTop="@dimen/player_time_labels_horizontal_margin"
@@ -196,7 +196,7 @@
         app:layout_constraintTop_toBottomOf="@+id/divider_bottom2">
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/image_view_upload_image1"
+            android:id="@+id/button_badges_quantity_minus"
             android:layout_width="@dimen/chat_footer_button_xy"
             android:layout_height="@dimen/chat_footer_button_xy"
             android:scaleType="centerCrop"
@@ -217,13 +217,13 @@
             android:textColor="@color/primaryText"
             android:textSize="@dimen/add_buttons_text_size"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_upload_image2"
-            app:layout_constraintStart_toEndOf="@+id/image_view_upload_image1"
+            app:layout_constraintEnd_toStartOf="@+id/button_badges_quantity_plus"
+            app:layout_constraintStart_toEndOf="@+id/button_badges_quantity_minus"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="0" />
 
         <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/image_view_upload_image2"
+            android:id="@+id/button_badges_quantity_plus"
             android:layout_width="@dimen/chat_footer_button_xy"
             android:layout_height="@dimen/chat_footer_button_xy"
             android:background="@drawable/button_badges_quantity_background"
@@ -286,7 +286,7 @@
         app:layout_constraintTop_toBottomOf="@+id/text_view_price_per_badge" />
 
     <TextView
-        android:id="@+id/text_view_total_sats_amout"
+        android:id="@+id/text_view_total_sats_amount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_small_layout_margin"
@@ -316,7 +316,7 @@
         tools:text="sats" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_button_add_frienad"
+        android:id="@+id/layout_constraint_button_create_badge"
         android:layout_width="match_parent"
         android:layout_height="@dimen/add_buttons_height"
         android:layout_margin="24dp"
@@ -328,7 +328,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/add_icon"
+            android:id="@+id/text_view_button_create_badge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"

@@ -89,6 +89,7 @@
     <dimen name="badges_icon_upload_button_height">40dp</dimen>
     <dimen name="badges_icon_upload_button_width">140dp</dimen>
     <dimen name="badges_text_create_button_size">18sp</dimen>
+    <dimen name="badges_row_button_size">45dp</dimen>
 
 
     <!-- Menu option input lock -->
