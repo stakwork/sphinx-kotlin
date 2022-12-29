@@ -85,6 +85,10 @@
     <dimen name="badges_select_medium_text_view_size">20sp</dimen>
     <dimen name="badges_select_light_text_view_size">19sp</dimen>
     <dimen name="badges_icon_row_size">32dp</dimen>
+    <dimen name="badges_icon_create_size">128dp</dimen>
+    <dimen name="badges_icon_upload_button_height">40dp</dimen>
+    <dimen name="badges_icon_upload_button_width">140dp</dimen>
+    <dimen name="badges_text_create_button_size">18sp</dimen>
 
 
     <!-- Menu option input lock -->

@@ -131,6 +131,16 @@
 
     <string name="select_badges">Select and customize</string>
     <string name="your_badges">your tribe badges</string>
+    <string name="badges_title_hint" translatable="false">Badge Title</string>
+    <string name="badges_upload_icon" translatable="false">Upload Icon</string>
+    <string name="badges_requirement" translatable="false">Requirement</string>
+    <string name="badges_quantity" translatable="false">Quantity</string>
+    <string name="badges_price_per_badge" translatable="false">Price per badge</string>
+    <string name="badges_price_total" translatable="false">Total</string>
+    <string name="badges_create_badge" translatable="false">Create Badge</string>
+    <string name="badges_quantity_button_minus" translatable="false">-</string>
+    <string name="badges_quantity_button_plus" translatable="false">+</string>
+    <string name="badges_icon_dimen_text" translatable="false">PNG, GIF or SVG, Min. Size 512 x512 px</string>
 
 
     <string name="balance_too_low">Balance too low</string>
