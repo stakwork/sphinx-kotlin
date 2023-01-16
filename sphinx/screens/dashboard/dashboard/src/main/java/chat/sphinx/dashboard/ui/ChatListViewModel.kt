@@ -51,6 +51,9 @@ internal suspend inline fun ChatListViewModel.updateChatListFilter(filter: ChatF
 internal inline val ChatListFragmentArgs.isChatListTypeConversation: Boolean
     get() = argChatListType == ChatType.CONVERSATION
 
+internal inline val ChatListFragmentArgs.isChatListTypeTribe: Boolean
+    get() = argChatListType == ChatType.TRIBE
+
 @HiltViewModel
 internal class ChatListViewModel @Inject constructor(
     private val app: Application,
@@ -80,6 +83,8 @@ internal class ChatListViewModel @Inject constructor(
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)
     }
+
+    val chatListType = args.argChatListType
 
     private val _accountOwnerStateFlow: MutableStateFlow<Contact?> by lazy {
         MutableStateFlow(null)

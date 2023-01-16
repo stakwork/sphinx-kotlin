@@ -32,6 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -146,6 +147,10 @@ internal class ChatListFragment : SideEffectFragment<
                         }
                     )
                 }
+            }
+
+            if (viewModel.chatListType == ChatType.TRIBE) {
+                includeLayoutButtonAddTribe.root.visible
             }
 
             editTextDashboardSearch.setOnEditorActionListener(object: TextView.OnEditorActionListener {
