@@ -319,3 +319,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 include ':sphinx:application:network:concepts:queries:concept-network-query-action-track'
 include ':sphinx:application:network:features:queries:feature-network-query-action-track'
 include ':sphinx:screens-detail:common-player'
+include ':sphinx:screens-detail:discover-tribes'

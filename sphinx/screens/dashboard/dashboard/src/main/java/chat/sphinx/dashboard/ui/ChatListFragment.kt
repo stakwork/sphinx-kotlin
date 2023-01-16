@@ -151,6 +151,11 @@ internal class ChatListFragment : SideEffectFragment<
 
             if (viewModel.chatListType == ChatType.TRIBE) {
                 includeLayoutButtonAddTribe.root.visible
+                includeLayoutButtonAddTribe.root.setOnClickListener {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.navDrawerNavigator.toDiscoverTribesScreen()
+                    }
+                }
             }
 
             editTextDashboardSearch.setOnEditorActionListener(object: TextView.OnEditorActionListener {

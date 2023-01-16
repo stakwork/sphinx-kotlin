@@ -7,6 +7,7 @@ import chat.sphinx.add_sats.navigation.ToAddSatsScreen
 import chat.sphinx.address_book.navigation.ToAddressBookScreen
 import chat.sphinx.create_tribe.navigation.ToCreateTribeDetail
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
+import chat.sphinx.discover_tribes.navigation.ToDiscoverTribesScreen
 import chat.sphinx.profile.navigation.ToProfileScreen
 import chat.sphinx.support_ticket.navigation.ToSupportTicketDetail
 import javax.inject.Inject
@@ -35,6 +36,10 @@ internal class DashboardNavDrawerNavigatorImpl @Inject constructor(
 
     override suspend fun toCreateTribeDetail() {
         detailDriver.submitNavigationRequest(ToCreateTribeDetail())
+    }
+
+    override suspend fun toDiscoverTribesScreen() {
+        detailDriver.submitNavigationRequest(ToDiscoverTribesScreen())
     }
 
     override suspend fun toSupportTicketDetail() {
