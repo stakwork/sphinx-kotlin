@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_button_add_tribe"
+    android:id="@+id/layout_constraint_button_tags"
     android:layout_width="wrap_content"
     android:layout_height="@dimen/add_buttons_height"
     android:background="@drawable/button_background_white_rad_48"
