@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_button_add_tribe"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/add_buttons_height"
+    android:background="@drawable/button_background_white_rad_48"
+    android:backgroundTint="@color/addressBookHeader"
+    android:paddingHorizontal="10dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/tag_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_tags"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tag_number"
+        android:layout_width="@dimen/tag_button_size"
+        android:layout_height="@dimen/tag_button_size"
+        android:background="@drawable/background_tags_number"
+        android:fontFamily="@font/roboto_bold"
+        android:gravity="center"
+        android:padding="4dp"
+        android:textColor="@color/primaryText"
+        android:textSize="14sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="3" />
+
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="9dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="@font/roboto_regular"
+        android:paddingRight="8dp"
+        android:paddingBottom="2dp"
+        android:text="@string/discover_tags"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/default_text_size_small_headline"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/tag_icon"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

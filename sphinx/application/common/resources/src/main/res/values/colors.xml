@@ -11,6 +11,8 @@
     <color name="listBG">#141E27</color>
     <color name="lightBG">#1A242E</color>
     <color name="profileBG">#1A242E</color>
+    <color name="inputBG1">#13181D</color>
+
 
     <color name="mainBottomIcons">#909BAA</color>
     <color name="chatListSelected">#151E27</color>

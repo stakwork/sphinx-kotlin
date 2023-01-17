@@ -13,7 +13,10 @@ class ToDiscoverTribesScreen(
         controller.navigate(
             R.id.discover_tribes_nav_graph,
             null,
-            options
+            DetailNavOptions.default
+                .setEnterAnim(io.matthewnelson.android_feature_navigation.R.anim.slide_in_left)
+                .setPopExitAnim(io.matthewnelson.android_feature_navigation.R.anim.slide_out_right)
+                .build()
         )
     }
 }

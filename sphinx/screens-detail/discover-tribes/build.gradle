@@ -44,6 +44,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-media-cache')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+    implementation project(path: ':sphinx:screens:dashboard:dashboard')
 
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
 
