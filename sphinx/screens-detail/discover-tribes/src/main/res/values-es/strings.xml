@@ -4,4 +4,6 @@
     <string name="discover_tribes_join">Unirse</string>
     <string name="discover_tribes_open">Abrir</string>
     <string name="discover_tribes_loading">Cargando ...</string>
+    <string name="discover_tribes_apply">Aplicar</string>
+
 </resources>

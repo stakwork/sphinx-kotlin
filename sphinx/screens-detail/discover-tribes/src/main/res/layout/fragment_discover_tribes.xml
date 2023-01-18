@@ -36,7 +36,7 @@
 
         <include
             android:id="@+id/layout_button_tag"
-            layout="@layout/layout_button_tags"
+            layout="@layout/layout_button_tags_popup"
             android:layout_width="100dp"
             android:layout_height="40dp"
             android:layout_marginTop="8dp"
