@@ -97,5 +97,12 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <include
+        android:id="@+id/include_layout_discover_tribes_tags"
+        layout="@layout/layout_discover_tribes_tags"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
