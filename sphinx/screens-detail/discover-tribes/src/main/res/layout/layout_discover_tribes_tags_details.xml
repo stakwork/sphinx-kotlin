@@ -38,13 +38,13 @@
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/tag_icon"
             android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_height="0dp"
             android:layout_marginEnd="12dp"
             android:src="@drawable/ic_tags"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/appCompatTextView"
             app:layout_constraintEnd_toStartOf="@+id/appCompatTextView"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.52" />
+            app:layout_constraintTop_toTopOf="@+id/appCompatTextView"
+            app:layout_constraintVertical_bias="0.727" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/appCompatTextView"
@@ -55,7 +55,7 @@
             android:paddingBottom="2dp"
             android:text="@string/discover_tags"
             android:textColor="@color/primaryText"
-            android:textSize="19sp"
+            android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -76,7 +76,7 @@
         <include
             android:id="@+id/include_tag_0"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             app:layout_constraintEnd_toStartOf="@+id/include_tag_1"
             app:layout_constraintHorizontal_bias="0.5"
@@ -86,7 +86,7 @@
         <include
             android:id="@+id/include_tag_1"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginStart="10dp"
             app:layout_constraintEnd_toStartOf="@+id/include_tag_2"
@@ -97,7 +97,7 @@
         <include
             android:id="@+id/include_tag_2"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginStart="10dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -108,7 +108,7 @@
         <include
             android:id="@+id/include_tag_3"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toStartOf="@+id/include_tag_4"
@@ -119,7 +119,7 @@
         <include
             android:id="@+id/include_tag_4"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginStart="10dp"
             app:layout_constraintBottom_toTopOf="@+id/include_tag_7"
@@ -131,7 +131,7 @@
         <include
             android:id="@+id/include_tag_5"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginStart="10dp"
             app:layout_constraintBottom_toTopOf="@+id/include_tag_8"
@@ -143,7 +143,7 @@
         <include
             android:id="@+id/include_tag_6"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toStartOf="@+id/include_tag_7"
@@ -154,7 +154,7 @@
         <include
             android:id="@+id/include_tag_7"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginStart="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -165,7 +165,7 @@
         <include
             android:id="@+id/include_tag_8"
             layout="@layout/layout_button_tag"
-            android:layout_width="@dimen/discover_tribe_tag_button_width"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/discover_tribe_tag_button_height"
             android:layout_marginStart="10dp"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -3,19 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_button_tag"
-    android:layout_width="@dimen/discover_tribe_tag_button_width"
+    android:layout_width="wrap_content"
     android:layout_height="@dimen/discover_tribe_tag_button_height"
-    android:background="@drawable/background_tag_rad"
+    android:background="@drawable/background_tag_transparent_rad"
     android:paddingHorizontal="10dp">
 
 
     <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tag_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginEnd="10dp"
         android:fontFamily="@font/roboto_regular"
         android:textColor="@color/primaryText"
+        android:maxLines="1"
         android:textSize="@dimen/default_text_size_small_headline"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
