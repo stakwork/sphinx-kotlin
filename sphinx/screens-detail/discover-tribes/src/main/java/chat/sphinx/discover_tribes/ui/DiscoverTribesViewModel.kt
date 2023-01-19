@@ -1,5 +1,6 @@
 package chat.sphinx.discover_tribes.ui
 
+import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -9,6 +10,7 @@ import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_feed.Feed
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.*
@@ -16,10 +18,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class DiscoverTribesViewModel @Inject constructor(dispatchers: CoroutineDispatchers,
+class DiscoverTribesViewModel @Inject constructor(
+    dispatchers: CoroutineDispatchers,
     val navigator: DiscoverTribesNavigator,
-    private val chatRepository: ChatRepository,
-    ): BaseViewModel<DiscoverTribesViewState>(dispatchers, DiscoverTribesViewState.Idle)
+    private val chatRepository: ChatRepository
+    ): SideEffectViewModel<
+        Context,
+        DiscoverTribesSideEffect,
+        DiscoverTribesViewState,
+        >(dispatchers, DiscoverTribesViewState.Idle)
 {
     val discoverTribesTagsViewStateContainer: ViewStateContainer<DiscoverTribesTagsViewState> by lazy {
         ViewStateContainer(DiscoverTribesTagsViewState.Closed)

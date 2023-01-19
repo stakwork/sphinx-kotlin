@@ -1,5 +1,6 @@
 package chat.sphinx.discover_tribes.ui
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
@@ -21,6 +22,7 @@ import chat.sphinx.resources.getRandomColor
 import chat.sphinx.resources.setBackgroundRandomColor
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
@@ -30,7 +32,9 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-internal class DiscoverTribesFragment: BaseFragment<
+internal class DiscoverTribesFragment: SideEffectFragment<
+        Context,
+        DiscoverTribesSideEffect,
         DiscoverTribesViewState,
         DiscoverTribesViewModel,
         FragmentDiscoverTribesBinding
@@ -240,6 +244,9 @@ internal class DiscoverTribesFragment: BaseFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
+    }
+
+    override suspend fun onSideEffectCollect(sideEffect: DiscoverTribesSideEffect) {
     }
 
 }
