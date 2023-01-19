@@ -4,24 +4,23 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import app.cash.exhaustive.Exhaustive
+import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.discover_tribes.R
+import chat.sphinx.discover_tribes.adapter.DiscoverTribesAdapter
 import chat.sphinx.discover_tribes.databinding.FragmentDiscoverTribesBinding
 import chat.sphinx.discover_tribes.databinding.LayoutDiscoverTribesTagsBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addKeyboardPadding
-import chat.sphinx.resources.getRandomColor
-import chat.sphinx.resources.setBackgroundRandomColor
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.invisible
@@ -30,6 +29,7 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class DiscoverTribesFragment: SideEffectFragment<
@@ -39,6 +39,10 @@ internal class DiscoverTribesFragment: SideEffectFragment<
         DiscoverTribesViewModel,
         FragmentDiscoverTribesBinding
         >(R.layout.fragment_discover_tribes) {
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
 
     override val viewModel: DiscoverTribesViewModel by viewModels()
     override val binding: FragmentDiscoverTribesBinding by viewBinding(FragmentDiscoverTribesBinding::bind)
@@ -50,7 +54,7 @@ internal class DiscoverTribesFragment: SideEffectFragment<
         super.onViewCreated(view, savedInstanceState)
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
-        getAllDiscoverTribes()
+        setupDiscoverTribesAdapter()
 
         binding.includeDiscoverTribesHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.discover_tribes_header_name)
@@ -194,6 +198,25 @@ internal class DiscoverTribesFragment: SideEffectFragment<
         }
     }
 
+    private fun setupDiscoverTribesAdapter() {
+        val linearLayoutManager = LinearLayoutManager(context)
+
+        binding.recyclerViewList.apply {
+            val discoverTribesAdapter = DiscoverTribesAdapter(
+                this,
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel
+            )
+
+            this.setHasFixedSize(false)
+            layoutManager = linearLayoutManager
+            adapter = discoverTribesAdapter
+            itemAnimator = null
+        }
+    }
+
     override fun onStart() {
         super.onStart()
     }
@@ -229,15 +252,6 @@ internal class DiscoverTribesFragment: SideEffectFragment<
         override fun handleOnBackPressed() {
             if (viewModel.discoverTribesTagsViewStateContainer.value is DiscoverTribesTagsViewState.Open) {
                 viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Closed)
-            }
-        }
-    }
-
-    // Forma de collectar en el el da
-    private fun getAllDiscoverTribes() {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.discoverTribesTagsStateFlow.collect { lista ->
-                println("pimba ${lista}")
             }
         }
     }

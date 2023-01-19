@@ -47,6 +47,7 @@ dependencies {
     implementation project(path: ':sphinx:screens:dashboard:dashboard')
 
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:screens-detail:join-tribe:join-tribe')
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

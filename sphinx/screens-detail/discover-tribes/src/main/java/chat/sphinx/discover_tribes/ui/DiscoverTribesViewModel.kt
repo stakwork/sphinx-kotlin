@@ -72,7 +72,7 @@ class DiscoverTribesViewModel @Inject constructor(
 //            }
 //        }
 //    }
-    val discoverTribesTagsStateFlow: StateFlow<List<TribeDto>> = flow {
+    val discoverTribesStateFlow: StateFlow<List<TribeDto>> = flow {
         chatRepository.getAllDiscoverTribes().collect { discoverTribes ->
             emit(discoverTribes)
         }

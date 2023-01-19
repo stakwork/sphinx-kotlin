@@ -12,20 +12,28 @@
         android:layout_height="match_parent"
         android:padding="@dimen/default_layout_margin">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_recommended_image"
-            android:layout_width="@dimen/discover_tribe_image_size"
-            android:layout_height="@dimen/discover_tribe_image_size"
-            android:layout_marginBottom="4dp"
-            android:background="@drawable/background_image_holder_corner"
-            android:scaleType="centerCrop"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/image_view_tribe_cardview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_small_layout_margin"
+            app:cardCornerRadius="@dimen/default_radius"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@drawable/ic_podcast_placeholder" />
+            app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_tribe_image"
+            android:layout_width="@dimen/discover_tribe_image_size"
+            android:layout_height="@dimen/discover_tribe_image_size"
+            android:scaleType="centerCrop"
+            android:background="@color/addressBookHeader"
+            tools:srcCompat="@drawable/ic_tribe_placeholder"/>
+
+        </androidx.cardview.widget.CardView>
 
         <TextView
-            android:id="@+id/text_view_recommended_title"
+            android:id="@+id/text_view_tribe_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -34,13 +42,13 @@
             android:maxLines="3"
             android:textColor="@color/text"
             android:textSize="17sp"
-            app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            app:layout_constraintStart_toEndOf="@id/image_view_tribe_cardview"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/image_view_recommended_image"
+            app:layout_constraintTop_toTopOf="@+id/image_view_tribe_cardview"
             tools:text="Show title" />
 
         <TextView
-            android:id="@+id/text_view_recommended_description"
+            android:id="@+id/text_view_tribe_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -50,19 +58,21 @@
             android:maxLines="1"
             android:textColor="@color/secondaryText"
             android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            app:layout_constraintStart_toEndOf="@id/image_view_tribe_cardview"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_title"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_title"
             tools:text="Who Will Build the Roads?" />
 
         <include
-            android:id="@+id/layout_button_tag"
+            android:id="@+id/layout_button_join"
             layout="@layout/layout_button_join"
             android:layout_width="82dp"
             android:layout_height="32dp"
             android:layout_marginStart="16dp"
-            app:layout_constraintBottom_toBottomOf="@+id/image_view_recommended_image"
-            app:layout_constraintStart_toEndOf="@+id/image_view_recommended_image" />
+            app:layout_constraintBottom_toBottomOf="@+id/image_view_tribe_cardview"
+            app:layout_constraintStart_toEndOf="@+id/image_view_tribe_cardview"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_description"
+            app:layout_constraintVertical_bias="1.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
