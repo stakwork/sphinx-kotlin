@@ -320,3 +320,5 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-acti
 include ':sphinx:application:network:features:queries:feature-network-query-action-track'
 include ':sphinx:screens-detail:common-player'
 include ':sphinx:screens-detail:discover-tribes'
+include ':sphinx:application:network:concepts:queries:concept-network-query-discover-tribes'
+include ':sphinx:application:network:features:queries:feature-network-query-discover-tribes'
