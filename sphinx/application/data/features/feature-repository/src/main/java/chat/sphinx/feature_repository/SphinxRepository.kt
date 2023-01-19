@@ -3725,6 +3725,19 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
+    override fun getAllDiscoverTribes(): Flow<List<TribeDto>> = flow {
+        networkQueryDiscoverTribes.getAllDiscoverTribes().collect { response ->
+            @Exhaustive
+            when(response) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+                    emit(response.value)
+                }
+            }
+        }
+    }
+
     override suspend fun updateTribeInfo(chat: Chat): TribeData? {
         var owner: Contact? = accountOwner.value
 

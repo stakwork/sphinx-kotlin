@@ -45,6 +45,7 @@ internal class DiscoverTribesFragment: BaseFragment<
         super.onViewCreated(view, savedInstanceState)
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
+        getAllDiscoverTribes()
 
         binding.includeDiscoverTribesHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.discover_tribes_header_name)
@@ -179,7 +180,6 @@ internal class DiscoverTribesFragment: BaseFragment<
             }
         }
 
-
         discoverTribesTagsBinding.apply {
             (requireActivity() as InsetterActivity).addKeyboardPadding(root)
         }
@@ -225,6 +225,12 @@ internal class DiscoverTribesFragment: BaseFragment<
             if (viewModel.discoverTribesTagsViewStateContainer.value is DiscoverTribesTagsViewState.Open) {
                 viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Closed)
             }
+        }
+    }
+
+    private fun getAllDiscoverTribes() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.getAllDiscoverTribes()
         }
     }
 

@@ -15,7 +15,9 @@ import chat.sphinx.wrapper_chat.TribeData
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
+import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
@@ -61,6 +63,8 @@ interface ChatRepository {
     fun joinTribe(
         tribeDto: TribeDto,
     ): Flow<LoadResponse<ChatDto, ResponseError>>
+
+    fun getAllDiscoverTribes(): Flow<List<TribeDto>>
 
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>

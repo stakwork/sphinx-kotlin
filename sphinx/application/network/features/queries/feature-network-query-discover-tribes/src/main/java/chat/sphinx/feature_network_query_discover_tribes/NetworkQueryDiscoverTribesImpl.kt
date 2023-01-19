@@ -18,7 +18,7 @@ class NetworkQueryDiscoverTribesImpl(
 
     }
 
-    override fun getAllTribes(): Flow<LoadResponse<List<TribeDto>, ResponseError>> =
+    override fun getAllDiscoverTribes(): Flow<LoadResponse<List<TribeDto>, ResponseError>> =
         networkRelayCall.getList(
             url = ENDPOINT_ALL_TRIBES,
             responseJsonClass = TribeDto::class.java
