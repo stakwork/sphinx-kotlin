@@ -26,6 +26,7 @@ import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -228,9 +229,12 @@ internal class DiscoverTribesFragment: BaseFragment<
         }
     }
 
+    // Forma de collectar en el el da
     private fun getAllDiscoverTribes() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.getAllDiscoverTribes()
+            viewModel.discoverTribesTagsStateFlow.collect { lista ->
+                println("pimba ${lista}")
+            }
         }
     }
 

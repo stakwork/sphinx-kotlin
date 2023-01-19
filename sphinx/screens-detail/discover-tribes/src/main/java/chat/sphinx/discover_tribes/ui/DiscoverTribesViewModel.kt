@@ -1,23 +1,22 @@
 package chat.sphinx.discover_tribes.ui
 
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.discover_tribes.model.DiscoverTribesTag
 import chat.sphinx.discover_tribes.navigation.DiscoverTribesNavigator
+import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_feed.Feed
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class DiscoverTribesViewModel @Inject constructor(
-    dispatchers: CoroutineDispatchers,
+internal class DiscoverTribesViewModel @Inject constructor(dispatchers: CoroutineDispatchers,
     val navigator: DiscoverTribesNavigator,
     private val chatRepository: ChatRepository,
     ): BaseViewModel<DiscoverTribesViewState>(dispatchers, DiscoverTribesViewState.Idle)
@@ -60,10 +59,19 @@ internal class DiscoverTribesViewModel @Inject constructor(
         _tribeSelectedTagsList.value = tribeTagsStateFlow.value.filter { it.isSelected }.map { it.name }
     }
 
-    suspend fun getAllDiscoverTribes() {
-        viewModelScope.launch(mainImmediate) {
-            chatRepository.getAllDiscoverTribes().collect { discoverTribes ->
-            }
+//    suspend fun getAllDiscoverTribes() {
+//        viewModelScope.launch(mainImmediate) {
+//            chatRepository.getAllDiscoverTribes().collect { discoverTribes ->
+//            }
+//        }
+//    }
+    val discoverTribesTagsStateFlow: StateFlow<List<TribeDto>> = flow {
+        chatRepository.getAllDiscoverTribes().collect { discoverTribes ->
+            emit(discoverTribes)
         }
-    }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5_000),
+        emptyList()
+    )
 }
