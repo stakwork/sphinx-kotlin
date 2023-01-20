@@ -64,7 +64,11 @@ interface ChatRepository {
         tribeDto: TribeDto,
     ): Flow<LoadResponse<ChatDto, ResponseError>>
 
-    fun getAllDiscoverTribes(): Flow<List<TribeDto>>
+    fun getAllDiscoverTribes(
+        page: Int,
+        searchTerm: String? = null,
+        tags: String? = null
+    ): Flow<List<TribeDto>>
 
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>

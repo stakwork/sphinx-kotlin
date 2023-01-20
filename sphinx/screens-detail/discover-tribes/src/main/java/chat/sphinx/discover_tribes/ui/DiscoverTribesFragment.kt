@@ -62,6 +62,7 @@ internal class DiscoverTribesFragment: SideEffectFragment<
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
         setupDiscoverTribesAdapter()
+        viewModel.getDiscoverTribesList()
 
         binding.includeDiscoverTribesHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.discover_tribes_header_name)
@@ -75,9 +76,6 @@ internal class DiscoverTribesFragment: SideEffectFragment<
         }
         binding.includeLayoutDiscoverTribesLoading.viewDiscoverTribesLock.setOnClickListener {
             viewModel.discoverTribesLoadingViewStateContainer.updateViewState(DiscoverTribesLoadingViewState.Closed)
-        }
-        binding.includeLayoutDiscoverTribesTags.viewDiscoverTribesLock.setOnClickListener {
-            viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Closed)
         }
 
         fun updateTagsNumber() {
@@ -197,9 +195,13 @@ internal class DiscoverTribesFragment: SideEffectFragment<
             }
 
             buttonApplyTags.setOnClickListener {
+                viewModel.page = 1
+                updateTagsNumber()
+                viewModel.cleanDiscoverTribesList()
+                viewModel.getDiscoverTribesList()
                 viewModel.discoverTribesTagsViewStateContainer.updateViewState(
                     DiscoverTribesTagsViewState.Closed)
-                updateTagsNumber()
+
             }
         }
 
@@ -234,17 +236,19 @@ internal class DiscoverTribesFragment: SideEffectFragment<
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
 
-                    if(!recyclerView.canScrollVertically(1)){
+                    if(!recyclerView.canScrollVertically(1)
+                        && newState == RecyclerView.SCROLL_STATE_IDLE) {
+
                         viewModel.discoverTribesLoadingViewStateContainer.updateViewState(
                             DiscoverTribesLoadingViewState.Open
                         )
-//                        binding.loadingProgressBar.visible
+                        viewModel.page += 1
+                        viewModel.getDiscoverTribesList()
                     }
                 }
-                }
+            }
             )
         }
-
     }
 
     override fun onStart() {

@@ -125,8 +125,7 @@ class DiscoverTribesAdapter(
     }
 
     override fun getItemCount(): Int {
-        return 15
-//        tribeItems.size
+        return tribeItems.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DiscoverTribesAdapter.DiscoverTribeViewHolder {

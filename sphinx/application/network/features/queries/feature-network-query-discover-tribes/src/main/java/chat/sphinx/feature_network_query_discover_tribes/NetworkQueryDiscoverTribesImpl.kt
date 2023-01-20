@@ -14,13 +14,33 @@ class NetworkQueryDiscoverTribesImpl(
     companion object {
         private const val TRIBES_DEFAULT_SERVER_URL = "https://tribes.sphinx.chat"
 
-        private const val ENDPOINT_ALL_TRIBES = "$TRIBES_DEFAULT_SERVER_URL/tribes"
-
+        private const val ENDPOINT_OFFSET_TRIBES = "/tribes?limit=50&page=%s"
+        private const val ENDPOINT_SEARCH_TRIBES = "&search=%s"
+        private const val ENDPOINT_TAGS_TRIBES = "&tags=%s"
     }
 
-    override fun getAllDiscoverTribes(): Flow<LoadResponse<List<TribeDto>, ResponseError>> =
-        networkRelayCall.getList(
-            url = ENDPOINT_ALL_TRIBES,
+    override fun getAllDiscoverTribes(
+        page: Int,
+        searchTerm: String?,
+        tags: String?
+    ): Flow<LoadResponse<List<TribeDto>, ResponseError>> {
+        var url = TRIBES_DEFAULT_SERVER_URL + String.format(ENDPOINT_OFFSET_TRIBES, page.toString())
+
+        searchTerm?.let {
+            if (it.isNotEmpty()){
+                url += String.format(ENDPOINT_SEARCH_TRIBES, it)
+            }
+        }
+
+        tags?.let {
+            if (it.isNotEmpty()) {
+                url += String.format(ENDPOINT_TAGS_TRIBES, it)
+            }
+        }
+
+        return networkRelayCall.getList(
+            url = url,
             responseJsonClass = TribeDto::class.java
         )
+    }
 }

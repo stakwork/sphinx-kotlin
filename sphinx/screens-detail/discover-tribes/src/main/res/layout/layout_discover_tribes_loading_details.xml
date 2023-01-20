@@ -18,7 +18,7 @@
         <ProgressBar
             android:id="@+id/loading_progress_bar"
             style="?android:attr/progressBarStyle"
-            android:layout_width="@dimen/default_header_margin_horizontal"
+            android:layout_width="@dimen/default_invite_qr_image_xy"
             android:layout_height="0dp"
             android:layout_marginEnd="16dp"
             android:fontFamily="@font/material_icons_regular"
@@ -36,7 +36,7 @@
             android:gravity="center"
             android:text="@string/discover_tribes_loading"
             android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_header_text_size"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

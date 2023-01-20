@@ -12,5 +12,8 @@ abstract class NetworkQueryDiscoverTribes {
     /// GET ///
     ///////////
     abstract fun getAllDiscoverTribes(
+        page: Int,
+        searchTerm: String?,
+        tags: String?
     ): Flow<LoadResponse<List<TribeDto>, ResponseError>>
 }

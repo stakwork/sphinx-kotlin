@@ -13,7 +13,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -34,6 +36,8 @@ class DiscoverTribesViewModel @Inject constructor(
     val discoverTribesLoadingViewStateContainer: ViewStateContainer<DiscoverTribesLoadingViewState> by lazy {
         ViewStateContainer(DiscoverTribesLoadingViewState.Closed)
     }
+
+    var page = 1
 
     private val _tribeTagsStateFlow: MutableStateFlow<Array<DiscoverTribesTag>> by lazy {
         MutableStateFlow(
@@ -69,19 +73,40 @@ class DiscoverTribesViewModel @Inject constructor(
         _tribeSelectedTagsList.value = tribeTagsStateFlow.value.filter { it.isSelected }.map { it.name }
     }
 
-//    suspend fun getAllDiscoverTribes() {
-//        viewModelScope.launch(mainImmediate) {
-//            chatRepository.getAllDiscoverTribes().collect { discoverTribes ->
-//            }
-//        }
-//    }
-    val discoverTribesStateFlow: StateFlow<List<TribeDto>> = flow {
-        chatRepository.getAllDiscoverTribes().collect { discoverTribes ->
-            emit(discoverTribes)
+    private val _discoverTribeStateFlow: MutableStateFlow<List<TribeDto>> by lazy {
+        MutableStateFlow(listOf())
+    }
+
+    val discoverTribesStateFlow: StateFlow<List<TribeDto>>
+        get() = _discoverTribeStateFlow.asStateFlow()
+
+
+    private var discoverTribeJob: Job? = null
+    fun getDiscoverTribesList() {
+        if (discoverTribeJob?.isActive == true) {
+            return
         }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
-    )
+
+        discoverTribeJob = viewModelScope.launch(mainImmediate) {
+
+            val tags: String? = tribeSelectedTagsList.value?.toString()?.replace(
+                "[", "")?.
+            replace("]", "")?.replace("\\s".toRegex(), "")
+
+            chatRepository.getAllDiscoverTribes(
+                page,
+                null,
+                tags
+            ).collect { discoverTribes ->
+                _discoverTribeStateFlow.value = _discoverTribeStateFlow.value + discoverTribes
+                discoverTribesLoadingViewStateContainer.updateViewState(
+                    DiscoverTribesLoadingViewState.Closed
+                )
+            }
+        }
+    }
+
+    fun cleanDiscoverTribesList(){
+        _discoverTribeStateFlow.value = listOf()
+    }
 }
