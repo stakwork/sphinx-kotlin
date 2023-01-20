@@ -1,4 +1,4 @@
-package chat.sphinx.discover_tribes.ui
+package chat.sphinx.discover_tribes.viewstate
 
 import androidx.constraintlayout.motion.widget.MotionLayout
 import chat.sphinx.discover_tribes.R

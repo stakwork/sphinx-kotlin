@@ -125,7 +125,8 @@ class DiscoverTribesAdapter(
     }
 
     override fun getItemCount(): Int {
-        return tribeItems.size
+        return 15
+//        tribeItems.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DiscoverTribesAdapter.DiscoverTribeViewHolder {
@@ -144,7 +145,7 @@ class DiscoverTribesAdapter(
 
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_video_placeholder)
+            .placeholderResId(R.drawable.ic_tribe)
             .build()
     }
 

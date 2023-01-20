@@ -12,12 +12,17 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.discover_tribes.R
 import chat.sphinx.discover_tribes.adapter.DiscoverTribesAdapter
 import chat.sphinx.discover_tribes.databinding.FragmentDiscoverTribesBinding
+import chat.sphinx.discover_tribes.databinding.LayoutDiscoverTribesLoadingBinding
 import chat.sphinx.discover_tribes.databinding.LayoutDiscoverTribesTagsBinding
+import chat.sphinx.discover_tribes.viewstate.DiscoverTribesLoadingViewState
+import chat.sphinx.discover_tribes.viewstate.DiscoverTribesTagsViewState
+import chat.sphinx.discover_tribes.viewstate.DiscoverTribesViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addKeyboardPadding
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,7 +32,6 @@ import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,6 +54,9 @@ internal class DiscoverTribesFragment: SideEffectFragment<
     private val discoverTribesTagsBinding: LayoutDiscoverTribesTagsBinding
         get() = binding.includeLayoutDiscoverTribesTags
 
+    private val discoverTribesLoadingBinding: LayoutDiscoverTribesLoadingBinding
+        get() = binding.includeLayoutDiscoverTribesLoading
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -65,6 +72,12 @@ internal class DiscoverTribesFragment: SideEffectFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
+        }
+        binding.includeLayoutDiscoverTribesLoading.viewDiscoverTribesLock.setOnClickListener {
+            viewModel.discoverTribesLoadingViewStateContainer.updateViewState(DiscoverTribesLoadingViewState.Closed)
+        }
+        binding.includeLayoutDiscoverTribesTags.viewDiscoverTribesLock.setOnClickListener {
+            viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Closed)
         }
 
         fun updateTagsNumber() {
@@ -184,7 +197,8 @@ internal class DiscoverTribesFragment: SideEffectFragment<
             }
 
             buttonApplyTags.setOnClickListener {
-                viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Closed)
+                viewModel.discoverTribesTagsViewStateContainer.updateViewState(
+                    DiscoverTribesTagsViewState.Closed)
                 updateTagsNumber()
             }
         }
@@ -194,7 +208,8 @@ internal class DiscoverTribesFragment: SideEffectFragment<
         }
 
         binding.layoutButtonTag.root.setOnClickListener {
-            viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Open)
+            viewModel.discoverTribesTagsViewStateContainer.updateViewState(
+                DiscoverTribesTagsViewState.Open)
         }
     }
 
@@ -214,7 +229,22 @@ internal class DiscoverTribesFragment: SideEffectFragment<
             layoutManager = linearLayoutManager
             adapter = discoverTribesAdapter
             itemAnimator = null
+
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+
+                    if(!recyclerView.canScrollVertically(1)){
+                        viewModel.discoverTribesLoadingViewStateContainer.updateViewState(
+                            DiscoverTribesLoadingViewState.Open
+                        )
+//                        binding.loadingProgressBar.visible
+                    }
+                }
+                }
+            )
         }
+
     }
 
     override fun onStart() {
@@ -231,6 +261,12 @@ internal class DiscoverTribesFragment: SideEffectFragment<
             viewModel.discoverTribesTagsViewStateContainer.collect { viewState ->
                 discoverTribesTagsBinding.root.setTransitionDuration(250)
                 viewState.transitionToEndSet(discoverTribesTagsBinding.root)
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.discoverTribesLoadingViewStateContainer.collect { viewState ->
+                discoverTribesLoadingBinding.root.setTransitionDuration(250)
+                viewState.transitionToEndSet(discoverTribesLoadingBinding.root)
             }
         }
     }
@@ -251,7 +287,8 @@ internal class DiscoverTribesFragment: SideEffectFragment<
 
         override fun handleOnBackPressed() {
             if (viewModel.discoverTribesTagsViewStateContainer.value is DiscoverTribesTagsViewState.Open) {
-                viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Closed)
+                viewModel.discoverTribesTagsViewStateContainer.updateViewState(
+                    DiscoverTribesTagsViewState.Closed)
             }
         }
     }

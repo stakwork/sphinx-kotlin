@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layoutDescription="@xml/layout_discover_tribes_loading_scene">
+
+    <View
+        android:id="@+id/view_discover_tribes_lock_"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:clickable="true" />
+
+    <include
+        android:id="@+id/include_layout_discover_tribes_loading_details"
+        layout="@layout/layout_discover_tribes_loading_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="parent" />
+
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

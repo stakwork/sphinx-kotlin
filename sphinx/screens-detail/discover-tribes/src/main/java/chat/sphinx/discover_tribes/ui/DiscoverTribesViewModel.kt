@@ -6,15 +6,14 @@ import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.discover_tribes.model.DiscoverTribesTag
 import chat.sphinx.discover_tribes.navigation.DiscoverTribesNavigator
-import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.discover_tribes.viewstate.DiscoverTribesLoadingViewState
+import chat.sphinx.discover_tribes.viewstate.DiscoverTribesTagsViewState
+import chat.sphinx.discover_tribes.viewstate.DiscoverTribesViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +29,10 @@ class DiscoverTribesViewModel @Inject constructor(
 {
     val discoverTribesTagsViewStateContainer: ViewStateContainer<DiscoverTribesTagsViewState> by lazy {
         ViewStateContainer(DiscoverTribesTagsViewState.Closed)
+    }
+
+    val discoverTribesLoadingViewStateContainer: ViewStateContainer<DiscoverTribesLoadingViewState> by lazy {
+        ViewStateContainer(DiscoverTribesLoadingViewState.Closed)
     }
 
     private val _tribeTagsStateFlow: MutableStateFlow<Array<DiscoverTribesTag>> by lazy {
