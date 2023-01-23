@@ -9,6 +9,7 @@ import chat.sphinx.discover_tribes.navigation.DiscoverTribesNavigator
 import chat.sphinx.discover_tribes.viewstate.DiscoverTribesLoadingViewState
 import chat.sphinx.discover_tribes.viewstate.DiscoverTribesTagsViewState
 import chat.sphinx.discover_tribes.viewstate.DiscoverTribesViewState
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -34,7 +35,7 @@ class DiscoverTribesViewModel @Inject constructor(
     }
 
     val discoverTribesLoadingViewStateContainer: ViewStateContainer<DiscoverTribesLoadingViewState> by lazy {
-        ViewStateContainer(DiscoverTribesLoadingViewState.Closed)
+        ViewStateContainer(DiscoverTribesLoadingViewState.Open)
     }
 
     var page = 1
@@ -111,5 +112,13 @@ class DiscoverTribesViewModel @Inject constructor(
     }
     fun cleanDiscoverTribesTags() {
         _tribeSelectedTagsList.value = listOf()
+    }
+
+    fun handleTribeLink(uuid: String) {
+        val tribeLink = TribeJoinLink("sphinx.chat://?action=tribe&uuid=${uuid}&host=tribes.sphinx.chat")
+
+        viewModelScope.launch(mainImmediate) {
+            navigator.toJoinTribeDetail(tribeLink)
+        }
     }
 }

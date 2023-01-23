@@ -40,6 +40,7 @@ dependencies {
     implementation project(path: ':sphinx:application:common:menus:menu-bottom-picture')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-feed')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-common')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-media-cache')

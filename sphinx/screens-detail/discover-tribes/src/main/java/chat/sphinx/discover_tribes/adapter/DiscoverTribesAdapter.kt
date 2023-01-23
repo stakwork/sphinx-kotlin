@@ -158,10 +158,12 @@ class DiscoverTribesAdapter(
         private var tribe: TribeDto? = null
 
         init {
-            binding.layoutButtonJoin.layoutConstraintButtonTags.setOnClickListener {
+            binding.root.setOnClickListener {
                 tribe?.let { nnTribe ->
                     lifecycleOwner.lifecycleScope.launch {
-                        // Navigate to Join Tribe screen
+                        nnTribe.uuid?.let { nnUUID ->
+                            viewModel.handleTribeLink(nnUUID)
+                        }
                     }
                 }
             }
