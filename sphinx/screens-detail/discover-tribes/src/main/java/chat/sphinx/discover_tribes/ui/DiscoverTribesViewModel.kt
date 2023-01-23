@@ -82,7 +82,7 @@ class DiscoverTribesViewModel @Inject constructor(
 
 
     private var discoverTribeJob: Job? = null
-    fun getDiscoverTribesList() {
+    fun getDiscoverTribesList(searchTerm: String? = null) {
         if (discoverTribeJob?.isActive == true) {
             return
         }
@@ -95,7 +95,7 @@ class DiscoverTribesViewModel @Inject constructor(
 
             chatRepository.getAllDiscoverTribes(
                 page,
-                null,
+                searchTerm,
                 tags
             ).collect { discoverTribes ->
                 _discoverTribeStateFlow.value = _discoverTribeStateFlow.value + discoverTribes
@@ -106,7 +106,10 @@ class DiscoverTribesViewModel @Inject constructor(
         }
     }
 
-    fun cleanDiscoverTribesList(){
+    fun cleanDiscoverTribesList() {
         _discoverTribeStateFlow.value = listOf()
+    }
+    fun cleanDiscoverTribesTags() {
+        _tribeSelectedTagsList.value = listOf()
     }
 }

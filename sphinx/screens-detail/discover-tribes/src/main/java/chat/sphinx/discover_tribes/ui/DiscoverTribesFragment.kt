@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -28,6 +29,7 @@ import chat.sphinx.insetter_activity.addKeyboardPadding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
@@ -62,6 +64,7 @@ internal class DiscoverTribesFragment: SideEffectFragment<
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
         setupDiscoverTribesAdapter()
+        setupSearch()
         viewModel.getDiscoverTribesList()
 
         binding.includeDiscoverTribesHeader.apply {
@@ -74,9 +77,7 @@ internal class DiscoverTribesFragment: SideEffectFragment<
                 }
             }
         }
-        binding.includeLayoutDiscoverTribesLoading.viewDiscoverTribesLock.setOnClickListener {
-            viewModel.discoverTribesLoadingViewStateContainer.updateViewState(DiscoverTribesLoadingViewState.Closed)
-        }
+
 
         fun updateTagsNumber() {
             viewModel.getTribeSelectedTags()
@@ -157,6 +158,15 @@ internal class DiscoverTribesFragment: SideEffectFragment<
             setAllTagsNames()
             updateTagsNumber()
 
+            binding.includeLayoutDiscoverTribesLoading.viewDiscoverTribesLock.setOnClickListener {
+                viewModel.discoverTribesLoadingViewStateContainer.updateViewState(DiscoverTribesLoadingViewState.Closed)
+            }
+            binding.includeLayoutDiscoverTribesTags.viewDiscoverTribesLock.setOnClickListener {
+                updateTagsNumber()
+                bindSelectedTags()
+                viewModel.discoverTribesTagsViewStateContainer.updateViewState(DiscoverTribesTagsViewState.Closed)
+            }
+
             includeTag0.layoutButtonTag.setOnClickListener {
                 viewModel.changeSelectTag(0)
                 bindSelectedTags()
@@ -198,7 +208,7 @@ internal class DiscoverTribesFragment: SideEffectFragment<
                 viewModel.page = 1
                 updateTagsNumber()
                 viewModel.cleanDiscoverTribesList()
-                viewModel.getDiscoverTribesList()
+                viewModel.getDiscoverTribesList(binding.layoutSearchBar.editTextDashboardSearch.text.toString())
                 viewModel.discoverTribesTagsViewStateContainer.updateViewState(
                     DiscoverTribesTagsViewState.Closed)
 
@@ -248,6 +258,28 @@ internal class DiscoverTribesFragment: SideEffectFragment<
                 }
             }
             )
+        }
+    }
+
+    private fun setupSearch() {
+        binding.layoutSearchBar.apply {
+            editTextDashboardSearch.addTextChangedListener { editable ->
+                buttonDashboardSearchClear.goneIfFalse(editable.toString().isNotEmpty())
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.page = 1
+                    viewModel.cleanDiscoverTribesList()
+                    viewModel.getDiscoverTribesList(
+                        editable.toString(),
+                    )
+                }
+            }
+            buttonDashboardSearchClear.setOnClickListener {
+                viewModel.page = 1
+                viewModel.cleanDiscoverTribesList()
+                viewModel.getDiscoverTribesList(null)
+                editTextDashboardSearch.setText("")
+            }
         }
     }
 
