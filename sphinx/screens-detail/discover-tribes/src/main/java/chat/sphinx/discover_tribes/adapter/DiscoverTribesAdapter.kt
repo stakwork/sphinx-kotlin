@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
@@ -16,6 +17,7 @@ import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.dashboard.R
 import chat.sphinx.discover_tribes.databinding.LayoutDiscoverTribeListItemHolderBinding
 import chat.sphinx.discover_tribes.ui.DiscoverTribesViewModel
+import chat.sphinx.resources.getString
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -167,6 +169,16 @@ class DiscoverTribesAdapter(
                     }
                 }
             }
+            tribe?.let { nnTribe ->
+                lifecycleOwner.lifecycleScope.launch {
+                    nnTribe.uuid?.let { nnUUID ->
+                        if (viewModel.checkJoinedTribe(nnUUID)) {
+                            binding.layoutButtonJoin.textViewButtonJoinOpen.text = "OPEN"
+                        }
+                    }
+                }
+            }
+
         }
 
         fun bind(position: Int) {
@@ -205,13 +217,23 @@ class DiscoverTribesAdapter(
 
                 textViewTribeTitle.text = tribeItem.name
                 textViewTribeDescription.text = tribeItem.description
+
+                tribe?.let { nnTribe ->
+                    nnTribe.uuid?.let { nnUUID ->
+                        lifecycleOwner.lifecycleScope.launch {
+                            if (viewModel.checkJoinedTribe(nnUUID)) {
+                                binding.layoutButtonJoin.textViewButtonJoinOpen.text = getString(R.string.discover_open)
+                                binding.layoutButtonJoin.layoutConstraintButtonTags.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
+                            }
+                        }
+                    }
+                }
             }
         }
 
         init {
             lifecycleOwner.lifecycle.addObserver(this)
         }
-
     }
 
     init {

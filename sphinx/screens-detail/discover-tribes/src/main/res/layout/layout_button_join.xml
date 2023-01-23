@@ -5,12 +5,12 @@
     android:id="@+id/layout_constraint_button_tags"
     android:layout_width="wrap_content"
     android:layout_height="@dimen/add_buttons_height"
-    android:background="@drawable/button_background_white_rad_48"
-    android:backgroundTint="@color/primaryBlue"
+    android:background="@drawable/background_button_join"
     android:paddingHorizontal="10dp">
 
 
     <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_button_join_open"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
