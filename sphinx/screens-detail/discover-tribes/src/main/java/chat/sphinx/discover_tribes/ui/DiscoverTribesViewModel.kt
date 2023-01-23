@@ -120,9 +120,12 @@ class DiscoverTribesViewModel @Inject constructor(
 
     fun handleTribeLink(uuid: String) {
         viewModelScope.launch(mainImmediate) {
-            navigator.toJoinTribeDetail(uuidToJoinTribeLink(uuid))
+            chatRepository.getChatByUUID(ChatUUID(uuid)).firstOrNull()?.let { chat ->
+                navigator.toChatTribe(chat.id)
+            } ?: navigator.toJoinTribeDetail(uuidToJoinTribeLink(uuid))
         }
     }
+
     suspend fun checkJoinedTribe(uuid: String): Boolean {
         val joined = chatRepository.getChatByUUID(ChatUUID(uuid)).firstOrNull()
         return joined != null

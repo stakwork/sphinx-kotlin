@@ -1,6 +1,7 @@
 package chat.sphinx.discover_tribes.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
@@ -15,4 +16,5 @@ abstract class DiscoverTribesNavigator(
     }
 
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
+    abstract suspend fun toChatTribe(chatId: ChatId)
 }
