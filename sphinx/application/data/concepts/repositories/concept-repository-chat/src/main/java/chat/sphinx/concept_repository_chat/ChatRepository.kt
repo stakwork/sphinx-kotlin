@@ -26,7 +26,9 @@ import kotlinx.coroutines.flow.Flow
  * them, and thus proc any [Flow] being collected
  * */
 interface ChatRepository {
+
     val getAllChats: Flow<List<Chat>>
+    val getAllTribeChats: Flow<List<Chat>>
     fun getChatById(chatId: ChatId): Flow<Chat?>
     fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?>
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>

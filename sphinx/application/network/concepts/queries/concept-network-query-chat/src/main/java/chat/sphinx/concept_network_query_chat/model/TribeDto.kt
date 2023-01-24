@@ -30,6 +30,8 @@ data class TribeDto(
     var host: String? = null
     var uuid: String? = null
 
+    var joined: Boolean? = null
+
     @Json(name = "my_alias")
     var myAlias: String? = null
 

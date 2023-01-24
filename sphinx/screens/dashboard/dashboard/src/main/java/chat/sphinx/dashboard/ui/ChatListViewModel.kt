@@ -4,17 +4,24 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.adapter.DashboardChat
 import chat.sphinx.dashboard.ui.viewstates.*
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.tribes_discover_view_model_coordinator.request.TribesDiscoverRequest
+import chat.sphinx.tribes_discover_view_model_coordinator.response.TribesDiscoverResponse
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_common.*
+import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -31,7 +38,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.util.*
 import javax.inject.Inject
 import kotlin.collections.ArrayList
 
@@ -51,22 +57,17 @@ internal suspend inline fun ChatListViewModel.updateChatListFilter(filter: ChatF
 internal inline val ChatListFragmentArgs.isChatListTypeConversation: Boolean
     get() = argChatListType == ChatType.CONVERSATION
 
-internal inline val ChatListFragmentArgs.isChatListTypeTribe: Boolean
-    get() = argChatListType == ChatType.TRIBE
-
 @HiltViewModel
 internal class ChatListViewModel @Inject constructor(
     private val app: Application,
     handler: SavedStateHandle,
-
     private val accountOwner: StateFlow<Contact?>,
-
     val dashboardNavigator: DashboardNavigator,
     val navDrawerNavigator: DashboardNavDrawerNavigator,
-
     dispatchers: CoroutineDispatchers,
-
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
+    private val chatRepository: ChatRepository,
+    private val tribesDiscoverCoordinator: ViewModelCoordinator<TribesDiscoverRequest, TribesDiscoverResponse>,
 ): SideEffectViewModel<
         Context,
         ChatListSideEffect,
@@ -83,8 +84,6 @@ internal class ChatListViewModel @Inject constructor(
     val chatViewStateContainer: ChatViewStateContainer by lazy {
         ChatViewStateContainer(dispatchers)
     }
-
-    val chatListType = args.argChatListType
 
     private val _accountOwnerStateFlow: MutableStateFlow<Contact?> by lazy {
         MutableStateFlow(null)
@@ -222,7 +221,8 @@ internal class ChatListViewModel @Inject constructor(
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = args.argChatListType == ChatType.CONVERSATION,
-                    createTribeVisible = args.argChatListType == ChatType.TRIBE && !owner.isOnVirtualNode()
+                    createTribeVisible = args.argChatListType == ChatType.TRIBE && !owner.isOnVirtualNode(),
+                    discoverTribesVisible = args.argChatListType == ChatType.TRIBE,
                 )
             )
         }
@@ -415,5 +415,38 @@ internal class ChatListViewModel @Inject constructor(
                 }
             }
         )
+    }
+
+    fun toTribesDiscover() {
+        viewModelScope.launch(mainImmediate) {
+            val response = tribesDiscoverCoordinator.submitRequest(
+                TribesDiscoverRequest()
+            )
+
+            if (response is Response.Success) {
+
+                val code = response.value.value
+
+                code?.toTribeJoinLink()?.let { tribeJoinLink ->
+                    handleTribeJoinLink(tribeJoinLink)
+                }
+            }
+        }
+    }
+
+    private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
+        val chat: Chat? = try {
+            chatRepository.getChatByUUID(
+                ChatUUID(tribeJoinLink.tribeUUID)
+            ).firstOrNull()
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+
+        if (chat != null) {
+            dashboardNavigator.toChatTribe(chat.id)
+        } else {
+            dashboardNavigator.toJoinTribeDetail(tribeJoinLink)
+        }
     }
 }

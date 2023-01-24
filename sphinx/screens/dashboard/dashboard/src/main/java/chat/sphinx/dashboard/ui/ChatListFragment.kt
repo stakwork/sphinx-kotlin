@@ -2,7 +2,6 @@ package chat.sphinx.dashboard.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -13,6 +12,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
@@ -21,18 +21,18 @@ import chat.sphinx.dashboard.databinding.FragmentChatListBinding
 import chat.sphinx.dashboard.ui.adapter.ChatListAdapter
 import chat.sphinx.dashboard.ui.adapter.ChatListFooterAdapter
 import chat.sphinx.dashboard.ui.adapter.DashboardFooterAdapter
-import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.dashboard.ui.viewstates.ChatFilter
+import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
 import chat.sphinx.dashboard.ui.viewstates.ChatListViewState
-import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_chat.ChatType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -149,12 +149,9 @@ internal class ChatListFragment : SideEffectFragment<
                 }
             }
 
-            if (viewModel.chatListType == ChatType.TRIBE) {
-                includeLayoutButtonAddTribe.root.visible
-                includeLayoutButtonAddTribe.root.setOnClickListener {
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        viewModel.navDrawerNavigator.toDiscoverTribesScreen()
-                    }
+            includeLayoutButtonAddTribe.root.setOnClickListener {
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.toTribesDiscover()
                 }
             }
 
@@ -206,6 +203,18 @@ internal class ChatListFragment : SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ChatListViewState) {
-        // TODO("Not yet implemented")
+        viewModel.chatListFooterButtonsViewStateContainer.collect { viewState ->
+            binding.layoutSearchBar.includeLayoutButtonAddTribe.apply {
+                @Exhaustive
+                when (viewState) {
+                    is ChatListFooterButtonsViewState.Idle -> {
+                        root.gone
+                    }
+                    is ChatListFooterButtonsViewState.ButtonsVisibility -> {
+                        root.goneIfFalse(viewState.discoverTribesVisible)
+                    }
+                }
+            }
+        }
     }
 }

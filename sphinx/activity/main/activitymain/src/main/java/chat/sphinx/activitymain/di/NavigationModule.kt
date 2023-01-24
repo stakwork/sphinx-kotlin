@@ -18,7 +18,7 @@ import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
-import chat.sphinx.discover_tribes.navigation.DiscoverTribesNavigator
+import chat.sphinx.tribes_discover.navigation.TribesDiscoverNavigator
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
@@ -322,8 +322,8 @@ internal object NavigationModule {
 
     @Provides
     fun provideDiscoverTribesNavigator(
-        discoverTribesNavigatorImpl: DiscoverTribesNavigatorImpl
-    ): DiscoverTribesNavigator =
+        discoverTribesNavigatorImpl: TribesDiscoverNavigatorImpl
+    ): TribesDiscoverNavigator =
         discoverTribesNavigatorImpl
 
     @Provides
