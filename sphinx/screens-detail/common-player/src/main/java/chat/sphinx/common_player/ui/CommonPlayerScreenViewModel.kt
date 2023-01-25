@@ -476,9 +476,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
                             podcast.getCurrentEpisode().recommendationPubKey?.toFeedDestinationAddress()
                                 ?.let { pubKey ->
 
-                                    println("llavecita no nula ${pubKey.value}")
-
-
                                     val feedDestination: List<FeedDestination> = arrayListOf(
                                         FeedDestination(
                                             address = pubKey,
@@ -487,17 +484,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                             feedId = podcast.getCurrentEpisode().id
                                         )
                                     )
-                                    println("DESTINACION ${feedDestination.toString()} ")
-                                    feedDestination.get(0).apply {
-                                        println("DESTINACION")
-                                        println(address.value)
-                                        println(split.value)
-                                        println(type.value)
-                                        println(feedId.value)
-                                        println("-------- Podcast Id -------")
-                                        println(podcast.getCurrentEpisode().id.value)
-                                    }
-                                    println(feedDestination.get(0).feedId)
 //                                    mediaPlayerServiceController.submitAction(
 //                                        UserAction.SendBoost(
 //                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),

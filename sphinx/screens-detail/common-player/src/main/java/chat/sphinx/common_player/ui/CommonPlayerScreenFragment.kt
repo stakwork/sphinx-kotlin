@@ -317,10 +317,9 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         )
                     }
 
-                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = 1.0f
-//                        if (podcast.hasDestinations) 1.0f else 0.3f
-                    this@customBoost.imageViewFeedBoostButton.isEnabled = true
-                    this@customBoost.editTextCustomBoost.isEnabled = true
+                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (currentEpisode.recommendationPubKey.isNullOrEmpty()) 0.3f else 1.0f
+                    this@customBoost.imageViewFeedBoostButton.isEnabled = !currentEpisode.recommendationPubKey.isNullOrEmpty()
+                    this@customBoost.editTextCustomBoost.isEnabled = !currentEpisode.recommendationPubKey.isNullOrEmpty()
                 }
             }
 
