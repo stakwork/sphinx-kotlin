@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="discover_tribes_progress_bar_xy">25dp</dimen>
+    <dimen name="discover_tribes_no_tribes_text_size">12sp</dimen>
+
+</resources>

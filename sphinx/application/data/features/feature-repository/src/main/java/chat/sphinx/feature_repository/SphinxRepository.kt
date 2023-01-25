@@ -3727,10 +3727,11 @@ abstract class SphinxRepository(
 
     override fun getAllDiscoverTribes(
         page: Int,
+        itemsPerPage: Int,
         searchTerm: String?,
         tags: String?
     ): Flow<List<TribeDto>> = flow {
-        networkQueryDiscoverTribes.getAllDiscoverTribes(page, searchTerm, tags).collect { response ->
+        networkQueryDiscoverTribes.getAllDiscoverTribes(page, itemsPerPage, searchTerm, tags).collect { response ->
             @Exhaustive
             when(response) {
                 is LoadResponse.Loading -> {}

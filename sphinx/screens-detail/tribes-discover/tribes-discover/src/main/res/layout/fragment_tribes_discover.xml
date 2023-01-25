@@ -56,16 +56,37 @@
         android:layout_height="0dp"
         android:background="@drawable/background_detail_screen"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_dashboard_chat_holder_avatar"
-        tools:layout_editor_absoluteX="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/layout_discover_tribe_list_item_holder" />
 
-    
-    <include
-        android:id="@+id/include_layout_discover_tribes_loading"
-        layout="@layout/layout_discover_tribes_loading"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:visibility="gone" />
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_no_tribes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:text="@string/discover_tribes_no_results"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/discover_tribes_no_tribes_text_size"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_discover_tribes"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/discover_tribes_progress_bar_xy"
+        android:layout_height="@dimen/discover_tribes_progress_bar_xy"
+        android:gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
     <include
         android:id="@+id/include_layout_discover_tribes_tags"

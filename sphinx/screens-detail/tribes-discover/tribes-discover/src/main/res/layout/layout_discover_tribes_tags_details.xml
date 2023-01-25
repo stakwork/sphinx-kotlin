@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clickable="true"
     android:background="@drawable/background_top_rounded_corners">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -67,8 +68,7 @@
         android:id="@+id/layout_constraint_tags_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="50dp"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_tag_title">

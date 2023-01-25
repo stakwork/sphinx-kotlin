@@ -68,6 +68,7 @@ interface ChatRepository {
 
     fun getAllDiscoverTribes(
         page: Int,
+        itemsPerPage: Int,
         searchTerm: String? = null,
         tags: String? = null
     ): Flow<List<TribeDto>>

@@ -6,4 +6,5 @@
     <string name="discover_tribes_open">Open</string>
     <string name="discover_tribes_loading">Loading ...</string>
     <string name="discover_tribes_apply">Apply</string>
+    <string name="discover_tribes_no_results">No tribes found</string>
 </resources>

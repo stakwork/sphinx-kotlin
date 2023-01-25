@@ -12,19 +12,20 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.tribes_discover.R
 import chat.sphinx.tribes_discover.databinding.LayoutDiscoverTribeListItemHolderBinding
 import chat.sphinx.tribes_discover.ui.TribesDiscoverViewModel
 import chat.sphinx.resources.getString
+import chat.sphinx.tribes_discover.viewstate.DiscoverTribesViewState
+import chat.sphinx.tribes_discover.viewstate.TribeHolderViewState
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 internal class TribesDiscoverAdapter(
-    private val recyclerView: RecyclerView,
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -32,8 +33,8 @@ internal class TribesDiscoverAdapter(
 ): RecyclerView.Adapter<TribesDiscoverAdapter.DiscoverTribeViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<TribeDto>,
-        private val newList: List<TribeDto>,
+        private val oldList: List<TribeHolderViewState>,
+        private val newList: List<TribeHolderViewState>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -53,8 +54,7 @@ internal class TribesDiscoverAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.owner_pubkey                 == new.owner_pubkey
-
+                    old.tribeDto?.uuid  == new.tribeDto?.uuid
 
                 if (sameList) {
                     sameList = same
@@ -73,8 +73,7 @@ internal class TribesDiscoverAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.name                   == new.name                &&
-                            old.description             == new.description
+                    old.tribeDto?.uuid  == new.tribeDto?.uuid
 
                 if (sameList) {
                     sameList = same
@@ -89,38 +88,23 @@ internal class TribesDiscoverAdapter(
 
     }
 
-    private val tribeItems = ArrayList<TribeDto>(listOf())
+    private val tribeItems = ArrayList<TribeHolderViewState>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.discoverTribesStateFlow.collect { list ->
+            viewModel.viewStateContainer.collect { viewState ->
 
-                val discoverTribesList = mutableListOf<TribeDto>()
+                tribeItems.clear()
 
-                list.forEach { tribe ->
-                        discoverTribesList.add(tribe)
-                    }
-
-                if (tribeItems.isEmpty()) {
-                    tribeItems.addAll(discoverTribesList)
-                    this@TribesDiscoverAdapter.notifyDataSetChanged()
-                } else {
-
-                    val diff = Diff(tribeItems, discoverTribesList)
-
-                    withContext(viewModel.dispatchers.default) {
-                        DiffUtil.calculateDiff(diff)
-                    }.let { result ->
-
-                        if (!diff.sameList) {
-                            tribeItems.clear()
-                            tribeItems.addAll(discoverTribesList)
-                            result.dispatchUpdatesTo(this@TribesDiscoverAdapter)
-                        }
-                    }
+                (viewState as? DiscoverTribesViewState.Tribes)?.tribes?.let { list ->
+                    tribeItems.addAll(list)
+                } ?: run {
+                    tribeItems.clear()
                 }
+
+                this@TribesDiscoverAdapter.notifyDataSetChanged()
             }
         }
     }
@@ -156,13 +140,13 @@ internal class TribesDiscoverAdapter(
         private val holderJobs: ArrayList<Job> = ArrayList(2)
         private val disposables: ArrayList<Disposable> = ArrayList(2)
 
-        private var tribe: TribeDto? = null
+        private var tribe: TribeHolderViewState? = null
 
         init {
             binding.root.setOnClickListener {
                 tribe?.let { nnTribe ->
                     lifecycleOwner.lifecycleScope.launch {
-                        nnTribe.uuid?.let { nnUUID ->
+                        nnTribe.tribeDto?.uuid?.let { nnUUID ->
                             viewModel.handleTribeLink(nnUUID)
                         }
                     }
@@ -181,42 +165,48 @@ internal class TribesDiscoverAdapter(
                     disposable.dispose()
                 }
 
-                val tribeItem: TribeDto = tribeItems.getOrNull(position) ?: let {
+                val tribeItem: TribeHolderViewState = tribeItems.getOrNull(position) ?: let {
                     tribe = null
                     return
                 }
                 tribe = tribeItem
 
-                tribeItem.img?.let { imageUrl ->
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        imageLoader.load(
-                            imageViewTribeImage,
-                            imageUrl,
-                            imageLoaderOptions
-                        ).also {
-                            disposables.add(it)
+                tribeItem.tribeDto?.let { tribeDto ->
+                    tribeDto.img?.let { imageUrl ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            imageLoader.load(
+                                imageViewTribeImage,
+                                imageUrl,
+                                imageLoaderOptions
+                            ).also {
+                                disposables.add(it)
+                            }
+                        }.let { job ->
+                            holderJobs.add(job)
                         }
-                    }.let { job ->
-                        holderJobs.add(job)
+                    } ?: run {
+                        imageViewTribeImage.setImageDrawable(
+                            ContextCompat.getDrawable(root.context, R.drawable.ic_tribe)
+                        )
                     }
-                } ?: run {
-                    imageViewTribeImage.setImageDrawable(
-                        ContextCompat.getDrawable(root.context, R.drawable.ic_tribe)
-                    )
-                }
 
-                textViewTribeTitle.text = tribeItem.name
-                textViewTribeDescription.text = tribeItem.description
+                    textViewTribeTitle.text = tribeDto.name
+                    textViewTribeDescription.text = tribeDto.description
 
-                layoutButtonJoin.apply {
-                    if (tribeItem.joined == true) {
-                        textViewButtonJoinOpen.text = getString(R.string.discover_tribes_open)
-                        layoutConstraintButtonTags.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
-                    } else {
-                        textViewButtonJoinOpen.text = getString(R.string.discover_tribes_join)
-                        layoutConstraintButtonTags.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
+                    layoutButtonJoin.apply {
+                        if (tribeDto.joined == true) {
+                            textViewButtonJoinOpen.text = getString(R.string.discover_tribes_open)
+                            layoutConstraintButtonTags.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
+                        } else {
+                            textViewButtonJoinOpen.text = getString(R.string.discover_tribes_join)
+                            layoutConstraintButtonTags.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
+                        }
                     }
                 }
+
+                includeLoadingMoreTribes.root.goneIfFalse(
+                    (tribeItem is TribeHolderViewState.Loader)
+                )
             }
         }
 
