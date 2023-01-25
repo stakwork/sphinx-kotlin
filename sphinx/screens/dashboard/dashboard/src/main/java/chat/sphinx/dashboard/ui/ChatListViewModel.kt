@@ -427,6 +427,8 @@ internal class ChatListViewModel @Inject constructor(
 
                 val code = response.value.value
 
+                delay(200L)
+
                 code?.toTribeJoinLink()?.let { tribeJoinLink ->
                     handleTribeJoinLink(tribeJoinLink)
                 }

@@ -207,6 +207,10 @@ internal class TribesDiscoverAdapter(
                 includeLoadingMoreTribes.root.goneIfFalse(
                     (tribeItem is TribeHolderViewState.Loader)
                 )
+
+                layoutConstraintItemContainer.goneIfFalse(
+                    (tribeItem is TribeHolderViewState.Tribe)
+                )
             }
         }
 

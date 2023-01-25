@@ -311,7 +311,7 @@ internal class TribesDiscoverFragment: SideEffectFragment<
                 if (tagsSelected) {
                     R.drawable.background_tag_white_rad
                 } else {
-                    R.drawable.background_tag_transparent_rad
+                    R.drawable.background_button_tags
                 }
             )
 
