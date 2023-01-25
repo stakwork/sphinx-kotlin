@@ -120,4 +120,9 @@ data class PodcastEpisode(
         get() {
             return date?.time ?: 0
         }
+
+    var isBoostAllowed: Boolean = false
+        get() {
+            return recommendationPubKey?.toFeedDestinationAddress() != null
+        }
 }

@@ -32,8 +32,10 @@ import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
@@ -100,6 +102,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 textViewShareClipButton.isEnabled = false
             }
         }
+
         setupBoost()
         setupItems()
     }
@@ -305,7 +308,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                             amount,
                             fireworksCallback = {
                                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                    setupBoostAnimation(amount)
+                                    setupBoostAnimation(null, amount)
 
                                     includeLayoutBoostFireworks.apply fireworks@ {
                                         this@fireworks.root.visible
@@ -317,9 +320,9 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         )
                     }
 
-                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (currentEpisode.recommendationPubKey.isNullOrEmpty()) 0.3f else 1.0f
-                    this@customBoost.imageViewFeedBoostButton.isEnabled = !currentEpisode.recommendationPubKey.isNullOrEmpty()
-                    this@customBoost.editTextCustomBoost.isEnabled = !currentEpisode.recommendationPubKey.isNullOrEmpty()
+                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (currentEpisode.isBoostAllowed) 1.0f else 0.3f
+                    this@customBoost.imageViewFeedBoostButton.isEnabled = currentEpisode.isBoostAllowed
+                    this@customBoost.editTextCustomBoost.isEnabled = currentEpisode.isBoostAllowed
                 }
             }
 
@@ -332,7 +335,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupBoostAnimation(
+    private suspend fun setupBoostAnimation(
+        photoUrl: PhotoUrl?,
         amount: Sat?
     ) {
 
@@ -344,6 +348,17 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             }
 
             includeLayoutBoostFireworks.apply {
+                photoUrl?.let { photoUrl ->
+                    imageLoader.load(
+                        imageViewProfilePicture,
+                        photoUrl.value,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                }
+
                 textViewSatsAmount.text = amount?.asFormattedString()
             }
         }
@@ -539,6 +554,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
                     is BoostAnimationViewState.BoosAnimationInfo -> {
                         setupBoostAnimation(
+                            viewState.photoUrl,
                             viewState.amount
                         )
                     }

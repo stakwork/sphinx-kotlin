@@ -1,5 +1,6 @@
 package chat.sphinx.common_player.ui
 
+import android.app.Application
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -55,6 +56,7 @@ internal inline val CommonPlayerScreenFragmentArgs.episodeId: FeedId
 @HiltViewModel
 class CommonPlayerScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     private val navigator: CommonPlayerNavigator,
     private val contactRepository: ContactRepository,
     private val feedRepository: FeedRepository,
@@ -449,18 +451,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 getAccountBalance().firstOrNull()?.let { balance ->
                     when {
                         (amount.value > balance.balance.value) -> {
-//                            submitSideEffect(
-//                                PodcastPlayerSideEffect.Notify(
-//                                    app.getString(R.string.balance_too_low)
-//                                )
-//                            )
+                            submitSideEffect(
+                                CommonPlayerScreenSideEffect.Notify.BalanceTooLow
+                            )
                         }
                         (amount.value <= 0) -> {
-//                            submitSideEffect(
-//                                PodcastPlayerSideEffect.Notify(
-//                                    app.getString(R.string.boost_amount_too_low)
-//                                )
-//                            )
+                            submitSideEffect(
+                                CommonPlayerScreenSideEffect.Notify.BoostAmountTooLow
+                            )
                         }
                         else -> {
                             fireworksCallback()
@@ -473,7 +471,9 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                 arrayListOf("")
                             )
 
-                            podcast.getCurrentEpisode().recommendationPubKey?.toFeedDestinationAddress()
+                            podcast.getCurrentEpisode()
+                                .recommendationPubKey
+                                ?.toFeedDestinationAddress()
                                 ?.let { pubKey ->
 
                                     val feedDestination: List<FeedDestination> = arrayListOf(
@@ -484,14 +484,15 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                             feedId = podcast.getCurrentEpisode().id
                                         )
                                     )
-//                                    mediaPlayerServiceController.submitAction(
-//                                        UserAction.SendBoost(
-//                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
-//                                            podcast.getCurrentEpisode().id.value,
-//                                            metaData,
-//                                            feedDestination
-//                                        )
-//                                    )
+
+                                    mediaPlayerServiceController.submitAction(
+                                        UserAction.SendBoost(
+                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                                            podcast.getCurrentEpisode().id.value,
+                                            metaData,
+                                            feedDestination
+                                        )
+                                    )
                                 }
                         }
                     }

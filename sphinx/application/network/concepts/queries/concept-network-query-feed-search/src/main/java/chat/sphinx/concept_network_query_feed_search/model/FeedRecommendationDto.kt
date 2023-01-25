@@ -19,7 +19,7 @@ data class FeedRecommendationDto(
     val l_image_url: String?,
     val node_type: String,
     val hosts: List<Hosts>,
-    val guests: List<Any>,
+    val guests: List<String>,
     val text: String,
     val timestamp: String,
     val episode_title: String,

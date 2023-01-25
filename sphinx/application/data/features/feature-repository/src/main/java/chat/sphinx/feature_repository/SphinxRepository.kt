@@ -716,8 +716,10 @@ abstract class SphinxRepository(
         clipMessageUUID: MessageUUID?,
     ) {
 
-        if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-            return
+        val updateMD = if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+            false
+        } else {
+            updateMetaData
         }
 
         if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
@@ -757,7 +759,7 @@ abstract class SphinxRepository(
                 metaData.satsPerMinute.value,
                 chatId.value,
                 streamSatsText.toJson(moshi),
-                updateMetaData,
+                updateMD,
                 destinationsArray
             )
 
