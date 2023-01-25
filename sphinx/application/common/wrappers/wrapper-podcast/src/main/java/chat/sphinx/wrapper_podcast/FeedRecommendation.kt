@@ -4,6 +4,7 @@ import java.util.*
 
 data class FeedRecommendation(
     val id: String,
+    val pubKey: String?,
     val feedType: String,
     val description: String,
     val smallImageUrl: String?,
@@ -15,7 +16,7 @@ data class FeedRecommendation(
     val date: Long?,
     val timestamp: String,
     val topics: List<String>,
-    val guests: List<String>,
+    val guests: List<Any>,
     val position: Int
 ) {
 

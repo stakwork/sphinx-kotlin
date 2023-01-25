@@ -15,8 +15,8 @@ import chat.sphinx.wrapper_podcast.PodcastEpisode
 import okio.base64.decodeBase64ToArray
 
 internal class FeedRecommendationPodcastPresenterMapper() {
-    fun mapFrom(value: FeedRecommendation, podcastId: FeedId): PodcastEpisode {
-        return PodcastEpisode(
+    fun mapFrom(value: FeedRecommendation, podcastId: FeedId): PodcastEpisode =
+        PodcastEpisode(
             FeedId(value.id),
             FeedTitle(value.title),
             FeedDescription(value.description),
@@ -33,9 +33,9 @@ internal class FeedRecommendationPodcastPresenterMapper() {
             value.startMilliseconds,
             value.endMilliseconds,
             value.topics,
-            value.guests
+            listOf(),
+            value.pubKey
         )
-    }
 
     fun getRecommendationsPodcast(): Podcast {
         return Podcast(

@@ -14,6 +14,7 @@ import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -22,7 +23,13 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.FeedDestination
+import chat.sphinx.wrapper_feed.FeedDestinationSplit
+import chat.sphinx.wrapper_feed.FeedDestinationType
+import chat.sphinx.wrapper_feed.toFeedDestinationAddress
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,6 +59,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
+    private val lightningRepository: LightningRepository,
     private val moshi: Moshi,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     savedStateHandle: SavedStateHandle,
@@ -63,6 +71,9 @@ class CommonPlayerScreenViewModel @Inject constructor(
 {
 
     private val args: CommonPlayerScreenFragmentArgs by savedStateHandle.navArgs()
+
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
 
     val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
         ViewStateContainer(BoostAnimationViewState.Idle)
@@ -428,6 +439,81 @@ class CommonPlayerScreenViewModel @Inject constructor(
             }
         }
     }
+
+    fun sendPodcastBoost(
+        amount: Sat,
+        fireworksCallback: () -> Unit
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                getAccountBalance().firstOrNull()?.let { balance ->
+                    when {
+                        (amount.value > balance.balance.value) -> {
+//                            submitSideEffect(
+//                                PodcastPlayerSideEffect.Notify(
+//                                    app.getString(R.string.balance_too_low)
+//                                )
+//                            )
+                        }
+                        (amount.value <= 0) -> {
+//                            submitSideEffect(
+//                                PodcastPlayerSideEffect.Notify(
+//                                    app.getString(R.string.boost_amount_too_low)
+//                                )
+//                            )
+                        }
+                        else -> {
+                            fireworksCallback()
+
+                            val metaData = podcast.getMetaData(amount)
+
+                            actionsRepository.trackFeedBoostAction(
+                                amount.value,
+                                podcast.getCurrentEpisode().id,
+                                arrayListOf("")
+                            )
+
+                            podcast.getCurrentEpisode().recommendationPubKey?.toFeedDestinationAddress()
+                                ?.let { pubKey ->
+
+                                    println("llavecita no nula ${pubKey.value}")
+
+
+                                    val feedDestination: List<FeedDestination> = arrayListOf(
+                                        FeedDestination(
+                                            address = pubKey,
+                                            split = FeedDestinationSplit(100.0),
+                                            type = FeedDestinationType("node"),
+                                            feedId = podcast.getCurrentEpisode().id
+                                        )
+                                    )
+                                    println("DESTINACION ${feedDestination.toString()} ")
+                                    feedDestination.get(0).apply {
+                                        println("DESTINACION")
+                                        println(address.value)
+                                        println(split.value)
+                                        println(type.value)
+                                        println(feedId.value)
+                                        println("-------- Podcast Id -------")
+                                        println(podcast.getCurrentEpisode().id.value)
+                                    }
+                                    println(feedDestination.get(0).feedId)
+//                                    mediaPlayerServiceController.submitAction(
+//                                        UserAction.SendBoost(
+//                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+//                                            podcast.getCurrentEpisode().id.value,
+//                                            metaData,
+//                                            feedDestination
+//                                        )
+//                                    )
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fun setNewHistoryItem(videoPosition: Long){
         videoRecordConsumed?.setNewHistoryItem(videoPosition)
     }

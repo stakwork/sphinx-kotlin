@@ -3994,6 +3994,7 @@ abstract class SphinxRepository(
                             results.add(
                                 FeedRecommendation(
                                     id = feedRecommendation.ref_id,
+                                    pubKey = feedRecommendation.pub_key,
                                     feedType = feedRecommendation.type,
                                     description = feedRecommendation.description,
                                     smallImageUrl = feedRecommendation.s_image_url,
