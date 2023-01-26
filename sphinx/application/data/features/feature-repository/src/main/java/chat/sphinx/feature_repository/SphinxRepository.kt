@@ -7,7 +7,6 @@ import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
 import chat.sphinx.concept_network_query_action_track.model.ActionTrackDto
-import chat.sphinx.concept_network_query_action_track.model.ActionTrackMetaDataDto
 import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -113,7 +112,6 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -4057,7 +4055,7 @@ abstract class SphinxRepository(
                 it,
                 podcast.id
             )
-        }
+        }.sortedByDescending { it.datePublishedTime }
 
         if (podcast.episodes.isEmpty()) {
             return null
@@ -4121,7 +4119,7 @@ abstract class SphinxRepository(
 
         withContext(dispatchers.default) {
             sortedList = list.sortedByDescending {
-                it.chat?.contentSeenAt?.time ?: it.lastItem?.datePublished?.time ?: 0
+                it.lastPublished?.datePublished?.time ?: 0
             }
         }
 
@@ -4245,7 +4243,7 @@ abstract class SphinxRepository(
         }
 
         val episodes = queries.feedItemsGetByFeedId(podcast.id).executeAsList().map {
-            podcastEpisodeDboPresenterMapper.mapFrom(it)
+            podcastEpisodeDboPresenterMapper.mapFrom(it, podcast)
         }
 
         val destinations = queries.feedDestinationsGetByFeedId(podcast.id).executeAsList().map {
@@ -4271,18 +4269,18 @@ abstract class SphinxRepository(
 
         val subscribedItems = if (feedType == null) {
             queries
-                .feedGetAllByTitle("%${searchTerm.lowercase().trim()}%")
+                .feedGetSubscribedByTitle("%${searchTerm.lowercase().trim()}%")
                 .executeAsList()
                 .map { it?.let { feedSearchResultDboPresenterMapper.mapFrom(it) } }
         } else {
             queries
-                .feedGetAllByTitleAndType("%${searchTerm.lowercase().trim()}%", feedType)
+                .feedGetSubscribedByTitleAndType("%${searchTerm.lowercase().trim()}%", feedType)
                 .executeAsList()
                 .map { it?.let { feedSearchResultDboPresenterMapper.mapFrom(it) } }
         }
 
 
-        if (subscribedItems.count() > 0) {
+        if (subscribedItems.isNotEmpty()) {
             results.add(
                 FeedSearchResultRow(
                     feedSearchResult = null,
@@ -4339,7 +4337,7 @@ abstract class SphinxRepository(
                         getSubscribedItemsBy(searchTerm, feedType)
                     )
 
-                    if (response.value.count() > 0) {
+                    if (response.value.isNotEmpty()) {
                         results.add(
                             FeedSearchResultRow(
                                 feedSearchResult = null,

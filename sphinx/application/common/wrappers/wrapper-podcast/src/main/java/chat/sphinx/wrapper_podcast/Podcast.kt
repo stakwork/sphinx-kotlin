@@ -119,9 +119,10 @@ data class Podcast(
     fun setCurrentEpisodeWith(episodeId: String) {
         this.playingEpisode?.playing = false
 
-        this.playingEpisode = getEpisodeWithId(episodeId)
+        val episode = getEpisodeWithId(episodeId)
+        this.playingEpisode = episode
         this.episodeDuration = null
-        this.timeMilliSeconds = 0
+        this.timeMilliSeconds = episode?.clipStartTime ?: 0
     }
 
     fun getMetaData(

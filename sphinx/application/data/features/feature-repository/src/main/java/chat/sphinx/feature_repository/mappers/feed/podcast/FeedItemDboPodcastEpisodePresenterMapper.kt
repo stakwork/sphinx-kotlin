@@ -2,12 +2,32 @@ package chat.sphinx.feature_repository.mappers.feed.podcast
 
 import chat.sphinx.conceptcoredb.FeedItemDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
+import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 
 internal class FeedItemDboPodcastEpisodePresenterMapper(
     dispatchers: CoroutineDispatchers,
 ): ClassMapper<FeedItemDbo, PodcastEpisode>(dispatchers) {
+    fun mapFrom(
+        value: FeedItemDbo,
+        podcast: Podcast
+    ): PodcastEpisode {
+        return PodcastEpisode(
+            id = value.id,
+            title = value.title,
+            description = value.description,
+            image = value.image_url ?: podcast.image,
+            link = value.link,
+            enclosureUrl = value.enclosure_url,
+            enclosureLength = value.enclosure_length,
+            enclosureType =  value.enclosure_type,
+            podcastId = value.feed_id,
+            localFile = value.local_file,
+            date = value.date_published
+        )
+    }
+
     override suspend fun mapFrom(value: FeedItemDbo): PodcastEpisode {
         return PodcastEpisode(
             id = value.id,
