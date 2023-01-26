@@ -351,7 +351,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         photoUrl: PhotoUrl?,
         amount: Sat?
     ) {
-
         binding.apply {
             includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
                 editTextCustomBoost.setText(

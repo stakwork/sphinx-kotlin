@@ -12,11 +12,10 @@ import chat.sphinx.wrapper_feed.FeedTitle
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
-import okio.base64.decodeBase64ToArray
 
 internal class FeedRecommendationPodcastPresenterMapper() {
-    fun mapFrom(value: FeedRecommendation, podcastId: FeedId): PodcastEpisode {
-        return PodcastEpisode(
+    fun mapFrom(value: FeedRecommendation, podcastId: FeedId): PodcastEpisode =
+        PodcastEpisode(
             FeedId(value.id),
             FeedTitle(value.title),
             FeedDescription(value.description),
@@ -33,9 +32,9 @@ internal class FeedRecommendationPodcastPresenterMapper() {
             value.startMilliseconds,
             value.endMilliseconds,
             value.topics,
-            value.guests
+            value.guests,
+            value.pubKey
         )
-    }
 
     fun getRecommendationsPodcast(): Podcast {
         return Podcast(

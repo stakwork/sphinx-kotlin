@@ -196,12 +196,16 @@ internal abstract class MediaPlayerService: SphinxService() {
                 }
                 is UserAction.SendBoost -> {
                     podData?.let { nnData ->
+                        if (nnData.destinations.isEmpty() && userAction.destinations.isNotEmpty()) {
+                            nnData.setDestinations(userAction.destinations)
+                        }
+
                         repositoryMedia.streamFeedPayments(
                             nnData.chatId,
                             userAction.metaData,
                             nnData.podcastId,
                             nnData.episodeId,
-                            nnData.destinations
+                            nnData.destinations,
                         )
                     }
                 }
