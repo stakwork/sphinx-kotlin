@@ -200,7 +200,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                     )
 
                     delay(300L)
-                    playEpisode(newEpisode, newEpisode.clipStartTime ?: podcast.currentTime)
+                    preLoadEpisode(newEpisode)
                 }
             } else {
                 playerViewStateContainer.updateViewState(
@@ -309,6 +309,21 @@ class CommonPlayerScreenViewModel @Inject constructor(
                         podcast.setCurrentEpisodeWith(episode.id.value)
                     }
                 }
+            }
+        }
+    }
+
+    private fun preLoadEpisode(episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+
+                podcast.setCurrentEpisodeWith(episode.id.value)
+
+                viewStateContainer.updateViewState(
+                    RecommendationsPodcastPlayerViewState.PodcastViewState.EpisodePlayed(
+                        podcast
+                    )
+                )
             }
         }
     }

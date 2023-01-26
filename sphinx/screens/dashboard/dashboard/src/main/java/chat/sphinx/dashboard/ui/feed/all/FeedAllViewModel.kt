@@ -162,7 +162,7 @@ internal class FeedAllViewModel @Inject constructor(
                 dashboardNavigator.toCommonPlayerScreen(
                     podcast.id,
                     FeedId(feed.id),
-                    podcast.episodeDuration ?: 0
+                    0
                 )
             }
         }
