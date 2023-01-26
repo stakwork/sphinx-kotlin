@@ -4225,7 +4225,7 @@ abstract class SphinxRepository(
         }
 
         val episodes = queries.feedItemsGetByFeedId(podcast.id).executeAsList().map {
-            podcastEpisodeDboPresenterMapper.mapFrom(it)
+            podcastEpisodeDboPresenterMapper.mapFrom(it, podcast)
         }
 
         val destinations = queries.feedDestinationsGetByFeedId(podcast.id).executeAsList().map {
