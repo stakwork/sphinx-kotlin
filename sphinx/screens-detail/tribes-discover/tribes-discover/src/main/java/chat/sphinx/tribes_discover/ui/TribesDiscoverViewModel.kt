@@ -195,11 +195,11 @@ internal class TribesDiscoverViewModel @Inject constructor(
                     )
                 }
 
-                val updateTribes = existingTribes.dropLast(1) + tribesHVSs
+                val updatedTribes = existingTribes.dropLast(1) + tribesHVSs
 
                 updateViewState(
                     DiscoverTribesViewState.Tribes(
-                        updateTribes,
+                        updatedTribes,
                         discoverTribes.size < itemsPerPage
                     )
                 )
