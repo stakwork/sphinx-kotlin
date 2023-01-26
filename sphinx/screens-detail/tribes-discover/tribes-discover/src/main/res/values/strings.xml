@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="discover_tribes_header_name">DISCOVER TRIBES</string>
+    <string name="discover_tribes_tags">Tags</string>
+    <string name="discover_tribes_join">Join</string>
+    <string name="discover_tribes_open">Open</string>
+    <string name="discover_tribes_apply">Apply</string>
+    <string name="discover_tribes_no_results">No tribes found</string>
+    <string name="discover_tribes_loading">Loading...</string>
+</resources>

@@ -17,6 +17,7 @@ import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
+import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
@@ -155,6 +156,7 @@ abstract class SphinxRepository(
     private val memeInputStreamHandler: MemeInputStreamHandler,
     private val memeServerTokenHandler: MemeServerTokenHandler,
     private val networkQueryActionTrack: NetworkQueryActionTrack,
+    private val networkQueryDiscoverTribes: NetworkQueryDiscoverTribes,
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
@@ -3723,6 +3725,24 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
+    override fun getAllDiscoverTribes(
+        page: Int,
+        itemsPerPage: Int,
+        searchTerm: String?,
+        tags: String?
+    ): Flow<List<TribeDto>> = flow {
+        networkQueryDiscoverTribes.getAllDiscoverTribes(page, itemsPerPage, searchTerm, tags).collect { response ->
+            @Exhaustive
+            when(response) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+                    emit(response.value)
+                }
+            }
+        }
+    }
+
     override suspend fun updateTribeInfo(chat: Chat): TribeData? {
         var owner: Contact? = accountOwner.value
 
@@ -6409,4 +6429,5 @@ abstract class SphinxRepository(
     override fun setAppLog(log: String) {
         appLogsStateFlow.value = appLogsStateFlow.value + log + "\n"
     }
+
 }

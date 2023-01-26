@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_button_tag"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/discover_tribe_tag_button_height"
+    android:background="@drawable/background_tag_transparent_rad"
+    android:paddingHorizontal="@dimen/default_layout_margin">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tag_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_medium"
+        android:textColor="@color/primaryText"
+        android:maxLines="1"
+        android:textSize="@dimen/default_header_text_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Bitcoin"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
