@@ -7,7 +7,6 @@ import android.os.Build
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -30,7 +29,10 @@ import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.isTrue
+import chat.sphinx.wrapper_common.feed.toFeedUrl
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
@@ -93,16 +95,20 @@ internal class PodcastPlayerViewModel @Inject constructor(
         lightningRepository.getAccountBalance()
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
-        if (args.argChatId != ChatId.NULL_CHAT_ID.toLong()) {
-            emitAll(feedRepository.getPodcastByChatId(args.chatId))
-        } else {
-            emitAll(feedRepository.getPodcastById(args.feedId))
-        }
+        emitAll(podcastFlow)
     }.distinctUntilChanged().shareIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private val podcastFlow: Flow<Podcast?> =
+        if (args.argChatId != ChatId.NULL_CHAT_ID.toLong()) {
+            feedRepository.getPodcastByChatId(args.chatId)
+        } else {
+            feedRepository.getPodcastById(args.feedId)
+        }
+
 
     private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -218,7 +224,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.addListener(this)
 
         viewModelScope.launch(mainImmediate) {
-            podcastSharedFlow.collect { podcast ->
+            podcastFlow.collect { podcast ->
                 podcast?.let { nnPodcast ->
                     podcastLoaded(nnPodcast)
                 }
@@ -340,9 +346,13 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.removeListener(this)
     }
 
+    private var toggleSubscriptionJob: Job? = null
     fun toggleSubscribeState() {
-        viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+        if (toggleSubscriptionJob?.isActive == true) {
+            return
+        }
+        toggleSubscriptionJob = viewModelScope.launch(mainImmediate) {
+            podcastFlow.firstOrNull()?.let { podcast ->
                 feedRepository.toggleFeedSubscribeState(
                     podcast.id,
                     podcast.subscribed
