@@ -48,6 +48,14 @@ data class Feed(
 
     var chat: Chat? = null
 
+    var lastPublished: FeedItem? = null
+        get() {
+            if (items.isNotEmpty()) {
+                return items.first()
+            }
+            return null
+        }
+
     var lastItem: FeedItem? = null
         get() {
             for (item in items) {

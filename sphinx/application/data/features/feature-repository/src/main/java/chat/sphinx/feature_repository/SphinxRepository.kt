@@ -4037,7 +4037,7 @@ abstract class SphinxRepository(
                 it,
                 podcast.id
             )
-        }
+        }.sortedByDescending { it.datePublishedTime }
 
         if (podcast.episodes.isEmpty()) {
             return null
@@ -4101,7 +4101,7 @@ abstract class SphinxRepository(
 
         withContext(dispatchers.default) {
             sortedList = list.sortedByDescending {
-                it.chat?.contentSeenAt?.time ?: it.lastItem?.datePublished?.time ?: 0
+                it.lastPublished?.datePublished?.time ?: 0
             }
         }
 
