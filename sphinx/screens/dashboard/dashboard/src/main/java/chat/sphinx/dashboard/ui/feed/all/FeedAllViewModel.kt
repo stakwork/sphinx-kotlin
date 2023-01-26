@@ -81,7 +81,9 @@ internal class FeedAllViewModel @Inject constructor(
             updateViewState(FeedAllViewState.Loading)
 
             repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->
-                feedRecommendationsHolderViewStateFlow.value = feedRecommended.toList()
+                feedRecommendationsHolderViewStateFlow.value = feedRecommended
+                    .sortedByDescending { it.date }
+                    .toList()
 
                 if (feedRecommended.isNotEmpty()) {
                     updateViewState(FeedAllViewState.RecommendedList)
