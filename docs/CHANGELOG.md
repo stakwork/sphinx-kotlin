@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha78 (2023-01-26)
+- Improves media players
+- Adds support for recommendations boost
+- Adds Tribes Discover section
+
 # Version 1.0.0-alpha77 (2022-12-27)
 - Improves actions tracking
 - Improves recommendations player

@@ -1,17 +1,17 @@
 package chat.sphinx.common_player.ui
 
+import android.animation.Animator
 import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.ContextThemeWrapper
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.PopupMenu
-import android.widget.SeekBar
+import android.view.inputmethod.EditorInfo
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -32,9 +32,13 @@ import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
@@ -99,8 +103,51 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             }
         }
 
+        setupBoost()
         setupItems()
     }
+    private fun setupBoost() {
+        binding.apply {
+            includeLayoutBoostFireworks.apply {
+                lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
+                    override fun onAnimationEnd(animation: Animator?) {
+                        root.gone
+                    }
+
+                    override fun onAnimationRepeat(animation: Animator?) {}
+
+                    override fun onAnimationCancel(animation: Animator?) {}
+
+                    override fun onAnimationStart(animation: Animator?) {}
+                })
+            }
+
+            includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
+                removeFocusOnEnter(editTextCustomBoost)
+            }
+        }
+    }
+
+    private fun removeFocusOnEnter(editText: EditText?) {
+        editText?.setOnEditorActionListener(object:
+            TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    editText.let { nnEditText ->
+                        binding.root.context.inputMethodManager?.let { imm ->
+                            if (imm.isActive(nnEditText)) {
+                                imm.hideSoftInputFromWindow(nnEditText.windowToken, 0)
+                                nnEditText.clearFocus()
+                            }
+                        }
+                    }
+                    return true
+                }
+                return false
+            }
+        })
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -252,9 +299,30 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 textViewPlaybackSpeedButton.text = "${podcast.getSpeedString()}"
 
                 includeLayoutCustomBoost.apply customBoost@ {
-                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (podcast.hasDestinations) 1.0f else 0.3f
-                    this@customBoost.imageViewFeedBoostButton.isEnabled = podcast.hasDestinations
-                    this@customBoost.editTextCustomBoost.isEnabled = podcast.hasDestinations
+                    this@customBoost.imageViewFeedBoostButton.setOnClickListener {
+                        val amount = editTextCustomBoost.text.toString()
+                            .replace(" ", "")
+                            .toLongOrNull()?.toSat() ?: Sat(0)
+
+                        viewModel.sendPodcastBoost(
+                            amount,
+                            fireworksCallback = {
+                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                    setupBoostAnimation(null, amount)
+
+                                    includeLayoutBoostFireworks.apply fireworks@ {
+                                        this@fireworks.root.visible
+                                        this@fireworks.lottieAnimationView.playAnimation()
+                                    }
+                                }
+
+                            }
+                        )
+                    }
+
+                    this@customBoost.layoutConstraintBoostButtonContainer.alpha = if (currentEpisode.isBoostAllowed) 1.0f else 0.3f
+                    this@customBoost.imageViewFeedBoostButton.isEnabled = currentEpisode.isBoostAllowed
+                    this@customBoost.editTextCustomBoost.isEnabled = currentEpisode.isBoostAllowed
                 }
             }
 
@@ -267,7 +335,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupBoostAnimation(
+    private suspend fun setupBoostAnimation(
+        photoUrl: PhotoUrl?,
         amount: Sat?
     ) {
 
@@ -276,6 +345,21 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 editTextCustomBoost.setText(
                     (amount ?: Sat(100)).asFormattedString()
                 )
+            }
+
+            includeLayoutBoostFireworks.apply {
+                photoUrl?.let { photoUrl ->
+                    imageLoader.load(
+                        imageViewProfilePicture,
+                        photoUrl.value,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                }
+
+                textViewSatsAmount.text = amount?.asFormattedString()
             }
         }
     }
@@ -470,6 +554,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
                     is BoostAnimationViewState.BoosAnimationInfo -> {
                         setupBoostAnimation(
+                            viewState.photoUrl,
                             viewState.amount
                         )
                     }

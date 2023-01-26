@@ -106,7 +106,7 @@ class FeedReadNowAdapter(
                 val episodesList = mutableListOf<FeedItem>()
 
                 list.forEach { feed ->
-                    feed.lastItem?.let { feedItem ->
+                    feed.lastPublished?.let { feedItem ->
                         episodesList.add(feedItem)
                     }
                 }

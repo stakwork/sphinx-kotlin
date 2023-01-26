@@ -1031,8 +1031,7 @@ feedUpsert {
         language = :language,
         items_count = :items_count,
         current_item_id = :current_item_id,
-        chat_id = :chat_id,
-        subscribed = :subscribed
+        chat_id = :chat_id
     WHERE id = :id;
 
     INSERT OR IGNORE INTO feedDbo(
@@ -1131,16 +1130,18 @@ SELECT *
 FROM feedDbo
 WHERE id IN ?;
 
-feedGetAllByTitle:
-SELECT *
-FROM feedDbo
-WHERE (title LIKE :title);
-
-feedGetAllByTitleAndType:
+feedGetSubscribedByTitle:
 SELECT *
 FROM feedDbo
 WHERE (title LIKE :title)
-AND feed_type = :feed_type;
+AND subscribed = 1;
+
+feedGetSubscribedByTitleAndType:
+SELECT *
+FROM feedDbo
+WHERE (title LIKE :title)
+AND feed_type = :feed_type
+AND subscribed = 1;
 
 feedUpdateCurrentItemIdByChatId:
 UPDATE feedDbo

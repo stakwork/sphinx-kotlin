@@ -49,6 +49,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
 
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
@@ -56,6 +57,7 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.square.moshi
+    implementation deps.lottie.sdk
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

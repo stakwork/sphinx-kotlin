@@ -7,7 +7,6 @@ import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
 import chat.sphinx.concept_network_query_action_track.model.ActionTrackDto
-import chat.sphinx.concept_network_query_action_track.model.ActionTrackMetaDataDto
 import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
@@ -17,6 +16,7 @@ import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
 import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
+import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
@@ -112,7 +112,6 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -155,6 +154,7 @@ abstract class SphinxRepository(
     private val memeInputStreamHandler: MemeInputStreamHandler,
     private val memeServerTokenHandler: MemeServerTokenHandler,
     private val networkQueryActionTrack: NetworkQueryActionTrack,
+    private val networkQueryDiscoverTribes: NetworkQueryDiscoverTribes,
     private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val networkQueryChat: NetworkQueryChat,
     private val networkQueryContact: NetworkQueryContact,
@@ -716,8 +716,10 @@ abstract class SphinxRepository(
         clipMessageUUID: MessageUUID?,
     ) {
 
-        if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-            return
+        val updateMD = if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+            false
+        } else {
+            updateMetaData
         }
 
         if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
@@ -757,7 +759,7 @@ abstract class SphinxRepository(
                 metaData.satsPerMinute.value,
                 chatId.value,
                 streamSatsText.toJson(moshi),
-                updateMetaData,
+                updateMD,
                 destinationsArray
             )
 
@@ -3723,6 +3725,24 @@ abstract class SphinxRepository(
         emit(response ?: Response.Error(ResponseError("")))
     }
 
+    override fun getAllDiscoverTribes(
+        page: Int,
+        itemsPerPage: Int,
+        searchTerm: String?,
+        tags: String?
+    ): Flow<List<TribeDto>> = flow {
+        networkQueryDiscoverTribes.getAllDiscoverTribes(page, itemsPerPage, searchTerm, tags).collect { response ->
+            @Exhaustive
+            when(response) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+                    emit(response.value)
+                }
+            }
+        }
+    }
+
     override suspend fun updateTribeInfo(chat: Chat): TribeData? {
         var owner: Contact? = accountOwner.value
 
@@ -3994,6 +4014,7 @@ abstract class SphinxRepository(
                             results.add(
                                 FeedRecommendation(
                                     id = feedRecommendation.ref_id,
+                                    pubKey = feedRecommendation.pub_key,
                                     feedType = feedRecommendation.type,
                                     description = feedRecommendation.description,
                                     smallImageUrl = feedRecommendation.s_image_url,
@@ -4034,7 +4055,7 @@ abstract class SphinxRepository(
                 it,
                 podcast.id
             )
-        }
+        }.sortedByDescending { it.datePublishedTime }
 
         if (podcast.episodes.isEmpty()) {
             return null
@@ -4098,7 +4119,7 @@ abstract class SphinxRepository(
 
         withContext(dispatchers.default) {
             sortedList = list.sortedByDescending {
-                it.chat?.contentSeenAt?.time ?: it.lastItem?.datePublished?.time ?: 0
+                it.lastPublished?.datePublished?.time ?: 0
             }
         }
 
@@ -4222,7 +4243,7 @@ abstract class SphinxRepository(
         }
 
         val episodes = queries.feedItemsGetByFeedId(podcast.id).executeAsList().map {
-            podcastEpisodeDboPresenterMapper.mapFrom(it)
+            podcastEpisodeDboPresenterMapper.mapFrom(it, podcast)
         }
 
         val destinations = queries.feedDestinationsGetByFeedId(podcast.id).executeAsList().map {
@@ -4248,18 +4269,18 @@ abstract class SphinxRepository(
 
         val subscribedItems = if (feedType == null) {
             queries
-                .feedGetAllByTitle("%${searchTerm.lowercase().trim()}%")
+                .feedGetSubscribedByTitle("%${searchTerm.lowercase().trim()}%")
                 .executeAsList()
                 .map { it?.let { feedSearchResultDboPresenterMapper.mapFrom(it) } }
         } else {
             queries
-                .feedGetAllByTitleAndType("%${searchTerm.lowercase().trim()}%", feedType)
+                .feedGetSubscribedByTitleAndType("%${searchTerm.lowercase().trim()}%", feedType)
                 .executeAsList()
                 .map { it?.let { feedSearchResultDboPresenterMapper.mapFrom(it) } }
         }
 
 
-        if (subscribedItems.count() > 0) {
+        if (subscribedItems.isNotEmpty()) {
             results.add(
                 FeedSearchResultRow(
                     feedSearchResult = null,
@@ -4316,7 +4337,7 @@ abstract class SphinxRepository(
                         getSubscribedItemsBy(searchTerm, feedType)
                     )
 
-                    if (response.value.count() > 0) {
+                    if (response.value.isNotEmpty()) {
                         results.add(
                             FeedSearchResultRow(
                                 feedSearchResult = null,
@@ -6409,4 +6430,5 @@ abstract class SphinxRepository(
     override fun setAppLog(log: String) {
         appLogsStateFlow.value = appLogsStateFlow.value + log + "\n"
     }
+
 }

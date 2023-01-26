@@ -9,6 +9,7 @@ abstract class JoinTribeNavigator(
     detailNavigationDriver: BaseNavigationDriver<NavController>
 ): Navigator<NavController>(detailNavigationDriver) {
     abstract suspend fun closeDetailScreen()
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }

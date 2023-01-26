@@ -1,5 +1,6 @@
 package chat.sphinx.common_player.ui
 
+import android.app.Application
 import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
@@ -14,6 +15,7 @@ import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -22,7 +24,13 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.FeedDestination
+import chat.sphinx.wrapper_feed.FeedDestinationSplit
+import chat.sphinx.wrapper_feed.FeedDestinationType
+import chat.sphinx.wrapper_feed.toFeedDestinationAddress
+import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,10 +56,12 @@ internal inline val CommonPlayerScreenFragmentArgs.episodeId: FeedId
 @HiltViewModel
 class CommonPlayerScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     private val navigator: CommonPlayerNavigator,
     private val contactRepository: ContactRepository,
     private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
+    private val lightningRepository: LightningRepository,
     private val moshi: Moshi,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     savedStateHandle: SavedStateHandle,
@@ -63,6 +73,9 @@ class CommonPlayerScreenViewModel @Inject constructor(
 {
 
     private val args: CommonPlayerScreenFragmentArgs by savedStateHandle.navArgs()
+
+    private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
+        lightningRepository.getAccountBalance()
 
     val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
         ViewStateContainer(BoostAnimationViewState.Idle)
@@ -187,7 +200,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                     )
 
                     delay(300L)
-                    playEpisode(newEpisode, newEpisode.clipStartTime ?: podcast.currentTime)
+                    preLoadEpisode(newEpisode)
                 }
             } else {
                 playerViewStateContainer.updateViewState(
@@ -296,6 +309,21 @@ class CommonPlayerScreenViewModel @Inject constructor(
                         podcast.setCurrentEpisodeWith(episode.id.value)
                     }
                 }
+            }
+        }
+    }
+
+    private fun preLoadEpisode(episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+
+                podcast.setCurrentEpisodeWith(episode.id.value)
+
+                viewStateContainer.updateViewState(
+                    RecommendationsPodcastPlayerViewState.PodcastViewState.EpisodePlayed(
+                        podcast
+                    )
+                )
             }
         }
     }
@@ -428,6 +456,66 @@ class CommonPlayerScreenViewModel @Inject constructor(
             }
         }
     }
+
+    fun sendPodcastBoost(
+        amount: Sat,
+        fireworksCallback: () -> Unit
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                getAccountBalance().firstOrNull()?.let { balance ->
+                    when {
+                        (amount.value > balance.balance.value) -> {
+                            submitSideEffect(
+                                CommonPlayerScreenSideEffect.Notify.BalanceTooLow
+                            )
+                        }
+                        (amount.value <= 0) -> {
+                            submitSideEffect(
+                                CommonPlayerScreenSideEffect.Notify.BoostAmountTooLow
+                            )
+                        }
+                        else -> {
+                            fireworksCallback()
+
+                            val metaData = podcast.getMetaData(amount)
+
+                            actionsRepository.trackFeedBoostAction(
+                                amount.value,
+                                podcast.getCurrentEpisode().id,
+                                arrayListOf("")
+                            )
+
+                            podcast.getCurrentEpisode()
+                                .recommendationPubKey
+                                ?.toFeedDestinationAddress()
+                                ?.let { pubKey ->
+
+                                    val feedDestination: List<FeedDestination> = arrayListOf(
+                                        FeedDestination(
+                                            address = pubKey,
+                                            split = FeedDestinationSplit(100.0),
+                                            type = FeedDestinationType("node"),
+                                            feedId = podcast.getCurrentEpisode().id
+                                        )
+                                    )
+
+                                    mediaPlayerServiceController.submitAction(
+                                        UserAction.SendBoost(
+                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                                            podcast.getCurrentEpisode().id.value,
+                                            metaData,
+                                            feedDestination
+                                        )
+                                    )
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fun setNewHistoryItem(videoPosition: Long){
         videoRecordConsumed?.setNewHistoryItem(videoPosition)
     }

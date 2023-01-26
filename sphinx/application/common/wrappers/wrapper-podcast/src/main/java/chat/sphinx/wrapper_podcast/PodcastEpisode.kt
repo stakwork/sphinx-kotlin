@@ -31,7 +31,8 @@ data class PodcastEpisode(
     val clipStartTime: Int? = null,
     val clipEndTime: Int? = null,
     val topics: List<String> = listOf(),
-    val people: List<String> = listOf()
+    val people: List<String> = listOf(),
+    val recommendationPubKey: String? = null
 ): DownloadableFeedItem {
 
     companion object {
@@ -118,5 +119,10 @@ data class PodcastEpisode(
     var datePublishedTime: Long = 0
         get() {
             return date?.time ?: 0
+        }
+
+    var isBoostAllowed: Boolean = false
+        get() {
+            return recommendationPubKey?.toFeedDestinationAddress() != null
         }
 }

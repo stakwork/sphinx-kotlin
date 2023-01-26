@@ -744,7 +744,8 @@ internal class DashboardViewModel @Inject constructor(
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = true,
-                    createTribeVisible = !owner.isOnVirtualNode()
+                    createTribeVisible = !owner.isOnVirtualNode(),
+                    discoverTribesVisible = false
                 )
             )
         }
