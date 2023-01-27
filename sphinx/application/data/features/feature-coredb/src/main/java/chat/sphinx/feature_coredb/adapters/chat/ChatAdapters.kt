@@ -2,7 +2,10 @@ package chat.sphinx.feature_coredb.adapters.chat
 
 import chat.sphinx.feature_coredb.adapters.common.DateTimeAdapter
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.lightning.Sat
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.ColumnAdapter
 
@@ -106,16 +109,16 @@ internal class ChatPrivateAdapter: ColumnAdapter<ChatPrivate, Long> {
         return value.value.toLong()
     }
 }
+// This class is deprecated and it's in use to fill meta_dataAdapter parameter on CoreDBImpl
+internal class ChatMetaDataAdapter(val moshi: Moshi): ColumnAdapter<ChatMetaData, String> {
+    override fun decode(databaseValue: String): ChatMetaData {
+        return ChatMetaData(FeedId(""), ItemId(0L), Sat(0),0, 0.0)
+    }
 
-//internal class ChatMetaDataAdapter(val moshi: Moshi): ColumnAdapter<ChatMetaData, String> {
-//    override fun decode(databaseValue: String): ChatMetaData {
-//        return databaseValue.toChatMetaData(moshi)
-//    }
-//
-//    override fun encode(value: ChatMetaData): String {
-//        return value.toJson(moshi)
-//    }
-//}
+    override fun encode(value: ChatMetaData): String {
+        return " "
+    }
+}
 
 internal class ChatAliasAdapter: ColumnAdapter<ChatAlias, String> {
     override fun decode(databaseValue: String): ChatAlias {

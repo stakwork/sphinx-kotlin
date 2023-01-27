@@ -177,7 +177,8 @@ inline fun TransactionCallbacks.upsertChat(
         dto.privateActual.toChatPrivate(),
         dto.owner_pub_key?.toLightningNodePubKey(),
         seen,
-//        dto.meta?.toChatMetaDataOrNull(moshi),
+        null,
+//        dto.meta?.toChatMetaDataOrNull(moshi), (it was replaced with the line above)
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },
