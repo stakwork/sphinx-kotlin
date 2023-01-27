@@ -107,14 +107,14 @@ data class Podcast(
         return episodesList
     }
 
-    fun setMetaData(metaData: ChatMetaData) {
-        episodeId = metaData.itemId.value
-        timeMilliSeconds = metaData.timeSeconds * 1000
-        speed = metaData.speed
-        satsPerMinute = metaData.satsPerMinute.value
-
-        playingEpisode = getEpisodeWithId(metaData.itemId.value)
-    }
+//    fun setMetaData(metaData: ChatMetaData) {
+//        episodeId = metaData.itemId.value
+//        timeMilliSeconds = metaData.timeSeconds * 1000
+//        speed = metaData.speed
+//        satsPerMinute = metaData.satsPerMinute.value
+//
+//        playingEpisode = getEpisodeWithId(metaData.itemId.value)
+//    }
 
     fun setCurrentEpisodeWith(episodeId: String) {
         this.playingEpisode?.playing = false
@@ -125,16 +125,16 @@ data class Podcast(
         this.timeMilliSeconds = episode?.clipStartTime ?: 0
     }
 
-    fun getMetaData(
-        customAmount: Sat? = null
-    ): ChatMetaData =
-        ChatMetaData(
-            FeedId(episodeId ?: "null"),
-            episodeId?.toLongOrNull()?.toItemId() ?: ItemId(-1),
-            customAmount ?: satsPerMinute.toSat() ?: Sat(0),
-            (timeMilliSeconds ?: 0) / 1000,
-            speed,
-        )
+//    fun getMetaData(
+//        customAmount: Sat? = null
+//    ): ChatMetaData =
+//        ChatMetaData(
+//            FeedId(episodeId ?: "null"),
+//            episodeId?.toLongOrNull()?.toItemId() ?: ItemId(-1),
+//            customAmount ?: satsPerMinute.toSat() ?: Sat(0),
+//            (timeMilliSeconds ?: 0) / 1000,
+//            speed,
+//        )
 
     fun getSpeedString(): String {
         if (speed.roundToInt().toDouble() == speed) {

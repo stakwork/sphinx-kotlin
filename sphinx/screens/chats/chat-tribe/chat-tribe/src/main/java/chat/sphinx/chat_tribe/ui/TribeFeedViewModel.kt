@@ -259,7 +259,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         feedUrl = data.feedUrl,
                         chatUUID = data.chatUUID,
                         subscribed = true.toSubscribed(),
-                        currentEpisodeId = data.metaData?.itemId
+//                        currentEpisodeId = data.metaData?.itemId
                     )
                 }
 
@@ -286,9 +286,9 @@ internal class TribeFeedViewModel @Inject constructor(
         feedData: TribeFeedData.Result.FeedData
     ) {
 
-        if (feedData.metaData != null) {
-            podcast.setMetaData(feedData.metaData)
-        }
+//        if (feedData.metaData != null) {
+//            podcast.setMetaData(feedData.metaData)
+//        }
 
         val clickPlayPause = OnClickCallback {
 
@@ -345,12 +345,12 @@ internal class TribeFeedViewModel @Inject constructor(
                         val vs = podcastViewStateContainer.value
 
                         if (vs is PodcastViewState.PodcastVS) {
-                            val metaData = vs.podcast.getMetaData(tip)
+//                            val metaData = vs.podcast.getMetaData(tip)
 
                             val feedBoost = FeedBoost(
                                 podcast.id,
-                                metaData.itemId,
-                                metaData.timeSeconds,
+//                                metaData.itemId,
+//                                metaData.timeSeconds,
                                 tip
                             )
 
@@ -363,7 +363,7 @@ internal class TribeFeedViewModel @Inject constructor(
                                 UserAction.SendBoost(
                                     args.chatId,
                                     vs.podcast.id.value,
-                                    metaData,
+//                                    metaData,
                                     vs.podcast.getFeedDestinations(),
                                 )
                             )
@@ -387,7 +387,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(
                         args.chatId,
-                        vs.podcast.getMetaData()
+//                        vs.podcast.getMetaData()
                     )
                 )
 
@@ -409,12 +409,12 @@ internal class TribeFeedViewModel @Inject constructor(
                 return@OnClickCallback
             }
 
-            repositoryMedia.updateChatMetaData(
-                args.chatId,
-                vs.podcast.id,
-                vs.podcast.getMetaData(),
-                false
-            )
+//            repositoryMedia.updateChatMetaData(
+//                args.chatId,
+//                vs.podcast.id,
+//                vs.podcast.getMetaData(),
+//                false
+//            )
 
             requestPodcastPlayer(vs)
         }
@@ -494,12 +494,12 @@ internal class TribeFeedViewModel @Inject constructor(
             podcastViewStateContainer.collect { podcastViewState ->
                 if (podcastViewState is PodcastViewState.PodcastVS.Available) {
                     chatRepository.getChatById(args.chatId).collect { chat ->
-                        chat?.metaData?.let { nnMetaData ->
-                            val vs = podcastViewStateContainer.value
-                            if (vs is PodcastViewState.PodcastVS) {
-                                vs.podcast.satsPerMinute = nnMetaData.satsPerMinute.value
-                            }
-                        }
+//                        chat?.metaData?.let { nnMetaData ->
+//                            val vs = podcastViewStateContainer.value
+//                            if (vs is PodcastViewState.PodcastVS) {
+//                                vs.podcast.satsPerMinute = nnMetaData.satsPerMinute.value
+//                            }
+//                        }
                         emit(true)
                     }
                 }

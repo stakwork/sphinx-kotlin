@@ -29,25 +29,25 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Seek(
             chatId: ChatId,
-            val chatMetaData: ChatMetaData,
+//            val chatMetaData: ChatMetaData,
         ): ServiceAction(chatId)
 
     }
 
     class AdjustSatsPerMinute(
         chatId: ChatId,
-        val chatMetaData: ChatMetaData,
+//        val chatMetaData: ChatMetaData,
     ): UserAction(chatId)
 
     class AdjustSpeed(
         chatId: ChatId,
-        val chatMetaData: ChatMetaData,
+//        val chatMetaData: ChatMetaData,
     ): UserAction(chatId)
 
     class SendBoost(
         chatId: ChatId,
         val podcastId: String,
-        val metaData: ChatMetaData,
+//        val metaData: ChatMetaData,
         val destinations: List<FeedDestination>
     ): UserAction(chatId)
 

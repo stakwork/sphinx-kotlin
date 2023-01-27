@@ -657,58 +657,58 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun updateChatMetaData(
-        chatId: ChatId,
-        podcastId: FeedId?,
-        metaData: ChatMetaData,
-        shouldSync: Boolean
-    ) {
-        applicationScope.launch(io) {
-            val queries = coreDB.getSphinxDatabaseQueries()
-
-            if (podcastId?.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
-                return@launch
-            }
-
-            if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-                //Podcast with no chat. Updating current item id
-                podcastId?.let { nnPodcastId ->
-                    podcastLock.withLock {
-                        queries.feedUpdateCurrentItemId(
-                            metaData.itemId,
-                            nnPodcastId
-                        )
-                    }
-                }
-                return@launch
-            }
-
-            chatLock.withLock {
-                queries.chatUpdateMetaData(metaData, chatId)
-            }
-
-            podcastLock.withLock {
-                queries.feedUpdateCurrentItemIdByChatId(
-                    metaData.itemId,
-                    chatId
-                )
-            }
-
-            if (shouldSync) {
-                try {
-                    networkQueryChat.updateChat(
-                        chatId,
-                        PutChatDto(meta = metaData.toJson(moshi))
-                    ).collect {}
-                } catch (e: AssertionError) {
-                }
-            }
-        }
-    }
+//    override fun updateChatMetaData(
+//        chatId: ChatId,
+//        podcastId: FeedId?,
+//        metaData: ChatMetaData,
+//        shouldSync: Boolean
+//    ) {
+//        applicationScope.launch(io) {
+//            val queries = coreDB.getSphinxDatabaseQueries()
+//
+//            if (podcastId?.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+//                return@launch
+//            }
+//
+//            if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
+//                //Podcast with no chat. Updating current item id
+//                podcastId?.let { nnPodcastId ->
+//                    podcastLock.withLock {
+//                        queries.feedUpdateCurrentItemId(
+//                            metaData.itemId,
+//                            nnPodcastId
+//                        )
+//                    }
+//                }
+//                return@launch
+//            }
+//
+//            chatLock.withLock {
+//                queries.chatUpdateMetaData(metaData, chatId)
+//            }
+//
+//            podcastLock.withLock {
+//                queries.feedUpdateCurrentItemIdByChatId(
+//                    metaData.itemId,
+//                    chatId
+//                )
+//            }
+//
+//            if (shouldSync) {
+//                try {
+//                    networkQueryChat.updateChat(
+//                        chatId,
+//                        PutChatDto(meta = metaData.toJson(moshi))
+//                    ).collect {}
+//                } catch (e: AssertionError) {
+//                }
+//            }
+//        }
+//    }
 
     override fun streamFeedPayments(
         chatId: ChatId,
-        metaData: ChatMetaData,
+//        metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
         destinations: List<FeedDestination>,
@@ -722,15 +722,15 @@ abstract class SphinxRepository(
             updateMetaData
         }
 
-        if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
-            return
-        }
+//        if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
+//            return
+//        }
 
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
             chatLock.withLock {
-                queries.chatUpdateMetaData(metaData, chatId)
+//                queries.chatUpdateMetaData(metaData, chatId)
             }
 
             val destinationsArray: MutableList<PostStreamSatsDestinationDto> =
@@ -750,13 +750,13 @@ abstract class SphinxRepository(
                 StreamSatsText(
                     podcastId,
                     episodeId,
-                    metaData.timeSeconds.toLong(),
-                    metaData.speed,
+//                    metaData.timeSeconds.toLong(),
+//                    metaData.speed,
                     clipMessageUUID?.value
                 )
 
             val postStreamSatsDto = PostStreamSatsDto(
-                metaData.satsPerMinute.value,
+//                metaData.satsPerMinute.value,
                 chatId.value,
                 streamSatsText.toJson(moshi),
                 updateMD,

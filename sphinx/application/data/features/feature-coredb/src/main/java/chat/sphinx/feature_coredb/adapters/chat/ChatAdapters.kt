@@ -107,15 +107,15 @@ internal class ChatPrivateAdapter: ColumnAdapter<ChatPrivate, Long> {
     }
 }
 
-internal class ChatMetaDataAdapter(val moshi: Moshi): ColumnAdapter<ChatMetaData, String> {
-    override fun decode(databaseValue: String): ChatMetaData {
-        return databaseValue.toChatMetaData(moshi)
-    }
-
-    override fun encode(value: ChatMetaData): String {
-        return value.toJson(moshi)
-    }
-}
+//internal class ChatMetaDataAdapter(val moshi: Moshi): ColumnAdapter<ChatMetaData, String> {
+//    override fun decode(databaseValue: String): ChatMetaData {
+//        return databaseValue.toChatMetaData(moshi)
+//    }
+//
+//    override fun encode(value: ChatMetaData): String {
+//        return value.toJson(moshi)
+//    }
+//}
 
 internal class ChatAliasAdapter: ColumnAdapter<ChatAlias, String> {
     override fun decode(databaseValue: String): ChatAlias {

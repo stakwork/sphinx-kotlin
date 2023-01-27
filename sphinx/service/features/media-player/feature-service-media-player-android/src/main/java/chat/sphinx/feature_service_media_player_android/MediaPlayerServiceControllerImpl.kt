@@ -83,17 +83,17 @@ internal class MediaPlayerServiceControllerImpl(
 
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
-                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
             }
             is UserAction.AdjustSatsPerMinute -> {
-                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
             }
             is UserAction.SendBoost -> {
                 repositoryMedia.streamFeedPayments(
                     userAction.chatId,
-                    userAction.metaData,
+//                    userAction.metaData,
                     userAction.podcastId,
-                    userAction.metaData.itemId.value,
+//                    userAction.metaData.itemId.value,
                     userAction.destinations
                 )
             }
@@ -106,7 +106,7 @@ internal class MediaPlayerServiceControllerImpl(
                 }
             }
             is UserAction.ServiceAction.Seek -> {
-                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 listenerHandler.dispatch(getCurrentState())
             }
         }

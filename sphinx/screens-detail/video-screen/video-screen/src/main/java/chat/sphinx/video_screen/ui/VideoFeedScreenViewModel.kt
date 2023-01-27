@@ -184,17 +184,17 @@ internal open class VideoFeedScreenViewModel(
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
 
-            repositoryMedia.updateChatMetaData(
-                getArgChatId(),
-                video.feed?.id,
-                ChatMetaData(
-                    itemId = video.id,
-                    itemLongId = ItemId(-1),
-                    satsPerMinute = getOwner()?.tipAmount ?: Sat(0),
-                    timeSeconds = 0,
-                    speed = 1.0
-                )
-            )
+//            repositoryMedia.updateChatMetaData(
+//                getArgChatId(),
+//                video.feed?.id,
+//                ChatMetaData(
+//                    itemId = video.id,
+//                    itemLongId = ItemId(-1),
+//                    satsPerMinute = getOwner()?.tipAmount ?: Sat(0),
+//                    timeSeconds = 0,
+//                    speed = 1.0
+//                )
+//            )
 
             selectedVideoStateContainer.updateViewState(
                 SelectedVideoViewState.VideoSelected(
@@ -269,13 +269,13 @@ internal open class VideoFeedScreenViewModel(
 
                                     repositoryMedia.streamFeedPayments(
                                         chatId,
-                                        ChatMetaData(
-                                            itemId = currentItem.id,
-                                            itemLongId = ItemId(-1),
-                                            satsPerMinute = amount,
-                                            timeSeconds = 0,
-                                            speed = 1.0
-                                        ),
+//                                        ChatMetaData(
+//                                            itemId = currentItem.id,
+//                                            itemLongId = ItemId(-1),
+//                                            satsPerMinute = amount,
+//                                            timeSeconds = 0,
+//                                            speed = 1.0
+//                                        ),
                                         videoFeed.id.value,
                                         currentItem.id.value,
                                         destinations

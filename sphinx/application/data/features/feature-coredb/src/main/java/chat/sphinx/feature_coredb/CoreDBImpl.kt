@@ -81,7 +81,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     private_tribeAdapter = ChatPrivateAdapter(),
                     owner_pub_keyAdapter = LightningNodePubKeyAdapter.getInstance(),
                     seenAdapter = SeenAdapter.getInstance(),
-                    meta_dataAdapter = ChatMetaDataAdapter(moshi),
+//                    meta_dataAdapter = ChatMetaDataAdapter(moshi),
                     my_photo_urlAdapter = PhotoUrlAdapter.getInstance(),
                     my_aliasAdapter = ChatAliasAdapter(),
                     pending_contact_idsAdapter = ContactIdsAdapter.getInstance(),

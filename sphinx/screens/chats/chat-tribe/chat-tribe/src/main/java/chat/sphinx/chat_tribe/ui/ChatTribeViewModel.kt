@@ -185,17 +185,17 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
         getPodcast()?.let { podcast ->
-            val metaData = ChatMetaData(
-                itemId = podcastClip.itemID,
-                itemLongId = ItemId(-1),
-                satsPerMinute = getChat()?.metaData?.satsPerMinute ?: Sat(podcast.satsPerMinute),
-                timeSeconds = podcastClip.ts,
-                speed = 1.0
-            )
+//            val metaData = ChatMetaData(
+//                itemId = podcastClip.itemID,
+//                itemLongId = ItemId(-1),
+//                satsPerMinute = getChat()?.metaData?.satsPerMinute ?: Sat(podcast.satsPerMinute),
+//                timeSeconds = podcastClip.ts,
+//                speed = 1.0
+//            )
 
             repositoryMedia.streamFeedPayments(
                 chatId,
-                metaData,
+//                metaData,
                 podcastClip.feedID.value,
                 podcastClip.itemID.value,
                 podcast.getFeedDestinations(podcastClip.pubkey),
@@ -271,7 +271,7 @@ internal class ChatTribeViewModel @Inject constructor(
                         tribeData.feedUrl,
                         tribeData.chatUUID,
                         tribeData.feedType,
-                        chat.metaData,
+//                        chat.metaData,
                     )
 
                 } ?: run {

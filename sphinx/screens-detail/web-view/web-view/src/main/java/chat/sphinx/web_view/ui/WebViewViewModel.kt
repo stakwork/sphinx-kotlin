@@ -226,13 +226,13 @@ internal class WebViewViewModel @Inject constructor(
                                 feed.destinations.let { destinations ->
                                     repositoryMedia.streamFeedPayments(
                                         chatId,
-                                        ChatMetaData(
-                                            itemId = feedItem.id,
-                                            itemLongId = ItemId(-1),
-                                            satsPerMinute = amount,
-                                            timeSeconds = 0,
-                                            speed = 1.0
-                                        ),
+//                                        ChatMetaData(
+//                                            itemId = feedItem.id,
+//                                            itemLongId = ItemId(-1),
+//                                            satsPerMinute = amount,
+//                                            timeSeconds = 0,
+//                                            speed = 1.0
+//                                        ),
                                         feed.id.value,
                                         feedItem.id.value,
                                         destinations

@@ -11,12 +11,12 @@ import java.io.File
 
 interface RepositoryMedia {
 
-    fun updateChatMetaData(
-        chatId: ChatId,
-        podcastId: FeedId?,
-        metaData: ChatMetaData,
-        shouldSync: Boolean = true
-    )
+//    fun updateChatMetaData(
+//        chatId: ChatId,
+//        podcastId: FeedId?,
+//        metaData: ChatMetaData,
+//        shouldSync: Boolean = true
+//    )
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
 
@@ -38,7 +38,7 @@ interface RepositoryMedia {
 
     fun streamFeedPayments(
         chatId: ChatId,
-        metaData: ChatMetaData,
+//        metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
         destinations: List<FeedDestination>,

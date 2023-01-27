@@ -308,17 +308,17 @@ internal class TribeDetailFragment: SideEffectFragment<
                         )
                     }
 
-                    viewState.chat.metaData?.let { nnMetaData ->
-                        constrainLayoutPodcastLightningControls.visible
-
-                        val satsPerMinute = nnMetaData.satsPerMinute.value
-                        val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
-                        val index = SLIDER_VALUES.indexOf(closest)
-
-                        seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
-                        seekBarSatsPerMinute.progress = index
-                        textViewPodcastSatsPerMinuteValue.text = closest.toString()
-                    }
+//                    viewState.chat.metaData?.let { nnMetaData ->
+//                        constrainLayoutPodcastLightningControls.visible
+//
+//                        val satsPerMinute = nnMetaData.satsPerMinute.value
+//                        val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+//                        val index = SLIDER_VALUES.indexOf(closest)
+//
+//                        seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+//                        seekBarSatsPerMinute.progress = index
+//                        textViewPodcastSatsPerMinuteValue.text = closest.toString()
+//                    }
 
 
                     if (viewState.chat.isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)) {

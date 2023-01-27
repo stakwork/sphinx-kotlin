@@ -230,12 +230,12 @@ internal class DashboardPodcastViewModel @Inject constructor(
                     return@OnClickCallback
                 }
 
-                repositoryMedia.updateChatMetaData(
-                    podcast.chatId,
-                    vs.podcast.id,
-                    vs.podcast.getMetaData(),
-                    false
-                )
+//                repositoryMedia.updateChatMetaData(
+//                    podcast.chatId,
+//                    vs.podcast.id,
+//                    vs.podcast.getMetaData(),
+//                    false
+//                )
 
                 requestPodcastPlayer(vs)
             }

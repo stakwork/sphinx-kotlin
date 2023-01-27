@@ -323,9 +323,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private fun podcastLoaded(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                chat.metaData?.let { metaData ->
-                    podcast.setMetaData(metaData)
-                }
+//                chat.metaData?.let { metaData ->
+//                    podcast.setMetaData(metaData)
+//                }
             }
 
             viewStateContainer.updateViewState(
