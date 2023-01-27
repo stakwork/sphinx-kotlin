@@ -230,6 +230,21 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     typeAdapter = ActionTrackTypeAdapter(),
                     meta_dataAdapter = ActionTrackMetaDataAdapter(),
                     uploadedAdapter = ActionTrackUploadedAdapter()
+                ),
+                contentFeedStatusDboAdapter = ContentFeedStatusDbo.Adapter(
+                    feed_idAdapter = FeedIdAdapter(),
+                    feed_urlAdapter = FeedUrlAdapter.getInstance(),
+                    subscription_statusAdapter = SubscribedAdapter.getInstance(),
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    item_idAdapter = FeedIdAdapter(),
+                    sats_per_minuteAdapter = SatAdapter.getInstance(),
+                    player_speedAdapter = FeedItemDurationAdapter()
+                ),
+                contentEpisodeStatusDboAdapter = ContentEpisodeStatusDbo.Adapter(
+                    feed_idAdapter = FeedIdAdapter(),
+                    item_idAdapter = FeedIdAdapter(),
+                    durationAdapter = FeedItemDurationAdapter(),
+                    current_timeAdapter = FeedItemDurationAdapter()
                 )
             ).sphinxDatabaseQueries
         }
