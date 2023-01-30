@@ -706,6 +706,53 @@ abstract class SphinxRepository(
 //        }
 //    }
 
+    private val contentFeedLock = Mutex()
+    override fun updateContentFeedStatus(
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        subscriptionStatus: Subscribed,
+        chatId: ChatId?,
+        itemId: FeedId,
+        satsPerMinute: Sat,
+        playerSpeed: FeedItemDuration
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentFeedLock.withLock {
+                queries.contentFeedStatusUpsert(
+                    feed_id = feedId,
+                    feed_url = feedUrl,
+                    subscription_status = subscriptionStatus,
+                    chat_id = chatId,
+                    item_id = itemId,
+                    sats_per_minute = satsPerMinute,
+                    player_speed = playerSpeed
+                )
+            }
+        }
+    }
+    private val contentEpisodeLock = Mutex()
+    override fun updateContentEpisodeStatus(
+        feedId: FeedId,
+        itemId: FeedId,
+        duration: FeedItemDuration,
+        currentTime: FeedItemDuration
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentEpisodeLock.withLock {
+                queries.contentEpisodeStatusUpsert(
+                    feed_id = feedId,
+                    item_id = itemId,
+                    duration = duration,
+                    current_time = currentTime
+                )
+            }
+        }
+    }
+
     override fun streamFeedPayments(
         chatId: ChatId,
 //        metaData: ChatMetaData,
