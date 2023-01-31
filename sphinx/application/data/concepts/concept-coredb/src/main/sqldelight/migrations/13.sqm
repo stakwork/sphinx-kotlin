@@ -13,7 +13,7 @@ CREATE TABLE contentFeedStatusDbo(
     chat_id                         INTEGER         AS ChatId,
     item_id                         TEXT            AS FeedId,
     sats_per_minute                 INTEGER         AS Sat,
-    player_speed                    INTEGER         AS FeedPlayerSpeed
+    player_speed                    REAL            AS FeedPlayerSpeed
 );
 
 CREATE TABLE contentEpisodeStatusDbo(

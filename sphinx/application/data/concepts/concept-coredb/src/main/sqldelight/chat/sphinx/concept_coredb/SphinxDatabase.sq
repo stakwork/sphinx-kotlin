@@ -1409,7 +1409,7 @@ CREATE TABLE contentFeedStatusDbo(
     chat_id                         INTEGER         AS ChatId,
     item_id                         TEXT            AS FeedId,
     sats_per_minute                 INTEGER         AS Sat,
-    player_speed                    INTEGER         AS FeedPlayerSpeed
+    player_speed                    REAL            AS FeedPlayerSpeed
 );
 
 contentFeedStatusUpsert {
@@ -1450,6 +1450,11 @@ contentFeedStatusGetByIds:
 SELECT *
 FROM contentFeedStatusDbo
 WHERE feed_id IN ?;
+
+contentFeedStatusGetByFeedId:
+SELECT *
+FROM contentFeedStatusDbo
+WHERE feed_id = :feed_id;
 
 contentFeedStatusDeleteAll:
 DELETE FROM contentFeedStatusDbo;
@@ -1492,6 +1497,10 @@ SELECT *
 FROM contentEpisodeStatusDbo
 WHERE feed_id IN ?;
 
+contentEpisodeStatusGetByItemId:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE item_id = :item_id;
+
 contentEpisodeStatusDeleteAll:
 DELETE FROM contentEpisodeStatusDbo;
-

@@ -714,10 +714,14 @@ abstract class SphinxRepository(
         chatId: ChatId?,
         itemId: FeedId,
         satsPerMinute: Sat,
-        playerSpeed: FeedItemDuration
+        playerSpeed: FeedPlayerSpeed
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
 
             contentFeedLock.withLock {
                 queries.contentFeedStatusUpsert(
@@ -741,6 +745,10 @@ abstract class SphinxRepository(
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
 
             contentEpisodeLock.withLock {
                 queries.contentEpisodeStatusUpsert(
