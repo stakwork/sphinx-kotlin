@@ -23,6 +23,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -195,6 +197,16 @@ internal open class VideoFeedScreenViewModel(
 //                    speed = 1.0
 //                )
 //            )
+
+            repositoryMedia.updateContentFeedStatus(
+                feedId = video.feedId,
+                feedUrl = video.enclosureUrl,
+                subscriptionStatus = Subscribed.False,
+                chatId = getArgChatId(),
+                itemId = video.id,
+                satsPerMinute = getOwner().tipAmount ?: Sat(0),
+                playerSpeed = FeedPlayerSpeed(1.0)
+            )
 
             selectedVideoStateContainer.updateViewState(
                 SelectedVideoViewState.VideoSelected(

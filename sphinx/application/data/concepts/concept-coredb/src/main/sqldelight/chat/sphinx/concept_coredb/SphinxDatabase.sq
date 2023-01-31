@@ -60,6 +60,7 @@ import chat.sphinx.wrapper_feed.FeedItemsCount;
 import chat.sphinx.wrapper_feed.FeedLanguage;
 import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
 import chat.sphinx.wrapper_feed.FeedTitle;
 import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.Flagged;
@@ -1408,7 +1409,7 @@ CREATE TABLE contentFeedStatusDbo(
     chat_id                         INTEGER         AS ChatId,
     item_id                         TEXT            AS FeedId,
     sats_per_minute                 INTEGER         AS Sat,
-    player_speed                    INTEGER         AS FeedItemDuration
+    player_speed                    INTEGER         AS FeedPlayerSpeed
 );
 
 contentFeedStatusUpsert {

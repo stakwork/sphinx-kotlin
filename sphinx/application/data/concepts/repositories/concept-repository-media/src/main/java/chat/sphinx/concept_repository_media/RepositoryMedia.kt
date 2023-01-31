@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_feed.DownloadableFeedItem
 import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.Message
 import java.io.File
 
@@ -29,7 +30,7 @@ interface RepositoryMedia {
         chatId: ChatId?,
         itemId: FeedId,
         satsPerMinute: Sat,
-        playerSpeed: FeedItemDuration
+        playerSpeed: FeedPlayerSpeed
     )
 
     fun updateContentEpisodeStatus(

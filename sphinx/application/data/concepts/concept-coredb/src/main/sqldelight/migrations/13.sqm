@@ -4,6 +4,7 @@ import chat.sphinx.wrapper_common.feed.FeedUrl;
 import chat.sphinx.wrapper_common.feed.Subscribed;
 import chat.sphinx.wrapper_common.lightning.Sat;
 import chat.sphinx.wrapper_feed.FeedItemDuration;
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
 
 CREATE TABLE contentFeedStatusDbo(
     feed_id                         TEXT            AS FeedId NOT NULL PRIMARY KEY,
@@ -12,7 +13,7 @@ CREATE TABLE contentFeedStatusDbo(
     chat_id                         INTEGER         AS ChatId,
     item_id                         TEXT            AS FeedId,
     sats_per_minute                 INTEGER         AS Sat,
-    player_speed                    INTEGER         AS FeedItemDuration
+    player_speed                    INTEGER         AS FeedPlayerSpeed
 );
 
 CREATE TABLE contentEpisodeStatusDbo(
