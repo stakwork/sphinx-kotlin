@@ -5,7 +5,7 @@ import chat.sphinx.wrapper_common.feed.FeedId
 
 data class ContentEpisodeStatus(
     val feedId: FeedId,
-    val itemId: ItemId,
+    val itemId: FeedId,
     val duration: FeedItemDuration,
     val currentTime: FeedItemDuration
 )

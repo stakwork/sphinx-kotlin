@@ -65,6 +65,8 @@ import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboPodcast
 import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboFeedSearchPresenterMapper
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.*
+import chat.sphinx.feature_repository.mappers.feed.ContentFeedStatusDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
@@ -4016,6 +4018,12 @@ abstract class SphinxRepository(
     private val feedDestinationDboPresenterMapper: FeedDestinationDboPresenterMapper by lazy {
         FeedDestinationDboPresenterMapper(dispatchers)
     }
+    private val contentFeedStatusDboPresenterMapper: ContentFeedStatusDboPresenterMapper by lazy {
+        ContentFeedStatusDboPresenterMapper(dispatchers)
+    }
+    private val contentEpisodeStatusDboPresenterMapper: ContentEpisodeStatusDboPresenterMapper by lazy {
+        ContentEpisodeStatusDboPresenterMapper(dispatchers)
+    }
 
     override fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
@@ -4224,14 +4232,30 @@ abstract class SphinxRepository(
             feedDestinationDboPresenterMapper.mapFrom(it)
         }
 
+        val contentFeedStatus = queries.contentFeedStatusGetByFeedId(feed.id).executeAsOneOrNull()?.let { contentFeedStatus ->
+            contentFeedStatusDboPresenterMapper.mapFrom(contentFeedStatus)
+        }
+
+        val itemIds = items.map { it.id }
+
+        val episodeStatus = queries.contentEpisodeStatusGetByItemIds(itemIds).executeAsList().map {
+            contentEpisodeStatusDboPresenterMapper.mapFrom(it)
+        }
+
         items.forEach { feedItem ->
             feedItem.feed = feed
+            episodeStatus.forEach { episodeStatus ->
+                if (feedItem.id == episodeStatus.itemId) {
+                    feedItem.contentEpisodeStatus = episodeStatus
+                }
+            }
         }
 
         feed.items = items
         feed.model = model
         feed.destinations = destinations
         feed.chat = chat
+        feed.contentFeedStatus = contentFeedStatus
 
         return feed
     }

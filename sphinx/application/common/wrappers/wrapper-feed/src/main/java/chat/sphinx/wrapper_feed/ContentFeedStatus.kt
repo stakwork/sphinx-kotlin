@@ -12,7 +12,7 @@ data class ContentFeedStatus(
     val feedUrl: FeedUrl,
     val subscriptionStatus: Subscribed,
     val chatId: ChatId?,
-    val itemId: ItemId,
+    val itemId: FeedId?,
     val satsPerMinute: Sat?,
     val playerSpeed: FeedPlayerSpeed?
 )

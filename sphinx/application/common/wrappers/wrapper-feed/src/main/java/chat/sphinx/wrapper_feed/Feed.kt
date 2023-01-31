@@ -48,6 +48,8 @@ data class Feed(
 
     var chat: Chat? = null
 
+    var contentFeedStatus: ContentFeedStatus? = null
+
     var lastPublished: FeedItem? = null
         get() {
             if (items.isNotEmpty()) {
