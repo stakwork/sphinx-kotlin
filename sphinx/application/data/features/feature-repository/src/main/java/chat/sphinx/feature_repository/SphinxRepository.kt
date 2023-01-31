@@ -4137,9 +4137,17 @@ abstract class SphinxRepository(
         val chatsMap: MutableMap<ChatId, Chat?> =
             LinkedHashMap(listFeedDbo.size)
 
+        val contentFeedStatusesMap: MutableMap<FeedId, ArrayList<ContentFeedStatus>> =
+            LinkedHashMap(listFeedDbo.size)
+
+        val contentEpisodeStatusesMap: MutableMap<FeedId, ArrayList<ContentEpisodeStatus>> =
+            LinkedHashMap(listFeedDbo.size)
+
         for (dbo in listFeedDbo) {
             itemsMap[dbo.id] = ArrayList(0)
             chatsMap[dbo.chat_id] = null
+            contentFeedStatusesMap[dbo.id] = ArrayList(0)
+            contentEpisodeStatusesMap[dbo.id] = ArrayList(0)
         }
 
         itemsMap.keys.chunked(500).forEach { chunkedIds ->
@@ -4168,13 +4176,43 @@ abstract class SphinxRepository(
                 }
         }
 
+        contentFeedStatusesMap.keys.chunked(500).forEach { chunkedIds ->
+            queries.contentFeedStatusGetByIds(chunkedIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        dbo.feed_id?.let { feedId ->
+                            contentFeedStatusesMap[feedId]?.add(
+                                contentFeedStatusDboPresenterMapper.mapFrom(dbo)
+                            )
+                        }
+                    }
+                }
+        }
+
+        contentEpisodeStatusesMap.keys.chunked(500).forEach { chunkedIds ->
+            queries.contentEpisodeStatusGetByIds(chunkedIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        dbo.feed_id?.let { feedId ->
+                            contentEpisodeStatusesMap[feedId]?.add(
+                                contentEpisodeStatusDboPresenterMapper.mapFrom(dbo)
+                            )
+                        }
+                    }
+                }
+        }
+
         val list = listFeedDbo.map {
             mapFeedDbo(
                 feedDbo = it,
                 items = itemsMap[it.id] ?: listOf(),
                 model = null,
                 destinations = listOf(),
-                chat = chatsMap[it.chat_id]
+                chat = chatsMap[it.chat_id],
+                contentFeedStatusesMap = contentFeedStatusesMap[it.id] ?: listOf(),
+                contentEpisodeStatusesMap = contentEpisodeStatusesMap[it.id] ?: listOf()
             )
         }
 
@@ -4195,6 +4233,8 @@ abstract class SphinxRepository(
         model: FeedModel? = null,
         destinations: List<FeedDestination>,
         chat: Chat? = null,
+        contentFeedStatuses: List<ContentFeedStatus>,
+        contentEpisodeStatuses: List<ContentEpisodeStatus>
     ): Feed {
 
         val feed = feedDboPresenterMapper.mapFrom(feedDbo)
