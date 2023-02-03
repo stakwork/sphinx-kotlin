@@ -238,7 +238,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     chat_idAdapter = ChatIdAdapter.getInstance(),
                     item_idAdapter = FeedIdAdapter(),
                     sats_per_minuteAdapter = SatAdapter.getInstance(),
-                    player_speedAdapter = FeedItemDurationAdapter()
+                    player_speedAdapter = PlayerSpeedAdapter()
                 ),
                 contentEpisodeStatusDboAdapter = ContentEpisodeStatusDbo.Adapter(
                     feed_idAdapter = FeedIdAdapter(),
