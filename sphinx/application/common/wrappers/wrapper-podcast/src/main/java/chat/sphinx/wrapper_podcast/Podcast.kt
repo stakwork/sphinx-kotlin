@@ -1,17 +1,12 @@
 package chat.sphinx.wrapper_podcast
 
-import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.DateTime
-import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
-import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_feed.*
 import java.io.File
 import kotlin.math.roundToInt
@@ -49,8 +44,10 @@ data class Podcast(
         return result
     }
 
-    var model: PodcastModel? = null
-    var destinations: List<PodcastDestination> = arrayListOf()
+    var model: FeedModel? = null
+    var destinations: List<FeedDestination> = arrayListOf()
+    var contentFeedStatus: ContentFeedStatus? = null
+
     var episodes: List<PodcastEpisode> = arrayListOf()
 
     //MetaData
@@ -334,16 +331,8 @@ data class Podcast(
         clipSenderPubKey: LightningNodePubKey? = null,
     ): List<FeedDestination> {
         val feedDestinations = mutableListOf<FeedDestination>()
-        destinations.forEach {
-            feedDestinations.add(
-                FeedDestination(
-                    it.address,
-                    it.split,
-                    it.type,
-                    it.podcastId
-                )
-            )
-        }
+
+        feedDestinations.addAll(destinations)
 
         clipSenderPubKey?.let {
             feedDestinations.add(

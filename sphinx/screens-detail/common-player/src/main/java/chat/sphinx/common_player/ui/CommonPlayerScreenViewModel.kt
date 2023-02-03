@@ -24,13 +24,8 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.FeedDestination
-import chat.sphinx.wrapper_feed.FeedDestinationSplit
-import chat.sphinx.wrapper_feed.FeedDestinationType
-import chat.sphinx.wrapper_feed.toFeedDestinationAddress
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel

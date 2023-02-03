@@ -1502,5 +1502,10 @@ SELECT *
 FROM contentEpisodeStatusDbo
 WHERE feed_id = :feed_id AND item_id IN ?;
 
+contentEpisodeStatusGetByItemIds:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE item_id IN ?;
+
 contentEpisodeStatusDeleteAll:
 DELETE FROM contentEpisodeStatusDbo;

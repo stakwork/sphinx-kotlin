@@ -55,6 +55,8 @@ data class PodcastEpisode(
         return result
     }
 
+    var contentEpisodeStatus: ContentEpisodeStatus? = null
+
     var titleToShow: String = ""
         get() = title.value.trim()
 

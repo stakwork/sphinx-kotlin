@@ -1,11 +1,8 @@
 package chat.sphinx.concept_service_media
 
-import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_feed.FeedDestination
-import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastDestination
 
 // TODO: info - episode id, episode url, start time, speed, general info about episode, chatId
 sealed class UserAction(val chatId: ChatId) {

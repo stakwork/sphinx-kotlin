@@ -4,7 +4,6 @@ import android.media.MediaPlayer
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_feed.FeedDestination
-import chat.sphinx.wrapper_podcast.PodcastDestination
 
 internal class PodcastDataHolder private constructor(
     val chatId: ChatId,
