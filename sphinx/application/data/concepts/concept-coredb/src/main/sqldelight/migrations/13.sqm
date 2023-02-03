@@ -17,8 +17,9 @@ CREATE TABLE contentFeedStatusDbo(
 );
 
 CREATE TABLE contentEpisodeStatusDbo(
-    feed_id                         TEXT            AS FeedId NOT NULL PRIMARY KEY,
     item_id                         TEXT            AS FeedId NOT NULL,
+    feed_id                         TEXT            AS FeedId NOT NULL,
     duration                        INTEGER         AS FeedItemDuration NOT NULL,
-    current_time                    INTEGER         AS FeedItemDuration NOT NULL
+    current_time                    INTEGER         AS FeedItemDuration NOT NULL,
+    PRIMARY KEY (item_id, feed_id)
 );

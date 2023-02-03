@@ -1461,28 +1461,28 @@ DELETE FROM contentFeedStatusDbo;
 
 
 CREATE TABLE contentEpisodeStatusDbo(
-    feed_id                         TEXT            AS FeedId NOT NULL PRIMARY KEY,
     item_id                         TEXT            AS FeedId NOT NULL,
+    feed_id                         TEXT            AS FeedId NOT NULL,
     duration                        INTEGER         AS FeedItemDuration NOT NULL,
-    current_time                    INTEGER         AS FeedItemDuration NOT NULL
+    current_time                    INTEGER         AS FeedItemDuration NOT NULL,
+    PRIMARY KEY (item_id, feed_id)
 );
 
 contentEpisodeStatusUpsert {
     UPDATE contentEpisodeStatusDbo
-    SET item_id = :item_id,
-        duration = :duration,
+    SET duration = :duration,
         current_time = :current_time
-    WHERE feed_id = :feed_id;
+    WHERE item_id = :item_id AND feed_id = :feed_id;
 
     INSERT OR IGNORE INTO contentEpisodeStatusDbo(
-           feed_id,
            item_id,
+           feed_id,
            duration,
            current_time
     )
     VALUES (
            :feed_id,
-           :item_id,
+           :feed_id,
            :duration,
            :current_time
     );
@@ -1492,15 +1492,15 @@ contentEpisodeStatusGetAll:
 SELECT *
 FROM contentEpisodeStatusDbo;
 
-contentEpisodeStatusGetByIds:
+contentEpisodeStatusGetByFeedIdAndItemId:
 SELECT *
 FROM contentEpisodeStatusDbo
-WHERE feed_id IN ?;
+WHERE feed_id = :feed_id AND item_id = :item_id;
 
-contentEpisodeStatusGetByItemIds:
+contentEpisodeStatusGetByFeedIdAndItemIds:
 SELECT *
 FROM contentEpisodeStatusDbo
-WHERE item_id IN ?;
+WHERE feed_id = :feed_id AND item_id IN ?;
 
 contentEpisodeStatusDeleteAll:
 DELETE FROM contentEpisodeStatusDbo;
