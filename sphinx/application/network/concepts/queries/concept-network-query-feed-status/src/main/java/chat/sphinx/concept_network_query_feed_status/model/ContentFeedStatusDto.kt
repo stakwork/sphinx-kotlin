@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_feed_status.model
 
+import chat.sphinx.wrapper_common.feed.FeedId
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -9,13 +10,13 @@ data class ContentFeedStatusDto(
     val subscription_status: Boolean,
     val chat_id: Long,
     val item_id: String,
-    val episodes_status: List<EpisodeIdDto>,
     val sats_per_minute: Int,
-    val player_speed: Double
+    val player_speed: Double,
+    val episodes_status: Map<FeedId, EpisodeStatusDto>,
 )
 
 @JsonClass(generateAdapter = true)
-data class EpisodeIdDto(
+data class EpisodeStatusDto(
     val duration: Int,
     val current_time: Int
 )

@@ -1,9 +1,11 @@
 package chat.sphinx.concept_network_query_feed_status
 
 import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
-import chat.sphinx.concept_network_query_feed_status.model.SyncFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.RequestSignature
@@ -15,15 +17,24 @@ abstract class NetworkQueryFeedStatus {
     ////////////
     /// POST ///
     ////////////
-    abstract fun sendFeedStatuses(
-        syncFeedStatusDto: SyncFeedStatusDto,
+    abstract fun saveFeedStatuses(
+        feedStatusesDto: PostFeedStatusDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any?, ResponseError>>
+
+    ////////////
+    /// PUT ///
+    ////////////
+    abstract fun saveFeedStatus(
+        feedId: FeedId,
+        feedStatusDto: PutFeedStatusDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<Any?, ResponseError>>
 
     ///////////
     /// GET ///
     ///////////
-    abstract fun getAllFeedStatuses(
+    abstract fun getFeedStatuses(
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<List<ContentFeedStatusDto>, ResponseError>>
 }
