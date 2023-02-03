@@ -332,12 +332,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 PodcastPlayerViewState.PodcastLoaded(podcast)
             )
 
-            mediaPlayerServiceController.submitAction(
-                UserAction.AdjustSatsPerMinute(
-                    args.chatId,
-                    podcast.getMetaData()
-                )
-            )
+//            mediaPlayerServiceController.submitAction(
+//                UserAction.AdjustSatsPerMinute(
+//                    args.chatId,
+//                    podcast.getMetaData()
+//                )
+//            )
         }
     }
 
@@ -425,14 +425,14 @@ internal class PodcastPlayerViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.didSeekTo(time)
 
-                val metaData = podcast.getMetaData()
-
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Seek(
-                        args.chatId,
-                        metaData
-                    )
-                )
+//                val metaData = podcast.getMetaData()
+//
+//                mediaPlayerServiceController.submitAction(
+//                    UserAction.ServiceAction.Seek(
+//                        args.chatId,
+//                        metaData
+//                    )
+//                )
             }
         }
     }
@@ -442,12 +442,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.speed = speed
 
-                mediaPlayerServiceController.submitAction(
-                    UserAction.AdjustSpeed(
-                        args.chatId,
-                        podcast.getMetaData()
-                    )
-                )
+//                mediaPlayerServiceController.submitAction(
+//                    UserAction.AdjustSpeed(
+//                        args.chatId,
+//                        podcast.getMetaData()
+//                    )
+//                )
             }
         }
     }
@@ -494,34 +494,34 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         else -> {
                             fireworksCallback()
 
-                            val metaData = podcast.getMetaData(amount)
-
-                            messageRepository.sendBoost(
-                                args.chatId,
-                                FeedBoost(
-                                    feedId = podcast.id,
-                                    itemId = metaData.itemId,
-                                    timeSeconds = metaData.timeSeconds,
-                                    amount = amount
-                                )
-                            )
-
-                            actionsRepository.trackFeedBoostAction(
-                                amount.value,
-                                podcast.getCurrentEpisode().id,
-                                arrayListOf("")
-                            )
-
-                            if (podcast.hasDestinations) {
-                                mediaPlayerServiceController.submitAction(
-                                    UserAction.SendBoost(
-                                        args.chatId,
-                                        podcast.id.value,
-                                        metaData,
-                                        podcast.getFeedDestinations()
-                                    )
-                                )
-                            }
+//                            val metaData = podcast.getMetaData(amount)
+//
+//                            messageRepository.sendBoost(
+//                                args.chatId,
+//                                FeedBoost(
+//                                    feedId = podcast.id,
+//                                    itemId = metaData.itemId,
+//                                    timeSeconds = metaData.timeSeconds,
+//                                    amount = amount
+//                                )
+//                            )
+//
+//                            actionsRepository.trackFeedBoostAction(
+//                                amount.value,
+//                                podcast.getCurrentEpisode().id,
+//                                arrayListOf("")
+//                            )
+//
+//                            if (podcast.hasDestinations) {
+//                                mediaPlayerServiceController.submitAction(
+//                                    UserAction.SendBoost(
+//                                        args.chatId,
+//                                        podcast.id.value,
+//                                        metaData,
+//                                        podcast.getFeedDestinations()
+//                                    )
+//                                )
+//                            }
                         }
                     }
                 }

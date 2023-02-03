@@ -205,12 +205,12 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 viewModelScope.launch(mainImmediate) {
                     vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
 
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Seek(
-                            podcast.chatId,
-                            vs.podcast.getMetaData()
-                        )
-                    )
+//                    mediaPlayerServiceController.submitAction(
+//                        UserAction.ServiceAction.Seek(
+//                            podcast.chatId,
+//                            vs.podcast.getMetaData()
+//                        )
+//                    )
 
                     if (!vs.podcast.isPlaying) {
                         vs.adjustState(

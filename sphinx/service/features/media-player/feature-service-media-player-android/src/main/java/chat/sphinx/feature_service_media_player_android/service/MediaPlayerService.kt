@@ -160,8 +160,8 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                     podData?.let { nnData ->
                         if (
-                            nnData.chatId == userAction.chatId &&
-//                            nnData.episodeId == userAction.chatMetaData.itemId.value
+                            nnData.chatId == userAction.chatId
+//                            && nnData.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
                                 val playing = nnData.mediaPlayer.isPlaying
@@ -319,22 +319,22 @@ internal abstract class MediaPlayerService: SphinxService() {
                 is UserAction.ServiceAction.Seek -> {
                     podData?.let { nnPlayer ->
                         if (
-                            nnPlayer.chatId == userAction.chatId &&
-//                            nnPlayer.episodeId == userAction.chatMetaData.itemId.value
+                            nnPlayer.chatId == userAction.chatId
+//                            && nnPlayer.episodeId == userAction.chatMetaData.itemId.value
                         ) {
                             try {
 //                                val secondPosition = userAction.chatMetaData.timeSeconds * 1000
-                                nnPlayer.mediaPlayer.seekTo(secondPosition)
+//                                nnPlayer.mediaPlayer.seekTo(secondPosition)
                                 createHistoryItem()
-                                setStartTimestamp(secondPosition.toLong())
+//                                setStartTimestamp(secondPosition.toLong())
                                 resetTrackSecondsConsumed()
                                 // TODO: Dispatch State
                             } catch (e: IllegalStateException) {
-                                LOG.e(
-                                    TAG,
+//                                LOG.e(
+//                                    TAG,
 //                                    "Failed to   seekTo ${userAction.chatMetaData.timeSeconds} for MediaPlayer",
-                                    e
-                                )
+//                                    e
+//                                )
                                 // TODO: Handle Error
                             }
                         }

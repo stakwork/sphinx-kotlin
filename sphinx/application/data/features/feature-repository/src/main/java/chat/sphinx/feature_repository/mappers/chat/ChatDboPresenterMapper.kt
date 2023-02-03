@@ -63,7 +63,7 @@ internal class ChatDboPresenterMapper(
             private_tribe = value.privateTribe,
             owner_pub_key = value.ownerPubKey,
             seen = value.seen,
-//            meta_data = value.metaData,
+            meta_data = null,
             my_photo_url = value.myPhotoUrl,
             my_alias = value.myAlias,
             pending_contact_ids = value.pendingContactIds,

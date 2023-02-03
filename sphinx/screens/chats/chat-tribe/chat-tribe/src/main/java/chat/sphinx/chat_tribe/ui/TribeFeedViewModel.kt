@@ -253,14 +253,14 @@ internal class TribeFeedViewModel @Inject constructor(
             is TribeFeedData.Result.FeedData -> {
 
                 viewModelScope.launch(mainImmediate) {
-                    feedRepository.updateFeedContent(
-                        chatId = args.chatId,
-                        host = data.host,
-                        feedUrl = data.feedUrl,
-                        chatUUID = data.chatUUID,
-                        subscribed = true.toSubscribed(),
+//                    feedRepository.updateFeedContent(
+//                        chatId = args.chatId,
+//                        host = data.host,
+//                        feedUrl = data.feedUrl,
+//                        chatUUID = data.chatUUID,
+//                        subscribed = true.toSubscribed(),
 //                        currentEpisodeId = data.metaData?.itemId
-                    )
+//                    )
                 }
 
                 if (data.feedType.isPodcast()) {
@@ -346,27 +346,27 @@ internal class TribeFeedViewModel @Inject constructor(
 
                         if (vs is PodcastViewState.PodcastVS) {
 //                            val metaData = vs.podcast.getMetaData(tip)
-
-                            val feedBoost = FeedBoost(
-                                podcast.id,
+//
+//                            val feedBoost = FeedBoost(
+//                                podcast.id,
 //                                metaData.itemId,
 //                                metaData.timeSeconds,
-                                tip
-                            )
-
-                            messageRepository.sendBoost(
-                                args.chatId,
-                                feedBoost
-                            )
-
-                            mediaPlayerServiceController.submitAction(
-                                UserAction.SendBoost(
-                                    args.chatId,
-                                    vs.podcast.id.value,
+//                                tip
+//                            )
+//
+//                            messageRepository.sendBoost(
+//                                args.chatId,
+//                                feedBoost
+//                            )
+//
+//                            mediaPlayerServiceController.submitAction(
+//                                UserAction.SendBoost(
+//                                    args.chatId,
+//                                    vs.podcast.id.value,
 //                                    metaData,
-                                    vs.podcast.getFeedDestinations(),
-                                )
-                            )
+//                                    vs.podcast.getFeedDestinations(),
+//                                )
+//                            )
                         }
                     }
                 }

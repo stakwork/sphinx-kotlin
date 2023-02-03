@@ -89,13 +89,13 @@ internal class MediaPlayerServiceControllerImpl(
 //                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
             }
             is UserAction.SendBoost -> {
-                repositoryMedia.streamFeedPayments(
-                    userAction.chatId,
+//                repositoryMedia.streamFeedPayments(
+//                    userAction.chatId,
 //                    userAction.metaData,
-                    userAction.podcastId,
+//                    userAction.podcastId,
 //                    userAction.metaData.itemId.value,
-                    userAction.destinations
-                )
+//                    userAction.destinations
+//                )
             }
             is UserAction.ServiceAction.Pause -> {
                 listenerHandler.dispatch(getCurrentState())

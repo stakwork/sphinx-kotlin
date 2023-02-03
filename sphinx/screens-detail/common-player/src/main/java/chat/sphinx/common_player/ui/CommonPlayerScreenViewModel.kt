@@ -382,14 +382,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.didSeekTo(time)
 
-                val metaData = podcast.getMetaData()
-
-                mediaPlayerServiceController.submitAction(
-                    UserAction.ServiceAction.Seek(
-                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        metaData
-                    )
-                )
+//                val metaData = podcast.getMetaData()
+//
+//                mediaPlayerServiceController.submitAction(
+//                    UserAction.ServiceAction.Seek(
+//                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+//                        metaData
+//                    )
+//                )
             }
         }
     }
@@ -399,12 +399,12 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.speed = speed
 
-                mediaPlayerServiceController.submitAction(
-                    UserAction.AdjustSpeed(
-                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        podcast.getMetaData()
-                    )
-                )
+//                mediaPlayerServiceController.submitAction(
+//                    UserAction.AdjustSpeed(
+//                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+//                        podcast.getMetaData()
+//                    )
+//                )
             }
         }
     }
@@ -478,37 +478,37 @@ class CommonPlayerScreenViewModel @Inject constructor(
                         else -> {
                             fireworksCallback()
 
-                            val metaData = podcast.getMetaData(amount)
-
-                            actionsRepository.trackFeedBoostAction(
-                                amount.value,
-                                podcast.getCurrentEpisode().id,
-                                arrayListOf("")
-                            )
-
-                            podcast.getCurrentEpisode()
-                                .recommendationPubKey
-                                ?.toFeedDestinationAddress()
-                                ?.let { pubKey ->
-
-                                    val feedDestination: List<FeedDestination> = arrayListOf(
-                                        FeedDestination(
-                                            address = pubKey,
-                                            split = FeedDestinationSplit(100.0),
-                                            type = FeedDestinationType("node"),
-                                            feedId = podcast.getCurrentEpisode().id
-                                        )
-                                    )
-
-                                    mediaPlayerServiceController.submitAction(
-                                        UserAction.SendBoost(
-                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                                            podcast.getCurrentEpisode().id.value,
-                                            metaData,
-                                            feedDestination
-                                        )
-                                    )
-                                }
+//                            val metaData = podcast.getMetaData(amount)
+//
+//                            actionsRepository.trackFeedBoostAction(
+//                                amount.value,
+//                                podcast.getCurrentEpisode().id,
+//                                arrayListOf("")
+//                            )
+//
+//                            podcast.getCurrentEpisode()
+//                                .recommendationPubKey
+//                                ?.toFeedDestinationAddress()
+//                                ?.let { pubKey ->
+//
+//                                    val feedDestination: List<FeedDestination> = arrayListOf(
+//                                        FeedDestination(
+//                                            address = pubKey,
+//                                            split = FeedDestinationSplit(100.0),
+//                                            type = FeedDestinationType("node"),
+//                                            feedId = podcast.getCurrentEpisode().id
+//                                        )
+//                                    )
+//
+//                                    mediaPlayerServiceController.submitAction(
+//                                        UserAction.SendBoost(
+//                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+//                                            podcast.getCurrentEpisode().id.value,
+//                                            metaData,
+//                                            feedDestination
+//                                        )
+//                                    )
+//                                }
                         }
                     }
                 }
