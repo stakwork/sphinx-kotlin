@@ -23,6 +23,7 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
@@ -67,7 +68,8 @@ internal class ChatTribeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
     tribeChatNavigator: TribeChatNavigator,
-    private val repositoryMedia: RepositoryMedia,
+    repositoryMedia: RepositoryMedia,
+    feedRepository: FeedRepository,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -86,6 +88,7 @@ internal class ChatTribeViewModel @Inject constructor(
     memeServerTokenHandler,
     tribeChatNavigator,
     repositoryMedia,
+    feedRepository,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -193,7 +196,7 @@ internal class ChatTribeViewModel @Inject constructor(
 //                speed = 1.0
 //            )
 
-            repositoryMedia.streamFeedPayments(
+            feedRepository.streamFeedPayments(
                 chatId,
 //                metaData,
                 podcastClip.feedID.value,

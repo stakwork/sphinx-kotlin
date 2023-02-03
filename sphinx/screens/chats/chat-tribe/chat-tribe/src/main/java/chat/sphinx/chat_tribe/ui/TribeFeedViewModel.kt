@@ -56,7 +56,6 @@ internal class TribeFeedViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val feedRepository: FeedRepository,
-    private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     private val podcastPlayerCoordinator: ViewModelCoordinator<PodcastPlayerRequest, PodcastPlayerResponse>,
 ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle),
@@ -409,7 +408,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 return@OnClickCallback
             }
 
-//            repositoryMedia.updateChatMetaData(
+//            feedRepository.updateChatMetaData(
 //                args.chatId,
 //                vs.podcast.id,
 //                vs.podcast.getMetaData(),

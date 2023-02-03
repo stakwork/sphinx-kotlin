@@ -35,6 +35,6 @@ abstract class NetworkQueryFeedStatus {
     /// GET ///
     ///////////
     abstract fun getFeedStatuses(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<List<ContentFeedStatusDto>, ResponseError>>
 }

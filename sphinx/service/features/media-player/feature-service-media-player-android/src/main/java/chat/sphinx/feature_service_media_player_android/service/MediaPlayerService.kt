@@ -11,7 +11,7 @@ import android.os.PowerManager
 import android.util.Log
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
-import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
@@ -23,12 +23,8 @@ import chat.sphinx.feature_sphinx_service.SphinxService
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
 import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
-import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.toFeedId
-import chat.sphinx.wrapper_common.toItemId
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.concept_foreground_state.ForegroundState
 import io.matthewnelson.concept_foreground_state.ForegroundStateManager
@@ -52,7 +48,7 @@ internal abstract class MediaPlayerService: SphinxService() {
     protected abstract val foregroundStateManager: ForegroundStateManager
     protected abstract val LOG: SphinxLogger
     internal abstract val mediaServiceController: MediaPlayerServiceControllerImpl
-    protected abstract val repositoryMedia: RepositoryMedia
+    protected abstract val feedRepository: FeedRepository
     protected abstract val actionsRepository: ActionsRepository
 
     @Suppress("DEPRECATION")
@@ -179,7 +175,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         }
                     }
 
-//                    repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                    feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
 
                 }
                 is UserAction.AdjustSatsPerMinute -> {
@@ -187,7 +183,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 //                        nnData.setSatsPerMinute(userAction.chatMetaData.satsPerMinute)
                     }
 
-//                    repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                    feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 }
                 is UserAction.SetPaymentsDestinations -> {
                     podData?.let { nnData ->
@@ -200,7 +196,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                             nnData.setDestinations(userAction.destinations)
                         }
 
-                        repositoryMedia.streamFeedPayments(
+                        feedRepository.streamFeedPayments(
                             nnData.chatId,
 //                            userAction.metaData,
                             nnData.podcastId,
@@ -220,7 +216,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                 is UserAction.ServiceAction.Play -> {
 
                     serviceLifecycleScope.launch {
-                        repositoryMedia.updateChatContentSeenAt(userAction.chatId)
+                        feedRepository.updateChatContentSeenAt(userAction.chatId)
                     }
 
                     podData?.let { nnData ->
@@ -285,7 +281,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceLoading
                             mediaServiceController.dispatchState(currentState)
 
-//                            repositoryMedia.updateChatMetaData(
+//                            feedRepository.updateChatMetaData(
 //                                nnData.chatId,
 //                                nnData.podcastId.toFeedId(),
 //                                ChatMetaData(
@@ -304,7 +300,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         setStartTimestamp(userAction.startTime.toLong())
                     }
 
-//                    repositoryMedia.updateChatMetaData(
+//                    feedRepository.updateChatMetaData(
 //                        userAction.chatId,
 //                        userAction.podcastId.toFeedId(),
 //                        ChatMetaData(
@@ -339,7 +335,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                             }
                         }
                     }
-//                    repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                    feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 }
                 is UserAction.TrackPodcastConsumed -> {
                     podData?.let { nnData ->
@@ -392,7 +388,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                         setPauseTime(nnData.currentTimeSeconds)
 
-//                        repositoryMedia.updateChatMetaData(
+//                        feedRepository.updateChatMetaData(
 //                            chatId,
 //                            nnData.podcastId?.toFeedId(),
 //                            ChatMetaData(
@@ -479,7 +475,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         if (count >= 60.0 * speed) {
 
                             //Chat meta data is updated on relay automatically on stream payments
-                            repositoryMedia.streamFeedPayments(
+                            feedRepository.streamFeedPayments(
                                 nnData.chatId,
 //                                ChatMetaData(
 //                                    FeedId(nnData.episodeId),
@@ -555,7 +551,7 @@ internal abstract class MediaPlayerService: SphinxService() {
             notification.clear()
             audioManagerHandler.abandonAudioFocus()
             podData?.let { data ->
-//                repositoryMedia.updateChatMetaData(
+//                feedRepository.updateChatMetaData(
 //                    data.chatId,
 //                    data.podcastId.toFeedId(),
 //                    ChatMetaData(

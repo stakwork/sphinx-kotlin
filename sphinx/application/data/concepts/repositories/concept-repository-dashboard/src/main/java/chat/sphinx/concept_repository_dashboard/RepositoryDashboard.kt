@@ -8,9 +8,11 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgress
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.ContentFeedStatus
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance

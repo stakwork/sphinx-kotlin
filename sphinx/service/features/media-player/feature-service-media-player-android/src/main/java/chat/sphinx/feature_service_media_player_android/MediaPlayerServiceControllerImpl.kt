@@ -7,7 +7,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.media.MediaPlayer
 import android.os.IBinder
-import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
 internal class MediaPlayerServiceControllerImpl(
     private val app: Application,
     dispatchers: CoroutineDispatchers,
-    private val repositoryMedia: RepositoryMedia,
+    private val feedRepository: FeedRepository,
 ): MediaPlayerServiceController(), CoroutineDispatchers by dispatchers {
 
     private val binder: MutableStateFlow<MediaPlayerService.MediaPlayerServiceBinder?> by lazy {
@@ -83,13 +83,13 @@ internal class MediaPlayerServiceControllerImpl(
 
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
-//                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
             }
             is UserAction.AdjustSatsPerMinute -> {
-//                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
             }
             is UserAction.SendBoost -> {
-//                repositoryMedia.streamFeedPayments(
+//                feedRepository.streamFeedPayments(
 //                    userAction.chatId,
 //                    userAction.metaData,
 //                    userAction.podcastId,
@@ -106,7 +106,7 @@ internal class MediaPlayerServiceControllerImpl(
                 }
             }
             is UserAction.ServiceAction.Seek -> {
-//                repositoryMedia.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+//                feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
                 listenerHandler.dispatch(getCurrentState())
             }
         }

@@ -37,7 +37,6 @@ internal class DashboardPodcastViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val app: Application,
     private val dashboardNavigator: DashboardNavigator,
-    private val repositoryMedia: RepositoryMedia,
     private val feedRepository: FeedRepository,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 ) : BaseViewModel<DashboardPodcastViewState>(dispatchers, DashboardPodcastViewState.Idle),
@@ -230,7 +229,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                     return@OnClickCallback
                 }
 
-//                repositoryMedia.updateChatMetaData(
+//                feedRepository.updateChatMetaData(
 //                    podcast.chatId,
 //                    vs.podcast.id,
 //                    vs.podcast.getMetaData(),

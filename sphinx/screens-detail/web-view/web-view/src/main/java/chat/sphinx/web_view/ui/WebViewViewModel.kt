@@ -224,7 +224,7 @@ internal class WebViewViewModel @Inject constructor(
                                 )
 
                                 feed.destinations.let { destinations ->
-                                    repositoryMedia.streamFeedPayments(
+                                    feedRepository.streamFeedPayments(
                                         chatId,
 //                                        ChatMetaData(
 //                                            itemId = feedItem.id,

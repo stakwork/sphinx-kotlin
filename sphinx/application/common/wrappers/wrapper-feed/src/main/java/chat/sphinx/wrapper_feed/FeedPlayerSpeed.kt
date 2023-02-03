@@ -1,9 +1,9 @@
 package chat.sphinx.wrapper_feed
 
 @Suppress("NOTHING_TO_INLINE")
-inline fun Double.toFeedPlayerSpeed(): FeedModelSuggested? =
+inline fun Double.toFeedPlayerSpeed(): FeedPlayerSpeed? =
     try {
-        FeedModelSuggested(this)
+        FeedPlayerSpeed(this)
     } catch (e: IllegalArgumentException) {
         null
     }

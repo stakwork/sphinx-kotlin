@@ -10,9 +10,9 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
-import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedDescription
-import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import kotlinx.coroutines.flow.Flow
@@ -48,4 +48,44 @@ interface FeedRepository {
     val recommendationsPodcast: MutableStateFlow<Podcast?>
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
+
+//    fun updateChatMetaData(
+//        chatId: ChatId,
+//        podcastId: FeedId?,
+//        metaData: ChatMetaData,
+//        shouldSync: Boolean = true
+//    )
+
+    suspend fun updateChatContentSeenAt(chatId: ChatId)
+
+    fun streamFeedPayments(
+        chatId: ChatId,
+//        metaData: ChatMetaData,
+        podcastId: String,
+        episodeId: String,
+        destinations: List<FeedDestination>,
+        updateMetaData: Boolean = true,
+        clipUUID: MessageUUID? = null
+    )
+
+    fun updateContentFeedStatus(
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        subscriptionStatus: Subscribed,
+        chatId: ChatId?,
+        itemId: FeedId,
+        satsPerMinute: Sat,
+        playerSpeed: FeedPlayerSpeed
+    )
+
+    fun updateContentEpisodeStatus(
+        feedId: FeedId,
+        itemId: FeedId,
+        duration: FeedItemDuration,
+        currentTime: FeedItemDuration
+    )
+
+    fun restoreContentFeedStatuses()
+    fun saveContentFeedStatusFor(feedId: FeedId)
+    fun saveContentFeedStatuses()
 }

@@ -22,6 +22,11 @@ import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
+import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
+import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.EpisodeStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
@@ -170,6 +175,7 @@ abstract class SphinxRepository(
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
+    private val networkQueryFeedStatus: NetworkQueryFeedStatus,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     private val sphinxNotificationManager: SphinxNotificationManager,
@@ -708,61 +714,6 @@ abstract class SphinxRepository(
 //            }
 //        }
 //    }
-
-    private val contentFeedLock = Mutex()
-    override fun updateContentFeedStatus(
-        feedId: FeedId,
-        feedUrl: FeedUrl,
-        subscriptionStatus: Subscribed,
-        chatId: ChatId?,
-        itemId: FeedId,
-        satsPerMinute: Sat,
-        playerSpeed: FeedPlayerSpeed
-    ) {
-        applicationScope.launch(io) {
-            val queries = coreDB.getSphinxDatabaseQueries()
-
-            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
-                return@launch
-            }
-
-            contentFeedLock.withLock {
-                queries.contentFeedStatusUpsert(
-                    feed_id = feedId,
-                    feed_url = feedUrl,
-                    subscription_status = subscriptionStatus,
-                    chat_id = chatId,
-                    item_id = itemId,
-                    sats_per_minute = satsPerMinute,
-                    player_speed = playerSpeed
-                )
-            }
-        }
-    }
-    private val contentEpisodeLock = Mutex()
-    override fun updateContentEpisodeStatus(
-        feedId: FeedId,
-        itemId: FeedId,
-        duration: FeedItemDuration,
-        currentTime: FeedItemDuration
-    ) {
-        applicationScope.launch(io) {
-            val queries = coreDB.getSphinxDatabaseQueries()
-
-            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
-                return@launch
-            }
-
-            contentEpisodeLock.withLock {
-                queries.contentEpisodeStatusUpsert(
-                    feed_id = feedId,
-                    item_id = itemId,
-                    duration = duration,
-                    current_time = currentTime
-                )
-            }
-        }
-    }
 
     override fun streamFeedPayments(
         chatId: ChatId,
@@ -6558,6 +6509,184 @@ abstract class SphinxRepository(
                         }
                         is Response.Error -> {}
                         else -> {}
+                    }
+                }
+            }
+        }
+    }
+
+    private val contentFeedLock = Mutex()
+    override fun updateContentFeedStatus(
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        subscriptionStatus: Subscribed,
+        chatId: ChatId?,
+        itemId: FeedId,
+        satsPerMinute: Sat,
+        playerSpeed: FeedPlayerSpeed
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
+
+            contentFeedLock.withLock {
+                queries.contentFeedStatusUpsert(
+                    feed_id = feedId,
+                    feed_url = feedUrl,
+                    subscription_status = subscriptionStatus,
+                    chat_id = chatId,
+                    item_id = itemId,
+                    sats_per_minute = satsPerMinute,
+                    player_speed = playerSpeed
+                )
+            }
+        }
+    }
+    private val contentEpisodeLock = Mutex()
+    override fun updateContentEpisodeStatus(
+        feedId: FeedId,
+        itemId: FeedId,
+        duration: FeedItemDuration,
+        currentTime: FeedItemDuration
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
+
+            contentEpisodeLock.withLock {
+                queries.contentEpisodeStatusUpsert(
+                    feed_id = feedId,
+                    item_id = itemId,
+                    duration = duration,
+                    current_time = currentTime
+                )
+            }
+        }
+    }
+
+    override fun saveContentFeedStatuses() {
+        applicationScope.launch(io) {
+
+            val contentFeedStatuses: MutableList<ContentFeedStatusDto> = mutableListOf()
+
+            getAllFeeds().firstOrNull()?.let { feeds ->
+                for (feed in feeds) {
+                    getContentFeedStatusDtoFrom(feed)?.let { feedStatus ->
+                        contentFeedStatuses.add(feedStatus)
+                    }
+                }
+            }
+
+            if (contentFeedStatuses.isEmpty()) {
+                return@launch
+            }
+
+            networkQueryFeedStatus.saveFeedStatuses(
+                PostFeedStatusDto(contentFeedStatuses)
+            ).collect { }
+        }
+    }
+
+    override fun saveContentFeedStatusFor(feedId: FeedId) {
+        applicationScope.launch(io) {
+
+            var contentFeedStatus: ContentFeedStatusDto? = null
+
+            getFeedById(feedId).firstOrNull()?.let { feed ->
+                contentFeedStatus = getContentFeedStatusDtoFrom(feed)
+            }
+
+            contentFeedStatus?.let { feedStatus ->
+                networkQueryFeedStatus.saveFeedStatus(
+                    feedId,
+                    PutFeedStatusDto(feedStatus)
+                ).collect { }
+            }
+        }
+    }
+
+    private fun getContentFeedStatusDtoFrom(feed: Feed) : ContentFeedStatusDto? {
+        var contentFeedStatus: ContentFeedStatusDto? = null
+
+        val episodeStatuses : MutableMap<FeedId, EpisodeStatusDto> = mutableMapOf()
+
+        for (feedItem in feed.items) {
+            feedItem.contentEpisodeStatus?.let { episodeStatus ->
+                if (episodeStatus.currentTime.value > 0.toLong() || episodeStatus.duration.value > 0.toLong()) {
+                    episodeStatuses[feedItem.id] = EpisodeStatusDto(
+                        episodeStatus.duration.value,
+                        episodeStatus.currentTime.value
+                    )
+                }
+            }
+        }
+
+        feed?.contentFeedStatus?.let { feedStatus ->
+            contentFeedStatus = ContentFeedStatusDto(
+                feedStatus.feedId.value,
+                feedStatus.feedUrl.value,
+                feedStatus.subscriptionStatus.isTrue(),
+                feedStatus.chatId?.value,
+                feedStatus.itemId?.value,
+                feedStatus.satsPerMinute?.value,
+                feedStatus.playerSpeed?.value,
+                episodeStatuses
+            )
+        }
+
+        return contentFeedStatus
+    }
+
+    override fun restoreContentFeedStatuses() {
+        applicationScope.launch(mainImmediate) {
+            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        restoreContentFeedStatusesFrom(loadResponse.value)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun restoreContentFeedStatusesFrom(
+        contentFeedStatuses: List<ContentFeedStatusDto>
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            for (contentFeedStatus in  contentFeedStatuses) {
+                contentFeedLock.withLock {
+                    queries.contentFeedStatusUpsert(
+                        FeedUrl(contentFeedStatus.feed_url),
+                        contentFeedStatus.subscription_status.toSubscribed(),
+                        contentFeedStatus.chat_id?.toChatId(),
+                        contentFeedStatus.item_id?.toFeedId(),
+                        contentFeedStatus.sats_per_minute?.toSat(),
+                        contentFeedStatus.player_speed?.toFeedPlayerSpeed(),
+                        FeedId(contentFeedStatus.feed_id)
+                    )
+                }
+
+                contentEpisodeLock.withLock {
+                    contentFeedStatus.episodes_status?.let { episodeStatuses ->
+                        for ((episodeId, episodeStatus) in episodeStatuses) {
+                            queries.contentEpisodeStatusUpsert(
+                                FeedItemDuration(episodeStatus.duration),
+                                FeedItemDuration(episodeStatus.current_time),
+                                episodeId,
+                                FeedId(contentFeedStatus.feed_id)
+                            )
+                        }
                     }
                 }
             }

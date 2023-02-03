@@ -186,7 +186,7 @@ internal open class VideoFeedScreenViewModel(
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
 
-//            repositoryMedia.updateChatMetaData(
+//            feedRepository.updateChatMetaData(
 //                getArgChatId(),
 //                video.feed?.id,
 //                ChatMetaData(
@@ -198,7 +198,7 @@ internal open class VideoFeedScreenViewModel(
 //                )
 //            )
 
-            repositoryMedia.updateContentFeedStatus(
+            feedRepository.updateContentFeedStatus(
                 feedId = video.feedId,
                 feedUrl = video.enclosureUrl,
                 subscriptionStatus = Subscribed.False,
@@ -279,7 +279,7 @@ internal open class VideoFeedScreenViewModel(
 
                                 videoFeed.destinations.let { destinations ->
 
-                                    repositoryMedia.streamFeedPayments(
+                                    feedRepository.streamFeedPayments(
                                         chatId,
 //                                        ChatMetaData(
 //                                            itemId = currentItem.id,
