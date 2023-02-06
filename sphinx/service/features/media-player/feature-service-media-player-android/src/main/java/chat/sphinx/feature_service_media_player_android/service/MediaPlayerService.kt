@@ -148,6 +148,26 @@ internal abstract class MediaPlayerService: SphinxService() {
             resetTrackSecondsConsumed()
         }
 
+        fun isPlaying(
+            podcastId: String?,
+            episodeId: String?
+        ): Boolean {
+            podData?.let { nnData ->
+                if (!nnData.mediaPlayer.isPlaying) {
+                    return false
+                }
+                podcastId?.let { nnPodcastId ->
+                    return nnData.podcastId == nnPodcastId
+                }
+                episodeId?.let { nnEpisodeId ->
+                    return nnData.episodeId == nnEpisodeId
+                }
+                return false
+            } ?: run {
+                return false
+            }
+        }
+
         @Synchronized
         fun processUserAction(userAction: UserAction) {
             @Exhaustive
@@ -600,6 +620,10 @@ internal abstract class MediaPlayerService: SphinxService() {
 
         fun processUserAction(userAction: UserAction) {
             mediaPlayerHolder.processUserAction(userAction)
+        }
+
+        fun isPlaying(episodeId: String?, podcastId: String?): Boolean {
+            return mediaPlayerHolder.isPlaying(episodeId, podcastId)
         }
     }
 
