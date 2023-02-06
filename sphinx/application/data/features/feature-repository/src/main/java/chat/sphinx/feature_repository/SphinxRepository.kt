@@ -6612,7 +6612,11 @@ abstract class SphinxRepository(
     }
 
     private fun getContentFeedStatusDtoFrom(feed: Feed) : ContentFeedStatusDto? {
-        var contentFeedStatus: ContentFeedStatusDto? = null
+        var contentFeedStatus: ContentFeedStatusDto?
+
+        if (feed?.getNNContentFeedStatus() == null) {
+            return null
+        }
 
         val episodeStatuses : MutableMap<FeedId, EpisodeStatusDto> = mutableMapOf()
 
@@ -6627,7 +6631,7 @@ abstract class SphinxRepository(
             }
         }
 
-        feed?.contentFeedStatus?.let { feedStatus ->
+        feed.getNNContentFeedStatus().let { feedStatus ->
             contentFeedStatus = ContentFeedStatusDto(
                 feedStatus.feedId.value,
                 feedStatus.feedUrl.value,
@@ -6661,6 +6665,10 @@ abstract class SphinxRepository(
     private fun restoreContentFeedStatusesFrom(
         contentFeedStatuses: List<ContentFeedStatusDto>
     ) {
+        if (contentFeedStatuses.isEmpty()) {
+            return
+        }
+
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 

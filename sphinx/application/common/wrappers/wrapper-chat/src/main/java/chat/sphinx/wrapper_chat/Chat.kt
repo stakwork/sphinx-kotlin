@@ -81,7 +81,7 @@ data class Chat(
     val privateTribe: ChatPrivate,
     val ownerPubKey: LightningNodePubKey?,
     val seen: Seen,
-//    val metaData: ChatMetaData?,
+    val metaData: ChatMetaData?,
     val myPhotoUrl: PhotoUrl?,
     val myAlias: ChatAlias?,
     val pendingContactIds: List<ContactId>?,

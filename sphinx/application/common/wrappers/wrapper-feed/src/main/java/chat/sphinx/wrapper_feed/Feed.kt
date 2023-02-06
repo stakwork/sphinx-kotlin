@@ -50,6 +50,19 @@ data class Feed(
 
     var contentFeedStatus: ContentFeedStatus? = null
 
+    fun getNNContentFeedStatus() : ContentFeedStatus {
+           return contentFeedStatus ?:
+                ContentFeedStatus(
+                    id,
+                    feedUrl,
+                    subscribed,
+                    chat?.id,
+                    chat?.metaData?.itemId ?: currentItemId,
+                    chat?.metaData?.satsPerMinute,
+                    chat?.metaData?.speed?.toFeedPlayerSpeed()
+                )
+    }
+
     var lastPublished: FeedItem? = null
         get() {
             if (items.isNotEmpty()) {
