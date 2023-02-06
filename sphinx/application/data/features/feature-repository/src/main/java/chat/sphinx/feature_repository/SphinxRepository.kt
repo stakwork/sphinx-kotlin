@@ -4243,6 +4243,7 @@ abstract class SphinxRepository(
 
         items.forEach { feedItem ->
             feedItem.feed = feed
+
             contentEpisodeStatuses.forEach { contentEpisodeStatus ->
                 if (feedItem.id == contentEpisodeStatus.itemId) {
                     feedItem.contentEpisodeStatus = contentEpisodeStatus
@@ -6683,9 +6684,12 @@ abstract class SphinxRepository(
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
+            //Delete feeds not coming from relay (update subscribed = false)
+
             for (contentFeedStatus in  contentFeedStatuses) {
 
-                //Search or fetch content feed
+                //Search on local db or fetch content feed (updateFeedContent)
+                // Wait until fetch finishes to continue
 
                 contentFeedLock.withLock {
                     if (contentFeedStatus.feed_id == playingPodcastId) {
