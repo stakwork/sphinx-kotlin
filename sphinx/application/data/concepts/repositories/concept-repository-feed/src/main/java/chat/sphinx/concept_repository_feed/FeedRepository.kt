@@ -85,7 +85,11 @@ interface FeedRepository {
         currentTime: FeedItemDuration
     )
 
-    fun restoreContentFeedStatuses()
+    fun restoreContentFeedStatuses(
+        playingPodcastId: String? = null,
+        playingEpisodeId: String? = null
+    )
+
     fun saveContentFeedStatusFor(feedId: FeedId)
     fun saveContentFeedStatuses()
 }

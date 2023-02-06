@@ -1442,6 +1442,13 @@ contentFeedStatusUpsert {
     );
 }
 
+contentFeedUpdate:
+UPDATE contentFeedStatusDbo
+SET subscription_status = :subscription_status,
+    chat_id = :chat_id,
+    sats_per_minute = :sats_per_minute
+WHERE feed_id = :feed_id;
+
 contentFeedStatusGetAll:
 SELECT *
 FROM contentFeedStatusDbo;
