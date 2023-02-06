@@ -1159,6 +1159,11 @@ UPDATE feedDbo
 SET subscribed = :subscribed
 WHERE id = ?;
 
+feedBatchUnsubscribe:
+UPDATE feedDbo
+SET subscribed = 0
+WHERE id NOT IN ?;
+
 feedDeleteById:
 DELETE
 FROM feedDbo

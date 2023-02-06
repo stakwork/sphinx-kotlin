@@ -6684,12 +6684,28 @@ abstract class SphinxRepository(
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
 
-            //Delete feeds not coming from relay (update subscribed = false)
+            queries.feedBatchUnsubscribe(contentFeedStatuses.map { FeedId(it.feed_id) })
 
-            for (contentFeedStatus in  contentFeedStatuses) {
+            for (contentFeedStatus in contentFeedStatuses) {
 
-                //Search on local db or fetch content feed (updateFeedContent)
-                // Wait until fetch finishes to continue
+                applicationScope.launch(io) {
+                    getFeedById(FeedId(contentFeedStatus.feed_id)).firstOrNull().let { feed ->
+                        if (feed == null) {
+                            val chat = contentFeedStatus.chat_id?.toChatId()
+                                ?.let { getChatById(it).firstOrNull() }
+                            contentFeedStatus.feed_url.toFeedUrl()?.let { feedUrl ->
+                                updateFeedContent(
+                                    chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                                    host = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
+                                    feedUrl = feedUrl,
+                                    chatUUID = chat?.uuid,
+                                    subscribed = contentFeedStatus.subscription_status.toSubscribed(),
+                                    currentItemId = null
+                                )
+                            }
+                        }
+                    }
+                }.join()
 
                 contentFeedLock.withLock {
                     if (contentFeedStatus.feed_id == playingPodcastId) {
