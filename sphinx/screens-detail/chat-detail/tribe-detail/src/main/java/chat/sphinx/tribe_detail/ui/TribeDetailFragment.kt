@@ -61,10 +61,6 @@ internal class TribeDetailFragment: SideEffectFragment<
     private val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
 
-    companion object {
-        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,20,20,40,40,80,80,100)
-    }
-
     private val bottomMenuTribe: BottomMenuTribe by lazy(LazyThreadSafetyMode.NONE) {
         BottomMenuTribe(
             onStopSupervisor,
@@ -212,32 +208,6 @@ internal class TribeDetailFragment: SideEffectFragment<
                     return false
                 }
             })
-
-            seekBarSatsPerMinute.setOnSeekBarChangeListener(
-                object : SeekBar.OnSeekBarChangeListener {
-
-                    override fun onProgressChanged(
-                        seekBar: SeekBar?,
-                        progress: Int,
-                        fromUser: Boolean
-                    ) {
-
-                        SLIDER_VALUES[progress].let {
-                            textViewPodcastSatsPerMinuteValue.text = it.toString()
-                        }
-                    }
-
-                    override fun onStartTrackingTouch(seekBar: SeekBar?) { }
-
-                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                        seekBar?.let {
-                            SLIDER_VALUES[seekBar.progress].let {
-                                viewModel.updateSatsPerMinute(it.toLong())
-                            }
-                        }
-                    }
-                }
-            )
 
             textViewMenuButton.setOnClickListener {
                 viewModel.tribeMenuHandler.viewStateContainer.updateViewState(

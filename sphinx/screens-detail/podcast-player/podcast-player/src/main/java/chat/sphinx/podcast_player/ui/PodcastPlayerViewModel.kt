@@ -46,6 +46,7 @@ import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -339,6 +340,29 @@ internal class PodcastPlayerViewModel @Inject constructor(
 //                )
 //            )
         }
+    }
+
+    fun updateSatsPerMinute(sats: Long) {
+        val vs = currentViewState
+
+//        vs.chat.metaData?.let { nnMetaData ->
+//
+//            viewModelScope.launch(mainImmediate) {
+//                mediaPlayerServiceController.submitAction(
+//                    UserAction.AdjustSatsPerMinute(
+//                        args.chatId,
+//                        ChatMetaData(
+//                            nnMetaData.itemId,
+//                            nnMetaData.itemId?.value?.toLongOrNull()?.toItemId() ?: ItemId(-1),
+//                            Sat(sats),
+//                            nnMetaData.timeSeconds,
+//                            nnMetaData.speed,
+//                        )
+//                    )
+//                )
+//            }
+//
+//        }
     }
 
     override fun onCleared() {

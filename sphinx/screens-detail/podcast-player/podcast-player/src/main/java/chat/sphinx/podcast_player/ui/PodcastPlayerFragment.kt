@@ -62,6 +62,10 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     override val viewModel: PodcastPlayerViewModel by viewModels()
     override val binding: FragmentPodcastPlayerBinding by viewBinding(FragmentPodcastPlayerBinding::bind)
 
+    companion object {
+        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,20,20,40,40,80,80,100)
+    }
+
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
@@ -253,6 +257,33 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
             }
+
+            seekBarSatsPerMinute.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+
+                        SLIDER_VALUES[progress].let {
+                            textViewPodcastSatsPerMinuteValue.text = it.toString()
+                        }
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        seekBar?.let {
+                            SLIDER_VALUES[seekBar.progress].let {
+                                viewModel.updateSatsPerMinute(it.toLong())
+                            }
+                        }
+                    }
+                }
+            )
+
         }
     }
 
