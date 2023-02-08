@@ -73,9 +73,9 @@ interface FeedRepository {
         feedUrl: FeedUrl,
         subscriptionStatus: Subscribed,
         chatId: ChatId?,
-        itemId: FeedId,
-        satsPerMinute: Sat,
-        playerSpeed: FeedPlayerSpeed
+        itemId: FeedId?,
+        satsPerMinute: Sat?,
+        playerSpeed: FeedPlayerSpeed?
     )
 
     fun updateContentEpisodeStatus(

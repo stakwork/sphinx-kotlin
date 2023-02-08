@@ -6522,9 +6522,9 @@ abstract class SphinxRepository(
         feedUrl: FeedUrl,
         subscriptionStatus: Subscribed,
         chatId: ChatId?,
-        itemId: FeedId,
-        satsPerMinute: Sat,
-        playerSpeed: FeedPlayerSpeed
+        itemId: FeedId?,
+        satsPerMinute: Sat?,
+        playerSpeed: FeedPlayerSpeed?
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()

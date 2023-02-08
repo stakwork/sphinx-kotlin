@@ -2,6 +2,8 @@ package chat.sphinx.concept_service_media
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_feed.ContentEpisodeStatus
+import chat.sphinx.wrapper_feed.ContentFeedStatus
 import chat.sphinx.wrapper_feed.FeedDestination
 
 // TODO: info - episode id, episode url, start time, speed, general info about episode, chatId
@@ -11,12 +13,9 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Play(
             chatId: ChatId,
-            val podcastId: String,
-            val episodeId: String,
             val episodeUrl: String,
-            val satPerMinute: Sat,
-            val speed: Double,
-            val startTime: Int,
+            val contentFeedStatus: ContentFeedStatus,
+            val contentEpisodeStatus: ContentEpisodeStatus
         ): ServiceAction(chatId)
 
         class Pause(
@@ -26,19 +25,19 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Seek(
             chatId: ChatId,
-//            val chatMetaData: ChatMetaData,
+            contentEpisodeStatus: ContentEpisodeStatus
         ): ServiceAction(chatId)
 
     }
 
     class AdjustSatsPerMinute(
         chatId: ChatId,
-//        val chatMetaData: ChatMetaData,
+        contentFeedStatus: ContentFeedStatus
     ): UserAction(chatId)
 
     class AdjustSpeed(
         chatId: ChatId,
-//        val chatMetaData: ChatMetaData,
+        contentFeedStatus: ContentFeedStatus
     ): UserAction(chatId)
 
     class SendBoost(

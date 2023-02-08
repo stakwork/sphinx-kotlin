@@ -15,16 +15,15 @@ import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
-import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.isTrue
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
-import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -198,15 +197,18 @@ internal open class VideoFeedScreenViewModel(
 //                )
 //            )
 
-            feedRepository.updateContentFeedStatus(
-                feedId = video.feedId,
-                feedUrl = video.enclosureUrl,
-                subscriptionStatus = Subscribed.False,
-                chatId = getArgChatId(),
-                itemId = video.id,
-                satsPerMinute = getOwner().tipAmount ?: Sat(0),
-                playerSpeed = FeedPlayerSpeed(1.0)
-            )
+            video.feed?.let { feed ->
+                feedRepository.updateContentFeedStatus(
+                    feedId = feed.id,
+                    feedUrl = feed.feedUrl,
+                    subscriptionStatus = feed.subscribed,
+                    chatId = feed.chatId,
+                    itemId = video.id,
+                    satsPerMinute = null,
+                    playerSpeed = null
+                )
+            }
+
 
             selectedVideoStateContainer.updateViewState(
                 SelectedVideoViewState.VideoSelected(

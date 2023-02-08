@@ -7,6 +7,8 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_feed.*
 import java.io.File
 import kotlin.math.roundToInt
@@ -122,16 +124,28 @@ data class Podcast(
         this.timeMilliSeconds = episode?.clipStartTime ?: 0
     }
 
-//    fun getMetaData(
-//        customAmount: Sat? = null
-//    ): ChatMetaData =
-//        ChatMetaData(
-//            FeedId(episodeId ?: "null"),
-//            episodeId?.toLongOrNull()?.toItemId() ?: ItemId(-1),
-//            customAmount ?: satsPerMinute.toSat() ?: Sat(0),
-//            (timeMilliSeconds ?: 0) / 1000,
-//            speed,
-//        )
+    fun getUpdatedContentFeedStatus(
+        customAmount: Sat? = null
+    ): ContentFeedStatus =
+        ContentFeedStatus(
+            this.id,
+            this.feedUrl,
+            this.subscribed,
+            this.chatId,
+            FeedId(episodeId ?: this.contentFeedStatus?.itemId?.value ?: "null"),
+            customAmount ?: satsPerMinute.toSat() ?: Sat(0),
+            speed.toFeedPlayerSpeed(),
+        )
+
+    fun getUpdatedContentEpisodeStatus(): ContentEpisodeStatus? =
+        episodeId?.let { nnEpisodeId ->
+            ContentEpisodeStatus(
+                this.id,
+                FeedId(nnEpisodeId),
+                FeedItemDuration(episodeDuration ?: 0),
+                FeedItemDuration(((timeMilliSeconds ?: 0) / 1000).toLong())
+            )
+        }
 
     fun getSpeedString(): String {
         if (speed.roundToInt().toDouble() == speed) {
