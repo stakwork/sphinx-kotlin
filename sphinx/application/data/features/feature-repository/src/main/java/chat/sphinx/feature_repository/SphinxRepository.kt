@@ -6672,6 +6672,21 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun getContentFeedStatusByFeedId(
+        feedId: FeedId
+    ) {
+       applicationScope.launch(mainImmediate) {
+           networkQueryFeedStatus.getByFeedId(feedId).collect { loadResponse ->
+               @Exhaustive
+               when (loadResponse) {
+                   is LoadResponse.Loading -> {}
+                   is Response.Error -> {}
+                   is Response.Success -> {}
+               }
+           }
+       }
+    }
+
     private suspend fun restoreContentFeedStatusesFrom(
         contentFeedStatuses: List<ContentFeedStatusDto>,
         playingPodcastId: String?,

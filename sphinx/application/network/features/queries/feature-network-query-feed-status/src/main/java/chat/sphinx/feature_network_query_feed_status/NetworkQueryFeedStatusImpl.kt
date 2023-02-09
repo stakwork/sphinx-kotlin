@@ -5,6 +5,7 @@ import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
+import chat.sphinx.feature_network_query_feed_status.model.ContentFeedStatusRelayGetListResponse
 import chat.sphinx.feature_network_query_feed_status.model.ContentFeedStatusRelayGetResponse
 import chat.sphinx.feature_network_query_feed_status.model.ContentFeedStatusRelayPostResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -22,6 +23,7 @@ class NetworkQueryFeedStatusImpl(
 
     companion object {
         private const val ENDPOINT_CONTENT_FEED_STATUS = "/content_feed_status"
+        private const val ENDPOINT_CONTENT_FEED_STATUS_FEED_ID = "/content_feed_status/:feed_id"
         private const val ENDPOINT_UPDATE_CONTENT_FEED_STATUS = "/content_feed_status/%s"
     }
 
@@ -54,8 +56,19 @@ class NetworkQueryFeedStatusImpl(
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<List<ContentFeedStatusDto>, ResponseError>> =
         networkRelayCall.relayGetList(
-            responseJsonClass = ContentFeedStatusRelayGetResponse::class.java,
+            responseJsonClass = ContentFeedStatusRelayGetListResponse::class.java,
             relayEndpoint = ENDPOINT_CONTENT_FEED_STATUS,
+            relayData = relayData,
+            useExtendedNetworkCallClient = true
+        )
+
+    override fun getByFeedId(
+        feedId: FeedId,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<ContentFeedStatusDto, ResponseError>> =
+        networkRelayCall.relayGet(
+            responseJsonClass = ContentFeedStatusRelayGetResponse::class.java,
+            relayEndpoint = ENDPOINT_CONTENT_FEED_STATUS_FEED_ID,
             relayData = relayData,
             useExtendedNetworkCallClient = true
         )
