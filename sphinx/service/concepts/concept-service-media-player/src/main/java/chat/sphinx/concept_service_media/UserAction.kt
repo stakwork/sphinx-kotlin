@@ -6,7 +6,6 @@ import chat.sphinx.wrapper_feed.ContentEpisodeStatus
 import chat.sphinx.wrapper_feed.ContentFeedStatus
 import chat.sphinx.wrapper_feed.FeedDestination
 
-// TODO: info - episode id, episode url, start time, speed, general info about episode, chatId
 sealed class UserAction(val chatId: ChatId) {
 
     sealed class ServiceAction(chatId: ChatId): UserAction(chatId) {
@@ -27,7 +26,6 @@ sealed class UserAction(val chatId: ChatId) {
             chatId: ChatId,
             val contentEpisodeStatus: ContentEpisodeStatus
         ): ServiceAction(chatId)
-
     }
 
     class AdjustSatsPerMinute(

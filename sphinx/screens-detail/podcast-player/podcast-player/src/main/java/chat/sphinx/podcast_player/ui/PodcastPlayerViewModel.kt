@@ -34,6 +34,7 @@ import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -323,12 +324,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun podcastLoaded(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-//                chat.metaData?.let { metaData ->
-//                    podcast.setMetaData(metaData)
-//                }
-            }
-
             viewStateContainer.updateViewState(
                 PodcastPlayerViewState.PodcastLoaded(podcast)
             )
@@ -345,26 +340,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     fun updateSatsPerMinute(sats: Long) {
-        val vs = currentViewState
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { nnPodcast ->
+                viewModelScope.launch(mainImmediate) {
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.AdjustSatsPerMinute(
+                            args.chatId,
+                            nnPodcast.getUpdatedContentFeedStatus(Sat(sats))
+                        )
+                    )
+                }
 
-//        vs.chat.metaData?.let { nnMetaData ->
-//
-//            viewModelScope.launch(mainImmediate) {
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.AdjustSatsPerMinute(
-//                        args.chatId,
-//                        ChatMetaData(
-//                            nnMetaData.itemId,    
-//                            nnMetaData.itemId?.value?.toLongOrNull()?.toItemId() ?: ItemId(-1),
-//                            Sat(sats),
-//                            nnMetaData.timeSeconds,
-//                            nnMetaData.speed,
-//                        )
-//                    )
-//                )
-//            }
-//
-//        }
+            }
+        }
     }
 
     override fun onCleared() {
@@ -516,34 +504,33 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         else -> {
                             fireworksCallback()
 
-//                            val metaData = podcast.getMetaData(amount)
-//
-//                            messageRepository.sendBoost(
-//                                args.chatId,
-//                                FeedBoost(
-//                                    feedId = podcast.id,
-//                                    itemId = metaData.itemId,
-//                                    timeSeconds = metaData.timeSeconds,
-//                                    amount = amount
-//                                )
-//                            )
-//
-//                            actionsRepository.trackFeedBoostAction(
-//                                amount.value,
-//                                podcast.getCurrentEpisode().id,
-//                                arrayListOf("")
-//                            )
-//
-//                            if (podcast.hasDestinations) {
-//                                mediaPlayerServiceController.submitAction(
-//                                    UserAction.SendBoost(
-//                                        args.chatId,
-//                                        podcast.id.value,
-//                                        metaData,
-//                                        podcast.getFeedDestinations()
-//                                    )
-//                                )
-//                            }
+                            messageRepository.sendBoost(
+                                args.chatId,
+                                FeedBoost(
+                                    feedId = podcast.id,
+                                    itemId = podcast.getUpdatedContentFeedStatus().itemId ?: podcast.getCurrentEpisode().id,
+                                    timeSeconds = podcast.getUpdatedContentEpisodeStatus().currentTime.value.toInt(),
+                                    amount = amount
+                                )
+                            )
+
+                            actionsRepository.trackFeedBoostAction(
+                                amount.value,
+                                podcast.getCurrentEpisode().id,
+                                arrayListOf("")
+                            )
+
+                            if (podcast.hasDestinations) {
+                                mediaPlayerServiceController.submitAction(
+                                    UserAction.SendBoost(
+                                        args.chatId,
+                                        podcast.id.value,
+                                        podcast.getUpdatedContentFeedStatus(),
+                                        podcast.getUpdatedContentEpisodeStatus(),
+                                        podcast.getFeedDestinations()
+                                    )
+                                )
+                            }
                         }
                     }
                 }

@@ -24,6 +24,7 @@ import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.toPodcastClipOrNull
 import chat.sphinx.wrapper_podcast.Podcast
@@ -336,28 +337,31 @@ internal class TribeFeedViewModel @Inject constructor(
                         val vs = podcastViewStateContainer.value
 
                         if (vs is PodcastViewState.PodcastVS) {
-//                            val metaData = vs.podcast.getMetaData(tip)
-//
-//                            val feedBoost = FeedBoost(
-//                                podcast.id,
-//                                metaData.itemId,
-//                                metaData.timeSeconds,
-//                                tip
-//                            )
-//
-//                            messageRepository.sendBoost(
-//                                args.chatId,
-//                                feedBoost
-//                            )
-//
-//                            mediaPlayerServiceController.submitAction(
-//                                UserAction.SendBoost(
-//                                    args.chatId,
-//                                    vs.podcast.id.value,
-//                                    metaData,
-//                                    vs.podcast.getFeedDestinations(),
-//                                )
-//                            )
+
+                            val contentFeedStatus = vs.podcast.getUpdatedContentFeedStatus(tip)
+                            val contentEpisodeStatus = vs.podcast.getUpdatedContentEpisodeStatus()
+
+                            val feedBoost = FeedBoost(
+                                podcast.id,
+                                contentFeedStatus.itemId ?: vs.podcast.getCurrentEpisode().id,
+                                contentEpisodeStatus.currentTime.value.toInt(),
+                                tip
+                            )
+
+                            messageRepository.sendBoost(
+                                args.chatId,
+                                feedBoost
+                            )
+
+                            mediaPlayerServiceController.submitAction(
+                                UserAction.SendBoost(
+                                    args.chatId,
+                                    vs.podcast.id.value,
+                                    contentFeedStatus,
+                                    contentEpisodeStatus,
+                                    vs.podcast.getFeedDestinations(),
+                                )
+                            )
                         }
                     }
                 }

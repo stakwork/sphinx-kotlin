@@ -24,10 +24,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.ContentEpisodeStatus
-import chat.sphinx.wrapper_feed.ContentFeedStatus
-import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
@@ -471,37 +468,36 @@ class CommonPlayerScreenViewModel @Inject constructor(
                         else -> {
                             fireworksCallback()
 
-//                            val metaData = podcast.getMetaData(amount)
-//
-//                            actionsRepository.trackFeedBoostAction(
-//                                amount.value,
-//                                podcast.getCurrentEpisode().id,
-//                                arrayListOf("")
-//                            )
-//
-//                            podcast.getCurrentEpisode()
-//                                .recommendationPubKey
-//                                ?.toFeedDestinationAddress()
-//                                ?.let { pubKey ->
-//
-//                                    val feedDestination: List<FeedDestination> = arrayListOf(
-//                                        FeedDestination(
-//                                            address = pubKey,
-//                                            split = FeedDestinationSplit(100.0),
-//                                            type = FeedDestinationType("node"),
-//                                            feedId = podcast.getCurrentEpisode().id
-//                                        )
-//                                    )
-//
-//                                    mediaPlayerServiceController.submitAction(
-//                                        UserAction.SendBoost(
-//                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
-//                                            podcast.getCurrentEpisode().id.value,
-//                                            metaData,
-//                                            feedDestination
-//                                        )
-//                                    )
-//                                }
+                            actionsRepository.trackFeedBoostAction(
+                                amount.value,
+                                podcast.getCurrentEpisode().id,
+                                arrayListOf("")
+                            )
+
+                            podcast.getCurrentEpisode()
+                                .recommendationPubKey
+                                ?.toFeedDestinationAddress()
+                                ?.let { pubKey ->
+
+                                    val feedDestinations: List<FeedDestination> = arrayListOf(
+                                        FeedDestination(
+                                            address = pubKey,
+                                            split = FeedDestinationSplit(100.0),
+                                            type = FeedDestinationType("node"),
+                                            feedId = podcast.getCurrentEpisode().id
+                                        )
+                                    )
+
+                                    mediaPlayerServiceController.submitAction(
+                                        UserAction.SendBoost(
+                                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                                            podcast.getCurrentEpisode().id.value,
+                                            podcast.getUpdatedContentFeedStatus(),
+                                            podcast.getUpdatedContentEpisodeStatus(),
+                                            feedDestinations
+                                        )
+                                    )
+                                }
                         }
                     }
                 }

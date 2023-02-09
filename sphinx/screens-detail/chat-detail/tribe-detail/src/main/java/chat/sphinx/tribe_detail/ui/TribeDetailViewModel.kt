@@ -230,33 +230,6 @@ internal class TribeDetailViewModel @Inject constructor(
         )
     }
 
-    fun updateSatsPerMinute(sats: Long) {
-        val vs = currentViewState
-
-        if (vs !is TribeDetailViewState.TribeProfile) {
-            return
-        }
-
-//        vs.chat.metaData?.let { nnMetaData ->
-//
-//            viewModelScope.launch(mainImmediate) {
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.AdjustSatsPerMinute(
-//                        args.chatId,
-//                        ChatMetaData(
-//                            nnMetaData.itemId,
-//                            nnMetaData.itemId?.value?.toLongOrNull()?.toItemId() ?: ItemId(-1),
-//                            Sat(sats),
-//                            nnMetaData.timeSeconds,
-//                            nnMetaData.speed,
-//                        )
-//                    )
-//                )
-//            }
-//
-//        }
-    }
-
     fun updateProfileAlias(alias: String?) {
         viewModelScope.launch(mainImmediate) {
             val response = chatRepository.updateChatProfileInfo(
