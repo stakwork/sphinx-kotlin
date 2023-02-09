@@ -469,8 +469,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        podcast.setInitialEpisodeDuration(args.argEpisodeDuration)
-
         val currentTime = podcast.currentTime.toLong()
 
         val duration = withContext(viewModel.io) {

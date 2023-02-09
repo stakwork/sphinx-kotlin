@@ -125,7 +125,7 @@ internal class FeedAllViewModel @Inject constructor(
     ) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, feedId, feedUrl, 0
+                chatId, feedId, feedUrl
             )
         }
     }
@@ -161,8 +161,7 @@ internal class FeedAllViewModel @Inject constructor(
 
                 dashboardNavigator.toCommonPlayerScreen(
                     podcast.id,
-                    FeedId(feed.id),
-                    0
+                    FeedId(feed.id)
                 )
             }
         }

@@ -35,7 +35,8 @@ interface FeedRepository {
         searchResultImageUrl: PhotoUrl? = null,
         chatUUID: ChatUUID?,
         subscribed: Subscribed,
-        currentEpisodeId: FeedId?
+        currentEpisodeId: FeedId?,
+        delay: Long = 500L
     ): Response<FeedId, ResponseError>
 
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
@@ -47,13 +48,6 @@ interface FeedRepository {
     val recommendationsPodcast: MutableStateFlow<Podcast?>
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)
-
-//    fun updateChatMetaData(
-//        chatId: ChatId,
-//        podcastId: FeedId?,
-//        metaData: ChatMetaData,
-//        shouldSync: Boolean = true
-//    )
 
     suspend fun updateChatContentSeenAt(chatId: ChatId)
 
@@ -90,7 +84,9 @@ interface FeedRepository {
     )
 
     fun getContentFeedStatusByFeedId(
-        feedId: FeedId
+        feedId: FeedId,
+        playingPodcastId: String? = null,
+        playingEpisodeId: String? = null
     )
 
     fun saveContentFeedStatusFor(feedId: FeedId)

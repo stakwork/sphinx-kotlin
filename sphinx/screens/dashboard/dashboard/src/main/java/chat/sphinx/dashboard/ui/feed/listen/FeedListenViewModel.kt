@@ -65,7 +65,7 @@ class FeedListenViewModel @Inject constructor(
     ) {
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, feedId, feedUrl, 0
+                chatId, feedId, feedUrl
             )
         }
     }

@@ -17,9 +17,8 @@ abstract class PodcastPlayerNavigator(
         chatId: ChatId,
         feedId: FeedId,
         feedUrl: FeedUrl,
-        currentEpisodeDuration: Long,
     ) {
-        navigationDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration, false))
+        navigationDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, false))
     }
 
     @JvmSynthetic

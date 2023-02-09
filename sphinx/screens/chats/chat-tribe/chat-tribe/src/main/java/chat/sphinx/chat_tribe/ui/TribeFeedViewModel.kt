@@ -11,27 +11,19 @@ import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
-import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.podcast_player.ui.chatId
 import chat.sphinx.podcast_player.ui.getMediaDuration
 import chat.sphinx.podcast_player_view_model_coordinator.request.PodcastPlayerRequest
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
-import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.ContentEpisodeStatus
-import chat.sphinx.wrapper_feed.ContentFeedStatus
-import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
-import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.toPodcastClipOrNull
 import chat.sphinx.wrapper_podcast.Podcast
@@ -315,33 +307,18 @@ internal class TribeFeedViewModel @Inject constructor(
                         )
                     )
                 } else {
-                    withContext(io) {
-                        vs.podcast.didStartPlayingEpisode(
-                            episode,
-                            vs.podcast.currentTime,
-                            ::retrieveEpisodeDuration,
-                        )
-                    }
+                    vs.podcast.didStartPlayingEpisode(
+                        episode,
+                        vs.podcast.currentTime,
+                        ::retrieveEpisodeDuration,
+                    )
 
                     mediaPlayerServiceController.submitAction(
                         UserAction.ServiceAction.Play(
                             args.chatId,
                             episode.episodeUrl,
-                            ContentFeedStatus(
-                                vs.podcast.id,
-                                vs.podcast.feedUrl,
-                                vs.podcast.subscribed,
-                                vs.podcast.chatId,
-                                episode.id,
-                                Sat(vs.podcast.satsPerMinute),
-                                vs.podcast.speed.toFeedPlayerSpeed()
-                            ),
-                            ContentEpisodeStatus(
-                                podcast.id,
-                                episode.id,
-                                FeedItemDuration(vs.podcast.episodeDuration ?: 0),
-                                FeedItemDuration(vs.podcast.currentTime.toLong())
-                            )
+                            vs.podcast.getUpdatedContentFeedStatus(),
+                            vs.podcast.getUpdatedContentEpisodeStatus()
                         )
                     )
                 }
@@ -398,19 +375,12 @@ internal class TribeFeedViewModel @Inject constructor(
             viewModelScope.launch(mainImmediate) {
                 vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
 
-                vs.podcast.getCurrentEpisode().contentEpisodeStatus?.let { currentEpisode ->
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Seek(
-                            args.chatId,
-                            ContentEpisodeStatus(
-                                vs.podcast.id,
-                                currentEpisode.itemId,
-                                currentEpisode.duration,
-                                currentEpisode.currentTime
-                            )
-                        )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Seek(
+                        args.chatId,
+                        vs.podcast.getUpdatedContentEpisodeStatus()
                     )
-                }
+                )
 
                 if (!vs.podcast.isPlaying) {
                     vs.adjustState(
@@ -512,8 +482,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 PodcastPlayerRequest(
                     chatId = args.chatId,
                     feedId = vs.podcast.id,
-                    feedUrl = vs.podcast.feedUrl,
-                    currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
+                    feedUrl = vs.podcast.feedUrl
                 )
             )
             if (response is Response.Success) {

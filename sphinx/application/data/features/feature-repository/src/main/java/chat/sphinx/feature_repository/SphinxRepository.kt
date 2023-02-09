@@ -3839,7 +3839,8 @@ abstract class SphinxRepository(
         searchResultImageUrl: PhotoUrl?,
         chatUUID: ChatUUID?,
         subscribed: Subscribed,
-        currentItemId: FeedId?
+        currentItemId: FeedId?,
+        delay: Long
     ): Response<FeedId, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -3889,7 +3890,7 @@ abstract class SphinxRepository(
                         }
                     }
 
-                    delay(500L)
+                    delay(delay)
 
                     updateResponse = feedId?.let {
                         Response.Success(it)
@@ -3939,6 +3940,8 @@ abstract class SphinxRepository(
                             queries
                         )
                     )
+                } ?: run {
+                    emit(null)
                 }
             }
     }
@@ -3954,6 +3957,8 @@ abstract class SphinxRepository(
             .collect { value: FeedItem? ->
                 value?.let { feedItem ->
                     emit(feedItem)
+                } ?: run {
+                    emit(null)
                 }
             }
     }
@@ -6619,16 +6624,20 @@ abstract class SphinxRepository(
             return null
         }
 
-        val episodeStatuses : MutableMap<FeedId, EpisodeStatusDto> = mutableMapOf()
+        val episodeStatuses : MutableList<Map<String, EpisodeStatusDto>> = mutableListOf()
 
         if (feed.isPodcast) {
             for (feedItem in feed.items) {
                 feedItem.contentEpisodeStatus?.let { episodeStatus ->
                     if (episodeStatus.currentTime.value > 0.toLong() || episodeStatus.duration.value > 0.toLong()) {
-                        episodeStatuses[feedItem.id] = EpisodeStatusDto(
+                        val status: MutableMap<String, EpisodeStatusDto> = mutableMapOf()
+
+                        status[feedItem.id.value] = EpisodeStatusDto(
                             episodeStatus.duration.value,
                             episodeStatus.currentTime.value
                         )
+
+                        episodeStatuses.add(status)
                     }
                 }
             }
@@ -6654,7 +6663,7 @@ abstract class SphinxRepository(
         playingPodcastId: String?,
         playingEpisodeId: String?
     ) {
-        applicationScope.launch(mainImmediate) {
+        applicationScope.launch(io) {
             networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
@@ -6673,7 +6682,9 @@ abstract class SphinxRepository(
     }
 
     override fun getContentFeedStatusByFeedId(
-        feedId: FeedId
+        feedId: FeedId,
+        playingPodcastId: String?,
+        playingEpisodeId: String?
     ) {
        applicationScope.launch(mainImmediate) {
            networkQueryFeedStatus.getByFeedId(feedId).collect { loadResponse ->
@@ -6681,7 +6692,14 @@ abstract class SphinxRepository(
                when (loadResponse) {
                    is LoadResponse.Loading -> {}
                    is Response.Error -> {}
-                   is Response.Success -> {}
+                   is Response.Success -> {
+                       restoreContentFeedStatusFrom(
+                           loadResponse.value,
+                           null,
+                           playingPodcastId,
+                           playingEpisodeId
+                       )
+                   }
                }
            }
        }
@@ -6702,60 +6720,90 @@ abstract class SphinxRepository(
             queries.feedBatchUnsubscribe(contentFeedStatuses.map { FeedId(it.feed_id) })
 
             for (contentFeedStatus in contentFeedStatuses) {
+                restoreContentFeedStatusFrom(
+                    contentFeedStatus,
+                    queries,
+                    playingPodcastId,
+                    playingEpisodeId
+                )
+            }
+        }
+    }
 
-                applicationScope.launch(io) {
-                    getFeedById(FeedId(contentFeedStatus.feed_id)).firstOrNull().let { feed ->
-                        if (feed == null) {
-                            val chat = contentFeedStatus.chat_id?.toChatId()
-                                ?.let { getChatById(it).firstOrNull() }
-                            contentFeedStatus.feed_url.toFeedUrl()?.let { feedUrl ->
-                                updateFeedContent(
-                                    chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                                    host = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
-                                    feedUrl = feedUrl,
-                                    chatUUID = chat?.uuid,
-                                    subscribed = contentFeedStatus.subscription_status.toSubscribed(),
-                                    currentItemId = null
-                                )
-                            }
-                        }
-                    }
-                }.join()
+    private suspend fun restoreContentFeedStatusFrom(
+        contentFeedStatus: ContentFeedStatusDto,
+        queries: SphinxDatabaseQueries?,
+        playingPodcastId: String?,
+        playingEpisodeId: String?
+    ) {
+        val queries = queries ?: coreDB.getSphinxDatabaseQueries()
+        var shouldRestoreItem = true
 
-                contentFeedLock.withLock {
-                    if (contentFeedStatus.feed_id == playingPodcastId) {
-                        queries.contentFeedUpdate(
-                            contentFeedStatus.subscription_status.toSubscribed(),
-                            contentFeedStatus.chat_id?.toChatId(),
-                            contentFeedStatus.sats_per_minute?.toSat(),
-                            FeedId(contentFeedStatus.feed_id)
-                        )
-                    } else {
-                        queries.contentFeedStatusUpsert(
-                            FeedUrl(contentFeedStatus.feed_url),
-                            contentFeedStatus.subscription_status.toSubscribed(),
-                            contentFeedStatus.chat_id?.toChatId(),
-                            contentFeedStatus.item_id?.toFeedId(),
-                            contentFeedStatus.sats_per_minute?.toSat(),
-                            contentFeedStatus.player_speed?.toFeedPlayerSpeed(),
-                            FeedId(contentFeedStatus.feed_id)
-                        )
-                    }
+        val feed = getFeedById(FeedId(contentFeedStatus.feed_id)).firstOrNull()
+
+        if (feed == null) {
+            val chat = contentFeedStatus.chat_id?.toChatId()?.let { getChatById(it).firstOrNull() }
+
+            contentFeedStatus.feed_url.toFeedUrl()?.let { feedUrl ->
+                val response = updateFeedContent(
+                    chatId = contentFeedStatus.chat_id?.toChatId() ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
+                    feedUrl = feedUrl,
+                    chatUUID = chat?.uuid,
+                    subscribed = Subscribed.True,
+                    currentItemId = contentFeedStatus.item_id?.toFeedId(),
+                    delay = 0
+                )
+
+                if (response is Response.Error) {
+                    shouldRestoreItem = false
                 }
+            }
+        } else {
+            queries.feedUpdateSubscribe(
+                Subscribed.True,
+                FeedId(contentFeedStatus.feed_id)
+            )
+        }
 
-                contentFeedStatus.episodes_status?.let { episodeStatuses ->
-                    for ((episodeId, episodeStatus) in episodeStatuses) {
-                        if (playingEpisodeId == episodeId.value) {
-                            continue
-                        }
-                        contentEpisodeLock.withLock {
-                            queries.contentEpisodeStatusUpsert(
-                                FeedItemDuration(episodeStatus.duration),
-                                FeedItemDuration(episodeStatus.current_time),
-                                episodeId,
-                                FeedId(contentFeedStatus.feed_id)
-                            )
-                        }
+        if (!shouldRestoreItem) {
+            return
+        }
+
+        contentFeedLock.withLock {
+            if (contentFeedStatus.feed_id == playingPodcastId) {
+                queries.contentFeedUpdate(
+                    contentFeedStatus.subscription_status.toSubscribed(),
+                    contentFeedStatus.chat_id?.toChatId(),
+                    contentFeedStatus.sats_per_minute?.toSat(),
+                    FeedId(contentFeedStatus.feed_id)
+                )
+            } else {
+                queries.contentFeedStatusUpsert(
+                    FeedUrl(contentFeedStatus.feed_url),
+                    contentFeedStatus.subscription_status.toSubscribed(),
+                    contentFeedStatus.chat_id?.toChatId(),
+                    contentFeedStatus.item_id?.toFeedId(),
+                    contentFeedStatus.sats_per_minute?.toSat(),
+                    contentFeedStatus.player_speed?.toFeedPlayerSpeed(),
+                    FeedId(contentFeedStatus.feed_id)
+                )
+            }
+        }
+
+        contentFeedStatus.episodes_status?.let { episodeStatuses ->
+            for (episodeStatus in episodeStatuses) {
+                for ((episodeId, status) in episodeStatus) {
+                    if (playingEpisodeId == episodeId) {
+                        continue
+                    }
+                    contentEpisodeLock.withLock {
+                        queries.contentEpisodeStatusUpsert(
+                            FeedItemDuration(status.duration),
+                            FeedItemDuration(status.current_time),
+                            FeedId(episodeId),
+                            FeedId(contentFeedStatus.feed_id)
+                        )
                     }
                 }
             }

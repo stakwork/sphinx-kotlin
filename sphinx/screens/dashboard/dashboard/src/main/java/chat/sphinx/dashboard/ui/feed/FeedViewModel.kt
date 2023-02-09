@@ -222,8 +222,7 @@ class FeedViewModel @Inject constructor(
                 dashboardNavigator.toPodcastPlayerScreen(
                     feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     feed.id,
-                    feed.feedUrl,
-                    0
+                    feed.feedUrl
                 )
             }
             feed.isVideo -> {

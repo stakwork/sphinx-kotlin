@@ -60,8 +60,5 @@ abstract class MediaPlayerServiceController {
 
     abstract suspend fun submitAction(userAction: UserAction)
 
-    abstract fun isPlaying(
-        podcastId: String?,
-        episodeId: String?
-    ): Boolean
+    abstract fun getPlayingContent(): Pair<String, String>?
 }

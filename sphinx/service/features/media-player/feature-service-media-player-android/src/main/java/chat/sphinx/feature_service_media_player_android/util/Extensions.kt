@@ -5,7 +5,15 @@ import android.content.Intent
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.feature_service_media_player_android.service.SphinxMediaPlayerService
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.Subscribed
+import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.toSat
+import chat.sphinx.wrapper_feed.ContentEpisodeStatus
+import chat.sphinx.wrapper_feed.ContentFeedStatus
+import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun UserAction.ServiceAction.Play.toIntent(
@@ -14,12 +22,14 @@ internal inline fun UserAction.ServiceAction.Play.toIntent(
     val intent = Intent(context.applicationContext, SphinxMediaPlayerService::class.java)
     intent.action = "PLAY"
     intent.putExtra("CHAT_ID", chatId.value)
-    intent.putExtra("PODCAST_ID", podcastId)
-    intent.putExtra("EPISODE_ID", episodeId)
+    intent.putExtra("PODCAST_ID", contentFeedStatus.feedId.value)
+    intent.putExtra("PODCAST_URL", contentFeedStatus.feedUrl.value)
+    intent.putExtra("EPISODE_ID", contentEpisodeStatus.itemId.value)
     intent.putExtra("EPISODE_URL", episodeUrl)
-    intent.putExtra("SAT_PER_MINUTE", satPerMinute.value)
-    intent.putExtra("SPEED", speed)
-    intent.putExtra("START_TIME", startTime)
+    intent.putExtra("SAT_PER_MINUTE", contentFeedStatus.satsPerMinute?.value ?: 0)
+    intent.putExtra("SPEED", contentFeedStatus.playerSpeed?.value ?: 1.0)
+    intent.putExtra("START_TIME", contentEpisodeStatus.currentTime.value)
+    intent.putExtra("DURATION", contentEpisodeStatus.duration.value)
     return intent
 }
 
@@ -41,11 +51,19 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         }
     }
 
-    val startTime: Int = getIntExtra("START_TIME", -1).let {
+    val startTime: Long = getIntExtra("START_TIME", -1).let {
         if (it == -1) {
             return null
         } else {
-            it
+            it.toLong()
+        }
+    }
+
+    val duration: Long = getIntExtra("DURATION", -1).let {
+        if (it == -1) {
+            return null
+        } else {
+            it.toLong()
         }
     }
 
@@ -57,13 +75,57 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         }
     }
 
+    val podcastId: String = getStringExtra("PODCAST_ID")?.let {
+        it.ifEmpty {
+            return null
+        }
+    } ?: run {
+        return null
+    }
+
+    val podcastUrl: String = getStringExtra("PODCAST_URL")?.let {
+        it.ifEmpty {
+            return null
+        }
+    } ?: run {
+        return null
+    }
+
+    val episodeId = getStringExtra("EPISODE_ID")?.let {
+        it.ifEmpty {
+            return null
+        }
+    } ?: run {
+        return null
+    }
+
+    val episodeUrl = getStringExtra("EPISODE_URL")?.let {
+        it.ifEmpty {
+            return null
+        }
+    } ?: run {
+        return null
+    }
+
+    val satsPerMinute = getLongExtra("SAT_PER_MINUTE", 0).toSat()
+
     return UserAction.ServiceAction.Play(
         chatId,
-        getStringExtra("PODCAST_ID") ?: return null,
-        getStringExtra("EPISODE_ID") ?: return null,
-        getStringExtra("EPISODE_URL") ?: return null,
-        getLongExtra("SAT_PER_MINUTE", -1L).toSat() ?: return null,
-        speed,
-        startTime,
+        episodeUrl,
+        ContentFeedStatus(
+            FeedId(podcastId),
+            FeedUrl(podcastUrl),
+            Subscribed.True,
+            chatId,
+            FeedId(episodeId),
+            satsPerMinute,
+            FeedPlayerSpeed(speed)
+        ),
+        ContentEpisodeStatus(
+            FeedId(podcastId),
+            FeedId(episodeId),
+            FeedItemDuration(duration),
+            FeedItemDuration(startTime)
+        )
     )
 }

@@ -74,8 +74,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var connectivityHelper: ConnectivityHelper
 
-    private val args: CommonPlayerScreenFragmentArgs by navArgs()
-
     override val binding: FragmentCommonPlayerScreenBinding by viewBinding(
         FragmentCommonPlayerScreenBinding::bind
     )
@@ -436,8 +434,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        podcast.setInitialEpisodeDuration(args.argEpisodeDuration)
-
         val currentTime = podcast.currentTime.toLong()
 
         val duration = withContext(viewModel.io) {

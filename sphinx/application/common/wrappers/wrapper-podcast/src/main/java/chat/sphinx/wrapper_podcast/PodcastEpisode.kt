@@ -57,6 +57,34 @@ data class PodcastEpisode(
 
     var contentEpisodeStatus: ContentEpisodeStatus? = null
 
+    fun getUpdatedContentEpisodeStatus(): ContentEpisodeStatus =
+        ContentEpisodeStatus(
+            podcastId,
+            this.id,
+            FeedItemDuration(duration ?: 0),
+            FeedItemDuration((currentTimeMilliseconds ?: 0) / 1000)
+        )
+
+    var duration: Long? = null
+        get() {
+            contentEpisodeStatus?.duration?.value?.let {
+                if (it > 0) {
+                    return it
+                }
+            }
+            return null
+        }
+
+    var currentTimeMilliseconds: Long? = null
+        get() {
+            contentEpisodeStatus?.currentTime?.value?.let {
+                if (it > 0) {
+                    return it * 1000
+                }
+            }
+            return null
+        }
+
     var titleToShow: String = ""
         get() = title.value.trim()
 

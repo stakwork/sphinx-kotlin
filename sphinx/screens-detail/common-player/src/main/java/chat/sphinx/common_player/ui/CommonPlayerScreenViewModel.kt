@@ -331,35 +331,21 @@ class CommonPlayerScreenViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
+
+                    podcast.didStartPlayingEpisode(
+                        episode,
+                        startTime,
+                        ::retrieveEpisodeDuration
+                    )
+
                     mediaPlayerServiceController.submitAction(
                         UserAction.ServiceAction.Play(
                             ChatId(ChatId.NULL_CHAT_ID.toLong()),
                             episode.episodeUrl,
-                            ContentFeedStatus(
-                                podcast.id,
-                                podcast.feedUrl,
-                                podcast.subscribed,
-                                podcast.chatId,
-                                episode.id,
-                                Sat(podcast.satsPerMinute),
-                                podcast.speed.toFeedPlayerSpeed()
-                            ),
-                            ContentEpisodeStatus(
-                                podcast.id,
-                                episode.id,
-                                FeedItemDuration(podcast.episodeDuration ?: 0),
-                                FeedItemDuration(startTime.toLong())
-                            )
+                            podcast.getUpdatedContentFeedStatus(),
+                            podcast.getUpdatedContentEpisodeStatus()
                         )
                     )
-
-                    withContext(io) {
-                        podcast.didStartPlayingEpisode(
-                            episode,
-                            startTime,
-                            ::retrieveEpisodeDuration
-                        )
-                    }
 
                     viewStateContainer.updateViewState(
                         RecommendationsPodcastPlayerViewState.PodcastViewState.EpisodePlayed(
@@ -391,16 +377,12 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.didSeekTo(time)
 
-                val contentEpisodeStatus = podcast.getUpdatedContentEpisodeStatus()
-
-                contentEpisodeStatus?.let { nnContentEpisodeStatus ->
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Seek(
-                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                            nnContentEpisodeStatus
-                        )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Seek(
+                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        podcast.getUpdatedContentEpisodeStatus()
                     )
-                }
+                )
             }
         }
     }

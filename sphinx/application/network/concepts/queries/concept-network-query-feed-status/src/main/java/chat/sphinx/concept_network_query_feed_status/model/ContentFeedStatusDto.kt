@@ -12,7 +12,7 @@ data class ContentFeedStatusDto(
     val item_id: String?,
     val sats_per_minute: Long?,
     val player_speed: Double?,
-    val episodes_status: Map<FeedId, EpisodeStatusDto>?,
+    val episodes_status: List<Map<String, EpisodeStatusDto>>?,
 )
 
 @JsonClass(generateAdapter = true)

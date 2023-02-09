@@ -109,14 +109,14 @@ internal class ChatPrivateAdapter: ColumnAdapter<ChatPrivate, Long> {
         return value.value.toLong()
     }
 }
-// This class is deprecated and it's in use to fill meta_dataAdapter parameter on CoreDBImpl
+
 internal class ChatMetaDataAdapter(val moshi: Moshi): ColumnAdapter<ChatMetaData, String> {
     override fun decode(databaseValue: String): ChatMetaData {
-        return ChatMetaData(FeedId(""), ItemId(0L), Sat(0),0, 0.0)
+        return databaseValue.toChatMetaData(moshi)
     }
 
     override fun encode(value: ChatMetaData): String {
-        return " "
+        return value.toJson(moshi)
     }
 }
 

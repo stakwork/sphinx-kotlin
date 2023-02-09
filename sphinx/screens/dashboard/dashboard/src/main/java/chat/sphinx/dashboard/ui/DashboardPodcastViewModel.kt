@@ -175,33 +175,18 @@ internal class DashboardPodcastViewModel @Inject constructor(
                             )
                         )
                     } else {
-                        withContext(io) {
-                            vs.podcast.didStartPlayingEpisode(
-                                episode,
-                                vs.podcast.currentTime,
-                                ::retrieveEpisodeDuration,
-                            )
-                        }
+                        vs.podcast.didStartPlayingEpisode(
+                            episode,
+                            vs.podcast.currentTime,
+                            ::retrieveEpisodeDuration,
+                        )
 
                         mediaPlayerServiceController.submitAction(
                             UserAction.ServiceAction.Play(
                                 podcast.chatId,
                                 episode.episodeUrl,
-                                ContentFeedStatus(
-                                    vs.podcast.id,
-                                    vs.podcast.feedUrl,
-                                    vs.podcast.subscribed,
-                                    vs.podcast.chatId,
-                                    episode.id,
-                                    Sat(vs.podcast.satsPerMinute),
-                                    vs.podcast.speed.toFeedPlayerSpeed()
-                                ),
-                                ContentEpisodeStatus(
-                                    podcast.id,
-                                    episode.id,
-                                    FeedItemDuration(vs.podcast.episodeDuration ?: 0),
-                                    FeedItemDuration(vs.podcast.currentTime.toLong())
-                                )
+                                vs.podcast.getUpdatedContentFeedStatus(),
+                                vs.podcast.getUpdatedContentEpisodeStatus()
                             )
                         )
                     }
@@ -218,14 +203,12 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 viewModelScope.launch(mainImmediate) {
                     vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
 
-                    vs.podcast.getUpdatedContentEpisodeStatus()?.let { nnContentEpisodeStatus ->
-                        mediaPlayerServiceController.submitAction(
-                            UserAction.ServiceAction.Seek(
-                                podcast.chatId,
-                                nnContentEpisodeStatus
-                            )
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Seek(
+                            podcast.chatId,
+                            vs.podcast.getUpdatedContentEpisodeStatus()
                         )
-                    }
+                    )
 
                     if (!vs.podcast.isPlaying) {
                         vs.adjustState(
@@ -333,15 +316,13 @@ internal class DashboardPodcastViewModel @Inject constructor(
             if (vs.podcast.id.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
                 dashboardNavigator.toCommonPlayerScreen(
                     vs.podcast.id,
-                    vs.podcast.getCurrentEpisode().id,
-                    vs.podcast.episodeDuration ?: 0
+                    vs.podcast.getCurrentEpisode().id
                 )
             } else {
                 dashboardNavigator.toPodcastPlayerScreen(
                     vs.podcast.chatId,
                     vs.podcast.id,
-                    vs.podcast.feedUrl,
-                    vs.podcast.episodeDuration ?: 0
+                    vs.podcast.feedUrl
                 )
             }
         }

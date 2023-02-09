@@ -138,11 +138,8 @@ internal class MediaPlayerServiceControllerImpl(
         }
     }
 
-    override fun isPlaying(
-        podcastId: String?,
-        episodeId: String?
-    ): Boolean {
-        return binder.value?.isPlaying(episodeId, podcastId) ?: false
+    override fun getPlayingContent(): Pair<String, String>? {
+        return binder.value?.getPlayingContent()
     }
 
     private var mp: MediaPlayer? = null

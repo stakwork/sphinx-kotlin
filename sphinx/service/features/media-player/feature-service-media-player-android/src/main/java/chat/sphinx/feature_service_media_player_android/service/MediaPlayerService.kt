@@ -152,23 +152,14 @@ internal abstract class MediaPlayerService: SphinxService() {
             resetTrackSecondsConsumed()
         }
 
-        fun isPlaying(
-            podcastId: String?,
-            episodeId: String?
-        ): Boolean {
+        fun getPlayingContent(): Pair<String, String>? {
             podData?.let { nnData ->
                 if (!nnData.mediaPlayer.isPlaying) {
-                    return false
+                    return null
                 }
-                podcastId?.let { nnPodcastId ->
-                    return nnData.podcastId == nnPodcastId
-                }
-                episodeId?.let { nnEpisodeId ->
-                    return nnData.episodeId == nnEpisodeId
-                }
-                return false
+                return Pair(nnData.podcastId, nnData.episodeId)
             } ?: run {
-                return false
+                return null
             }
         }
 
@@ -405,6 +396,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                             }
                         }
                     }
+
                     userAction.contentEpisodeStatus.apply {
                         feedRepository.updateContentEpisodeStatus(
                             feedId,
@@ -467,13 +459,20 @@ internal abstract class MediaPlayerService: SphinxService() {
                         setPauseTime(nnData.currentTimeSeconds)
 
                         feedRepository.updateContentFeedStatus(
-                            nnData.podcastId.toFeedId() ?: FeedId("null"),
+                            FeedId(nnData.podcastId),
                             nnData.feedUrl,
                             nnData.subscriptionStatus,
                             nnData.chatId,
-                            nnData.episodeId.toFeedId(),
+                            FeedId(nnData.episodeId),
                             nnData.satsPerMinute,
                             nnData.speed.toFeedPlayerSpeed()
+                        )
+
+                        feedRepository.updateContentEpisodeStatus(
+                            FeedId(nnData.podcastId),
+                            FeedId(nnData.episodeId),
+                            FeedItemDuration(nnData.durationMilliSeconds.toLong() / 1000),
+                            FeedItemDuration(currentTime.toLong() / 1000)
                         )
 
                     } catch (e: IllegalStateException) {
@@ -690,8 +689,8 @@ internal abstract class MediaPlayerService: SphinxService() {
             mediaPlayerHolder.processUserAction(userAction)
         }
 
-        fun isPlaying(episodeId: String?, podcastId: String?): Boolean {
-            return mediaPlayerHolder.isPlaying(episodeId, podcastId)
+        fun getPlayingContent(): Pair<String, String>? {
+            return mediaPlayerHolder.getPlayingContent()
         }
     }
 

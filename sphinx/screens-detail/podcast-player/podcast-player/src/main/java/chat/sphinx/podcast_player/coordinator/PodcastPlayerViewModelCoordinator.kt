@@ -32,8 +32,7 @@ internal class PodcastPlayerViewModelCoordinator(
         podcastPlayerNavigator.toPodcastPlayerScreen(
             request.request.chatId,
             request.request.feedId,
-            request.request.feedUrl,
-            request.request.currentEpisodeDuration
+            request.request.feedUrl
         )
     }
 

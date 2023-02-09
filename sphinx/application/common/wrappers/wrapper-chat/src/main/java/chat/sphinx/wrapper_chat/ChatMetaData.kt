@@ -7,75 +7,75 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 
-//@Suppress("NOTHING_TO_INLINE")
-//inline fun String.toChatMetaDataOrNull(moshi: Moshi): ChatMetaData? =
-//    try {
-//        this.toChatMetaData(moshi)
-//    } catch (e: Exception) {
-//        null
-//    }
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toChatMetaDataOrNull(moshi: Moshi): ChatMetaData? =
+    try {
+        this.toChatMetaData(moshi)
+    } catch (e: Exception) {
+        null
+    }
 
-//@Throws(
-//    IllegalArgumentException::class,
-//    JsonDataException::class
-//)
-//fun String.toChatMetaData(moshi: Moshi): ChatMetaData {
-//    val chatMetaData = try {
-//        moshi.adapter(ChatMetaDataLongIdMoshi::class.java)
-//            .fromJson(this)
-//            ?.let {
-//                ChatMetaData(
-//                    FeedId(it.itemID.toString()),
-//                    ItemId(it.itemID),
-//                    Sat(it.sats_per_minute),
-//                    it.ts,
-//                    it.speed
-//                )
-//            }
-//    } catch (e: Exception) {
-//        null
-//    }
-//
-//    return chatMetaData ?: run {
-//        moshi.adapter(ChatMetaDataStringIdMoshi::class.java)
-//            .fromJson(this)
-//            ?.let {
-//                ChatMetaData(
-//                    FeedId(it.itemID),
-//                    ItemId(-1),
-//                    Sat(it.sats_per_minute),
-//                    it.ts,
-//                    it.speed
-//                )
-//            }
-//            ?: throw IllegalArgumentException("Provided Json was invalid")
-//    }
-//}
+@Throws(
+    IllegalArgumentException::class,
+    JsonDataException::class
+)
+fun String.toChatMetaData(moshi: Moshi): ChatMetaData {
+    val chatMetaData = try {
+        moshi.adapter(ChatMetaDataLongIdMoshi::class.java)
+            .fromJson(this)
+            ?.let {
+                ChatMetaData(
+                    FeedId(it.itemID.toString()),
+                    ItemId(it.itemID),
+                    Sat(it.sats_per_minute),
+                    it.ts,
+                    it.speed
+                )
+            }
+    } catch (e: Exception) {
+        null
+    }
 
-//@Throws(AssertionError::class)
-//fun ChatMetaData.toJson(moshi: Moshi): String {
-//    return if (itemLongId.value >= 0) {
-//        moshi.adapter(ChatMetaDataLongIdMoshi::class.java)
-//            .toJson(
-//                ChatMetaDataLongIdMoshi(
-//                    itemLongId.value,
-//                    satsPerMinute.value,
-//                    timeSeconds,
-//                    speed
-//                )
-//            )
-//    } else {
-//        moshi.adapter(ChatMetaDataStringIdMoshi::class.java)
-//            .toJson(
-//                ChatMetaDataStringIdMoshi(
-//                    itemId.value,
-//                    satsPerMinute.value,
-//                    timeSeconds,
-//                    speed
-//                )
-//            )
-//    }
-//}
+    return chatMetaData ?: run {
+        moshi.adapter(ChatMetaDataStringIdMoshi::class.java)
+            .fromJson(this)
+            ?.let {
+                ChatMetaData(
+                    FeedId(it.itemID),
+                    ItemId(-1),
+                    Sat(it.sats_per_minute),
+                    it.ts,
+                    it.speed
+                )
+            }
+            ?: throw IllegalArgumentException("Provided Json was invalid")
+    }
+}
+
+@Throws(AssertionError::class)
+fun ChatMetaData.toJson(moshi: Moshi): String {
+    return if (itemLongId.value >= 0) {
+        moshi.adapter(ChatMetaDataLongIdMoshi::class.java)
+            .toJson(
+                ChatMetaDataLongIdMoshi(
+                    itemLongId.value,
+                    satsPerMinute.value,
+                    timeSeconds,
+                    speed
+                )
+            )
+    } else {
+        moshi.adapter(ChatMetaDataStringIdMoshi::class.java)
+            .toJson(
+                ChatMetaDataStringIdMoshi(
+                    itemId.value,
+                    satsPerMinute.value,
+                    timeSeconds,
+                    speed
+                )
+            )
+    }
+}
 
 
 data class ChatMetaData(

@@ -122,6 +122,7 @@ internal class DashboardViewModel @Inject constructor(
         handleDeepLink(args.argDeepLink)
 
         actionsRepository.syncActions()
+        feedRepository.restoreContentFeedStatuses()
     }
     
     private fun getRelayKeys() {
