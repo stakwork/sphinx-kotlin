@@ -25,19 +25,19 @@ sealed class UserAction(val chatId: ChatId) {
 
         class Seek(
             chatId: ChatId,
-            contentEpisodeStatus: ContentEpisodeStatus
+            val contentEpisodeStatus: ContentEpisodeStatus
         ): ServiceAction(chatId)
 
     }
 
     class AdjustSatsPerMinute(
         chatId: ChatId,
-        contentFeedStatus: ContentFeedStatus
+        val contentFeedStatus: ContentFeedStatus
     ): UserAction(chatId)
 
     class AdjustSpeed(
         chatId: ChatId,
-        contentFeedStatus: ContentFeedStatus
+        val contentFeedStatus: ContentFeedStatus
     ): UserAction(chatId)
 
     class SendBoost(

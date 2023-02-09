@@ -19,6 +19,10 @@ import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState.NoPodcast.cli
 import chat.sphinx.dashboard.ui.viewstates.adjustState
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_feed.ContentEpisodeStatus
+import chat.sphinx.wrapper_feed.ContentFeedStatus
+import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -182,12 +186,22 @@ internal class DashboardPodcastViewModel @Inject constructor(
                         mediaPlayerServiceController.submitAction(
                             UserAction.ServiceAction.Play(
                                 podcast.chatId,
-                                vs.podcast.id.value,
-                                episode.id.value,
                                 episode.episodeUrl,
-                                Sat(vs.podcast.satsPerMinute),
-                                vs.podcast.speed,
-                                vs.podcast.currentTime,
+                                ContentFeedStatus(
+                                    vs.podcast.id,
+                                    vs.podcast.feedUrl,
+                                    vs.podcast.subscribed,
+                                    vs.podcast.chatId,
+                                    episode.id,
+                                    Sat(vs.podcast.satsPerMinute),
+                                    vs.podcast.speed.toFeedPlayerSpeed()
+                                ),
+                                ContentEpisodeStatus(
+                                    podcast.id,
+                                    episode.id,
+                                    FeedItemDuration(vs.podcast.episodeDuration ?: 0),
+                                    FeedItemDuration(vs.podcast.currentTime.toLong())
+                                )
                             )
                         )
                     }
@@ -204,12 +218,14 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 viewModelScope.launch(mainImmediate) {
                     vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
 
-//                    mediaPlayerServiceController.submitAction(
-//                        UserAction.ServiceAction.Seek(
-//                            podcast.chatId,
-//                            vs.podcast.getMetaData()
-//                        )
-//                    )
+                    vs.podcast.getUpdatedContentEpisodeStatus()?.let { nnContentEpisodeStatus ->
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Seek(
+                                podcast.chatId,
+                                nnContentEpisodeStatus
+                            )
+                        )
+                    }
 
                     if (!vs.podcast.isPlaying) {
                         vs.adjustState(
@@ -229,12 +245,26 @@ internal class DashboardPodcastViewModel @Inject constructor(
                     return@OnClickCallback
                 }
 
-//                feedRepository.updateChatMetaData(
-//                    podcast.chatId,
-//                    vs.podcast.id,
-//                    vs.podcast.getMetaData(),
-//                    false
-//                )
+                val contentFeedStatus = vs.podcast.getUpdatedContentFeedStatus()
+                feedRepository.updateContentFeedStatus(
+                    vs.podcast.id,
+                    contentFeedStatus.feedUrl,
+                    contentFeedStatus.subscriptionStatus,
+                    podcast.chatId,
+                    contentFeedStatus.itemId,
+                    contentFeedStatus.satsPerMinute,
+                    contentFeedStatus.playerSpeed
+                )
+
+                val contentEpisodeStatus = vs.podcast.getUpdatedContentEpisodeStatus()
+                contentEpisodeStatus?.itemId?.let {episodeId ->
+                    feedRepository.updateContentEpisodeStatus(
+                        vs.podcast.id,
+                        episodeId,
+                        contentEpisodeStatus.duration,
+                        contentEpisodeStatus.currentTime
+                    )
+                }
 
                 requestPodcastPlayer(vs)
             }

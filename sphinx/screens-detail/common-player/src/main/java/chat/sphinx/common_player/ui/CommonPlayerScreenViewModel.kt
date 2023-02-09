@@ -24,6 +24,10 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.ContentEpisodeStatus
+import chat.sphinx.wrapper_feed.ContentFeedStatus
+import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
@@ -330,12 +334,22 @@ class CommonPlayerScreenViewModel @Inject constructor(
                     mediaPlayerServiceController.submitAction(
                         UserAction.ServiceAction.Play(
                             ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                            podcast.id.value,
-                            episode.id.value,
                             episode.episodeUrl,
-                            Sat(podcast.satsPerMinute),
-                            podcast.speed,
-                            startTime,
+                            ContentFeedStatus(
+                                podcast.id,
+                                podcast.feedUrl,
+                                podcast.subscribed,
+                                podcast.chatId,
+                                episode.id,
+                                Sat(podcast.satsPerMinute),
+                                podcast.speed.toFeedPlayerSpeed()
+                            ),
+                            ContentEpisodeStatus(
+                                podcast.id,
+                                episode.id,
+                                FeedItemDuration(podcast.episodeDuration ?: 0),
+                                FeedItemDuration(startTime.toLong())
+                            )
                         )
                     )
 
@@ -377,14 +391,16 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.didSeekTo(time)
 
-//                val metaData = podcast.getMetaData()
-//
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.ServiceAction.Seek(
-//                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
-//                        metaData
-//                    )
-//                )
+                val contentEpisodeStatus = podcast.getUpdatedContentEpisodeStatus()
+
+                contentEpisodeStatus?.let { nnContentEpisodeStatus ->
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Seek(
+                            ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                            nnContentEpisodeStatus
+                        )
+                    )
+                }
             }
         }
     }

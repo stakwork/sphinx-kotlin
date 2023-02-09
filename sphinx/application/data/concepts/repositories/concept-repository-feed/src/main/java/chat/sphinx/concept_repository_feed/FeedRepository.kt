@@ -17,7 +17,6 @@ import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 interface FeedRepository {
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>

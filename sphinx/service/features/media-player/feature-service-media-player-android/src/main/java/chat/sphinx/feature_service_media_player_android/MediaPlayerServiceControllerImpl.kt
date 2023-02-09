@@ -17,7 +17,6 @@ import chat.sphinx.feature_service_media_player_android.util.toIntent
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -83,10 +82,30 @@ internal class MediaPlayerServiceControllerImpl(
 
         binder.value?.processUserAction(userAction) ?: when (userAction) {
             is UserAction.AdjustSpeed -> {
-//                feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+                userAction.contentFeedStatus.apply {
+                    feedRepository.updateContentFeedStatus(
+                        feedId,
+                        feedUrl,
+                        subscriptionStatus,
+                        userAction.chatId,
+                        itemId,
+                        satsPerMinute,
+                        playerSpeed
+                    )
+                }
             }
             is UserAction.AdjustSatsPerMinute -> {
-//                feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+                userAction.contentFeedStatus.apply {
+                    feedRepository.updateContentFeedStatus(
+                        feedId,
+                        feedUrl,
+                        subscriptionStatus,
+                        userAction.chatId,
+                        itemId,
+                        satsPerMinute,
+                        playerSpeed
+                    )
+                }
             }
             is UserAction.SendBoost -> {
 //                feedRepository.streamFeedPayments(
@@ -106,7 +125,14 @@ internal class MediaPlayerServiceControllerImpl(
                 }
             }
             is UserAction.ServiceAction.Seek -> {
-//                feedRepository.updateChatMetaData(userAction.chatId, null, userAction.chatMetaData)
+                userAction.contentEpisodeStatus.apply {
+                    feedRepository.updateContentEpisodeStatus(
+                        feedId,
+                        itemId,
+                        duration,
+                        currentTime
+                    )
+                }
                 listenerHandler.dispatch(getCurrentState())
             }
         }
