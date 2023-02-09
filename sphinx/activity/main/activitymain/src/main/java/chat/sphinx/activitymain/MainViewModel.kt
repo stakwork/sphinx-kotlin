@@ -83,7 +83,7 @@ internal class MainViewModel @Inject constructor(
     }
 
     fun saveContentFeedStatuses() {
-//        feedRepository.saveContentFeedStatuses()
+        feedRepository.saveContentFeedStatuses()
     }
 
 }

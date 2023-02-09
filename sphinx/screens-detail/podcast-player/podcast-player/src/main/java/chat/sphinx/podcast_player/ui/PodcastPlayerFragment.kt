@@ -222,7 +222,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                     if (currentEpisode.playing) {
                         viewModel.pauseEpisode(currentEpisode)
                     } else {
-                        viewModel.playEpisode(currentEpisode, podcast.currentTime)
+                        viewModel.playEpisode(currentEpisode)
                     }
                 }
 

@@ -83,7 +83,7 @@ interface FeedRepository {
         playingEpisodeId: String? = null
     )
 
-    fun getContentFeedStatusByFeedId(
+    fun restoreContentFeedStatusByFeedId(
         feedId: FeedId,
         playingPodcastId: String? = null,
         playingEpisodeId: String? = null

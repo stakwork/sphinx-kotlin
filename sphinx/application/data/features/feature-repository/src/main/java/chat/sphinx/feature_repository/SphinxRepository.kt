@@ -6681,7 +6681,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun getContentFeedStatusByFeedId(
+    override fun restoreContentFeedStatusByFeedId(
         feedId: FeedId,
         playingPodcastId: String?,
         playingEpisodeId: String?
@@ -6759,11 +6759,6 @@ abstract class SphinxRepository(
                     shouldRestoreItem = false
                 }
             }
-        } else {
-            queries.feedUpdateSubscribe(
-                Subscribed.True,
-                FeedId(contentFeedStatus.feed_id)
-            )
         }
 
         if (!shouldRestoreItem) {

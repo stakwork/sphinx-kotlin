@@ -186,7 +186,7 @@ internal class PodcastEpisodesListAdapter(
             binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
                 episode?.let { podcastEpisode ->
                     if (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded) {
-                        viewModel.playEpisodeFromList(podcastEpisode, 0)
+                        viewModel.playEpisodeFromList(podcastEpisode)
                     }
                 }
             }

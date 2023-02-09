@@ -387,24 +387,24 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun playEpisodeFromList(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
 
             delay(50L)
 
-            playEpisode(episode, startTime)
+            playEpisode(episode)
         }
     }
 
-    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
 
                     podcast.didStartPlayingEpisode(
                         episode,
-                        startTime,
+                        ((episode.currentTimeMilliseconds ?: 0) / 1000).toInt(),
                         ::retrieveEpisodeDuration
                     )
 
