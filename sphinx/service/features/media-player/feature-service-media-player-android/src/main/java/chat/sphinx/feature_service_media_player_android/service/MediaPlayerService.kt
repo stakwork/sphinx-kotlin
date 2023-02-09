@@ -233,11 +233,13 @@ internal abstract class MediaPlayerService: SphinxService() {
                         }
 
                         feedRepository.streamFeedPayments(
-                            nnData.chatId,
-//                            userAction.metaData,
+                            userAction.chatId,
                             nnData.podcastId,
                             nnData.episodeId,
-                            nnData.destinations,
+                            userAction.contentEpisodeStatus.currentTime.value,
+                            userAction.contentFeedStatus.satsPerMinute,
+                            userAction.contentFeedStatus.playerSpeed,
+                            nnData.destinations
                         )
                     }
                 }
@@ -543,7 +545,7 @@ internal abstract class MediaPlayerService: SphinxService() {
         private fun startStateDispatcher() {
             stateDispatcherJob?.cancel()
             stateDispatcherJob = serviceLifecycleScope.launch {
-                var count: Double = 0.0
+                var count = 0.0
                 while (isActive) {
                     val speed: Double = podData?.speed ?: 1.0
                     podData?.let { nnData ->
@@ -552,21 +554,15 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                         if (count >= 60.0 * speed) {
 
-                            //Chat meta data is updated on relay automatically on stream payments
                             feedRepository.streamFeedPayments(
                                 nnData.chatId,
-//                                ChatMetaData(
-//                                    FeedId(nnData.episodeId),
-//                                    nnData.episodeId.toLongOrNull()?.toItemId() ?: ItemId(-1),
-//                                    nnData.satsPerMinute,
-//                                    currentTimeSeconds,
-//                                    speed,
-//                                ),
                                 nnData.podcastId,
                                 nnData.episodeId,
+                                currentTimeSeconds.toLong(),
+                                nnData.satsPerMinute,
+                                speed.toFeedPlayerSpeed(),
                                 nnData.destinations
                             )
-
                             count = 0.0
                         } else {
                             count += 1.0

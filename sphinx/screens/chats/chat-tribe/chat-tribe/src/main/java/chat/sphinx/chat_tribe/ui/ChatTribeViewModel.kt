@@ -44,6 +44,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -188,21 +189,14 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
         getPodcast()?.let { podcast ->
-//            val metaData = ChatMetaData(
-//                itemId = podcastClip.itemID,
-//                itemLongId = ItemId(-1),
-//                satsPerMinute = getChat()?.metaData?.satsPerMinute ?: Sat(podcast.satsPerMinute),
-//                timeSeconds = podcastClip.ts,
-//                speed = 1.0
-//            )
-
             feedRepository.streamFeedPayments(
                 chatId,
-//                metaData,
                 podcastClip.feedID.value,
                 podcastClip.itemID.value,
+                podcastClip.ts.toLong(),
+                getChat()?.metaData?.satsPerMinute ?: Sat(podcast.satsPerMinute),
+                FeedPlayerSpeed(1.0),
                 podcast.getFeedDestinations(podcastClip.pubkey),
-                false,
                 messageUUID
             )
         }

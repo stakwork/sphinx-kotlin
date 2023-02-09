@@ -108,13 +108,17 @@ internal class MediaPlayerServiceControllerImpl(
                 }
             }
             is UserAction.SendBoost -> {
-//                feedRepository.streamFeedPayments(
-//                    userAction.chatId,
-//                    userAction.metaData,
-//                    userAction.podcastId,
-//                    userAction.metaData.itemId.value,
-//                    userAction.destinations
-//                )
+                userAction.contentFeedStatus.itemId?.value?.let { itemId ->
+                    feedRepository.streamFeedPayments(
+                        userAction.chatId,
+                        userAction.podcastId,
+                        itemId,
+                        userAction.contentEpisodeStatus.currentTime.value,
+                        userAction.contentFeedStatus.satsPerMinute,
+                        userAction.contentFeedStatus.playerSpeed,
+                        userAction.destinations
+                    )
+                }
             }
             is UserAction.ServiceAction.Pause -> {
                 listenerHandler.dispatch(getCurrentState())

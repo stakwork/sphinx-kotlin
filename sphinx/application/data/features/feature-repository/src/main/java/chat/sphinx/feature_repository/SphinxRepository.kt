@@ -10,10 +10,7 @@ import chat.sphinx.concept_network_query_action_track.model.ActionTrackDto
 import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
-import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.PostGroupDto
-import chat.sphinx.concept_network_query_chat.model.PutChatDto
-import chat.sphinx.concept_network_query_chat.model.TribeDto
+import chat.sphinx.concept_network_query_chat.model.*
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
@@ -717,68 +714,57 @@ abstract class SphinxRepository(
 
     override fun streamFeedPayments(
         chatId: ChatId,
-//        metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
+        currentTime: Long,
+        satsPerMinute: Sat?,
+        playerSpeed: FeedPlayerSpeed?,
         destinations: List<FeedDestination>,
-        updateMetaData: Boolean,
-        clipMessageUUID: MessageUUID?,
+        clipMessageUUID: MessageUUID?
     ) {
 
-//        val updateMD = if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-//            false
-//        } else {
-//            updateMetaData
-//        }
-//
-//        if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
-//            return
-//        }
-//
-//        applicationScope.launch(io) {
-//            val queries = coreDB.getSphinxDatabaseQueries()
-//
-//            chatLock.withLock {
-//                queries.chatUpdateMetaData(metaData, chatId)
-//            }
-//
-//            val destinationsArray: MutableList<PostStreamSatsDestinationDto> =
-//                ArrayList(destinations.size)
-//
-//            for (destination in destinations) {
-//                destinationsArray.add(
-//                    PostStreamSatsDestinationDto(
-//                        destination.address.value,
-//                        destination.type.value,
-//                        destination.split.value,
-//                    )
-//                )
-//            }
-//
-//            val streamSatsText =
-//                StreamSatsText(
-//                    podcastId,
-//                    episodeId,
-//                    metaData.timeSeconds.toLong(),
-//                    metaData.speed,
-//                    clipMessageUUID?.value
-//                )
-//
-//            val postStreamSatsDto = PostStreamSatsDto(
-//                metaData.satsPerMinute.value,
-//                chatId.value,
-//                streamSatsText.toJson(moshi),
-//                updateMD,
-//                destinationsArray
-//            )
-//
-//            try {
-//                networkQueryChat.streamSats(
-//                    postStreamSatsDto
-//                ).collect {}
-//            } catch (e: AssertionError) {
-//            }
-//        }
+        if ((satsPerMinute?.value ?: 0) <= 0 || destinations.isEmpty()) {
+            return
+        }
+
+        applicationScope.launch(io) {
+            val destinationsArray: MutableList<PostStreamSatsDestinationDto> =
+                ArrayList(destinations.size)
+
+            for (destination in destinations) {
+                destinationsArray.add(
+                    PostStreamSatsDestinationDto(
+                        destination.address.value,
+                        destination.type.value,
+                        destination.split.value,
+                    )
+                )
+            }
+
+            val streamSatsText =
+                StreamSatsText(
+                    podcastId,
+                    episodeId,
+                    currentTime,
+                    playerSpeed?.value ?: 1.0,
+                    clipMessageUUID?.value
+                )
+
+            val postStreamSatsDto = PostStreamSatsDto(
+                satsPerMinute?.value ?: 0,
+                chatId.value,
+                streamSatsText.toJson(moshi),
+                false,
+                destinationsArray
+            )
+
+            try {
+                networkQueryChat.streamSats(
+                    postStreamSatsDto
+                ).collect {}
+            } catch (e: AssertionError) {
+            }
+        }
     }
 
 
@@ -6595,7 +6581,20 @@ abstract class SphinxRepository(
 
             networkQueryFeedStatus.saveFeedStatuses(
                 PostFeedStatusDto(contentFeedStatuses)
-            ).collect { }
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+
+                    }
+                    is Response.Error -> {
+
+                    }
+                    is Response.Success -> {
+
+                    }
+                }
+            }
         }
     }
 

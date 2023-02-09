@@ -53,12 +53,13 @@ interface FeedRepository {
 
     fun streamFeedPayments(
         chatId: ChatId,
-//        metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
+        currentTime: Long,
+        satsPerMinute: Sat?,
+        playerSpeed: FeedPlayerSpeed?,
         destinations: List<FeedDestination>,
-        updateMetaData: Boolean = true,
-        clipUUID: MessageUUID? = null
+        clipMessageUUID: MessageUUID? = null
     )
 
     fun updateContentFeedStatus(

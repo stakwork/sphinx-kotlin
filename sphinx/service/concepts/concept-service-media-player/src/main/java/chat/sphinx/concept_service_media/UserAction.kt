@@ -43,7 +43,8 @@ sealed class UserAction(val chatId: ChatId) {
     class SendBoost(
         chatId: ChatId,
         val podcastId: String,
-//        val metaData: ChatMetaData,
+        val contentFeedStatus: ContentFeedStatus,
+        val contentEpisodeStatus: ContentEpisodeStatus,
         val destinations: List<FeedDestination>
     ): UserAction(chatId)
 

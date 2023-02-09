@@ -24,6 +24,8 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
+import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -283,15 +285,11 @@ internal open class VideoFeedScreenViewModel(
 
                                     feedRepository.streamFeedPayments(
                                         chatId,
-//                                        ChatMetaData(
-//                                            itemId = currentItem.id,
-//                                            itemLongId = ItemId(-1),
-//                                            satsPerMinute = amount,
-//                                            timeSeconds = 0,
-//                                            speed = 1.0
-//                                        ),
                                         videoFeed.id.value,
                                         currentItem.id.value,
+                                        0,
+                                        amount,
+                                        FeedPlayerSpeed(1.0),
                                         destinations
                                     )
                                 }
