@@ -84,7 +84,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/seek_bar_sats_per_minute_padding"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="@+id/image_view_podcast_image"
                 app:layout_constraintStart_toStartOf="parent"
                 android:background="@color/blackSemiTransparent"
