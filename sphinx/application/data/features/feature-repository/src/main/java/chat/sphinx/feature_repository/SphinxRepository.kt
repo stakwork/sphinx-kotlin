@@ -1056,7 +1056,7 @@ abstract class SphinxRepository(
                             emit(
                                 if (processChatsResponse is Response.Success) {
                                     Response.Success(
-                                        RestoreProgress(restoring, 4)
+                                        RestoreProgress(restoring, 5)
                                     )
                                 } else {
                                     Response.Error(ResponseError("Failed to refresh contacts and chats"))
@@ -4737,11 +4737,12 @@ abstract class SphinxRepository(
             newMessagesTotal / MESSAGE_PAGINATION_LIMIT
         }
 
-        val contactsRestoreProgressTotal = 4
-        val messagesRestoreProgressTotal = 96
+        val contactsRestoreProgressTotal = 5
+        val feedRestoreProgressTotal = 10
+        val messagesRestoreProgressTotal = 85
         val currentPage: Int = offset / MESSAGE_PAGINATION_LIMIT
-        val progress: Int =
-            contactsRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
+
+        val progress: Int = contactsRestoreProgressTotal + feedRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
 
         return RestoreProgress(
             true,

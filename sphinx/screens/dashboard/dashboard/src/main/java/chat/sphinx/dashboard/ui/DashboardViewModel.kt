@@ -916,6 +916,8 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
 
+            //networkRefreshFeedContent
+
             if (_networkStateFlow.value is Response.Error) {
                 jobNetworkRefresh?.cancel()
             }
