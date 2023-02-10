@@ -170,7 +170,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         }
     }
 
-    private var dragging: Boolean = false
+    private var draggingTimeSlider: Boolean = false
+    private var draggingSatsSlider: Boolean = false
     private fun addPodcastOnClickListeners(podcast: Podcast) {
         binding.apply {
             includeLayoutEpisodeSliderControl.apply {
@@ -189,14 +190,14 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                         }
 
                         override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                            dragging = true
+                            draggingTimeSlider = true
                         }
 
                         override fun onStopTrackingTouch(seekBar: SeekBar?) {
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                                 seekTo(podcast, seekBar?.progress ?: 0)
                             }
-                            dragging = false
+                            draggingTimeSlider = false
                         }
                     }
                 )
@@ -272,9 +273,13 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                         }
                     }
 
-                    override fun onStartTrackingTouch(seekBar: SeekBar?) { }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = true
+                    }
 
                     override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = false
+
                         seekBar?.let {
                             SLIDER_VALUES[seekBar.progress].let {
                                 viewModel.updateSatsPerMinute(it.toLong())
@@ -369,17 +374,19 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
             }
 
-            val satsPerMinute = podcast.satsPerMinute
-            val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
-            val index = SLIDER_VALUES.indexOf(closest)
+            if (!draggingSatsSlider) {
+                val satsPerMinute = podcast.satsPerMinute
+                val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+                val index = SLIDER_VALUES.indexOf(closest)
 
-            seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
-            seekBarSatsPerMinute.progress = index
-            textViewPodcastSatsPerMinuteValue.text = closest.toString()
+                seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+                seekBarSatsPerMinute.progress = index
+                textViewPodcastSatsPerMinuteValue.text = closest.toString()
+            }
 
             togglePlayPauseButton(podcast.isPlaying)
 
-            if (!dragging && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
+            if (!draggingTimeSlider && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
 
             toggleLoadingWheel(false)
             addPodcastOnClickListeners(podcast)

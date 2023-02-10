@@ -342,6 +342,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun updateSatsPerMinute(sats: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { nnPodcast ->
+
+                nnPodcast.didChangeSatsPerMinute(sats)
+
                 viewModelScope.launch(mainImmediate) {
                     mediaPlayerServiceController.submitAction(
                         UserAction.AdjustSatsPerMinute(

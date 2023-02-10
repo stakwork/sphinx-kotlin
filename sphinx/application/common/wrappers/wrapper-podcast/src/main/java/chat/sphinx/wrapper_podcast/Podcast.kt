@@ -284,6 +284,10 @@ data class Podcast(
         this.timeMilliSeconds = time
     }
 
+    fun didChangeSatsPerMinute(sats: Long) {
+        this.satsPerMinute = sats
+    }
+
     fun playingEpisodeUpdate(
         episodeId: String,
         time: Int,
