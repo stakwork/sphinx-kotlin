@@ -40,7 +40,6 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.dashboard.RestoreProgress
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -922,7 +921,7 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
 
-            repositoryDashboard.networkRefreshFeedContentStatuses.collect { response ->
+            repositoryDashboard.networkRefreshFeedContent.collect { response ->
                 @Exhaustive
                 when (response) {
                     is Response.Success -> {

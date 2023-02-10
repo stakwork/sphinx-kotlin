@@ -80,21 +80,19 @@
                 app:layout_constraintBottom_toBottomOf="@id/text_view_dismiss_button"/>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constrain_layout_podcast_lightning_controls"
+                android:id="@+id/constraint_layout_podcast_lightning_controls"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/seek_bar_sats_per_minute_padding"
-                android:visibility="visible"
+                android:padding="@dimen/player_slider_control_margin"
                 app:layout_constraintBottom_toBottomOf="@+id/image_view_podcast_image"
                 app:layout_constraintStart_toStartOf="parent"
-                android:background="@color/blackSemiTransparent"
-                tools:visibility="visible">
+                android:background="@color/blackSemiTransparent70">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/constrain_layout_podcast_controls_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/default_form_horizontal_margin"
+                    android:layout_marginHorizontal="@dimen/player_time_labels_horizontal_margin"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
 
@@ -105,6 +103,7 @@
                         android:text="@string/podcast_sats_per_minute"
                         android:textColor="@color/textMessages"
                         android:textSize="@dimen/default_text_size_body"
+                        android:fontFamily="@font/roboto_medium"
                         app:layout_constraintEnd_toStartOf="@+id/text_view_podcast_sats_per_minute_value"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -115,6 +114,7 @@
                         android:layout_height="wrap_content"
                         android:textColor="@color/textMessages"
                         android:textSize="@dimen/default_text_size_body"
+                        android:fontFamily="@font/roboto_medium"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="0" />
@@ -126,12 +126,11 @@
                     style="?android:attr/seekBarStyle"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/seek_bar_sats_per_minute_margin_horizontal"
                     android:layout_marginVertical="@dimen/seek_bar_sats_per_minute_margin_vertical"
-                    android:progressDrawable="@drawable/podcast_player_seek_bar_progress"
-                    android:secondaryProgressTint="@color/receivedIcon"
+                    android:progressDrawable="@drawable/sats_seek_bar_progress"
+                    android:secondaryProgressTint="@android:color/white"
                     android:thumb="@drawable/podcast_player_seek_bar_thumb"
-                    android:thumbTint="@color/receivedIcon"
+                    android:thumbTint="@android:color/white"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/constrain_layout_podcast_controls_text" />

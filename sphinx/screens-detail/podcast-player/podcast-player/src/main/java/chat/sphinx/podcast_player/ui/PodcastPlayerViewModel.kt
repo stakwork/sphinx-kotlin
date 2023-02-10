@@ -34,9 +34,8 @@ import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip
@@ -47,7 +46,6 @@ import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -55,7 +53,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -226,10 +223,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.addListener(this)
 
         viewModelScope.launch(mainImmediate) {
-            podcastFlow.collect { podcast ->
-                podcast?.let { nnPodcast ->
-                    podcastLoaded(nnPodcast)
-                }
+            getPodcast()?.let { nnPodcast ->
+                podcastLoaded(nnPodcast)
             }
         }
 
@@ -349,7 +344,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     mediaPlayerServiceController.submitAction(
                         UserAction.AdjustSatsPerMinute(
                             args.chatId,
-                            nnPodcast.getUpdatedContentFeedStatus(Sat(sats))
+                            nnPodcast.getUpdatedContentFeedStatus(
+                                Sat(sats)
+                            )
                         )
                     )
                 }

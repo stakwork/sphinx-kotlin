@@ -58,18 +58,18 @@ data class PodcastEpisode(
     var contentEpisodeStatus: ContentEpisodeStatus? = null
 
     fun getUpdatedContentEpisodeStatus(): ContentEpisodeStatus =
-        ContentEpisodeStatus(
+        contentEpisodeStatus ?: ContentEpisodeStatus(
             podcastId,
             this.id,
-            FeedItemDuration(duration ?: 0),
-            FeedItemDuration((currentTimeMilliseconds ?: 0) / 1000)
+            FeedItemDuration(0),
+            FeedItemDuration(0)
         )
 
-    var duration: Long? = null
+    var durationMilliseconds: Long? = null
         get() {
             contentEpisodeStatus?.duration?.value?.let {
                 if (it > 0) {
-                    return it
+                    return it * 1000
                 }
             }
             return null

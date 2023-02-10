@@ -8,7 +8,6 @@ import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_feed.*
 import java.io.File
 import kotlin.math.roundToInt
@@ -50,56 +49,104 @@ data class Podcast(
     var destinations: List<FeedDestination> = arrayListOf()
 
     var contentFeedStatus: ContentFeedStatus? = null
-        set(value) {
-            value?.itemId?.value?.let { eId ->
-                episodeId = eId
-                playingEpisode = getEpisodeWithId(eId)
-                episodeDuration = playingEpisode?.duration
-                timeMilliSeconds = playingEpisode?.currentTimeMilliseconds?.toInt()
-
-                speed = value?.playerSpeed?.value ?: 1.0
-                satsPerMinute = value?.satsPerMinute?.value ?: model?.suggested?.value?.toLong() ?: 0
-            }
-
-            field = value
-        }
 
     var episodes: List<PodcastEpisode> = arrayListOf()
 
-    //MetaData
-    @Volatile
-    var episodeId: String? = null
-
-    @Volatile
-    var timeMilliSeconds: Int? = null
+    var episodeId: String?
+        get() {
+            contentFeedStatus?.itemId?.value?.let {
+                if (it.isNotEmpty()) {
+                    return it
+                }
+            }
+            return null
+        }
         set(value) {
-            value?.toLong()?.let {
+            value?.let {
+                playingEpisode = getEpisodeWithId(it)
+
+                contentFeedStatus = contentFeedStatus?.copy(
+                    itemId = FeedId(value)
+                )
+            }
+        }
+
+    private var timeMilliSeconds: Long
+        get() {
+            playingEpisode?.contentEpisodeStatus?.currentTime?.value?.let {
+                return it * 1000
+            }
+            return 0
+        }
+        set(value) {
+            value?.let {
                 playingEpisode?.contentEpisodeStatus = playingEpisode?.getUpdatedContentEpisodeStatus()?.copy(
                     currentTime = FeedItemDuration(it / 1000)
                 )
             }
-            field = value
+        }
+
+    var speed: Double
+        get() {
+            contentFeedStatus?.playerSpeed?.value?.let {
+                return it
+            }
+            return 1.0
+        }
+        set(value) {
+            value?.let {
+                contentFeedStatus = contentFeedStatus?.copy(
+                    playerSpeed = FeedPlayerSpeed(value)
+                )
+            }
+        }
+
+    var satsPerMinute: Long
+        get() {
+            contentFeedStatus?.satsPerMinute?.value?.let {
+                return it
+            }
+            return model?.suggested?.value?.toLong() ?: 0
+        }
+        set(value) {
+            value?.let {
+                contentFeedStatus = contentFeedStatus?.copy(
+                    satsPerMinute = Sat(value)
+                )
+            }
+        }
+
+    private var episodeDurationMilliseconds: Long
+        get() {
+            playingEpisode?.contentEpisodeStatus?.duration?.value?.let { it
+                if (it > 0) {
+                    return it * 1000
+                }
+            }
+            return 0
+        }
+        set(value) {
+            value?.let {
+                playingEpisode?.contentEpisodeStatus = playingEpisode?.getUpdatedContentEpisodeStatus()?.copy(
+                    duration = FeedItemDuration(it / 1000)
+                )
+            }
         }
 
     @Volatile
-    var speed: Double = 1.0
-
-    @Volatile
-    var satsPerMinute: Long = model?.suggested?.value?.toLong() ?: 0
-
-    //Duration
-    @Volatile
-    var episodeDuration: Long? = null
-
-    //Current Episode
-    @Volatile
     var playingEpisode: PodcastEpisode? = null
+        get() {
+            return episodeId?.let {
+                getEpisodeWithId(it)
+            }
+
+        }
 
     val episodesCount: Int
         get() = episodes.count()
 
     val currentTime: Int
-        get() = timeMilliSeconds ?: 0
+        get() = timeMilliSeconds.toInt()
 
     val isPlaying: Boolean
         get() = playingEpisode?.playing ?: false
@@ -131,30 +178,38 @@ data class Podcast(
         this.playingEpisode?.playing = false
 
         val episode = getEpisodeWithId(episodeId)
-        this.playingEpisode = episode
-        this.episodeDuration = episode?.duration
-        this.timeMilliSeconds = episode?.clipStartTime ?: episode?.currentTimeMilliseconds?.toInt()
+        this.episodeId = episodeId
+        this.episodeDurationMilliseconds = episode?.durationMilliseconds ?: 0
+        this.timeMilliSeconds = episode?.clipStartTime?.toLong() ?: episode?.currentTimeMilliseconds ?: 0
     }
 
     fun getUpdatedContentFeedStatus(
         customAmount: Sat? = null
-    ): ContentFeedStatus =
-        ContentFeedStatus(
-            this.id,
-            this.feedUrl,
-            this.subscribed,
-            this.chatId,
-            FeedId(episodeId ?: this.contentFeedStatus?.itemId?.value ?: "null"),
-            customAmount ?: satsPerMinute.toSat() ?: Sat(0),
-            speed.toFeedPlayerSpeed(),
+    ): ContentFeedStatus {
+        val cfs = customAmount?.let {
+            contentFeedStatus?.copy(
+                satsPerMinute = customAmount
+            )
+        } ?: contentFeedStatus
+
+        return cfs ?: ContentFeedStatus(
+            feedId = this.id,
+            feedUrl = this.feedUrl,
+            subscriptionStatus = this.subscribed,
+            chatId = this.chatId,
+            itemId = getCurrentEpisode()?.id,
+            satsPerMinute = customAmount ?: Sat((model?.suggested?.value ?: 0).toLong()),
+            playerSpeed = FeedPlayerSpeed(1.0),
         )
+    }
+
 
     fun getUpdatedContentEpisodeStatus(): ContentEpisodeStatus =
         playingEpisode?.getUpdatedContentEpisodeStatus() ?: ContentEpisodeStatus(
             this.id,
             getCurrentEpisode().id,
-            FeedItemDuration(getCurrentEpisode().duration ?: 0),
-            FeedItemDuration((getCurrentEpisode().currentTimeMilliseconds ?: 0) / 1000)
+            FeedItemDuration(0),
+            FeedItemDuration(0)
         )
 
     fun getSpeedString(): String {
@@ -165,24 +220,20 @@ data class Podcast(
     }
 
     fun getCurrentEpisode(): PodcastEpisode {
-        playingEpisode?.let { episode ->
-            return episode
-        } ?: run {
-            episodeId?.let { episodeId ->
-                getEpisodeWithId(episodeId)?.let { episode ->
-                    return episode
-                }
+        episodeId?.let { episodeId ->
+            getEpisodeWithId(episodeId)?.let { episode ->
+                return episode
             }
-            return episodes[0]
         }
+        return episodes[0]
     }
 
     fun getLastDownloadedEpisode(): PodcastEpisode? {
         for (episode in episodes) {
             if (episode.downloaded) {
-                playingEpisode = episode
-                episodeDuration = episode.duration
-                timeMilliSeconds = episode.currentTimeMilliseconds?.toInt() ?: 0
+                episodeId = episode.id.value
+                episodeDurationMilliseconds = episode.durationMilliseconds ?: 0
+                timeMilliSeconds = episode.currentTimeMilliseconds ?: 0
                 return episode
             }
         }
@@ -220,25 +271,21 @@ data class Podcast(
     fun getCurrentEpisodeDuration(
         durationRetrieverHandler: (url: String, localFile: File?) -> Long
     ): Long {
-        if (episodeDuration == null) {
-
-            if (playingEpisode == null) {
-                playingEpisode = getCurrentEpisode()
-            }
+        if (episodeDurationMilliseconds == 0.toLong()) {
 
             playingEpisode?.let { episode ->
-                episode?.duration?.let {
-                    episodeDuration = it
+                episode?.durationMilliseconds?.let {
+                    episodeDurationMilliseconds = it
                 } ?: run {
-                    episodeDuration = durationRetrieverHandler(
+                    val durationMilliseconds = durationRetrieverHandler(
                         episode.enclosureUrl.value,
                         episode.localFile
                     )
+                    episodeDurationMilliseconds = durationMilliseconds
                 }
             }
         }
-
-        return episodeDuration ?: 0
+        return episodeDurationMilliseconds
     }
 
     @Throws(ArithmeticException::class)
@@ -269,19 +316,18 @@ data class Podcast(
         if (didChangeEpisode) {
             this.playingEpisode?.playing = false
 
-            this.playingEpisode = getEpisodeWithId(episodeId)
-            this.episodeDuration = this.playingEpisode?.duration
+            this.episodeId = episodeId
+            this.episodeDurationMilliseconds = this.playingEpisode?.durationMilliseconds ?: 0
         }
 
-        this.episodeId = episodeId
         this.playingEpisode?.playing = true
-        this.timeMilliSeconds = time
+        this.timeMilliSeconds = time.toLong()
 
         getCurrentEpisodeDuration(durationRetrieverHandle)
     }
 
     fun didSeekTo(time: Int) {
-        this.timeMilliSeconds = time
+        this.timeMilliSeconds = time.toLong()
     }
 
     fun didChangeSatsPerMinute(sats: Long) {
@@ -294,28 +340,18 @@ data class Podcast(
         duration: Long,
         speed: Double
     ) {
-        this.speed = speed
-
-        if (playingEpisode == null) {
-            this.episodeId?.let { currentEpisodeId ->
-                this.playingEpisode = getEpisodeWithId(currentEpisodeId)
-            }
-        }
-
-        this.episodeDuration = if (duration > 0) duration else this.episodeDuration
-
-        if (episodeId != playingEpisode?.id?.value) {
+        if (episodeId != this.episodeId) {
             this.playingEpisode?.playing = false
-
-            this.playingEpisode = getEpisodeWithId(episodeId)
-            this.episodeDuration = this.playingEpisode?.duration
         }
+
+        this.speed = speed
+        this.episodeId = episodeId
 
         playingEpisode?.let { nnEpisode ->
             nnEpisode.playing = true
 
-            this.episodeId = nnEpisode.id.value
-            this.timeMilliSeconds = time
+            this.episodeDurationMilliseconds = if (duration > 0) duration else this.episodeDurationMilliseconds
+            this.timeMilliSeconds = time.toLong()
         }
     }
 
@@ -342,10 +378,8 @@ data class Podcast(
     ) {
         episode.playing = false
 
-        this.playingEpisode = nextEpisode
         this.episodeId = nextEpisode.id.value
-        this.episodeDuration = nextEpisode.duration
-
+        this.episodeDurationMilliseconds = nextEpisode.durationMilliseconds ?: 0
         this.timeMilliSeconds = 0
 
         getCurrentEpisodeDuration(durationRetrieverHandle)

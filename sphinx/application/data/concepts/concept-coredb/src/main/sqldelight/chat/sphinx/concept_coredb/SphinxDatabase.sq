@@ -1492,7 +1492,7 @@ contentEpisodeStatusUpsert {
            current_time
     )
     VALUES (
-           :feed_id,
+           :item_id,
            :feed_id,
            :duration,
            :current_time

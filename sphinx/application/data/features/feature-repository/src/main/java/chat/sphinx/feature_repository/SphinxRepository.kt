@@ -4270,16 +4270,22 @@ abstract class SphinxRepository(
             contentFeedStatusDboPresenterMapper.mapFrom(it)
         }
 
+        val allContentStatuses = queries.contentEpisodeStatusGetAll().executeAsList()
+
         val episodeIds = episodes.map { it.id }
 
         val contentEpisodeStatuses = queries.contentEpisodeStatusGetByFeedIdAndItemIds(podcast.id, episodeIds).executeAsList().map {
             contentEpisodeStatusDboPresenterMapper.mapFrom(it)
         }
 
-        episodes.forEach { episode ->
-            contentEpisodeStatuses.forEach { contentEpisodeStatus ->
-                if (episode.id == contentEpisodeStatus.itemId) {
-                    episode.contentEpisodeStatus = contentEpisodeStatus
+        LOG.d("TEST", "${allContentStatuses.count()}")
+
+        if (contentEpisodeStatuses.isNotEmpty()) {
+            episodes.forEach { episode ->
+                contentEpisodeStatuses.forEach { contentEpisodeStatus ->
+                    if (episode.id == contentEpisodeStatus.itemId) {
+                        episode.contentEpisodeStatus = contentEpisodeStatus
+                    }
                 }
             }
         }
@@ -4442,8 +4448,18 @@ abstract class SphinxRepository(
         }
     }
 
-    override val networkRefreshFeedContentStatuses: Flow<LoadResponse<RestoreProgress, ResponseError>> by lazy {
+    override val networkRefreshFeedContent: Flow<LoadResponse<RestoreProgress, ResponseError>> by lazy {
         flow {
+
+            val lastSeenMessagesDate: String? = authenticationStorage.getString(
+                REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+                null
+            )
+
+            if (lastSeenMessagesDate != null) {
+                return@flow
+            }
+
             val queries = coreDB.getSphinxDatabaseQueries()
 
             var contentFeedStatuses: List<ContentFeedStatusDto> = listOf()
@@ -4461,12 +4477,14 @@ abstract class SphinxRepository(
             if (contentFeedStatuses.isNotEmpty()) {
 
                 for ((index, contentFeedStatus) in contentFeedStatuses.withIndex()) {
+
                     restoreContentFeedStatusFrom(
                         contentFeedStatus,
                         queries,
                         null,
                         null
                     )
+
                     val restoreProgress =
                         getFeedStatusesRestoreProgress(contentFeedStatuses.lastIndex, index)
 

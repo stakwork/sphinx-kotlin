@@ -389,12 +389,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.speed = speed
 
-//                mediaPlayerServiceController.submitAction(
-//                    UserAction.AdjustSpeed(
-//                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
-//                        podcast.getMetaData()
-//                    )
-//                )
+                val contentFeedStatus = podcast.getUpdatedContentFeedStatus()
+
+                mediaPlayerServiceController.submitAction(
+                    UserAction.AdjustSpeed(
+                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        contentFeedStatus
+                    )
+                )
             }
         }
     }
