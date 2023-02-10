@@ -663,55 +663,6 @@ abstract class SphinxRepository(
         }
     }
 
-//    override fun updateChatMetaData(
-//        chatId: ChatId,
-//        podcastId: FeedId?,
-//        metaData: ChatMetaData,
-//        shouldSync: Boolean
-//    ) {
-//        applicationScope.launch(io) {
-//            val queries = coreDB.getSphinxDatabaseQueries()
-//
-//            if (podcastId?.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
-//                return@launch
-//            }
-//
-//            if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-//                //Podcast with no chat. Updating current item id
-//                podcastId?.let { nnPodcastId ->
-//                    podcastLock.withLock {
-//                        queries.feedUpdateCurrentItemId(
-//                            metaData.itemId,
-//                            nnPodcastId
-//                        )
-//                    }
-//                }
-//                return@launch
-//            }
-//
-//            chatLock.withLock {
-//                queries.chatUpdateMetaData(metaData, chatId)
-//            }
-//
-//            podcastLock.withLock {
-//                queries.feedUpdateCurrentItemIdByChatId(
-//                    metaData.itemId,
-//                    chatId
-//                )
-//            }
-//
-//            if (shouldSync) {
-//                try {
-//                    networkQueryChat.updateChat(
-//                        chatId,
-//                        PutChatDto(meta = metaData.toJson(moshi))
-//                    ).collect {}
-//                } catch (e: AssertionError) {
-//                }
-//            }
-//        }
-//    }
-
     override fun streamFeedPayments(
         chatId: ChatId,
         podcastId: String,
@@ -1075,7 +1026,6 @@ abstract class SphinxRepository(
                         emit(loadResponse)
                     }
                 }
-
             }
         }
     }
@@ -3869,8 +3819,8 @@ abstract class SphinxRepository(
                                 searchResultDescription,
                                 searchResultImageUrl,
                                 cId,
-                                currentItemId,
                                 subscribed,
+                                currentItemId,
                                 queries
                             )
                         }
@@ -6530,8 +6480,8 @@ abstract class SphinxRepository(
                     feed_id = feedId,
                     feed_url = feedUrl,
                     subscription_status = subscriptionStatus,
-                    chat_id = chatId,
-                    item_id = itemId,
+                    chat_id = if (chatId?.value == ChatId.NULL_CHAT_ID.toLong()) null else chatId,
+                    item_id = if (itemId?.value == FeedId.NULL_FEED_ID) null else itemId,
                     sats_per_minute = satsPerMinute,
                     player_speed = playerSpeed
                 )
@@ -6618,11 +6568,8 @@ abstract class SphinxRepository(
     }
 
     private fun getContentFeedStatusDtoFrom(feed: Feed) : ContentFeedStatusDto? {
-        var contentFeedStatus: ContentFeedStatusDto?
-
-        if (feed?.getNNContentFeedStatus() == null) {
-            return null
-        }
+        var contentFeedStatusDto: ContentFeedStatusDto?
+        val nnContentFeedStatus = feed.getNNContentFeedStatus()
 
         val episodeStatuses : MutableList<Map<String, EpisodeStatusDto>> = mutableListOf()
 
@@ -6643,8 +6590,8 @@ abstract class SphinxRepository(
             }
         }
 
-        feed.getNNContentFeedStatus().let { feedStatus ->
-            contentFeedStatus = ContentFeedStatusDto(
+        nnContentFeedStatus.let { feedStatus ->
+            contentFeedStatusDto = ContentFeedStatusDto(
                 feedStatus.feedId.value,
                 feedStatus.feedUrl.value,
                 feedStatus.subscriptionStatus.isTrue(),
@@ -6656,7 +6603,7 @@ abstract class SphinxRepository(
             )
         }
 
-        return contentFeedStatus
+        return contentFeedStatusDto
     }
 
     override fun restoreContentFeedStatuses(

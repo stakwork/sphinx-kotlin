@@ -191,7 +191,7 @@ class FeedViewModel @Inject constructor(
                     searchResultImageUrl = searchResult.imageUrl?.toPhotoUrl(),
                     chatUUID = null,
                     subscribed = false.toSubscribed(),
-                    currentEpisodeId = null
+                    currentItemId = null
                 )
 
                 @Exhaustive

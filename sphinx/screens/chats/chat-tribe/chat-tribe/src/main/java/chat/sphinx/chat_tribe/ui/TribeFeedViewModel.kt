@@ -22,6 +22,7 @@ import chat.sphinx.podcast_player_view_model_coordinator.request.PodcastPlayerRe
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.feed.isPodcast
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.FeedBoost
@@ -250,14 +251,13 @@ internal class TribeFeedViewModel @Inject constructor(
             is TribeFeedData.Result.FeedData -> {
 
                 viewModelScope.launch(mainImmediate) {
-//                    feedRepository.updateFeedContent(
-//                        chatId = args.chatId,
-//                        host = data.host,
-//                        feedUrl = data.feedUrl,
-//                        chatUUID = data.chatUUID,
-//                        subscribed = true.toSubscribed(),
-//                        currentEpisodeId = data.metaData?.itemId
-//                    )
+                    feedRepository.updateFeedContent(
+                        chatId = args.chatId,
+                        host = data.host,
+                        feedUrl = data.feedUrl,
+                        chatUUID = data.chatUUID,
+                        subscribed = true.toSubscribed()
+                    )
                 }
 
                 if (data.feedType.isPodcast()) {
@@ -266,10 +266,7 @@ internal class TribeFeedViewModel @Inject constructor(
 
                         feedRepository.getPodcastByChatId(args.chatId).collect { podcast ->
                             podcast?.let { nnPodcast ->
-                                podcastLoaded(
-                                    nnPodcast,
-                                    data
-                                )
+                                podcastLoaded(nnPodcast)
                             }
                         }
                     }
@@ -280,13 +277,7 @@ internal class TribeFeedViewModel @Inject constructor(
 
     private suspend fun podcastLoaded(
         podcast: Podcast,
-        feedData: TribeFeedData.Result.FeedData
     ) {
-
-//        if (feedData.metaData != null) {
-//            podcast.setMetaData(feedData.metaData)
-//        }
-
         val clickPlayPause = OnClickCallback {
 
             val vs = podcastViewStateContainer.value

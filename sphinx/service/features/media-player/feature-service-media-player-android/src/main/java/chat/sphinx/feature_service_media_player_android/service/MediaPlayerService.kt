@@ -324,7 +324,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                             userAction.contentFeedStatus.apply {
                                 feedRepository.updateContentFeedStatus(
-                                    nnData.podcastId.toFeedId() ?: FeedId("null"),
+                                    FeedId(nnData.podcastId),
                                     nnData.feedUrl,
                                     nnData.subscriptionStatus,
                                     nnData.chatId,
@@ -337,7 +337,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                             userAction.contentEpisodeStatus.apply {
                                 nnData.episodeId.toFeedId()?.let {episodeId ->
                                     feedRepository.updateContentEpisodeStatus(
-                                        nnData.podcastId.toFeedId() ?: FeedId("null"),
+                                        FeedId(nnData.podcastId),
                                         episodeId,
                                         FeedItemDuration(nnData.durationMilliSeconds.toLong()),
                                         FeedItemDuration(nnData.currentTimeMilliSeconds.toLong())
@@ -627,7 +627,7 @@ internal abstract class MediaPlayerService: SphinxService() {
             podData?.let { data ->
 
                 feedRepository.updateContentFeedStatus(
-                    data.podcastId.toFeedId() ?: FeedId("null"),
+                    FeedId(data.podcastId),
                     data.feedUrl,
                     data.subscriptionStatus,
                     data.chatId,
@@ -638,7 +638,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                 data.episodeId.toFeedId()?.let { episodeId ->
                     feedRepository.updateContentEpisodeStatus(
-                        data.podcastId.toFeedId() ?: FeedId("null"),
+                        FeedId(data.podcastId),
                         episodeId,
                         FeedItemDuration(data.durationMilliSeconds.toLong()),
                         FeedItemDuration(data.currentTimeMilliSeconds.toLong())

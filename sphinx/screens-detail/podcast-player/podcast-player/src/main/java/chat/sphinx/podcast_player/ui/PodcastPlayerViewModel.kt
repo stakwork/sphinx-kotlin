@@ -316,7 +316,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     feedUrl = feedUrl,
                     chatUUID = chat?.uuid,
                     subscribed = subscribed.toSubscribed(),
-                    currentEpisodeId = null
+                    currentItemId = null
                 )
             }
         }

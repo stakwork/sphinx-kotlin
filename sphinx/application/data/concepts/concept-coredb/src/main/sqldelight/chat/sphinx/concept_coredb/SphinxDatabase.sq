@@ -1031,7 +1031,6 @@ feedUpsert {
         content_type = :content_type,
         language = :language,
         items_count = :items_count,
-        current_item_id = :current_item_id,
         chat_id = :chat_id
     WHERE id = :id;
 

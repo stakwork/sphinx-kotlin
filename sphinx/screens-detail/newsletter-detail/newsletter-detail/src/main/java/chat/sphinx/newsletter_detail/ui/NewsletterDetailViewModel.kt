@@ -76,7 +76,7 @@ internal class NewsletterDetailViewModel @Inject constructor(
                             feedUrl = feedUrl,
                             chatUUID = chat.uuid,
                             subscribed = true.toSubscribed(),
-                            currentEpisodeId = null
+                            currentItemId = null
                         )
                     }
                 }

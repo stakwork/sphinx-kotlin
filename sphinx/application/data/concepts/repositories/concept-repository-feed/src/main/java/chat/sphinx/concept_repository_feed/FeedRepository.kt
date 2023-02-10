@@ -35,7 +35,7 @@ interface FeedRepository {
         searchResultImageUrl: PhotoUrl? = null,
         chatUUID: ChatUUID?,
         subscribed: Subscribed,
-        currentEpisodeId: FeedId?,
+        currentItemId: FeedId? = null,
         delay: Long = 500L
     ): Response<FeedId, ResponseError>
 

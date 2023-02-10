@@ -267,8 +267,7 @@ internal class ChatTribeViewModel @Inject constructor(
                         tribeData.host,
                         tribeData.feedUrl,
                         tribeData.chatUUID,
-                        tribeData.feedType,
-//                        chat.metaData,
+                        tribeData.feedType
                     )
 
                 } ?: run {

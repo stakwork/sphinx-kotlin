@@ -51,16 +51,25 @@ data class Feed(
     var contentFeedStatus: ContentFeedStatus? = null
 
     fun getNNContentFeedStatus() : ContentFeedStatus {
-           return contentFeedStatus ?:
-                ContentFeedStatus(
-                    id,
-                    feedUrl,
-                    subscribed,
-                    chat?.id,
-                    chat?.metaData?.itemId ?: currentItemId,
-                    chat?.metaData?.satsPerMinute,
-                    chat?.metaData?.speed?.toFeedPlayerSpeed()
-                )
+        contentFeedStatus?.let {
+            return it
+        }
+
+        var itemId = chat?.metaData?.itemId ?: currentItemId
+        itemId = if (itemId?.value == FeedId.NULL_FEED_ID) null else itemId
+
+        val subscriptionState = if (chat?.id == null) Subscribed.True else Subscribed.False
+
+        return ContentFeedStatus(
+            id,
+            feedUrl,
+            subscriptionState,
+            chat?.id,
+            itemId,
+            chat?.metaData?.satsPerMinute,
+            chat?.metaData?.speed?.toFeedPlayerSpeed()
+        )
+
     }
 
     var lastPublished: FeedItem? = null

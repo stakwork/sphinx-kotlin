@@ -478,16 +478,14 @@ fun TransactionCallbacks.upsertFeed(
     searchResultDescription: FeedDescription? = null,
     searchResultImageUrl: PhotoUrl? = null,
     chatId: ChatId,
-    currentItemId: FeedId?,
     subscribed: Subscribed,
+    currentItemId: FeedId? = null,
     queries: SphinxDatabaseQueries
 ) {
 
     if (feedDto.items.isEmpty()) {
         return
     }
-
-    var cItemId: FeedId? = null
 
     if (chatId.value != ChatId.NULL_CHAT_ID.toLong()) {
         queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
@@ -497,9 +495,6 @@ fun TransactionCallbacks.upsertFeed(
                     feedDbo.id,
                     queries
                 )
-            } else {
-                //Using existing current item id on update if param is null
-                cItemId = currentItemId ?: feedDbo.current_item_id
             }
         }
     }
@@ -579,11 +574,11 @@ fun TransactionCallbacks.upsertFeed(
         content_type = feedDto.contentType?.toFeedContentType(),
         language = feedDto.language?.toFeedLanguage(),
         items_count = FeedItemsCount(feedDto.items.count().toLong()),
-        current_item_id = cItemId,
         chat_id = chatId,
         subscribed = subscribed,
         id = feedId,
         generator = feedDto.generator?.toFeedGenerator(),
+        current_item_id = currentItemId
     )
 }
 
