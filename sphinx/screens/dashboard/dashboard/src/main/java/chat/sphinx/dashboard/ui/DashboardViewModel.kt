@@ -916,7 +916,29 @@ internal class DashboardViewModel @Inject constructor(
                 }
             }
 
-            //networkRefreshFeedContent
+            repositoryDashboard.networkRefreshFeedContentStatuses.collect { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Success -> {
+                        val restoreProgress = response.value
+
+                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
+                            _restoreStateFlow.value = restoreProgress
+                        } else {
+                            _restoreStateFlow.value = null
+
+                            _networkStateFlow.value = Response.Success(true)
+                        }
+                    }
+                    is Response.Error -> {
+                        _networkStateFlow.value = response
+                    }
+                    is LoadResponse.Loading -> {
+                        _networkStateFlow.value = response
+                    }
+                }
+            }
+
 
             if (_networkStateFlow.value is Response.Error) {
                 jobNetworkRefresh?.cancel()

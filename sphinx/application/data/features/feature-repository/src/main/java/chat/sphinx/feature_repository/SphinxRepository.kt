@@ -144,6 +144,7 @@ import java.io.InputStream
 import java.text.ParseException
 import java.util.*
 import kotlin.math.absoluteValue
+import kotlin.math.round
 
 
 abstract class SphinxRepository(
@@ -4491,6 +4492,41 @@ abstract class SphinxRepository(
         }
     }
 
+    override val networkRefreshFeedContentStatuses: Flow<LoadResponse<RestoreProgress, ResponseError>> by lazy {
+        flow {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            var contentFeedStatuses: List<ContentFeedStatusDto> = listOf()
+
+            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        contentFeedStatuses = loadResponse.value
+                    }
+                }
+            }
+            if (contentFeedStatuses.isNotEmpty()) {
+
+                for ((index, contentFeedStatus) in contentFeedStatuses.withIndex()) {
+                    restoreContentFeedStatusFrom(
+                        contentFeedStatus,
+                        queries,
+                        null,
+                        null
+                    )
+                    val restoreProgress =
+                        getFeedStatusesRestoreProgress(contentFeedStatuses.lastIndex, index)
+
+                    emit(Response.Success(restoreProgress))
+                }
+            }
+        }
+
+    }
+
     /*
 * Used to hold in memory the chat table's latest message time to reduce disk IO
 * and mitigate conflicting updates between SocketIO and networkRefreshMessages
@@ -4743,6 +4779,23 @@ abstract class SphinxRepository(
         val currentPage: Int = offset / MESSAGE_PAGINATION_LIMIT
 
         val progress: Int = contactsRestoreProgressTotal + feedRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
+
+        return RestoreProgress(
+            true,
+            progress
+        )
+    }
+
+    private fun getFeedStatusesRestoreProgress(
+        feedTotal: Int,
+        currentIndex: Int
+    ): RestoreProgress {
+
+        val contactsRestoreProgressTotal = 5
+        val feedRestoreProgressTotal = 10
+        val feedPercentage = feedRestoreProgressTotal.toDouble() / feedTotal.toDouble() * currentIndex
+
+        val progress: Int = contactsRestoreProgressTotal + round(feedPercentage).toInt()
 
         return RestoreProgress(
             true,
