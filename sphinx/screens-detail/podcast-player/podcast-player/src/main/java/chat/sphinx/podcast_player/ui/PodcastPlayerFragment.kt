@@ -369,6 +369,14 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
             }
 
+            val satsPerMinute = podcast.satsPerMinute
+            val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+            val index = SLIDER_VALUES.indexOf(closest)
+
+            seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+            seekBarSatsPerMinute.progress = index
+            textViewPodcastSatsPerMinuteValue.text = closest.toString()
+
             togglePlayPauseButton(podcast.isPlaying)
 
             if (!dragging && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
@@ -557,5 +565,9 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: PodcastPlayerSideEffect) {
         sideEffect.execute(requireActivity())
+    }
+
+    private fun List<Int>.closestValue(value: Int) = minByOrNull {
+        kotlin.math.abs(value - it)
     }
 }
