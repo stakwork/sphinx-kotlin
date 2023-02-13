@@ -6546,7 +6546,8 @@ abstract class SphinxRepository(
         chatId: ChatId?,
         itemId: FeedId?,
         satsPerMinute: Sat?,
-        playerSpeed: FeedPlayerSpeed?
+        playerSpeed: FeedPlayerSpeed?,
+        shouldSync: Boolean
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6566,6 +6567,10 @@ abstract class SphinxRepository(
                     player_speed = playerSpeed
                 )
             }
+
+            if (shouldSync) {
+                saveContentFeedStatusFor(feedId)
+            }
         }
     }
     private val contentEpisodeLock = Mutex()
@@ -6573,7 +6578,8 @@ abstract class SphinxRepository(
         feedId: FeedId,
         itemId: FeedId,
         duration: FeedItemDuration,
-        currentTime: FeedItemDuration
+        currentTime: FeedItemDuration,
+        shouldSync: Boolean
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6589,6 +6595,10 @@ abstract class SphinxRepository(
                     duration = duration,
                     current_time = currentTime
                 )
+            }
+
+            if (shouldSync) {
+                saveContentFeedStatusFor(feedId)
             }
         }
     }

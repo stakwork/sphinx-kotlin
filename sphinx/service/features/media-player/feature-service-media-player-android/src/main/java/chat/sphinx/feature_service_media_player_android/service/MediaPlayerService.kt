@@ -198,7 +198,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                             userAction.chatId,
                             itemId,
                             satsPerMinute,
-                            playerSpeed
+                            playerSpeed,
+                            true
                         )
                     }
 
@@ -216,7 +217,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                             userAction.chatId,
                             itemId,
                             satsPerMinute,
-                            playerSpeed
+                            playerSpeed,
+                            true
                         )
                     }
 
@@ -404,7 +406,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                             feedId,
                             itemId,
                             duration,
-                            currentTime
+                            currentTime,
+                            true
                         )
                     }
 
@@ -474,7 +477,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                             FeedId(nnData.podcastId),
                             FeedId(nnData.episodeId),
                             FeedItemDuration(nnData.durationMilliSeconds.toLong() / 1000),
-                            FeedItemDuration(currentTime.toLong() / 1000)
+                            FeedItemDuration(currentTime.toLong() / 1000),
+                            true
                         )
 
                     } catch (e: IllegalStateException) {
@@ -552,8 +556,13 @@ internal abstract class MediaPlayerService: SphinxService() {
                         val currentTimeMilliseconds = nnData.currentTimeMilliSeconds
                         val currentTimeSeconds = nnData.currentTimeSeconds
 
-                        if (count >= 60.0 * speed) {
+                        if (count % 15 == 0.0) {
+                            feedRepository.saveContentFeedStatusFor(
+                                FeedId(nnData.podcastId)
+                            )
+                        }
 
+                        if (count >= 60.0 * speed) {
                             feedRepository.streamFeedPayments(
                                 nnData.chatId,
                                 nnData.podcastId,
@@ -604,6 +613,10 @@ internal abstract class MediaPlayerService: SphinxService() {
                             mediaServiceController.dispatchState(state)
 
                             if (state is MediaPlayerServiceState.ServiceActive.MediaState.Ended) {
+                                feedRepository.saveContentFeedStatusFor(
+                                    FeedId(nnData.podcastId)
+                                )
+
                                 shutDownService()
                             }
 

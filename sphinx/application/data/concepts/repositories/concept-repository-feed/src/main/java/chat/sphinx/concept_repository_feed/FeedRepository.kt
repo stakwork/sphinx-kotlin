@@ -69,14 +69,16 @@ interface FeedRepository {
         chatId: ChatId?,
         itemId: FeedId?,
         satsPerMinute: Sat?,
-        playerSpeed: FeedPlayerSpeed?
+        playerSpeed: FeedPlayerSpeed?,
+        shouldSync: Boolean = false
     )
 
     fun updateContentEpisodeStatus(
         feedId: FeedId,
         itemId: FeedId,
         duration: FeedItemDuration,
-        currentTime: FeedItemDuration
+        currentTime: FeedItemDuration,
+        shouldSync: Boolean = false
     )
 
     fun restoreContentFeedStatuses(
