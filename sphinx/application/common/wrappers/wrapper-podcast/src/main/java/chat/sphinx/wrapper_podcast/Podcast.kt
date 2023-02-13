@@ -1,5 +1,6 @@
 package chat.sphinx.wrapper_podcast
 
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -44,6 +45,8 @@ data class Podcast(
         result = _31 * result + episodes.hashCode()
         return result
     }
+
+    var chat: Chat? = null
 
     var model: FeedModel? = null
     var destinations: List<FeedDestination> = arrayListOf()
@@ -104,6 +107,9 @@ data class Podcast(
     var satsPerMinute: Long
         get() {
             contentFeedStatus?.satsPerMinute?.value?.let {
+                return it
+            }
+            chat?.metaData?.satsPerMinute?.value?.let {
                 return it
             }
             return model?.suggested?.value?.toLong() ?: 0

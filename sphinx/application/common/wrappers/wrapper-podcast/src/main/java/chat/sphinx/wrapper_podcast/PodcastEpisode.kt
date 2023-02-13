@@ -75,9 +75,9 @@ data class PodcastEpisode(
             return null
         }
 
-    var durationSeconds: Long = 0
+    var currentTimeSeconds: Long = 0
         get() {
-            return (durationMilliseconds ?: 0) / 1000
+            return (currentTimeMilliseconds ?: 0) / 1000
         }
 
     var currentTimeMilliseconds: Long? = null

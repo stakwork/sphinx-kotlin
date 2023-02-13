@@ -4270,6 +4270,10 @@ abstract class SphinxRepository(
             contentFeedStatusDboPresenterMapper.mapFrom(it)
         }
 
+        val chat = queries.chatGetById(podcast.chatId).executeAsOneOrNull()?.let {
+            chatDboPresenterMapper.mapFrom(it)
+        }
+
         val allContentStatuses = queries.contentEpisodeStatusGetAll().executeAsList()
 
         val episodeIds = episodes.map { it.id }
@@ -4293,6 +4297,7 @@ abstract class SphinxRepository(
         podcast.episodes = episodes
         podcast.destinations = destinations
         podcast.contentFeedStatus = contentFeedStatus
+        podcast.chat = chat
 
         return podcast
     }

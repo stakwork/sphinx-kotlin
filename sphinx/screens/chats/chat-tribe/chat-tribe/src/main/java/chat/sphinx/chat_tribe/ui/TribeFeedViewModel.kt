@@ -544,8 +544,8 @@ internal class TribeFeedViewModel @Inject constructor(
             feedRepository.updateContentEpisodeStatus(
                 feedId = episode.podcastId,
                 itemId = episode.id,
-                FeedItemDuration(duration),
-                FeedItemDuration(episode.durationSeconds / 1000)
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
             )
         }
 
