@@ -36,6 +36,7 @@ import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip
@@ -223,8 +224,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.addListener(this)
 
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { nnPodcast ->
-                podcastLoaded(nnPodcast)
+            podcastFlow.collect { podcast ->
+                podcast?.let { nnPodcast ->
+                    podcastLoaded(nnPodcast)
+                }
             }
         }
 
@@ -302,7 +305,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
             val chat = chatRepository.getChatById(args.chatId).firstOrNull()
             val podcast = getPodcast()
             val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
-            val subscribed = (chat != null || (podcast?.subscribed?.isTrue() == true))
+            val subscribed = podcast?.subscribed?.isTrue() == true
 
             args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
                 feedRepository.updateFeedContent(
@@ -548,12 +551,23 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration),
+                FeedItemDuration(episode.durationSeconds / 1000)
+            )
         }
+
+        return duration
     }
 
     fun downloadMedia(

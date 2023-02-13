@@ -305,7 +305,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             }
 
             is PodcastPlayerViewState.PodcastLoaded -> {
-                toggleLoadingWheel(true)
                 showPodcastInfo(viewState.podcast)
             }
 
@@ -486,9 +485,12 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
         val currentTime = podcast.currentTime.toLong()
 
+        toggleLoadingWheel(podcast.shouldLoadDuration)
+
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
+
         val progress: Int =
             try {
                 ((currentTime * 100) / duration).toInt()

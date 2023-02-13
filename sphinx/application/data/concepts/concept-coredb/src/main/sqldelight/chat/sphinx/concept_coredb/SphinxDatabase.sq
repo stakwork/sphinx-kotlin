@@ -1084,7 +1084,7 @@ ORDER BY id DESC;
 feedGetAllSubscribed:
 SELECT *
 FROM feedDbo
-WHERE subscribed = 1
+WHERE (subscribed = 1 OR chat_id != 2147483647)
 ORDER BY id DESC;
 
 feedGetByChatId:
@@ -1112,7 +1112,7 @@ feedGetAllByFeedType:
 SELECT *
 FROM feedDbo
 WHERE feed_type = ?
-AND subscribed = 1
+AND (subscribed = 1 OR chat_id != 2147483647)
 ORDER BY id DESC;
 
 feedGetAllByIds:
@@ -1134,23 +1134,19 @@ feedGetSubscribedByTitle:
 SELECT *
 FROM feedDbo
 WHERE (title LIKE :title)
-AND subscribed = 1;
+AND (subscribed = 1 OR chat_id != 2147483647);
 
 feedGetSubscribedByTitleAndType:
 SELECT *
 FROM feedDbo
 WHERE (title LIKE :title)
 AND feed_type = :feed_type
-AND subscribed = 1;
+AND (subscribed = 1 || chat_id != 2147483647);
 
-feedUpdateCurrentItemIdByChatId:
+feedUpdateSubscribeAndChat:
 UPDATE feedDbo
-SET current_item_id = :item_id
-WHERE chat_id = ?;
-
-feedUpdateCurrentItemId:
-UPDATE feedDbo
-SET current_item_id = :item_id
+SET subscribed = :subscribed,
+chat_id = :chat_id
 WHERE id = ?;
 
 feedUpdateSubscribe:
@@ -1423,7 +1419,8 @@ contentFeedStatusUpsert {
         chat_id = :chat_id,
         item_id = :item_id,
         sats_per_minute = :sats_per_minute,
-        player_speed = :player_speed
+        player_speed = :player_speed,
+        subscription_status = :subscription_status
     WHERE feed_id = :feed_id;
 
     INSERT OR IGNORE INTO contentFeedStatusDbo(
@@ -1453,6 +1450,11 @@ SET subscription_status = :subscription_status,
     sats_per_minute = :sats_per_minute
 WHERE feed_id = :feed_id;
 
+contentFeedUpdateSubscriptionStatus:
+UPDATE contentFeedStatusDbo
+SET subscription_status = :subscription_status
+WHERE feed_id = ?;
+
 contentFeedStatusGetAll:
 SELECT *
 FROM contentFeedStatusDbo;
@@ -1469,6 +1471,11 @@ WHERE feed_id = ?;
 
 contentFeedStatusDeleteAll:
 DELETE FROM contentFeedStatusDbo;
+
+contentFeedStatusDeleteByFeedId:
+DELETE
+FROM contentFeedStatusDbo
+WHERE feed_id = ?;
 
 
 CREATE TABLE contentEpisodeStatusDbo(
@@ -1525,3 +1532,8 @@ WHERE feed_id IN ?;
 
 contentEpisodeStatusDeleteAll:
 DELETE FROM contentEpisodeStatusDbo;
+
+contentEpisodeStatusDeleteByFeedId:
+DELETE
+FROM contentEpisodeStatusDbo
+WHERE feed_id = ?;

@@ -212,7 +212,7 @@ internal class JoinTribeViewModel @Inject constructor(
                             host = chatHost,
                             feedUrl = feedUrl,
                             chatUUID = chatUUID,
-                            subscribed = true.toSubscribed(),
+                            subscribed = false.toSubscribed(),
                             currentItemId = null
                         )
                     }

@@ -142,6 +142,9 @@ data class Podcast(
 
         }
 
+    val shouldLoadDuration: Boolean
+        get() = episodeDurationMilliseconds == 0.toLong()
+
     val episodesCount: Int
         get() = episodes.count()
 
@@ -269,7 +272,7 @@ data class Podcast(
     }
 
     fun getCurrentEpisodeDuration(
-        durationRetrieverHandler: (url: String, localFile: File?) -> Long
+        durationRetrieverHandler: (episode: PodcastEpisode) -> Long
     ): Long {
         if (episodeDurationMilliseconds == 0.toLong()) {
 
@@ -278,8 +281,7 @@ data class Podcast(
                     episodeDurationMilliseconds = it
                 } ?: run {
                     val durationMilliseconds = durationRetrieverHandler(
-                        episode.enclosureUrl.value,
-                        episode.localFile
+                        episode
                     )
                     episodeDurationMilliseconds = durationMilliseconds
                 }
@@ -290,7 +292,7 @@ data class Podcast(
 
     @Throws(ArithmeticException::class)
     fun getPlayingProgress(
-        durationRetrieverHandle: (url: String, localFile: File?) -> Long
+        durationRetrieverHandle: (episode: PodcastEpisode) -> Long
     ): Int {
         val currentEpisodeDuration = getCurrentEpisodeDuration(durationRetrieverHandle)
         if (currentEpisodeDuration > 0) {
@@ -308,7 +310,7 @@ data class Podcast(
     fun didStartPlayingEpisode(
         episode: PodcastEpisode,
         time: Int,
-        durationRetrieverHandle: (url: String, localFile: File?) -> Long
+        durationRetrieverHandle: (episode: PodcastEpisode) -> Long
     ) {
         val episodeId = episode.id.value
         val didChangeEpisode = this.episodeId != episodeId
@@ -363,7 +365,7 @@ data class Podcast(
 
     fun endEpisodeUpdate(
         episodeId: String,
-        durationRetrieverHandle: (url: String, localFile: File?) -> Long
+        durationRetrieverHandle: (episode: PodcastEpisode) -> Long
     ) {
         playingEpisode?.let { episode ->
             val nextEpisode = getNextEpisode(episodeId)
@@ -374,7 +376,7 @@ data class Podcast(
     private fun didEndPlayingEpisode(
         episode: PodcastEpisode,
         nextEpisode: PodcastEpisode,
-        durationRetrieverHandle: (url: String, localFile: File?) -> Long
+        durationRetrieverHandle: (episode: PodcastEpisode) -> Long
     ) {
         episode.playing = false
 

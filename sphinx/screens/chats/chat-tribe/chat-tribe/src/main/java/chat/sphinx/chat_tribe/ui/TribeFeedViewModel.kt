@@ -25,10 +25,12 @@ import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.toPodcastClipOrNull
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -256,7 +258,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         host = data.host,
                         feedUrl = data.feedUrl,
                         chatUUID = data.chatUUID,
-                        subscribed = true.toSubscribed()
+                        subscribed = false.toSubscribed()
                     )
                 }
 
@@ -531,11 +533,22 @@ internal class TribeFeedViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    private fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration),
+                FeedItemDuration(episode.durationSeconds / 1000)
+            )
         }
+
+        return duration
     }
 }

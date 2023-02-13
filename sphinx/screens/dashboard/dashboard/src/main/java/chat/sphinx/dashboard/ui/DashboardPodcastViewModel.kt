@@ -19,11 +19,9 @@ import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState.NoPodcast.cli
 import chat.sphinx.dashboard.ui.viewstates.adjustState
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_feed.ContentEpisodeStatus
-import chat.sphinx.wrapper_feed.ContentFeedStatus
-import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedRecommendation
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -328,12 +326,23 @@ internal class DashboardPodcastViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    private fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration),
+                FeedItemDuration(episode.durationSeconds / 1000)
+            )
         }
+
+        return duration
     }
 }
 

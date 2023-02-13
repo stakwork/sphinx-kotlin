@@ -1,6 +1,5 @@
 package chat.sphinx.concept_network_query_feed_status.model
 
-import chat.sphinx.wrapper_common.feed.FeedId
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)

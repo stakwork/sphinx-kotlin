@@ -3767,7 +3767,7 @@ abstract class SphinxRepository(
         return tribeData
     }
 
-    private val podcastLock = Mutex()
+    private val feedLock = Mutex()
     override suspend fun updateFeedContent(
         chatId: ChatId,
         host: ChatHost,
@@ -3812,7 +3812,7 @@ abstract class SphinxRepository(
                             }
                     }
 
-                    podcastLock.withLock {
+                    feedLock.withLock {
                         queries.transaction {
                             upsertFeed(
                                 response.value,
@@ -4411,11 +4411,15 @@ abstract class SphinxRepository(
         currentSubscribeState: Subscribed
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
+        val newValue = if (currentSubscribeState.isTrue()) Subscribed.False else Subscribed.True
 
-        queries.feedUpdateSubscribe(
-            if (currentSubscribeState.isTrue()) Subscribed.False else Subscribed.True,
-            feedId
-        )
+        queries.transaction {
+            updateSubscriptionStatus(
+                queries,
+                newValue,
+                feedId
+            )
+        }
     }
 
     private suspend fun mapFeedItemDboList(
@@ -6666,7 +6670,7 @@ abstract class SphinxRepository(
                 feedStatus.feedId.value,
                 feedStatus.feedUrl.value,
                 feedStatus.subscriptionStatus.isTrue(),
-                feedStatus.chatId?.value,
+                feedStatus.actualChatId?.value,
                 feedStatus.itemId?.value,
                 feedStatus.satsPerMinute?.value,
                 feedStatus.playerSpeed?.value,
@@ -6768,7 +6772,7 @@ abstract class SphinxRepository(
                     host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
                     feedUrl = feedUrl,
                     chatUUID = chat?.uuid,
-                    subscribed = Subscribed.True,
+                    subscribed = contentFeedStatus.subscription_status.toSubscribed(),
                     currentItemId = contentFeedStatus.item_id?.toFeedId(),
                     delay = 0
                 )
@@ -6802,6 +6806,14 @@ abstract class SphinxRepository(
                     FeedId(contentFeedStatus.feed_id)
                 )
             }
+        }
+
+        feedLock.withLock {
+            queries.feedUpdateSubscribeAndChat(
+                contentFeedStatus.subscription_status.toSubscribed(),
+                contentFeedStatus.chat_id?.toChatId() ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                FeedId(contentFeedStatus.feed_id)
+            )
         }
 
         contentFeedStatus.episodes_status?.let { episodeStatuses ->

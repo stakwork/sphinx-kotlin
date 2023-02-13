@@ -58,13 +58,13 @@ data class Feed(
         var itemId = chat?.metaData?.itemId ?: currentItemId
         itemId = if (itemId?.value == FeedId.NULL_FEED_ID) null else itemId
 
-        val subscriptionState = if (chat?.id == null) Subscribed.True else Subscribed.False
+        val chatId = if (this.chat?.id?.value == ChatId.NULL_CHAT_ID.toLong()) null else this.chat?.id
 
         return ContentFeedStatus(
             id,
             feedUrl,
-            subscriptionState,
-            chat?.id,
+            this.subscribed,
+            chatId,
             itemId,
             chat?.metaData?.satsPerMinute,
             chat?.metaData?.speed?.toFeedPlayerSpeed()

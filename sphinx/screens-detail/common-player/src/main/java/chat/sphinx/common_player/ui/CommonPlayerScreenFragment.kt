@@ -249,7 +249,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             }
 
             is RecommendationsPodcastPlayerViewState.PodcastViewState.PodcastLoaded -> {
-                toggleLoadingWheel(true)
                 showPodcastInfo(viewState.podcast)
             }
 
@@ -435,6 +434,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
         val currentTime = podcast.currentTime.toLong()
+
+        toggleLoadingWheel(podcast.shouldLoadDuration)
 
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
