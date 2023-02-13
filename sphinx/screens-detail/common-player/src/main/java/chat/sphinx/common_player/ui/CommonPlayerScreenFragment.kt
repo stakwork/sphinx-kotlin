@@ -214,7 +214,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 }
 
                 textViewReplay15Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime - 15000)
+                    viewModel.seekTo(podcast.timeMilliSeconds - 15000L)
                     updateViewAfterSeek(podcast)
                 }
 
@@ -224,12 +224,12 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                     if (currentEpisode.playing) {
                         viewModel.pauseEpisode(currentEpisode)
                     } else {
-                        viewModel.playEpisode(currentEpisode, podcast.currentTime)
+                        viewModel.playEpisode(currentEpisode, podcast.timeMilliSeconds)
                     }
                 }
 
                 textViewForward30Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime + 30000)
+                    viewModel.seekTo(podcast.timeMilliSeconds + 30000L)
                     updateViewAfterSeek(podcast)
                 }
             }
@@ -422,7 +422,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
-        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
+        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toLong()
         viewModel.seekTo(seekTime)
     }
 
@@ -433,7 +433,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        val currentTime = podcast.currentTime.toLong()
+        val currentTime = podcast.timeMilliSeconds.toLong()
 
         toggleLoadingWheel(podcast.shouldLoadDuration)
 
@@ -451,8 +451,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
         setClipView(
             duration,
-            (podcast.getCurrentEpisode().clipStartTime ?: 0).toLong(),
-            (podcast.getCurrentEpisode().clipEndTime ?: 0).toLong()
+            (podcast.getCurrentEpisode().clipStartTime ?: 0).toLong() * 1000L,
+            (podcast.getCurrentEpisode().clipEndTime ?: 0).toLong() * 1000L
         )
     }
 

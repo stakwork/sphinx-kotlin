@@ -3,6 +3,7 @@ package chat.sphinx.common_player.ui
 import android.app.Application
 import android.content.Context
 import android.media.MediaMetadataRetriever
+import android.media.MicrophoneDirection
 import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.SavedStateHandle
@@ -291,7 +292,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
                     playEpisode(
                         episode,
-                        episode.clipStartTime ?: 0
+                        (episode.clipStartTime ?: 0).toLong() * 1000
                     )
                 } else if (episode.isYouTubeVideo) {
                     playerViewStateContainer.updateViewState(
@@ -324,14 +325,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: PodcastEpisode, startTimeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
 
                     podcast.didStartPlayingEpisode(
                         episode,
-                        startTime,
+                        startTimeMilliseconds,
                         ::retrieveEpisodeDuration
                     )
 
@@ -369,10 +370,10 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(time: Int) {
+    fun seekTo(timeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.didSeekTo(time)
+                podcast.didSeekTo(timeMilliseconds)
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(

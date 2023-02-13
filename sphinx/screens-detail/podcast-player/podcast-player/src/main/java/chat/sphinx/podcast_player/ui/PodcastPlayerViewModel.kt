@@ -268,12 +268,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         url = podcast.getCurrentEpisode().episodeUrl,
                         feedID = podcast.id,
                         itemID = podcast.getCurrentEpisode().id,
-                        ts = podcast.currentTime / 1000
+                        ts = (podcast.timeMilliSeconds / 1000).toInt()
                     )
 
                     actionsRepository.trackPodcastClipComments(
                         podcast.getCurrentEpisode().id,
-                        podcast.currentTime.toLong(),
+                        podcast.timeMilliSeconds / 1000,
                         arrayListOf("")
                     )
 
@@ -395,7 +395,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
                     podcast.didStartPlayingEpisode(
                         episode,
-                        ((episode.currentTimeMilliseconds ?: 0) / 1000).toInt(),
+                        episode.currentTimeMilliseconds ?: 0,
                         ::retrieveEpisodeDuration
                     )
 
@@ -433,10 +433,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(time: Int) {
+    fun seekTo(timeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.didSeekTo(time)
+                podcast.didSeekTo(timeMilliseconds)
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(

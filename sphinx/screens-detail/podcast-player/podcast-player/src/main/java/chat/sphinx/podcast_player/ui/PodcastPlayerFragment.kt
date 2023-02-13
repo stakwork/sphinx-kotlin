@@ -213,7 +213,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
 
                 textViewReplay15Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime - 15000)
+                    viewModel.seekTo(podcast.timeMilliSeconds - 15000L)
                     updateViewAfterSeek(podcast)
                 }
 
@@ -228,7 +228,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
 
                 textViewForward30Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime + 30000)
+                    viewModel.seekTo(podcast.timeMilliSeconds + 30000L)
                     updateViewAfterSeek(podcast)
                 }
 
@@ -472,7 +472,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
-        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
+        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toLong()
         viewModel.seekTo(seekTime)
     }
 
@@ -483,7 +483,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        val currentTime = podcast.currentTime.toLong()
+        val currentTime = podcast.timeMilliSeconds
 
         toggleLoadingWheel(podcast.shouldLoadDuration)
 

@@ -46,30 +46,14 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
             try {
                 ChatId(id)
             } catch (e: IllegalArgumentException) {
-                return null
+                ChatId(ChatId.NULL_CHAT_ID.toLong())
             }
-        }
-    }
-
-    val startTime: Long = getIntExtra("START_TIME", -1).let {
-        if (it == -1) {
-            return null
-        } else {
-            it.toLong()
-        }
-    }
-
-    val duration: Long = getIntExtra("DURATION", -1).let {
-        if (it == -1) {
-            return null
-        } else {
-            it.toLong()
         }
     }
 
     val speed: Double = getDoubleExtra("SPEED", -1.0).let {
         if (it == -1.0) {
-            return null
+            1.0
         } else {
             it
         }
@@ -79,6 +63,7 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         it.ifEmpty {
             return null
         }
+        it
     } ?: run {
         return null
     }
@@ -87,6 +72,7 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         it.ifEmpty {
             return null
         }
+        it
     } ?: run {
         return null
     }
@@ -95,6 +81,7 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         it.ifEmpty {
             return null
         }
+        it
     } ?: run {
         return null
     }
@@ -103,11 +90,14 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
         it.ifEmpty {
             return null
         }
+        it
     } ?: run {
         return null
     }
 
     val satsPerMinute = getLongExtra("SAT_PER_MINUTE", 0).toSat()
+    val startTime = getLongExtra("START_TIME", 0)
+    val duration = getLongExtra("DURATION", 0)
 
     return UserAction.ServiceAction.Play(
         chatId,

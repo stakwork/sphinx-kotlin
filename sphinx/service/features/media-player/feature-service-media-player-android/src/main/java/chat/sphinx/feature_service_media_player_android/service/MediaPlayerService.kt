@@ -82,7 +82,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
         private var trackSecondsConsumed: Long = 0
         private var startTimestamp: Long = 0
-        private var currentPauseTime: Int = 0
+        private var currentPauseTime: Long = 0
         private var history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
 
         @Synchronized
@@ -264,9 +264,9 @@ internal abstract class MediaPlayerService: SphinxService() {
                                 nnData.episodeId
                             )
                         }
-                        if (currentPauseTime != nnData.currentTimeSeconds) {
-                            setStartTimestamp(nnData.currentTimeMilliSeconds.toLong())
-                        }
+
+                        setStartTimestamp(nnData.currentTimeMilliSeconds.toLong())
+
                         if (nnData.chatId != userAction.chatId) {
                             //Podcast has changed. Payments Destinations needs to be set again
                             currentState = MediaPlayerServiceState.ServiceActive.ServiceConnected
@@ -280,7 +280,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                             if (!nnData.mediaPlayer.isPlaying) {
                                 try {
-                                    nnData.mediaPlayer.seekTo(userAction.contentEpisodeStatus.currentTime.value.toInt())
+                                    nnData.mediaPlayer.seekTo(userAction.contentEpisodeStatus.currentTime.value.toInt() * 1000)
                                     nnData.setSpeed(userAction.contentFeedStatus.playerSpeed?.value ?: 1.0)
 
                                     if (audioManagerHandler.requestAudioFocus()) {
@@ -339,8 +339,8 @@ internal abstract class MediaPlayerService: SphinxService() {
                                     feedRepository.updateContentEpisodeStatus(
                                         FeedId(nnData.podcastId),
                                         episodeId,
-                                        FeedItemDuration(nnData.durationMilliSeconds.toLong()),
-                                        FeedItemDuration(nnData.currentTimeMilliSeconds.toLong())
+                                        FeedItemDuration(nnData.durationSeconds.toLong()),
+                                        FeedItemDuration(nnData.currentTimeSeconds.toLong())
                                     )
                                 }
                             }
@@ -350,7 +350,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                         }
                     } ?: createMediaPlayer(userAction, null).also {
-                        setStartTimestamp(userAction.contentEpisodeStatus.currentTime.value)
+                        setStartTimestamp(userAction.contentEpisodeStatus.currentTime.value * 1000)
                     }
 
                     userAction.contentFeedStatus.apply {
@@ -382,16 +382,16 @@ internal abstract class MediaPlayerService: SphinxService() {
                             nnPlayer.episodeId == userAction.contentEpisodeStatus.itemId.value
                         ) {
                             try {
-                                val secondPosition = userAction.contentEpisodeStatus.currentTime.value.toInt() * 1000
-                                nnPlayer.mediaPlayer.seekTo(secondPosition)
+                                val newTime = userAction.contentEpisodeStatus.currentTime.value.toInt() * 1000
+                                nnPlayer.mediaPlayer.seekTo(newTime)
                                 createHistoryItem()
-                                setStartTimestamp(secondPosition.toLong())
+                                setStartTimestamp(newTime.toLong())
                                 resetTrackSecondsConsumed()
                                 // TODO: Dispatch State
                             } catch (e: IllegalStateException) {
                                 LOG.e(
                                     TAG,
-                                    "Failed to   seekTo ${userAction.contentEpisodeStatus.currentTime.value} for MediaPlayer",
+                                    "Failed to   seekTo ${userAction.contentEpisodeStatus.currentTime.value * 1000} for MediaPlayer",
                                     e
                                 )
                                 // TODO: Handle Error
@@ -458,7 +458,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                         )
                         mediaServiceController.dispatchState(currentState)
 
-                        setPauseTime(nnData.currentTimeSeconds)
+                        setPauseTime(nnData.currentTimeMilliSeconds.toLong())
 
                         feedRepository.updateContentFeedStatus(
                             FeedId(nnData.podcastId),
@@ -497,7 +497,7 @@ internal abstract class MediaPlayerService: SphinxService() {
                 setDataSource(userAction.episodeUrl)
                 setOnPreparedListener { mp ->
                     mp.setOnPreparedListener(null)
-                    mp.seekTo(userAction.contentEpisodeStatus.currentTime.value.toInt())
+                    mp.seekTo(userAction.contentEpisodeStatus.currentTime.value.toInt() * 1000)
                     mp.playbackParams = mp.playbackParams.setSpeed(userAction.contentFeedStatus.playerSpeed?.value?.toFloat() ?: 1F)
 
                     if (audioManagerHandler.requestAudioFocus()) {
@@ -653,9 +653,11 @@ internal abstract class MediaPlayerService: SphinxService() {
             trackSecondsConsumed = 0
         }
         private fun setStartTimestamp(startTime: Long){
-            startTimestamp = startTime
+            if (currentPauseTime != startTime) {
+                startTimestamp = startTime
+            }
         }
-        private fun setPauseTime(pauseTime: Int){
+        private fun setPauseTime(pauseTime: Long){
             currentPauseTime = pauseTime
         }
 

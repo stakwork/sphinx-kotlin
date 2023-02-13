@@ -303,7 +303,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 } else {
                     vs.podcast.didStartPlayingEpisode(
                         episode,
-                        vs.podcast.currentTime,
+                        vs.podcast.timeMilliSeconds,
                         ::retrieveEpisodeDuration,
                     )
 
@@ -370,7 +370,7 @@ internal class TribeFeedViewModel @Inject constructor(
             }
 
             viewModelScope.launch(mainImmediate) {
-                vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
+                vs.podcast.didSeekTo(vs.podcast.timeMilliSeconds + 30_000L)
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(

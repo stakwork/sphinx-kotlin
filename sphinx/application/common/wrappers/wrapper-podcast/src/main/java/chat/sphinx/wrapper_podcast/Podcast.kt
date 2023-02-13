@@ -75,7 +75,7 @@ data class Podcast(
             }
         }
 
-    private var timeMilliSeconds: Long
+    var timeMilliSeconds: Long
         get() {
             playingEpisode?.contentEpisodeStatus?.currentTime?.value?.let {
                 return it * 1000
@@ -155,9 +155,6 @@ data class Podcast(
     val episodesCount: Int
         get() = episodes.count()
 
-    val currentTime: Int
-        get() = timeMilliSeconds.toInt()
-
     val isPlaying: Boolean
         get() = playingEpisode?.playing ?: false
 
@@ -202,7 +199,7 @@ data class Podcast(
             )
         } ?: contentFeedStatus
 
-        return cfs ?: ContentFeedStatus(
+        contentFeedStatus = cfs ?: ContentFeedStatus(
             feedId = this.id,
             feedUrl = this.feedUrl,
             subscriptionStatus = this.subscribed,
@@ -211,6 +208,8 @@ data class Podcast(
             satsPerMinute = customAmount ?: this.satsPerMinute?.toSat(),
             playerSpeed = FeedPlayerSpeed(1.0),
         )
+
+        return contentFeedStatus!!
     }
 
 
@@ -303,20 +302,20 @@ data class Podcast(
     ): Int {
         val currentEpisodeDuration = getCurrentEpisodeDuration(durationRetrieverHandle)
         if (currentEpisodeDuration > 0) {
-            val progress = (currentTime.toLong() * 100) / currentEpisodeDuration
+            val progress = (timeMilliSeconds * 100) / currentEpisodeDuration
             return progress.toInt()
         }
         return 0
     }
 
     fun getPlayingProgress(duration: Int): Int {
-        val progress = (currentTime.toLong() * 100) / duration
+        val progress = (timeMilliSeconds.toLong() * 100) / duration
         return progress.toInt()
     }
 
     fun didStartPlayingEpisode(
         episode: PodcastEpisode,
-        time: Int,
+        timeMilliseconds: Long,
         durationRetrieverHandle: (episode: PodcastEpisode) -> Long
     ) {
         val episodeId = episode.id.value
@@ -330,13 +329,13 @@ data class Podcast(
         }
 
         this.playingEpisode?.playing = true
-        this.timeMilliSeconds = time.toLong()
+        this.timeMilliSeconds = timeMilliseconds
 
         getCurrentEpisodeDuration(durationRetrieverHandle)
     }
 
-    fun didSeekTo(time: Int) {
-        this.timeMilliSeconds = time.toLong()
+    fun didSeekTo(timeMilliseconds: Long) {
+        this.timeMilliSeconds = timeMilliseconds
     }
 
     fun didChangeSatsPerMinute(sats: Long) {
@@ -345,7 +344,7 @@ data class Podcast(
 
     fun playingEpisodeUpdate(
         episodeId: String,
-        time: Int,
+        timeMilliseconds: Int,
         duration: Long,
         speed: Double
     ) {
@@ -360,7 +359,7 @@ data class Podcast(
             nnEpisode.playing = true
 
             this.episodeDurationMilliseconds = if (duration > 0) duration else this.episodeDurationMilliseconds
-            this.timeMilliSeconds = time.toLong()
+            this.timeMilliSeconds = timeMilliseconds.toLong()
         }
     }
 
