@@ -3767,7 +3767,7 @@ abstract class SphinxRepository(
         return tribeData
     }
 
-    private val podcastLock = Mutex()
+    private val feedLock = Mutex()
     override suspend fun updateFeedContent(
         chatId: ChatId,
         host: ChatHost,
@@ -3812,7 +3812,7 @@ abstract class SphinxRepository(
                             }
                     }
 
-                    podcastLock.withLock {
+                    feedLock.withLock {
                         queries.transaction {
                             upsertFeed(
                                 response.value,
@@ -4270,6 +4270,10 @@ abstract class SphinxRepository(
             contentFeedStatusDboPresenterMapper.mapFrom(it)
         }
 
+        val chat = queries.chatGetById(podcast.chatId).executeAsOneOrNull()?.let {
+            chatDboPresenterMapper.mapFrom(it)
+        }
+
         val allContentStatuses = queries.contentEpisodeStatusGetAll().executeAsList()
 
         val episodeIds = episodes.map { it.id }
@@ -4293,6 +4297,7 @@ abstract class SphinxRepository(
         podcast.episodes = episodes
         podcast.destinations = destinations
         podcast.contentFeedStatus = contentFeedStatus
+        podcast.chat = chat
 
         return podcast
     }
@@ -4411,11 +4416,15 @@ abstract class SphinxRepository(
         currentSubscribeState: Subscribed
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
+        val newValue = if (currentSubscribeState.isTrue()) Subscribed.False else Subscribed.True
 
-        queries.feedUpdateSubscribe(
-            if (currentSubscribeState.isTrue()) Subscribed.False else Subscribed.True,
-            feedId
-        )
+        queries.transaction {
+            updateSubscriptionStatus(
+                queries,
+                newValue,
+                feedId
+            )
+        }
     }
 
     private suspend fun mapFeedItemDboList(
@@ -6537,7 +6546,8 @@ abstract class SphinxRepository(
         chatId: ChatId?,
         itemId: FeedId?,
         satsPerMinute: Sat?,
-        playerSpeed: FeedPlayerSpeed?
+        playerSpeed: FeedPlayerSpeed?,
+        shouldSync: Boolean
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6557,6 +6567,10 @@ abstract class SphinxRepository(
                     player_speed = playerSpeed
                 )
             }
+
+            if (shouldSync) {
+                saveContentFeedStatusFor(feedId)
+            }
         }
     }
     private val contentEpisodeLock = Mutex()
@@ -6564,7 +6578,8 @@ abstract class SphinxRepository(
         feedId: FeedId,
         itemId: FeedId,
         duration: FeedItemDuration,
-        currentTime: FeedItemDuration
+        currentTime: FeedItemDuration,
+        shouldSync: Boolean
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6580,6 +6595,10 @@ abstract class SphinxRepository(
                     duration = duration,
                     current_time = currentTime
                 )
+            }
+
+            if (shouldSync) {
+                saveContentFeedStatusFor(feedId)
             }
         }
     }
@@ -6666,7 +6685,7 @@ abstract class SphinxRepository(
                 feedStatus.feedId.value,
                 feedStatus.feedUrl.value,
                 feedStatus.subscriptionStatus.isTrue(),
-                feedStatus.chatId?.value,
+                feedStatus.actualChatId?.value,
                 feedStatus.itemId?.value,
                 feedStatus.satsPerMinute?.value,
                 feedStatus.playerSpeed?.value,
@@ -6768,7 +6787,7 @@ abstract class SphinxRepository(
                     host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
                     feedUrl = feedUrl,
                     chatUUID = chat?.uuid,
-                    subscribed = Subscribed.True,
+                    subscribed = contentFeedStatus.subscription_status.toSubscribed(),
                     currentItemId = contentFeedStatus.item_id?.toFeedId(),
                     delay = 0
                 )
@@ -6802,6 +6821,14 @@ abstract class SphinxRepository(
                     FeedId(contentFeedStatus.feed_id)
                 )
             }
+        }
+
+        feedLock.withLock {
+            queries.feedUpdateSubscribeAndChat(
+                contentFeedStatus.subscription_status.toSubscribed(),
+                contentFeedStatus.chat_id?.toChatId() ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                FeedId(contentFeedStatus.feed_id)
+            )
         }
 
         contentFeedStatus.episodes_status?.let { episodeStatuses ->

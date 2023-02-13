@@ -14,4 +14,8 @@ data class ContentFeedStatus(
     val itemId: FeedId?,
     val satsPerMinute: Sat?,
     val playerSpeed: FeedPlayerSpeed?
-)
+) {
+
+    val actualChatId: ChatId?
+        get() = if (chatId?.value == ChatId.NULL_CHAT_ID.toLong()) null else chatId
+}

@@ -213,22 +213,20 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
 
                 textViewReplay15Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime - 15000)
+                    viewModel.seekTo(podcast.timeMilliSeconds - 15000L)
                     updateViewAfterSeek(podcast)
                 }
 
                 textViewPlayPauseButton.setOnClickListener {
-                    val currentEpisode = podcast.getCurrentEpisode()
-
-                    if (currentEpisode.playing) {
-                        viewModel.pauseEpisode(currentEpisode)
-                    } else {
-                        viewModel.playEpisode(currentEpisode)
+                    if (!podcast.getCurrentEpisode().playing) {
+                        toggleLoadingWheel(true)
                     }
+
+                    viewModel.togglePlayState()
                 }
 
                 textViewForward30Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime + 30000)
+                    viewModel.seekTo(podcast.timeMilliSeconds + 30000L)
                     updateViewAfterSeek(podcast)
                 }
 
@@ -305,7 +303,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             }
 
             is PodcastPlayerViewState.PodcastLoaded -> {
-                toggleLoadingWheel(true)
                 showPodcastInfo(viewState.podcast)
             }
 
@@ -473,7 +470,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
-        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
+        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toLong()
         viewModel.seekTo(seekTime)
     }
 
@@ -484,11 +481,14 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        val currentTime = podcast.currentTime.toLong()
+        val currentTime = podcast.timeMilliSeconds
+
+        toggleLoadingWheel(podcast.shouldLoadDuration)
 
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
+
         val progress: Int =
             try {
                 ((currentTime * 100) / duration).toInt()

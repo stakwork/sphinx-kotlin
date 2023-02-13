@@ -90,7 +90,8 @@ internal class MediaPlayerServiceControllerImpl(
                         userAction.chatId,
                         itemId,
                         satsPerMinute,
-                        playerSpeed
+                        playerSpeed,
+                        true
                     )
                 }
             }
@@ -103,7 +104,8 @@ internal class MediaPlayerServiceControllerImpl(
                         userAction.chatId,
                         itemId,
                         satsPerMinute,
-                        playerSpeed
+                        playerSpeed,
+                        true
                     )
                 }
             }
@@ -134,7 +136,8 @@ internal class MediaPlayerServiceControllerImpl(
                         feedId,
                         itemId,
                         duration,
-                        currentTime
+                        currentTime,
+                        true
                     )
                 }
                 listenerHandler.dispatch(getCurrentState())

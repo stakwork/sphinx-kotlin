@@ -15,11 +15,9 @@ import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.feed.isTrue
-import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
@@ -165,21 +163,20 @@ internal open class VideoFeedScreenViewModel(
 
     private fun updateFeedContentInBackground() {
         viewModelScope.launch(io) {
-            chatRepository.getChatById(getArgChatId()).firstOrNull()?.let { chat ->
-                chat.host?.let { chatHost ->
-                    getArgFeedUrl()?.let { feedUrl ->
-                        val subscribed = (chat != null || (getVideoFeed()?.subscribed?.isTrue() == true))
+            val chat = chatRepository.getChatById(getArgChatId()).firstOrNull()
+            val videoFeed = getVideoFeed()
+            val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
+            val subscribed = videoFeed?.subscribed?.isTrue() == true
 
-                        feedRepository.updateFeedContent(
-                            chatId = chat.id,
-                            host = chatHost,
-                            feedUrl = feedUrl,
-                            chatUUID = chat.uuid,
-                            subscribed = subscribed.toSubscribed(),
-                            currentItemId = null
-                        )
-                    }
-                }
+            getArgFeedUrl()?.let { feedUrl ->
+                feedRepository.updateFeedContent(
+                    chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = chatHost,
+                    feedUrl = feedUrl,
+                    chatUUID = chat?.uuid,
+                    subscribed = subscribed.toSubscribed(),
+                    currentItemId = null
+                )
             }
         }
     }

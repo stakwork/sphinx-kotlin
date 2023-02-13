@@ -70,6 +70,9 @@ internal class PodcastDataHolder private constructor(
     val currentTimeSeconds: Int
         get() = mediaPlayer.currentPosition / 1000
 
+    val durationSeconds: Int
+        get() = mediaPlayer.duration / 1000
+
     val currentTimeMilliSeconds: Int
         get() = mediaPlayer.currentPosition
 

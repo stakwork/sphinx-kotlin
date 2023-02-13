@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
-import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -18,22 +17,17 @@ import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState
 import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState.NoPodcast.clickBoost
 import chat.sphinx.dashboard.ui.viewstates.adjustState
 import chat.sphinx.wrapper_common.feed.toFeedId
-import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_feed.ContentEpisodeStatus
-import chat.sphinx.wrapper_feed.ContentFeedStatus
-import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedRecommendation
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -175,9 +169,9 @@ internal class DashboardPodcastViewModel @Inject constructor(
                             )
                         )
                     } else {
-                        vs.podcast.didStartPlayingEpisode(
+                        vs.podcast.willStartPlayingEpisode(
                             episode,
-                            vs.podcast.currentTime,
+                            vs.podcast.timeMilliSeconds,
                             ::retrieveEpisodeDuration,
                         )
 
@@ -201,7 +195,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 }
 
                 viewModelScope.launch(mainImmediate) {
-                    vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
+                    vs.podcast.didSeekTo(vs.podcast.timeMilliSeconds + 30_000L)
 
                     mediaPlayerServiceController.submitAction(
                         UserAction.ServiceAction.Seek(
@@ -229,6 +223,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 }
 
                 val contentFeedStatus = vs.podcast.getUpdatedContentFeedStatus()
+
                 feedRepository.updateContentFeedStatus(
                     vs.podcast.id,
                     contentFeedStatus.feedUrl,
@@ -240,6 +235,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 )
 
                 val contentEpisodeStatus = vs.podcast.getUpdatedContentEpisodeStatus()
+
                 contentEpisodeStatus?.itemId?.let {episodeId ->
                     feedRepository.updateContentEpisodeStatus(
                         vs.podcast.id,
@@ -328,12 +324,23 @@ internal class DashboardPodcastViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    private fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
         }
+
+        return duration
     }
 }
 

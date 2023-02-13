@@ -582,6 +582,41 @@ fun TransactionCallbacks.upsertFeed(
     )
 }
 
+fun TransactionCallbacks.upsertFeedItems(
+    feedDto: FeedDto,
+    queries: SphinxDatabaseQueries
+) {
+    val feedId = FeedId(feedDto.id)
+
+    val itemIds: MutableList<FeedId> = mutableListOf()
+
+    for (item in feedDto.items) {
+        val itemId = FeedId(item.id)
+
+        itemIds.add(itemId)
+
+        queries.feedItemUpsert(
+            title = FeedTitle(item.title),
+            description = item.description?.toFeedDescription(),
+            date_published = item.datePublished?.secondsToDateTime(),
+            date_updated = item.dateUpdated?.secondsToDateTime(),
+            author = item.author?.toFeedAuthor(),
+            content_type = item.contentType?.toFeedContentType(),
+            enclosure_length = item.enclosureLength?.toFeedEnclosureLength(),
+            enclosure_url = FeedUrl(item.enclosureUrl),
+            enclosure_type = item.enclosureType?.toFeedEnclosureType(),
+            image_url = item.imageUrl?.toPhotoUrl(),
+            thumbnail_url = item.thumbnailUrl?.toPhotoUrl(),
+            link = item.link?.toFeedUrl(),
+            feed_id = feedId,
+            id = itemId,
+            duration = item.duration?.toFeedItemDuration(),
+        )
+    }
+
+    queries.feedItemsDeleteOldByFeedId(feedId, itemIds)
+}
+
 
 fun TransactionCallbacks.deleteFeedsByChatId(
     chatId: ChatId,
@@ -605,4 +640,14 @@ fun TransactionCallbacks.deleteFeedById(
         queries.feedDestinationDeleteByFeedId(feedDbo.id)
         queries.feedDeleteById(feedDbo.id)
     }
+}
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun TransactionCallbacks.updateSubscriptionStatus(
+    queries: SphinxDatabaseQueries,
+    subscribed: Subscribed,
+    feedId: FeedId
+) {
+    queries.feedUpdateSubscribe(subscribed, feedId)
+    queries.contentFeedUpdateSubscriptionStatus(subscribed, feedId)
 }

@@ -36,6 +36,7 @@ import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip
@@ -223,8 +224,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         mediaPlayerServiceController.addListener(this)
 
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { nnPodcast ->
-                podcastLoaded(nnPodcast)
+            podcastFlow.collect { podcast ->
+                podcast?.let { nnPodcast ->
+                    podcastLoaded(nnPodcast)
+                }
             }
         }
 
@@ -265,12 +268,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         url = podcast.getCurrentEpisode().episodeUrl,
                         feedID = podcast.id,
                         itemID = podcast.getCurrentEpisode().id,
-                        ts = podcast.currentTime / 1000
+                        ts = (podcast.timeMilliSeconds / 1000).toInt()
                     )
 
                     actionsRepository.trackPodcastClipComments(
                         podcast.getCurrentEpisode().id,
-                        podcast.currentTime.toLong(),
+                        podcast.timeMilliSeconds / 1000,
                         arrayListOf("")
                     )
 
@@ -302,7 +305,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
             val chat = chatRepository.getChatById(args.chatId).firstOrNull()
             val podcast = getPodcast()
             val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
-            val subscribed = (chat != null || (podcast?.subscribed?.isTrue() == true))
+            val subscribed = podcast?.subscribed?.isTrue() == true
 
             args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
                 feedRepository.updateFeedContent(
@@ -319,6 +322,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun podcastLoaded(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
+
+            val playingContent = mediaPlayerServiceController.getPlayingContent()
+            podcast.applyPlayingContentState(playingContent)
+
             viewStateContainer.updateViewState(
                 PodcastPlayerViewState.PodcastLoaded(podcast)
             )
@@ -385,14 +392,28 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
+    fun togglePlayState() {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                val episode = podcast.getCurrentEpisode()
+
+                if (episode.playing) {
+                    pauseEpisode(episode)
+                } else {
+                    playEpisode(episode)
+                }
+            }
+        }
+    }
+
     fun playEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
 
-                    podcast.didStartPlayingEpisode(
+                    podcast.willStartPlayingEpisode(
                         episode,
-                        ((episode.currentTimeMilliseconds ?: 0) / 1000).toInt(),
+                        episode.currentTimeMilliseconds ?: 0,
                         ::retrieveEpisodeDuration
                     )
 
@@ -430,10 +451,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(time: Int) {
+    fun seekTo(timeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.didSeekTo(time)
+                podcast.didSeekTo(timeMilliseconds)
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(
@@ -525,7 +546,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                     UserAction.SendBoost(
                                         args.chatId,
                                         podcast.id.value,
-                                        podcast.getUpdatedContentFeedStatus(),
+                                        podcast.getUpdatedContentFeedStatus(amount),
                                         podcast.getUpdatedContentEpisodeStatus(),
                                         podcast.getFeedDestinations()
                                     )
@@ -548,12 +569,23 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
         }
+
+        return duration
     }
 
     fun downloadMedia(

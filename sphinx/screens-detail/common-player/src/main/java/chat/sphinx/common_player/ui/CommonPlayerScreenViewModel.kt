@@ -39,8 +39,6 @@ import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 internal inline val CommonPlayerScreenFragmentArgs.podcastId: FeedId
@@ -291,7 +289,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
                     playEpisode(
                         episode,
-                        episode.clipStartTime ?: 0
+                        (episode.clipStartTime ?: 0).toLong() * 1000
                     )
                 } else if (episode.isYouTubeVideo) {
                     playerViewStateContainer.updateViewState(
@@ -324,14 +322,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: PodcastEpisode, startTimeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
 
-                    podcast.didStartPlayingEpisode(
+                    podcast.willStartPlayingEpisode(
                         episode,
-                        startTime,
+                        startTimeMilliseconds,
                         ::retrieveEpisodeDuration
                     )
 
@@ -369,10 +367,10 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(time: Int) {
+    fun seekTo(timeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.didSeekTo(time)
+                podcast.didSeekTo(timeMilliseconds)
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(
@@ -401,12 +399,23 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
         }
+
+        return duration
     }
 
     suspend fun playingVideoDidPause() {
@@ -494,7 +503,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                         UserAction.SendBoost(
                                             ChatId(ChatId.NULL_CHAT_ID.toLong()),
                                             podcast.getCurrentEpisode().id.value,
-                                            podcast.getUpdatedContentFeedStatus(),
+                                            podcast.getUpdatedContentFeedStatus(amount),
                                             podcast.getUpdatedContentEpisodeStatus(),
                                             feedDestinations
                                         )
