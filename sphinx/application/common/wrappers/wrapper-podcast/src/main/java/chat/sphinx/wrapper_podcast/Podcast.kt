@@ -112,7 +112,7 @@ data class Podcast(
             chat?.metaData?.satsPerMinute?.value?.let {
                 return it
             }
-            return model?.suggested?.value?.toLong() ?: 0
+            return model?.suggestedSats ?: 0
         }
         set(value) {
             value?.let {

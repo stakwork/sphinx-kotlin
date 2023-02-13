@@ -979,7 +979,7 @@ internal class DashboardViewModel @Inject constructor(
                         if (restoreProgress.restoring && restoreProgress.progress < 100) {
                             _restoreProgressStateFlow.value = RestoreProgressViewState(
                                 response.value.progress,
-                                R.string.dashboard_restore_progress_chat,
+                                R.string.dashboard_restore_progress_messages,
                                 true
                             )
                         } else {

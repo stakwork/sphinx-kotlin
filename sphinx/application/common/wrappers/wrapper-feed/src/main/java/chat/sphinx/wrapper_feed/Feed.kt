@@ -5,6 +5,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.lightning.toSat
 
 inline val Feed.isPodcast: Boolean
     get() = feedType.isPodcast()
@@ -60,13 +61,15 @@ data class Feed(
 
         val chatId = if (this.chat?.id?.value == ChatId.NULL_CHAT_ID.toLong()) null else this.chat?.id
 
+        val satsPerMinute = chat?.metaData?.satsPerMinute ?: model?.suggestedSats?.toSat()
+
         return ContentFeedStatus(
             id,
             feedUrl,
             this.subscribed,
             chatId,
             itemId,
-            chat?.metaData?.satsPerMinute,
+            satsPerMinute,
             chat?.metaData?.speed?.toFeedPlayerSpeed()
         )
 

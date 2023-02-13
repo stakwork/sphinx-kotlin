@@ -145,7 +145,7 @@
     <string name="dashboard_restore_progress">Restoring: %s</string>
     <string name="dashboard_restore_progress_contacts">Restoring Contacts: %s</string>
     <string name="dashboard_restore_progress_feeds">Restoring Feeds: %s</string>
-    <string name="dashboard_restore_progress_chat">Restoring Chats: %s</string>
+    <string name="dashboard_restore_progress_messages">Restoring Messages: %s</string>
     <string name="dashboard_stop_restore">Continue later</string>
 
     <string name="loading_recommendations">Loading Recommendations...</string>
