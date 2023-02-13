@@ -4085,7 +4085,7 @@ abstract class SphinxRepository(
         }
 
         contentEpisodeStatusesMap.keys.chunked(500).forEach { chunkedIds ->
-            queries.contentEpisodeStatusGetByItemIds(chunkedIds)
+            queries.contentEpisodeStatusGetByFeedIds(chunkedIds)
                 .executeAsList()
                 .let { response ->
                     response.forEach { dbo ->
