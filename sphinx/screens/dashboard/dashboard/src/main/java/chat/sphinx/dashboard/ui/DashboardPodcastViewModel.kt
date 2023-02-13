@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
-import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -18,7 +17,6 @@ import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState
 import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState.NoPodcast.clickBoost
 import chat.sphinx.dashboard.ui.viewstates.adjustState
 import chat.sphinx.wrapper_common.feed.toFeedId
-import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.PodcastEpisode
@@ -27,11 +25,9 @@ import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -173,7 +169,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                             )
                         )
                     } else {
-                        vs.podcast.didStartPlayingEpisode(
+                        vs.podcast.willStartPlayingEpisode(
                             episode,
                             vs.podcast.timeMilliSeconds,
                             ::retrieveEpisodeDuration,

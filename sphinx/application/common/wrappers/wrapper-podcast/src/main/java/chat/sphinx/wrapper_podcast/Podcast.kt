@@ -63,6 +63,9 @@ data class Podcast(
                     return it
                 }
             }
+            if (episodes.isNotEmpty()) {
+                return episodes[0].id?.value
+            }
             return null
         }
         set(value) {
@@ -146,7 +149,6 @@ data class Podcast(
             return episodeId?.let {
                 getEpisodeWithId(it)
             }
-
         }
 
     val shouldLoadDuration: Boolean
@@ -168,6 +170,15 @@ data class Podcast(
             }
             return image
         }
+
+    fun applyPlayingContentState(
+        playingContent: Pair<String, String>?
+    ) {
+        if (playingContent?.first == id.value) {
+            episodeId = playingContent?.second
+            playingEpisode?.playing = true
+        }
+    }
 
     fun getEpisodesListCopy(): ArrayList<PodcastEpisode> {
         var episodesList = ArrayList<PodcastEpisode>()
@@ -313,7 +324,7 @@ data class Podcast(
         return progress.toInt()
     }
 
-    fun didStartPlayingEpisode(
+    fun willStartPlayingEpisode(
         episode: PodcastEpisode,
         timeMilliseconds: Long,
         durationRetrieverHandle: (episode: PodcastEpisode) -> Long

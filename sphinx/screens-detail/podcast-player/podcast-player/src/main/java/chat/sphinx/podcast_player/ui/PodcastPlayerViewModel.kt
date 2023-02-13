@@ -322,6 +322,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun podcastLoaded(podcast: Podcast) {
         viewModelScope.launch(mainImmediate) {
+
+            val playingContent = mediaPlayerServiceController.getPlayingContent()
+            podcast.applyPlayingContentState(playingContent)
+
             viewStateContainer.updateViewState(
                 PodcastPlayerViewState.PodcastLoaded(podcast)
             )
@@ -388,12 +392,26 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
+    fun togglePlayState() {
+        viewModelScope.launch(mainImmediate) {
+            getPodcast()?.let { podcast ->
+                val episode = podcast.getCurrentEpisode()
+
+                if (episode.playing) {
+                    pauseEpisode(episode)
+                } else {
+                    playEpisode(episode)
+                }
+            }
+        }
+    }
+
     fun playEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
 
-                    podcast.didStartPlayingEpisode(
+                    podcast.willStartPlayingEpisode(
                         episode,
                         episode.currentTimeMilliseconds ?: 0,
                         ::retrieveEpisodeDuration
@@ -528,7 +546,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                     UserAction.SendBoost(
                                         args.chatId,
                                         podcast.id.value,
-                                        podcast.getUpdatedContentFeedStatus(),
+                                        podcast.getUpdatedContentFeedStatus(amount),
                                         podcast.getUpdatedContentEpisodeStatus(),
                                         podcast.getFeedDestinations()
                                     )

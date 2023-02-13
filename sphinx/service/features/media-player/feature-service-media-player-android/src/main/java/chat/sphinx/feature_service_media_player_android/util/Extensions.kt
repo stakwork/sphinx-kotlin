@@ -8,7 +8,6 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
-import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_feed.ContentEpisodeStatus
 import chat.sphinx.wrapper_feed.ContentFeedStatus

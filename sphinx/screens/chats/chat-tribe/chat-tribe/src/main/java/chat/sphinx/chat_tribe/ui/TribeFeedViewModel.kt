@@ -44,7 +44,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -301,7 +300,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         )
                     )
                 } else {
-                    vs.podcast.didStartPlayingEpisode(
+                    vs.podcast.willStartPlayingEpisode(
                         episode,
                         vs.podcast.timeMilliSeconds,
                         ::retrieveEpisodeDuration,

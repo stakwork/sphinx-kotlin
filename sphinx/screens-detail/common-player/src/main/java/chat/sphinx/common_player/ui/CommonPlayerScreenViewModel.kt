@@ -3,7 +3,6 @@ package chat.sphinx.common_player.ui
 import android.app.Application
 import android.content.Context
 import android.media.MediaMetadataRetriever
-import android.media.MicrophoneDirection
 import android.net.Uri
 import android.os.Build
 import androidx.lifecycle.SavedStateHandle
@@ -40,8 +39,6 @@ import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 internal inline val CommonPlayerScreenFragmentArgs.podcastId: FeedId
@@ -330,7 +327,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
 
-                    podcast.didStartPlayingEpisode(
+                    podcast.willStartPlayingEpisode(
                         episode,
                         startTimeMilliseconds,
                         ::retrieveEpisodeDuration
@@ -506,7 +503,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                         UserAction.SendBoost(
                                             ChatId(ChatId.NULL_CHAT_ID.toLong()),
                                             podcast.getCurrentEpisode().id.value,
-                                            podcast.getUpdatedContentFeedStatus(),
+                                            podcast.getUpdatedContentFeedStatus(amount),
                                             podcast.getUpdatedContentEpisodeStatus(),
                                             feedDestinations
                                         )

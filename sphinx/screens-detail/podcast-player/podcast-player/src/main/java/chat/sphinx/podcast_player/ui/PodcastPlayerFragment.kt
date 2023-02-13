@@ -218,13 +218,11 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
 
                 textViewPlayPauseButton.setOnClickListener {
-                    val currentEpisode = podcast.getCurrentEpisode()
-
-                    if (currentEpisode.playing) {
-                        viewModel.pauseEpisode(currentEpisode)
-                    } else {
-                        viewModel.playEpisode(currentEpisode)
+                    if (!podcast.getCurrentEpisode().playing) {
+                        toggleLoadingWheel(true)
                     }
+
+                    viewModel.togglePlayState()
                 }
 
                 textViewForward30Button.setOnClickListener {
