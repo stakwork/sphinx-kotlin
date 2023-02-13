@@ -227,6 +227,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 }
 
                 val contentFeedStatus = vs.podcast.getUpdatedContentFeedStatus()
+
                 feedRepository.updateContentFeedStatus(
                     vs.podcast.id,
                     contentFeedStatus.feedUrl,
@@ -238,6 +239,7 @@ internal class DashboardPodcastViewModel @Inject constructor(
                 )
 
                 val contentEpisodeStatus = vs.podcast.getUpdatedContentEpisodeStatus()
+
                 contentEpisodeStatus?.itemId?.let {episodeId ->
                     feedRepository.updateContentEpisodeStatus(
                         vs.podcast.id,

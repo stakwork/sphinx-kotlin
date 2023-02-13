@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_feed.*
 import java.io.File
 import kotlin.math.roundToInt
@@ -207,7 +208,7 @@ data class Podcast(
             subscriptionStatus = this.subscribed,
             chatId = this.chatId,
             itemId = getCurrentEpisode()?.id,
-            satsPerMinute = customAmount ?: Sat((model?.suggested?.value ?: 0).toLong()),
+            satsPerMinute = customAmount ?: this.satsPerMinute?.toSat(),
             playerSpeed = FeedPlayerSpeed(1.0),
         )
     }
