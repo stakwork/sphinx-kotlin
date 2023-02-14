@@ -23,8 +23,7 @@ class NetworkQueryFeedStatusImpl(
 
     companion object {
         private const val ENDPOINT_CONTENT_FEED_STATUS = "/content_feed_status"
-        private const val ENDPOINT_CONTENT_FEED_STATUS_FEED_ID = "/content_feed_status/:feed_id"
-        private const val ENDPOINT_UPDATE_CONTENT_FEED_STATUS = "/content_feed_status/%s"
+        private const val ENDPOINT_CONTENT_FEED_STATUS_FEED_ID = "/content_feed_status/%s"
     }
 
     override fun saveFeedStatuses(
@@ -46,7 +45,7 @@ class NetworkQueryFeedStatusImpl(
     ): Flow<LoadResponse<Any?, ResponseError>> =
         networkRelayCall.relayPut(
             responseJsonClass = ContentFeedStatusRelayPostResponse::class.java,
-            relayEndpoint = ENDPOINT_UPDATE_CONTENT_FEED_STATUS,
+            relayEndpoint = String.format(ENDPOINT_CONTENT_FEED_STATUS_FEED_ID, feedId.value),
             requestBodyJsonClass = PutFeedStatusDto::class.java,
             requestBody = feedStatusDto,
             relayData = relayData
@@ -68,7 +67,7 @@ class NetworkQueryFeedStatusImpl(
     ): Flow<LoadResponse<ContentFeedStatusDto, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = ContentFeedStatusRelayGetResponse::class.java,
-            relayEndpoint = ENDPOINT_CONTENT_FEED_STATUS_FEED_ID,
+            relayEndpoint = String.format(ENDPOINT_CONTENT_FEED_STATUS_FEED_ID, feedId.value),
             relayData = relayData,
             useExtendedNetworkCallClient = true
         )
