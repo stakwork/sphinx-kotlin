@@ -16,7 +16,11 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.listen.FeedListenViewModel
+import chat.sphinx.wrapper_common.secondsToDateTime
+import chat.sphinx.wrapper_common.timeAgo
+import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_feed.FeedItem
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -199,8 +203,23 @@ class FeedListenNowAdapter(
                     )
                 }
 
+                val currentTime = podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0
+                val duration = podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0
+
+                println("episodeCurrentTime $currentTime")
+                println("episodeDuration $duration")
+
+                val timeLeft = formatDurationAndCurrentTime(duration.toInt(), currentTime.toInt())
+                val progress = getSeekbarProgress(duration.toInt(), currentTime.toInt())
+
                 textViewItemName.text = podcastEpisode.titleToShow
                 textViewItemDescription.text = podcastEpisode.descriptionToShow
+
+                publicationTimeAndDurationConstraint.visible
+                textViewItemPublicationTime.text = podcastEpisode.datePublished?.timeAgo()
+                textViewItemEpisodeTime.text = timeLeft
+                seekBarCurrentTimeEpisodeProgress.progress = progress
+
             }
         }
 
@@ -213,4 +232,27 @@ class FeedListenNowAdapter(
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }
+
+    private fun formatDurationAndCurrentTime(duration: Int, currentTime: Int): String {
+        if (currentTime == 0) {
+            val durationHours = duration / 3600
+            val durationMinutes = (duration % 3600) / 60
+            return if (duration >= 3600) {
+                "$durationHours hr $durationMinutes min"
+            } else "$durationMinutes min"
+
+        }
+
+        val secondsLeft = duration - currentTime
+        val hours = secondsLeft / 3600
+        val minutes = (secondsLeft % 3600) / 60
+
+        return if (secondsLeft >= 3600) {
+            "$hours hr $minutes min left"
+        } else "$minutes min left"
+    }
+
+    private fun getSeekbarProgress(duration: Int, currentTime: Int): Int =
+        currentTime * 100 / duration
+
 }
