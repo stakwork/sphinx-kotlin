@@ -63,7 +63,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/card_view_image_wrapper"
         app:layout_constraintHorizontal_bias="1.0"
@@ -101,16 +101,15 @@
 
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/seek_bar_current_time_episode_progress"
-            android:layout_width="0dp"
+            android:layout_width="100dp"
             android:layout_height="0dp"
-            android:layout_marginStart="4dp"
+            android:layout_marginTop="2dp"
             android:progress="0"
             android:progressDrawable="@drawable/podcast_episode_progress_bar_duration_holder"
             android:secondaryProgressTint="@color/receivedIcon"
             android:splitTrack="false"
             android:thumb="@null"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_item_episode_time"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time"
             app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time" />
 
