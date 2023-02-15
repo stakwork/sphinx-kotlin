@@ -8,6 +8,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.feed.Subscribed
+import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_feed.ContentEpisodeStatus
 import chat.sphinx.wrapper_feed.ContentFeedStatus
@@ -23,10 +24,11 @@ internal inline fun UserAction.ServiceAction.Play.toIntent(
     intent.putExtra("CHAT_ID", chatId.value)
     intent.putExtra("PODCAST_ID", contentFeedStatus.feedId.value)
     intent.putExtra("PODCAST_URL", contentFeedStatus.feedUrl.value)
-    intent.putExtra("EPISODE_ID", contentEpisodeStatus.itemId.value)
-    intent.putExtra("EPISODE_URL", episodeUrl)
+    intent.putExtra("SUBSCRIBED", contentFeedStatus.subscriptionStatus.value)
     intent.putExtra("SAT_PER_MINUTE", contentFeedStatus.satsPerMinute?.value ?: 0)
     intent.putExtra("SPEED", contentFeedStatus.playerSpeed?.value ?: 1.0)
+    intent.putExtra("EPISODE_URL", episodeUrl)
+    intent.putExtra("EPISODE_ID", contentEpisodeStatus.itemId.value)
     intent.putExtra("START_TIME", contentEpisodeStatus.currentTime.value)
     intent.putExtra("DURATION", contentEpisodeStatus.duration.value)
     return intent
@@ -98,13 +100,15 @@ internal inline fun Intent.toServiceActionPlay(): UserAction.ServiceAction.Play?
     val startTime = getLongExtra("START_TIME", 0)
     val duration = getLongExtra("DURATION", 0)
 
+    val subscribed = getIntExtra("SUBSCRIBED", 0)
+
     return UserAction.ServiceAction.Play(
         chatId,
         episodeUrl,
         ContentFeedStatus(
             FeedId(podcastId),
             FeedUrl(podcastUrl),
-            Subscribed.True,
+            subscribed.toSubscribed(),
             chatId,
             FeedId(episodeId),
             satsPerMinute,

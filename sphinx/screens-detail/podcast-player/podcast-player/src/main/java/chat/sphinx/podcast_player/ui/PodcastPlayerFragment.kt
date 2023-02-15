@@ -78,6 +78,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
+
         viewModel.trackPodcastConsumed()
     }
 
