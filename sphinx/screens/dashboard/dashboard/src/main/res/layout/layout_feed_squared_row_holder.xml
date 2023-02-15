@@ -29,11 +29,10 @@
     <TextView
         android:id="@+id/text_view_item_name"
         android:layout_width="0dp"
-        android:layout_height="@dimen/default_form_horizontal_margin"
-        android:layout_marginHorizontal="@dimen/default_tiny_layout_margin"
+        android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:fontFamily="@font/roboto_regular"
-        android:maxLines="2"
+        android:lines="2"
         android:textAlignment="textStart"
         android:textColor="@color/text"
         android:textSize="@dimen/default_text_size_list_row_headline"
@@ -45,11 +44,10 @@
     <TextView
         android:id="@+id/text_view_item_description"
         android:layout_width="0dp"
-        android:layout_height="@dimen/default_large_layout_margin"
-        android:layout_marginHorizontal="@dimen/default_tiny_layout_margin"
+        android:layout_height="wrap_content"
         android:layout_marginVertical="@dimen/default_small_layout_margin"
         android:fontFamily="@font/roboto_regular"
-        android:maxLines="3"
+        android:lines="3"
         android:textAlignment="textStart"
         android:textColor="@color/secondaryText"
         android:textSize="@dimen/default_text_size_list_row_headline"
@@ -59,19 +57,16 @@
         tools:text="episode that a user can play now and so and so forth" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/publication_time_and_duration_constraint"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/text_view_item_description"
-        app:layout_constraintStart_toStartOf="@+id/text_view_item_description"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_item_description"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintStart_toStartOf="@+id/card_view_image_wrapper"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_description">
 
         <TextView
-            android:id="@+id/text_view_item_publication_time"
+            android:id="@+id/text_view_item_publish_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
@@ -85,33 +80,32 @@
 
         <TextView
             android:id="@+id/text_view_item_episode_time"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
-            android:textAlignment="textStart"
             android:textColor="@color/receivedIcon"
             android:textSize="@dimen/default_text_size_caption1"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_item_publication_time"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_item_publish_time"
             tools:text="1h 19 min left" />
 
         <androidx.appcompat.widget.AppCompatSeekBar
             android:id="@+id/seek_bar_current_time_episode_progress"
-            android:layout_width="@dimen/default_progress_bar_time_left"
-            android:layout_height="0dp"
-            android:layout_marginTop="2dp"
-            android:progress="0"
+            android:layout_width="@dimen/default_progress_bar_time_left_with"
+            android:layout_height="@dimen/default_progress_bar_time_left_height"
+            android:layout_marginStart="@dimen/default_half_layout_margin"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             android:progressDrawable="@drawable/podcast_episode_progress_bar_duration_holder"
             android:secondaryProgressTint="@color/receivedIcon"
             android:splitTrack="false"
             android:thumb="@null"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_item_episode_time"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time"
-            app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time" />
+            app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time"
+            app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -150,4 +150,6 @@
 
     <string name="loading_recommendations">Cargando Recomendaciones...</string>
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+
+    <string name="time_left">Faltan %s</string>
 </resources>

@@ -19,8 +19,10 @@ import chat.sphinx.dashboard.ui.feed.listen.FeedListenViewModel
 import chat.sphinx.wrapper_common.secondsToDateTime
 import chat.sphinx.wrapper_common.timeAgo
 import chat.sphinx.wrapper_common.toDateTime
+import chat.sphinx.wrapper_contact.ContactFromGroup
 import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
@@ -207,23 +209,24 @@ class FeedListenNowAdapter(
                     )
                 }
 
-                val currentTime = podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0
-                val duration = podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0
-
-                val timeLeft = formatDurationAndCurrentTime(duration.toInt(), currentTime.toInt())
-                val progress = getSeekbarProgress(duration.toInt(), currentTime.toInt())
-
                 textViewItemName.text = podcastEpisode.titleToShow
                 textViewItemDescription.text = podcastEpisode.descriptionToShow
+                textViewItemPublishTime.text = podcastEpisode.datePublished?.timeAgo()
 
-                publicationTimeAndDurationConstraint.visible
-                textViewItemPublicationTime.text = podcastEpisode.datePublished?.timeAgo()
-                textViewItemEpisodeTime.text = timeLeft
-                if (currentTime.toInt() == 0) {
-                    seekBarCurrentTimeEpisodeProgress.invisible
-                }
-                else {
+                val currentTime = (podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0).toInt()
+                val duration = (podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0).toInt()
+
+                textViewItemEpisodeTime.goneIfFalse(currentTime > 0 || duration > 0)
+
+                val progress = getSeekbarProgress(duration, currentTime)
                 seekBarCurrentTimeEpisodeProgress.progress = progress
+                seekBarCurrentTimeEpisodeProgress.goneIfFalse(currentTime > 0)
+
+                if (currentTime > 0 && duration > 0) {
+                    val timeLeft = duration - currentTime
+                    textViewItemEpisodeTime.text = binding.root.context.getString(R.string.time_left, "${timeLeft.toHrAndMin()}")
+                } else if (duration > 0) {
+                    textViewItemEpisodeTime.text = "${duration.toHrAndMin()}"
                 }
             }
         }
@@ -238,25 +241,6 @@ class FeedListenNowAdapter(
         lifecycleOwner.lifecycle.addObserver(this)
     }
 
-    private fun formatDurationAndCurrentTime(duration: Int, currentTime: Int): String {
-        if (currentTime == 0) {
-            val durationHours = duration / 3600
-            val durationMinutes = (duration % 3600) / 60
-            return if (duration >= 3600) {
-                "$durationHours hr $durationMinutes min"
-            } else "$durationMinutes min"
-
-        }
-
-        val secondsLeft = duration - currentTime
-        val hours = secondsLeft / 3600
-        val minutes = (secondsLeft % 3600) / 60
-
-        return if (secondsLeft >= 3600) {
-            "$hours hr $minutes min left"
-        } else "$minutes min left"
-    }
-
     private fun getSeekbarProgress(duration: Int, currentTime: Int): Int {
         return try {
             currentTime * 100 / duration
@@ -264,5 +248,14 @@ class FeedListenNowAdapter(
             0
         }
     }
+}
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
 }

@@ -17,6 +17,7 @@ import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_common.timeAgo
 import chat.sphinx.wrapper_feed.Feed
 import io.matthewnelson.android_feature_screens.util.gone
@@ -227,10 +228,9 @@ class FeedFollowingAdapter(
                 textViewItemName.text = f.titleToShow
                 textViewItemDescription.text = f.descriptionToShow
 
-                publicationTimeAndDurationConstraint.visible
                 textViewItemEpisodeTime.gone
                 seekBarCurrentTimeEpisodeProgress.gone
-                textViewItemPublicationTime.text = f.dateUpdated?.timeAgo()
+                textViewItemPublishTime.text = f.lastItem?.datePublished?.timeAgo()
             }
         }
 
