@@ -129,22 +129,22 @@ inline fun DateTime.timeAgo(): String {
     val days = (timeDiff / 86400000).toDouble().roundToInt()
     val weeks = (timeDiff / 604800000).toDouble().roundToInt()
 
-    if ( seconds <= 60 ) {
+    if (seconds <= 60) {
         return "just now"
-    } else if ( minutes <= 60 ) {
+    } else if (minutes <= 60) {
         return if (minutes == 1) {
             "one minute ago"
         } else {
             "$minutes minutes ago"
         }
-    } else if ( hours <= 24 ) {
-        return if ( hours == 1 ) {
+    } else if (hours <= 24) {
+        return if (hours == 1) {
             "an hour ago"
         } else {
             "$hours hrs ago"
         }
-    } else if ( days <= 7 ) {
-        "$days days ago"
+    } else if (days <= 7) {
+        return "$days days ago"
     } else {
         return if (weeks == 1) {
             "a week ago"
@@ -152,9 +152,7 @@ inline fun DateTime.timeAgo(): String {
             "$weeks weeks ago"
         }
     }
-    return ""
 }
-
 /**
  * DateTime format from Relay: 2021-02-26T10:48:20.025Z
  *
