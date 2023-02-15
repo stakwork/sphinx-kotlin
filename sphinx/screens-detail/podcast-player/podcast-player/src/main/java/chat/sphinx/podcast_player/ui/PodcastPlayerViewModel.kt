@@ -381,11 +381,15 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
+            getPodcast()?.let { podcast ->
+                podcast.getEpisodeWithId(episode.id.value)?.let {
+                    viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(it))
 
-            delay(50L)
+                    delay(50L)
 
-            playEpisode(episode)
+                    playEpisode(it)
+                }
+            }
         }
     }
 
@@ -406,29 +410,26 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private fun playEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                viewModelScope.launch(mainImmediate) {
+                podcast.willStartPlayingEpisode(
+                    episode,
+                    episode.currentTimeMilliseconds ?: 0,
+                    ::retrieveEpisodeDuration
+                )
 
-                    podcast.willStartPlayingEpisode(
-                        episode,
-                        episode.currentTimeMilliseconds ?: 0,
-                        ::retrieveEpisodeDuration
+                viewStateContainer.updateViewState(
+                    PodcastPlayerViewState.EpisodePlayed(
+                        podcast
                     )
+                )
 
-                    mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Play(
-                            args.chatId,
-                            episode.episodeUrl,
-                            podcast.getUpdatedContentFeedStatus(),
-                            podcast.getUpdatedContentEpisodeStatus()
-                        )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Play(
+                        args.chatId,
+                        episode.episodeUrl,
+                        podcast.getUpdatedContentFeedStatus(),
+                        podcast.getUpdatedContentEpisodeStatus()
                     )
-
-                    viewStateContainer.updateViewState(
-                        PodcastPlayerViewState.EpisodePlayed(
-                            podcast
-                        )
-                    )
-                }
+                )
             }
         }
     }
