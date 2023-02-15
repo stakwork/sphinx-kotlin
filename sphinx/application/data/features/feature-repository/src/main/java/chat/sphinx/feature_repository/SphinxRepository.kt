@@ -6538,6 +6538,22 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun updateContentFeedStatus(
+        feedId: FeedId,
+        itemId: FeedId
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentFeedLock.withLock {
+                queries.contentFeedStatusUpdateItemId(
+                    itemId,
+                    feedId
+                )
+            }
+        }
+    }
+
     private val contentFeedLock = Mutex()
     override fun updateContentFeedStatus(
         feedId: FeedId,
@@ -6804,7 +6820,7 @@ abstract class SphinxRepository(
 
         contentFeedLock.withLock {
             if (contentFeedStatus.feed_id == playingPodcastId) {
-                queries.contentFeedUpdate(
+                queries.contentFeedStatusUpdate(
                     contentFeedStatus.subscription_status.toSubscribed(),
                     contentFeedStatus.chat_id?.toChatId(),
                     contentFeedStatus.sats_per_minute?.toSat(),

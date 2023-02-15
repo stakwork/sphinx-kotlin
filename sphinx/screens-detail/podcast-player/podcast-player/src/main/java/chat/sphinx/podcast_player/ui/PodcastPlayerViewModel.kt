@@ -403,7 +403,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun playEpisode(episode: PodcastEpisode) {
+    private fun playEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
@@ -433,7 +433,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun pauseEpisode(episode: PodcastEpisode) {
+    private fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 podcast.didPausePlayingEpisode(episode)

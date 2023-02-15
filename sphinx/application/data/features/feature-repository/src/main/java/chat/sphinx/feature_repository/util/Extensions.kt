@@ -649,5 +649,5 @@ inline fun TransactionCallbacks.updateSubscriptionStatus(
     feedId: FeedId
 ) {
     queries.feedUpdateSubscribe(subscribed, feedId)
-    queries.contentFeedUpdateSubscriptionStatus(subscribed, feedId)
+    queries.contentFeedStatusUpdateSubscriptionStatus(subscribed, feedId)
 }

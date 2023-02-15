@@ -64,6 +64,11 @@ interface FeedRepository {
 
     fun updateContentFeedStatus(
         feedId: FeedId,
+        itemId: FeedId
+    )
+
+    fun updateContentFeedStatus(
+        feedId: FeedId,
         feedUrl: FeedUrl,
         subscriptionStatus: Subscribed,
         chatId: ChatId?,
