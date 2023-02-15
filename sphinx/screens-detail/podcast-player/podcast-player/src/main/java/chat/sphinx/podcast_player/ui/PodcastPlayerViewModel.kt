@@ -604,6 +604,21 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
+
+    private var forceFeedJob: Job? = null
+    fun forceFeedReload() {
+        if (forceFeedJob?.isActive == true) {
+            return
+        }
+        forceFeedJob = viewModelScope.launch(io) {
+            getPodcast()?.let { podcast ->
+                feedRepository.toggleFeedSubscribeState(
+                    podcast.id,
+                    if (podcast.subscribed.isTrue()) Subscribed.False else Subscribed.True,
+                )
+            }
+        }
+    }
 }
 
 fun Uri.getMediaDuration(
