@@ -80,8 +80,10 @@ class FeedListenNowAdapter(
                 val same: Boolean =
                     old.title                   == new.title                &&
                     old.description             == new.description          &&
-                    old.feed?.itemsCount        == new.feed?.itemsCount      &&
-                    old.feed?.lastItem?.id      == new.feed?.lastItem?.id
+                    old.feed?.itemsCount        == new.feed?.itemsCount     &&
+                    old.feed?.lastItem?.id      == new.feed?.lastItem?.id   &&
+                            old.contentEpisodeStatus?.currentTime == new.contentEpisodeStatus?.currentTime &&
+                            old.contentEpisodeStatus?.duration == new.contentEpisodeStatus?.duration
 
                 if (sameList) {
                     sameList = same
