@@ -675,7 +675,7 @@ internal abstract class MediaPlayerService: SphinxService() {
         }
 
         private fun createHistoryItem() {
-            if (trackSecondsConsumed > 0) {
+            if (trackSecondsConsumed > 2) {
                 val item = ContentConsumedHistoryItem(
                     arrayListOf(""),
                     startTimestamp,
