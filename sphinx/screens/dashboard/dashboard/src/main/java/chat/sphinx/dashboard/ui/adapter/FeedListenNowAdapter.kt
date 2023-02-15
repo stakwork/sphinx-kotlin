@@ -1,6 +1,9 @@
 package chat.sphinx.dashboard.ui.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
@@ -8,7 +11,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -16,15 +18,9 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.listen.FeedListenViewModel
-import chat.sphinx.wrapper_common.secondsToDateTime
 import chat.sphinx.wrapper_common.timeAgo
-import chat.sphinx.wrapper_common.toDateTime
-import chat.sphinx.wrapper_contact.ContactFromGroup
 import chat.sphinx.wrapper_feed.FeedItem
-import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.invisible
-import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -179,6 +175,7 @@ class FeedListenNowAdapter(
                     }
                 }
             }
+            binding.seekBarCurrentTimeEpisodeProgress.setOnTouchListener { _, _ -> true }
         }
 
         fun bind(position: Int) {

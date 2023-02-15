@@ -606,12 +606,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
 
-    private var forceFeedJob: Job? = null
     fun forceFeedReload() {
-        if (forceFeedJob?.isActive == true) {
-            return
-        }
-        forceFeedJob = viewModelScope.launch(io) {
+        viewModelScope.launch(io) {
             getPodcast()?.let { podcast ->
                 feedRepository.toggleFeedSubscribeState(
                     podcast.id,
