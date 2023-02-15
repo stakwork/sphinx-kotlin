@@ -39,6 +39,60 @@ data class Feed(
 
     companion object {
         const val TRIBES_DEFAULT_SERVER_URL = "tribes.sphinx.chat"
+
+        @Suppress("ObjectPropertyName")
+        private const val _17 = 17
+        @Suppress("ObjectPropertyName")
+        private const val _31 = 31
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return  other                                             is Feed                                        &&
+                other.id                                          == id                                          &&
+                other.feedType                                    == feedType                                    &&
+                other.title                                       == title                                       &&
+                other.description                                 == description                                 &&
+                other.feedUrl                                     == feedUrl                                     &&
+                other.author                                      == author                                      &&
+                other.generator                                   == generator                                   &&
+                other.imageUrl                                    == imageUrl                                    &&
+                other.ownerUrl                                    == ownerUrl                                    &&
+                other.link                                        == link                                        &&
+                other.datePublished                               == datePublished                               &&
+                other.dateUpdated                                 == dateUpdated                                 &&
+                other.contentType                                 == contentType                                 &&
+                other.language                                    == language                                    &&
+                other.itemsCount                                  == itemsCount                                  &&
+                other.currentItemId                               == currentItemId                               &&
+                other.chatId                                      == chatId                                      &&
+                other.subscribed                                  == subscribed                                  &&
+                other.lastItem?.contentEpisodeStatus?.duration    == lastItem?.contentEpisodeStatus?.duration    &&
+                other.lastItem?.contentEpisodeStatus?.currentTime == lastItem?.contentEpisodeStatus?.currentTime
+    }
+
+    override fun hashCode(): Int {
+        var result = _17
+        result = _31 * result + id.hashCode()
+        result = _31 * result + feedType.hashCode()
+        result = _31 * result + title.hashCode()
+        result = _31 * result + description.hashCode()
+        result = _31 * result + feedUrl.hashCode()
+        result = _31 * result + author.hashCode()
+        result = _31 * result + generator.hashCode()
+        result = _31 * result + imageUrl.hashCode()
+        result = _31 * result + ownerUrl.hashCode()
+        result = _31 * result + link.hashCode()
+        result = _31 * result + datePublished.hashCode()
+        result = _31 * result + dateUpdated.hashCode()
+        result = _31 * result + contentType.hashCode()
+        result = _31 * result + language.hashCode()
+        result = _31 * result + itemsCount.hashCode()
+        result = _31 * result + currentItemId.hashCode()
+        result = _31 * result + chatId.hashCode()
+        result = _31 * result + subscribed.hashCode()
+        result = _31 * result + lastItem?.contentEpisodeStatus?.duration.hashCode()
+        result = _31 * result + lastItem?.contentEpisodeStatus?.currentTime.hashCode()
+        return result
     }
 
     var items: List<FeedItem> = listOf()
