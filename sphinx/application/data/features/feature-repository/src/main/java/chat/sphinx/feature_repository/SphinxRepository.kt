@@ -11,6 +11,7 @@ import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
+import chat.sphinx.concept_network_query_chat.model.feed.FeedItemDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
@@ -119,6 +120,7 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -3841,6 +3843,56 @@ abstract class SphinxRepository(
         return updateResponse
     }
 
+    private suspend fun updateFeedContentItems(
+        host: ChatHost,
+        feedUrl: FeedUrl,
+        durationRetrieverHandler: ((url: String) -> Long)? = null
+    ): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        var updateResponse: Response<Any, ResponseError> = Response.Error(ResponseError("Feed content items update failed"))
+
+        networkQueryChat.getFeedContent(
+            host,
+            feedUrl,
+            null
+        ).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    updateResponse = response
+                }
+                is Response.Success -> {
+
+                    feedLock.withLock {
+                        queries.transaction {
+                            upsertFeedItems(
+                                response.value,
+                                queries
+                            )
+                        }
+                    }
+
+                    for (item in response.value.items) {
+                        (durationRetrieverHandler?.let { it(item.enclosureUrl) })?.let { duration ->
+                            updateContentEpisodeStatusDuration(
+                                FeedId(item.id),
+                                FeedItemDuration(duration / 1000),
+                                queries
+                            )
+                        }
+                    }
+
+                    updateResponse = Response.Success(true)
+                }
+            }
+        }
+
+        return updateResponse
+    }
+
     override fun getFeedByChatId(chatId: ChatId): Flow<Feed?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -6619,6 +6671,21 @@ abstract class SphinxRepository(
         }
     }
 
+    fun updateContentEpisodeStatusDuration(
+        itemId: FeedId,
+        duration: FeedItemDuration,
+        queries: SphinxDatabaseQueries
+    ) {
+        applicationScope.launch(io) {
+            contentEpisodeLock.withLock {
+                queries.contentEpisodeStatusUpdateDuration(
+                    duration,
+                    itemId
+                )
+            }
+        }
+    }
+
     override fun saveContentFeedStatuses() {
         applicationScope.launch(io) {
 
@@ -6714,7 +6781,8 @@ abstract class SphinxRepository(
 
     override fun restoreContentFeedStatuses(
         playingPodcastId: String?,
-        playingEpisodeId: String?
+        playingEpisodeId: String?,
+        durationRetrieverHandler: ((url: String) -> Long)?
     ) {
         applicationScope.launch(io) {
             networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
@@ -6726,7 +6794,8 @@ abstract class SphinxRepository(
                         restoreContentFeedStatusesFrom(
                             loadResponse.value,
                             playingPodcastId,
-                            playingEpisodeId
+                            playingEpisodeId,
+                            durationRetrieverHandler
                         )
                     }
                 }
@@ -6761,7 +6830,8 @@ abstract class SphinxRepository(
     private suspend fun restoreContentFeedStatusesFrom(
         contentFeedStatuses: List<ContentFeedStatusDto>,
         playingPodcastId: String?,
-        playingEpisodeId: String?
+        playingEpisodeId: String?,
+        durationRetrieverHandler: ((url: String) -> Long)? = null
     ) {
         if (contentFeedStatuses.isEmpty()) {
             return
@@ -6779,6 +6849,24 @@ abstract class SphinxRepository(
                     playingPodcastId,
                     playingEpisodeId
                 )
+            }
+        }.join()
+
+        fetchFeedNewItems(durationRetrieverHandler)
+    }
+
+    private fun fetchFeedNewItems(
+        durationRetrieverHandler: ((url: String) -> Long)? = null
+    ) {
+        applicationScope.launch(io) {
+            getAllFeeds().firstOrNull()?.let { feeds ->
+                for (feed in feeds) {
+                    updateFeedContentItems(
+                        ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
+                        feed.feedUrl,
+                        durationRetrieverHandler
+                    )
+                }
             }
         }
     }

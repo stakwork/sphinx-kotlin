@@ -1,15 +1,21 @@
 package chat.sphinx.activitymain
 
+import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.activitymain.navigation.drivers.AuthenticationNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
+import chat.sphinx.concept_network_query_chat.model.feed.FeedItemDto
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.dashboard.navigation.ToDashboardScreen
+import chat.sphinx.dashboard.ui.getMediaDuration
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_activity.NavigationViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -78,12 +84,19 @@ internal class MainViewModel @Inject constructor(
 
         feedRepository.restoreContentFeedStatuses(
             playingContent?.first,
-            playingContent?.second
+            playingContent?.second,
+            ::retrieveEpisodeDuration
         )
     }
 
     fun saveContentFeedStatuses() {
         feedRepository.saveContentFeedStatuses()
+    }
+
+    private fun retrieveEpisodeDuration(
+        url: String
+    ) : Long {
+        return Uri.parse(url).getMediaDuration(false)
     }
 
 }

@@ -11,13 +11,9 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
-import chat.sphinx.dashboard.ui.viewstates.DashboardPodcastViewState
-import chat.sphinx.dashboard.ui.viewstates.OnClickCallback
-import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState
 import chat.sphinx.dashboard.ui.viewstates.PlayingPodcastViewState.NoPodcast.clickBoost
-import chat.sphinx.dashboard.ui.viewstates.adjustState
 import chat.sphinx.wrapper_common.feed.toFeedId
-import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +21,8 @@ import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
