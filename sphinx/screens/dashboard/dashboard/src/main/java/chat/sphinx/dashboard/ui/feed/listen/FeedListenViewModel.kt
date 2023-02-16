@@ -113,6 +113,14 @@ class FeedListenViewModel @Inject constructor(
     }
 
     override fun feedSelected(feed: Feed) {
+        val playingContent = mediaPlayerServiceController.getPlayingContent()
+
+        feedRepository.restoreContentFeedStatusByFeedId(
+            feed.id,
+            playingContent?.first,
+            playingContent?.second
+        )
+
         goToPodcastPlayer(
             feed.chat?.id ?: feed.chatId,
             feed.id,

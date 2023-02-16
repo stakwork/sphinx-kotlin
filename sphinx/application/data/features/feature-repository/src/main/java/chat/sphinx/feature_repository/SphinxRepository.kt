@@ -6739,7 +6739,7 @@ abstract class SphinxRepository(
         playingPodcastId: String?,
         playingEpisodeId: String?
     ) {
-       applicationScope.launch(mainImmediate) {
+       applicationScope.launch(io) {
            networkQueryFeedStatus.getByFeedId(feedId).collect { loadResponse ->
                @Exhaustive
                when (loadResponse) {

@@ -123,6 +123,14 @@ internal class FeedAllViewModel @Inject constructor(
         feedId: FeedId,
         feedUrl: FeedUrl
     ) {
+        val playingContent = mediaPlayerServiceController.getPlayingContent()
+
+        feedRepository.restoreContentFeedStatusByFeedId(
+            feedId,
+            playingContent?.first,
+            playingContent?.second
+        )
+
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
                 chatId, feedId, feedUrl
