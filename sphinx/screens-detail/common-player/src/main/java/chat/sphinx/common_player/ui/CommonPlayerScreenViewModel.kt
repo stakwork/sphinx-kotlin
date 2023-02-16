@@ -289,7 +289,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
                     playEpisode(
                         episode,
-                        (episode.clipStartTime ?: 0).toLong() * 1000
+                        (episode.clipStartTime ?: 0).toLong()
                     )
                 } else if (episode.isYouTubeVideo) {
                     playerViewStateContainer.updateViewState(

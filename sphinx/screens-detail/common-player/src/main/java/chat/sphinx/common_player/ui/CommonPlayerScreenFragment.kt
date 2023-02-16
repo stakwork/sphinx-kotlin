@@ -451,8 +451,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
         setClipView(
             duration,
-            (podcast.getCurrentEpisode().clipStartTime ?: 0).toLong() * 1000L,
-            (podcast.getCurrentEpisode().clipEndTime ?: 0).toLong() * 1000L
+            (podcast.getCurrentEpisode().clipStartTime ?: 0).toLong(),
+            (podcast.getCurrentEpisode().clipEndTime ?: 0).toLong()
         )
     }
 
