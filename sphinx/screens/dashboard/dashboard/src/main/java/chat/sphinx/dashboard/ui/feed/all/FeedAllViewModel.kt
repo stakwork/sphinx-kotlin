@@ -65,6 +65,7 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun loadFeedRecommendations() {
         if (!feedRepository.recommendationsToggleStateFlow.value) {
+            updateViewState(FeedAllViewState.Disabled)
             return
         }
 
