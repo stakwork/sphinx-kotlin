@@ -65,14 +65,14 @@ data class PodcastEpisode(
             podcastId,
             this.id,
             FeedItemDuration(0),
-            FeedItemDuration(0)
+            FeedItemDuration((clipStartTime?.toLong() ?: 0) / 1000)
         )
         return contentEpisodeStatus!!
     }
 
     var durationMilliseconds: Long? = null
         get() {
-            contentEpisodeStatus?.duration?.value?.let {
+            getUpdatedContentEpisodeStatus()?.duration?.value?.let {
                 if (it > 0) {
                     return it * 1000
                 }
@@ -87,7 +87,7 @@ data class PodcastEpisode(
 
     var currentTimeMilliseconds: Long? = null
         get() {
-            contentEpisodeStatus?.currentTime?.value?.let {
+            getUpdatedContentEpisodeStatus()?.currentTime?.value?.let {
                 if (it > 0) {
                     return it * 1000
                 }

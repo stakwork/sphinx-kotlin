@@ -433,7 +433,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        val currentTime = podcast.timeMilliSeconds.toLong()
+        val currentTime = podcast.timeMilliSeconds
 
         toggleLoadingWheel(podcast.shouldLoadDuration)
 

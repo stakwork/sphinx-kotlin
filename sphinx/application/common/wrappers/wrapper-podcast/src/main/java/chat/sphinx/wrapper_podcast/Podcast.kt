@@ -58,13 +58,10 @@ data class Podcast(
 
     var episodeId: String?
         get() {
-            contentFeedStatus?.itemId?.value?.let {
+            getUpdatedContentFeedStatus()?.itemId?.value?.let {
                 if (it.isNotEmpty()) {
                     return it
                 }
-            }
-            if (episodes.isNotEmpty()) {
-                return episodes[0].id?.value
             }
             return null
         }
@@ -72,7 +69,7 @@ data class Podcast(
             value?.let {
                 playingEpisode = getEpisodeWithId(it)
 
-                contentFeedStatus = contentFeedStatus?.copy(
+                contentFeedStatus = getUpdatedContentFeedStatus()?.copy(
                     itemId = FeedId(value)
                 )
             }
@@ -80,7 +77,7 @@ data class Podcast(
 
     var timeMilliSeconds: Long
         get() {
-            playingEpisode?.contentEpisodeStatus?.currentTime?.value?.let {
+            playingEpisode?.getUpdatedContentEpisodeStatus()?.currentTime?.value?.let {
                 return it * 1000
             }
             return 0
@@ -95,14 +92,14 @@ data class Podcast(
 
     var speed: Double
         get() {
-            contentFeedStatus?.playerSpeed?.value?.let {
+            getUpdatedContentFeedStatus().playerSpeed?.value?.let {
                 return it
             }
             return 1.0
         }
         set(value) {
             value?.let {
-                contentFeedStatus = contentFeedStatus?.copy(
+                contentFeedStatus = getUpdatedContentFeedStatus()?.copy(
                     playerSpeed = FeedPlayerSpeed(value)
                 )
             }
@@ -110,17 +107,14 @@ data class Podcast(
 
     var satsPerMinute: Long
         get() {
-            contentFeedStatus?.satsPerMinute?.value?.let {
+            getUpdatedContentFeedStatus()?.satsPerMinute?.value?.let {
                 return it
             }
-            chat?.metaData?.satsPerMinute?.value?.let {
-                return it
-            }
-            return model?.suggestedSats ?: 0
+            return 0
         }
         set(value) {
             value?.let {
-                contentFeedStatus = contentFeedStatus?.copy(
+                contentFeedStatus = getUpdatedContentFeedStatus()?.copy(
                     satsPerMinute = Sat(value)
                 )
             }
@@ -128,7 +122,7 @@ data class Podcast(
 
     private var episodeDurationMilliseconds: Long
         get() {
-            playingEpisode?.contentEpisodeStatus?.duration?.value?.let { it
+            playingEpisode?.getUpdatedContentEpisodeStatus()?.duration?.value?.let { it
                 if (it > 0) {
                     return it * 1000
                 }
@@ -195,10 +189,7 @@ data class Podcast(
     fun setCurrentEpisodeWith(episodeId: String) {
         this.playingEpisode?.playing = false
 
-        val episode = getEpisodeWithId(episodeId)
         this.episodeId = episodeId
-        this.episodeDurationMilliseconds = episode?.durationMilliseconds ?: 0
-        this.timeMilliSeconds = episode?.clipStartTime?.toLong() ?: episode?.currentTimeMilliseconds ?: 0
     }
 
     fun getUpdatedContentFeedStatus(
@@ -207,16 +198,20 @@ data class Podcast(
         val cfs = customAmount?.let {
             contentFeedStatus?.copy(
                 satsPerMinute = customAmount
-            )
+            )?.let {
+                return it
+            }
         } ?: contentFeedStatus
+
+        val defaultSatsPerMinute = (chat?.metaData?.satsPerMinute?.value ?: model?.suggestedSats ?: 0).toSat()
 
         contentFeedStatus = cfs ?: ContentFeedStatus(
             feedId = this.id,
             feedUrl = this.feedUrl,
             subscriptionStatus = this.subscribed,
             chatId = this.chatId,
-            itemId = getCurrentEpisode()?.id,
-            satsPerMinute = customAmount ?: this.satsPerMinute?.toSat(),
+            itemId = episodes[0]?.id,
+            satsPerMinute = customAmount ?: defaultSatsPerMinute,
             playerSpeed = FeedPlayerSpeed(1.0),
         )
 
@@ -240,12 +235,7 @@ data class Podcast(
     }
 
     fun getCurrentEpisode(): PodcastEpisode {
-        episodeId?.let { episodeId ->
-            getEpisodeWithId(episodeId)?.let { episode ->
-                return episode
-            }
-        }
-        return episodes[0]
+        return playingEpisode ?: episodes[0]
     }
 
     fun getLastDownloadedEpisode(): PodcastEpisode? {
