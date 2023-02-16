@@ -231,7 +231,7 @@ data class Podcast(
         if (speed.roundToInt().toDouble() == speed) {
             return "${speed.toInt()}x"
         }
-        return "${speed}x"
+        return "${String.format("%.1f", speed)}x"
     }
 
     fun getCurrentEpisode(): PodcastEpisode {
