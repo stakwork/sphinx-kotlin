@@ -11,7 +11,6 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_feed.*
-import java.io.File
 import kotlin.math.roundToInt
 
 

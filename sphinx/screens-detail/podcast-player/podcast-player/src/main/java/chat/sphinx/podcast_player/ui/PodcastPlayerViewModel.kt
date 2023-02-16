@@ -91,14 +91,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
 
-    private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
-        emitAll(podcastFlow)
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000),
-        replay = 1,
-    )
-
     private val podcastFlow: Flow<Podcast?> =
         if (args.argChatId != ChatId.NULL_CHAT_ID.toLong()) {
             feedRepository.getPodcastByChatId(args.chatId)
@@ -129,27 +121,21 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getPodcast(): Podcast? {
-        podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
-            return podcast
-        }
+    var podcast: Podcast? = null
 
-        podcastSharedFlow.firstOrNull()?.let { podcast ->
-            return podcast
-        }
-
-        var podcast: Podcast? = null
-
-        try {
-            podcastSharedFlow.collect {
-                if (it != null) {
-                    podcast = it
-                    throw Exception()
-                }
-            }
-        } catch (e: Exception) {}
-        delay(25L)
+    private fun getPodcastFeed(): Podcast? {
         return podcast
+    }
+
+    private fun setPodcastFeed(podcast: Podcast) {
+        val episodeId = this.podcast?.episodeId
+        val playing = this.podcast?.playingEpisode?.playing == true
+        val timeMilliSeconds = this.podcast?.timeMilliSeconds ?: 0
+
+        this.podcast = podcast
+        this.podcast?.episodeId = episodeId
+        this.podcast?.playingEpisode?.playing = playing
+        this.podcast?.timeMilliSeconds = timeMilliSeconds
     }
 
     val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
@@ -164,7 +150,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
 
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 when (serviceState) {
                     is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
                         podcast.playingEpisodeUpdate(
@@ -223,6 +209,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             podcastFlow.collect { podcast ->
                 podcast?.let { nnPodcast ->
+                    setPodcastFeed(podcast)
                     podcastLoaded(nnPodcast)
                 }
             }
@@ -255,7 +242,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
 
         responseJob = viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 getOwner().nodePubKey?.let { ownerPubKey ->
 
                     val podcastClip = PodcastClip(
@@ -300,7 +287,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private fun updateFeedContentInBackground() {
         viewModelScope.launch(io) {
             val chat = chatRepository.getChatById(args.chatId).firstOrNull()
-            val podcast = getPodcast()
+            val podcast = getPodcastFeed()
             val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
             val subscribed = podcast?.subscribed?.isTrue() == true
 
@@ -340,7 +327,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun updateSatsPerMinute(sats: Long) {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { nnPodcast ->
+            getPodcastFeed()?.let { nnPodcast ->
 
                 nnPodcast.didChangeSatsPerMinute(sats)
 
@@ -381,7 +368,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 podcast.getEpisodeWithId(episode.id.value)?.let {
                     viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(it))
 
@@ -395,7 +382,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun togglePlayState() {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 val episode = podcast.getCurrentEpisode()
 
                 if (episode.playing) {
@@ -409,7 +396,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun playEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 podcast.willStartPlayingEpisode(
                     episode,
                     episode.currentTimeMilliseconds ?: 0,
@@ -436,7 +423,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun pauseEpisode(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 podcast.didPausePlayingEpisode(episode)
 
                 mediaPlayerServiceController.submitAction(
@@ -451,7 +438,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun seekTo(timeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 podcast.didSeekTo(timeMilliseconds)
 
                 mediaPlayerServiceController.submitAction(
@@ -466,7 +453,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun adjustSpeed(speed: Double) {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 podcast.speed = speed
 
                 val contentFeedStatus = podcast.getUpdatedContentFeedStatus()
@@ -483,7 +470,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     private fun setPaymentsDestinations() {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 val destinations = podcast.getFeedDestinations()
 
                 if (destinations.isNotEmpty()) {
@@ -503,7 +490,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         fireworksCallback: () -> Unit
     ) {
         viewModelScope.launch(mainImmediate) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 getAccountBalance().firstOrNull()?.let { balance ->
                     when {
                         (amount.value > balance.balance.value) -> {
@@ -608,7 +595,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun forceFeedReload() {
         viewModelScope.launch(io) {
-            getPodcast()?.let { podcast ->
+            getPodcastFeed()?.let { podcast ->
                 feedRepository.toggleFeedSubscribeState(
                     podcast.id,
                     if (podcast.subscribed.isTrue()) Subscribed.False else Subscribed.True,
