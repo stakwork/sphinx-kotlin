@@ -22,6 +22,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -224,17 +225,14 @@ internal class WebViewViewModel @Inject constructor(
                                 )
 
                                 feed.destinations.let { destinations ->
-                                    repositoryMedia.streamFeedPayments(
+
+                                    feedRepository.streamFeedPayments(
                                         chatId,
-                                        ChatMetaData(
-                                            itemId = feedItem.id,
-                                            itemLongId = ItemId(-1),
-                                            satsPerMinute = amount,
-                                            timeSeconds = 0,
-                                            speed = 1.0
-                                        ),
                                         feed.id.value,
                                         feedItem.id.value,
+                                        0,
+                                        amount,
+                                        FeedPlayerSpeed(1.0),
                                         destinations
                                     )
                                 }

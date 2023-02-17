@@ -15,9 +15,6 @@
         <argument
             android:name="argEpisodeId"
             app:argType="string" />
-        <argument
-            android:name="argEpisodeDuration"
-            app:argType="long" />
     </fragment>
 
 </navigation>

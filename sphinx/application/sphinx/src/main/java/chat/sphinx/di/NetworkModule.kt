@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_subscription.NetworkQuerySubscription
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
@@ -36,6 +37,7 @@ import chat.sphinx.feature_network_query_chat.NetworkQueryChatImpl
 import chat.sphinx.feature_network_query_contact.NetworkQueryContactImpl
 import chat.sphinx.feature_network_query_crypter.NetworkQueryCrypterImpl
 import chat.sphinx.feature_network_query_discover_tribes.NetworkQueryDiscoverTribesImpl
+import chat.sphinx.feature_network_query_feed_status.NetworkQueryFeedStatusImpl
 import chat.sphinx.feature_network_query_invite.NetworkQueryInviteImpl
 import chat.sphinx.feature_network_query_lightning.NetworkQueryLightningImpl
 import chat.sphinx.feature_network_query_meme_server.NetworkQueryMemeServerImpl
@@ -468,4 +470,15 @@ object NetworkModule {
     ): NetworkQueryDiscoverTribes =
         networkQueryDiscoverTribesImpl
 
+    @Provides
+    fun provideNetworkQueryFeedStatusImpl(
+        networkRelayCall: NetworkRelayCall
+    ): NetworkQueryFeedStatusImpl =
+        NetworkQueryFeedStatusImpl(networkRelayCall)
+
+    @Provides
+    fun provideNetworkQueryFeedStatus(
+        networkQueryFeedStatusImpl: NetworkQueryFeedStatusImpl
+    ): NetworkQueryFeedStatus =
+        networkQueryFeedStatusImpl
 }

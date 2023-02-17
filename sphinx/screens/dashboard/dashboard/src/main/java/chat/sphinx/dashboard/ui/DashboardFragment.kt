@@ -1,6 +1,7 @@
 package chat.sphinx.dashboard.ui
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat.setBackgroundTintList
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -466,14 +468,18 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.restoreStateFlow.collect { response ->
+            viewModel.restoreProgressStateFlow.collect { response ->
                 binding.layoutDashboardRestore.apply {
                     if (response != null) {
                         layoutDashboardRestoreProgress.apply {
                             val progressString = "${response.progress}%"
 
-                            textViewRestoreProgress.text = getString(R.string.dashboard_restore_progress, progressString)
+                            textViewRestoreProgress.text = getString(response.progressLabel, progressString)
                             progressBarRestore.progress = response.progress
+                            buttonStopRestore.isEnabled = response.continueButtonEnabled
+                            buttonStopRestore.backgroundTintList =
+                                if (response.continueButtonEnabled) ContextCompat.getColorStateList(root.context, R.color.primaryBlue)
+                                else ContextCompat.getColorStateList(root.context, R.color.secondaryTextInverted)
                         }
                         root.visible
                     } else {

@@ -109,6 +109,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-transport-key')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-crypter')
     implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-discover-tribes')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-feed-status')
     implementation project(path: ':sphinx:application:network:features:feature-network-relay-call')
     implementation project(path: ':sphinx:application:network:features:feature-socket-io')
     implementation project(path: ':sphinx:application:network:features:tor:feature-network-tor')

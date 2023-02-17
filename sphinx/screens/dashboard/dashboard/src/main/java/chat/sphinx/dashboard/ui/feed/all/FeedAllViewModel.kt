@@ -65,6 +65,7 @@ internal class FeedAllViewModel @Inject constructor(
 
     override fun loadFeedRecommendations() {
         if (!feedRepository.recommendationsToggleStateFlow.value) {
+            updateViewState(FeedAllViewState.Disabled)
             return
         }
 
@@ -123,9 +124,17 @@ internal class FeedAllViewModel @Inject constructor(
         feedId: FeedId,
         feedUrl: FeedUrl
     ) {
+        val playingContent = mediaPlayerServiceController.getPlayingContent()
+
+        feedRepository.restoreContentFeedStatusByFeedId(
+            feedId,
+            playingContent?.first,
+            playingContent?.second
+        )
+
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, feedId, feedUrl, 0
+                chatId, feedId, feedUrl
             )
         }
     }
@@ -161,8 +170,7 @@ internal class FeedAllViewModel @Inject constructor(
 
                 dashboardNavigator.toCommonPlayerScreen(
                     podcast.id,
-                    FeedId(feed.id),
-                    0
+                    FeedId(feed.id)
                 )
             }
         }

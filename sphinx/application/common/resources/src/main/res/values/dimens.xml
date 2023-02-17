@@ -76,6 +76,8 @@
 
     <dimen name="default_progress_bar_xy">25dp</dimen>
     <dimen name="default_progress_bar_margin_left">10dp</dimen>
+    <dimen name="default_progress_bar_time_left_with">50dp</dimen>
+    <dimen name="default_progress_bar_time_left_height">4dp</dimen>
 
     <dimen name="amount_pad_text_size">25sp</dimen>
     <dimen name="pin_pad_text_size">27sp</dimen>

@@ -143,8 +143,13 @@
     <string name="podcast_search_placeholder_3">on the Podcast Index</string>
 
     <string name="dashboard_restore_progress">Restoring: %s</string>
+    <string name="dashboard_restore_progress_contacts">Restoring Contacts: %s</string>
+    <string name="dashboard_restore_progress_feeds">Restoring Feeds: %s</string>
+    <string name="dashboard_restore_progress_messages">Restoring Messages: %s</string>
     <string name="dashboard_stop_restore">Continue later</string>
 
     <string name="loading_recommendations">Loading Recommendations...</string>
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+
+    <string name="time_left">%s left</string>
 </resources>
