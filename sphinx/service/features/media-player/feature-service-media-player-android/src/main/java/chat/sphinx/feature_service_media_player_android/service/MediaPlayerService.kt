@@ -557,8 +557,12 @@ internal abstract class MediaPlayerService: SphinxService() {
                         val currentTimeSeconds = nnData.currentTimeSeconds
 
                         if (count % 15 == 0.0) {
-                            feedRepository.saveContentFeedStatusFor(
-                                FeedId(nnData.podcastId)
+                            feedRepository.updateContentEpisodeStatus(
+                                FeedId(nnData.podcastId),
+                                FeedId(nnData.episodeId),
+                                FeedItemDuration(nnData.durationSeconds.toLong()),
+                                FeedItemDuration(nnData.currentTimeSeconds.toLong()),
+                                true
                             )
                         }
 
@@ -613,8 +617,12 @@ internal abstract class MediaPlayerService: SphinxService() {
                             mediaServiceController.dispatchState(state)
 
                             if (state is MediaPlayerServiceState.ServiceActive.MediaState.Ended) {
-                                feedRepository.saveContentFeedStatusFor(
-                                    FeedId(nnData.podcastId)
+                                feedRepository.updateContentEpisodeStatus(
+                                    FeedId(nnData.podcastId),
+                                    FeedId(nnData.episodeId),
+                                    FeedItemDuration(nnData.durationSeconds.toLong()),
+                                    FeedItemDuration(nnData.currentTimeSeconds.toLong()),
+                                    true
                                 )
 
                                 shutDownService()

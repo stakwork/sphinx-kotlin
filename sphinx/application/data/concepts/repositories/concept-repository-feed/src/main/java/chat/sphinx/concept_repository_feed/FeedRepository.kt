@@ -99,6 +99,5 @@ interface FeedRepository {
         playingEpisodeId: String? = null
     )
 
-    fun saveContentFeedStatusFor(feedId: FeedId)
     fun saveContentFeedStatuses()
 }

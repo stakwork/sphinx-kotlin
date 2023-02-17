@@ -6722,7 +6722,7 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun saveContentFeedStatusFor(feedId: FeedId) {
+    private fun saveContentFeedStatusFor(feedId: FeedId) {
         applicationScope.launch(io) {
 
             var contentFeedStatus: ContentFeedStatusDto? = null

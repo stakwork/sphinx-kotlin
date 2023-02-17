@@ -32,7 +32,7 @@ data class Feed(
     val contentType: FeedContentType?,
     val language: FeedLanguage?,
     val itemsCount: FeedItemsCount,
-    val currentItemId: FeedId?,
+    val currentItemId: FeedId?, //Not used anymore. Replaced by contentFeedEpisodeStatus.itemId
     val chatId: ChatId,
     val subscribed: Subscribed,
 ) {
@@ -139,12 +139,7 @@ data class Feed(
 
     var lastItem: FeedItem? = null
         get() {
-            for (item in items) {
-                if (item.id.value == currentItemId?.value) {
-                    return item
-                }
-            }
-            if (items.count() > 0) {
+            if (items.isNotEmpty()) {
                 return items.first()
             }
             return null

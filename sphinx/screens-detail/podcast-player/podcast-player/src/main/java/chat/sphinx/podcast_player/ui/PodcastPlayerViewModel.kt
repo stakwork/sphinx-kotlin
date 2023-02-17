@@ -49,7 +49,10 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -130,7 +133,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
     private fun setPodcastFeed(podcast: Podcast) {
         val episodeId = this.podcast?.episodeId
         val playing = this.podcast?.playingEpisode?.playing == true
-        val timeMilliSeconds = this.podcast?.timeMilliSeconds ?: 0
+
+        val timeMilliSeconds = if (podcast.timeMilliSeconds > 0) {
+            podcast.timeMilliSeconds
+        } else {
+            this.podcast?.timeMilliSeconds ?: 0
+        }
 
         this.podcast = podcast
         this.podcast?.episodeId = episodeId
