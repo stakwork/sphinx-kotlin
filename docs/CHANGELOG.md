@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha79 (2023-02-17)
+- Improves media players
+- Adds Content Feed Status sync between devices
+
 # Version 1.0.0-alpha78 (2023-01-26)
 - Improves media players
 - Adds support for recommendations boost
