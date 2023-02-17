@@ -69,6 +69,10 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 redemptionCode is RedemptionCode.NodeInvite) {
                 isValid = true
             }
+            if (redemptionCode != null &&
+                redemptionCode is RedemptionCode.SwarmConnect) {
+                isValid = true
+            }
 
         } else if (vs is OnBoardConnectViewState.ExistingUser) {
             if (redemptionCode != null &&

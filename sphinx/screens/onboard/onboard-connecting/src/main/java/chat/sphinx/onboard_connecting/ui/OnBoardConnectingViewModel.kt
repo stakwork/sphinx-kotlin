@@ -65,6 +65,16 @@ internal inline val OnBoardConnectingFragmentArgs.connectionCode: RedemptionCode
         return null
     }
 
+internal inline val OnBoardConnectingFragmentArgs.swarmCode: RedemptionCode.SwarmConnect?
+    get() {
+        val redemptionCode = RedemptionCode.decode(argCode)
+
+        if (redemptionCode is RedemptionCode.SwarmConnect) {
+            return redemptionCode
+        }
+        return null
+    }
+
 internal inline val OnBoardConnectingFragmentArgs.inviteCode: InviteString?
     get() = argCode.toValidInviteStringOrNull()
 
@@ -112,7 +122,15 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     password = connectionCode.password,
                     redeemInviteDto = null
                 )
-            } ?: args.inviteCode?.let { inviteCode ->
+            } ?: args.swarmCode?.let { swarmCode ->
+                getTransportKey(
+                    ip = swarmCode.ip,
+                    nodePubKey = swarmCode.pubKey,
+                    null,
+                    null,
+                )
+            }
+            ?: args.inviteCode?.let { inviteCode ->
                 redeemInvite(inviteCode)
             } ?: run {
                 submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
