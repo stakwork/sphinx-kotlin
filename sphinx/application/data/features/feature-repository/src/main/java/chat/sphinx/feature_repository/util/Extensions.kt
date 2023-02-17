@@ -499,7 +499,7 @@ fun TransactionCallbacks.upsertFeed(
         }
     }
 
-    val feedId = FeedId(feedDto.id)
+    val feedId = FeedId(feedDto.fixedId)
 
     feedDto.value?.let { feedValueDto ->
         queries.feedModelUpsert(
@@ -586,7 +586,7 @@ fun TransactionCallbacks.upsertFeedItems(
     feedDto: FeedDto,
     queries: SphinxDatabaseQueries
 ) {
-    val feedId = FeedId(feedDto.id)
+    val feedId = FeedId(feedDto.fixedId)
 
     val itemIds: MutableList<FeedId> = mutableListOf()
 

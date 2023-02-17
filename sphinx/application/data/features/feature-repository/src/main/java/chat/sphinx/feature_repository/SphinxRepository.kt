@@ -3800,7 +3800,7 @@ abstract class SphinxRepository(
                 is Response.Success -> {
 
                     var cId: ChatId = chatId
-                    val feedId = response.value.id.toFeedId()
+                    val feedId = response.value.fixedId.toFeedId()
 
                     feedId?.let { feedId ->
                         queries.feedGetByIds(
@@ -6961,5 +6961,4 @@ abstract class SphinxRepository(
     override fun setAppLog(log: String) {
         appLogsStateFlow.value = appLogsStateFlow.value + log + "\n"
     }
-
 }
