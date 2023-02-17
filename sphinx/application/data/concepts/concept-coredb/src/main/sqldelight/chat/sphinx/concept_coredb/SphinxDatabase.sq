@@ -60,6 +60,7 @@ import chat.sphinx.wrapper_feed.FeedItemsCount;
 import chat.sphinx.wrapper_feed.FeedLanguage;
 import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
 import chat.sphinx.wrapper_feed.FeedTitle;
 import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.Flagged;
@@ -1030,7 +1031,6 @@ feedUpsert {
         content_type = :content_type,
         language = :language,
         items_count = :items_count,
-        current_item_id = :current_item_id,
         chat_id = :chat_id
     WHERE id = :id;
 
@@ -1084,7 +1084,7 @@ ORDER BY id DESC;
 feedGetAllSubscribed:
 SELECT *
 FROM feedDbo
-WHERE subscribed = 1
+WHERE (subscribed = 1 OR chat_id != 2147483647)
 ORDER BY id DESC;
 
 feedGetByChatId:
@@ -1112,7 +1112,7 @@ feedGetAllByFeedType:
 SELECT *
 FROM feedDbo
 WHERE feed_type = ?
-AND subscribed = 1
+AND (subscribed = 1 OR chat_id != 2147483647)
 ORDER BY id DESC;
 
 feedGetAllByIds:
@@ -1134,29 +1134,30 @@ feedGetSubscribedByTitle:
 SELECT *
 FROM feedDbo
 WHERE (title LIKE :title)
-AND subscribed = 1;
+AND (subscribed = 1 OR chat_id != 2147483647);
 
 feedGetSubscribedByTitleAndType:
 SELECT *
 FROM feedDbo
 WHERE (title LIKE :title)
 AND feed_type = :feed_type
-AND subscribed = 1;
+AND (subscribed = 1 || chat_id != 2147483647);
 
-feedUpdateCurrentItemIdByChatId:
+feedUpdateSubscribeAndChat:
 UPDATE feedDbo
-SET current_item_id = :item_id
-WHERE chat_id = ?;
-
-feedUpdateCurrentItemId:
-UPDATE feedDbo
-SET current_item_id = :item_id
+SET subscribed = :subscribed,
+chat_id = :chat_id
 WHERE id = ?;
 
 feedUpdateSubscribe:
 UPDATE feedDbo
 SET subscribed = :subscribed
 WHERE id = ?;
+
+feedBatchUnsubscribe:
+UPDATE feedDbo
+SET subscribed = 0
+WHERE id NOT IN ?;
 
 feedDeleteById:
 DELETE
@@ -1401,5 +1402,148 @@ UPDATE actionTrackDbo
 SET uploaded = 1
 WHERE id IN :ids;
 
+CREATE TABLE contentFeedStatusDbo(
+    feed_id                         TEXT            AS FeedId NOT NULL PRIMARY KEY,
+    feed_url                        TEXT            AS FeedUrl NOT NULL,
+    subscription_status             INTEGER         AS Subscribed NOT NULL DEFAULT 0,
+    chat_id                         INTEGER         AS ChatId,
+    item_id                         TEXT            AS FeedId,
+    sats_per_minute                 INTEGER         AS Sat,
+    player_speed                    REAL            AS FeedPlayerSpeed
+);
+
+contentFeedStatusUpsert {
+    UPDATE contentFeedStatusDbo
+    SET feed_url = :feed_url,
+        subscription_status = :subscription_status,
+        chat_id = :chat_id,
+        item_id = :item_id,
+        sats_per_minute = :sats_per_minute,
+        player_speed = :player_speed,
+        subscription_status = :subscription_status
+    WHERE feed_id = :feed_id;
+
+    INSERT OR IGNORE INTO contentFeedStatusDbo(
+           feed_id,
+           feed_url,
+           subscription_status,
+           chat_id,
+           item_id,
+           sats_per_minute,
+           player_speed
+    )
+    VALUES (
+           :feed_id,
+           :feed_url,
+           :subscription_status,
+           :chat_id,
+           :item_id,
+           :sats_per_minute,
+           :player_speed
+    );
+}
+
+contentFeedStatusUpdate:
+UPDATE contentFeedStatusDbo
+SET subscription_status = :subscription_status,
+    chat_id = :chat_id,
+    sats_per_minute = :sats_per_minute
+WHERE feed_id = :feed_id;
+
+contentFeedStatusUpdateItemId:
+UPDATE contentFeedStatusDbo
+SET item_id = :item_id
+WHERE feed_id = :feed_id;
+
+contentFeedStatusUpdateSubscriptionStatus:
+UPDATE contentFeedStatusDbo
+SET subscription_status = :subscription_status
+WHERE feed_id = ?;
+
+contentFeedStatusGetAll:
+SELECT *
+FROM contentFeedStatusDbo;
+
+contentFeedStatusGetByIds:
+SELECT *
+FROM contentFeedStatusDbo
+WHERE feed_id IN ?;
+
+contentFeedStatusGetByFeedId:
+SELECT *
+FROM contentFeedStatusDbo
+WHERE feed_id = ?;
+
+contentFeedStatusDeleteAll:
+DELETE FROM contentFeedStatusDbo;
+
+contentFeedStatusDeleteByFeedId:
+DELETE
+FROM contentFeedStatusDbo
+WHERE feed_id = ?;
 
 
+CREATE TABLE contentEpisodeStatusDbo(
+    item_id                         TEXT            AS FeedId NOT NULL,
+    feed_id                         TEXT            AS FeedId NOT NULL,
+    duration                        INTEGER         AS FeedItemDuration NOT NULL,
+    current_time                    INTEGER         AS FeedItemDuration NOT NULL,
+    PRIMARY KEY (item_id, feed_id)
+);
+
+contentEpisodeStatusUpsert {
+    UPDATE contentEpisodeStatusDbo
+    SET duration = :duration,
+        current_time = :current_time
+    WHERE item_id = :item_id AND feed_id = :feed_id;
+
+    INSERT OR IGNORE INTO contentEpisodeStatusDbo(
+           item_id,
+           feed_id,
+           duration,
+           current_time
+    )
+    VALUES (
+           :item_id,
+           :feed_id,
+           :duration,
+           :current_time
+    );
+}
+
+contentEpisodeStatusGetAll:
+SELECT *
+FROM contentEpisodeStatusDbo;
+
+contentEpisodeStatusGetByFeedIdAndItemId:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE feed_id = :feed_id AND item_id = :item_id;
+
+contentEpisodeStatusGetByFeedIdAndItemIds:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE feed_id = :feed_id AND item_id IN ?;
+
+contentEpisodeStatusGetByItemIds:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE item_id IN ?;
+
+contentEpisodeStatusGetByFeedIds:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE feed_id IN ?;
+
+contentEpisodeStatusUpdateDuration:
+UPDATE contentEpisodeStatusDbo
+SET duration = :duration
+WHERE item_id = ?;
+
+contentEpisodeStatusDeleteAll:
+DELETE FROM contentEpisodeStatusDbo;
+
+contentEpisodeStatusDeleteByFeedId:
+DELETE
+FROM contentEpisodeStatusDbo
+WHERE feed_id = ?;

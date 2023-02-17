@@ -232,3 +232,14 @@ internal class FeedItemDurationAdapter: ColumnAdapter<FeedItemDuration, Long> {
         return value.value
     }
 }
+
+internal class PlayerSpeedAdapter: ColumnAdapter<FeedPlayerSpeed, Double> {
+
+    override fun decode(databaseValue: Double): FeedPlayerSpeed {
+        return FeedPlayerSpeed(databaseValue)
+    }
+
+    override fun encode(value: FeedPlayerSpeed): Double {
+        return value.value
+    }
+}

@@ -63,6 +63,7 @@
     <color name="whiteFiftyPercentOpacity">#80FFFFFF</color>
     <color name="whiteSeventyPercentOpacity">#B3FFFFFF</color>
     <color name="blackSemiTransparent">#80000000</color>
+    <color name="blackSemiTransparent70">#B3000000</color>
 
     <color name="greenBorder">#2EB379</color>
 

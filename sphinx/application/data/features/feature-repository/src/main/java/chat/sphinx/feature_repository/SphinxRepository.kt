@@ -11,6 +11,7 @@ import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
+import chat.sphinx.concept_network_query_chat.model.feed.FeedItemDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
@@ -19,6 +20,11 @@ import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
+import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
+import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.EpisodeStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.balance.BalanceDto
@@ -27,9 +33,9 @@ import chat.sphinx.concept_network_query_meme_server.model.PostMemeServerUploadD
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_message.model.*
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
-import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_people.model.DeletePeopleProfileDto
 import chat.sphinx.concept_network_query_people.model.PeopleProfileDto
+import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_redeem_badge_token.model.RedeemBadgeTokenDto
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
@@ -58,18 +64,14 @@ import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessage
 import chat.sphinx.concept_socket_io.SphinxSocketIOMessageListener
 import chat.sphinx.conceptcoredb.*
-import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboContentBoostPresenterMapper
-import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboContentConsumedPresenterMapper
-import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboMessagePresenterMapper
-import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboPodcastClipCommentPresenterMapper
-import chat.sphinx.feature_repository.mappers.action_track.ActionTrackDboFeedSearchPresenterMapper
+import chat.sphinx.feature_repository.mappers.action_track.*
 import chat.sphinx.feature_repository.mappers.chat.ChatDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.contact.ContactDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedDestinationDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedItemDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.FeedModelDboPresenterMapper
-import chat.sphinx.feature_repository.mappers.feed.podcast.*
+import chat.sphinx.feature_repository.mappers.feed.*
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboFeedSearchResultPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedDboPodcastPresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedItemDboPodcastEpisodePresenterMapper
+import chat.sphinx.feature_repository.mappers.feed.podcast.FeedRecommendationPodcastPresenterMapper
 import chat.sphinx.feature_repository.mappers.invite.InviteDboPresenterMapper
 import chat.sphinx.feature_repository.mappers.mapListFrom
 import chat.sphinx.feature_repository.mappers.message.MessageDboPresenterMapper
@@ -83,8 +85,11 @@ import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.logger.w
 import chat.sphinx.notification.SphinxNotificationManager
-import chat.sphinx.wrapper_action_track.*
+import chat.sphinx.wrapper_action_track.ActionTrackId
+import chat.sphinx.wrapper_action_track.ActionTrackMetaData
+import chat.sphinx.wrapper_action_track.ActionTrackType
 import chat.sphinx.wrapper_action_track.action_wrappers.*
+import chat.sphinx.wrapper_action_track.toActionTrackUploaded
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -93,7 +98,10 @@ import chat.sphinx.wrapper_common.contact.isTrue
 import chat.sphinx.wrapper_common.dashboard.*
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.invite.InviteStatus
-import chat.sphinx.wrapper_common.lightning.*
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 import chat.sphinx.wrapper_common.subscription.EndNumber
@@ -112,6 +120,7 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -136,9 +145,8 @@ import java.io.File
 import java.io.InputStream
 import java.text.ParseException
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.LinkedHashMap
 import kotlin.math.absoluteValue
+import kotlin.math.round
 
 
 abstract class SphinxRepository(
@@ -167,6 +175,7 @@ abstract class SphinxRepository(
     private val networkQuerySubscription: NetworkQuerySubscription,
     private val networkQueryFeedSearch: NetworkQueryFeedSearch,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
+    private val networkQueryFeedStatus: NetworkQueryFeedStatus,
     private val rsa: RSA,
     private val socketIOManager: SocketIOManager,
     private val sphinxNotificationManager: SphinxNotificationManager,
@@ -657,82 +666,22 @@ abstract class SphinxRepository(
         }
     }
 
-    override fun updateChatMetaData(
-        chatId: ChatId,
-        podcastId: FeedId?,
-        metaData: ChatMetaData,
-        shouldSync: Boolean
-    ) {
-        applicationScope.launch(io) {
-            val queries = coreDB.getSphinxDatabaseQueries()
-
-            if (podcastId?.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
-                return@launch
-            }
-
-            if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-                //Podcast with no chat. Updating current item id
-                podcastId?.let { nnPodcastId ->
-                    podcastLock.withLock {
-                        queries.feedUpdateCurrentItemId(
-                            metaData.itemId,
-                            nnPodcastId
-                        )
-                    }
-                }
-                return@launch
-            }
-
-            chatLock.withLock {
-                queries.chatUpdateMetaData(metaData, chatId)
-            }
-
-            podcastLock.withLock {
-                queries.feedUpdateCurrentItemIdByChatId(
-                    metaData.itemId,
-                    chatId
-                )
-            }
-
-            if (shouldSync) {
-                try {
-                    networkQueryChat.updateChat(
-                        chatId,
-                        PutChatDto(meta = metaData.toJson(moshi))
-                    ).collect {}
-                } catch (e: AssertionError) {
-                }
-            }
-        }
-    }
-
     override fun streamFeedPayments(
         chatId: ChatId,
-        metaData: ChatMetaData,
         podcastId: String,
         episodeId: String,
+        currentTime: Long,
+        satsPerMinute: Sat?,
+        playerSpeed: FeedPlayerSpeed?,
         destinations: List<FeedDestination>,
-        updateMetaData: Boolean,
-        clipMessageUUID: MessageUUID?,
+        clipMessageUUID: MessageUUID?
     ) {
 
-        val updateMD = if (chatId.value == ChatId.NULL_CHAT_ID.toLong()) {
-            false
-        } else {
-            updateMetaData
-        }
-
-        if (metaData.satsPerMinute.value <= 0 || destinations.isEmpty()) {
+        if ((satsPerMinute?.value ?: 0) <= 0 || destinations.isEmpty()) {
             return
         }
 
         applicationScope.launch(io) {
-            val queries = coreDB.getSphinxDatabaseQueries()
-
-            chatLock.withLock {
-                queries.chatUpdateMetaData(metaData, chatId)
-            }
-
             val destinationsArray: MutableList<PostStreamSatsDestinationDto> =
                 ArrayList(destinations.size)
 
@@ -750,16 +699,16 @@ abstract class SphinxRepository(
                 StreamSatsText(
                     podcastId,
                     episodeId,
-                    metaData.timeSeconds.toLong(),
-                    metaData.speed,
+                    currentTime,
+                    playerSpeed?.value ?: 1.0,
                     clipMessageUUID?.value
                 )
 
             val postStreamSatsDto = PostStreamSatsDto(
-                metaData.satsPerMinute.value,
+                satsPerMinute?.value ?: 0,
                 chatId.value,
                 streamSatsText.toJson(moshi),
-                updateMD,
+                false,
                 destinationsArray
             )
 
@@ -1061,7 +1010,7 @@ abstract class SphinxRepository(
                             emit(
                                 if (processChatsResponse is Response.Success) {
                                     Response.Success(
-                                        RestoreProgress(restoring, 4)
+                                        RestoreProgress(restoring, 5)
                                     )
                                 } else {
                                     Response.Error(ResponseError("Failed to refresh contacts and chats"))
@@ -1080,7 +1029,6 @@ abstract class SphinxRepository(
                         emit(loadResponse)
                     }
                 }
-
             }
         }
     }
@@ -3821,7 +3769,7 @@ abstract class SphinxRepository(
         return tribeData
     }
 
-    private val podcastLock = Mutex()
+    private val feedLock = Mutex()
     override suspend fun updateFeedContent(
         chatId: ChatId,
         host: ChatHost,
@@ -3830,7 +3778,8 @@ abstract class SphinxRepository(
         searchResultImageUrl: PhotoUrl?,
         chatUUID: ChatUUID?,
         subscribed: Subscribed,
-        currentItemId: FeedId?
+        currentItemId: FeedId?,
+        delay: Long
     ): Response<FeedId, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
 
@@ -3851,7 +3800,7 @@ abstract class SphinxRepository(
                 is Response.Success -> {
 
                     var cId: ChatId = chatId
-                    val feedId = response.value.id.toFeedId()
+                    val feedId = response.value.fixedId.toFeedId()
 
                     feedId?.let { feedId ->
                         queries.feedGetByIds(
@@ -3865,7 +3814,7 @@ abstract class SphinxRepository(
                             }
                     }
 
-                    podcastLock.withLock {
+                    feedLock.withLock {
                         queries.transaction {
                             upsertFeed(
                                 response.value,
@@ -3873,20 +3822,70 @@ abstract class SphinxRepository(
                                 searchResultDescription,
                                 searchResultImageUrl,
                                 cId,
-                                currentItemId,
                                 subscribed,
+                                currentItemId,
                                 queries
                             )
                         }
                     }
 
-                    delay(500L)
+                    delay(delay)
 
                     updateResponse = feedId?.let {
                         Response.Success(it)
                     } ?: run {
                        Response.Error(ResponseError("Feed content update failed"))
                     }
+                }
+            }
+        }
+
+        return updateResponse
+    }
+
+    private suspend fun updateFeedContentItems(
+        host: ChatHost,
+        feedUrl: FeedUrl,
+        durationRetrieverHandler: ((url: String) -> Long)? = null
+    ): Response<Any, ResponseError> {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        var updateResponse: Response<Any, ResponseError> = Response.Error(ResponseError("Feed content items update failed"))
+
+        networkQueryChat.getFeedContent(
+            host,
+            feedUrl,
+            null
+        ).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {
+                    updateResponse = response
+                }
+                is Response.Success -> {
+
+                    feedLock.withLock {
+                        queries.transaction {
+                            upsertFeedItems(
+                                response.value,
+                                queries
+                            )
+                        }
+                    }
+
+                    for (item in response.value.items) {
+                        (durationRetrieverHandler?.let { it(item.enclosureUrl) })?.let { duration ->
+                            updateContentEpisodeStatusDuration(
+                                FeedId(item.id),
+                                FeedItemDuration(duration / 1000),
+                                queries
+                            )
+                        }
+                    }
+
+                    updateResponse = Response.Success(true)
                 }
             }
         }
@@ -3930,6 +3929,8 @@ abstract class SphinxRepository(
                             queries
                         )
                     )
+                } ?: run {
+                    emit(null)
                 }
             }
     }
@@ -3945,6 +3946,8 @@ abstract class SphinxRepository(
             .collect { value: FeedItem? ->
                 value?.let { feedItem ->
                     emit(feedItem)
+                } ?: run {
+                    emit(null)
                 }
             }
     }
@@ -3960,6 +3963,12 @@ abstract class SphinxRepository(
     }
     private val feedDestinationDboPresenterMapper: FeedDestinationDboPresenterMapper by lazy {
         FeedDestinationDboPresenterMapper(dispatchers)
+    }
+    private val contentFeedStatusDboPresenterMapper: ContentFeedStatusDboPresenterMapper by lazy {
+        ContentFeedStatusDboPresenterMapper(dispatchers)
+    }
+    private val contentEpisodeStatusDboPresenterMapper: ContentEpisodeStatusDboPresenterMapper by lazy {
+        ContentEpisodeStatusDboPresenterMapper(dispatchers)
     }
 
     override fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>> = flow {
@@ -4068,15 +4077,25 @@ abstract class SphinxRepository(
         listFeedDbo: List<FeedDbo>,
         queries: SphinxDatabaseQueries
     ): List<Feed> {
+
         val itemsMap: MutableMap<FeedId, ArrayList<FeedItem>> =
             LinkedHashMap(listFeedDbo.size)
 
         val chatsMap: MutableMap<ChatId, Chat?> =
             LinkedHashMap(listFeedDbo.size)
 
+        val contentFeedStatusMap: MutableMap<FeedId, ContentFeedStatus?> =
+            LinkedHashMap(listFeedDbo.size)
+
+        val contentEpisodeStatusesMap: MutableMap<FeedId, ArrayList<ContentEpisodeStatus>> =
+            LinkedHashMap(listFeedDbo.size)
+
         for (dbo in listFeedDbo) {
-            itemsMap[dbo.id] = ArrayList(0)
             chatsMap[dbo.chat_id] = null
+            contentFeedStatusMap[dbo.id] = null
+
+            itemsMap[dbo.id] = ArrayList(0)
+            contentEpisodeStatusesMap[dbo.id] = ArrayList(0)
         }
 
         itemsMap.keys.chunked(500).forEach { chunkedIds ->
@@ -4105,13 +4124,41 @@ abstract class SphinxRepository(
                 }
         }
 
+        contentFeedStatusMap.keys.chunked(500).forEach { chunkedIds ->
+            queries.contentFeedStatusGetByIds(chunkedIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        dbo.feed_id?.let { feedId ->
+                            contentFeedStatusMap[feedId] = contentFeedStatusDboPresenterMapper.mapFrom(dbo)
+                        }
+                    }
+                }
+        }
+
+        contentEpisodeStatusesMap.keys.chunked(500).forEach { chunkedIds ->
+            queries.contentEpisodeStatusGetByFeedIds(chunkedIds)
+                .executeAsList()
+                .let { response ->
+                    response.forEach { dbo ->
+                        dbo.feed_id?.let { feedId ->
+                            contentEpisodeStatusesMap[feedId]?.add(
+                                contentEpisodeStatusDboPresenterMapper.mapFrom(dbo)
+                            )
+                        }
+                    }
+                }
+        }
+
         val list = listFeedDbo.map {
             mapFeedDbo(
                 feedDbo = it,
                 items = itemsMap[it.id] ?: listOf(),
                 model = null,
                 destinations = listOf(),
-                chat = chatsMap[it.chat_id]
+                chat = chatsMap[it.chat_id],
+                contentFeedStatus = contentFeedStatusMap[it.id],
+                contentEpisodeStatus = contentEpisodeStatusesMap[it.id] ?: listOf()
             )
         }
 
@@ -4132,18 +4179,27 @@ abstract class SphinxRepository(
         model: FeedModel? = null,
         destinations: List<FeedDestination>,
         chat: Chat? = null,
+        contentFeedStatus: ContentFeedStatus? = null,
+        contentEpisodeStatus: List<ContentEpisodeStatus>
     ): Feed {
 
         val feed = feedDboPresenterMapper.mapFrom(feedDbo)
 
         items.forEach { feedItem ->
             feedItem.feed = feed
+
+            contentEpisodeStatus.forEach { contentEpisodeStatus ->
+                if (feedItem.id == contentEpisodeStatus.itemId) {
+                    feedItem.contentEpisodeStatus = contentEpisodeStatus
+                }
+            }
         }
 
         feed.items = items
         feed.model = model
         feed.destinations = destinations
         feed.chat = chat
+        feed.contentFeedStatus = contentFeedStatus
 
         return feed
     }
@@ -4169,14 +4225,31 @@ abstract class SphinxRepository(
             feedDestinationDboPresenterMapper.mapFrom(it)
         }
 
+        val contentFeedStatus = queries.contentFeedStatusGetByFeedId(feed.id).executeAsOneOrNull()?.let { contentFeedStatus ->
+            contentFeedStatusDboPresenterMapper.mapFrom(contentFeedStatus)
+        }
+
+        val itemIds = items.map { it.id }
+
+        val contentEpisodeStatuses = queries.contentEpisodeStatusGetByFeedIdAndItemIds(feed.id, itemIds).executeAsList().map {
+            contentEpisodeStatusDboPresenterMapper.mapFrom(it)
+        }
+
         items.forEach { feedItem ->
             feedItem.feed = feed
+
+            contentEpisodeStatuses.forEach { contentEpisodeStatus ->
+                if (feedItem.id == contentEpisodeStatus.itemId) {
+                    feedItem.contentEpisodeStatus = contentEpisodeStatus
+                }
+            }
         }
 
         feed.items = items
         feed.model = model
         feed.destinations = destinations
         feed.chat = chat
+        feed.contentFeedStatus = contentFeedStatus
 
         return feed
     }
@@ -4184,14 +4257,9 @@ abstract class SphinxRepository(
     private val podcastDboPresenterMapper: FeedDboPodcastPresenterMapper by lazy {
         FeedDboPodcastPresenterMapper(dispatchers)
     }
-    private val podcastDestinationDboPresenterMapper: FeedDestinationDboPodcastDestinationPresenterMapper by lazy {
-        FeedDestinationDboPodcastDestinationPresenterMapper(dispatchers)
-    }
+
     private val podcastEpisodeDboPresenterMapper: FeedItemDboPodcastEpisodePresenterMapper by lazy {
         FeedItemDboPodcastEpisodePresenterMapper(dispatchers)
-    }
-    private val podcastModelDboPresenterMapper: FeedModelDboPodcastModelPresenterMapper by lazy {
-        FeedModelDboPodcastModelPresenterMapper(dispatchers)
     }
 
     override fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?> = flow {
@@ -4205,7 +4273,7 @@ abstract class SphinxRepository(
             .collect { value: Podcast? ->
                 value?.let { podcast ->
                     emit(
-                        processPodcast(podcast, queries)
+                        mapPodcast(podcast, queries)
                     )
                 }
             }
@@ -4227,19 +4295,19 @@ abstract class SphinxRepository(
             .collect { value: Podcast? ->
                 value?.let { podcast ->
                     emit(
-                        processPodcast(podcast, queries)
+                        mapPodcast(podcast, queries)
                     )
                 }
             }
     }
 
-    private suspend fun processPodcast(
+    private suspend fun mapPodcast(
         podcast: Podcast,
         queries: SphinxDatabaseQueries
     ): Podcast {
 
         queries.feedModelGetById(podcast.id).executeAsOneOrNull()?.let { feedModelDbo ->
-            podcast.model = podcastModelDboPresenterMapper.mapFrom(feedModelDbo)
+            podcast.model = feedModelDboPresenterMapper.mapFrom(feedModelDbo)
         }
 
         val episodes = queries.feedItemsGetByFeedId(podcast.id).executeAsList().map {
@@ -4247,11 +4315,41 @@ abstract class SphinxRepository(
         }
 
         val destinations = queries.feedDestinationsGetByFeedId(podcast.id).executeAsList().map {
-            podcastDestinationDboPresenterMapper.mapFrom(it)
+            feedDestinationDboPresenterMapper.mapFrom(it)
+        }
+
+        val contentFeedStatus = queries.contentFeedStatusGetByFeedId(podcast.id).executeAsOneOrNull()?.let {
+            contentFeedStatusDboPresenterMapper.mapFrom(it)
+        }
+
+        val chat = queries.chatGetById(podcast.chatId).executeAsOneOrNull()?.let {
+            chatDboPresenterMapper.mapFrom(it)
+        }
+
+        val allContentStatuses = queries.contentEpisodeStatusGetAll().executeAsList()
+
+        val episodeIds = episodes.map { it.id }
+
+        val contentEpisodeStatuses = queries.contentEpisodeStatusGetByFeedIdAndItemIds(podcast.id, episodeIds).executeAsList().map {
+            contentEpisodeStatusDboPresenterMapper.mapFrom(it)
+        }
+
+        LOG.d("TEST", "${allContentStatuses.count()}")
+
+        if (contentEpisodeStatuses.isNotEmpty()) {
+            episodes.forEach { episode ->
+                contentEpisodeStatuses.forEach { contentEpisodeStatus ->
+                    if (episode.id == contentEpisodeStatus.itemId) {
+                        episode.contentEpisodeStatus = contentEpisodeStatus
+                    }
+                }
+            }
         }
 
         podcast.episodes = episodes
         podcast.destinations = destinations
+        podcast.contentFeedStatus = contentFeedStatus
+        podcast.chat = chat
 
         return podcast
     }
@@ -4370,11 +4468,15 @@ abstract class SphinxRepository(
         currentSubscribeState: Subscribed
     ) {
         val queries = coreDB.getSphinxDatabaseQueries()
+        val newValue = if (currentSubscribeState.isTrue()) Subscribed.False else Subscribed.True
 
-        queries.feedUpdateSubscribe(
-            if (currentSubscribeState.isTrue()) Subscribed.False else Subscribed.True,
-            feedId
-        )
+        queries.transaction {
+            updateSubscriptionStatus(
+                queries,
+                newValue,
+                feedId
+            )
+        }
     }
 
     private suspend fun mapFeedItemDboList(
@@ -4405,6 +4507,53 @@ abstract class SphinxRepository(
                 it.feed_id
             }
         }
+    }
+
+    override val networkRefreshFeedContent: Flow<LoadResponse<RestoreProgress, ResponseError>> by lazy {
+        flow {
+
+            val lastSeenMessagesDate: String? = authenticationStorage.getString(
+                REPOSITORY_LAST_SEEN_MESSAGE_DATE,
+                null
+            )
+
+            if (lastSeenMessagesDate != null) {
+                return@flow
+            }
+
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            var contentFeedStatuses: List<ContentFeedStatusDto> = listOf()
+
+            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        contentFeedStatuses = loadResponse.value
+                    }
+                }
+            }
+            if (contentFeedStatuses.isNotEmpty()) {
+
+                for ((index, contentFeedStatus) in contentFeedStatuses.withIndex()) {
+
+                    restoreContentFeedStatusFrom(
+                        contentFeedStatus,
+                        queries,
+                        null,
+                        null
+                    )
+
+                    val restoreProgress =
+                        getFeedStatusesRestoreProgress(contentFeedStatuses.lastIndex, index)
+
+                    emit(Response.Success(restoreProgress))
+                }
+            }
+        }
+
     }
 
     /*
@@ -4653,11 +4802,29 @@ abstract class SphinxRepository(
             newMessagesTotal / MESSAGE_PAGINATION_LIMIT
         }
 
-        val contactsRestoreProgressTotal = 4
-        val messagesRestoreProgressTotal = 96
+        val contactsRestoreProgressTotal = 5
+        val feedRestoreProgressTotal = 10
+        val messagesRestoreProgressTotal = 85
         val currentPage: Int = offset / MESSAGE_PAGINATION_LIMIT
-        val progress: Int =
-            contactsRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
+
+        val progress: Int = contactsRestoreProgressTotal + feedRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
+
+        return RestoreProgress(
+            true,
+            progress
+        )
+    }
+
+    private fun getFeedStatusesRestoreProgress(
+        feedTotal: Int,
+        currentIndex: Int
+    ): RestoreProgress {
+
+        val contactsRestoreProgressTotal = 5
+        val feedRestoreProgressTotal = 10
+        val feedPercentage = feedRestoreProgressTotal.toDouble() / feedTotal.toDouble() * currentIndex
+
+        val progress: Int = contactsRestoreProgressTotal + round(feedPercentage).toInt()
 
         return RestoreProgress(
             true,
@@ -6423,6 +6590,370 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun updateContentFeedStatus(
+        feedId: FeedId,
+        itemId: FeedId
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentFeedLock.withLock {
+                queries.contentFeedStatusUpdateItemId(
+                    itemId,
+                    feedId
+                )
+            }
+        }
+    }
+
+    private val contentFeedLock = Mutex()
+    override fun updateContentFeedStatus(
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        subscriptionStatus: Subscribed,
+        chatId: ChatId?,
+        itemId: FeedId?,
+        satsPerMinute: Sat?,
+        playerSpeed: FeedPlayerSpeed?,
+        shouldSync: Boolean
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
+
+            contentFeedLock.withLock {
+                queries.contentFeedStatusUpsert(
+                    feed_id = feedId,
+                    feed_url = feedUrl,
+                    subscription_status = subscriptionStatus,
+                    chat_id = if (chatId?.value == ChatId.NULL_CHAT_ID.toLong()) null else chatId,
+                    item_id = if (itemId?.value == FeedId.NULL_FEED_ID) null else itemId,
+                    sats_per_minute = satsPerMinute,
+                    player_speed = playerSpeed
+                )
+            }
+
+            if (shouldSync) {
+                saveContentFeedStatusFor(feedId)
+            }
+        }
+    }
+    private val contentEpisodeLock = Mutex()
+    override fun updateContentEpisodeStatus(
+        feedId: FeedId,
+        itemId: FeedId,
+        duration: FeedItemDuration,
+        currentTime: FeedItemDuration,
+        shouldSync: Boolean
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            if (feedId.value == FeedRecommendation.RECOMMENDATION_PODCAST_ID) {
+                return@launch
+            }
+
+            contentEpisodeLock.withLock {
+                queries.contentEpisodeStatusUpsert(
+                    feed_id = feedId,
+                    item_id = itemId,
+                    duration = duration,
+                    current_time = currentTime
+                )
+            }
+
+            if (shouldSync) {
+                saveContentFeedStatusFor(feedId)
+            }
+        }
+    }
+
+    fun updateContentEpisodeStatusDuration(
+        itemId: FeedId,
+        duration: FeedItemDuration,
+        queries: SphinxDatabaseQueries
+    ) {
+        applicationScope.launch(io) {
+            contentEpisodeLock.withLock {
+                queries.contentEpisodeStatusUpdateDuration(
+                    duration,
+                    itemId
+                )
+            }
+        }
+    }
+
+    override fun saveContentFeedStatuses() {
+        applicationScope.launch(io) {
+
+            val contentFeedStatuses: MutableList<ContentFeedStatusDto> = mutableListOf()
+
+            getAllFeeds().firstOrNull()?.let { feeds ->
+                for (feed in feeds) {
+                    getContentFeedStatusDtoFrom(feed)?.let { feedStatus ->
+                        contentFeedStatuses.add(feedStatus)
+                    }
+                }
+            }
+
+            if (contentFeedStatuses.isEmpty()) {
+                return@launch
+            }
+
+            networkQueryFeedStatus.saveFeedStatuses(
+                PostFeedStatusDto(contentFeedStatuses)
+            ).collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+
+                    }
+                    is Response.Error -> {
+
+                    }
+                    is Response.Success -> {
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun saveContentFeedStatusFor(feedId: FeedId) {
+        applicationScope.launch(io) {
+
+            var contentFeedStatus: ContentFeedStatusDto? = null
+
+            getFeedById(feedId).firstOrNull()?.let { feed ->
+                contentFeedStatus = getContentFeedStatusDtoFrom(feed)
+            }
+
+            contentFeedStatus?.let { feedStatus ->
+                networkQueryFeedStatus.saveFeedStatus(
+                    feedId,
+                    PutFeedStatusDto(feedStatus)
+                ).collect { }
+            }
+        }
+    }
+
+    private fun getContentFeedStatusDtoFrom(feed: Feed) : ContentFeedStatusDto? {
+        var contentFeedStatusDto: ContentFeedStatusDto?
+        val nnContentFeedStatus = feed.getNNContentFeedStatus()
+
+        val episodeStatuses : MutableList<Map<String, EpisodeStatusDto>> = mutableListOf()
+
+        if (feed.isPodcast) {
+            for (feedItem in feed.items) {
+                feedItem.contentEpisodeStatus?.let { episodeStatus ->
+                    if (episodeStatus.currentTime.value > 0.toLong() || episodeStatus.duration.value > 0.toLong()) {
+                        val status: MutableMap<String, EpisodeStatusDto> = mutableMapOf()
+
+                        status[feedItem.id.value] = EpisodeStatusDto(
+                            episodeStatus.duration.value,
+                            episodeStatus.currentTime.value
+                        )
+
+                        episodeStatuses.add(status)
+                    }
+                }
+            }
+        }
+
+        nnContentFeedStatus.let { feedStatus ->
+            contentFeedStatusDto = ContentFeedStatusDto(
+                feedStatus.feedId.value,
+                feedStatus.feedUrl.value,
+                feedStatus.subscriptionStatus.isTrue(),
+                feedStatus.actualChatId?.value,
+                feedStatus.itemId?.value,
+                feedStatus.satsPerMinute?.value,
+                feedStatus.playerSpeed?.value,
+                episodeStatuses
+            )
+        }
+
+        return contentFeedStatusDto
+    }
+
+    override fun restoreContentFeedStatuses(
+        playingPodcastId: String?,
+        playingEpisodeId: String?,
+        durationRetrieverHandler: ((url: String) -> Long)?
+    ) {
+        applicationScope.launch(io) {
+            networkQueryFeedStatus.getFeedStatuses().collect { loadResponse ->
+                @Exhaustive
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        restoreContentFeedStatusesFrom(
+                            loadResponse.value,
+                            playingPodcastId,
+                            playingEpisodeId,
+                            durationRetrieverHandler
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    override fun restoreContentFeedStatusByFeedId(
+        feedId: FeedId,
+        playingPodcastId: String?,
+        playingEpisodeId: String?
+    ) {
+       applicationScope.launch(io) {
+           networkQueryFeedStatus.getByFeedId(feedId).collect { loadResponse ->
+               @Exhaustive
+               when (loadResponse) {
+                   is LoadResponse.Loading -> {}
+                   is Response.Error -> {}
+                   is Response.Success -> {
+                       restoreContentFeedStatusFrom(
+                           loadResponse.value,
+                           null,
+                           playingPodcastId,
+                           playingEpisodeId
+                       )
+                   }
+               }
+           }
+       }
+    }
+
+    private suspend fun restoreContentFeedStatusesFrom(
+        contentFeedStatuses: List<ContentFeedStatusDto>,
+        playingPodcastId: String?,
+        playingEpisodeId: String?,
+        durationRetrieverHandler: ((url: String) -> Long)? = null
+    ) {
+        if (contentFeedStatuses.isEmpty()) {
+            return
+        }
+
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            queries.feedBatchUnsubscribe(contentFeedStatuses.map { FeedId(it.feed_id) })
+
+            for (contentFeedStatus in contentFeedStatuses) {
+                restoreContentFeedStatusFrom(
+                    contentFeedStatus,
+                    queries,
+                    playingPodcastId,
+                    playingEpisodeId
+                )
+            }
+        }.join()
+
+        fetchFeedNewItems(durationRetrieverHandler)
+    }
+
+    private fun fetchFeedNewItems(
+        durationRetrieverHandler: ((url: String) -> Long)? = null
+    ) {
+        applicationScope.launch(io) {
+            getAllFeeds().firstOrNull()?.let { feeds ->
+                for (feed in feeds) {
+                    updateFeedContentItems(
+                        ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
+                        feed.feedUrl,
+                        durationRetrieverHandler
+                    )
+                }
+            }
+        }
+    }
+
+    private suspend fun restoreContentFeedStatusFrom(
+        contentFeedStatus: ContentFeedStatusDto,
+        queries: SphinxDatabaseQueries?,
+        playingPodcastId: String?,
+        playingEpisodeId: String?
+    ) {
+        val queries = queries ?: coreDB.getSphinxDatabaseQueries()
+        var shouldRestoreItem = true
+
+        val feed = getFeedById(FeedId(contentFeedStatus.feed_id)).firstOrNull()
+
+        if (feed == null) {
+            val chat = contentFeedStatus.chat_id?.toChatId()?.let { getChatById(it).firstOrNull() }
+
+            contentFeedStatus.feed_url.toFeedUrl()?.let { feedUrl ->
+                val response = updateFeedContent(
+                    chatId = contentFeedStatus.chat_id?.toChatId() ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
+                    feedUrl = feedUrl,
+                    chatUUID = chat?.uuid,
+                    subscribed = contentFeedStatus.subscription_status.toSubscribed(),
+                    currentItemId = contentFeedStatus.item_id?.toFeedId(),
+                    delay = 0
+                )
+
+                if (response is Response.Error) {
+                    shouldRestoreItem = false
+                }
+            }
+        }
+
+        if (!shouldRestoreItem) {
+            return
+        }
+
+        contentFeedLock.withLock {
+            if (contentFeedStatus.feed_id == playingPodcastId) {
+                queries.contentFeedStatusUpdate(
+                    contentFeedStatus.subscription_status.toSubscribed(),
+                    contentFeedStatus.chat_id?.toChatId(),
+                    contentFeedStatus.sats_per_minute?.toSat(),
+                    FeedId(contentFeedStatus.feed_id)
+                )
+            } else {
+                queries.contentFeedStatusUpsert(
+                    FeedUrl(contentFeedStatus.feed_url),
+                    contentFeedStatus.subscription_status.toSubscribed(),
+                    contentFeedStatus.chat_id?.toChatId(),
+                    contentFeedStatus.item_id?.toFeedId(),
+                    contentFeedStatus.sats_per_minute?.toSat(),
+                    contentFeedStatus.player_speed?.toFeedPlayerSpeed(),
+                    FeedId(contentFeedStatus.feed_id)
+                )
+            }
+        }
+
+        feedLock.withLock {
+            queries.feedUpdateSubscribeAndChat(
+                contentFeedStatus.subscription_status.toSubscribed(),
+                contentFeedStatus.chat_id?.toChatId() ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                FeedId(contentFeedStatus.feed_id)
+            )
+        }
+
+        contentFeedStatus.episodes_status?.let { episodeStatuses ->
+            for (episodeStatus in episodeStatuses) {
+                for ((episodeId, status) in episodeStatus) {
+                    if (playingEpisodeId == episodeId) {
+                        continue
+                    }
+                    contentEpisodeLock.withLock {
+                        queries.contentEpisodeStatusUpsert(
+                            FeedItemDuration(status.duration),
+                            FeedItemDuration(status.current_time),
+                            FeedId(episodeId),
+                            FeedId(contentFeedStatus.feed_id)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     override val appLogsStateFlow: MutableStateFlow<String> by lazy {
         MutableStateFlow("")
     }
@@ -6430,5 +6961,4 @@ abstract class SphinxRepository(
     override fun setAppLog(log: String) {
         appLogsStateFlow.value = appLogsStateFlow.value + log + "\n"
     }
-
 }

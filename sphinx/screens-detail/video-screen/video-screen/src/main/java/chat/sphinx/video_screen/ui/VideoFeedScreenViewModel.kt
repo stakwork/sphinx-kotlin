@@ -15,14 +15,15 @@ import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
-import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.ItemId
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
+import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -162,21 +163,20 @@ internal open class VideoFeedScreenViewModel(
 
     private fun updateFeedContentInBackground() {
         viewModelScope.launch(io) {
-            chatRepository.getChatById(getArgChatId()).firstOrNull()?.let { chat ->
-                chat.host?.let { chatHost ->
-                    getArgFeedUrl()?.let { feedUrl ->
-                        val subscribed = (chat != null || (getVideoFeed()?.subscribed?.isTrue() == true))
+            val chat = chatRepository.getChatById(getArgChatId()).firstOrNull()
+            val videoFeed = getVideoFeed()
+            val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
+            val subscribed = videoFeed?.subscribed?.isTrue() == true
 
-                        feedRepository.updateFeedContent(
-                            chatId = chat.id,
-                            host = chatHost,
-                            feedUrl = feedUrl,
-                            chatUUID = chat.uuid,
-                            subscribed = subscribed.toSubscribed(),
-                            currentEpisodeId = null
-                        )
-                    }
-                }
+            getArgFeedUrl()?.let { feedUrl ->
+                feedRepository.updateFeedContent(
+                    chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = chatHost,
+                    feedUrl = feedUrl,
+                    chatUUID = chat?.uuid,
+                    subscribed = subscribed.toSubscribed(),
+                    currentItemId = null
+                )
             }
         }
     }
@@ -184,17 +184,18 @@ internal open class VideoFeedScreenViewModel(
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
 
-            repositoryMedia.updateChatMetaData(
-                getArgChatId(),
-                video.feed?.id,
-                ChatMetaData(
+            video.feed?.let { feed ->
+                feedRepository.updateContentFeedStatus(
+                    feedId = feed.id,
+                    feedUrl = feed.feedUrl,
+                    subscriptionStatus = feed.subscribed,
+                    chatId = feed.chatId,
                     itemId = video.id,
-                    itemLongId = ItemId(-1),
-                    satsPerMinute = getOwner()?.tipAmount ?: Sat(0),
-                    timeSeconds = 0,
-                    speed = 1.0
+                    satsPerMinute = null,
+                    playerSpeed = null
                 )
-            )
+            }
+
 
             selectedVideoStateContainer.updateViewState(
                 SelectedVideoViewState.VideoSelected(
@@ -267,17 +268,13 @@ internal open class VideoFeedScreenViewModel(
 
                                 videoFeed.destinations.let { destinations ->
 
-                                    repositoryMedia.streamFeedPayments(
+                                    feedRepository.streamFeedPayments(
                                         chatId,
-                                        ChatMetaData(
-                                            itemId = currentItem.id,
-                                            itemLongId = ItemId(-1),
-                                            satsPerMinute = amount,
-                                            timeSeconds = 0,
-                                            speed = 1.0
-                                        ),
                                         videoFeed.id.value,
                                         currentItem.id.value,
+                                        0,
+                                        amount,
+                                        FeedPlayerSpeed(1.0),
                                         destinations
                                     )
                                 }

@@ -44,6 +44,7 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-feed-status')
 
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

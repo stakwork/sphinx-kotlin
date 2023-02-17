@@ -19,6 +19,7 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
@@ -70,6 +71,7 @@ internal class ChatContactViewModel @Inject constructor(
     memeServerTokenHandler: MemeServerTokenHandler,
     contactChatNavigator: ContactChatNavigator,
     repositoryMedia: RepositoryMedia,
+    feedRepository: FeedRepository,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -88,6 +90,7 @@ internal class ChatContactViewModel @Inject constructor(
     memeServerTokenHandler,
     contactChatNavigator,
     repositoryMedia,
+    feedRepository,
     chatRepository,
     contactRepository,
     messageRepository,

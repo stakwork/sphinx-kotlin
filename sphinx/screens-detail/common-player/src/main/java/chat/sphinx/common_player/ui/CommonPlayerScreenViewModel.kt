@@ -24,13 +24,9 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.FeedDestination
-import chat.sphinx.wrapper_feed.FeedDestinationSplit
-import chat.sphinx.wrapper_feed.FeedDestinationType
-import chat.sphinx.wrapper_feed.toFeedDestinationAddress
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastDestination
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,8 +39,6 @@ import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 internal inline val CommonPlayerScreenFragmentArgs.podcastId: FeedId
@@ -295,7 +289,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
                     playEpisode(
                         episode,
-                        episode.clipStartTime ?: 0
+                        (episode.clipStartTime ?: 0).toLong()
                     )
                 } else if (episode.isYouTubeVideo) {
                     playerViewStateContainer.updateViewState(
@@ -328,29 +322,25 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun playEpisode(episode: PodcastEpisode, startTime: Int) {
+    fun playEpisode(episode: PodcastEpisode, startTimeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
                 viewModelScope.launch(mainImmediate) {
+
+                    podcast.willStartPlayingEpisode(
+                        episode,
+                        startTimeMilliseconds,
+                        ::retrieveEpisodeDuration
+                    )
+
                     mediaPlayerServiceController.submitAction(
                         UserAction.ServiceAction.Play(
                             ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                            podcast.id.value,
-                            episode.id.value,
                             episode.episodeUrl,
-                            Sat(podcast.satsPerMinute),
-                            podcast.speed,
-                            startTime,
+                            podcast.getUpdatedContentFeedStatus(),
+                            podcast.getUpdatedContentEpisodeStatus()
                         )
                     )
-
-                    withContext(io) {
-                        podcast.didStartPlayingEpisode(
-                            episode,
-                            startTime,
-                            ::retrieveEpisodeDuration
-                        )
-                    }
 
                     viewStateContainer.updateViewState(
                         RecommendationsPodcastPlayerViewState.PodcastViewState.EpisodePlayed(
@@ -377,17 +367,15 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun seekTo(time: Int) {
+    fun seekTo(timeMilliseconds: Long) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
-                podcast.didSeekTo(time)
-
-                val metaData = podcast.getMetaData()
+                podcast.didSeekTo(timeMilliseconds)
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(
                         ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        metaData
+                        podcast.getUpdatedContentEpisodeStatus()
                     )
                 )
             }
@@ -399,22 +387,35 @@ class CommonPlayerScreenViewModel @Inject constructor(
             getPodcast()?.let { podcast ->
                 podcast.speed = speed
 
+                val contentFeedStatus = podcast.getUpdatedContentFeedStatus()
+
                 mediaPlayerServiceController.submitAction(
                     UserAction.AdjustSpeed(
                         ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        podcast.getMetaData()
+                        contentFeedStatus
                     )
                 )
             }
         }
     }
 
-    fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
         }
+
+        return duration
     }
 
     suspend fun playingVideoDidPause() {
@@ -478,8 +479,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
                         else -> {
                             fireworksCallback()
 
-                            val metaData = podcast.getMetaData(amount)
-
                             actionsRepository.trackFeedBoostAction(
                                 amount.value,
                                 podcast.getCurrentEpisode().id,
@@ -491,7 +490,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                 ?.toFeedDestinationAddress()
                                 ?.let { pubKey ->
 
-                                    val feedDestination: List<FeedDestination> = arrayListOf(
+                                    val feedDestinations: List<FeedDestination> = arrayListOf(
                                         FeedDestination(
                                             address = pubKey,
                                             split = FeedDestinationSplit(100.0),
@@ -504,8 +503,9 @@ class CommonPlayerScreenViewModel @Inject constructor(
                                         UserAction.SendBoost(
                                             ChatId(ChatId.NULL_CHAT_ID.toLong()),
                                             podcast.getCurrentEpisode().id.value,
-                                            metaData,
-                                            feedDestination
+                                            podcast.getUpdatedContentFeedStatus(amount),
+                                            podcast.getUpdatedContentEpisodeStatus(),
+                                            feedDestinations
                                         )
                                     )
                                 }

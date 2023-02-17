@@ -86,4 +86,6 @@ data class FeedItem(
 
     val downloaded: Boolean
         get()= localFile != null
+
+    var contentEpisodeStatus: ContentEpisodeStatus? = null
 }
