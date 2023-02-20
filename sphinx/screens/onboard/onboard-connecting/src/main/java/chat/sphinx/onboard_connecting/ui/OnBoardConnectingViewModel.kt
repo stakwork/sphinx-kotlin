@@ -354,54 +354,15 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             ResponseError("generateToken endpoint failed")
         )
 
-        if (relayTransportToken != null) {
-            networkQueryContact.generateToken(
-                password,
-                nodePubKey,
-                Triple(Pair(authToken, relayTransportToken), null, relayUrl)
-            ).collect { loadResponse ->
-                generateTokenResponse = loadResponse
-            }
-        } else {
-            networkQueryContact.generateToken(
-                relayUrl,
-                authToken,
-                password,
-                nodePubKey
-            ).collect { loadResponse ->
-                generateTokenResponse = loadResponse
-            }
-        }
+        if (token != null) {
 
-        @Exhaustive
-        when (generateTokenResponse) {
-            is LoadResponse.Loading -> {}
-            is Response.Error -> {
-                if (tokenRetries < 3) {
-                    tokenRetries += 1
+            val hMacKey = createHMacKey(
+                relayData = Triple(Pair(authToken, relayTransportToken), null, relayUrl),
+                transportKey = transportKey
+            )
 
-                    registerTokenAndStartOnBoard(
-                        ip,
-                        nodePubKey,
-                        password,
-                        redeemInviteDto,
-                        authToken,
-                        transportKey,
-                        relayTransportToken
-                    )
-                } else {
-                    submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
-                    navigator.popBackStack()
-                }
-            }
-            is Response.Success -> {
-
-                val hMacKey = createHMacKey(
-                    relayData = Triple(Pair(authToken, relayTransportToken), null, relayUrl),
-                    transportKey = transportKey
-                )
-
-                val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
+            val step1Message: OnBoardStep.Step1_WelcomeMessage? =
+                onBoardStepHandler.persistOnBoardStep1Data(
                     relayUrl,
                     authToken,
                     transportKey,
@@ -409,11 +370,76 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     inviterData
                 )
 
-                if (step1Message == null) {
-                    submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
-                    navigator.popBackStack()
-                } else {
-                    navigator.toOnBoardMessageScreen(step1Message)
+            if (step1Message == null) {
+                submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
+                navigator.popBackStack()
+            } else {
+                navigator.toOnBoardMessageScreen(step1Message)
+            }
+        } else {
+
+            if (relayTransportToken != null) {
+                networkQueryContact.generateToken(
+                    password,
+                    nodePubKey,
+                    Triple(Pair(authToken, relayTransportToken), null, relayUrl)
+                ).collect { loadResponse ->
+                    generateTokenResponse = loadResponse
+                }
+            } else {
+                networkQueryContact.generateToken(
+                    relayUrl,
+                    authToken,
+                    password,
+                    nodePubKey
+                ).collect { loadResponse ->
+                    generateTokenResponse = loadResponse
+                }
+            }
+
+            @Exhaustive
+            when (generateTokenResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    if (tokenRetries < 3) {
+                        tokenRetries += 1
+
+                        registerTokenAndStartOnBoard(
+                            ip,
+                            nodePubKey,
+                            password,
+                            redeemInviteDto,
+                            authToken,
+                            transportKey,
+                            relayTransportToken
+                        )
+                    } else {
+                        submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
+                        navigator.popBackStack()
+                    }
+                }
+                is Response.Success -> {
+
+                    val hMacKey = createHMacKey(
+                        relayData = Triple(Pair(authToken, relayTransportToken), null, relayUrl),
+                        transportKey = transportKey
+                    )
+
+                    val step1Message: OnBoardStep.Step1_WelcomeMessage? =
+                        onBoardStepHandler.persistOnBoardStep1Data(
+                            relayUrl,
+                            authToken,
+                            transportKey,
+                            hMacKey,
+                            inviterData
+                        )
+
+                    if (step1Message == null) {
+                        submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
+                        navigator.popBackStack()
+                    } else {
+                        navigator.toOnBoardMessageScreen(step1Message)
+                    }
                 }
             }
         }

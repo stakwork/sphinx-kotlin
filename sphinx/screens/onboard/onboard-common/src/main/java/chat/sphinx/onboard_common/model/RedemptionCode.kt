@@ -27,12 +27,6 @@ sealed class RedemptionCode(val identifier: String) {
                                 decodedSplit.elementAt(2)
                             )
                         }
-                        if (decodedSplit.elementAt(0) == ClaimConnect.DECODED_INDEX_0) {
-                            return ClaimConnect(
-                                decodedSplit.elementAt(1).toRelayUrl() ?: return null,
-                                decodedSplit.elementAt(2)
-                            )
-                        }
                     } else if (decodedSplit.size == 2) {
                         if (decodedSplit.elementAt(0) == AccountRestoration.DECODED_INDEX_0) {
                             return AccountRestoration(
@@ -47,6 +41,12 @@ sealed class RedemptionCode(val identifier: String) {
                         return SwarmConnect(
                             swarmSplit.elementAt(1).toRelayUrl() ?: return null,
                             swarmSplit.elementAt(2)
+                        )
+                    }
+                    if (swarmSplit.elementAt(0) == ClaimConnect.DECODED_INDEX_0) {
+                        return ClaimConnect(
+                            swarmSplit.elementAt(1).toRelayUrl() ?: return null,
+                            swarmSplit.elementAt(2).decodeBase64ToArray()?.decodeToString() ?: return null
                         )
                     }
                 }
