@@ -12,7 +12,7 @@ import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import kotlin.jvm.Throws
 
-    sealed class RedemptionCode(val identifier: String) {
+sealed class RedemptionCode(val identifier: String) {
 
     companion object {
         fun decode(code: String): RedemptionCode? {
@@ -23,6 +23,12 @@ import kotlin.jvm.Throws
                     if (decodedSplit.size == 3) {
                         if (decodedSplit.elementAt(0) == NodeInvite.DECODED_INDEX_0) {
                             return NodeInvite(
+                                decodedSplit.elementAt(1).toRelayUrl() ?: return null,
+                                decodedSplit.elementAt(2)
+                            )
+                        }
+                        if (decodedSplit.elementAt(0) == ClaimConnect.DECODED_INDEX_0) {
+                            return ClaimConnect(
                                 decodedSplit.elementAt(1).toRelayUrl() ?: return null,
                                 decodedSplit.elementAt(2)
                             )
@@ -138,6 +144,21 @@ import kotlin.jvm.Throws
                 @JvmSynthetic
                 internal operator fun invoke(ip: RelayUrl, pubKey: String): SwarmConnect =
                     SwarmConnect(ip, pubKey)
+            }
+        }
+
+        @Suppress("DataClassPrivateConstructor")
+        data class ClaimConnect private constructor(
+            val ip: RelayUrl,
+            val token: String,
+        ) : RedemptionCode(DECODED_INDEX_0) {
+
+            companion object {
+                const val DECODED_INDEX_0 = "claim"
+
+                @JvmSynthetic
+                internal operator fun invoke(ip: RelayUrl, token: String): ClaimConnect =
+                    ClaimConnect(ip, token)
             }
         }
 }
