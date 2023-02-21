@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha80 (2023-02-21)
+- Adds support for swarm QR codes
+
 # Version 1.0.0-alpha79 (2023-02-17)
 - Improves media players
 - Adds Content Feed Status sync between devices

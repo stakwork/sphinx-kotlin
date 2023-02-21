@@ -65,6 +65,26 @@ internal inline val OnBoardConnectingFragmentArgs.connectionCode: RedemptionCode
         return null
     }
 
+internal inline val OnBoardConnectingFragmentArgs.swarmConnect: RedemptionCode.SwarmConnect?
+    get() {
+        val redemptionCode = RedemptionCode.decode(argCode)
+
+        if (redemptionCode is RedemptionCode.SwarmConnect) {
+            return redemptionCode
+        }
+        return null
+    }
+
+internal inline val OnBoardConnectingFragmentArgs.swarmClaim: RedemptionCode.SwarmClaim?
+    get() {
+        val redemptionCode = RedemptionCode.decode(argCode)
+
+        if (redemptionCode is RedemptionCode.SwarmClaim) {
+            return redemptionCode
+        }
+        return null
+    }
+
 internal inline val OnBoardConnectingFragmentArgs.inviteCode: InviteString?
     get() = argCode.toValidInviteStringOrNull()
 
@@ -111,6 +131,21 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     nodePubKey = null,
                     password = connectionCode.password,
                     redeemInviteDto = null
+                )
+            } ?: args.swarmConnect?.let { swarmCode ->
+                getTransportKey(
+                    ip = swarmCode.ip,
+                    nodePubKey = swarmCode.pubKey,
+                    null,
+                    null,
+                )
+            } ?: args.swarmClaim?.let { claimCode ->
+                getTransportKey(
+                    ip = claimCode.ip,
+                    null,
+                    null,
+                    null,
+                    token = claimCode.token.toAuthorizationToken()
                 )
             } ?: args.inviteCode?.let { inviteCode ->
                 redeemInvite(inviteCode)
@@ -267,14 +302,69 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             }
         }
 
-        registerTokenAndStartOnBoard(
-            ip,
-            nodePubKey,
-            password,
-            redeemInviteDto,
-            token,
-            transportKey
+        if (token != null) {
+            continueWithToken(
+                token,
+                relayUrl,
+                transportKey,
+                redeemInviteDto
+            )
+        } else {
+            registerTokenAndStartOnBoard(
+                ip,
+                nodePubKey,
+                password,
+                redeemInviteDto,
+                token,
+                transportKey
+            )
+        }
+    }
+
+    private suspend fun continueWithToken(
+        token: AuthorizationToken,
+        relayUrl: RelayUrl,
+        transportKey: RsaPublicKey? = null,
+        redeemInviteDto: RedeemInviteDto?
+    ) {
+        val inviterData: OnBoardInviterData? = redeemInviteDto?.let { dto ->
+            OnBoardInviterData(
+                dto.nickname,
+                dto.pubkey?.toLightningNodePubKey(),
+                dto.route_hint,
+                dto.message,
+                dto.action,
+                dto.pin
+            )
+        }
+
+        val relayTransportToken = transportKey?.let { transportKey ->
+            relayDataHandler.retrieveRelayTransportToken(
+                token,
+                transportKey
+            )
+        } ?: null
+
+        val hMacKey = createHMacKey(
+            relayData = Triple(Pair(token, relayTransportToken), null, relayUrl),
+            transportKey = transportKey
         )
+
+        val step1Message: OnBoardStep.Step1_WelcomeMessage? =
+            onBoardStepHandler.persistOnBoardStep1Data(
+                relayUrl,
+                token,
+                transportKey,
+                hMacKey,
+                inviterData
+            )
+
+        if (step1Message == null) {
+            submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
+            navigator.popBackStack()
+        } else {
+            navigator.toOnBoardMessageScreen(step1Message)
+        }
     }
 
     private var tokenRetries = 0
@@ -365,13 +455,14 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     transportKey = transportKey
                 )
 
-                val step1Message: OnBoardStep.Step1_WelcomeMessage? = onBoardStepHandler.persistOnBoardStep1Data(
-                    relayUrl,
-                    authToken,
-                    transportKey,
-                    hMacKey,
-                    inviterData
-                )
+                val step1Message: OnBoardStep.Step1_WelcomeMessage? =
+                    onBoardStepHandler.persistOnBoardStep1Data(
+                        relayUrl,
+                        authToken,
+                        transportKey,
+                        hMacKey,
+                        inviterData
+                    )
 
                 if (step1Message == null) {
                     submitSideEffect(OnBoardConnectingSideEffect.GenerateTokenFailed)
