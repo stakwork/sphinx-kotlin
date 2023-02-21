@@ -65,7 +65,7 @@ internal inline val OnBoardConnectingFragmentArgs.connectionCode: RedemptionCode
         return null
     }
 
-internal inline val OnBoardConnectingFragmentArgs.swarmCode: RedemptionCode.SwarmConnect?
+internal inline val OnBoardConnectingFragmentArgs.swarmConnect: RedemptionCode.SwarmConnect?
     get() {
         val redemptionCode = RedemptionCode.decode(argCode)
 
@@ -75,11 +75,11 @@ internal inline val OnBoardConnectingFragmentArgs.swarmCode: RedemptionCode.Swar
         return null
     }
 
-internal inline val OnBoardConnectingFragmentArgs.claimCode: RedemptionCode.ClaimConnect?
+internal inline val OnBoardConnectingFragmentArgs.swarmClaim: RedemptionCode.SwarmClaim?
     get() {
         val redemptionCode = RedemptionCode.decode(argCode)
 
-        if (redemptionCode is RedemptionCode.ClaimConnect) {
+        if (redemptionCode is RedemptionCode.SwarmClaim) {
             return redemptionCode
         }
         return null
@@ -132,14 +132,14 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     password = connectionCode.password,
                     redeemInviteDto = null
                 )
-            } ?: args.swarmCode?.let { swarmCode ->
+            } ?: args.swarmConnect?.let { swarmCode ->
                 getTransportKey(
                     ip = swarmCode.ip,
                     nodePubKey = swarmCode.pubKey,
                     null,
                     null,
                 )
-            } ?: args.claimCode?.let { claimCode ->  
+            } ?: args.swarmClaim?.let { claimCode ->
                 getTransportKey(
                     ip = claimCode.ip,
                     null,
@@ -147,8 +147,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                     null,
                     token = claimCode.token.toAuthorizationToken()
                 )
-            }
-            ?: args.inviteCode?.let { inviteCode ->
+            } ?: args.inviteCode?.let { inviteCode ->
                 redeemInvite(inviteCode)
             } ?: run {
                 submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)

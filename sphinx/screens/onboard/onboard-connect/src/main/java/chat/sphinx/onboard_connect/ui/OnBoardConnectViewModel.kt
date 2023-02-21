@@ -74,10 +74,9 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 isValid = true
             }
             if (redemptionCode != null &&
-                redemptionCode is RedemptionCode.ClaimConnect) {
+                redemptionCode is RedemptionCode.SwarmClaim) {
                 isValid = true
             }
-
         } else if (vs is OnBoardConnectViewState.ExistingUser) {
             if (redemptionCode != null &&
                 redemptionCode is RedemptionCode.AccountRestoration) {
@@ -101,6 +100,15 @@ internal class OnBoardConnectViewModel @Inject constructor(
             )
             if (response is Response.Success) {
                 submitSideEffect(OnBoardConnectSideEffect.FromScanner(response.value))
+
+                val code = response.value.value
+                validateCode(code)
+
+                if (submitButtonViewStateContainer.value is OnBoardConnectSubmitButtonViewState.Enabled) {
+                    viewModelScope.launch(mainImmediate) {
+                        navigator.toOnBoardConnectingScreen(code)
+                    }
+                }
             }
         }
     }

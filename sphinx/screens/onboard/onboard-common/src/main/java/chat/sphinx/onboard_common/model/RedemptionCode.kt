@@ -12,7 +12,7 @@ import org.cryptonode.jncryptor.AES256JNCryptor
 import org.cryptonode.jncryptor.CryptorException
 import kotlin.jvm.Throws
 
-sealed class RedemptionCode(val identifier: String) {
+sealed class RedemptionCode {
 
     companion object {
         fun decode(code: String): RedemptionCode? {
@@ -43,8 +43,8 @@ sealed class RedemptionCode(val identifier: String) {
                             swarmSplit.elementAt(2)
                         )
                     }
-                    if (swarmSplit.elementAt(0) == ClaimConnect.DECODED_INDEX_0) {
-                        return ClaimConnect(
+                    if (swarmSplit.elementAt(0) == SwarmClaim.DECODED_INDEX_0) {
+                        return SwarmClaim(
                             swarmSplit.elementAt(1).toRelayUrl() ?: return null,
                             swarmSplit.elementAt(2).decodeBase64ToArray()?.decodeToString() ?: return null
                         )
@@ -57,7 +57,7 @@ sealed class RedemptionCode(val identifier: String) {
 
         class AccountRestoration private constructor(
             private val byteArrayToDecrypt: ByteArray
-        ) : RedemptionCode(DECODED_INDEX_0) {
+        ) : RedemptionCode() {
 
             companion object {
                 const val DECODED_INDEX_0 = "keys"
@@ -120,7 +120,7 @@ sealed class RedemptionCode(val identifier: String) {
         data class NodeInvite private constructor(
             val ip: RelayUrl,
             val password: String,
-        ) : RedemptionCode(DECODED_INDEX_0) {
+        ) : RedemptionCode() {
 
             companion object {
                 const val DECODED_INDEX_0 = "ip"
@@ -136,7 +136,7 @@ sealed class RedemptionCode(val identifier: String) {
         data class SwarmConnect private constructor(
             val ip: RelayUrl,
             val pubKey: String,
-        ) : RedemptionCode(DECODED_INDEX_0) {
+        ) : RedemptionCode() {
 
             companion object {
                 const val DECODED_INDEX_0 = "connect"
@@ -148,17 +148,17 @@ sealed class RedemptionCode(val identifier: String) {
         }
 
         @Suppress("DataClassPrivateConstructor")
-        data class ClaimConnect private constructor(
+        data class SwarmClaim private constructor(
             val ip: RelayUrl,
             val token: String,
-        ) : RedemptionCode(DECODED_INDEX_0) {
+        ) : RedemptionCode() {
 
             companion object {
                 const val DECODED_INDEX_0 = "claim"
 
                 @JvmSynthetic
-                internal operator fun invoke(ip: RelayUrl, token: String): ClaimConnect =
-                    ClaimConnect(ip, token)
+                internal operator fun invoke(ip: RelayUrl, token: String): SwarmClaim =
+                    SwarmClaim(ip, token)
             }
         }
 }
