@@ -146,6 +146,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleStakworkAuthorizeLink(stakworkAuthorizeLink)
             } ?: deepLink?.toCreateInvoiceLink()?.let { createInvoiceLink ->
                 handleCreateInvoiceLink(createInvoiceLink)
+            } ?: deepLink?.toRedeemSatsLink()?.let { redeemSatsLink ->
+                handleRedeemSatsLink(redeemSatsLink)
             }
         }
     }
@@ -292,6 +294,12 @@ internal class DashboardViewModel @Inject constructor(
     private fun handleStakworkAuthorizeLink(link: StakworkAuthorizeLink) {
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.StakworkAuthorizePopup(link)
+        )
+    }
+
+    private fun handleRedeemSatsLink(link: RedeemSatsLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.RedeemSatsPopup(link)
         )
     }
 
@@ -564,6 +572,40 @@ internal class DashboardViewModel @Inject constructor(
                         app.getString(R.string.dashboard_authorize_generic_error)
                     )
                 )
+            }
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
+            )
+        }
+    }
+
+    fun redeemSats() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        viewModelScope.launch(mainImmediate) {
+
+            if (viewState is DeepLinkPopupViewState.RedeemSatsPopup) {
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.RedeemSatsPopupProcessing
+                )
+
+                val response = repositoryDashboard.redeemSats(
+                    viewState.link.host,
+                    viewState.link.token,
+
+                )
+
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(response.cause.message)
+                        )
+                    }
+                    is Response.Success -> {
+                        networkRefresh()
+                    }
+                }
             }
 
             deepLinkPopupViewStateContainer.updateViewState(
