@@ -90,6 +90,7 @@
     <dimen name="badges_icon_create_size">128dp</dimen>
     <dimen name="badges_icon_upload_button_height">40dp</dimen>
     <dimen name="badges_icon_upload_button_width">140dp</dimen>
+    <dimen name="badges_icon_types">36dp</dimen>
     <dimen name="badges_text_create_button_size">18sp</dimen>
     <dimen name="badges_row_count_height">25dp</dimen>
     <dimen name="badges_row_count_width">45dp</dimen>

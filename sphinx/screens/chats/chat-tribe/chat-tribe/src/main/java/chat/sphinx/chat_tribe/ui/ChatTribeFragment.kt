@@ -512,11 +512,11 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
 
                                 includeLayoutTribeProfileInfoContainer.apply {
-                                    textViewCodingLanguages.text = viewState.profile.extras?.codingLanguages ?: "-"
-                                    textViewPriceToMeet.text = viewState.profile.price_to_meet.toLong().toSat()?.asFormattedString() ?: "0"
+//                                    textViewCodingLanguages.text = viewState.profile.extras?.codingLanguages ?: "-"
+//                                    textViewPriceToMeet.text = viewState.profile.price_to_meet.toLong().toSat()?.asFormattedString() ?: "0"
                                     textViewPosts.text = (viewState.profile.extras?.post?.size ?: 0).toString()
-                                    textViewTwitterAccount.text = viewState.profile.extras?.twitter?.first()?.formattedValue ?: "-"
-                                    textViewGithubAccount.text = viewState.profile.extras?.github?.first()?.formattedValue ?: "-"
+//                                    textViewTwitterAccount.text = viewState.profile.extras?.twitter?.first()?.formattedValue ?: "-"
+//                                    textViewGithubAccount.text = viewState.profile.extras?.github?.first()?.formattedValue ?: "-"
                                 }
                             }
                         }
