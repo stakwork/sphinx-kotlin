@@ -19,9 +19,6 @@
             android:name="argFeedUrl"
             app:argType="string" />
         <argument
-            android:name="argEpisodeDuration"
-            app:argType="long" />
-        <argument
             android:name="argFromFeed"
             app:argType="boolean" />
     </fragment>

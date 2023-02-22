@@ -2,15 +2,18 @@ package chat.sphinx.feature_service_media_player_android.model
 
 import android.media.MediaPlayer
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.Subscribed
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_feed.FeedDestination
-import chat.sphinx.wrapper_podcast.PodcastDestination
 
 internal class PodcastDataHolder private constructor(
     val chatId: ChatId,
     val podcastId: String,
     val episodeId: String,
     val mediaPlayer: MediaPlayer,
+    val feedUrl: FeedUrl,
+    val subscriptionStatus: Subscribed,
 ) {
     companion object {
         @JvmSynthetic
@@ -21,12 +24,16 @@ internal class PodcastDataHolder private constructor(
             satsPerMinute: Sat,
             mediaPlayer: MediaPlayer,
             speed: Double,
+            feedUrl: FeedUrl,
+            subscriptionStatus: Subscribed
         ): PodcastDataHolder =
             PodcastDataHolder(
                 chatId,
                 podcastId,
                 episodeId,
-                mediaPlayer
+                mediaPlayer,
+                feedUrl,
+                subscriptionStatus
             ).also {
                 it.setSpeed(speed)
                 it.setSatsPerMinute(satsPerMinute)
@@ -62,6 +69,9 @@ internal class PodcastDataHolder private constructor(
 
     val currentTimeSeconds: Int
         get() = mediaPlayer.currentPosition / 1000
+
+    val durationSeconds: Int
+        get() = mediaPlayer.duration / 1000
 
     val currentTimeMilliSeconds: Int
         get() = mediaPlayer.currentPosition

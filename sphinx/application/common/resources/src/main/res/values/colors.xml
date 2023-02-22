@@ -11,6 +11,8 @@
     <color name="listBG">#141E27</color>
     <color name="lightBG">#1A242E</color>
     <color name="profileBG">#1A242E</color>
+    <color name="inputBG1">#13181D</color>
+
 
     <color name="mainBottomIcons">#909BAA</color>
     <color name="chatListSelected">#151E27</color>
@@ -61,6 +63,7 @@
     <color name="whiteFiftyPercentOpacity">#80FFFFFF</color>
     <color name="whiteSeventyPercentOpacity">#B3FFFFFF</color>
     <color name="blackSemiTransparent">#80000000</color>
+    <color name="blackSemiTransparent70">#B3000000</color>
 
     <color name="greenBorder">#2EB379</color>
 

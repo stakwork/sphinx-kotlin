@@ -68,7 +68,7 @@
             android:fontFamily="@font/roboto_regular"
             android:text=""
             android:gravity="center|start"
-            android:maxLines="3"
+            android:maxLines="1"
             android:background="@android:color/transparent"
             android:layout_marginStart="@dimen/default_layout_margin"
             android:layout_marginBottom="@dimen/chat_footer_episode_label_vertical_margin"

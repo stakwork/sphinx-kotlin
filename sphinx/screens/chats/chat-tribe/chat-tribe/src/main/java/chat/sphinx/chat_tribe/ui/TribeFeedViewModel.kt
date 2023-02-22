@@ -11,7 +11,6 @@ import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
-import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
@@ -26,10 +25,12 @@ import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.toPodcastClipOrNull
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -43,7 +44,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -56,7 +56,6 @@ internal class TribeFeedViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val feedRepository: FeedRepository,
-    private val repositoryMedia: RepositoryMedia,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     private val podcastPlayerCoordinator: ViewModelCoordinator<PodcastPlayerRequest, PodcastPlayerResponse>,
 ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle),
@@ -258,8 +257,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         host = data.host,
                         feedUrl = data.feedUrl,
                         chatUUID = data.chatUUID,
-                        subscribed = true.toSubscribed(),
-                        currentEpisodeId = data.metaData?.itemId
+                        subscribed = false.toSubscribed()
                     )
                 }
 
@@ -269,10 +267,7 @@ internal class TribeFeedViewModel @Inject constructor(
 
                         feedRepository.getPodcastByChatId(args.chatId).collect { podcast ->
                             podcast?.let { nnPodcast ->
-                                podcastLoaded(
-                                    nnPodcast,
-                                    data
-                                )
+                                podcastLoaded(nnPodcast)
                             }
                         }
                     }
@@ -283,13 +278,7 @@ internal class TribeFeedViewModel @Inject constructor(
 
     private suspend fun podcastLoaded(
         podcast: Podcast,
-        feedData: TribeFeedData.Result.FeedData
     ) {
-
-        if (feedData.metaData != null) {
-            podcast.setMetaData(feedData.metaData)
-        }
-
         val clickPlayPause = OnClickCallback {
 
             val vs = podcastViewStateContainer.value
@@ -311,23 +300,18 @@ internal class TribeFeedViewModel @Inject constructor(
                         )
                     )
                 } else {
-                    withContext(io) {
-                        vs.podcast.didStartPlayingEpisode(
-                            episode,
-                            vs.podcast.currentTime,
-                            ::retrieveEpisodeDuration,
-                        )
-                    }
+                    vs.podcast.willStartPlayingEpisode(
+                        episode,
+                        vs.podcast.timeMilliSeconds,
+                        ::retrieveEpisodeDuration,
+                    )
 
                     mediaPlayerServiceController.submitAction(
                         UserAction.ServiceAction.Play(
                             args.chatId,
-                            vs.podcast.id.value,
-                            episode.id.value,
                             episode.episodeUrl,
-                            Sat(vs.podcast.satsPerMinute),
-                            vs.podcast.speed,
-                            vs.podcast.currentTime,
+                            vs.podcast.getUpdatedContentFeedStatus(),
+                            vs.podcast.getUpdatedContentEpisodeStatus()
                         )
                     )
                 }
@@ -345,12 +329,14 @@ internal class TribeFeedViewModel @Inject constructor(
                         val vs = podcastViewStateContainer.value
 
                         if (vs is PodcastViewState.PodcastVS) {
-                            val metaData = vs.podcast.getMetaData(tip)
+
+                            val contentFeedStatus = vs.podcast.getUpdatedContentFeedStatus(tip)
+                            val contentEpisodeStatus = vs.podcast.getUpdatedContentEpisodeStatus()
 
                             val feedBoost = FeedBoost(
                                 podcast.id,
-                                metaData.itemId,
-                                metaData.timeSeconds,
+                                contentFeedStatus.itemId ?: vs.podcast.getCurrentEpisode().id,
+                                contentEpisodeStatus.currentTime.value.toInt(),
                                 tip
                             )
 
@@ -363,7 +349,8 @@ internal class TribeFeedViewModel @Inject constructor(
                                 UserAction.SendBoost(
                                     args.chatId,
                                     vs.podcast.id.value,
-                                    metaData,
+                                    contentFeedStatus,
+                                    contentEpisodeStatus,
                                     vs.podcast.getFeedDestinations(),
                                 )
                             )
@@ -382,12 +369,12 @@ internal class TribeFeedViewModel @Inject constructor(
             }
 
             viewModelScope.launch(mainImmediate) {
-                vs.podcast.didSeekTo(vs.podcast.currentTime + 30_000)
+                vs.podcast.didSeekTo(vs.podcast.timeMilliSeconds + 30_000L)
 
                 mediaPlayerServiceController.submitAction(
                     UserAction.ServiceAction.Seek(
                         args.chatId,
-                        vs.podcast.getMetaData()
+                        vs.podcast.getUpdatedContentEpisodeStatus()
                     )
                 )
 
@@ -409,12 +396,26 @@ internal class TribeFeedViewModel @Inject constructor(
                 return@OnClickCallback
             }
 
-            repositoryMedia.updateChatMetaData(
-                args.chatId,
+            val contentFeedStatus = vs.podcast.getUpdatedContentFeedStatus()
+            feedRepository.updateContentFeedStatus(
                 vs.podcast.id,
-                vs.podcast.getMetaData(),
-                false
+                contentFeedStatus.feedUrl,
+                contentFeedStatus.subscriptionStatus,
+                args.chatId,
+                contentFeedStatus.itemId,
+                contentFeedStatus.satsPerMinute,
+                contentFeedStatus.playerSpeed
             )
+
+            val contentEpisodeStatus = vs.podcast.getUpdatedContentEpisodeStatus()
+            contentEpisodeStatus?.itemId?.let {episodeId ->
+                feedRepository.updateContentEpisodeStatus(
+                    vs.podcast.id,
+                    episodeId,
+                    contentEpisodeStatus.duration,
+                    contentEpisodeStatus.currentTime
+                )
+            }
 
             requestPodcastPlayer(vs)
         }
@@ -477,8 +478,7 @@ internal class TribeFeedViewModel @Inject constructor(
                 PodcastPlayerRequest(
                     chatId = args.chatId,
                     feedId = vs.podcast.id,
-                    feedUrl = vs.podcast.feedUrl,
-                    currentEpisodeDuration = vs.podcast.episodeDuration ?: 0
+                    feedUrl = vs.podcast.feedUrl
                 )
             )
             if (response is Response.Success) {
@@ -494,12 +494,12 @@ internal class TribeFeedViewModel @Inject constructor(
             podcastViewStateContainer.collect { podcastViewState ->
                 if (podcastViewState is PodcastViewState.PodcastVS.Available) {
                     chatRepository.getChatById(args.chatId).collect { chat ->
-                        chat?.metaData?.let { nnMetaData ->
-                            val vs = podcastViewStateContainer.value
-                            if (vs is PodcastViewState.PodcastVS) {
-                                vs.podcast.satsPerMinute = nnMetaData.satsPerMinute.value
-                            }
-                        }
+//                        chat?.metaData?.let { nnMetaData ->
+//                            val vs = podcastViewStateContainer.value
+//                            if (vs is PodcastViewState.PodcastVS) {
+//                                vs.podcast.satsPerMinute = nnMetaData.satsPerMinute.value
+//                            }
+//                        }
                         emit(true)
                     }
                 }
@@ -532,11 +532,22 @@ internal class TribeFeedViewModel @Inject constructor(
         }
     }
 
-    private fun retrieveEpisodeDuration(episodeUrl: String, localFile: File?): Long {
-        localFile?.let {
-            return Uri.fromFile(it).getMediaDuration(true)
-        } ?: run {
-            return Uri.parse(episodeUrl).getMediaDuration(false)
+    private fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
         }
+
+        return duration
     }
 }

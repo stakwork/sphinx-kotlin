@@ -3,6 +3,9 @@
     <string name="add_icon"></string>
     <string name="join_tribe_link">Código QR de la tribu</string>
     <string name="add_friend">Agregar Amigo</string>
+    <string name="add_tribe">Agregar Tribu</string>
+    <string name="discover_tags">Tags</string>
+    <string name="discover_open">Open</string>
     <string name="create_tribe">Crear Tribu</string>
     <string name="contacts">Contactos</string>
     <string name="profile">Perfil</string>
@@ -140,8 +143,13 @@
     <string name="podcast_search_placeholder_3">en el Podcast Index</string>
 
     <string name="dashboard_restore_progress">Restaurando: %s</string>
+    <string name="dashboard_restore_progress_contacts">Restaurando Contactos: %s</string>
+    <string name="dashboard_restore_progress_feeds">Restaurando Feeds: %s</string>
+    <string name="dashboard_restore_progress_messages">Restaurando Mensajes: %s</string>
     <string name="dashboard_stop_restore">Continuar más tarde</string>
 
     <string name="loading_recommendations">Cargando Recomendaciones...</string>
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+
+    <string name="time_left">Faltan %s</string>
 </resources>

@@ -2,7 +2,7 @@ package chat.sphinx.feature_service_media_player_android.service
 
 import android.content.Context
 import chat.sphinx.concept_repository_actions.ActionsRepository
-import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.feature_service_media_player_android.MediaPlayerServiceControllerImpl
 import chat.sphinx.feature_service_media_player_android.service.components.AudioManagerHandler
 import chat.sphinx.feature_service_media_player_android.service.components.SphinxAudioManagerHandler
@@ -60,10 +60,10 @@ internal class SphinxMediaPlayerService: MediaPlayerService() {
 
     @Inject
     @Suppress("PropertyName", "ProtectedInFinal")
-    protected lateinit var _repositoryMedia: RepositoryMedia
+    protected lateinit var _feedRepository: FeedRepository
 
-    override val repositoryMedia: RepositoryMedia
-        get() = _repositoryMedia
+    override val feedRepository: FeedRepository
+        get() = _feedRepository
 
     @Inject
     @Suppress("PropertyName", "ProtectedInFinal")

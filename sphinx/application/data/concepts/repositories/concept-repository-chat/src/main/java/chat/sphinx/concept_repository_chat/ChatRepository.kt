@@ -15,7 +15,9 @@ import chat.sphinx.wrapper_chat.TribeData
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
+import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
@@ -24,7 +26,9 @@ import kotlinx.coroutines.flow.Flow
  * them, and thus proc any [Flow] being collected
  * */
 interface ChatRepository {
+
     val getAllChats: Flow<List<Chat>>
+    val getAllTribeChats: Flow<List<Chat>>
     fun getChatById(chatId: ChatId): Flow<Chat?>
     fun getChatByUUID(chatUUID: ChatUUID): Flow<Chat?>
     fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?>
@@ -61,6 +65,13 @@ interface ChatRepository {
     fun joinTribe(
         tribeDto: TribeDto,
     ): Flow<LoadResponse<ChatDto, ResponseError>>
+
+    fun getAllDiscoverTribes(
+        page: Int,
+        itemsPerPage: Int,
+        searchTerm: String? = null,
+        tags: String? = null
+    ): Flow<List<TribeDto>>
 
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>

@@ -31,7 +31,7 @@ class NetworkQueryFeedSearchImpl(
         searchTerm: String,
         feedType: FeedType,
     ): Flow<LoadResponse<List<FeedSearchResultDto>, ResponseError>> =
-        networkRelayCall.getList(
+        networkRelayCall.getList(   
             url = String.format(
                 if (feedType.isPodcast())
                     ENDPOINT_PODCAST_SEARCH

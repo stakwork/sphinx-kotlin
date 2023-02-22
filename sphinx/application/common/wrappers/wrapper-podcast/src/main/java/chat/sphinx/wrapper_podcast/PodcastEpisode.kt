@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.PODCAST_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.TWITTER_TYPE
 import chat.sphinx.wrapper_podcast.FeedRecommendation.Companion.YOUTUBE_VIDEO_TYPE
 import java.io.File
+import java.util.*
 
 data class PodcastEpisode(
     override val id: FeedId,
@@ -30,7 +31,8 @@ data class PodcastEpisode(
     val clipStartTime: Int? = null,
     val clipEndTime: Int? = null,
     val topics: List<String> = listOf(),
-    val people: List<String> = listOf()
+    val people: List<String> = listOf(),
+    val recommendationPubKey: String? = null
 ): DownloadableFeedItem {
 
     companion object {
@@ -52,6 +54,46 @@ data class PodcastEpisode(
         result = _31 * result + id.hashCode()
         return result
     }
+
+    var contentEpisodeStatus: ContentEpisodeStatus? = null
+
+    fun getUpdatedContentEpisodeStatus(): ContentEpisodeStatus {
+        contentEpisodeStatus?.let {
+            return it
+        }
+        contentEpisodeStatus = ContentEpisodeStatus(
+            podcastId,
+            this.id,
+            FeedItemDuration(0),
+            FeedItemDuration((clipStartTime?.toLong() ?: 0) / 1000)
+        )
+        return contentEpisodeStatus!!
+    }
+
+    var durationMilliseconds: Long? = null
+        get() {
+            getUpdatedContentEpisodeStatus()?.duration?.value?.let {
+                if (it > 0) {
+                    return it * 1000
+                }
+            }
+            return null
+        }
+
+    var currentTimeSeconds: Long = 0
+        get() {
+            return (currentTimeMilliseconds ?: 0) / 1000
+        }
+
+    var currentTimeMilliseconds: Long? = null
+        get() {
+            getUpdatedContentEpisodeStatus()?.currentTime?.value?.let {
+                if (it > 0) {
+                    return it * 1000
+                }
+            }
+            return null
+        }
 
     var titleToShow: String = ""
         get() = title.value.trim()
@@ -75,7 +117,13 @@ data class PodcastEpisode(
         }
 
     val dateString: String
-        get() = date?.chatTimeFormat() ?: "-"
+        get() {
+            return date?.value?.let {
+                DateTime.getFormatMMMddyyyy(
+                    TimeZone.getTimeZone(DateTime.UTC)
+                ).format(it)
+            } ?: "-"
+        }
 
     val downloaded: Boolean
         get()= localFile != null
@@ -111,5 +159,10 @@ data class PodcastEpisode(
     var datePublishedTime: Long = 0
         get() {
             return date?.time ?: 0
+        }
+
+    var isBoostAllowed: Boolean = false
+        get() {
+            return recommendationPubKey?.toFeedDestinationAddress() != null
         }
 }

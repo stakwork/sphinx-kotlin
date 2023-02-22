@@ -1,7 +1,10 @@
 package chat.sphinx.wrapper_podcast
 
+import java.util.*
+
 data class FeedRecommendation(
     val id: String,
+    val pubKey: String?,
     val feedType: String,
     val description: String,
     val smallImageUrl: String?,
@@ -52,6 +55,16 @@ data class FeedRecommendation(
         get() {
             return timestamp.split("-").lastOrNull()?.toMilliseconds() ?: 0
         }
+
+    val daysAgo: String
+        get() {
+            date?.let { nnDate ->
+                return if (nnDate > 0) {
+                    Date(nnDate).getTimeAgo()
+                } else ""
+            }
+            return ""
+        }
 }
 
 @Suppress("NOTHING_TO_INLINE")
@@ -64,6 +77,35 @@ inline fun String.toMilliseconds(): Int {
         return (seconds * 1000) + (minutes * 60 * 1000) + (hours * 60 * 60 * 1000)
     }
     return 0
+}
+
+inline fun Date.getTimeAgo(): String {
+
+    val secondsMillis = 1000
+    val minuteMillis = 60 * secondsMillis
+    val hourMillis = 60 * minuteMillis
+    val dayMillis = 24 * hourMillis
+
+    var time = this.time
+    if (time < 1000000000000L) {
+        time *= 1000
+    }
+
+    val now = Calendar.getInstance().time.time
+    if (time > now || time <= 0) {
+        return "in the future"
+    }
+
+    val diff = now - time
+    return when {
+        diff < minuteMillis -> "moments ago"
+        diff < 2 * minuteMillis -> "a minute ago"
+        diff < 60 * minuteMillis -> "${diff / minuteMillis} minutes ago"
+        diff < 2 * hourMillis -> "an hour ago"
+        diff < 24 * hourMillis -> "${diff / hourMillis} hours ago"
+        diff < 48 * hourMillis -> "yesterday"
+        else -> "${diff / dayMillis} days ago"
+    }
 }
 
 

@@ -3,6 +3,7 @@
     <string name="add_icon"></string>
     <string name="join_tribe_link">Join Tribe Link</string>
     <string name="add_friend">Add Friend</string>
+    <string name="add_tribe">Add Tribe</string>
     <string name="create_tribe">Create Tribe</string>
     <string name="contacts">Contacts</string>
     <string name="profile">Profile</string>
@@ -139,8 +140,13 @@
     <string name="podcast_search_placeholder_3">on the Podcast Index</string>
 
     <string name="dashboard_restore_progress">Restoring: %s</string>
+    <string name="dashboard_restore_progress_contacts">Restoring Contacts: %s</string>
+    <string name="dashboard_restore_progress_feeds">Restoring Feeds: %s</string>
+    <string name="dashboard_restore_progress_messages">Restoring Messages: %s</string>
     <string name="dashboard_stop_restore">Continue later</string>
 
     <string name="loading_recommendations">Loading Recommendations...</string>
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+
+    <string name="time_left">%s left</string>
 </resources>

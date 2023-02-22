@@ -23,6 +23,7 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
@@ -43,6 +44,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -67,7 +69,8 @@ internal class ChatTribeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
     tribeChatNavigator: TribeChatNavigator,
-    private val repositoryMedia: RepositoryMedia,
+    repositoryMedia: RepositoryMedia,
+    feedRepository: FeedRepository,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
@@ -86,6 +89,7 @@ internal class ChatTribeViewModel @Inject constructor(
     memeServerTokenHandler,
     tribeChatNavigator,
     repositoryMedia,
+    feedRepository,
     chatRepository,
     contactRepository,
     messageRepository,
@@ -185,21 +189,14 @@ internal class ChatTribeViewModel @Inject constructor(
 
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
         getPodcast()?.let { podcast ->
-            val metaData = ChatMetaData(
-                itemId = podcastClip.itemID,
-                itemLongId = ItemId(-1),
-                satsPerMinute = getChat()?.metaData?.satsPerMinute ?: Sat(podcast.satsPerMinute),
-                timeSeconds = podcastClip.ts,
-                speed = 1.0
-            )
-
-            repositoryMedia.streamFeedPayments(
+            feedRepository.streamFeedPayments(
                 chatId,
-                metaData,
                 podcastClip.feedID.value,
                 podcastClip.itemID.value,
+                podcastClip.ts.toLong(),
+                getChat()?.metaData?.satsPerMinute ?: Sat(podcast.satsPerMinute),
+                FeedPlayerSpeed(1.0),
                 podcast.getFeedDestinations(podcastClip.pubkey),
-                false,
                 messageUUID
             )
         }
@@ -270,8 +267,7 @@ internal class ChatTribeViewModel @Inject constructor(
                         tribeData.host,
                         tribeData.feedUrl,
                         tribeData.chatUUID,
-                        tribeData.feedType,
-                        chat.metaData,
+                        tribeData.feedType
                     )
 
                 } ?: run {

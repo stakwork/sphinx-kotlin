@@ -2,7 +2,10 @@ package chat.sphinx.feature_coredb.adapters.chat
 
 import chat.sphinx.feature_coredb.adapters.common.DateTimeAdapter
 import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.lightning.Sat
 import com.squareup.moshi.Moshi
 import com.squareup.sqldelight.ColumnAdapter
 

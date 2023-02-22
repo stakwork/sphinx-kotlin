@@ -235,7 +235,7 @@ class FeedSearchAdapter(
             }
         }
 
-        fun searchResultsSelected(searchResult: FeedSearchResult) {
+        private fun searchResultsSelected(searchResult: FeedSearchResult) {
             binding.progressBarResultLoading.visible
             binding.layoutConstraintSearchResultsHolder.isClickable = false
 

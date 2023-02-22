@@ -41,7 +41,7 @@ internal class FeedAllViewModel @Inject constructor(
         FragmentActivity,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.NoRecommendations), FeedFollowingViewModel, FeedRecommendationsViewModel
+        >(dispatchers, FeedAllViewState.Disabled), FeedFollowingViewModel, FeedRecommendationsViewModel
 {
 
     override val feedRecommendationsHolderViewStateFlow: MutableStateFlow<List<FeedRecommendation>> = MutableStateFlow(emptyList())
@@ -64,6 +64,11 @@ internal class FeedAllViewModel @Inject constructor(
     }
 
     override fun loadFeedRecommendations() {
+        if (!feedRepository.recommendationsToggleStateFlow.value) {
+            updateViewState(FeedAllViewState.Disabled)
+            return
+        }
+
         viewModelScope.launch(mainImmediate) {
             feedRepository.getPodcastById(
                 FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID)
@@ -77,7 +82,9 @@ internal class FeedAllViewModel @Inject constructor(
             updateViewState(FeedAllViewState.Loading)
 
             repositoryDashboard.getRecommendedFeeds().collect { feedRecommended ->
-                feedRecommendationsHolderViewStateFlow.value = feedRecommended.toList()
+                feedRecommendationsHolderViewStateFlow.value = feedRecommended
+                    .sortedByDescending { it.date }
+                    .toList()
 
                 if (feedRecommended.isNotEmpty()) {
                     updateViewState(FeedAllViewState.RecommendedList)
@@ -117,9 +124,17 @@ internal class FeedAllViewModel @Inject constructor(
         feedId: FeedId,
         feedUrl: FeedUrl
     ) {
+        val playingContent = mediaPlayerServiceController.getPlayingContent()
+
+        feedRepository.restoreContentFeedStatusByFeedId(
+            feedId,
+            playingContent?.first,
+            playingContent?.second
+        )
+
         viewModelScope.launch(mainImmediate) {
             dashboardNavigator.toPodcastPlayerScreen(
-                chatId, feedId, feedUrl, 0
+                chatId, feedId, feedUrl
             )
         }
     }
@@ -155,8 +170,7 @@ internal class FeedAllViewModel @Inject constructor(
 
                 dashboardNavigator.toCommonPlayerScreen(
                     podcast.id,
-                    FeedId(feed.id),
-                    podcast.episodeDuration ?: 0
+                    FeedId(feed.id)
                 )
             }
         }

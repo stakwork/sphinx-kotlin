@@ -40,7 +40,7 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.dashboard.RestoreProgress
+import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
@@ -122,6 +122,7 @@ internal class DashboardViewModel @Inject constructor(
         handleDeepLink(args.argDeepLink)
 
         actionsRepository.syncActions()
+        feedRepository.restoreContentFeedStatuses()
     }
     
     private fun getRelayKeys() {
@@ -744,7 +745,8 @@ internal class DashboardViewModel @Inject constructor(
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = true,
-                    createTribeVisible = !owner.isOnVirtualNode()
+                    createTribeVisible = !owner.isOnVirtualNode(),
+                    discoverTribesVisible = false
                 )
             )
         }
@@ -854,7 +856,7 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(LoadResponse.Loading)
     }
 
-    private val _restoreStateFlow: MutableStateFlow<RestoreProgress?> by lazy {
+    private val _restoreProgressStateFlow: MutableStateFlow<RestoreProgressViewState?> by lazy {
         MutableStateFlow(null)
     }
 
@@ -871,8 +873,8 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
-    val restoreStateFlow: StateFlow<RestoreProgress?>
-        get() = _restoreStateFlow.asStateFlow()
+    val restoreProgressStateFlow: StateFlow<RestoreProgressViewState?>
+        get() = _restoreProgressStateFlow.asStateFlow()
 
     private var jobNetworkRefresh: Job? = null
     private var jobPushNotificationRegistration: Job? = null
@@ -908,11 +910,44 @@ internal class DashboardViewModel @Inject constructor(
                         val restoreProgress = response.value
 
                         if (restoreProgress.restoring) {
-                            _restoreStateFlow.value = restoreProgress
+
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_contacts,
+                                false
+                            )
                         }
                     }
                 }
             }
+
+            repositoryDashboard.networkRefreshFeedContent.collect { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Success -> {
+                        val restoreProgress = response.value
+
+                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_feeds,
+                                true
+                            )
+                        } else {
+                            _restoreProgressStateFlow.value = null
+
+                            _networkStateFlow.value = Response.Success(true)
+                        }
+                    }
+                    is Response.Error -> {
+                        _networkStateFlow.value = response
+                    }
+                    is LoadResponse.Loading -> {
+                        _networkStateFlow.value = response
+                    }
+                }
+            }
+
 
             if (_networkStateFlow.value is Response.Error) {
                 jobNetworkRefresh?.cancel()
@@ -942,9 +977,13 @@ internal class DashboardViewModel @Inject constructor(
                         val restoreProgress = response.value
 
                         if (restoreProgress.restoring && restoreProgress.progress < 100) {
-                            _restoreStateFlow.value = restoreProgress
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_messages,
+                                true
+                            )
                         } else {
-                            _restoreStateFlow.value = null
+                            _restoreProgressStateFlow.value = null
 
                             _networkStateFlow.value = Response.Success(true)
                         }
@@ -966,7 +1005,7 @@ internal class DashboardViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
 
             _networkStateFlow.value = Response.Success(true)
-            _restoreStateFlow.value = null
+            _restoreProgressStateFlow.value = null
 
             repositoryDashboard.didCancelRestore()
         }

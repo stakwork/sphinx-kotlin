@@ -49,7 +49,7 @@ data class FeedItem(
             imageUrl?.let {
                 return it
             }
-            return null
+            return feed?.imageUrlToShow
         }
 
     var thumbnailUrlToShow: PhotoUrl? = null
@@ -86,4 +86,6 @@ data class FeedItem(
 
     val downloaded: Boolean
         get()= localFile != null
+
+    var contentEpisodeStatus: ContentEpisodeStatus? = null
 }

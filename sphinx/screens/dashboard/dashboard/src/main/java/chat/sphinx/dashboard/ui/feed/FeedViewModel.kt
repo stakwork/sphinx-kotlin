@@ -122,10 +122,12 @@ class FeedViewModel @Inject constructor(
     }
 
     private fun addSearchTerm(searchTerm: String) {
-        for (st in searchFeedsTerm) {
+        searchFeedsTerm.lastOrNull()?.let { st ->
             if (searchTerm.contains(st)) {
-              searchFeedsTerm.remove(st)
-            }
+                searchFeedsTerm.remove(st)
+            } else if (st.contains(searchTerm)) {
+                return
+            } else {}
         }
         searchFeedsTerm.add(searchTerm)
     }
@@ -189,7 +191,7 @@ class FeedViewModel @Inject constructor(
                     searchResultImageUrl = searchResult.imageUrl?.toPhotoUrl(),
                     chatUUID = null,
                     subscribed = false.toSubscribed(),
-                    currentEpisodeId = null
+                    currentItemId = null
                 )
 
                 @Exhaustive
@@ -220,8 +222,7 @@ class FeedViewModel @Inject constructor(
                 dashboardNavigator.toPodcastPlayerScreen(
                     feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     feed.id,
-                    feed.feedUrl,
-                    0
+                    feed.feedUrl
                 )
             }
             feed.isVideo -> {

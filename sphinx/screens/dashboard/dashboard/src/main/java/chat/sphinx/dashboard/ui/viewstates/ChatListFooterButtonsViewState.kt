@@ -9,5 +9,6 @@ sealed class ChatListFooterButtonsViewState: ViewState<ChatListFooterButtonsView
     data class ButtonsVisibility(
         val addFriendVisible: Boolean,
         val createTribeVisible: Boolean,
+        val discoverTribesVisible: Boolean
     ) : ChatListFooterButtonsViewState()
 }

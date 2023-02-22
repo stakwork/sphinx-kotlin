@@ -218,8 +218,8 @@ class RecommendedItemsAdapter (
                     )
                 }
 
-                textViewRecommendedTitle.text = podcastEpisode.title.value
-                textViewRecommendedDescription.text = podcastEpisode.description?.value ?: "-"
+                textViewRecommendedTitle.text = podcastEpisode.description?.value ?: "-"
+                textViewRecommendedDescription.text = podcastEpisode.title.value
 
                 imageViewItemRowRecommendationType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, podcastEpisode.getIconType())

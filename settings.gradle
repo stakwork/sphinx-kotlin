@@ -109,6 +109,10 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-cryp
 include ':sphinx:application:network:features:queries:feature-network-query-crypter'
 include ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys'
 include ':sphinx:application:network:features:queries:feature-network-query-transport-key'
+include ':sphinx:application:network:concepts:queries:concept-network-query-action-track'
+include ':sphinx:application:network:features:queries:feature-network-query-action-track'
+include ':sphinx:application:network:concepts:queries:concept-network-query-discover-tribes'
+include ':sphinx:application:network:features:queries:feature-network-query-discover-tribes'
 
 // Activity
 include ':sphinx:activity:hilt-qualifiers'
@@ -180,6 +184,9 @@ include ':sphinx:screens-detail:web-view:web-view'
 include ':sphinx:screens-detail:newsletter-detail:newsletter-detail'
 include ':sphinx:screens-detail:video-screen:video-screen'
 include ':sphinx:screens-detail:notification-level:notification-level'
+include ':sphinx:screens-detail:common-player'
+include ':sphinx:screens-detail:tribes-discover:tribes-discover'
+include ':sphinx:screens-detail:tribes-discover:tribes-discover-view-model-coordinator'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'
@@ -320,3 +327,5 @@ include ':sphinx:application:network:concepts:queries:concept-network-query-acti
 include ':sphinx:application:network:features:queries:feature-network-query-action-track'
 include ':sphinx:screens-detail:common-player'
 include ':sphinx:screens-detail:tribe-badge'
+include ':sphinx:application:network:concepts:queries:concept-network-query-feed-status'
+include ':sphinx:application:network:features:queries:feature-network-query-feed-status'

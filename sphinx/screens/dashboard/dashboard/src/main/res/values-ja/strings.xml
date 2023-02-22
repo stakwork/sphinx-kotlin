@@ -3,6 +3,9 @@
     <string name="add_icon"></string>
     <string name="join_tribe_link">Tribe参加リンク</string>
     <string name="add_friend">友だちを追加</string>
+    <string name="add_tribe">Add Tribe</string>
+    <string name="discover_tags">Tags</string>
+    <string name="discover_open">Open</string>
     <string name="create_tribe">Tribeを作る</string>
     <string name="contacts">友だちリスト</string>
     <string name="profile">プロフィール</string>
@@ -140,8 +143,13 @@
     <string name="podcast_search_placeholder_3">on the Podcast Index</string>
 
     <string name="dashboard_restore_progress">Restoring: %s</string>
+    <string name="dashboard_restore_progress_contacts">Restoring Contacts: %s</string>
+    <string name="dashboard_restore_progress_feeds">Restoring Feeds: %s</string>
+    <string name="dashboard_restore_progress_messages">Restoring Messages: %s</string>
     <string name="dashboard_stop_restore">Continue later</string>
 
     <string name="loading_recommendations">Loading Recommendations...</string>
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+
+    <string name="time_left">%s left</string>
 </resources>
