@@ -148,6 +148,7 @@
 
     <string name="tribe_member_profile_send_sats">Send Sats</string>
     <string name="tribe_member_profile_earn_badges" translatable="false">Earn Badges</string>
+    <string name="tribe_member_profile_on_chain" translatable="false">ON-CHAIN</string>
     <string name="tribe_member_profile_price_to_meet">Price to Meet:</string>
     <string name="tribe_member_profile_coding_languages">Coding Languages:</string>
     <string name="tribe_member_profile_post">Posts:</string>
