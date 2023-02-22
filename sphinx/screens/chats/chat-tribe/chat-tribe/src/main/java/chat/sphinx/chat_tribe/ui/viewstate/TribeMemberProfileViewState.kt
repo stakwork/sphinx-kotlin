@@ -27,4 +27,16 @@ sealed class TribeMemberProfileViewState: MotionLayoutViewState<TribeMemberProfi
             motionLayout.setProgress(1F, 1F)
         }
     }
+
+    object FullScreen: TribeMemberProfileViewState() {
+        override val startSetId: Int
+            get() = R.id.motion_scene_tribe_member_profile_open
+        override val endSetId: Int?
+            get() = R.id.motion_scene_tribe_member_profile_fullscreen
+
+        override fun restoreMotionScene(motionLayout: MotionLayout) {
+            motionLayout.setTransition(R.id.transition_tribe_member_profile_open_to_fullscreen)
+            motionLayout.setProgress(1F, 1F)
+        }
+    }
 }

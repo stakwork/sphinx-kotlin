@@ -201,6 +201,9 @@ internal class ChatTribeFragment: ChatFragment<
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
                 }
             }
+            includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRow1.setOnClickListener {
+                viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.FullScreen)
+            }
         }
 
         footerBinding.editTextChatFooter.addTextChangedListener(object : TextWatcher {
