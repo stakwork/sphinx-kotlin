@@ -88,13 +88,13 @@
         android:id="@+id/constraint_layout_tribe_recycler_row"
         android:layout_width="match_parent"
         android:layout_height="334dp"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_row_1">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_view_messages"
+            android:id="@+id/recycler_view_badges"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/headerBG"

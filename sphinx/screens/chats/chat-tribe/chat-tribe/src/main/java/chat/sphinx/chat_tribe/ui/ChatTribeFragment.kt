@@ -14,6 +14,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -23,6 +25,8 @@ import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
+import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
+import chat.sphinx.chat_tribe.adapters.BadgesItemFooterAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
@@ -46,7 +50,6 @@ import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
@@ -114,6 +117,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
+    private val badgesListViewModel: BadgesListViewModel by viewModels()
 
 
     @Inject
@@ -198,10 +202,12 @@ internal class ChatTribeFragment: ChatFragment<
                     viewModel.goToPaymentSend()
                 }
                 layoutConstraintDismissLine.setOnClickListener {
+                    includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRecyclerRow.gone
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
                 }
             }
             includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRow1.setOnClickListener {
+                includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRecyclerRow.visible
                 viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.FullScreen)
             }
         }
@@ -233,6 +239,24 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         mentionMembersPopup.listviewMentionTribeMembers.adapter = MessageMentionsAdapter(binding.root.context, mutableListOf())
+
+        tribeMemberProfileBinding.includeLayoutTribeMemberProfileDetails
+            .includeLayoutTribeProfileInfoContainer.recyclerViewBadges
+            .apply {
+                val linearLayoutManager = LinearLayoutManager(context)
+                val badgesItemsAdapter = BadgesItemAdapter(
+                    imageLoader,
+                    viewLifecycleOwner,
+                    onStopSupervisor,
+                    badgesListViewModel
+                )
+                val badgesItemFooterAdapter =
+                    BadgesItemFooterAdapter(requireActivity() as InsetterActivity)
+                this.setHasFixedSize(false)
+                layoutManager = linearLayoutManager
+                adapter = ConcatAdapter(badgesItemsAdapter, badgesItemFooterAdapter)
+                itemAnimator = null
+            }
     }
 
     override fun onDestroyView() {
