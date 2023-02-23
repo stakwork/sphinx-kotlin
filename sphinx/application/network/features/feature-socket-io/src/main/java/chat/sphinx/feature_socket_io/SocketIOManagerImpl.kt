@@ -40,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
+import java.net.URI
 import java.util.concurrent.TimeUnit
 import kotlin.collections.LinkedHashSet
 
@@ -251,7 +252,11 @@ class SocketIOManagerImpl(
             .writeTimeout(0L, TimeUnit.SECONDS)
             .build()
 
+        val socketURI = URI(nnRelayData.third.value + "/socket.io")
+        val socketURL = socketURI.toURL()
+
         val options: IO.Options = IO.Options().apply {
+            path = socketURI.rawPath
             callFactory = client
             webSocketFactory = client
             reconnection = true
@@ -268,7 +273,7 @@ class SocketIOManagerImpl(
         val socket: Socket = try {
             // TODO: Need to add listener to relayData in case it is changed
             //  need to disconnect and open a new socket.
-            IO.socket(nnRelayData.third.value, options)
+            IO.socket(socketURL.protocol + "://" + socketURL.authority, options)
         } catch (e: Exception) {
             val msg = "Failed to create socket-io instance"
             LOG.e(TAG, msg, e)
