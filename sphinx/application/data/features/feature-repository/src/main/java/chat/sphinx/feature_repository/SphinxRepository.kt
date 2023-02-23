@@ -5058,9 +5058,13 @@ abstract class SphinxRepository(
                     is Response.Success -> {
 
                         val sig = loadResponse.value.sig
-                        val publicKey = accountOwner.value?.getNodeDescriptor()
-                        val urlString =
-                            "https://auth.sphinx.chat/oauth_verify?id=$id&sig=$sig&pubkey=$publicKey"
+                        val publicKey = accountOwner.value?.nodePubKey?.value ?: ""
+
+                        var urlString = "https://auth.sphinx.chat/oauth_verify?id=$id&sig=$sig&pubkey=$publicKey"
+
+                        accountOwner.value?.routeHint?.value?.let {
+                            urlString += "&route_hint=$it"
+                        }
 
                         response = Response.Success(urlString)
                     }
