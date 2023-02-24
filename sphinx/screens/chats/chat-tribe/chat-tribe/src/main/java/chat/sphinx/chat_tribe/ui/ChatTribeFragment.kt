@@ -33,6 +33,7 @@ import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBindi
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.KnownBadgesViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -45,6 +46,7 @@ import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
+import chat.sphinx.resources.databinding.LayoutKnownBadgesBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
@@ -77,6 +79,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutPopup
     private val tribeMemberProfileBinding: LayoutTribeMemberProfileBinding
         get() = binding.includeLayoutTribeMemberProfile
+    private val knownBadgesBinding: LayoutKnownBadgesBinding
+        get() = binding.includeLayoutKnownBadgesList
 
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
@@ -205,10 +209,23 @@ internal class ChatTribeFragment: ChatFragment<
                     includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRecyclerRow.gone
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
                 }
+                includeLayoutTribeSendSatsBar.layoutConstraintEarnBadges.setOnClickListener {
+                    viewModel.knownBadgesListViewStateContainer.updateViewState(KnownBadgesViewState.Open)
+                }
+
             }
             includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRow1.setOnClickListener {
                 includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRecyclerRow.visible
                 viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.FullScreen)
+            }
+        }
+
+        knownBadgesBinding.apply {
+            (requireActivity() as InsetterActivity).addKeyboardPadding(root)
+
+            includeLayoutKnownBadgesDetails.includeLayoutKnownBadgesHeader.textViewDetailScreenHeaderNavBack.setOnClickListener {
+                viewModel.knownBadgesListViewStateContainer.updateViewState(KnownBadgesViewState.Closed)
+                viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Open)
             }
         }
 
@@ -283,6 +300,15 @@ internal class ChatTribeFragment: ChatFragment<
             if (viewModel.tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
                 viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
             } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.handleCommonChatOnBackPressed()
+                }
+            }
+            if (viewModel.knownBadgesListViewStateContainer.value is KnownBadgesViewState.Open) {
+                viewModel.knownBadgesListViewStateContainer.updateViewState(
+                    KnownBadgesViewState.Closed
+                )
+            } else  {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.handleCommonChatOnBackPressed()
                 }
@@ -458,6 +484,13 @@ internal class ChatTribeFragment: ChatFragment<
             viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->
                 tribeMemberProfileBinding.root.setTransitionDuration(250)
                 viewState.transitionToEndSet(tribeMemberProfileBinding.root)
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.knownBadgesListViewStateContainer.collect { viewState ->
+                knownBadgesBinding.root.setTransitionDuration(250)
+                viewState.transitionToEndSet(knownBadgesBinding.root)
             }
         }
 

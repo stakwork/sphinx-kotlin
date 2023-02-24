@@ -154,6 +154,8 @@
     <string name="tribe_member_profile_post">Posts:</string>
     <string name="tribe_member_profile_twitter">Twitter:</string>
     <string name="tribe_member_profile_github">Github:</string>
+    <string name="known_badges_title" translatable="false">LIST OF KNOWN BADGES</string>
+
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

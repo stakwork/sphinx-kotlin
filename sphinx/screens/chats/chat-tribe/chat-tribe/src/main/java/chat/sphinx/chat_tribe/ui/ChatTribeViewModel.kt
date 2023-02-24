@@ -12,6 +12,7 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.chat_tribe.ui.viewstate.KnownBadgesViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
@@ -127,6 +128,10 @@ internal class ChatTribeViewModel @Inject constructor(
 
     val tribeMemberProfileViewStateContainer: ViewStateContainer<TribeMemberProfileViewState> by lazy {
         ViewStateContainer(TribeMemberProfileViewState.Closed)
+    }
+
+    val knownBadgesListViewStateContainer: ViewStateContainer<KnownBadgesViewState> by lazy {
+        ViewStateContainer(KnownBadgesViewState.Closed)
     }
 
     val tribeMemberDataViewStateContainer: ViewStateContainer<TribeMemberDataViewState> by lazy {
@@ -400,6 +405,11 @@ internal class ChatTribeViewModel @Inject constructor(
             if (tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
                 tribeMemberProfileViewStateContainer.updateViewState(
                     TribeMemberProfileViewState.Closed
+                )
+            }
+            if (knownBadgesListViewStateContainer.value is KnownBadgesViewState.Open) {
+                knownBadgesListViewStateContainer.updateViewState(
+                    KnownBadgesViewState.Closed
                 )
             }
         }

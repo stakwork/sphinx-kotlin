@@ -71,7 +71,7 @@ internal class TribeBadgesFragment: SideEffectFragment<
         }
     }
     private fun setupHeaderScreen() {
-        binding.includeTribeBadgesHeader.apply {
+        binding.includeLayoutKnownBadgesTitle.apply {
             textViewDetailScreenHeaderNavBack.visible
             textViewDetailScreenHeaderName.text = "Tribe Badges"
             textViewDetailScreenClose.gone
