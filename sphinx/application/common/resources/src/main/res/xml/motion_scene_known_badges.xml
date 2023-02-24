@@ -19,9 +19,7 @@
         </Constraint>
 
         <Constraint android:id="@+id/include_layout_known_badges_details"
-            motion:layout_editor_absoluteY="107dp"
-            android:layout_height="wrap_content"
-            motion:layout_editor_absoluteX="0dp"
+            android:layout_height="match_parent"
             android:layout_width="match_parent">
             <Layout
                 android:layout_width="match_parent"
@@ -48,8 +46,9 @@
 
         <Constraint android:id="@+id/include_layout_known_badges_details">
             <Layout
+                android:layout_marginTop="46dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
             <PropertySet android:visibility="visible" />
         </Constraint>

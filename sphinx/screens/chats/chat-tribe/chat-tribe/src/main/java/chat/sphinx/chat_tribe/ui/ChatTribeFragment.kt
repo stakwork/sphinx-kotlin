@@ -28,6 +28,7 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.BadgesItemFooterAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
+import chat.sphinx.chat_tribe.adapters.TribeKnownBadgesAdapter
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
@@ -274,6 +275,20 @@ internal class ChatTribeFragment: ChatFragment<
                 adapter = ConcatAdapter(badgesItemsAdapter, badgesItemFooterAdapter)
                 itemAnimator = null
             }
+
+        knownBadgesBinding.includeLayoutKnownBadgesDetails.recyclerViewList.apply {
+            val linearLayoutManager = LinearLayoutManager(context)
+            val tribeKnownBadgesAdapter = TribeKnownBadgesAdapter(
+                this,
+                linearLayoutManager,
+                imageLoader,
+                viewLifecycleOwner,
+                badgesListViewModel
+            )
+            layoutManager = linearLayoutManager
+            adapter = tribeKnownBadgesAdapter
+            itemAnimator = null
+        }
     }
 
     override fun onDestroyView() {
