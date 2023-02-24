@@ -80,6 +80,9 @@
     <string name="dashboard_authorize_button">AUTHORIZE</string>
     <string name="dashboard_authorize_generic_error">Something went wrong while authorizing external source, please try again later</string>
 
+    <string name="dashboard_redeem_sats_popup_title">Redeem %s sats from:</string>
+    <string name="dashboard_redeem_sats_button">Confirm</string>
+
     <string name="dashboard_connect_button">CONNECT</string>
     <string name="dashboard_connect_price_to_meet">Price to meet: %s</string>
     <string name="dashboard_connect_description_missing">No description</string>

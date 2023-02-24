@@ -65,6 +65,11 @@ interface RepositoryDashboard {
         challenge: String
     ): Response<String, ResponseError>
 
+    suspend fun redeemSats(
+        host: String,
+        token: String
+    ): Response<Boolean, ResponseError>
+
     suspend fun savePeopleProfile(
         body: String
     ): Response<Boolean, ResponseError>

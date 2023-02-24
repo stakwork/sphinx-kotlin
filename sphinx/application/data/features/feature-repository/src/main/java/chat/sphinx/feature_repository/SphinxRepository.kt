@@ -44,6 +44,7 @@ import chat.sphinx.concept_network_query_subscription.model.PostSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
+import chat.sphinx.concept_network_query_verify_external.model.RedeemSatsDto
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -5058,10 +5059,45 @@ abstract class SphinxRepository(
 
                         val sig = loadResponse.value.sig
                         val publicKey = accountOwner.value?.nodePubKey?.value ?: ""
-                        val urlString =
-                            "https://auth.sphinx.chat/oauth_verify?id=$id&sig=$sig&pubkey=$publicKey"
+
+                        var urlString = "https://auth.sphinx.chat/oauth_verify?id=$id&sig=$sig&pubkey=$publicKey"
+
+                        accountOwner.value?.routeHint?.value?.let {
+                            urlString += "&route_hint=$it"
+                        }
 
                         response = Response.Success(urlString)
+                    }
+                }
+            }
+        }.join()
+
+        return response ?: Response.Error(ResponseError("Returned before completing"))
+    }
+
+    override suspend fun redeemSats(
+        host: String,
+        token: String
+    ): Response<Boolean, ResponseError> {
+        var response: Response<Boolean, ResponseError>? = null
+
+        applicationScope.launch(mainImmediate) {
+            networkQueryAuthorizeExternal.redeemSats(
+                host,
+                RedeemSatsDto(
+                    accountOwner.value?.getNodeDescriptor(),
+                    token
+                )
+            ).collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+
+                    is Response.Success -> {
+                        response = Response.Success(true)
                     }
                 }
             }
