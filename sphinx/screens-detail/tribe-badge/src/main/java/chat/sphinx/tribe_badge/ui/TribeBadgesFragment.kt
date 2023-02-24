@@ -63,6 +63,7 @@ internal class TribeBadgesFragment: SideEffectFragment<
                 linearLayoutManager,
                 imageLoader,
                 viewLifecycleOwner,
+                onStopSupervisor,
                 viewModel
             )
             layoutManager = linearLayoutManager
