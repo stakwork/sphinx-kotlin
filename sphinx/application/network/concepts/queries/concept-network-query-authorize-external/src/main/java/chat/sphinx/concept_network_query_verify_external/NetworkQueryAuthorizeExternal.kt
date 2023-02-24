@@ -1,9 +1,6 @@
 package chat.sphinx.concept_network_query_verify_external
 
-import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
-import chat.sphinx.concept_network_query_verify_external.model.SignBase64Dto
-import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalDto
-import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalInfoDto
+import chat.sphinx.concept_network_query_verify_external.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.AuthorizationToken
@@ -28,6 +25,11 @@ abstract class NetworkQueryAuthorizeExternal {
         challenge: String,
         token: String,
         info: VerifyExternalInfoDto,
+    ): Flow<LoadResponse<Any, ResponseError>>
+
+    abstract fun redeemSats(
+        host: String,
+        info: RedeemSatsDto,
     ): Flow<LoadResponse<Any, ResponseError>>
 
     abstract fun getPersonInfo(
