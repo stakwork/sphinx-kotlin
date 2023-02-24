@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha81 (2023-02-24)
+- Adds support for Stakwork authentication
+- Fixes issue on chat keyboard
+- Improves socket connection
+
 # Version 1.0.0-alpha80 (2023-02-21)
 - Adds support for swarm QR codes
 
