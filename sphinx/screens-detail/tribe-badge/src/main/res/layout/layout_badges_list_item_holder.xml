@@ -52,10 +52,20 @@
             app:layout_constraintTop_toBottomOf="@+id/text_view_badge_title"
             tools:text="Post 1000 non-consecutive\n messages in the tribe" />
 
+        <include
+            android:id="@+id/layout_button_template"
+            layout="@layout/layout_button_small"
+            android:layout_width="@dimen/player_bar_height_with_shadow"
+            android:layout_height="@dimen/custom_boost_button_xy"
+            android:layout_marginTop="@dimen/default_header_headline_margin_vertical"
+            app:layout_constraintStart_toStartOf="@+id/text_view_badge_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badge_description" />
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_badges_row_count"
             android:layout_width="@dimen/badges_row_count_width"
             android:layout_height="@dimen/badges_row_count_height"
+            android:layout_marginStart="20dp"
             android:layout_marginTop="@dimen/default_half_layout_margin"
             android:background="@drawable/chat_initials_circle"
             android:backgroundTint="@color/lightDivider"
@@ -63,7 +73,8 @@
             android:gravity="center"
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_text_size_list_row_headline"
-            app:layout_constraintStart_toStartOf="@+id/text_view_badge_description"
+            app:layout_constraintBottom_toBottomOf="@+id/layout_button_template"
+            app:layout_constraintStart_toEndOf="@+id/layout_button_template"
             app:layout_constraintTop_toBottomOf="@+id/text_view_badge_description"
             tools:text="650"
             tools:visibility="visible" />
@@ -93,7 +104,7 @@
             android:maxLines="2"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_list_row_headline"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_badges_row_count"
             app:layout_constraintStart_toEndOf="@+id/text_view_badges_row_count"
             app:layout_constraintTop_toTopOf="@+id/text_view_badges_row_count"
             tools:text="of 100 Badges left" />
