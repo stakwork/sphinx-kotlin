@@ -141,6 +141,8 @@
     <string name="badges_quantity_button_minus" translatable="false">-</string>
     <string name="badges_quantity_button_plus" translatable="false">+</string>
     <string name="badges_icon_dimen_text" translatable="false">PNG, GIF or SVG, Min. Size 512 x512 px</string>
+    <string name="badges_no_found" translatable="false">No badges found</string>
+
 
 
     <string name="balance_too_low">Balance too low</string>
