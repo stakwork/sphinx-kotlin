@@ -1,22 +1,21 @@
-package chat.sphinx.tribe_badge.navigation
+package chat.sphinx.create_badge.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.create_badge.R
+import chat.sphinx.create_badge.ui.CreateBadgeFragmentArgs
 import chat.sphinx.detail_resources.DetailNavOptions
-import chat.sphinx.tribe_badge.R
-import chat.sphinx.tribe_badge.ui.TribeBadgesFragmentArgs
-import chat.sphinx.wrapper_common.dashboard.ChatId
 import io.matthewnelson.concept_navigation.NavigationRequest
 import io.matthewnelson.android_feature_navigation.R as nav_R
 
-class ToTribeBadges(
-    private val chatId: ChatId,
+class ToCreateBadge(
+    private val badgeName: String
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
 
         controller.navigate(
-            R.id.tribe_badges_nav_graph,
-            TribeBadgesFragmentArgs
-                .Builder(chatId.value)
+            R.id.create_badge_nav_graph,
+            CreateBadgeFragmentArgs
+                .Builder(badgeName)
                 .build().toBundle(),
             DetailNavOptions.default
                 .setEnterAnim(nav_R.anim.slide_in_left)

@@ -292,6 +292,12 @@ internal class TribeBadgesListAdapter(
         private val binding: LayoutManageBadgesLabelItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
+        init {
+            binding.layoutConstraintManageBadgesHolder.setOnClickListener {
+                viewModel.goToCreateBadgeScreen("testing navigation")
+            }
+        }
+
     }
 }
 

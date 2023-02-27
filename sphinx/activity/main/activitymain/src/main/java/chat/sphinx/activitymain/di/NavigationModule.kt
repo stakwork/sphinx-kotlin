@@ -14,6 +14,7 @@ import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.common_player.navigation.CommonPlayerNavigator
+import chat.sphinx.create_badge.navigation.CreateBadgeNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -50,7 +51,7 @@ import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
-import chat.sphinx.tribe_badge.adapter.TribeBadgesNavigator
+import chat.sphinx.tribe_badge.navigation.TribeBadgesNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
@@ -332,6 +333,12 @@ internal object NavigationModule {
         tribeBadgesNavigatorImpl: TribeBadgesNavigatorImpl
     ): TribeBadgesNavigator =
         tribeBadgesNavigatorImpl
+
+    @Provides
+    fun provideCreateBadgeNavigator(
+        createBadgeNavigatorImpl: CreateBadgeNavigatorImpl
+    ): CreateBadgeNavigator =
+        createBadgeNavigatorImpl
 
     @Provides
     fun provideJoinTribeNavigator(
