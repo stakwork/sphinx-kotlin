@@ -215,9 +215,25 @@ internal class ChatTribeFragment: ChatFragment<
                 }
 
             }
-            includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRow1.setOnClickListener {
-                includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRecyclerRow.visible
-                viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.FullScreen)
+            includeLayoutTribeMemberProfileDetails.includeLayoutTribeProfileInfoContainer.apply {
+                constraintLayoutTribeRow1.setOnClickListener {
+                    constraintLayoutTribeRecyclerRow.visible
+                    constraintLayoutBadgesImageContainer.gone
+                    buttonBadgesArrowDown.visible
+
+                viewModel.tribeMemberProfileViewStateContainer.updateViewState(
+                    TribeMemberProfileViewState.FullScreen
+                )
+            }
+                buttonBadgesArrowDown.setOnClickListener {
+                    constraintLayoutTribeRecyclerRow.gone
+                    constraintLayoutBadgesImageContainer.visible
+                    buttonBadgesArrowDown.gone
+
+                    viewModel.tribeMemberProfileViewStateContainer.updateViewState(
+                        TribeMemberProfileViewState.Open
+                    )
+                }
             }
         }
 
@@ -587,7 +603,6 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
 
                                 includeLayoutTribeProfileInfoContainer.apply {
-//                                    textViewCodingLanguages.text = viewState.profile.extras?.codingLanguages ?: "-"
 //                                    textViewPriceToMeet.text = viewState.profile.price_to_meet.toLong().toSat()?.asFormattedString() ?: "0"
                                     textViewPosts.text = (viewState.profile.extras?.post?.size ?: 0).toString()
 //                                    textViewTwitterAccount.text = viewState.profile.extras?.twitter?.first()?.formattedValue ?: "-"

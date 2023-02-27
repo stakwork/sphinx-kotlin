@@ -22,7 +22,7 @@
             android:fontFamily="@font/roboto_regular"
             android:inputType="textCapWords"
             android:singleLine="true"
-            android:text="@string/tribe_member_profile_price_to_meet"
+            android:text="@string/tribe_member_profile_badges"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_form_edit_view_text_size"
             app:backgroundTint="@android:color/transparent"
@@ -31,47 +31,69 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Badges:" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_tribe_badge_picture_1"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_profile_avatar_circle"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_badges_image_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tribe_badge_picture_1"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_avatar_circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tribe_badge_picture_2"
+                android:layout_width="@dimen/badges_icon_types"
+                android:layout_height="@dimen/badges_icon_types"
+                android:layout_marginEnd="12dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_avatar_circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_1"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tribe_badge_picture_3"
+                android:layout_width="@dimen/badges_icon_types"
+                android:layout_height="@dimen/badges_icon_types"
+                android:layout_marginEnd="12dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_avatar_circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_2"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tribe_badge_picture_4"
+                android:layout_width="@dimen/badges_icon_types"
+                android:layout_height="@dimen/badges_icon_types"
+                android:layout_marginEnd="12dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_avatar_circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_3"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_tribe_badge_picture_2"
-            android:layout_width="@dimen/badges_icon_types"
-            android:layout_height="@dimen/badges_icon_types"
-            android:layout_marginEnd="12dp"
+            android:id="@+id/button_badges_arrow_down"
+            android:layout_width="@dimen/player_time_labels_horizontal_margin"
+            android:layout_height="@dimen/default_radius"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_profile_avatar_circle"
+            android:visibility="gone"
+            android:src="@drawable/button_badges_arrow_down"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_1"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_tribe_badge_picture_3"
-            android:layout_width="@dimen/badges_icon_types"
-            android:layout_height="@dimen/badges_icon_types"
-            android:layout_marginEnd="12dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_profile_avatar_circle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_2"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_tribe_badge_picture_4"
-            android:layout_width="@dimen/badges_icon_types"
-            android:layout_height="@dimen/badges_icon_types"
-            android:layout_marginEnd="12dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_profile_avatar_circle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_3"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -130,7 +152,7 @@
             android:fontFamily="@font/roboto_regular"
             android:inputType="textCapWords"
             android:singleLine="true"
-            android:text="@string/tribe_member_profile_post"
+            android:text="@string/tribe_member_profile_reputation"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_form_edit_view_text_size"
             app:backgroundTint="@android:color/transparent"
@@ -183,7 +205,7 @@
             android:fontFamily="@font/roboto_regular"
             android:inputType="textCapWords"
             android:singleLine="true"
-            android:text="@string/tribe_member_profile_twitter"
+            android:text="@string/tribe_member_profile_contributions"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_form_edit_view_text_size"
             app:backgroundTint="@android:color/transparent"
@@ -248,7 +270,7 @@
             android:fontFamily="@font/roboto_regular"
             android:inputType="textCapWords"
             android:singleLine="true"
-            android:text="@string/tribe_member_profile_github"
+            android:text="@string/tribe_member_profile_earnings"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_form_edit_view_text_size"
             app:backgroundTint="@android:color/transparent"

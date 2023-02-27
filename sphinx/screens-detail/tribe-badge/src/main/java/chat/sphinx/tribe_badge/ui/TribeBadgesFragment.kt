@@ -81,7 +81,6 @@ internal class TribeBadgesFragment: SideEffectFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
-
         }
 
     }
