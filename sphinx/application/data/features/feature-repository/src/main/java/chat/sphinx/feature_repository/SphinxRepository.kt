@@ -3844,9 +3844,9 @@ abstract class SphinxRepository(
         return updateResponse
     }
 
-    private suspend fun updateFeedContentItems(
+    private suspend fun updateFeedContentItemsFor(
+        feed: Feed,
         host: ChatHost,
-        feedUrl: FeedUrl,
         durationRetrieverHandler: ((url: String) -> Long)? = null
     ): Response<Any, ResponseError> {
         val queries = coreDB.getSphinxDatabaseQueries()
@@ -3855,7 +3855,7 @@ abstract class SphinxRepository(
 
         networkQueryChat.getFeedContent(
             host,
-            feedUrl,
+            feed.feedUrl,
             null
         ).collect { response ->
             @Exhaustive
@@ -3876,13 +3876,21 @@ abstract class SphinxRepository(
                         }
                     }
 
-                    for (item in response.value.items) {
-                        (durationRetrieverHandler?.let { it(item.enclosureUrl) })?.let { duration ->
-                            updateContentEpisodeStatusDuration(
-                                FeedId(item.id),
-                                FeedItemDuration(duration / 1000),
-                                queries
-                            )
+                    for (item in response.value.items.take(5)) {
+
+                        val episodeStatus = feed.items.firstOrNull { it.id.value == item.id }?.let {
+                            it.contentEpisodeStatus
+                        }
+
+                        if (episodeStatus == null) {
+                            (durationRetrieverHandler?.let { it(item.enclosureUrl) })?.let { duration ->
+                                updateContentEpisodeStatusDuration(
+                                    FeedId(item.id),
+                                    feed.id,
+                                    FeedItemDuration(duration / 1000),
+                                    queries
+                                )
+                            }
                         }
                     }
 
@@ -6707,16 +6715,19 @@ abstract class SphinxRepository(
         }
     }
 
-    fun updateContentEpisodeStatusDuration(
+    private fun updateContentEpisodeStatusDuration(
         itemId: FeedId,
+        feedId: FeedId,
         duration: FeedItemDuration,
         queries: SphinxDatabaseQueries
     ) {
         applicationScope.launch(io) {
             contentEpisodeLock.withLock {
-                queries.contentEpisodeStatusUpdateDuration(
+                queries.contentEpisodeStatusUpsert(
                     duration,
-                    itemId
+                    FeedItemDuration(0),
+                    itemId,
+                    feedId,
                 )
             }
         }
@@ -6897,9 +6908,9 @@ abstract class SphinxRepository(
         applicationScope.launch(io) {
             getAllFeeds().firstOrNull()?.let { feeds ->
                 for (feed in feeds) {
-                    updateFeedContentItems(
+                    updateFeedContentItemsFor(
+                        feed,
                         ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
-                        feed.feedUrl,
                         durationRetrieverHandler
                     )
                 }
