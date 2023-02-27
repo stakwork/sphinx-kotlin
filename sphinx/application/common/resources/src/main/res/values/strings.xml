@@ -137,12 +137,13 @@
     <string name="badges_quantity" translatable="false">Quantity</string>
     <string name="badges_price_per_badge" translatable="false">Price per badge</string>
     <string name="badges_price_total" translatable="false">Total</string>
-    <string name="badges_create_badge" translatable="false">Create Badge</string>
+    <string name="badges_purchase_badges" translatable="false">Purchase Badges</string>
     <string name="badges_quantity_button_minus" translatable="false">-</string>
     <string name="badges_quantity_button_plus" translatable="false">+</string>
     <string name="badges_icon_dimen_text" translatable="false">PNG, GIF or SVG, Min. Size 512 x512 px</string>
     <string name="badges_no_found" translatable="false">No badges found</string>
     <string name="badges_manage_label" translatable="false">Manage Existing Badges</string>
+    <string name="badges_deactivate_label" translatable="false">Deactivate Badge</string>
     <string name="badges_template" translatable="false">Template</string>
     <string name="badges_active" translatable="false">Active</string>
 

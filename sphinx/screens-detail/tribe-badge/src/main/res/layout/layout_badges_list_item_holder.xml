@@ -79,6 +79,20 @@
             tools:text="650"
             tools:visibility="visible" />
 
+        <TextView
+            android:id="@+id/text_view_badges_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_half_layout_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="2"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_badges_row_count"
+            app:layout_constraintStart_toEndOf="@+id/text_view_badges_row_count"
+            app:layout_constraintTop_toTopOf="@+id/text_view_badges_row_count"
+            tools:text="of 100 Badges left" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/icon_right_arrow"
@@ -93,21 +107,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@+id/text_view_badge_description"
             app:track="@drawable/switch_track_selector" />
-
-        <TextView
-            android:id="@+id/text_view_recommended_descriptioan"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_half_layout_margin"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="2"
-            android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_text_size_list_row_headline"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_badges_row_count"
-            app:layout_constraintStart_toEndOf="@+id/text_view_badges_row_count"
-            app:layout_constraintTop_toTopOf="@+id/text_view_badges_row_count"
-            tools:text="of 100 Badges left" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
