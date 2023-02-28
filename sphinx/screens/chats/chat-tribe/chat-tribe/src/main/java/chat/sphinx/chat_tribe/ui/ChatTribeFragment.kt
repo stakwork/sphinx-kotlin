@@ -33,10 +33,7 @@ import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
-import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
-import chat.sphinx.chat_tribe.ui.viewstate.KnownBadgesViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
+import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -59,6 +56,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
@@ -627,6 +625,8 @@ internal class ChatTribeFragment: ChatFragment<
                                         constraintLayoutTribeRow1.gone
                                     } else {
                                         val badgesList = viewState.badges
+
+                                        badgesListViewModel.updateViewState(BadgesListViewState.BadgesLoaded(viewState.badges))
 
                                         if (badgesList.size > 4) {
                                             imageViewTribeBadgePicture1.invisible

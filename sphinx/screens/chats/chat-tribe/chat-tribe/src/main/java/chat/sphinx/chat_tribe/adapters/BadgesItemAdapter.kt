@@ -11,9 +11,11 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.chat_tribe.ui.viewstate.BadgesListViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_network_query_people.model.BadgeDto
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
@@ -28,8 +30,8 @@ class BadgesItemAdapter (
 ): RecyclerView.Adapter<BadgesItemAdapter.BadgesItemViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<BadgeItem>,
-        private val newList: List<BadgeItem>,
+        private val oldList: List<BadgeDto>,
+        private val newList: List<BadgeDto>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -81,7 +83,7 @@ class BadgesItemAdapter (
 
     }
 
-    private val badgeItems = ArrayList<BadgeItem>()
+    private val badgeItems = ArrayList<BadgeDto>()
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -89,7 +91,11 @@ class BadgesItemAdapter (
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                var badges = ArrayList<BadgeItem>()
+                var badges = ArrayList<BadgeDto>()
+
+                if (viewState is BadgesListViewState.BadgesLoaded) {
+                    badges = ArrayList(viewState.badges)
+                }
 
                 if (badges.isNotEmpty()) {
                     if (badgeItems.isEmpty()) {
@@ -140,7 +146,7 @@ class BadgesItemAdapter (
         private var holderJob: Job? = null
         private var disposable: Disposable? = null
 
-        private var badge: BadgeItem? = null
+        private var badge: BadgeDto? = null
 
         init {
 //            binding.layoutConstraintRecommendedHolder.setOnClickListener {
@@ -155,7 +161,7 @@ class BadgesItemAdapter (
         fun bind(position: Int) {
             binding.apply {
 
-                val badgeItem: BadgeItem = badgeItems.getOrNull(position) ?: let {
+                val badgeItem: BadgeDto = badgeItems.getOrNull(position) ?: let {
                     badge = null
                     return
                 }
@@ -163,7 +169,7 @@ class BadgesItemAdapter (
                 disposable?.dispose()
                 holderJob?.cancel()
 
-                badgeItem.image?.value?.let { imageUrl ->
+                badgeItem.icon?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
                             imageViewTribeBadgePicture,

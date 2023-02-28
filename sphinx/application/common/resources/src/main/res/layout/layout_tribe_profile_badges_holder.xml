@@ -87,6 +87,7 @@
         android:layout_width="wrap_content"
         android:layout_height="@dimen/default_double_layout_margin"
         android:layout_marginStart="@dimen/default_header_margin_horizontal"
+        android:visibility="invisible"
         android:background="@drawable/button_background_send_sats"
         android:clickable="true"
         app:layout_constraintStart_toEndOf="@+id/card_view_tribe_badge_image"
