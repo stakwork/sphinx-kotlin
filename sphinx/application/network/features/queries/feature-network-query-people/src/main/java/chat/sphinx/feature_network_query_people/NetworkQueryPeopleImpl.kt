@@ -3,8 +3,6 @@ package chat.sphinx.feature_network_query_people
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_people.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
-import chat.sphinx.feature_network_query_people.model.GetBadgesRelayResponse
-import chat.sphinx.feature_network_query_people.model.GetLeaderboardRelayResponse
 import chat.sphinx.feature_network_query_people.model.SaveProfileResponse
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -84,25 +82,19 @@ class NetworkQueryPeopleImpl(
         )
 
     override fun getLeaderboard(
-        tribeUUID: ChatUUID,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+        tribeUUID: ChatUUID
     ): Flow<LoadResponse<List<ChatLeaderboardDto>, ResponseError>> =
-        networkRelayCall.relayGetList(
-            responseJsonClass = GetLeaderboardRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_TRIBE_LEADERBOARD, tribeUUID.value),
-            relayData = relayData,
-            useExtendedNetworkCallClient = true
+        networkRelayCall.getList(
+            url = String.format(ENDPOINT_TRIBE_LEADERBOARD, tribeUUID.value),
+            responseJsonClass = ChatLeaderboardDto::class.java,
         )
 
     override fun getBadgesByPerson(
-        person: MessagePerson,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+        person: MessagePerson
     ): Flow<LoadResponse<List<BadgeDto>, ResponseError>> =
-        networkRelayCall.relayGetList(
-            responseJsonClass = GetBadgesRelayResponse::class.java,
-            relayEndpoint = String.format(ENDPOINT_TRIBE_BADGES, person.host(), person.uuid()),
-            relayData = relayData,
-            useExtendedNetworkCallClient = true
+        networkRelayCall.getList(
+            url = String.format(ENDPOINT_TRIBE_BADGES, person.host(), person.uuid()),
+            responseJsonClass = BadgeDto::class.java,
         )
 
 }

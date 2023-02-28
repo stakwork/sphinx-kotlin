@@ -21,6 +21,7 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
+import chat.sphinx.concept_network_query_people.model.ChatLeaderboardDto
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -125,6 +126,10 @@ internal class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private val leaderboardListStateFlow: MutableStateFlow<List<ChatLeaderboardDto>?> by lazy {
+        MutableStateFlow(null)
+    }
 
     val tribeMemberProfileViewStateContainer: ViewStateContainer<TribeMemberProfileViewState> by lazy {
         ViewStateContainer(TribeMemberProfileViewState.Closed)
@@ -283,6 +288,7 @@ internal class ChatTribeViewModel @Inject constructor(
                 _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
             }
         }
+        getAllLeaderboards()
     }
 
     override suspend fun processMemberRequest(
@@ -358,6 +364,21 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    private fun getAllLeaderboards(){
+        viewModelScope.launch(mainImmediate) {
+           val tribeUUID = getChat().uuid
+            networkQueryPeople.getLeaderboard(tribeUUID).collect { loadResponse ->
+                when(loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        leaderboardListStateFlow.value = loadResponse.value
+                    }
+                }
+            }
+        }
+    }
+
     private fun loadPersonData(message: Message) {
         viewModelScope.launch(mainImmediate) {
             message.person?.let { person ->
@@ -370,13 +391,34 @@ internal class ChatTribeViewModel @Inject constructor(
                             tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
                         }
                         is Response.Success -> {
-                            tribeMemberDataViewStateContainer.updateViewState(
-                                TribeMemberDataViewState.TribeMemberProfile(
-                                    message.uuid,
-                                    person,
-                                    loadResponse.value
-                                )
-                            )
+                            val leaderboard = leaderboardListStateFlow.value?.find { it.alias == loadResponse.value.owner_alias  }
+                            networkQueryPeople.getBadgesByPerson(person).collect { badgesResponse ->
+                                when (badgesResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {
+                                        tribeMemberDataViewStateContainer.updateViewState(
+                                            TribeMemberDataViewState.TribeMemberProfile(
+                                                message.uuid,
+                                                person,
+                                                loadResponse.value,
+                                                leaderboard,
+                                                null
+                                            )
+                                        )
+                                    }
+                                    is Response.Success -> {
+                                        tribeMemberDataViewStateContainer.updateViewState(
+                                            TribeMemberDataViewState.TribeMemberProfile(
+                                                message.uuid,
+                                                person,
+                                                loadResponse.value,
+                                                leaderboard,
+                                                badgesResponse.value
+                                            )
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }

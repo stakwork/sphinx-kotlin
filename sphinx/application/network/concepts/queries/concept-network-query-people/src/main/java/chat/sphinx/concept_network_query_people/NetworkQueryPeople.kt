@@ -34,11 +34,9 @@ abstract class NetworkQueryPeople {
 
     abstract fun getLeaderboard(
         tribeUUID: ChatUUID,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<List<ChatLeaderboardDto>, ResponseError>>
 
     abstract fun getBadgesByPerson(
         person: MessagePerson,
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
 }
