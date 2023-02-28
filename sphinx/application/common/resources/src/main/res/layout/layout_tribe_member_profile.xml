@@ -19,11 +19,4 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="parent" />
 
-    <include
-        android:id="@+id/include_layout_loading_placeholder"
-        layout="@layout/layout_tribe_loading_placeholder_member_profile"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="parent" />
-
 </androidx.constraintlayout.motion.widget.MotionLayout>

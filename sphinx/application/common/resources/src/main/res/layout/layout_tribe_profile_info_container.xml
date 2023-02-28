@@ -25,7 +25,6 @@
             android:text="@string/tribe_member_profile_badges"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_form_edit_view_text_size"
-            app:backgroundTint="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -42,13 +41,32 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_tribe_badge_picture_1"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="@dimen/badges_icon_types"
+                android:layout_height="@dimen/badges_icon_types"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_profile_avatar_circle"
+                android:src="@drawable/ic_tribe"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_tribe_badge_picture_num"
+                android:layout_width="@dimen/badges_icon_types"
+                android:layout_height="@dimen/badges_icon_types"
+                android:background="@drawable/background_badge_number"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:inputType="textCapWords"
+                android:singleLine="true"
+                android:textColor="@color/mainBottomIcons"
+                android:textSize="@dimen/default_chip_text_size"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="+5" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_tribe_badge_picture_2"
@@ -56,7 +74,7 @@
                 android:layout_height="@dimen/badges_icon_types"
                 android:layout_marginEnd="12dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_profile_avatar_circle"
+                android:src="@drawable/ic_tribe"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_1"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -67,7 +85,7 @@
                 android:layout_height="@dimen/badges_icon_types"
                 android:layout_marginEnd="12dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_profile_avatar_circle"
+                android:src="@drawable/ic_tribe"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_2"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -78,7 +96,7 @@
                 android:layout_height="@dimen/badges_icon_types"
                 android:layout_marginEnd="12dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_profile_avatar_circle"
+                android:src="@drawable/ic_tribe"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_3"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -199,7 +217,7 @@
         app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_row_3">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_twitter_account_label"
+            android:id="@+id/text_view_contributions_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
@@ -222,6 +240,7 @@
             android:fontFamily="@font/roboto_regular"
             android:gravity="right"
             android:maxLines="1"
+            android:text="@string/sats"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/default_form_edit_view_text_size"
             app:backgroundTint="@android:color/transparent"
@@ -264,7 +283,7 @@
         app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_row_4">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_github_account_label"
+            android:id="@+id/text_view_earnings_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
@@ -288,6 +307,7 @@
             android:gravity="right"
             android:maxLines="1"
             android:textColor="@color/primaryText"
+            android:text="@string/sats"
             android:textSize="@dimen/default_form_edit_view_text_size"
             app:backgroundTint="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -57,6 +57,7 @@ import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
@@ -304,6 +305,21 @@ internal class ChatTribeFragment: ChatFragment<
             layoutManager = linearLayoutManager
             adapter = tribeKnownBadgesAdapter
             itemAnimator = null
+        }
+    }
+
+    private suspend fun loadBadgeImage(imageView: ImageView, photoUrl: String?) {
+        if (photoUrl == null) {
+            imageView.gone
+        } else {
+            imageLoader.load(
+                imageView,
+                photoUrl,
+                ImageLoaderOptions.Builder()
+                    .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_tribe)
+                    .transformation(Transformation.CircleCrop)
+                    .build()
+            )
         }
     }
 
@@ -572,7 +588,7 @@ internal class ChatTribeFragment: ChatFragment<
 
                         tribeMemberProfileBinding.apply {
                             includeLayoutTribeMemberProfileDetails.apply {
-                                layoutConstraintProgressBarContainer.visible
+                                includeLayoutLoadingPlaceholder.root.visible
                             }
                         }
                     }
@@ -581,7 +597,7 @@ internal class ChatTribeFragment: ChatFragment<
 
                         tribeMemberProfileBinding.apply {
                             includeLayoutTribeMemberProfileDetails.apply {
-                                layoutConstraintProgressBarContainer.gone
+                                includeLayoutLoadingPlaceholder.root.gone
 
                                 includeLayoutTribeProfilePictureHolder.apply {
                                     textViewTribeProfileName.text = viewState.profile.owner_alias
@@ -603,10 +619,32 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
 
                                 includeLayoutTribeProfileInfoContainer.apply {
-//                                    textViewPriceToMeet.text = viewState.profile.price_to_meet.toLong().toSat()?.asFormattedString() ?: "0"
                                     textViewPosts.text = (viewState.profile.extras?.post?.size ?: 0).toString()
-//                                    textViewTwitterAccount.text = viewState.profile.extras?.twitter?.first()?.formattedValue ?: "-"
-//                                    textViewGithubAccount.text = viewState.profile.extras?.github?.first()?.formattedValue ?: "-"
+                                    textViewSatsContributionsNumber.text = (viewState.leaderboard?.spent ?: 0).toString()
+                                    textViewSatsEarningsNumber.text = (viewState.leaderboard?.earned ?: 0).toString()
+
+                                    if (viewState.badges.isNullOrEmpty()) {
+                                        constraintLayoutTribeRow1.gone
+                                    } else {
+                                        val badgesList = viewState.badges
+
+                                        if (badgesList.size > 4) {
+                                            imageViewTribeBadgePicture1.invisible
+                                            textViewTribeBadgePictureNum.visible
+                                            textViewTribeBadgePictureNum.text = "+${badgesList.size - 3}"
+                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList[0].icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList[1].icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList[2].icon)
+                                        }
+                                        else {
+                                            textViewTribeBadgePictureNum.invisible
+                                            loadBadgeImage(imageViewTribeBadgePicture1, badgesList[0].icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList[1].icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList[2].icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList[3].icon)
+                                        }
+                                    }
+
                                 }
                             }
                         }
