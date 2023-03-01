@@ -37,8 +37,8 @@ internal class TribeBadgesListAdapter(
     DefaultLifecycleObserver
 {
     companion object {
-        private const val INACTIVE_BADGE = 0
-        private const val ACTIVE_BADGE = 1
+        private const val TEMPLATE_BADGE = 0
+        private const val EXISTING_BADGE = 1
         private const val MANAGE_LABEL = 2
     }
 
@@ -137,19 +137,19 @@ internal class TribeBadgesListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return 10
+        return tribeBadgesList.size
     }
 
     override fun getItemViewType(position: Int): Int {
         val badgeItemType = tribeBadgesList.getOrNull(position)
         return when {
+            badgeItemType?.isTemplate == false -> {
+                EXISTING_BADGE
+            }
             badgeItemType?.isActive == true -> {
-                ACTIVE_BADGE
+                TEMPLATE_BADGE
             }
-            badgeItemType?.isActive == false -> {
-                INACTIVE_BADGE
-            }
-            badgeItemType?.manageLabel != null -> {
+            badgeItemType?.manageLabel == true -> {
                 MANAGE_LABEL
             }
             else -> {
@@ -160,21 +160,21 @@ internal class TribeBadgesListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         when {
-            viewType == ACTIVE_BADGE -> {
+            viewType == EXISTING_BADGE -> {
                 val binding = LayoutBadgesListItemHolderBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
                 )
-                return ActiveBadgeViewHolder(binding)
+                return ExistingBadgeViewHolder(binding)
             }
-            viewType == INACTIVE_BADGE -> {
+            viewType == TEMPLATE_BADGE -> {
                 val binding = LayoutBadgesListItemHolderBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent,
                     false
                 )
-                return InactiveBadgeViewHolder(binding)
+                return TemplateBadgeViewHolder(binding)
             }
             else -> {
                 val binding = LayoutManageBadgesLabelItemHolderBinding.inflate(
@@ -190,11 +190,11 @@ internal class TribeBadgesListAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when {
-            ACTIVE_BADGE == getItemViewType(position) -> {
-                (holder as ActiveBadgeViewHolder).bind(position)
+            EXISTING_BADGE == getItemViewType(position) -> {
+                (holder as ExistingBadgeViewHolder).bind(position)
             }
-            INACTIVE_BADGE == getItemViewType(position) -> {
-                (holder as InactiveBadgeViewHolder).bind(position)
+            TEMPLATE_BADGE == getItemViewType(position) -> {
+                (holder as TemplateBadgeViewHolder).bind(position)
             }
         }
     }
@@ -205,7 +205,7 @@ internal class TribeBadgesListAdapter(
             .build()
     }
 
-    inner class ActiveBadgeViewHolder(
+    inner class ExistingBadgeViewHolder(
         private val binding: LayoutBadgesListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
@@ -247,7 +247,7 @@ internal class TribeBadgesListAdapter(
         }
     }
 
-    inner class InactiveBadgeViewHolder(
+    inner class TemplateBadgeViewHolder(
         private val binding: LayoutBadgesListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 

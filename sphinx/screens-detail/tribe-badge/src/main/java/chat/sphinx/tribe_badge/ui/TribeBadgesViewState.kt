@@ -5,7 +5,9 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class TribeBadgesViewState: ViewState<TribeBadgesViewState>() {
 
-    object Idle : TribeBadgesViewState()
+    object Idle: TribeBadgesViewState()
+    object Loading: TribeBadgesViewState()
+    object Close: TribeBadgesViewState()
 
     data class TribeBadgesList(
         val tribeBadges: List<TribeBadge>

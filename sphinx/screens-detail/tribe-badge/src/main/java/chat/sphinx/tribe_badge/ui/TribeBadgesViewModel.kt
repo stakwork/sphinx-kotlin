@@ -1,26 +1,105 @@
 package chat.sphinx.tribe_badge.ui
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.tribe_badge.model.TribeBadge
 import chat.sphinx.tribe_badge.navigation.TribeBadgesNavigator
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 internal class TribeBadgesViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
-    val navigator: TribeBadgesNavigator
-): SideEffectViewModel<
+    savedStateHandle: SavedStateHandle,
+    val navigator: TribeBadgesNavigator,
+    private val networkQueryPeople: NetworkQueryPeople,
+    ): SideEffectViewModel<
         Context,
         TribeBadgesSideEffect,
         TribeBadgesViewState>(dispatchers, TribeBadgesViewState.Idle)
 {
+
+    private val args: TribeBadgesFragmentArgs by savedStateHandle.navArgs()
+
+    val chatId = args.argChatId
+
     fun goToCreateBadgeScreen(badgeName: String) {
         viewModelScope.launch(mainImmediate) {
             navigator.toCreateBadgeScreen(badgeName)
+        }
+    }
+
+    init {
+        getBadgesTemplates()
+        }
+
+    private fun getBadgesTemplates() {
+        viewModelScope.launch(mainImmediate) {
+            networkQueryPeople.getBadgeTemplates().collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {
+                        updateViewState(TribeBadgesViewState.Loading)
+                    }
+                    is Response.Error -> {
+                        updateViewState(TribeBadgesViewState.Close)
+                    }
+                    is Response.Success -> {
+                        val badgeTemplatesList: List<TribeBadge> = loadResponse.value.map {
+                            TribeBadge(
+                                name = it.name,
+                                imageUrl = it.icon,
+                                rewardType = it.rewardType,
+                                rewardRequirement = it.rewardRequirement,
+                                isTemplate = true
+                            )
+                        }
+                        networkQueryPeople.getUserExistingBadges(ChatId(chatId)).collect { existingBadges ->
+                            when (existingBadges) {
+                                is Response.Error -> {
+                                    updateViewState(TribeBadgesViewState.TribeBadgesList(badgeTemplatesList))
+                                }
+                                is LoadResponse.Loading -> {}
+                                is Response.Success -> {
+                                    val manageBadgeLabel = TribeBadge(
+                                        name = "Manage Label",
+                                        imageUrl = null,
+                                        rewardType = null,
+                                        rewardRequirement = null,
+                                        manageLabel = true,
+                                    )
+
+                                    val existingBadgesList: List<TribeBadge> = existingBadges.value.map {
+                                        TribeBadge(
+                                            name = it.name,
+                                            description = it.memo,
+                                            rewardType = it.reward_type,
+                                            rewardRequirement = it.reward_requirement,
+                                            amount_created = it.amount_created,
+                                            amount_issued = it.amount_issued,
+                                            isActive = it.activationState,
+                                            isTemplate = false,
+                                            imageUrl = it.icon,
+                                        )
+                                    }
+                                    val badgesList = badgeTemplatesList.plus(manageBadgeLabel).plus(existingBadgesList)
+                                    updateViewState(TribeBadgesViewState.TribeBadgesList(badgesList))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
