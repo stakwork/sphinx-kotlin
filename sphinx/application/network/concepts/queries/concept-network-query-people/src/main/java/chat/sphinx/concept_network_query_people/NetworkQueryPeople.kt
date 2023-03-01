@@ -4,6 +4,7 @@ import chat.sphinx.concept_network_query_people.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_message.MessagePerson
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RequestSignature
@@ -39,4 +40,14 @@ abstract class NetworkQueryPeople {
     abstract fun getBadgesByPerson(
         person: MessagePerson,
     ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
+
+    abstract fun getBadgeTemplates(
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<List<BadgeTemplateDto>, ResponseError>>
+
+    abstract fun getUserExistingBadges(
+        chatId: ChatId,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
+
 }
