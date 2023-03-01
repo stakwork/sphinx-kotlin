@@ -17,7 +17,6 @@
             android:id="@+id/image_view_badge_image"
             android:layout_width="@dimen/feed_fragment_bottom_padding"
             android:layout_height="@dimen/feed_fragment_bottom_padding"
-            android:layout_marginStart="16dp"
             android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -29,31 +28,16 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginBottom="4dp"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_bold"
             android:maxLines="1"
             android:textColor="@color/text"
             android:textSize="@dimen/default_text_size_tab"
-            app:layout_constraintBottom_toTopOf="@+id/text_view_badge_description"
+            app:layout_constraintBottom_toBottomOf="@+id/image_view_badge_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
+            app:layout_constraintTop_toTopOf="@+id/image_view_badge_image"
             tools:text="Badge Name" />
-
-        <TextView
-            android:id="@+id/text_view_badge_description"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginBottom="8dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="2"
-            android:textColor="@color/secondaryTextInverted"
-            android:textSize="@dimen/default_text_size_list_row_headline"
-            app:layout_constraintBottom_toBottomOf="@+id/image_view_badge_image"
-            app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
-            tools:text="Post 1000 non-consecutive\nmessages in the tribe" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -218,16 +218,16 @@ internal class ChatTribeFragment: ChatFragment<
                 constraintLayoutTribeRow1.setOnClickListener {
                     constraintLayoutTribeRecyclerRow.visible
                     constraintLayoutBadgesImageContainer.gone
-                    buttonBadgesArrowDown.visible
+                    layoutBadgesArrowDownContainer.visible
 
                 viewModel.tribeMemberProfileViewStateContainer.updateViewState(
                     TribeMemberProfileViewState.FullScreen
                 )
             }
-                buttonBadgesArrowDown.setOnClickListener {
+                layoutBadgesArrowDownContainer.setOnClickListener {
                     constraintLayoutTribeRecyclerRow.gone
                     constraintLayoutBadgesImageContainer.visible
-                    buttonBadgesArrowDown.gone
+                    layoutBadgesArrowDownContainer.gone
 
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(
                         TribeMemberProfileViewState.Open
@@ -632,16 +632,16 @@ internal class ChatTribeFragment: ChatFragment<
                                             imageViewTribeBadgePicture1.invisible
                                             textViewTribeBadgePictureNum.visible
                                             textViewTribeBadgePictureNum.text = "+${badgesList.size - 3}"
-                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList[0].icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList[1].icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList[2].icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList.getOrNull(0)?.icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList.getOrNull(1)?.icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList.getOrNull(2)?.icon)
                                         }
                                         else {
                                             textViewTribeBadgePictureNum.invisible
-                                            loadBadgeImage(imageViewTribeBadgePicture1, badgesList[0].icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList[1].icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList[2].icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList[3].icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture1, badgesList.getOrNull(0)?.icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList.getOrNull(1)?.icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList.getOrNull(2)?.icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList.getOrNull(3)?.icon)
                                         }
                                     }
 

@@ -48,8 +48,7 @@
                 android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_tribe_badge_picture_num"
@@ -58,7 +57,7 @@
                 android:background="@drawable/background_badge_number"
                 android:fontFamily="@font/roboto_regular"
                 android:gravity="center"
-                android:inputType="textCapWords"
+                android:clickable="false"
                 android:singleLine="true"
                 android:textColor="@color/mainBottomIcons"
                 android:textSize="@dimen/default_chip_text_size"
@@ -103,16 +102,26 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_badges_arrow_down_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/button_badges_arrow_down"
             android:layout_width="@dimen/player_time_labels_horizontal_margin"
             android:layout_height="@dimen/default_radius"
             android:scaleType="centerCrop"
-            android:visibility="gone"
             android:src="@drawable/button_badges_arrow_down"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_tribe_name_badges_border"

@@ -11,6 +11,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.chat_tribe.databinding.LayoutProfileBadgesListItemHolderBinding
 import chat.sphinx.chat_tribe.ui.viewstate.BadgesListViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -126,7 +127,7 @@ class BadgesItemAdapter (
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgesItemViewHolder {
-        val binding = LayoutTribeProfileBadgesHolderBinding.inflate(
+        val binding = LayoutProfileBadgesListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -140,23 +141,13 @@ class BadgesItemAdapter (
     }
 
     inner class BadgesItemViewHolder(
-        private val binding: LayoutTribeProfileBadgesHolderBinding
+        private val binding: LayoutProfileBadgesListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var holderJob: Job? = null
         private var disposable: Disposable? = null
 
         private var badge: BadgeDto? = null
-
-        init {
-//            binding.layoutConstraintRecommendedHolder.setOnClickListener {
-//                episode?.let { podcastEpisode ->
-//                    if (connectivityHelper.isNetworkConnected()) {
-//                        viewModel.playEpisodeFromList(podcastEpisode)
-//                    }
-//                }
-//            }
-        }
 
         fun bind(position: Int) {
             binding.apply {
@@ -172,14 +163,14 @@ class BadgesItemAdapter (
                 badgeItem.icon?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
-                            imageViewTribeBadgePicture,
+                            imageViewBadgeImage,
                             imageUrl,
                             ImageLoaderOptions.Builder()
                                 .placeholderResId(R.drawable.ic_tribe_placeholder)
                                 .build()
                         )
 
-                        textViewTribeBadgeName.text = badgeItem.name ?: "-"
+                        textViewBadgeTitle.text = badgeItem.name ?: "-"
                     }
                 }
             }
