@@ -101,11 +101,13 @@
                     android:id="@+id/text_view_menu_button"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:fontFamily="@font/material_icons_regular"
                     android:gravity="center"
                     android:text="more_vert"
-                    android:fontFamily="@font/material_icons_regular"
+                    android:textColor="@color/secondaryText"
                     android:textSize="@dimen/default_text_size_large_title"
-                    android:textColor="@color/secondaryText" />
+                    tools:layout_editor_absoluteX="0dp"
+                    tools:layout_editor_absoluteY="0dp" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

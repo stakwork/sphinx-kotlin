@@ -308,7 +308,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     private suspend fun loadBadgeImage(imageView: ImageView, photoUrl: String?) {
         if (photoUrl == null) {
-            imageView.gone
+            imageView.invisible
         } else {
             imageLoader.load(
                 imageView,
