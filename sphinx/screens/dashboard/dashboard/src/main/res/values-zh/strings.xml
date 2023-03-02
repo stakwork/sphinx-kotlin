@@ -82,6 +82,9 @@
     <string name="dashboard_authorize_button">允許</string>
     <string name="dashboard_authorize_generic_error">外部連結失敗，請稍後再試</string>
 
+    <string name="dashboard_redeem_sats_popup_title">Redeem %s sats from:</string>
+    <string name="dashboard_redeem_sats_button">Confirm</string>
+
     <string name="dashboard_connect_button">連接</string>
     <string name="dashboard_connect_price_to_meet">會合費用: %s</string>
     <string name="dashboard_connect_description_missing">無細節</string>

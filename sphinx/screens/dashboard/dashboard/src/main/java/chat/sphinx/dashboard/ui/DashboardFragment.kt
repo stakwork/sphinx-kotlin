@@ -363,6 +363,18 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
+        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+
+            buttonConfirm.setOnClickListener {
+                viewModel.redeemSats()
+            }
+        }
+
         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
             textViewDashboardPopupClose.setOnClickListener {
                 viewModel.deepLinkPopupViewStateContainer.updateViewState(
@@ -663,8 +675,20 @@ internal class DashboardFragment : MotionLayoutFragment<
                         }
                         binding.layoutDashboardPopup.root.visible
                     }
+                    is DeepLinkPopupViewState.RedeemSatsPopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.apply {
+                            textViewDashboardPopupRedeemSatsName.text = viewState.link.host
+                            textViewDashboardPopupRedeemSatsTitle.text = getString(R.string.dashboard_redeem_sats_popup_title, viewState.link.amount)
+                            layoutConstraintRedeemSatsPopup.visible
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
                     is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
+                    }
+                    is DeepLinkPopupViewState.RedeemSatsPopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.progressBarRedeemSats.visible
                     }
                     is DeepLinkPopupViewState.LoadingExternalRequestPopup -> {
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
@@ -771,6 +795,11 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
                             root.gone
                             progressBarAuthorize.gone
+                        }
+
+                        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.apply {
+                            root.gone
+                            progressBarRedeemSats.gone
                         }
 
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {

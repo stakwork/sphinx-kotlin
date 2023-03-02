@@ -1,10 +1,7 @@
 package chat.sphinx.feature_network_query_verify_external
 
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
-import chat.sphinx.concept_network_query_verify_external.model.PersonInfoDto
-import chat.sphinx.concept_network_query_verify_external.model.SignBase64Dto
-import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalDto
-import chat.sphinx.concept_network_query_verify_external.model.VerifyExternalInfoDto
+import chat.sphinx.concept_network_query_verify_external.model.*
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_verify_external.model.SignBase64RelayResponse
 import chat.sphinx.feature_network_query_verify_external.model.VerifyExternalRelayResponse
@@ -25,6 +22,7 @@ class NetworkQueryAuthorizeExternalImpl(
         private const val ENDPOINT_SIGN_BASE_64 = "/signer/%s"
         private const val ENDPOINT_AUTHORIZE_EXTERNAL = "https://%s/verify/%s?token=%s"
         private const val ENDPOINT_GET_PERSON_INFO = "https://%s/person/%s"
+        private const val ENDPOINT_REDEEM_SATS = "https://%s"
     }
 
     override fun verifyExternal(
@@ -63,6 +61,20 @@ class NetworkQueryAuthorizeExternalImpl(
             ),
             responseJsonClass = Any::class.java,
             requestBodyJsonClass = VerifyExternalInfoDto::class.java,
+            requestBody = info,
+        )
+
+    override fun redeemSats(
+        host: String,
+        info: RedeemSatsDto,
+    ): Flow<LoadResponse<Any, ResponseError>> =
+        networkRelayCall.post(
+            url = String.format(
+                ENDPOINT_REDEEM_SATS,
+                host
+            ),
+            responseJsonClass = Any::class.java,
+            requestBodyJsonClass = RedeemSatsDto::class.java,
             requestBody = info,
         )
 
