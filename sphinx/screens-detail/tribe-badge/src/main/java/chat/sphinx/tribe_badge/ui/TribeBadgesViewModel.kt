@@ -1,14 +1,14 @@
 package chat.sphinx.tribe_badge.ui
 
 import android.content.Context
-import androidx.core.content.res.TypedArrayUtils.getString
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.tribe_badge.R
-import chat.sphinx.tribe_badge.model.TribeBadge
+import chat.sphinx.tribe_badge.model.TribeBadgeListHolder
+import chat.sphinx.tribe_badge.model.TribeBadgeListHolderType
 import chat.sphinx.tribe_badge.navigation.TribeBadgesNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -57,13 +57,13 @@ internal class TribeBadgesViewModel @Inject constructor(
                         updateViewState(TribeBadgesViewState.Close)
                     }
                     is Response.Success -> {
-                        val badgeTemplatesList: List<TribeBadge> = loadResponse.value.map {
-                            TribeBadge(
-                                name = it.name,
+                        val badgeTemplatesList: List<TribeBadgeListHolder> = loadResponse.value.map {
+                            TribeBadgeListHolder(
+                                name = it.name ?: "",
                                 imageUrl = it.icon,
                                 rewardType = if (it.rewardType == 1) R.string.badges_earn else R.string.badges_spend,
                                 rewardRequirement = it.rewardRequirement,
-                                isTemplate = true
+                                holderType = TribeBadgeListHolderType.TEMPLATE
                             )
                         }
                         networkQueryPeople.getUserExistingBadges(ChatId(chatId)).collect { existingBadges ->
@@ -73,25 +73,22 @@ internal class TribeBadgesViewModel @Inject constructor(
                                 }
                                 is LoadResponse.Loading -> {}
                                 is Response.Success -> {
-                                    val manageBadgeLabel = TribeBadge(
+                                    val manageBadgeLabel = TribeBadgeListHolder(
                                         name = "Manage Label",
-                                        imageUrl = null,
-                                        rewardType = null,
-                                        rewardRequirement = null,
-                                        manageLabel = true,
+                                        holderType = TribeBadgeListHolderType.HEADER
                                     )
 
-                                    val existingBadgesList: List<TribeBadge> = existingBadges.value.map {
-                                        TribeBadge(
-                                            name = it.name,
+                                    val existingBadgesList: List<TribeBadgeListHolder> = existingBadges.value.map {
+                                        TribeBadgeListHolder(
+                                            name = it.name ?: "",
                                             description = it.memo,
                                             rewardType = if (it.reward_type == 1) R.string.badges_earn else R.string.badges_spend,
                                             rewardRequirement = it.reward_requirement,
                                             amount_created = it.amount_created,
                                             amount_issued = it.amount_issued,
                                             isActive = it.activationState,
-                                            isTemplate = false,
                                             imageUrl = it.icon,
+                                            holderType = TribeBadgeListHolderType.BADGE
                                         )
                                     }
                                     val badgesList = badgeTemplatesList.plus(manageBadgeLabel).plus(existingBadgesList)
