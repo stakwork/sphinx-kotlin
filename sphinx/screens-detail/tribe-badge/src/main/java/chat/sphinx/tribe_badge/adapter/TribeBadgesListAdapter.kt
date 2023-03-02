@@ -19,6 +19,7 @@ import chat.sphinx.tribe_badge.databinding.LayoutManageBadgesLabelItemHolderBind
 import chat.sphinx.tribe_badge.model.TribeBadge
 import chat.sphinx.tribe_badge.ui.TribeBadgesViewModel
 import chat.sphinx.tribe_badge.ui.TribeBadgesViewState
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
@@ -235,10 +236,22 @@ internal class TribeBadgesListAdapter(
 
                 textViewBadgeTitle.text = tribeBadge?.name ?: ""
                 textViewBadgeDescription.text = tribeBadge?.description ?: ""
+                textViewBadgesRowCount.text = tribeBadge?.amount_issued.toString()
+                textViewBadgesLeft.text = (tribeBadge?.amount_created?.minus(tribeBadge.amount_issued ?: 0)).toString()
 
-                layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_active)
-                layoutButtonTemplate.layoutConstraintButtonSmall.background =
-                    ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
+
+                if (tribeBadge?.isActive == true) {
+                    layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_active)
+                    layoutButtonTemplate.layoutConstraintButtonSmall.background =
+                        ContextCompat.getDrawable(root.context, R.drawable.background_button_open_white)
+                    layoutButtonTemplate.textViewButtonSmall.setTextColor(ContextCompat.getColor(root.context, R.color.headerBG))
+                }
+                else {
+                    layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_inactive)
+                    layoutButtonTemplate.layoutConstraintButtonSmall.background =
+                        ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
+                    layoutButtonTemplate.textViewButtonSmall.setTextColor(ContextCompat.getColor(root.context, R.color.secondaryText))
+                }
             }
         }
 
@@ -274,12 +287,15 @@ internal class TribeBadgesListAdapter(
                         ContextCompat.getDrawable(root.context, R.drawable.ic_tribe)
                     )
                 }
+                val description = getString(R.string.badges_template_description)
+                val earnOrSpend = tribeBadge?.rewardType?.let { getString(it) } ?: ""
 
                 textViewBadgeTitle.text = tribeBadge?.name ?: ""
-                textViewBadgeDescription.text = tribeBadge?.description ?: ""
-
+                textViewBadgeDescription.text = String.format(description, earnOrSpend, tribeBadge?.rewardRequirement)
                 layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_template)
                 layoutButtonTemplate.layoutConstraintButtonSmall.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
+                textViewBadgesRowCount.invisible
+                textViewBadgesLeft.invisible
             }
         }
 

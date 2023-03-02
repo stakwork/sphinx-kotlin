@@ -20,6 +20,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
+import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -45,7 +46,21 @@ internal class TribeBadgesFragment: SideEffectFragment<
     }
 
     override suspend fun onViewStateFlowCollect(viewState: TribeBadgesViewState) {
-
+        @Exhaustive
+        when (viewState) {
+            is TribeBadgesViewState.Idle -> {}
+            is TribeBadgesViewState.Loading -> {
+                binding.layoutConstraintProgressBarContainer.visible
+            }
+            is TribeBadgesViewState.Close -> {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
+            }
+            is TribeBadgesViewState.TribeBadgesList -> {
+                binding.layoutConstraintProgressBarContainer.gone
+            }
+        }
     }
 
     override fun subscribeToViewStateFlow() {
@@ -82,6 +97,5 @@ internal class TribeBadgesFragment: SideEffectFragment<
                 }
             }
         }
-
     }
 }

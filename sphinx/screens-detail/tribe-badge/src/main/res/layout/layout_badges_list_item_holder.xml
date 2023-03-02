@@ -45,12 +45,13 @@
             android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
-            android:maxLines="2"
+            android:maxLines="1"
             android:textColor="@color/secondaryTextInverted"
             android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintEnd_toStartOf="@+id/icon_right_arrow"
             app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
             app:layout_constraintTop_toBottomOf="@+id/text_view_badge_title"
-            tools:text="Post 1000 non-consecutive\n messages in the tribe" />
+            tools:text="Earn at least 1000 sats in this tribe." />
 
         <include
             android:id="@+id/layout_button_template"
@@ -71,13 +72,13 @@
             android:backgroundTint="@color/lightDivider"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center"
+            android:visibility="visible"
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintBottom_toBottomOf="@+id/layout_button_template"
             app:layout_constraintStart_toEndOf="@+id/layout_button_template"
             app:layout_constraintTop_toBottomOf="@+id/text_view_badge_description"
-            tools:text="650"
-            tools:visibility="visible" />
+            tools:text="650" />
 
         <TextView
             android:id="@+id/text_view_badges_left"
@@ -87,6 +88,7 @@
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="2"
+            android:visibility="visible"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_badges_row_count"
@@ -97,7 +99,7 @@
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/icon_right_arrow"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:fontFamily="@font/material_icons_regular"
             android:gravity="center"
             android:text="@string/material_icon_name_chevron_right_button"
