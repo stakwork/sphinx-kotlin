@@ -240,8 +240,8 @@ internal class TribeBadgesListAdapter(
 
                 textViewBadgeTitle.text = tribeBadgeListHolder?.name ?: ""
                 textViewBadgeDescription.text = tribeBadgeListHolder?.description ?: ""
-                textViewBadgesLeft.text = String.format(getString(R.string.badges_left), badgesLeftNum)
-                textViewBadgesRowCount.text = tribeBadgeListHolder?.amount_created.toString()
+                textViewBadgesLeft.text = String.format(getString(R.string.badges_left), tribeBadgeListHolder?.amount_created)
+                textViewBadgesRowCount.text = badgesLeftNum
                 layoutButtonTemplate.textViewButtonSmall.textSize = 12F
 
 
