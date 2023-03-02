@@ -51,6 +51,8 @@
     <string name="badges_spend" >Gastar</string>
     <string name="badges_active">ACTIVO</string>
     <string name="badges_inactive">INACTIVO</string>
+    <string name="badges_left" >de %s Badges</string>
+
 
     <string name="balance_too_low">Balance demasiado bajo</string>
     <string name="boost_amount_too_low">El monto del Boost debe ser mayor a 0</string>

@@ -90,7 +90,10 @@ internal class TribeBadgesViewModel @Inject constructor(
                                             imageUrl = it.icon,
                                             holderType = TribeBadgeListHolderType.BADGE
                                         )
-                                    }
+                                    }.sortedWith(
+                                        compareByDescending<TribeBadgeListHolder> { it.isActive }
+                                            .thenBy { it.name }
+                                    )
                                     val badgesList = badgeTemplatesList.plus(manageBadgeLabel).plus(existingBadgesList)
                                     updateViewState(TribeBadgesViewState.TribeBadgesList(badgesList))
                                 }

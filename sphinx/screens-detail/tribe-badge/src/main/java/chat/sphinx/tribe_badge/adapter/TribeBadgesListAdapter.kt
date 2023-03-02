@@ -236,10 +236,13 @@ internal class TribeBadgesListAdapter(
                     )
                 }
 
+                val badgesLeftNum = (tribeBadgeListHolder?.amount_created?.minus(tribeBadgeListHolder.amount_issued ?: 0)).toString()
+
                 textViewBadgeTitle.text = tribeBadgeListHolder?.name ?: ""
                 textViewBadgeDescription.text = tribeBadgeListHolder?.description ?: ""
-                textViewBadgesRowCount.text = tribeBadgeListHolder?.amount_issued.toString()
-                textViewBadgesLeft.text = (tribeBadgeListHolder?.amount_created?.minus(tribeBadgeListHolder.amount_issued ?: 0)).toString()
+                textViewBadgesLeft.text = String.format(getString(R.string.badges_left), badgesLeftNum)
+                textViewBadgesRowCount.text = tribeBadgeListHolder?.amount_created.toString()
+                layoutButtonTemplate.textViewButtonSmall.textSize = 12F
 
 
                 if (tribeBadgeListHolder?.isActive == true) {
@@ -297,6 +300,7 @@ internal class TribeBadgesListAdapter(
                 textViewBadgeDescription.text = String.format(description, earnOrSpend, tribeBadgeListHolder?.rewardRequirement)
                 layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_template)
                 layoutButtonTemplate.layoutConstraintButtonSmall.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
+                layoutButtonTemplate.textViewButtonSmall.textSize = 12F
                 textViewBadgesRowCount.invisible
                 textViewBadgesLeft.invisible
             }
