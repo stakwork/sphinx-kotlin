@@ -18,23 +18,28 @@ abstract class TribeBadgesNavigator(
 
     @JvmSynthetic
     suspend fun toCreateBadgeScreen(
-        badgeName: String,
-        badgeImage: String,
-        badgeDescription: String,
-        badgeAmount: String,
-        badgeLeft: String,
-        badgeActive: Boolean
+        name: String,
+        description: String,
+        image: String,
+        rewardType: Int,
+        rewardRequirement: Int,
+        isActive: Boolean,
+        chatId: Long,
+        badgeId: Int,
+        holderType: Int
     ) {
         navigationDriver.submitNavigationRequest(
             ToCreateBadge(
-                badgeName,
-                badgeImage,
-                badgeDescription,
-                badgeAmount,
-                badgeLeft,
-                badgeActive,
+                name,
+                description,
+                image,
+                rewardType,
+                rewardRequirement,
+                isActive,
+                chatId,
+                badgeId,
+                holderType
             )
         )
     }
-
 }

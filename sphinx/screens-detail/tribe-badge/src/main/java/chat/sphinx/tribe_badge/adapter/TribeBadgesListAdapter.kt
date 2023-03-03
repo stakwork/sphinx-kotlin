@@ -261,12 +261,15 @@ internal class TribeBadgesListAdapter(
 
                 binding.root.setOnClickListener {
                     viewModel.goToCreateBadgeScreen(
-                        tribeBadgeHolder?.badge?.name ?: "",
-                        tribeBadgeHolder?.badge?.imageUrl ?: "",
-                        tribeBadgeHolder?.badge?.description ?: "",
-                        badgesAmount,
-                        badgesLeft,
-                        tribeBadgeHolder?.badge?.isActive ?: false
+                        name =  tribeBadgeHolder?.badge?.name ?: "",
+                        description = tribeBadgeHolder?.badge?.description ?: "",
+                        image = tribeBadgeHolder?.badge?.imageUrl ?: "",
+                        rewardType = tribeBadgeHolder?.badge?.rewardType ?: 0,
+                        rewardRequirement= tribeBadgeHolder?.badge?.rewardRequirement ?: 0,
+                        isActive = tribeBadgeHolder?.badge?.isActive ?: false,
+                        chatId = tribeBadgeHolder?.badge?.chatId?.toLong() ?: 0L,
+                        badgeId = tribeBadgeHolder?.badge?.badgeId ?: 0,
+                        holderType = TribeBadgeHolderType.BADGE
                     )
                 }
             }
@@ -315,6 +318,20 @@ internal class TribeBadgesListAdapter(
                 layoutButtonTemplate.textViewButtonSmall.textSize = 12F
                 textViewBadgesRowCount.invisible
                 textViewBadgesLeft.invisible
+
+                binding.root.setOnClickListener {
+                    viewModel.goToCreateBadgeScreen(
+                        name =  tribeBadgeHolder?.badgeTemplate?.name ?: "",
+                        description = tribeBadgeHolder?.badgeTemplate?.description ?: "",
+                        image = tribeBadgeHolder?.badgeTemplate?.imageUrl ?: "",
+                        rewardType = tribeBadgeHolder?.badgeTemplate?.rewardType ?: 0,
+                        rewardRequirement= tribeBadgeHolder?.badgeTemplate?.rewardRequirement ?: 0,
+                        isActive = false,
+                        chatId = 0L,
+                        badgeId = 0,
+                        holderType = TribeBadgeHolderType.TEMPLATE
+                    )
+                }
             }
         }
 

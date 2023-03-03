@@ -8,12 +8,15 @@ import io.matthewnelson.concept_navigation.NavigationRequest
 import io.matthewnelson.android_feature_navigation.R as nav_R
 
 class ToCreateBadge(
-    private val badgeName: String,
-    private val badgeImage: String,
-    private val badgeDescription: String,
-    private val badgeAmount: String,
-    private val badgeLeft: String,
-    private val badgeActive: Boolean
+    private val name: String,
+    private val description: String,
+    private val image: String,
+    private val rewardType: Int,
+    private val rewardRequirement: Int,
+    private val isActive: Boolean,
+    private val chatId: Long,
+    private val badgeId: Int,
+    private val holderType: Int
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
 
@@ -21,12 +24,15 @@ class ToCreateBadge(
             R.id.create_badge_nav_graph,
             CreateBadgeFragmentArgs
                 .Builder(
-                    badgeName,
-                    badgeImage,
-                    badgeDescription,
-                    badgeAmount,
-                    badgeLeft,
-                    badgeActive
+                    name,
+                    description,
+                    image,
+                    rewardType,
+                    rewardRequirement,
+                    isActive,
+                    chatId,
+                    badgeId,
+                    holderType
                 )
                 .build().toBundle(),
             DetailNavOptions.default

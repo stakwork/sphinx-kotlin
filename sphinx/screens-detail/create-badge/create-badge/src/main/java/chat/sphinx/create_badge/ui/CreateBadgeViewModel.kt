@@ -33,16 +33,7 @@ internal class CreateBadgeViewModel @Inject constructor(
     }
 
     init {
-        updateViewState(
-            CreateBadgeViewState.EditBadge(
-                args.badgeName,
-                args.badgeImage,
-                args.badgeDescription,
-                args.badgeAmount,
-                args.badgeLeft,
-                args.badgeActive
-            )
-        )
+
     }
 
 

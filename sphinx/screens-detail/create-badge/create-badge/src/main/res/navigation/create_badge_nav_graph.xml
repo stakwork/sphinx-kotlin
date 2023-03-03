@@ -10,23 +10,34 @@
         android:name="chat.sphinx.create_badge.ui.CreateBadgeFragment"
         tools:layout="@layout/fragment_create_badge">
         <argument
-            android:name="badgeName"
-            app:argType="string"/>
+            android:name="argName"
+            app:argType="string" />
         <argument
-            android:name="badgeImage"
-            app:argType="string"/>
+            android:name="argDescription"
+            app:argType="string" />
         <argument
-            android:name="badgeDescription"
-            app:argType="string"/>
+            android:name="argImage"
+            app:argType="string" />
         <argument
-            android:name="badgeAmount"
-            app:argType="string"/>
+            android:name="argRewardType"
+            app:argType="integer" />
         <argument
-            android:name="badgeLeft"
-            app:argType="string"/>
+            android:name="argRewardRequirement"
+            app:argType="integer" />
         <argument
-            android:name="badgeActive"
-            app:argType="boolean"/>
+            android:name="argIsActive"
+            app:argType="boolean" />
+        <argument
+            android:name="argChatId"
+            app:argType="long" />
+        <argument
+            android:name="argBadgeId"
+            app:argType="integer" />
+        <argument
+            android:name="argHolderType"
+            app:argType="integer" />
+
+
     </fragment>
 
 </navigation>

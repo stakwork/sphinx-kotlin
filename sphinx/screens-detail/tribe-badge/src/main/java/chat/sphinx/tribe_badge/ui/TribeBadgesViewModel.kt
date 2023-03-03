@@ -39,21 +39,27 @@ internal class TribeBadgesViewModel @Inject constructor(
     val chatId = args.argChatId
 
     fun goToCreateBadgeScreen(
-        badgeName: String,
-        badgeImage: String,
-        badgeDescription: String,
-        badgeAmount: String,
-        badgeLeft: String,
-        badgeActive: Boolean
+        name: String,
+        description: String,
+        image: String,
+        rewardType: Int,
+        rewardRequirement: Int,
+        isActive: Boolean,
+        chatId: Long,
+        badgeId: Int,
+        holderType: Int
     ) {
         viewModelScope.launch(mainImmediate) {
             navigator.toCreateBadgeScreen(
-                badgeName,
-                badgeImage,
-                badgeDescription,
-                badgeAmount,
-                badgeLeft,
-                badgeActive
+                name,
+                description,
+                image,
+                rewardType,
+                rewardRequirement,
+                isActive,
+                chatId,
+                badgeId,
+                holderType
             )
         }
     }
