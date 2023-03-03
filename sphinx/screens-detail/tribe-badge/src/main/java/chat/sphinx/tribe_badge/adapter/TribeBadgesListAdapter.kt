@@ -267,8 +267,11 @@ internal class TribeBadgesListAdapter(
                         rewardType = tribeBadgeHolder?.badge?.rewardType ?: 0,
                         rewardRequirement= tribeBadgeHolder?.badge?.rewardRequirement ?: 0,
                         isActive = tribeBadgeHolder?.badge?.isActive ?: false,
-                        chatId = tribeBadgeHolder?.badge?.chatId?.toLong() ?: 0L,
+                        chatId = tribeBadgeHolder?.badge?.chatId?: 0,
                         badgeId = tribeBadgeHolder?.badge?.badgeId ?: 0,
+                        amountCreated = tribeBadgeHolder?.badge?.amountCreated ?: 0,
+                        amountIssued = tribeBadgeHolder?.badge?.amountIssued ?: 0,
+                        claimAmount = tribeBadgeHolder?.badge?.claimAmount ?: 0,
                         holderType = TribeBadgeHolderType.BADGE
                     )
                 }
@@ -308,11 +311,12 @@ internal class TribeBadgesListAdapter(
                         ContextCompat.getDrawable(root.context, R.drawable.ic_tribe)
                     )
                 }
-                val description = getString(R.string.badges_template_description)
+                val labelDescription = getString(R.string.badges_template_description)
                 val earnOrSpend = tribeBadgeHolder?.badgeTemplate?.rewardType?.let { getString(it) } ?: ""
+                val templateDescription = String.format(labelDescription, earnOrSpend, tribeBadgeHolder?.badgeTemplate?.rewardRequirement)
 
                 textViewBadgeTitle.text = tribeBadgeHolder?.badgeTemplate?.name ?: ""
-                textViewBadgeDescription.text = String.format(description, earnOrSpend, tribeBadgeHolder?.badgeTemplate?.rewardRequirement)
+                textViewBadgeDescription.text = templateDescription
                 layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_template)
                 layoutButtonTemplate.layoutConstraintButtonSmall.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
                 layoutButtonTemplate.textViewButtonSmall.textSize = 12F
@@ -322,13 +326,16 @@ internal class TribeBadgesListAdapter(
                 binding.root.setOnClickListener {
                     viewModel.goToCreateBadgeScreen(
                         name =  tribeBadgeHolder?.badgeTemplate?.name ?: "",
-                        description = tribeBadgeHolder?.badgeTemplate?.description ?: "",
+                        description = templateDescription ?: "",
                         image = tribeBadgeHolder?.badgeTemplate?.imageUrl ?: "",
                         rewardType = tribeBadgeHolder?.badgeTemplate?.rewardType ?: 0,
                         rewardRequirement= tribeBadgeHolder?.badgeTemplate?.rewardRequirement ?: 0,
                         isActive = false,
-                        chatId = 0L,
+                        chatId = 0,
                         badgeId = 0,
+                        amountCreated = 0,
+                        amountIssued = 0,
+                        claimAmount = 0,
                         holderType = TribeBadgeHolderType.TEMPLATE
                     )
                 }

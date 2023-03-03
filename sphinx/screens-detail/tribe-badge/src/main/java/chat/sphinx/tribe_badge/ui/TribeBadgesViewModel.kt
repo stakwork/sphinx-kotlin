@@ -45,8 +45,11 @@ internal class TribeBadgesViewModel @Inject constructor(
         rewardType: Int,
         rewardRequirement: Int,
         isActive: Boolean,
-        chatId: Long,
+        chatId: Int,
         badgeId: Int,
+        amountCreated: Int,
+        amountIssued: Int,
+        claimAmount: Int,
         holderType: Int
     ) {
         viewModelScope.launch(mainImmediate) {
@@ -59,6 +62,9 @@ internal class TribeBadgesViewModel @Inject constructor(
                 isActive,
                 chatId,
                 badgeId,
+                amountCreated,
+                amountIssued,
+                claimAmount,
                 holderType
             )
         }
@@ -100,13 +106,13 @@ internal class TribeBadgesViewModel @Inject constructor(
                                     val existingBadgesList: List<Badge> = existingBadges.value.map {
                                         Badge(
                                             name = it.name ?: "",
-                                            description = it.memo,
+                                            description = it.memo ?: "",
                                             rewardType = if (it.reward_type == 1) R.string.badges_earn else R.string.badges_spend,
                                             rewardRequirement = it.reward_requirement,
                                             amountCreated = it.amount_created,
                                             amountIssued = it.amount_issued,
                                             isActive = it.activationState,
-                                            imageUrl = it.icon,
+                                            imageUrl = it.icon ?: "",
                                             badgeId = it.badge_id,
                                             chatId = it.chat_id,
                                             claimAmount = it.claim_amount

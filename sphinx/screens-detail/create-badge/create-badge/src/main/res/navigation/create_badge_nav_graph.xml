@@ -29,9 +29,18 @@
             app:argType="boolean" />
         <argument
             android:name="argChatId"
-            app:argType="long" />
+            app:argType="integer" />
         <argument
             android:name="argBadgeId"
+            app:argType="integer" />
+        <argument
+            android:name="argAmountCreated"
+            app:argType="integer" />
+        <argument
+            android:name="argAmountIssued"
+            app:argType="integer" />
+        <argument
+            android:name="argClaimAmount"
             app:argType="integer" />
         <argument
             android:name="argHolderType"

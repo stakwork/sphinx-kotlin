@@ -24,8 +24,11 @@ abstract class TribeBadgesNavigator(
         rewardType: Int,
         rewardRequirement: Int,
         isActive: Boolean,
-        chatId: Long,
+        chatId: Int,
         badgeId: Int,
+        amountCreated: Int,
+        amountIssued: Int,
+        claimAmount: Int,
         holderType: Int
     ) {
         navigationDriver.submitNavigationRequest(
@@ -38,6 +41,9 @@ abstract class TribeBadgesNavigator(
                 isActive,
                 chatId,
                 badgeId,
+                amountCreated,
+                amountIssued,
+                claimAmount,
                 holderType
             )
         )

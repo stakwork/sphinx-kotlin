@@ -12,8 +12,12 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.create_badge.R
 import chat.sphinx.create_badge.databinding.FragmentCreateBadgeBinding
+import chat.sphinx.resources.getString
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.invisible
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -51,18 +55,52 @@ internal class CreateBadgeFragment: SideEffectFragment<
             is CreateBadgeViewState.EditBadge -> {
 
                 binding.apply {
+
+                    layoutConstraintDeactivateBadge.gone
+                    layoutConstraintCreateBadge.gone
+                    layoutConstraintButtonCreateBadge.gone
+                    textViewBadgesRowCount.visible
+                    textViewBadgesLeft.visible
+                    layoutConstraintDeactivateBadge.visible
+
                     imageLoader.load(
                         imageViewBadgeImage,
-                        viewState.badgeImage,
+                        viewState.badge.imageUrl,
                         viewModel.imageLoaderDefaults,
                     )
 
-                    textViewBadgeName.text = viewState.badgeName
-                    textViewBadgeEditDescription.text = viewState.badgeDescription
-                    textViewBadgesRowCount.text = viewState.badgeAmount
-                    textViewBadgesLeft.text = viewState.badgeLeft
-                    switchDeactivateBadge.isChecked = setInverseSwitch(viewState.badgeActive)
+                    val badgesAmount = (viewState.badge.amountCreated?.minus(viewState.badge.amountIssued ?: 0)).toString()
+                    val badgesLeft = String.format(getString(R.string.badges_left), viewState.badge.amountCreated)
+
+                    textViewBadgeName.text = viewState.badge.name
+                    textViewBadgeEditDescription.text = viewState.badge.description
+                    textViewBadgesRowCount.text = badgesAmount
+                    textViewBadgesLeft.text = badgesLeft
+                    switchDeactivateBadge.isChecked = viewState.badge.isActive
                 }
+            }
+            is CreateBadgeViewState.Template -> {
+                binding.apply {
+
+                    layoutConstraintButtonCreateBadge.visible
+                    textViewBadgesRowCount.visible
+                    textViewBadgesLeft.visible
+                    layoutConstraintDeactivateBadge.gone
+                    layoutConstraintCreateBadge.visible
+                    textViewBadgesRowCount.gone
+                    textViewBadgesLeft.gone
+
+                    viewState.badgeTemplate.imageUrl?.let {
+                        imageLoader.load(
+                            imageViewBadgeImage,
+                            it,
+                            viewModel.imageLoaderDefaults,
+                        )
+                    }
+                    textViewBadgeName.text = viewState.badgeTemplate.name
+                    textViewBadgesRequirementDescription.text = viewState.badgeTemplate.description
+                }
+
             }
         }
 
@@ -74,9 +112,6 @@ internal class CreateBadgeFragment: SideEffectFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: CreateBadgeSideEffect) {
     }
-
-    private fun setInverseSwitch(isActive: Boolean): Boolean = !isActive
-
 
 
 }

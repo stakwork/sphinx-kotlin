@@ -56,7 +56,7 @@
         android:id="@+id/layout_constraint_create_badge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_button_upload_edit_icon">
 
         <View
@@ -87,7 +87,7 @@
             app:layout_constraintTop_toBottomOf="@+id/divider_bottom" />
 
         <TextView
-            android:id="@+id/text_view_barges_requirement_description"
+            android:id="@+id/text_view_badges_requirement_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/default_double_layout_margin"
@@ -110,7 +110,7 @@
             android:background="@color/blackSemiTransparent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_barges_requirement_description" />
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badges_requirement_description" />
 
         <TextView
             android:id="@+id/text_view_quantity"
@@ -328,7 +328,7 @@
             android:layout_marginEnd="@dimen/default_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="2"
-            android:text="@string/badges_deactivate_label"
+            android:text="@string/badges_state_label"
             android:textColor="@color/text"
             android:textSize="@dimen/pin_text_view_size"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -357,10 +357,11 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/add_buttons_height"
         android:layout_margin="24dp"
-        android:visibility="gone"
+        android:layout_marginBottom="4dp"
         android:background="@drawable/button_background_white_rad_48"
         android:backgroundTint="@color/primaryGreen"
         android:paddingHorizontal="@dimen/default_inner_spacing_list_item_title"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">

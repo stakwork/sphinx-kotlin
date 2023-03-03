@@ -14,8 +14,11 @@ class ToCreateBadge(
     private val rewardType: Int,
     private val rewardRequirement: Int,
     private val isActive: Boolean,
-    private val chatId: Long,
+    private val chatId: Int,
     private val badgeId: Int,
+    private val amountCreated: Int,
+    private val amountIssued: Int,
+    private val claimAmount: Int,
     private val holderType: Int
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
@@ -32,6 +35,9 @@ class ToCreateBadge(
                     isActive,
                     chatId,
                     badgeId,
+                    amountCreated,
+                    amountIssued,
+                    claimAmount,
                     holderType
                 )
                 .build().toBundle(),
