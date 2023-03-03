@@ -167,6 +167,12 @@ sealed class DashboardChat {
                         amount
                     )
                 }
+                message.type.isCallLink() -> {
+                    context.getString(
+                        R.string.last_message_description_call_invite,
+                        getMessageSender(message, context)
+                    )
+                }
                 message.messageDecryptionError -> {
                     context.getString(R.string.decryption_error)
                 }

@@ -9,6 +9,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.CallLinkMessage
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.*
@@ -90,6 +91,12 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
     var _feedBoost: FeedBoost? = null
     override val feedBoost: FeedBoost?
         get() = _feedBoost
+
+    @Volatile
+    @Suppress("PropertyName")
+    var _callLinkMessage: CallLinkMessage? = null
+    override val callLinkMessage: CallLinkMessage?
+        get() = _callLinkMessage
 
     @Volatile
     @Suppress("PropertyName")

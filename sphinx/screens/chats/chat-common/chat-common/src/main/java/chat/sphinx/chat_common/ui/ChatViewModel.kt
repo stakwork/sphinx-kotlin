@@ -3,7 +3,6 @@ package chat.sphinx.chat_common.ui
 import android.app.Application
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -71,9 +70,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
@@ -86,6 +83,7 @@ import com.giphy.sdk.ui.themes.GPHTheme
 import com.giphy.sdk.ui.themes.GridType
 import com.giphy.sdk.ui.utils.aspectRatio
 import com.giphy.sdk.ui.views.GiphyDialogFragment
+import com.squareup.moshi.Moshi
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -96,7 +94,6 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.jitsi.meet.sdk.JitsiMeet
 import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
@@ -126,6 +123,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
     private val memeInputStreamHandler: MemeInputStreamHandler,
+    val moshi: Moshi,
     protected val LOG: SphinxLogger,
 ) : MotionLayoutViewModel<
         Nothing,
@@ -890,10 +888,21 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         } ?: msg.first?.let { message ->
             messageRepository.sendMessage(message)
 
+            joinCallIfNeeded(message)
 //            trackMessage(message.text)
         }
 
         return msg.first
+    }
+
+    private fun joinCallIfNeeded(message: SendMessage) {
+        if (message.isCall) {
+            message.text
+                ?.replaceFirst(CallLinkMessage.MESSAGE_PREFIX, "")
+                ?.toCallLinkMessageOrNull(moshi)?.link?.let { link ->
+                    joinCall(link, link.startAudioOnly)
+            }
+        }
     }
 
 //    private fun trackMessage(text: String?) {
@@ -1603,11 +1612,21 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             SphinxCallLink.DEFAULT_CALL_SERVER_URL
         ) ?: SphinxCallLink.DEFAULT_CALL_SERVER_URL
 
-        SphinxCallLink.newCallInvite(meetingServerUrl, audioOnly)?.value?.let { newCallLink ->
-            val messageBuilder = SendMessage.Builder()
-            messageBuilder.setText(newCallLink)
+        viewModelScope.launch(mainImmediate) {
+            val chat = chatSharedFlow.firstOrNull()
 
-            viewModelScope.launch(mainImmediate) {
+            val messageText = if (chat?.isConversation() == true) {
+                SphinxCallLink.newCallLinkMessage(meetingServerUrl, audioOnly, moshi)
+            } else {
+                SphinxCallLink.newCallLink(meetingServerUrl, audioOnly)
+            }
+
+            val isCall = (chat?.isConversation() == true)
+
+            messageText?.let { newCallLink ->
+                val messageBuilder = SendMessage.Builder()
+                messageBuilder.setText(newCallLink)
+                messageBuilder.setIsCall(isCall)
                 sendMessage(messageBuilder)
             }
         }
@@ -1625,32 +1644,35 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     fun joinCall(message: Message, audioOnly: Boolean) {
         message.retrieveSphinxCallLink()?.let { sphinxCallLink ->
+            joinCall(sphinxCallLink, audioOnly)
+        }
+    }
 
-            sphinxCallLink.callServerUrl?.let { nnCallUrl ->
+    private fun joinCall(link: SphinxCallLink, audioOnly: Boolean) {
+        link.callServerUrl?.let { nnCallUrl ->
 
-                viewModelScope.launch(mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
 
-                    val owner = getOwner()
+                val owner = getOwner()
 
-                    val userInfo = JitsiMeetUserInfo()
-                    userInfo.displayName = owner.alias?.value ?: ""
+                val userInfo = JitsiMeetUserInfo()
+                userInfo.displayName = owner.alias?.value ?: ""
 
-                    owner.avatarUrl?.let { nnAvatarUrl ->
-                        userInfo.avatar = nnAvatarUrl
-                    }
-
-                    val options = JitsiMeetConferenceOptions.Builder()
-                        .setServerURL(nnCallUrl)
-                        .setRoom(sphinxCallLink.callRoom)
-                        .setAudioMuted(false)
-                        .setVideoMuted(false)
-                        .setFeatureFlag("welcomepage.enabled", false)
-                        .setAudioOnly(audioOnly)
-                        .setUserInfo(userInfo)
-                        .build()
-
-                    JitsiMeetActivity.launch(app, options)
+                owner.avatarUrl?.let { nnAvatarUrl ->
+                    userInfo.avatar = nnAvatarUrl
                 }
+
+                val options = JitsiMeetConferenceOptions.Builder()
+                    .setServerURL(nnCallUrl)
+                    .setRoom(link.callRoom)
+                    .setAudioMuted(false)
+                    .setVideoMuted(false)
+                    .setFeatureFlag("welcomepage.enabled", false)
+                    .setAudioOnly(audioOnly)
+                    .setUserInfo(userInfo)
+                    .build()
+
+                JitsiMeetActivity.launch(app, options)
             }
         }
     }

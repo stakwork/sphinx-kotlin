@@ -47,6 +47,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -82,6 +83,7 @@ internal class ChatTribeViewModel @Inject constructor(
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
     memeInputStreamHandler: MemeInputStreamHandler,
+    moshi: Moshi,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatTribeFragmentArgs>(
     app,
@@ -101,6 +103,7 @@ internal class ChatTribeViewModel @Inject constructor(
     cameraViewModelCoordinator,
     linkPreviewHandler,
     memeInputStreamHandler,
+    moshi,
     LOG,
 )
 {
