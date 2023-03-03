@@ -38,6 +38,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.getColorKey
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -68,6 +69,7 @@ class ChatGroupViewModel @Inject constructor(
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
     memeInputStreamHandler: MemeInputStreamHandler,
+    moshi: Moshi,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatGroupFragmentArgs>(
     app,
@@ -87,6 +89,7 @@ class ChatGroupViewModel @Inject constructor(
     cameraViewModelCoordinator,
     linkPreviewHandler,
     memeInputStreamHandler,
+    moshi,
     LOG,
 ) {
     override val args: ChatGroupFragmentArgs by savedStateHandle.navArgs()

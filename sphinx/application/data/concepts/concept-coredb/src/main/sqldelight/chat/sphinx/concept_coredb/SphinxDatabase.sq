@@ -664,7 +664,8 @@ AND (
     type = 21 OR
     type = 22 OR
     type = 25 OR
-    (type = 29 AND reply_uuid IS NULL)
+    (type = 29 AND reply_uuid IS NULL) OR
+    type = 32
 )
 ORDER BY date DESC
 LIMIT ?;
@@ -687,7 +688,8 @@ AND (
     type = 21 OR
     type = 22 OR
     type = 25 OR
-    (type = 29 AND reply_uuid IS NULL)
+    (type = 29 AND reply_uuid IS NULL) OR
+    type = 32
 )
 ORDER BY date DESC;
 
