@@ -7,8 +7,8 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.tribe_badge.R
-import chat.sphinx.tribe_badge.model.TribeBadgeListHolder
-import chat.sphinx.tribe_badge.model.TribeBadgeListHolderType
+import chat.sphinx.tribe_badge.model.TribeBadgeHolder
+import chat.sphinx.tribe_badge.model.TribeBadgeHolderType
 import chat.sphinx.tribe_badge.navigation.TribeBadgesNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,9 +36,23 @@ internal class TribeBadgesViewModel @Inject constructor(
 
     val chatId = args.argChatId
 
-    fun goToCreateBadgeScreen(badgeName: String) {
+    fun goToCreateBadgeScreen(
+        badgeName: String,
+        badgeImage: String,
+        badgeDescription: String,
+        badgeAmount: String,
+        badgeLeft: String,
+        badgeActive: Boolean
+    ) {
         viewModelScope.launch(mainImmediate) {
-            navigator.toCreateBadgeScreen(badgeName)
+            navigator.toCreateBadgeScreen(
+                badgeName,
+                badgeImage,
+                badgeDescription,
+                badgeAmount,
+                badgeLeft,
+                badgeActive
+            )
         }
     }
 
@@ -57,13 +71,13 @@ internal class TribeBadgesViewModel @Inject constructor(
                         updateViewState(TribeBadgesViewState.Close)
                     }
                     is Response.Success -> {
-                        val badgeTemplatesList: List<TribeBadgeListHolder> = loadResponse.value.map {
-                            TribeBadgeListHolder(
+                        val badgeTemplatesList: List<TribeBadgeHolder> = loadResponse.value.map {
+                            TribeBadgeHolder(
                                 name = it.name ?: "",
                                 imageUrl = it.icon,
                                 rewardType = if (it.rewardType == 1) R.string.badges_earn else R.string.badges_spend,
                                 rewardRequirement = it.rewardRequirement,
-                                holderType = TribeBadgeListHolderType.TEMPLATE
+                                holderType = TribeBadgeHolderType.TEMPLATE
                             )
                         }
                         networkQueryPeople.getUserExistingBadges(ChatId(chatId)).collect { existingBadges ->
@@ -73,13 +87,13 @@ internal class TribeBadgesViewModel @Inject constructor(
                                 }
                                 is LoadResponse.Loading -> {}
                                 is Response.Success -> {
-                                    val manageBadgeLabel = TribeBadgeListHolder(
+                                    val manageBadgeLabel = TribeBadgeHolder(
                                         name = "Manage Label",
-                                        holderType = TribeBadgeListHolderType.HEADER
+                                        holderType = TribeBadgeHolderType.HEADER
                                     )
 
-                                    val existingBadgesList: List<TribeBadgeListHolder> = existingBadges.value.map {
-                                        TribeBadgeListHolder(
+                                    val existingBadgesList: List<TribeBadgeHolder> = existingBadges.value.map {
+                                        TribeBadgeHolder(
                                             name = it.name ?: "",
                                             description = it.memo,
                                             rewardType = if (it.reward_type == 1) R.string.badges_earn else R.string.badges_spend,
@@ -88,10 +102,10 @@ internal class TribeBadgesViewModel @Inject constructor(
                                             amount_issued = it.amount_issued,
                                             isActive = it.activationState,
                                             imageUrl = it.icon,
-                                            holderType = TribeBadgeListHolderType.BADGE
+                                            holderType = TribeBadgeHolderType.BADGE
                                         )
                                     }.sortedWith(
-                                        compareByDescending<TribeBadgeListHolder> { it.isActive }
+                                        compareByDescending<TribeBadgeHolder> { it.isActive }
                                             .thenBy { it.name }
                                     )
                                     val badgesList = badgeTemplatesList.plus(manageBadgeLabel).plus(existingBadgesList)

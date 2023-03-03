@@ -1,6 +1,6 @@
 package chat.sphinx.tribe_badge.ui
 
-import chat.sphinx.tribe_badge.model.TribeBadgeListHolder
+import chat.sphinx.tribe_badge.model.TribeBadgeHolder
 import io.matthewnelson.concept_views.viewstate.ViewState
 
 sealed class TribeBadgesViewState: ViewState<TribeBadgesViewState>() {
@@ -10,7 +10,7 @@ sealed class TribeBadgesViewState: ViewState<TribeBadgesViewState>() {
     object Close: TribeBadgesViewState()
 
     data class TribeBadgesList(
-        val tribeBadgeListHolders: List<TribeBadgeListHolder>
+        val tribeBadgeHolders: List<TribeBadgeHolder>
     ): TribeBadgesViewState()
 
 }

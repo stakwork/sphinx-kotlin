@@ -1,6 +1,6 @@
 package chat.sphinx.tribe_badge.model
 
-data class TribeBadgeListHolder(
+data class TribeBadgeHolder(
     val name: String,
     val description: String? = null,
     val rewardType: Int? = null,
@@ -13,7 +13,7 @@ data class TribeBadgeListHolder(
     val holderType: Int? = null
 )
 
-sealed class TribeBadgeListHolderType {
+sealed class TribeBadgeHolderType {
 
     companion object {
         const val TEMPLATE = 0

@@ -17,8 +17,24 @@ abstract class TribeBadgesNavigator(
     }
 
     @JvmSynthetic
-    suspend fun toCreateBadgeScreen(badgeName: String){
-        navigationDriver.submitNavigationRequest(ToCreateBadge(badgeName))
+    suspend fun toCreateBadgeScreen(
+        badgeName: String,
+        badgeImage: String,
+        badgeDescription: String,
+        badgeAmount: String,
+        badgeLeft: String,
+        badgeActive: Boolean
+    ) {
+        navigationDriver.submitNavigationRequest(
+            ToCreateBadge(
+                badgeName,
+                badgeImage,
+                badgeDescription,
+                badgeAmount,
+                badgeLeft,
+                badgeActive,
+            )
+        )
     }
 
 }

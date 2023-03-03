@@ -16,8 +16,8 @@ import chat.sphinx.resources.getString
 import chat.sphinx.tribe_badge.R
 import chat.sphinx.tribe_badge.databinding.LayoutBadgesListItemHolderBinding
 import chat.sphinx.tribe_badge.databinding.LayoutManageBadgesLabelItemHolderBinding
-import chat.sphinx.tribe_badge.model.TribeBadgeListHolder
-import chat.sphinx.tribe_badge.model.TribeBadgeListHolderType
+import chat.sphinx.tribe_badge.model.TribeBadgeHolder
+import chat.sphinx.tribe_badge.model.TribeBadgeHolderType
 import chat.sphinx.tribe_badge.ui.TribeBadgesViewModel
 import chat.sphinx.tribe_badge.ui.TribeBadgesViewState
 import io.matthewnelson.android_feature_screens.util.invisible
@@ -45,8 +45,8 @@ internal class TribeBadgesListAdapter(
     }
 
     private inner class Diff(
-        private val oldList: List<TribeBadgeListHolder>,
-        private val newList: List<TribeBadgeListHolder>,
+        private val oldList: List<TribeBadgeHolder>,
+        private val newList: List<TribeBadgeHolder>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -102,7 +102,7 @@ internal class TribeBadgesListAdapter(
         }
     }
 
-    private val tribeBadgesListListHolder = ArrayList<TribeBadgeListHolder>(listOf())
+    private val tribeBadgesListListHolder = ArrayList<TribeBadgeHolder>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -110,8 +110,8 @@ internal class TribeBadgesListAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                var list: List<TribeBadgeListHolder> = if (viewState is TribeBadgesViewState.TribeBadgesList) {
-                    viewState.tribeBadgeListHolders
+                var list: List<TribeBadgeHolder> = if (viewState is TribeBadgesViewState.TribeBadgesList) {
+                    viewState.tribeBadgeHolders
                 } else {
                     listOf()
                 }
@@ -146,13 +146,13 @@ internal class TribeBadgesListAdapter(
         val badgeItemType = tribeBadgesListListHolder.getOrNull(position)
 
         return when (badgeItemType?.holderType) {
-            TribeBadgeListHolderType.TEMPLATE -> {
+            TribeBadgeHolderType.TEMPLATE -> {
                 TEMPLATE_BADGE
             }
-            TribeBadgeListHolderType.BADGE -> {
+            TribeBadgeHolderType.BADGE -> {
                 EXISTING_BADGE
             }
-            TribeBadgeListHolderType.HEADER -> {
+            TribeBadgeHolderType.HEADER -> {
                 MANAGE_LABEL
             }
             else -> {
@@ -216,9 +216,9 @@ internal class TribeBadgesListAdapter(
         private val disposables: ArrayList<Disposable> = ArrayList(2)
         fun bind(position: Int) {
             binding.apply {
-                val tribeBadgeListHolder: TribeBadgeListHolder? = tribeBadgesListListHolder.getOrNull(position)
+                val tribeBadgeHolder: TribeBadgeHolder? = tribeBadgesListListHolder.getOrNull(position)
 
-                tribeBadgeListHolder?.imageUrl?.let { imageUrl ->
+                tribeBadgeHolder?.imageUrl?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
                             imageViewBadgeImage,
@@ -236,16 +236,17 @@ internal class TribeBadgesListAdapter(
                     )
                 }
 
-                val badgesLeftNum = (tribeBadgeListHolder?.amount_created?.minus(tribeBadgeListHolder.amount_issued ?: 0)).toString()
+                val badgesAmount = (tribeBadgeHolder?.amount_created?.minus(tribeBadgeHolder.amount_issued ?: 0)).toString()
+                val badgesLeft = String.format(getString(R.string.badges_left), tribeBadgeHolder?.amount_created)
 
-                textViewBadgeTitle.text = tribeBadgeListHolder?.name ?: ""
-                textViewBadgeDescription.text = tribeBadgeListHolder?.description ?: ""
-                textViewBadgesLeft.text = String.format(getString(R.string.badges_left), tribeBadgeListHolder?.amount_created)
-                textViewBadgesRowCount.text = badgesLeftNum
+                textViewBadgeTitle.text = tribeBadgeHolder?.name ?: ""
+                textViewBadgeDescription.text = tribeBadgeHolder?.description ?: ""
+                textViewBadgesLeft.text = badgesLeft
+                textViewBadgesRowCount.text = badgesAmount
                 layoutButtonTemplate.textViewButtonSmall.textSize = 12F
 
 
-                if (tribeBadgeListHolder?.isActive == true) {
+                if (tribeBadgeHolder?.isActive == true) {
                     layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_active)
                     layoutButtonTemplate.layoutConstraintButtonSmall.background =
                         ContextCompat.getDrawable(root.context, R.drawable.background_button_open_white)
@@ -256,6 +257,17 @@ internal class TribeBadgesListAdapter(
                     layoutButtonTemplate.layoutConstraintButtonSmall.background =
                         ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
                     layoutButtonTemplate.textViewButtonSmall.setTextColor(ContextCompat.getColor(root.context, R.color.secondaryText))
+                }
+
+                binding.root.setOnClickListener {
+                    viewModel.goToCreateBadgeScreen(
+                        tribeBadgeHolder?.name ?: "",
+                        tribeBadgeHolder?.imageUrl ?: "",
+                        tribeBadgeHolder?.description ?: "",
+                        badgesAmount,
+                        badgesLeft,
+                        tribeBadgeHolder?.isActive ?: false
+                    )
                 }
             }
         }
@@ -274,9 +286,9 @@ internal class TribeBadgesListAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-                val tribeBadgeListHolder: TribeBadgeListHolder? = tribeBadgesListListHolder.getOrNull(position)
+                val tribeBadgeHolder: TribeBadgeHolder? = tribeBadgesListListHolder.getOrNull(position)
 
-                tribeBadgeListHolder?.imageUrl?.let { imageUrl ->
+                tribeBadgeHolder?.imageUrl?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
                             imageViewBadgeImage,
@@ -294,10 +306,10 @@ internal class TribeBadgesListAdapter(
                     )
                 }
                 val description = getString(R.string.badges_template_description)
-                val earnOrSpend = tribeBadgeListHolder?.rewardType?.let { getString(it) } ?: ""
+                val earnOrSpend = tribeBadgeHolder?.rewardType?.let { getString(it) } ?: ""
 
-                textViewBadgeTitle.text = tribeBadgeListHolder?.name ?: ""
-                textViewBadgeDescription.text = String.format(description, earnOrSpend, tribeBadgeListHolder?.rewardRequirement)
+                textViewBadgeTitle.text = tribeBadgeHolder?.name ?: ""
+                textViewBadgeDescription.text = String.format(description, earnOrSpend, tribeBadgeHolder?.rewardRequirement)
                 layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_template)
                 layoutButtonTemplate.layoutConstraintButtonSmall.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
                 layoutButtonTemplate.textViewButtonSmall.textSize = 12F
@@ -318,12 +330,6 @@ internal class TribeBadgesListAdapter(
     inner class ManageBadgeViewHolder(
         private val binding: LayoutManageBadgesLabelItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
-
-        init {
-            binding.layoutConstraintManageBadgesHolder.setOnClickListener {
-                viewModel.goToCreateBadgeScreen("testing navigation")
-            }
-        }
 
     }
 }
