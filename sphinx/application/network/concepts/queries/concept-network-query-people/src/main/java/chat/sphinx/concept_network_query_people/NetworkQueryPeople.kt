@@ -50,4 +50,15 @@ abstract class NetworkQueryPeople {
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
 
+    abstract fun changeBadgeState(
+        badge: BadgeStateDto,
+        state: Boolean,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
+
+    abstract fun createBadge(
+        badge: BadgeCreateDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
+
 }

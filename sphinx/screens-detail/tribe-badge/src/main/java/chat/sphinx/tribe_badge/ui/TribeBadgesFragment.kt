@@ -89,7 +89,7 @@ internal class TribeBadgesFragment: SideEffectFragment<
     private fun setupHeaderScreen() {
         binding.includeLayoutKnownBadgesTitle.apply {
             textViewDetailScreenHeaderNavBack.visible
-            textViewDetailScreenHeaderName.text = "Tribe Badges"
+            textViewDetailScreenHeaderName.text = getString(R.string.badges_header)
             textViewDetailScreenClose.gone
             textViewDetailScreenHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {

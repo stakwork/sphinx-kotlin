@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.create_badge.R
 import chat.sphinx.create_badge.navigation.CreateBadgeNavigator
 import chat.sphinx.wrapper_badge.Badge
@@ -48,8 +49,9 @@ internal inline val CreateBadgeFragmentArgs.template: BadgeTemplate
 internal class CreateBadgeViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
-    val navigator: CreateBadgeNavigator
-): SideEffectViewModel<
+    val navigator: CreateBadgeNavigator,
+    private val networkQueryPeople: NetworkQueryPeople
+    ): SideEffectViewModel<
         Context,
         CreateBadgeSideEffect,
         CreateBadgeViewState>(dispatchers, CreateBadgeViewState.Idle)

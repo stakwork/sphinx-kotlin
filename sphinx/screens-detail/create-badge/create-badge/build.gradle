@@ -46,6 +46,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
     api project(path: ':sphinx:screens-detail:camera:camera-view-model-coordinator')
     api project(path: ':sphinx:screens-detail:common:detail-resources')
     api project(path: ':sphinx:service:concepts:concept-service-media-player')

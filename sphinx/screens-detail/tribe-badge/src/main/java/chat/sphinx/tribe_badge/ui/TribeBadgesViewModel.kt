@@ -38,38 +38,6 @@ internal class TribeBadgesViewModel @Inject constructor(
 
     val chatId = args.argChatId
 
-    fun goToCreateBadgeScreen(
-        name: String,
-        description: String,
-        image: String,
-        rewardType: Int,
-        rewardRequirement: Int,
-        isActive: Boolean,
-        chatId: Int,
-        badgeId: Int,
-        amountCreated: Int,
-        amountIssued: Int,
-        claimAmount: Int,
-        holderType: Int
-    ) {
-        viewModelScope.launch(mainImmediate) {
-            navigator.toCreateBadgeScreen(
-                name,
-                description,
-                image,
-                rewardType,
-                rewardRequirement,
-                isActive,
-                chatId,
-                badgeId,
-                amountCreated,
-                amountIssued,
-                claimAmount,
-                holderType
-            )
-        }
-    }
-
     init {
         getBadgesTemplates()
         }
@@ -121,6 +89,7 @@ internal class TribeBadgesViewModel @Inject constructor(
                                         compareByDescending<Badge> { it.isActive }
                                             .thenBy { it.name }
                                     )
+
                                     val tribeBadgesHolderList: List<TribeBadgeHolder> = badgeTemplatesList.map { badgeTemplate ->
                                         TribeBadgeHolder(
                                             TribeBadgeHolderType.TEMPLATE,
@@ -146,6 +115,38 @@ internal class TribeBadgesViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    fun goToCreateBadgeScreen(
+        name: String,
+        description: String,
+        image: String,
+        rewardType: Int,
+        rewardRequirement: Int,
+        isActive: Boolean,
+        chatId: Int,
+        badgeId: Int,
+        amountCreated: Int,
+        amountIssued: Int,
+        claimAmount: Int,
+        holderType: Int
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            navigator.toCreateBadgeScreen(
+                name,
+                description,
+                image,
+                rewardType,
+                rewardRequirement,
+                isActive,
+                chatId,
+                badgeId,
+                amountCreated,
+                amountIssued,
+                claimAmount,
+                holderType
+            )
         }
     }
 
