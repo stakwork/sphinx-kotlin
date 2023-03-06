@@ -52,6 +52,8 @@
     <string name="badges_active">ACTIVO</string>
     <string name="badges_inactive">INACTIVO</string>
     <string name="badges_left" >de %s Badges</string>
+    <string name="badges_create_error">Error al crear badge</string>
+    <string name="badges_state_error">Error al cambiar el estado del badge</string>
 
 
     <string name="balance_too_low">Balance demasiado bajo</string>

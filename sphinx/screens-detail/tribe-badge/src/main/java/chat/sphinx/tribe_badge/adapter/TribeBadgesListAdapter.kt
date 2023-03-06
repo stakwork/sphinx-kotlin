@@ -331,7 +331,7 @@ internal class TribeBadgesListAdapter(
                         rewardType = tribeBadgeHolder?.badgeTemplate?.rewardType ?: 0,
                         rewardRequirement= tribeBadgeHolder?.badgeTemplate?.rewardRequirement ?: 0,
                         isActive = false,
-                        chatId = 0,
+                        chatId = tribeBadgeHolder?.badgeTemplate?.chatId ?: 0,
                         badgeId = 0,
                         amountCreated = 0,
                         amountIssued = 0,

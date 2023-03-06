@@ -51,6 +51,8 @@
     <string name="badges_active">ACTIVE</string>
     <string name="badges_inactive">INACTIVE</string>
     <string name="badges_left" >of %s Badges left</string>
+    <string name="badges_create_error">Failed to create badge</string>
+    <string name="badges_state_error">Failed to change badge state</string>
 
     <string name="balance_too_low">Balance too low</string>
     <string name="boost_amount_too_low">Boost amount must be greater than 0</string>

@@ -59,7 +59,8 @@ internal class TribeBadgesViewModel @Inject constructor(
                                 rewardType = if (it.rewardType == 1) R.string.badges_earn else R.string.badges_spend,
                                 rewardRequirement = it.rewardRequirement,
                                 imageUrl = it.icon,
-                                description = null
+                                description = null,
+                                chatId = chatId.toInt()
                             )
                         }
                         networkQueryPeople.getUserExistingBadges(ChatId(chatId)).collect { existingBadges ->

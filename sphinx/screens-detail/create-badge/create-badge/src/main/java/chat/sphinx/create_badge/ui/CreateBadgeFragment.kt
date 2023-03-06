@@ -19,16 +19,19 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_network_query_people.model.BadgeCreateDto
 import chat.sphinx.create_badge.R
 import chat.sphinx.create_badge.databinding.FragmentCreateBadgeBinding
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -89,6 +92,16 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     textViewBadgesRowCount.text = badgesAmount
                     textViewBadgesLeft.text = badgesLeft
                     switchDeactivateBadge.isChecked = viewState.badge.isActive
+
+                    switchDeactivateBadge.setOnCheckedChangeListener { _, isChecked ->
+                        if (isChecked) {
+                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId?.toLong(), true)
+                        }
+                        else {
+                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId?.toLong(), false)
+                        }
+
+                    }
                 }
             }
             is CreateBadgeViewState.Template -> {
@@ -116,16 +129,31 @@ internal class CreateBadgeFragment: SideEffectFragment<
                         removeFocusOnEnter(quantityNumber)
                     }
 
-
                     buttonBadgesQuantityMinus.setOnClickListener { decreaseQuantity() }
                     buttonBadgesQuantityPlus.setOnClickListener { increaseQuantity() }
 
                     setSatsQuantity()
-                }
 
+                    layoutConstraintButtonCreateBadge.setOnClickListener {
+                        viewModel.createBadge(
+                            BadgeCreateDto(
+                                viewState.badgeTemplate.chatId?.toLong() ?: 0L,
+                                viewState.badgeTemplate.name ?: "",
+                                viewState.badgeTemplate.rewardRequirement ?: 0,
+                                viewState.badgeTemplate.description ?: "",
+                                viewState.badgeTemplate.imageUrl ?: "",
+                                viewState.badgeTemplate.rewardType ?: 0,
+                                false,
+                                currentQuantity
+                            )
+                        )
+                    }
+                }
+            }
+            is CreateBadgeViewState.BadgeCreatedSuccessfully -> {
+                viewModel.navigator.popBackStack()
             }
         }
-
     }
 
 
@@ -177,6 +205,7 @@ internal class CreateBadgeFragment: SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CreateBadgeSideEffect) {
+        sideEffect.execute(binding.root.context)
     }
 
 

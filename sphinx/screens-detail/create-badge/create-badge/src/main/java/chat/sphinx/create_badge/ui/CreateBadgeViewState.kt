@@ -16,4 +16,6 @@ sealed class CreateBadgeViewState: ViewState<CreateBadgeViewState>() {
         val badgeTemplate: BadgeTemplate
     ): CreateBadgeViewState()
 
+    object BadgeCreatedSuccessfully: CreateBadgeViewState()
+
 }
