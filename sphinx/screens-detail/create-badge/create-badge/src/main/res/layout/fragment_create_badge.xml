@@ -153,11 +153,17 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:srcCompat="@drawable/ic_icon_upload_badges" />
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/quantity_number"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:digits="0123456789"
                 android:fontFamily="@font/roboto_regular"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:maxLength="8"
+                android:gravity="center"
+                android:singleLine="true"
                 android:textColor="@color/primaryText"
                 android:textSize="@dimen/add_buttons_text_size"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -199,19 +205,33 @@
             app:layout_constraintTop_toBottomOf="@+id/text_view_quantity" />
 
         <TextView
-            android:id="@+id/text_view_sats_amount"
+            android:id="@+id/text_view_sats_per_badge"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/default_large_layout_margin"
+            android:layout_marginHorizontal="@dimen/default_small_layout_margin"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center"
-            android:maxLines="2"
+            android:maxLines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_price_per_badge"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_sats_per_badge_label"
+            tools:text="10" />
+
+        <TextView
+            android:id="@+id/text_view_sats_per_badge_label"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/default_large_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:text="@string/sats"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_header_text_size"
             app:layout_constraintBaseline_toBaselineOf="@+id/text_view_price_per_badge"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:text="10 sats" />
+            tools:text="sats" />
 
         <TextView
             android:id="@+id/text_view_total"
@@ -231,7 +251,7 @@
 
         <TextView
             android:id="@+id/text_view_total_sats_amount"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/default_small_layout_margin"
             android:ellipsize="end"
@@ -253,11 +273,11 @@
             android:fontFamily="@font/roboto_regular"
             android:gravity="center"
             android:maxLines="2"
+            android:text="@string/sats"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_header_text_size"
             app:layout_constraintBaseline_toBaselineOf="@+id/text_view_total"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="sats" />
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
