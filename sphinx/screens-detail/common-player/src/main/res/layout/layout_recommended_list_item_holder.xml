@@ -8,31 +8,50 @@
     android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/default_layout_margin">
+        android:layout_height="wrap_content"
+        android:padding="@dimen/default_layout_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_recommended_image"
-            android:layout_width="@dimen/recommended_list_item_cover_image_xy"
-            android:layout_height="@dimen/recommended_list_item_cover_image_xy"
-            android:layout_marginBottom="4dp"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_image_episode_wrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/episode_image_radius"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@drawable/ic_podcast_placeholder" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_item_row_recommendation_type"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="54dp"
-            android:layout_marginTop="54dp"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_podcast_placeholder"
-            app:layout_constraintStart_toStartOf="@+id/image_view_recommended_image"
-            app:layout_constraintTop_toTopOf="@+id/image_view_recommended_image" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_recommended_image"
+                android:layout_width="@dimen/recommended_list_item_cover_image_xy"
+                android:layout_height="@dimen/recommended_list_item_cover_image_xy"
+                android:scaleType="centerCrop"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@drawable/ic_podcast_placeholder" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_image_type_wrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+            app:cardCornerRadius="@dimen/episode_type_radius"
+            app:layout_constraintStart_toStartOf="@+id/text_view_recommended_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_item_row_recommendation_type"
+                android:layout_width="@dimen/default_feed_play_elevation"
+                android:layout_height="@dimen/default_feed_play_elevation"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_podcast_placeholder" />
+
+        </androidx.cardview.widget.CardView>
+
 
         <TextView
             android:id="@+id/text_view_recommended_title"
@@ -40,30 +59,84 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
             android:ellipsize="end"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="3"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="2"
             android:textColor="@color/text"
-            android:textSize="14sp"
-            app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            android:textSize="@dimen/chat_footer_episode_title_text_size"
+            app:layout_constraintBottom_toBottomOf="@+id/card_view_image_episode_wrapper"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/image_view_recommended_image"
+            app:layout_constraintStart_toEndOf="@id/card_view_image_episode_wrapper"
+            app:layout_constraintTop_toTopOf="@+id/card_view_image_episode_wrapper"
             tools:text="Show title" />
 
         <TextView
             android:id="@+id/text_view_recommended_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_layout_margin"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="@dimen/default_list_row_padding_vertical"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
-            android:maxLines="1"
+            android:maxLines="2"
             android:textColor="@color/secondaryText"
-            android:textSize="13sp"
-            app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/card_view_image_episode_wrapper"
             tools:text="Who Will Build the Roads?" />
+
+        <TextView
+            android:id="@+id/text_view_recommended_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="2"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_body"
+            app:layout_constraintBottom_toBottomOf="@+id/card_view_image_type_wrapper"
+            app:layout_constraintStart_toEndOf="@+id/card_view_image_type_wrapper"
+            app:layout_constraintTop_toTopOf="@+id/card_view_image_type_wrapper"
+            tools:text="3 Apr 2022" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/appCompatImageView"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/circular_split"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_recommended_date"
+            app:layout_constraintStart_toEndOf="@+id/text_view_recommended_date"
+            app:layout_constraintTop_toTopOf="@+id/text_view_recommended_date" />
+
+        <TextView
+            android:id="@+id/text_view_item_episode_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:textColor="@color/receivedIcon"
+            android:textSize="@dimen/default_text_size_caption1"
+            app:layout_constraintBottom_toBottomOf="@+id/appCompatImageView"
+            app:layout_constraintStart_toEndOf="@+id/appCompatImageView"
+            app:layout_constraintTop_toTopOf="@+id/appCompatImageView"
+            tools:text="1h 19 min left" />
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/seek_bar_current_time_episode_progress"
+            android:layout_width="@dimen/default_progress_bar_time_left_with"
+            android:layout_height="@dimen/default_progress_bar_time_left_height"
+            android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:progressDrawable="@drawable/podcast_episode_progress_bar_duration_holder"
+            android:secondaryProgressTint="@color/receivedIcon"
+            android:splitTrack="false"
+            android:thumb="@null"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_item_episode_time"
+            app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time"
+            app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time" />
 
         <TextView
             android:id="@+id/text_view_recommended_duration"
@@ -74,24 +147,103 @@
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
             android:textColor="@color/secondaryText"
-            android:textSize="12sp"
+            android:textSize="@dimen/default_text_size_body"
             android:visibility="gone"
-            app:layout_constraintBaseline_toBaselineOf="@+id/image_view_recommended_image"
-            app:layout_constraintStart_toEndOf="@id/image_view_recommended_image"
+            app:layout_constraintBaseline_toBaselineOf="@+id/card_view_image_episode_wrapper"
+            app:layout_constraintStart_toEndOf="@id/card_view_image_episode_wrapper"
             app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description"
             tools:text="02:24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/divider_bottom"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:background="@color/recommendedItemDivider"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_episode_icons_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_download_wrapper"
+            android:layout_width="@dimen/default_double_layout_margin"
+            android:layout_height="@dimen/default_double_layout_margin"
+            android:layout_marginStart="@dimen/default_list_row_padding_vertical"
+            app:cardBackgroundColor="@color/headerBG"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ProgressBar
+                android:id="@+id/progress_bar_episode_download"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:indeterminateTint="@color/receivedIcon"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_stop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="@dimen/default_medium_layout_margin"
+                android:src="@drawable/ic_stop_icon"
+                android:visibility="visible" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_download_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/download_arrow" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/button_episode_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_header_margin_horizontal"
+            android:src="@drawable/ic_episode_share"
+            app:layout_constraintStart_toEndOf="@+id/card_view_download_wrapper"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/button_additional_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_header_margin_horizontal"
+            android:src="@drawable/ic_additional_options"
+            app:layout_constraintStart_toEndOf="@+id/button_episode_share"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/button_play_episode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:src="@drawable/ic_play_episode"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/divider_bottom"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:background="@color/lightEpisodeDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/button_play_episode" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
