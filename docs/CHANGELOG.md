@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha83 (2023-03-03)
+- General fixes and improvements
+
 # Version 1.0.0-alpha82 (2023-02-27)
 - Fixes Content Feed Status sync between devices
 
