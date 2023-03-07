@@ -20,6 +20,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.tribes_discover.navigation.TribesDiscoverNavigator
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
+import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
@@ -379,5 +380,11 @@ internal object NavigationModule {
         notificationLevelNavigatorImpl: NotificationLevelNavigatorImpl
     ): NotificationLevelNavigator =
         notificationLevelNavigatorImpl
+
+    @Provides
+    fun provideEpisodeDetailNavigator(
+        episodeNavigatorNavigatorImpl: EpisodeDetailNavigatorImpl
+    ): EpisodeDetailNavigator =
+        episodeNavigatorNavigatorImpl
 
 }
