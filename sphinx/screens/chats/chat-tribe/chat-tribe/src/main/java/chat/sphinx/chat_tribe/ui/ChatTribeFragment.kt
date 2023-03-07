@@ -117,8 +117,6 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
-    private val badgesListViewModel: BadgesListViewModel by viewModels()
-
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -265,7 +263,7 @@ internal class ChatTribeFragment: ChatFragment<
                     imageLoader,
                     viewLifecycleOwner,
                     onStopSupervisor,
-                    badgesListViewModel
+                    viewModel
                 )
                 this.setHasFixedSize(false)
                 layoutManager = linearLayoutManager
@@ -282,7 +280,7 @@ internal class ChatTribeFragment: ChatFragment<
                 imageView,
                 photoUrl,
                 ImageLoaderOptions.Builder()
-                    .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_tribe)
+                    .placeholderResId(R.drawable.sphinx_icon)
                     .transformation(Transformation.CircleCrop)
                     .build()
             )
@@ -609,7 +607,7 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
 
                                 includeLayoutTribeProfileInfoContainer.apply {
-                                    textViewPosts.text = (viewState.profile.extras?.post?.size ?: 0).toString()
+                                    textViewReputation.text = (viewState.leaderboard?.reputation ?: 0).toString()
                                     textViewSatsContributionsNumber.text = (viewState.leaderboard?.spent ?: 0).toString()
                                     textViewSatsEarningsNumber.text = (viewState.leaderboard?.earned ?: 0).toString()
 
@@ -618,22 +616,46 @@ internal class ChatTribeFragment: ChatFragment<
                                     } else {
                                         val badgesList = viewState.badges
 
-                                        badgesListViewModel.updateViewState(BadgesListViewState.BadgesLoaded(viewState.badges))
-
                                         if (badgesList.size > 4) {
-                                            imageViewTribeBadgePicture1.invisible
                                             textViewTribeBadgePictureNum.visible
                                             textViewTribeBadgePictureNum.text = "+${badgesList.size - 3}"
-                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList.getOrNull(0)?.icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList.getOrNull(1)?.icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList.getOrNull(2)?.icon)
-                                        }
-                                        else {
-                                            textViewTribeBadgePictureNum.invisible
+
+                                            cardViewBadgeImage1.visible
+                                            cardViewBadgeImage2.visible
+                                            cardViewBadgeImage3.visible
+                                            cardViewBadgeImage4.invisible
+
                                             loadBadgeImage(imageViewTribeBadgePicture1, badgesList.getOrNull(0)?.icon)
                                             loadBadgeImage(imageViewTribeBadgePicture2, badgesList.getOrNull(1)?.icon)
                                             loadBadgeImage(imageViewTribeBadgePicture3, badgesList.getOrNull(2)?.icon)
-                                            loadBadgeImage(imageViewTribeBadgePicture4, badgesList.getOrNull(3)?.icon)
+                                        }
+                                        else {
+                                            textViewTribeBadgePictureNum.invisible
+
+                                            cardViewBadgeImage1.invisible
+                                            cardViewBadgeImage2.invisible
+                                            cardViewBadgeImage3.invisible
+                                            cardViewBadgeImage4.invisible
+
+                                            badgesList.getOrNull(0)?.let {
+                                                cardViewBadgeImage4.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture4, it.icon)
+                                            }
+
+                                            badgesList.getOrNull(2)?.let {
+                                                cardViewBadgeImage3.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture3, it.icon)
+                                            }
+
+                                            badgesList.getOrNull(3)?.let {
+                                                cardViewBadgeImage2.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture2, it.icon)
+                                            }
+
+                                            badgesList.getOrNull(4)?.let {
+                                                cardViewBadgeImage1.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture1, it.icon)
+                                            }
                                         }
                                     }
 

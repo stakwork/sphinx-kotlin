@@ -25,7 +25,6 @@ sealed class TribeMemberDataViewState: ViewState<TribeMemberDataViewState>() {
 
     class TribeMemberProfile(
         val messageUUID: MessageUUID?,
-        val person: MessagePerson,
         val profile: TribeMemberProfileDto,
         val leaderboard: ChatLeaderboardDto?,
         val badges: List<BadgeDto>?

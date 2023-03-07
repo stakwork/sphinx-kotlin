@@ -50,6 +50,7 @@ import chat.sphinx.wrapper_podcast.Podcast
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -64,7 +65,7 @@ internal inline val ChatTribeFragmentArgs.chatId: ChatId
     get() = ChatId(argChatId)
 
 @HiltViewModel
-internal class ChatTribeViewModel @Inject constructor(
+class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
@@ -393,7 +394,6 @@ internal class ChatTribeViewModel @Inject constructor(
                                         tribeMemberDataViewStateContainer.updateViewState(
                                             TribeMemberDataViewState.TribeMemberProfile(
                                                 message.uuid,
-                                                person,
                                                 loadResponse.value,
                                                 leaderboard,
                                                 null
@@ -404,7 +404,6 @@ internal class ChatTribeViewModel @Inject constructor(
                                         tribeMemberDataViewStateContainer.updateViewState(
                                             TribeMemberDataViewState.TribeMemberProfile(
                                                 message.uuid,
-                                                person,
                                                 loadResponse.value,
                                                 leaderboard,
                                                 badgesResponse.value

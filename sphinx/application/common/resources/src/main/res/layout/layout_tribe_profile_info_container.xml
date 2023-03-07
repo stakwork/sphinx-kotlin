@@ -39,21 +39,86 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_tribe_badge_picture_1"
-                android:layout_width="@dimen/badges_icon_types"
-                android:layout_height="@dimen/badges_icon_types"
-                android:scaleType="centerCrop"
-                android:src="@drawable/sphinx_white_logo"
-                android:visibility="visible"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_badge_image_1"
+                android:layout_width="@dimen/badges_icon_size"
+                android:layout_height="@dimen/badges_icon_size"
+                android:layout_marginEnd="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/card_view_badge_image_2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:cardCornerRadius="@dimen/badges_icon_radius">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/image_view_tribe_badge_picture_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/sphinx_icon" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_badge_image_2"
+                android:layout_width="@dimen/badges_icon_size"
+                android:layout_height="@dimen/badges_icon_size"
+                android:layout_marginEnd="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/card_view_badge_image_3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:cardCornerRadius="@dimen/badges_icon_radius">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/image_view_tribe_badge_picture_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/sphinx_icon" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_badge_image_3"
+                android:layout_width="@dimen/badges_icon_size"
+                android:layout_height="@dimen/badges_icon_size"
+                android:layout_marginEnd="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/card_view_badge_image_4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:cardCornerRadius="@dimen/badges_icon_radius">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/image_view_tribe_badge_picture_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/sphinx_icon" />
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_badge_image_4"
+                android:layout_width="@dimen/badges_icon_size"
+                android:layout_height="@dimen/badges_icon_size"
+                android:layout_marginEnd="12dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:cardCornerRadius="@dimen/badges_icon_radius">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/image_view_tribe_badge_picture_4"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/sphinx_icon" />
+
+            </androidx.cardview.widget.CardView>
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_tribe_badge_picture_num"
-                android:layout_width="@dimen/badges_icon_types"
-                android:layout_height="@dimen/badges_icon_types"
+                android:layout_width="@dimen/badges_icon_size"
+                android:layout_height="@dimen/badges_icon_size"
                 android:background="@drawable/background_badge_number"
                 android:fontFamily="@font/roboto_regular"
                 android:gravity="center"
@@ -61,44 +126,11 @@
                 android:singleLine="true"
                 android:textColor="@color/mainBottomIcons"
                 android:textSize="@dimen/default_chip_text_size"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="+5" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_tribe_badge_picture_2"
-                android:layout_width="@dimen/badges_icon_types"
-                android:layout_height="@dimen/badges_icon_types"
-                android:layout_marginEnd="12dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/sphinx_white_logo"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_1"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_tribe_badge_picture_3"
-                android:layout_width="@dimen/badges_icon_types"
-                android:layout_height="@dimen/badges_icon_types"
-                android:layout_marginEnd="12dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/sphinx_white_logo"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_2"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_tribe_badge_picture_4"
-                android:layout_width="@dimen/badges_icon_types"
-                android:layout_height="@dimen/badges_icon_types"
-                android:layout_marginEnd="12dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/sphinx_white_logo"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/image_view_tribe_badge_picture_3"
-                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -175,7 +207,7 @@
         app:layout_constraintTop_toBottomOf="@+id/constraint_layout_tribe_recycler_row">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_posts_label"
+            android:id="@+id/text_view_reputation_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
@@ -191,7 +223,7 @@
             tools:text="Posts:" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_posts"
+            android:id="@+id/text_view_reputation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
@@ -202,7 +234,7 @@
             android:gravity="right"
             android:ellipsize="end"
             android:layout_marginStart="@dimen/default_layout_margin"
-            app:layout_constraintStart_toEndOf="@+id/text_view_posts_label"
+            app:layout_constraintStart_toEndOf="@+id/text_view_reputation_label"
             app:backgroundTint="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

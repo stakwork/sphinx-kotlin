@@ -1,9 +1,6 @@
 package chat.sphinx.chat_tribe.adapters
 
 import chat.sphinx.chat_tribe.R
-import chat.sphinx.chat_tribe.model.BadgeItem
-import chat.sphinx.chat_tribe.ui.BadgesListViewModel
-import chat.sphinx.resources.databinding.LayoutTribeProfileBadgesHolderBinding
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -12,13 +9,15 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_tribe.databinding.LayoutProfileBadgesListItemHolderBinding
-import chat.sphinx.chat_tribe.ui.viewstate.BadgesListViewState
+import chat.sphinx.chat_tribe.ui.ChatTribeViewModel
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_network_query_people.model.BadgeDto
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,7 +26,7 @@ class BadgesItemAdapter (
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: BadgesListViewModel
+    private val viewModel: ChatTribeViewModel
 ): RecyclerView.Adapter<BadgesItemAdapter.BadgesItemViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
@@ -90,11 +89,11 @@ class BadgesItemAdapter (
         super.onStart(owner)
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.collectViewState { viewState ->
+            viewModel.tribeMemberDataViewStateContainer.collect { viewState ->
 
                 var badges = ArrayList<BadgeDto>()
 
-                if (viewState is BadgesListViewState.BadgesLoaded) {
+                if (viewState is TribeMemberDataViewState.TribeMemberProfile) {
                     badges = ArrayList(viewState.badges)
                 }
 
@@ -123,7 +122,7 @@ class BadgesItemAdapter (
     }
 
     override fun getItemCount(): Int {
-        return 5
+        return badgeItems.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BadgesItemViewHolder {
@@ -166,7 +165,7 @@ class BadgesItemAdapter (
                             imageViewBadgeImage,
                             imageUrl,
                             ImageLoaderOptions.Builder()
-                                .placeholderResId(R.drawable.ic_tribe_placeholder)
+                                .placeholderResId(R.drawable.sphinx_icon)
                                 .build()
                         )
 
