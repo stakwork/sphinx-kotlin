@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_manage_badges_holder"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/background_detail_screen">
+    android:layout_height="@dimen/default_header_height"
+    android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -19,12 +19,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginVertical="14dp"
-            android:fontFamily="@font/roboto_bold"
-            android:gravity="center"
-            android:maxLines="1"
+            android:layout_marginStart="26dp"
+            android:gravity="left"
             android:text="@string/badges_manage_label"
-            android:textColor="@color/text"
-            android:textSize="@dimen/default_text_size_tab"
+            android:fontFamily="@font/roboto_medium"
+            android:paddingEnd="4dp"
+            android:singleLine="true"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_headline"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"

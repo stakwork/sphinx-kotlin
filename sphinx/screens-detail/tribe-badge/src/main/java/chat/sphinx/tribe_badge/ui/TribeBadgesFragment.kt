@@ -52,7 +52,7 @@ internal class TribeBadgesFragment: SideEffectFragment<
             is TribeBadgesViewState.Loading -> {
                 binding.layoutConstraintProgressBarContainer.visible
             }
-            is TribeBadgesViewState.Close -> {
+            is TribeBadgesViewState.Error -> {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }
@@ -63,11 +63,8 @@ internal class TribeBadgesFragment: SideEffectFragment<
         }
     }
 
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
-    }
-
     override suspend fun onSideEffectCollect(sideEffect: TribeBadgesSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 
     private fun setupTribeBadgesListAdapter(){
@@ -79,20 +76,16 @@ internal class TribeBadgesFragment: SideEffectFragment<
                 onStopSupervisor,
                 viewModel
             )
-            val TribeBadgesFooterAdapter =
-                TribeBadgesListFooterAdapter(requireActivity() as InsetterActivity)
+            val tribeBadgesFooterAdapter = TribeBadgesListFooterAdapter(requireActivity() as InsetterActivity)
             this.setHasFixedSize(false)
             layoutManager = linearLayoutManager
-            adapter = ConcatAdapter(tribeBadgesListAdapter, TribeBadgesFooterAdapter)
+            adapter = ConcatAdapter(tribeBadgesListAdapter, tribeBadgesFooterAdapter)
             layoutManager = linearLayoutManager
             itemAnimator = null
         }
     }
     private fun setupHeaderScreen() {
-        binding.includeLayoutKnownBadgesTitle.apply {
-            textViewDetailScreenHeaderNavBack.visible
-            textViewDetailScreenHeaderName.text = getString(R.string.badges_header)
-            textViewDetailScreenClose.gone
+        binding.apply {
             textViewDetailScreenHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()

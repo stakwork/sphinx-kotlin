@@ -7,7 +7,7 @@ sealed class TribeBadgesViewState: ViewState<TribeBadgesViewState>() {
 
     object Idle: TribeBadgesViewState()
     object Loading: TribeBadgesViewState()
-    object Close: TribeBadgesViewState()
+    object Error: TribeBadgesViewState()
 
     data class TribeBadgesList(
         val tribeBadgeHolders: List<TribeBadgeHolder>

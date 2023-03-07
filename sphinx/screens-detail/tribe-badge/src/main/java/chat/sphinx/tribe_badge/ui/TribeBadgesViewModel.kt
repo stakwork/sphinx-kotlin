@@ -50,7 +50,7 @@ internal class TribeBadgesViewModel @Inject constructor(
                         updateViewState(TribeBadgesViewState.Loading)
                     }
                     is Response.Error -> {
-                        updateViewState(TribeBadgesViewState.Close)
+                        updateViewState(TribeBadgesViewState.Error)
                     }
                     is Response.Success -> {
                         val badgeTemplatesList: List<BadgeTemplate> = loadResponse.value.map {

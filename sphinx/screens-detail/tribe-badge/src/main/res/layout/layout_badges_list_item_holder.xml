@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/default_list_row_padding_vertical"
-    android:background="@color/headerBG">
+    android:background="@color/body">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -19,8 +19,8 @@
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_badge_image"
             android:layout_width="@dimen/badges_icon_row_size"
-            android:layout_height="@dimen/badges_icon_row_size"
-            android:scaleType="centerCrop"
+            android:layout_height="wrap_content"
+            android:scaleType="centerInside"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@drawable/ic_icon_badges_crown" />
@@ -114,16 +114,5 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <View
-        android:id="@+id/divider_bottom"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_marginStart="@dimen/default_big_layout_margin"
-        android:background="@color/transactionBGBorder"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/constraintLayout" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

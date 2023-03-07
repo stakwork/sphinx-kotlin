@@ -7,12 +7,42 @@
     android:background="@drawable/background_detail_screen"
     tools:context="chat.sphinx.tribe_badge.ui.TribeBadgesFragment">
 
-    <include
-        android:id="@+id/include_layout_known_badges_title"
-        layout="@layout/layout_detail_screen_header"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/badges_header"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:background="@color/headerBG"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_header_nav_back"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_nav_back"
+            android:textColor="@color/washedOutReceivedText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_header_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:paddingEnd="4dp"
+            android:singleLine="true"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_headline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_header_nav_back"
+            app:layout_constraintTop_toTopOf="parent"
+            android:text="@string/badges_header" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout_tribe_badges_select"
@@ -20,7 +50,7 @@
         android:layout_height="0dp"
         android:visibility="gone"
         android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@+id/include_layout_known_badges_title"
+        app:layout_constraintTop_toBottomOf="@+id/badges_header"
         tools:layout_editor_absoluteX="0dp">
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -93,6 +123,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
