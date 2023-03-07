@@ -80,6 +80,7 @@ dependencies {
     kapt kaptDeps.google.hilt
 
     implementation deps.square.okio
+    implementation deps.square.moshi
     implementation deps.giphy.sdk
     implementation deps.jitsi.sdk
 }

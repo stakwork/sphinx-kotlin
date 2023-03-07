@@ -35,5 +35,6 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation deps.square.moshi
     kapt kaptDeps.google.hilt
 }

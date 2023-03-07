@@ -19,6 +19,7 @@ class SendMessage private constructor(
     val giphyData: GiphyData?,
     val podcastClip: PodcastClip?,
     val isBoost: Boolean,
+    val isCall: Boolean,
     val isTribePayment: Boolean,
     val paidMessagePrice: Sat?,
     val priceToMeet: Sat?
@@ -34,6 +35,7 @@ class SendMessage private constructor(
         private var giphyData: GiphyData?           = null
         private var podcastClip: PodcastClip?       = null
         private var isBoost: Boolean                = false
+        private var isCall: Boolean                 = false
         private var isTribePayment: Boolean         = false
         private var paidMessagePrice: Sat?          = null
         private var priceToMeet: Sat?               = null
@@ -159,6 +161,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setIsCall(isCall: Boolean): Builder {
+            this.isCall = isCall
+            return this
+        }
+
+        @Synchronized
         fun setIsTribePayment(isTribePayment: Boolean): Builder {
             this.isTribePayment = isTribePayment
             return this
@@ -194,6 +202,7 @@ class SendMessage private constructor(
                         giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
                         podcastClip?.let { PodcastClip(text, it.title, it.pubkey, it.url, it.feedID, it.itemID, it.ts) },
                         isBoost,
+                        isCall,
                         isTribePayment,
                         paidMessagePrice,
                         priceToMeet

@@ -3,6 +3,8 @@ package chat.sphinx.feature_repository.mappers.message
 import chat.sphinx.conceptcoredb.MessageDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
 import chat.sphinx.feature_repository.model.message.MessageDboWrapper
+import chat.sphinx.wrapper_common.message.CallLinkMessage
+import chat.sphinx.wrapper_common.message.toCallLinkMessageOrNull
 import chat.sphinx.wrapper_message.*
 import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -58,6 +60,14 @@ internal class MessageDboPresenterMapper(
                         decrypted.value.replaceFirst(FeedBoost.MESSAGE_PREFIX, "")
                             .toPodBoostOrNull(moshi)?.let { podBoost ->
                                 message._feedBoost = podBoost
+                            }
+                    }
+                } else if (message.type.isCallLink()) {
+                    withContext(default) {
+                        decrypted.value.replaceFirst(CallLinkMessage.MESSAGE_PREFIX, "")
+                            .toCallLinkMessageOrNull(moshi)
+                            ?.let { callLink ->
+                                message._callLinkMessage = callLink
                             }
                     }
                 }
