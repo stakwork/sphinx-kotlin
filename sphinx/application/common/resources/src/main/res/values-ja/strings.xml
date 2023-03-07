@@ -51,7 +51,7 @@
     <string name="badges_spend" >Spend</string>
     <string name="badges_active">ACTIVE</string>
     <string name="badges_inactive">INACTIVE</string>
-    <string name="badges_left" >of %s Badges left</string>
+    <string name="badges_left" >of %s left</string>
     <string name="badges_create_error">Failed to create badge</string>
     <string name="badges_state_error">Failed to change badge state</string>
 

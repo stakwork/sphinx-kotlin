@@ -8,14 +8,11 @@ sealed class CreateBadgeViewState: ViewState<CreateBadgeViewState>() {
 
     object Idle : CreateBadgeViewState()
 
-    data class EditBadge(
+    data class ToggleBadge(
         val badge: Badge
     ): CreateBadgeViewState()
 
-    data class Template(
+    data class CreateBadge(
         val badgeTemplate: BadgeTemplate
     ): CreateBadgeViewState()
-
-    object BadgeCreatedSuccessfully: CreateBadgeViewState()
-
 }

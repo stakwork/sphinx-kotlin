@@ -57,7 +57,6 @@ internal class CreateBadgeFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         binding.apply {
             includeCreateBadgeHeader.textViewDetailScreenClose.gone
             includeCreateBadgeHeader.textViewDetailScreenHeaderNavBack.visible
@@ -72,16 +71,12 @@ internal class CreateBadgeFragment: SideEffectFragment<
     override suspend fun onViewStateFlowCollect(viewState: CreateBadgeViewState) {
         when (viewState) {
             is CreateBadgeViewState.Idle -> {}
-            is CreateBadgeViewState.EditBadge -> {
+            is CreateBadgeViewState.ToggleBadge -> {
 
                 binding.apply {
 
-                    layoutConstraintDeactivateBadge.gone
+                    layoutConstraintToggleBadgeState.visible
                     layoutConstraintCreateBadge.gone
-                    layoutConstraintButtonCreateBadge.gone
-                    textViewBadgesRowCount.visible
-                    textViewBadgesLeft.visible
-                    layoutConstraintDeactivateBadge.visible
 
                     imageLoader.load(
                         imageViewBadgeImage,
@@ -93,7 +88,7 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     val badgesLeft = String.format(getString(R.string.badges_left), viewState.badge.amountCreated)
 
                     textViewBadgeName.text = viewState.badge.name
-                    textViewBadgeEditDescription.text = viewState.badge.description
+                    textViewBadgeDescription.text = viewState.badge.description
                     textViewBadgesRowCount.text = badgesAmount
                     textViewBadgesLeft.text = badgesLeft
                     switchDeactivateBadge.isChecked = viewState.badge.isActive
@@ -101,24 +96,17 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     switchDeactivateBadge.setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
                             viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId, true)
-                        }
-                        else {
+                        } else {
                             viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId, false)
                         }
-
                     }
                 }
             }
-            is CreateBadgeViewState.Template -> {
+            is CreateBadgeViewState.CreateBadge -> {
                 binding.apply {
 
-                    layoutConstraintButtonCreateBadge.visible
-                    textViewBadgesRowCount.visible
-                    textViewBadgesLeft.visible
-                    layoutConstraintDeactivateBadge.gone
+                    layoutConstraintToggleBadgeState.gone
                     layoutConstraintCreateBadge.visible
-                    textViewBadgesRowCount.gone
-                    textViewBadgesLeft.gone
 
                     viewState.badgeTemplate.imageUrl?.let {
                         imageLoader.load(
@@ -128,7 +116,7 @@ internal class CreateBadgeFragment: SideEffectFragment<
                         )
                     }
                     textViewBadgeName.text = viewState.badgeTemplate.name
-                    textViewBadgesRequirementDescription.text = viewState.badgeTemplate.description
+                    textViewBadgeDescription.text = viewState.badgeTemplate.description
 
                    layoutConstraintCreateBadge.apply {
                         removeFocusOnEnter(quantityNumber)
@@ -140,23 +128,9 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     setSatsQuantity()
 
                     layoutConstraintButtonCreateBadge.setOnClickListener {
-                        viewModel.createBadge(
-                            BadgeCreateDto(
-                                viewState.badgeTemplate.chatId ?: 0,
-                                viewState.badgeTemplate.name ?: "",
-                                viewState.badgeTemplate.rewardRequirement ?: 0,
-                                viewState.badgeTemplate.description ?: "",
-                                viewState.badgeTemplate.imageUrl ?: "",
-                                viewState.badgeTemplate.rewardType ?: 0,
-                                false,
-                                currentQuantity
-                            )
-                        )
+                        viewModel.createBadge(currentQuantity)
                     }
                 }
-            }
-            is CreateBadgeViewState.BadgeCreatedSuccessfully -> {
-                viewModel.navigator.popBackStack()
             }
         }
     }

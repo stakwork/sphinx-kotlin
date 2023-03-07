@@ -150,7 +150,7 @@
     <string name="badges_template_description">%s at least %s sats in this tribe. </string>
     <string name="badges_earn" >Earn</string>
     <string name="badges_spend" >Spend</string>
-    <string name="badges_left" >of %s Badges left</string>
+    <string name="badges_left" >of %s left</string>
     <string name="badges_header" translatable="false">Tribe Badges</string>
     <string name="badges_create_error">Failed to create badge</string>
     <string name="badges_state_error">Failed to change badge state</string>

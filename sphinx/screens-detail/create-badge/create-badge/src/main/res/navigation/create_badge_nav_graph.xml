@@ -46,7 +46,6 @@
             android:name="argHolderType"
             app:argType="integer" />
 
-
     </fragment>
 
 </navigation>

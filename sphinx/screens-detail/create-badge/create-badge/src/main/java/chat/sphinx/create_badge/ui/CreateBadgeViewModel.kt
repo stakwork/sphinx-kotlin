@@ -17,6 +17,7 @@ import chat.sphinx.wrapper_badge.BadgeTemplate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -77,11 +78,9 @@ internal class CreateBadgeViewModel @Inject constructor(
 
     init {
         if (args.argHolderType == 1 ) {
-            updateViewState(CreateBadgeViewState.EditBadge(args.badge))
-        }
-        else
-        {
-            updateViewState(CreateBadgeViewState.Template(args.template))
+            updateViewState(CreateBadgeViewState.ToggleBadge(args.badge))
+        } else {
+            updateViewState(CreateBadgeViewState.CreateBadge(args.template))
         }
     }
 
@@ -113,20 +112,31 @@ internal class CreateBadgeViewModel @Inject constructor(
     }
 
     fun createBadge(
-        badge: BadgeCreateDto
+        amount: Int
     ) {
         viewModelScope.launch(mainImmediate) {
-            networkQueryPeople.createBadge(
-                badge
-            ).collect { loadResponse ->
-                when (loadResponse) {
-                    is Response.Error -> {
-                        submitSideEffect(CreateBadgeSideEffect.Notify.FailedToCreateBadge)
+            (currentViewState as? CreateBadgeViewState.CreateBadge)?.let {
+                networkQueryPeople.createBadge(
+                    BadgeCreateDto(
+                        it.badgeTemplate.chatId ?: 0,
+                        it.badgeTemplate.name ?: "",
+                        it.badgeTemplate.rewardRequirement ?: 0,
+                        it.badgeTemplate.description ?: "",
+                        it.badgeTemplate.imageUrl ?: "",
+                        it.badgeTemplate.rewardType ?: 0,
+                        false,
+                        amount
+                    )
+                ).collect { loadResponse ->
+                    when (loadResponse) {
+                        is Response.Error -> {
+                            submitSideEffect(CreateBadgeSideEffect.Notify.FailedToCreateBadge)
+                        }
+                        is Response.Success -> {
+                            navigator.popBackStack()
+                        }
+                        is LoadResponse.Loading -> {}
                     }
-                    is Response.Success -> {
-                        updateViewState(CreateBadgeViewState.BadgeCreatedSuccessfully)
-                    }
-                    is LoadResponse.Loading -> {}
                 }
             }
         }
