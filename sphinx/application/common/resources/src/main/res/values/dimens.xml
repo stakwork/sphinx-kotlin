@@ -156,6 +156,7 @@
     <dimen name="player_time_labels_horizontal_margin">18dp</dimen>
 
     <!-- Tribe Member Profile -->
+    <dimen name="tribe_member_collapsed_height">456dp</dimen>
     <dimen name="tribe_member_image_section_height">112dp</dimen>
     <dimen name="tribe_member_image_corner_radius">56dp</dimen>
     <dimen name="tribe_member_send_sats_button_width">147dp</dimen>
