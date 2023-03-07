@@ -42,7 +42,7 @@ internal class TribeBadgesViewModel @Inject constructor(
         getBadgesTemplates()
         }
 
-    private fun getBadgesTemplates() {
+    fun getBadgesTemplates() {
         viewModelScope.launch(mainImmediate) {
             networkQueryPeople.getBadgeTemplates().collect { loadResponse ->
                 when (loadResponse) {
@@ -80,10 +80,10 @@ internal class TribeBadgesViewModel @Inject constructor(
                                             rewardRequirement = it.reward_requirement,
                                             amountCreated = it.amount_created,
                                             amountIssued = it.amount_issued,
-                                            isActive = it.activationState,
+                                            isActive = it.active,
                                             imageUrl = it.icon ?: "",
                                             badgeId = it.badge_id,
-                                            chatId = it.chat_id,
+                                            chatId = chatId.toInt(),
                                             claimAmount = it.claim_amount
                                         )
                                     }.sortedWith(

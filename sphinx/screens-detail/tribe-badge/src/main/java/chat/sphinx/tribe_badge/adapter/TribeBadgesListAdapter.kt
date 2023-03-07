@@ -28,8 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 internal class TribeBadgesListAdapter(
-    private val recyclerView: RecyclerView,
-    private val layoutManager: LinearLayoutManager,
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -243,7 +241,7 @@ internal class TribeBadgesListAdapter(
                 textViewBadgeDescription.text = tribeBadgeHolder?.badge?.description ?: ""
                 textViewBadgesLeft.text = badgesLeft
                 textViewBadgesRowCount.text = badgesAmount
-                layoutButtonTemplate.textViewButtonSmall.textSize = 12F
+                layoutButtonTemplate.textViewButtonSmall.textSize = 10F
 
 
                 if (tribeBadgeHolder?.badge?.isActive == true) {
@@ -319,7 +317,7 @@ internal class TribeBadgesListAdapter(
                 textViewBadgeDescription.text = templateDescription
                 layoutButtonTemplate.textViewButtonSmall.text = getString(R.string.badges_template)
                 layoutButtonTemplate.layoutConstraintButtonSmall.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
-                layoutButtonTemplate.textViewButtonSmall.textSize = 12F
+                layoutButtonTemplate.textViewButtonSmall.textSize = 10F
                 textViewBadgesRowCount.invisible
                 textViewBadgesLeft.invisible
 

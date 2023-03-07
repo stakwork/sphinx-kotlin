@@ -5,5 +5,5 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class BadgeStateDto(
     val badge_id: Int,
-    val chat_id: Long
+    val chat_id: Int
 )

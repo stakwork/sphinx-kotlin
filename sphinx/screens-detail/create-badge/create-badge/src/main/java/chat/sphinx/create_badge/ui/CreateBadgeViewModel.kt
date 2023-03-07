@@ -87,7 +87,7 @@ internal class CreateBadgeViewModel @Inject constructor(
 
     fun changeBadgeState(
         badgeId: Int?,
-        chatId: Long?,
+        chatId: Int?,
         state: Boolean,
     ) {
         if (chatId != null && badgeId != null) {

@@ -57,9 +57,14 @@ internal class CreateBadgeFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.includeCreateBadgeHeader.textViewDetailScreenClose.setOnClickListener {
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.navigator.popBackStack()
+
+        binding.apply {
+            includeCreateBadgeHeader.textViewDetailScreenClose.gone
+            includeCreateBadgeHeader.textViewDetailScreenHeaderNavBack.visible
+            includeCreateBadgeHeader.textViewDetailScreenHeaderNavBack.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
             }
         }
     }
@@ -95,10 +100,10 @@ internal class CreateBadgeFragment: SideEffectFragment<
 
                     switchDeactivateBadge.setOnCheckedChangeListener { _, isChecked ->
                         if (isChecked) {
-                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId?.toLong(), true)
+                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId, true)
                         }
                         else {
-                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId?.toLong(), false)
+                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId, false)
                         }
 
                     }
@@ -137,7 +142,7 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     layoutConstraintButtonCreateBadge.setOnClickListener {
                         viewModel.createBadge(
                             BadgeCreateDto(
-                                viewState.badgeTemplate.chatId?.toLong() ?: 0L,
+                                viewState.badgeTemplate.chatId ?: 0,
                                 viewState.badgeTemplate.name ?: "",
                                 viewState.badgeTemplate.rewardRequirement ?: 0,
                                 viewState.badgeTemplate.description ?: "",

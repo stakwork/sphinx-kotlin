@@ -14,5 +14,5 @@ data class BadgeDto(
     val reward_type: Int?,
     val reward_requirement: Int?,
     val memo: String?,
-    val activationState : Boolean = false
+    val active : Boolean = false
 )

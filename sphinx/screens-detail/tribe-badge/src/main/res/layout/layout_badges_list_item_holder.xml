@@ -9,9 +9,12 @@
     android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/default_layout_margin">
+        android:padding="@dimen/default_layout_margin"
+        tools:layout_editor_absoluteX="10dp"
+        tools:layout_editor_absoluteY="10dp">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_badge_image"
@@ -56,7 +59,7 @@
         <include
             android:id="@+id/layout_button_template"
             layout="@layout/layout_button_small"
-            android:layout_width="@dimen/player_bar_height_with_shadow"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/default_message_action_image_xy"
             android:layout_marginTop="@dimen/default_header_headline_margin_vertical"
             app:layout_constraintStart_toStartOf="@+id/text_view_badge_description"
@@ -70,9 +73,9 @@
             android:layout_marginTop="@dimen/default_half_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:gravity="center"
-            android:visibility="visible"
             android:textColor="@android:color/white"
             android:textSize="@dimen/default_text_size_list_row_headline"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/layout_button_template"
             app:layout_constraintStart_toEndOf="@+id/layout_button_template"
             app:layout_constraintTop_toBottomOf="@+id/text_view_badge_description"
@@ -116,11 +119,11 @@
         android:id="@+id/divider_bottom"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:background="@color/blackSemiTransparent"
+        android:layout_marginStart="@dimen/default_big_layout_margin"
+        android:background="@color/transactionBGBorder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="@+id/constraintLayout" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,7 +4,7 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class BadgeCreateDto(
-    val chat_id: Long,
+    val chat_id: Int,
     val name: String,
     val reward_requirement: Int,
     val memo: String,

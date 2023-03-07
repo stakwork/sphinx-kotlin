@@ -10,11 +10,11 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.tribe_badge.R
 import chat.sphinx.tribe_badge.adapter.TribeBadgesListAdapter
+import chat.sphinx.tribe_badge.adapter.TribeBadgesListFooterAdapter
 import chat.sphinx.tribe_badge.databinding.FragmentTribeBadgesBinding
-import chat.sphinx.tribe_badge.ui.TribeBadgesViewModel
-import chat.sphinx.tribe_badge.ui.TribeBadgesViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -73,16 +73,18 @@ internal class TribeBadgesFragment: SideEffectFragment<
     private fun setupTribeBadgesListAdapter(){
         binding.recyclerViewList.apply {
             val linearLayoutManager = LinearLayoutManager(context)
-            val leaderboardListAdapter = TribeBadgesListAdapter(
-                this,
-                linearLayoutManager,
+            val tribeBadgesListAdapter = TribeBadgesListAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
                 viewModel
             )
+            val TribeBadgesFooterAdapter =
+                TribeBadgesListFooterAdapter(requireActivity() as InsetterActivity)
+            this.setHasFixedSize(false)
             layoutManager = linearLayoutManager
-            adapter = leaderboardListAdapter
+            adapter = ConcatAdapter(tribeBadgesListAdapter, TribeBadgesFooterAdapter)
+            layoutManager = linearLayoutManager
             itemAnimator = null
         }
     }
@@ -97,5 +99,10 @@ internal class TribeBadgesFragment: SideEffectFragment<
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.getBadgesTemplates()
     }
 }

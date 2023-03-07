@@ -94,6 +94,8 @@
     <dimen name="badges_text_create_button_size">18sp</dimen>
     <dimen name="badges_row_count_height">25dp</dimen>
     <dimen name="badges_row_count_width">45dp</dimen>
+    <dimen name="badges_constraint_badge_quantity_width">180dp</dimen>
+    <dimen name="badges_constraint_badge_quantity_height">40dp</dimen>
 
 
 
