@@ -203,7 +203,7 @@ internal class ChatTribeFragment: ChatFragment<
                     }
 
                     layoutConstraintEarnBadges.setOnClickListener {
-                        //TO DO: navigate to new view
+                        viewModel.goToKnownBadges()
                     }
                 }
 

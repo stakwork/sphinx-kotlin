@@ -84,6 +84,7 @@ internal class TribeBadgesFragment: SideEffectFragment<
             itemAnimator = null
         }
     }
+
     private fun setupHeaderScreen() {
         binding.apply {
             textViewDetailScreenHeaderNavBack.setOnClickListener {

@@ -37,6 +37,10 @@ abstract class NetworkQueryPeople {
         tribeUUID: ChatUUID,
     ): Flow<LoadResponse<List<ChatLeaderboardDto>, ResponseError>>
 
+    abstract fun getKnownBadges(
+        badgeIds: Array<Long>,
+    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
+
     abstract fun getBadgesByPerson(
         person: MessagePerson,
     ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>

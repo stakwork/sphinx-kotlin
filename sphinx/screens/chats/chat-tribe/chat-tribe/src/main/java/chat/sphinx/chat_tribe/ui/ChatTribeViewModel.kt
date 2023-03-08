@@ -272,7 +272,8 @@ class ChatTribeViewModel @Inject constructor(
                         tribeData.host,
                         tribeData.feedUrl,
                         tribeData.chatUUID,
-                        tribeData.feedType
+                        tribeData.feedType,
+                        tribeData.badgeIds
                     )
 
                 } ?: run {
@@ -430,6 +431,26 @@ class ChatTribeViewModel @Inject constructor(
                     chatId
                 )
             }
+
+            if (tribeMemberDataViewStateContainer.value !is TribeMemberDataViewState.Idle) {
+                tribeMemberDataViewStateContainer.updateViewState(
+                    TribeMemberDataViewState.Idle
+                )
+            }
+
+            if (tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
+                tribeMemberProfileViewStateContainer.updateViewState(
+                    TribeMemberProfileViewState.Closed
+                )
+            }
+        }
+    }
+
+    fun goToKnownBadges() {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toKnownBadges(
+                badgeIds = (feedDataStateFlow.value as? TribeFeedData.Result.FeedData)?.badges ?: arrayOf()
+            )
 
             if (tribeMemberDataViewStateContainer.value !is TribeMemberDataViewState.Idle) {
                 tribeMemberDataViewStateContainer.updateViewState(

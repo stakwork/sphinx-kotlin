@@ -3755,11 +3755,15 @@ abstract class SphinxRepository(
                             }
 
                             chat.host?.let { host ->
-                                tribeDto.feed_url?.toFeedUrl()?.let { feedUrl ->
-                                    val feedType = (tribeDto.feed_type ?: 0).toFeedType()
+                                val feedType = (tribeDto.feed_type ?: 0).toFeedType()
 
-                                    tribeData = TribeData(host, chat.uuid, feedUrl, feedType)
-                                }
+                                tribeData = TribeData(
+                                    host,
+                                    chat.uuid,
+                                    tribeDto.feed_url?.toFeedUrl(),
+                                    feedType,
+                                    tribeDto.badges
+                                )
                             }
                         }
                     }

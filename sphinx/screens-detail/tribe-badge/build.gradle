@@ -42,6 +42,7 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     api project(path: ':sphinx:application:common:wrappers:wrapper-meme-server')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-chat')
+
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')

@@ -24,6 +24,7 @@ data class TribeDto(
     val app_url: String?,
     val feed_url: String?,
     val feed_type: Int?,
+    var badges: Array<String> = arrayOf()
 ) {
 
     var amount: Long? = null

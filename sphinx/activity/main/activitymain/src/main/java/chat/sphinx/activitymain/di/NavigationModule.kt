@@ -26,6 +26,7 @@ import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
+import chat.sphinx.known_badges.navigation.KnownBadgesNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.notification_level.navigation.NotificationLevelNavigator
@@ -393,5 +394,11 @@ internal object NavigationModule {
         notificationLevelNavigatorImpl: NotificationLevelNavigatorImpl
     ): NotificationLevelNavigator =
         notificationLevelNavigatorImpl
+
+    @Provides
+    fun provideKnownBadgesNavigator(
+        knownBadgesNavigatorImpl: KnownBadgesNavigatorImpl
+    ): KnownBadgesNavigator =
+        knownBadgesNavigatorImpl
 
 }

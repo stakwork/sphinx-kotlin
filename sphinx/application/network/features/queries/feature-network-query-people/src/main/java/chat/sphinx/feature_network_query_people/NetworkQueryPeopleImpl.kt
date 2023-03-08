@@ -26,6 +26,7 @@ class NetworkQueryPeopleImpl(
 
     companion object {
         private const val TRIBES_DEFAULT_SERVER_URL = "https://tribes.sphinx.chat"
+        private const val LIQUID_DEFAULT_SERVER_URL = "https://liquid.sphinx.chat"
 
         private const val ENDPOINT_SAVE_KEY = "https://%s/save/%s"
         private const val ENDPOINT_PROFILE = "/profile"
@@ -37,6 +38,7 @@ class NetworkQueryPeopleImpl(
         private const val ENDPOINT_TRIBE_ACTIVE_BADGE = "/add_badge"
         private const val ENDPOINT_TRIBE_DEACTIVATE_BADGE = "/remove_badge"
         private const val ENDPOINT_TRIBE_CREATE_BADGE = "/create_badge"
+        private const val ENDPOINT_KNOWN_BADGES = "$LIQUID_DEFAULT_SERVER_URL/asset/filter"
     }
 
     override fun getTribeMemberProfile(
@@ -96,6 +98,16 @@ class NetworkQueryPeopleImpl(
         networkRelayCall.getList(
             url = String.format(ENDPOINT_TRIBE_LEADERBOARD, tribeUUID.value),
             responseJsonClass = ChatLeaderboardDto::class.java,
+        )
+
+    override fun getKnownBadges(
+        badgeIds: Array<Long>
+    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>> =
+        networkRelayCall.postList(
+            url = ENDPOINT_KNOWN_BADGES,
+            responseJsonClass = BadgeDto::class.java,
+            requestBodyJsonClass = KnownBadgesPostDto::class.java,
+            requestBody = KnownBadgesPostDto(badgeIds.toList()),
         )
 
     override fun getBadgesByPerson(
