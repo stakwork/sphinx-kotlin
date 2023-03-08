@@ -16,6 +16,8 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.collect
@@ -141,6 +143,14 @@ internal class TribeBadgesViewModel @Inject constructor(
         holderType: Int
     ) {
         viewModelScope.launch(mainImmediate) {
+            val existingBadges = (currentViewState as? TribeBadgesViewState.TribeBadgesList)
+                ?.tribeBadgeHolders?.map { it.badge?.rewardType } ?: listOf()
+
+            if (existingBadges.contains(rewardType)) {
+                submitSideEffect(TribeBadgesSideEffect.BadgeAlreadyExists)
+                return@launch
+            }
+
             navigator.toCreateBadgeScreen(
                 name,
                 description,

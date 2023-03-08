@@ -54,7 +54,7 @@
         app:layout_constraintBottom_toTopOf="@+id/text_view_tribe_profile_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/card_view_tribe_profile_image"
-        android:text="TRIBE MEMBER" />
+        android:text="@string/tribe_member" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_tribe_profile_name"
