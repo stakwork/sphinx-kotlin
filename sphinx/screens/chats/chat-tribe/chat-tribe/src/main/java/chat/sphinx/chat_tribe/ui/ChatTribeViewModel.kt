@@ -391,6 +391,7 @@ class ChatTribeViewModel @Inject constructor(
                         }
                         is Response.Success -> {
                             val leaderboard = leaderboardListStateFlow.value?.find { it.alias == loadResponse.value.owner_alias  }
+
                             networkQueryPeople.getBadgesByPerson(person).collect { badgesResponse ->
                                 when (badgesResponse) {
                                     is LoadResponse.Loading -> {}

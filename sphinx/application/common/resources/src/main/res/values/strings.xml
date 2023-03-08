@@ -170,9 +170,8 @@
     <string name="tribe_member_profile_github">Github:</string>
     <string name="tribe_member_profile_contributions">Contributions</string>
     <string name="tribe_member_profile_earnings" translatable="false">Earnings</string>
-
+    <string name="tribe_member" translatable="false">TRIBE MEMBER</string>
     <string name="known_badges_title" translatable="false">LIST OF KNOWN BADGES</string>
-
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>
