@@ -3,11 +3,13 @@ package chat.sphinx.episode_detail.ui
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.viewModelScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.episode_detail.R
 import chat.sphinx.episode_detail.databinding.FragmentEpisodeDetailBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
@@ -23,6 +25,9 @@ internal class EpisodeDetailFragment: BaseFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.layoutConstraintCloseContainer.setOnClickListener {
+            viewModel.popBackStack()
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: EpisodeDetailViewState) {

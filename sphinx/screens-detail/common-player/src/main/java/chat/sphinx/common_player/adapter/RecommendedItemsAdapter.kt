@@ -180,12 +180,16 @@ class RecommendedItemsAdapter (
         private var episode: PodcastEpisode? = null
 
         init {
-            binding.layoutConstraintRecommendedHolder.setOnClickListener {
+            binding.buttonPlayEpisode.setOnClickListener {
                 episode?.let { podcastEpisode ->
                     if (connectivityHelper.isNetworkConnected()) {
                         viewModel.playEpisodeFromList(podcastEpisode)
                     }
                 }
+            }
+
+            binding.buttonAdditionalOptions.setOnClickListener {
+                viewModel.navigateToEpisodeDetail()
             }
         }
 

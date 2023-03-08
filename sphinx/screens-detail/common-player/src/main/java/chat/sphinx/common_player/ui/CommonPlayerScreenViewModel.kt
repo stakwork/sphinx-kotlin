@@ -458,6 +458,12 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
+    fun navigateToEpisodeDetail(){
+        viewModelScope.launch(mainImmediate) {
+            navigator.toEpisodeDetail()
+        }
+    }
+
     fun sendPodcastBoost(
         amount: Sat,
         fireworksCallback: () -> Unit
