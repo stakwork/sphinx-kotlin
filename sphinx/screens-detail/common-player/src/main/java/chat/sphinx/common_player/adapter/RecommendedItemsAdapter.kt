@@ -207,7 +207,7 @@ class RecommendedItemsAdapter (
                 podcastEpisode.image?.value?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
-                            imageViewRecommendedImage,
+                            imageViewEpisodeImage,
                             imageUrl,
                             getImageLoaderOptions(podcastEpisode)
                         ).also {
@@ -217,15 +217,15 @@ class RecommendedItemsAdapter (
                         holderJob = job
                     }
                 } ?: run {
-                    imageViewRecommendedImage.setImageDrawable(
+                    imageViewEpisodeImage.setImageDrawable(
                         ContextCompat.getDrawable(root.context, podcastEpisode.getPlaceHolderImageRes())
                     )
                 }
 
-                textViewRecommendedTitle.text = podcastEpisode.description?.value ?: "-"
-                textViewRecommendedDescription.text = podcastEpisode.title.value
+                textViewEpisodeHeader.text = podcastEpisode.description?.value ?: "-"
+                textViewEpisodeDescription.text = podcastEpisode.title.value
 
-                imageViewItemRowRecommendationType.setImageDrawable(
+                imageViewItemRowEpisodeType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, podcastEpisode.getIconType())
                 )
 

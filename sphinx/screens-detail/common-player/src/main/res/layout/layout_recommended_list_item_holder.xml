@@ -8,7 +8,7 @@
     android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/layout_constraint_episode_info_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="false"
@@ -25,7 +25,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_recommended_image"
+                android:id="@+id/image_view_episode_image"
                 android:layout_width="@dimen/recommended_list_item_cover_image_xy"
                 android:layout_height="@dimen/recommended_list_item_cover_image_xy"
                 android:scaleType="centerCrop"
@@ -36,7 +36,7 @@
         </androidx.cardview.widget.CardView>
 
         <TextView
-            android:id="@+id/text_view_recommended_title"
+            android:id="@+id/text_view_episode_header"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
@@ -52,7 +52,7 @@
             tools:text="Show title" />
 
         <TextView
-            android:id="@+id/text_view_recommended_description"
+            android:id="@+id/text_view_episode_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/default_list_row_padding_vertical"
@@ -72,11 +72,11 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
             app:cardCornerRadius="@dimen/episode_type_radius"
-            app:layout_constraintStart_toStartOf="@+id/text_view_recommended_description"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description">
+            app:layout_constraintStart_toStartOf="@+id/text_view_episode_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_episode_description">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_item_row_recommendation_type"
+                android:id="@+id/image_view_item_row_episode_type"
                 android:layout_width="@dimen/default_feed_play_elevation"
                 android:layout_height="@dimen/default_feed_play_elevation"
                 android:scaleType="centerCrop"
@@ -85,7 +85,7 @@
         </androidx.cardview.widget.CardView>
 
         <TextView
-            android:id="@+id/text_view_recommended_date"
+            android:id="@+id/text_view_episode_date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
@@ -105,9 +105,9 @@
             android:layout_height="4dp"
             android:layout_marginStart="8dp"
             android:src="@drawable/circular_split"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_recommended_date"
-            app:layout_constraintStart_toEndOf="@+id/text_view_recommended_date"
-            app:layout_constraintTop_toTopOf="@+id/text_view_recommended_date" />
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_episode_date"
+            app:layout_constraintStart_toEndOf="@+id/text_view_episode_date"
+            app:layout_constraintTop_toTopOf="@+id/text_view_episode_date" />
 
         <TextView
             android:id="@+id/text_view_item_episode_time"
@@ -151,7 +151,7 @@
             android:visibility="gone"
             app:layout_constraintBaseline_toBaselineOf="@+id/card_view_image_episode_wrapper"
             app:layout_constraintStart_toEndOf="@id/card_view_image_episode_wrapper"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_episode_description"
             tools:text="02:24" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -161,7 +161,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_episode_info_container">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/card_view_download_wrapper"
