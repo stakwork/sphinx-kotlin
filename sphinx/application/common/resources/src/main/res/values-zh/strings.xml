@@ -43,6 +43,17 @@
     <string name="feed_search_directory_section">DIRECTORY</string>
     <string name="recommendations">Recommendations</string>
 
+    <string name="select_badges">Select and customize</string>
+    <string name="your_badges">your tribe badges</string>
+    <string name="badges_template_description">%s at least %s sats in this tribe. </string>
+    <string name="badges_earn" >Earn</string>
+    <string name="badges_spend" >Spend</string>
+    <string name="badges_active">ACTIVE</string>
+    <string name="badges_inactive">INACTIVE</string>
+    <string name="badges_left" >of %s left</string>
+    <string name="badges_create_error">Failed to create badge</string>
+    <string name="badges_state_error">Failed to change badge state</string>
+
     <string name="balance_too_low">Balance too low</string>
     <string name="boost_amount_too_low">Boost amount must be greater than 0</string>
 
@@ -52,6 +63,8 @@
     <string name="tribe_member_profile_post">Posts:</string>
     <string name="tribe_member_profile_twitter">Twitter:</string>
     <string name="tribe_member_profile_github">Github:</string>
+    <string name="tribe_member_profile_reputation">Reputation</string>
+    <string name="tribe_member_profile_contributions">Contributions:</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

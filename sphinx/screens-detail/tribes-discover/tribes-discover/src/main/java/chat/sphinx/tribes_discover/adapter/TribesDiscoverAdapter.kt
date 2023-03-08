@@ -195,11 +195,11 @@ internal class TribesDiscoverAdapter(
 
                     layoutButtonJoin.apply {
                         if (tribeDto.joined == true) {
-                            textViewButtonJoinOpen.text = getString(R.string.discover_tribes_open)
-                            layoutConstraintButtonTags.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
+                            textViewButtonSmall.text = getString(R.string.discover_tribes_open)
+                            layoutConstraintButtonSmall.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_open)
                         } else {
-                            textViewButtonJoinOpen.text = getString(R.string.discover_tribes_join)
-                            layoutConstraintButtonTags.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
+                            textViewButtonSmall.text = getString(R.string.discover_tribes_join)
+                            layoutConstraintButtonSmall.background = ContextCompat.getDrawable(root.context, R.drawable.background_button_join)
                         }
                     }
                 }

@@ -250,24 +250,25 @@ internal class TribeFeedViewModel @Inject constructor(
         when (data) {
             is TribeFeedData.Result.NoFeed -> { /* no-op */}
             is TribeFeedData.Result.FeedData -> {
-
-                viewModelScope.launch(mainImmediate) {
-                    feedRepository.updateFeedContent(
-                        chatId = args.chatId,
-                        host = data.host,
-                        feedUrl = data.feedUrl,
-                        chatUUID = data.chatUUID,
-                        subscribed = false.toSubscribed()
-                    )
-                }
-
-                if (data.feedType.isPodcast()) {
+                data.feedUrl?.let {
                     viewModelScope.launch(mainImmediate) {
-                        delay(500L)
+                        feedRepository.updateFeedContent(
+                            chatId = args.chatId,
+                            host = data.host,
+                            feedUrl = data.feedUrl,
+                            chatUUID = data.chatUUID,
+                            subscribed = false.toSubscribed()
+                        )
+                    }
 
-                        feedRepository.getPodcastByChatId(args.chatId).collect { podcast ->
-                            podcast?.let { nnPodcast ->
-                                podcastLoaded(nnPodcast)
+                    if (data.feedType.isPodcast()) {
+                        viewModelScope.launch(mainImmediate) {
+                            delay(500L)
+
+                            feedRepository.getPodcastByChatId(args.chatId).collect { podcast ->
+                                podcast?.let { nnPodcast ->
+                                    podcastLoaded(nnPodcast)
+                                }
                             }
                         }
                     }

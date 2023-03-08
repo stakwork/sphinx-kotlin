@@ -306,7 +306,7 @@ internal class TribesDiscoverFragment: SideEffectFragment<
             tagNumber.invisibleIfFalse(tagsSelected)
             tagIcon.invisibleIfFalse(!tagsSelected)
 
-            layoutConstraintButtonTags.background = ContextCompat.getDrawable(
+            layoutConstraintButtonSmall.background = ContextCompat.getDrawable(
                 root.context,
                 if (tagsSelected) {
                     R.drawable.background_tag_white_rad

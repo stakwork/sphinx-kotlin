@@ -14,6 +14,7 @@ import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.common_player.navigation.CommonPlayerNavigator
+import chat.sphinx.create_badge.navigation.CreateBadgeNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
@@ -25,6 +26,7 @@ import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
+import chat.sphinx.known_badges.navigation.KnownBadgesNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.notification_level.navigation.NotificationLevelNavigator
@@ -50,6 +52,7 @@ import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
+import chat.sphinx.tribe_badge.navigation.TribeBadgesNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
@@ -327,6 +330,18 @@ internal object NavigationModule {
         discoverTribesNavigatorImpl
 
     @Provides
+    fun provideTribeBadgesNavigator(
+        tribeBadgesNavigatorImpl: TribeBadgesNavigatorImpl
+    ): TribeBadgesNavigator =
+        tribeBadgesNavigatorImpl
+
+    @Provides
+    fun provideCreateBadgeNavigator(
+        createBadgeNavigatorImpl: CreateBadgeNavigatorImpl
+    ): CreateBadgeNavigator =
+        createBadgeNavigatorImpl
+
+    @Provides
     fun provideJoinTribeNavigator(
         joinTribeNavigatorImpl: JoinTribeNavigatorImpl
     ): JoinTribeNavigator =
@@ -379,5 +394,11 @@ internal object NavigationModule {
         notificationLevelNavigatorImpl: NotificationLevelNavigatorImpl
     ): NotificationLevelNavigator =
         notificationLevelNavigatorImpl
+
+    @Provides
+    fun provideKnownBadgesNavigator(
+        knownBadgesNavigatorImpl: KnownBadgesNavigatorImpl
+    ): KnownBadgesNavigator =
+        knownBadgesNavigatorImpl
 
 }

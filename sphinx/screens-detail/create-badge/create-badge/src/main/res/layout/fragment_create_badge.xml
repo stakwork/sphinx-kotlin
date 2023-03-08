@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen">
+
+    <include
+        android:id="@+id/include_create_badge_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/image_view_badge_image"
+        android:layout_width="@dimen/badges_icon_create_size"
+        android:layout_height="@dimen/badges_icon_create_size"
+        android:layout_marginTop="@dimen/default_header_margin_horizontal"
+        android:padding="@dimen/default_header_headline_margin_horizontal"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_create_badge_header"
+        tools:srcCompat="@drawable/ic_icon_badges_crown" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_badge_name_and_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintEnd_toEndOf="@+id/image_view_badge_image"
+        app:layout_constraintStart_toStartOf="@+id/image_view_badge_image"
+        app:layout_constraintTop_toBottomOf="@+id/image_view_badge_image">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_badge_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:paddingBottom="@dimen/default_tiny_layout_margin"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/badges_text_create_button_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Big Earner"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_badge_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/secondaryTextInverted"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badge_name"
+            tools:text="Earn at least 1000 sats in this tribe" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_create_badge"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_badge_name_and_description"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/text_view_quantity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@string/badges_quantity"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_badges_quantity"
+            android:layout_height="@dimen/badges_constraint_badge_quantity_height"
+            android:layout_width="@dimen/badges_constraint_badge_quantity_width"
+            android:layout_marginEnd="@dimen/default_double_layout_margin"
+            android:background="@drawable/buttons_badges_quantity_container_background"
+            android:paddingHorizontal="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_quantity"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/text_view_quantity">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_badges_quantity_minus"
+                android:layout_width="@dimen/chat_footer_button_xy"
+                android:layout_height="@dimen/chat_footer_button_xy"
+                android:background="@drawable/button_badges_quantity_background"
+                android:gravity="center"
+                android:scaleType="centerCrop"
+                android:text="@string/badges_quantity_button_minus"
+                android:textColor="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@drawable/ic_icon_upload_badges" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/quantity_number"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:digits="0123456789"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:imeOptions="actionDone"
+                android:inputType="number"
+                android:maxLength="8"
+                android:singleLine="true"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/add_buttons_text_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_badges_quantity_plus"
+                app:layout_constraintStart_toEndOf="@+id/button_badges_quantity_minus"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="0" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_badges_quantity_plus"
+                android:layout_width="@dimen/chat_footer_button_xy"
+                android:layout_height="@dimen/chat_footer_button_xy"
+                android:background="@drawable/button_badges_quantity_background"
+                android:gravity="center"
+                android:scaleType="centerCrop"
+                android:text="@string/badges_quantity_button_plus"
+                android:textColor="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@drawable/ic_icon_upload_badges" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/text_view_price_per_badge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:layout_marginTop="@dimen/default_header_margin_horizontal"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@string/badges_price_per_badge"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_quantity" />
+
+        <TextView
+            android:id="@+id/text_view_sats_per_badge"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_small_layout_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_price_per_badge"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_sats_per_badge_label"
+            tools:text="10" />
+
+        <TextView
+            android:id="@+id/text_view_sats_per_badge_label"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/default_large_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:text="@string/sats"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_price_per_badge"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="sats" />
+
+        <TextView
+            android:id="@+id/text_view_total"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:layout_marginTop="@dimen/default_header_margin_horizontal"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_bold"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@string/badges_price_total"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_price_per_badge" />
+
+        <TextView
+            android:id="@+id/text_view_total_sats_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_small_layout_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_bold"
+            android:gravity="center"
+            android:maxLines="2"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_total"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_sats_total"
+            tools:text="0" />
+
+        <TextView
+            android:id="@+id/text_view_sats_total"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_large_layout_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="@string/sats"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_header_text_size"
+            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_total"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar_creating_badge"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="@dimen/default_double_layout_margin"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/text"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/layout_constraint_button_create_badge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_button_create_badge"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/create_badge_button_height"
+            android:layout_marginHorizontal="@dimen/default_header_margin_horizontal"
+            android:layout_marginBottom="@dimen/default_layout_margin"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryGreen"
+            android:paddingHorizontal="@dimen/default_inner_spacing_list_item_title"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_button_create_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_regular"
+                android:text="@string/badges_purchase_badges"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/badges_text_create_button_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/appCompatImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_regular"
+                android:paddingRight="@dimen/default_half_layout_margin"
+                android:paddingBottom="@dimen/default_tiny_layout_margin"
+                android:src="@drawable/ic_icon_create_badge"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/add_buttons_text_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_toggle_badge_state"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_feed_watch_channel_image_xy"
+        android:layout_marginTop="@dimen/badges_icon_row_size"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_badge_name_and_description">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_badge_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_badges_row_count"
+                android:layout_width="@dimen/badges_row_count_width"
+                android:layout_height="@dimen/badges_row_count_height"
+                android:layout_marginEnd="@dimen/default_header_navigation_margin_start"
+                android:background="@drawable/chat_initials_circle"
+                android:backgroundTint="@color/lightDivider"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/default_text_size_list_row_headline"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_badges_left"
+                app:layout_constraintTop_toTopOf="@+id/text_view_badges_left"
+                app:layout_constraintEnd_toStartOf="@+id/text_view_badges_left"
+                tools:text="650"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/text_view_badges_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_header_margin_horizontal"
+                android:ellipsize="end"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="2"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_list_row_headline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="of 100 Badges left" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_deactivate_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="2"
+            android:text="@string/badges_state_label"
+            android:textColor="@color/text"
+            android:textSize="@dimen/pin_text_view_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/switch_deactivate_badge"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_badge_count" />
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/switch_deactivate_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:theme="@style/CustomSwitch"
+            android:thumb="@drawable/switch_thumb_selector"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/text_view_deactivate_text"
+            app:layout_constraintTop_toTopOf="@+id/text_view_deactivate_text"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_deactivate_text"
+            app:track="@drawable/switch_track_selector" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

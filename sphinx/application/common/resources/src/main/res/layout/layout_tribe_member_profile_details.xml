@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_chat_menu_options"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -25,10 +26,12 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_tribe_member_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/tribe_member_collapsed_height"
         android:paddingHorizontal="@dimen/default_double_layout_margin"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_dismiss_line">
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_dismiss_line"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <include
             android:id="@+id/include_layout_tribe_profile_picture_holder"
@@ -41,16 +44,17 @@
             layout="@layout/layout_tribe_send_sats_bar"
             android:layout_marginTop="@dimen/default_double_layout_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/tribe_member_send_sats_button_height"
             app:layout_constraintTop_toBottomOf="@id/include_layout_tribe_profile_picture_holder" />
 
         <include
             android:id="@+id/include_layout_tribe_profile_info_container"
             layout="@layout/layout_tribe_profile_info_container"
-            android:layout_marginTop="@dimen/default_layout_margin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/include_layout_tribe_send_sats_bar" />
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_tribe_send_sats_bar"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -75,5 +79,16 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/include_layout_loading_placeholder"
+        layout="@layout/layout_tribe_loading_placeholder_member_profile"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

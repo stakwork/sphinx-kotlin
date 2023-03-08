@@ -224,6 +224,10 @@ internal class TribeDetailFragment: SideEffectFragment<
             buttonAdminViewMembers.setOnClickListener {
                 viewModel.toTribeMemberList()
             }
+
+            layoutConstraintTribeBadges.setOnClickListener {
+                viewModel.goToTribeBadgesScreen()
+            }
         }
     }
 
@@ -280,8 +284,10 @@ internal class TribeDetailFragment: SideEffectFragment<
 
                     if (viewState.chat.isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)) {
                         buttonAdminViewMembers.visible
+                        layoutConstraintTribeBadges.visible
                     } else {
                         buttonAdminViewMembers.gone
+                        layoutConstraintTribeBadges.gone
                     }
                 }
             }

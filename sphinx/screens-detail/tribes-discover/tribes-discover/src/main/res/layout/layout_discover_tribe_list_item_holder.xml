@@ -67,7 +67,7 @@
 
         <include
             android:id="@+id/layout_button_join"
-            layout="@layout/layout_button_join"
+            layout="@layout/layout_button_small"
             android:layout_width="@dimen/discover_tribes_item_join_button_width"
             android:layout_height="@dimen/discover_tribes_item_join_button_height"
             android:layout_marginStart="@dimen/default_layout_margin"

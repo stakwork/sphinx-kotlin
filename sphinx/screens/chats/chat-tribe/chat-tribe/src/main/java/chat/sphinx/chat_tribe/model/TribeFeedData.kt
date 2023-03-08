@@ -14,9 +14,10 @@ sealed class TribeFeedData {
 
         data class FeedData(
             val host: ChatHost,
-            val feedUrl: FeedUrl,
+            val feedUrl: FeedUrl?,
             val chatUUID: ChatUUID,
-            val feedType: FeedType
+            val feedType: FeedType,
+            val badges: Array<String>,
         ) : Result()
     }
 }

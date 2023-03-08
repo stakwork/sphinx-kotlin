@@ -1,11 +1,10 @@
 package chat.sphinx.concept_network_query_people
 
-import chat.sphinx.concept_network_query_people.model.DeletePeopleProfileDto
-import chat.sphinx.concept_network_query_people.model.PeopleProfileDto
-import chat.sphinx.concept_network_query_people.model.GetExternalRequestDto
-import chat.sphinx.concept_network_query_people.model.TribeMemberProfileDto
+import chat.sphinx.concept_network_query_people.model.*
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
+import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_message.MessagePerson
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RequestSignature
@@ -33,4 +32,37 @@ abstract class NetworkQueryPeople {
     abstract fun getTribeMemberProfile(
         person: MessagePerson
     ): Flow<LoadResponse<TribeMemberProfileDto, ResponseError>>
+
+    abstract fun getLeaderboard(
+        tribeUUID: ChatUUID,
+    ): Flow<LoadResponse<List<ChatLeaderboardDto>, ResponseError>>
+
+    abstract fun getKnownBadges(
+        badgeIds: Array<Long>,
+    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
+
+    abstract fun getBadgesByPerson(
+        person: MessagePerson,
+    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
+
+    abstract fun getBadgeTemplates(
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<List<BadgeTemplateDto>, ResponseError>>
+
+    abstract fun getUserExistingBadges(
+        chatId: ChatId,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<List<BadgeDto>, ResponseError>>
+
+    abstract fun changeBadgeState(
+        badge: BadgeStateDto,
+        state: Boolean,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
+
+    abstract fun createBadge(
+        badge: BadgeCreateDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
+    ): Flow<LoadResponse<Any, ResponseError>>
+
 }
