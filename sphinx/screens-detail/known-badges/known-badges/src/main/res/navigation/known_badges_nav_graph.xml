@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/known_badges_nav_graph"
+    app:startDestination="@+id/navigation_known_badges_fragment">
+
+    <fragment
+        android:id="@+id/navigation_known_badges_fragment"
+        android:name="chat.sphinx.known_badges.ui.KnownBadgesFragment"
+        tools:layout="@layout/fragment_known_badges" >
+        <argument
+            android:name="badgeIds"
+            app:argType="string[]" />
+    </fragment>
+
+</navigation>
