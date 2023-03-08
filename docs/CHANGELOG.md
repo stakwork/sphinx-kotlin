@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha84 (2023-03-08)
+- Adds support for tribe badges
+
 # Version 1.0.0-alpha83 (2023-03-03)
 - General fixes and improvements
 
