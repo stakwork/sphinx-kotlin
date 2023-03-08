@@ -38,10 +38,6 @@ internal class TribeBadgesViewModel @Inject constructor(
 
     val chatId = args.argChatId
 
-    init {
-        getBadgesTemplates()
-        }
-
     fun getBadgesTemplates() {
         viewModelScope.launch(mainImmediate) {
             networkQueryPeople.getBadgeTemplates().collect { loadResponse ->
@@ -53,22 +49,32 @@ internal class TribeBadgesViewModel @Inject constructor(
                         updateViewState(TribeBadgesViewState.Error)
                     }
                     is Response.Success -> {
+
                         val badgeTemplatesList: List<BadgeTemplate> = loadResponse.value.map {
                             BadgeTemplate(
                                 name = it.name ?: "",
-                                rewardType = if (it.rewardType == 1) R.string.badges_earn else R.string.badges_spend,
-                                rewardRequirement = it.rewardRequirement,
-                                imageUrl = it.icon,
-                                description = null,
+                                rewardType = it.rewardType ?: 1,
+                                rewardRequirement = it.rewardRequirement ?: 0,
+                                imageUrl = it.icon ?: "",
                                 chatId = chatId.toInt()
                             )
                         }
-                        networkQueryPeople.getUserExistingBadges(ChatId(chatId)).collect { existingBadges ->
+
+                        networkQueryPeople.getUserExistingBadges(
+                            ChatId(chatId)
+                        ).collect { existingBadges ->
                             when (existingBadges) {
                                 is Response.Error -> {
-                                    updateViewState(TribeBadgesViewState.TribeBadgesList(badgeTemplatesList.map {
-                                        TribeBadgeHolder(holderType = TribeBadgeHolderType.TEMPLATE, badgeTemplate = it)
-                                    }))
+                                    updateViewState(
+                                        TribeBadgesViewState.TribeBadgesList(
+                                            badgeTemplatesList.map {
+                                                TribeBadgeHolder(
+                                                    holderType = TribeBadgeHolderType.TEMPLATE,
+                                                    badgeTemplate = it
+                                                )
+                                            }
+                                        )
+                                    )
                                 }
                                 is LoadResponse.Loading -> {}
                                 is Response.Success -> {
@@ -76,7 +82,7 @@ internal class TribeBadgesViewModel @Inject constructor(
                                         Badge(
                                             name = it.name ?: "",
                                             description = it.memo ?: "",
-                                            rewardType = if (it.reward_type == 1) R.string.badges_earn else R.string.badges_spend,
+                                            rewardType = it.reward_type ?: 0,
                                             rewardRequirement = it.reward_requirement,
                                             amountCreated = it.amount_created,
                                             amountIssued = it.amount_issued,
@@ -109,6 +115,7 @@ internal class TribeBadgesViewModel @Inject constructor(
                                             )
                                         }
                                     )
+
                                     updateViewState(TribeBadgesViewState.TribeBadgesList(tribeBadgesHolderList))
                                 }
                             }

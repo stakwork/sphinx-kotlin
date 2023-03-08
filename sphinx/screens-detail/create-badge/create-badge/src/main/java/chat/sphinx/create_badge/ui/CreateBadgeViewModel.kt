@@ -67,6 +67,11 @@ internal class CreateBadgeViewModel @Inject constructor(
         CreateBadgeSideEffect,
         CreateBadgeViewState>(dispatchers, CreateBadgeViewState.Idle)
 {
+    companion object {
+        const val DEFAULT_QUANTITY: Int = 100
+        const val DEFAULT_PRICE_PER_BADGE: Int = 10
+    }
+
     private val args: CreateBadgeFragmentArgs by savedStateHandle.navArgs()
 
     val imageLoaderDefaults by lazy {
@@ -80,57 +85,102 @@ internal class CreateBadgeViewModel @Inject constructor(
         if (args.argHolderType == 1 ) {
             updateViewState(CreateBadgeViewState.ToggleBadge(args.badge))
         } else {
-            updateViewState(CreateBadgeViewState.CreateBadge(args.template))
+            updateViewState(
+                CreateBadgeViewState.CreateBadge(
+                    args.template,
+                    DEFAULT_QUANTITY,
+                    DEFAULT_PRICE_PER_BADGE
+                )
+            )
         }
     }
 
-    fun changeBadgeState(
-        badgeId: Int?,
-        chatId: Int?,
-        state: Boolean,
-    ) {
-        if (chatId != null && badgeId != null) {
-            viewModelScope.launch(mainImmediate) {
-                networkQueryPeople.changeBadgeState(
-                    BadgeStateDto(
-                        badgeId,
-                        chatId
-                    ),
-                    state
-                ).collect { loadResponse ->
-                    @Exhaustive
-                    when (loadResponse) {
-                        is Response.Error -> {
-                            submitSideEffect(CreateBadgeSideEffect.Notify.FailedToChangeState)
+    fun toggleBadgeState() {
+        (currentViewState as? CreateBadgeViewState.ToggleBadge)?.badge?.let { badge ->
+            val updatedBadge = badge.getToggledBadge()
+
+            updateViewState(CreateBadgeViewState.ToggleBadge(updatedBadge))
+
+            updatedBadge.badgeId?.let { nnBadgeId ->
+                updatedBadge.chatId?.let { nnChatId ->
+                    viewModelScope.launch(mainImmediate) {
+                        networkQueryPeople.changeBadgeState(
+                            BadgeStateDto(
+                                nnBadgeId,
+                                nnChatId
+                            ),
+                            updatedBadge.isActive
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is Response.Error -> {
+                                    updateViewState(CreateBadgeViewState.ToggleBadge(badge))
+                                    submitSideEffect(CreateBadgeSideEffect.Notify.FailedToChangeState)
+                                }
+                                is Response.Success -> {}
+                                is LoadResponse.Loading -> {}
+                            }
                         }
-                        is Response.Success -> {}
-                        is LoadResponse.Loading -> {}
                     }
+                    return
                 }
+            }
+
+            updateViewState(CreateBadgeViewState.ToggleBadge(badge))
+        }
+    }
+
+    fun decreaseQuantity() {
+        (currentViewState as? CreateBadgeViewState.CreateBadge)?.let { viewState ->
+            if (viewState.currentQuantity > 0) {
+                updateViewState(
+                    CreateBadgeViewState.CreateBadge(
+                        viewState.badgeTemplate,
+                        currentQuantity = viewState.currentQuantity - 1,
+                        DEFAULT_PRICE_PER_BADGE
+                    )
+                )
             }
         }
     }
 
+    fun increaseQuantity() {
+        (currentViewState as? CreateBadgeViewState.CreateBadge)?.let { viewState ->
+            updateViewState(
+                CreateBadgeViewState.CreateBadge(
+                    viewState.badgeTemplate,
+                    currentQuantity = viewState.currentQuantity + 1,
+                    DEFAULT_PRICE_PER_BADGE
+                )
+            )
+        }
+    }
+
     fun createBadge(
-        amount: Int
+        amount: Int,
+        description: String,
     ) {
         viewModelScope.launch(mainImmediate) {
             (currentViewState as? CreateBadgeViewState.CreateBadge)?.let {
+
+                updateViewState(CreateBadgeViewState.LoadingCreateBadge)
+
                 networkQueryPeople.createBadge(
                     BadgeCreateDto(
-                        it.badgeTemplate.chatId ?: 0,
-                        it.badgeTemplate.name ?: "",
-                        it.badgeTemplate.rewardRequirement ?: 0,
-                        it.badgeTemplate.description ?: "",
-                        it.badgeTemplate.imageUrl ?: "",
-                        it.badgeTemplate.rewardType ?: 0,
-                        false,
-                        amount
+                        chat_id = it.badgeTemplate.chatId,
+                        name = it.badgeTemplate.name,
+                        reward_requirement = it.badgeTemplate.rewardRequirement,
+                        memo = description,
+                        icon = it.badgeTemplate.imageUrl,
+                        reward_type = it.badgeTemplate.rewardType,
+                        active = false,
+                        amount = amount
                     )
                 ).collect { loadResponse ->
                     when (loadResponse) {
                         is Response.Error -> {
                             submitSideEffect(CreateBadgeSideEffect.Notify.FailedToCreateBadge)
+                            updateViewState(it)
                         }
                         is Response.Success -> {
                             navigator.popBackStack()
@@ -141,7 +191,4 @@ internal class CreateBadgeViewModel @Inject constructor(
             }
         }
     }
-
-
-
 }

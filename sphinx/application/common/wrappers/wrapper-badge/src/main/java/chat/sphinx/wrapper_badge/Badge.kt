@@ -12,4 +12,21 @@ data class Badge(
     val rewardType: Int?,
     val rewardRequirement: Int?,
     val isActive: Boolean = false
-)
+) {
+    fun getToggledBadge(
+    ) : Badge {
+        return Badge(
+            this.name,
+            this.description,
+            this.badgeId,
+            this.imageUrl,
+            this.amountCreated,
+            this.amountIssued,
+            this.chatId,
+            this.claimAmount,
+            this.rewardType,
+            this.rewardRequirement,
+            !this.isActive
+        )
+    }
+}

@@ -22,6 +22,8 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_network_query_people.model.BadgeCreateDto
 import chat.sphinx.create_badge.R
 import chat.sphinx.create_badge.databinding.FragmentCreateBadgeBinding
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -51,13 +53,15 @@ internal class CreateBadgeFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
-    private var currentQuantity = 100
-    private val pricePerBadge = 10
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.apply {
+
+            (requireActivity() as InsetterActivity)
+                .addNavigationBarPadding(binding.root)
+//                .addNavigationBarPadding(binding.root)
+
             includeCreateBadgeHeader.textViewDetailScreenClose.gone
             includeCreateBadgeHeader.textViewDetailScreenHeaderNavBack.visible
             includeCreateBadgeHeader.textViewDetailScreenHeaderNavBack.setOnClickListener {
@@ -65,15 +69,45 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
+
+            switchDeactivateBadge.setOnCheckedChangeListener { compoundButton, _ ->
+                if(!compoundButton.isPressed) {
+                    return@setOnCheckedChangeListener
+                }
+                viewModel.toggleBadgeState()
+            }
+
+            layoutConstraintButtonCreateBadge.setOnClickListener {
+                viewModel.createBadge(
+                    amount = quantityNumber.text.toString().toIntOrNull() ?: 100,
+                    description = textViewBadgeDescription.text.toString()
+                )
+            }
+
+            buttonBadgesQuantityMinus.setOnClickListener {
+                viewModel.decreaseQuantity()
+            }
+
+            buttonBadgesQuantityPlus.setOnClickListener {
+                viewModel.increaseQuantity()
+            }
         }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: CreateBadgeViewState) {
         when (viewState) {
             is CreateBadgeViewState.Idle -> {}
-            is CreateBadgeViewState.ToggleBadge -> {
-
+            is CreateBadgeViewState.LoadingCreateBadge -> {
                 binding.apply {
+                    progressBarCreatingBadge.visible
+                    layoutConstraintButtonCreateBadge.isEnabled = false
+                }
+            }
+            is CreateBadgeViewState.ToggleBadge -> {
+                binding.apply {
+
+                    progressBarCreatingBadge.gone
+                    layoutConstraintButtonCreateBadge.isEnabled = false
 
                     layoutConstraintToggleBadgeState.visible
                     layoutConstraintCreateBadge.gone
@@ -88,22 +122,17 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     val badgesLeft = String.format(getString(R.string.badges_left), viewState.badge.amountCreated)
 
                     textViewBadgeName.text = viewState.badge.name
-                    textViewBadgeDescription.text = viewState.badge.description
                     textViewBadgesRowCount.text = badgesAmount
+                    textViewBadgeDescription.text = viewState.badge.description
                     textViewBadgesLeft.text = badgesLeft
                     switchDeactivateBadge.isChecked = viewState.badge.isActive
-
-                    switchDeactivateBadge.setOnCheckedChangeListener { _, isChecked ->
-                        if (isChecked) {
-                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId, true)
-                        } else {
-                            viewModel.changeBadgeState(viewState.badge.badgeId, viewState.badge.chatId, false)
-                        }
-                    }
                 }
             }
             is CreateBadgeViewState.CreateBadge -> {
                 binding.apply {
+
+                    progressBarCreatingBadge.gone
+                    layoutConstraintButtonCreateBadge.isEnabled = true
 
                     layoutConstraintToggleBadgeState.gone
                     layoutConstraintCreateBadge.visible
@@ -118,74 +147,15 @@ internal class CreateBadgeFragment: SideEffectFragment<
                     textViewBadgeName.text = viewState.badgeTemplate.name
                     textViewBadgeDescription.text = viewState.badgeTemplate.description
 
-                   layoutConstraintCreateBadge.apply {
-                        removeFocusOnEnter(quantityNumber)
-                    }
-
-                    buttonBadgesQuantityMinus.setOnClickListener { decreaseQuantity() }
-                    buttonBadgesQuantityPlus.setOnClickListener { increaseQuantity() }
-
-                    setSatsQuantity()
-
-                    layoutConstraintButtonCreateBadge.setOnClickListener {
-                        viewModel.createBadge(currentQuantity)
-                    }
+                    quantityNumber.text = viewState.currentQuantity.toString()
+                    textViewSatsPerBadge.text = viewState.pricePerBadge.toString()
+                    textViewTotalSatsAmount.text = (viewState.currentQuantity * viewState.pricePerBadge).toString()
                 }
             }
         }
-    }
-
-
-    private fun decreaseQuantity() {
-        if (currentQuantity > 0) {
-            currentQuantity -= 1
-            setSatsQuantity()
-        }
-    }
-
-    private fun increaseQuantity() {
-        currentQuantity += 1
-        setSatsQuantity()
-    }
-    private fun setSatsQuantity() {
-        binding.apply {
-            quantityNumber.setText(currentQuantity.toString())
-            textViewSatsPerBadge.text = pricePerBadge.toString()
-            textViewTotalSatsAmount.text = (currentQuantity * pricePerBadge).toString()
-        }
-    }
-
-
-    private fun removeFocusOnEnter(editText: EditText?) {
-        editText?.setOnEditorActionListener(object:
-            TextView.OnEditorActionListener {
-            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
-                if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
-                    editText.let { nnEditText ->
-                        currentQuantity = nnEditText.text.toString().toInt()
-                        setSatsQuantity()
-                        binding.root.context.inputMethodManager?.let { imm ->
-                            if (imm.isActive(nnEditText)) {
-                                imm.hideSoftInputFromWindow(nnEditText.windowToken, 0)
-                                nnEditText.clearFocus()
-                            }
-                        }
-                    }
-                    return true
-                }
-                return false
-            }
-        })
-    }
-
-
-    override fun subscribeToViewStateFlow() {
-        super.subscribeToViewStateFlow()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CreateBadgeSideEffect) {
         sideEffect.execute(binding.root.context)
     }
-
-
 }

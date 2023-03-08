@@ -96,6 +96,7 @@ internal class TribeBadgesFragment: SideEffectFragment<
 
     override fun onResume() {
         super.onResume()
+
         viewModel.getBadgesTemplates()
     }
 }

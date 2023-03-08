@@ -12,7 +12,11 @@ sealed class CreateBadgeViewState: ViewState<CreateBadgeViewState>() {
         val badge: Badge
     ): CreateBadgeViewState()
 
+    object LoadingCreateBadge: CreateBadgeViewState()
+
     data class CreateBadge(
-        val badgeTemplate: BadgeTemplate
+        val badgeTemplate: BadgeTemplate,
+        val currentQuantity: Int,
+        val pricePerBadge: Int
     ): CreateBadgeViewState()
 }

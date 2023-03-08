@@ -310,7 +310,8 @@ internal class TribeBadgesListAdapter(
                     )
                 }
                 val labelDescription = getString(R.string.badges_template_description)
-                val earnOrSpend = tribeBadgeHolder?.badgeTemplate?.rewardType?.let { getString(it) } ?: ""
+                val earnOrSpendRes = if (tribeBadgeHolder?.badgeTemplate?.rewardType == 1) R.string.badges_earn else R.string.badges_spend
+                val earnOrSpend = getString(earnOrSpendRes)
                 val templateDescription = String.format(labelDescription, earnOrSpend, tribeBadgeHolder?.badgeTemplate?.rewardRequirement)
 
                 textViewBadgeTitle.text = tribeBadgeHolder?.badgeTemplate?.name ?: ""
@@ -324,7 +325,7 @@ internal class TribeBadgesListAdapter(
                 binding.root.setOnClickListener {
                     viewModel.goToCreateBadgeScreen(
                         name =  tribeBadgeHolder?.badgeTemplate?.name ?: "",
-                        description = templateDescription ?: "",
+                        description = templateDescription,
                         image = tribeBadgeHolder?.badgeTemplate?.imageUrl ?: "",
                         rewardType = tribeBadgeHolder?.badgeTemplate?.rewardType ?: 0,
                         rewardRequirement= tribeBadgeHolder?.badgeTemplate?.rewardRequirement ?: 0,

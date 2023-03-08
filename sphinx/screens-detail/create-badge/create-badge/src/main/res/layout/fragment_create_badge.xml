@@ -66,7 +66,7 @@
         android:id="@+id/layout_constraint_create_badge"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:visibility="gone"
+        android:visibility="visible"
         android:layout_marginTop="@dimen/default_layout_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_badge_name_and_description"
         app:layout_constraintBottom_toBottomOf="parent">
@@ -112,7 +112,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:srcCompat="@drawable/ic_icon_upload_badges" />
 
-            <androidx.appcompat.widget.AppCompatEditText
+            <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/quantity_number"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -238,12 +238,26 @@
             app:layout_constraintBaseline_toBaselineOf="@+id/text_view_total"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <ProgressBar
+            android:id="@+id/progress_bar_creating_badge"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginBottom="@dimen/default_double_layout_margin"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/text"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/layout_constraint_button_create_badge"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible" />
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_button_create_badge"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/add_buttons_height"
+            android:layout_height="@dimen/create_badge_button_height"
             android:layout_marginHorizontal="@dimen/default_header_margin_horizontal"
-            android:layout_marginBottom="@dimen/player_bar_height"
+            android:layout_marginBottom="@dimen/default_layout_margin"
             android:background="@drawable/button_background_white_rad_48"
             android:backgroundTint="@color/primaryGreen"
             android:paddingHorizontal="@dimen/default_inner_spacing_list_item_title"
@@ -289,7 +303,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_feed_watch_channel_image_xy"
         android:layout_marginTop="@dimen/badges_icon_row_size"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_badge_name_and_description">
 
         <androidx.constraintlayout.widget.ConstraintLayout
