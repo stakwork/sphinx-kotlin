@@ -389,6 +389,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.DirectPayment,
                 MessageType.GroupAction.Join,
                 MessageType.GroupAction.Leave,
+                MessageType.CallLink,
                 MessageType.Message -> {
                     // 🤔 We should never get here since these message types ARE supported.
                     getString(R.string.placeholder_unsupported_message_type_default)
