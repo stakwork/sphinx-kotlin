@@ -28,7 +28,7 @@ internal class KnownBadgesListAdapter(
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: KnownBadgesViewModel,
 ):
-    RecyclerView.Adapter<KnownBadgesListAdapter.KnwnoBadgeViewHolder>(),
+    RecyclerView.Adapter<KnownBadgesListAdapter.KnownBadgeViewHolder>(),
     DefaultLifecycleObserver
 {
 
@@ -130,18 +130,18 @@ internal class KnownBadgesListAdapter(
         return knownBadges.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KnwnoBadgeViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): KnownBadgeViewHolder {
         val binding = LayoutKnownBadgesListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
 
-        return KnwnoBadgeViewHolder(binding)
+        return KnownBadgeViewHolder(binding)
 
     }
 
-    override fun onBindViewHolder(holder: KnwnoBadgeViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: KnownBadgeViewHolder, position: Int) {
         holder.bind(position)
     }
 
@@ -151,7 +151,7 @@ internal class KnownBadgesListAdapter(
             .build()
     }
 
-    inner class KnwnoBadgeViewHolder(
+    inner class KnownBadgeViewHolder(
         private val binding: LayoutKnownBadgesListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 

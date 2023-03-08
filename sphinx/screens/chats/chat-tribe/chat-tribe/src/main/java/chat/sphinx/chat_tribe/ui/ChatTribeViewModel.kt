@@ -276,7 +276,7 @@ class ChatTribeViewModel @Inject constructor(
                         tribeData.feedUrl,
                         tribeData.chatUUID,
                         tribeData.feedType,
-                        tribeData.badgeIds
+                        tribeData.badges
                     )
 
                 } ?: run {
