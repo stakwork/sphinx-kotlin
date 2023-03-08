@@ -9,7 +9,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.common_player.R
-import chat.sphinx.common_player.databinding.LayoutRecommendedListItemHolderBinding
 import chat.sphinx.common_player.ui.CommonPlayerScreenViewModel
 import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
@@ -17,6 +16,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
+import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
@@ -129,7 +129,7 @@ class RecommendedItemsAdapter (
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecommendedItemViewHolder {
-        val binding = LayoutRecommendedListItemHolderBinding.inflate(
+        val binding = LayoutEpisodeGenericListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -171,7 +171,7 @@ class RecommendedItemsAdapter (
     }
 
     inner class RecommendedItemViewHolder(
-        private val binding: LayoutRecommendedListItemHolderBinding
+        private val binding: LayoutEpisodeGenericListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var holderJob: Job? = null

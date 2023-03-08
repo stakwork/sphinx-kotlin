@@ -77,6 +77,6 @@
         android:background="@color/body"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_videos_list"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/layout_recommended_list_item_holder" />
+        tools:listitem="@layout/layout_episode_generic_list_item_holder" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

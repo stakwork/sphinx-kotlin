@@ -26,8 +26,8 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_episode_image"
-                android:layout_width="@dimen/recommended_list_item_cover_image_xy"
-                android:layout_height="@dimen/recommended_list_item_cover_image_xy"
+                android:layout_width="@dimen/player_bar_image_xy"
+                android:layout_height="@dimen/player_bar_image_xy"
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
