@@ -34,25 +34,6 @@
 
         </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/card_view_image_type_wrapper"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
-            app:cardCornerRadius="@dimen/episode_type_radius"
-            app:layout_constraintStart_toStartOf="@+id/text_view_recommended_description"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_item_row_recommendation_type"
-                android:layout_width="@dimen/default_feed_play_elevation"
-                android:layout_height="@dimen/default_feed_play_elevation"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_podcast_placeholder" />
-
-        </androidx.cardview.widget.CardView>
-
-
         <TextView
             android:id="@+id/text_view_recommended_title"
             android:layout_width="0dp"
@@ -83,6 +64,24 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/card_view_image_episode_wrapper"
             tools:text="Who Will Build the Roads?" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_image_type_wrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+            app:cardCornerRadius="@dimen/episode_type_radius"
+            app:layout_constraintStart_toStartOf="@+id/text_view_recommended_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_item_row_recommendation_type"
+                android:layout_width="@dimen/default_feed_play_elevation"
+                android:layout_height="@dimen/default_feed_play_elevation"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_podcast_placeholder" />
+
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/text_view_recommended_date"
@@ -199,7 +198,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:src="@drawable/download_arrow" />
+                android:src="@drawable/ic_download_arrow" />
 
         </androidx.cardview.widget.CardView>
 

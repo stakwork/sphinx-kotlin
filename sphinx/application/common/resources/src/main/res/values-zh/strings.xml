@@ -53,5 +53,11 @@
     <string name="tribe_member_profile_twitter">Twitter:</string>
     <string name="tribe_member_profile_github">Github:</string>
 
+    <string name="episode_detail_download">Download</string>
+    <string name="episode_detail_share">Share</string>
+    <string name="episode_detail_copy_link">Copy Link</string>
+    <string name="episode_detail_played">Mark as Played</string>
+    <string name="episode_detail_close">CLOSE</string>
+
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>
