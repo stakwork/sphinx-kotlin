@@ -454,18 +454,6 @@ class ChatTribeViewModel @Inject constructor(
             (chatNavigator as TribeChatNavigator).toKnownBadges(
                 badgeIds = (feedDataStateFlow.value as? TribeFeedData.Result.FeedData)?.badges ?: arrayOf()
             )
-
-            if (tribeMemberDataViewStateContainer.value !is TribeMemberDataViewState.Idle) {
-                tribeMemberDataViewStateContainer.updateViewState(
-                    TribeMemberDataViewState.Idle
-                )
-            }
-
-            if (tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
-                tribeMemberProfileViewStateContainer.updateViewState(
-                    TribeMemberProfileViewState.Closed
-                )
-            }
         }
     }
 
