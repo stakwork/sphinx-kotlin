@@ -458,9 +458,23 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun navigateToEpisodeDetail(){
+    fun navigateToEpisodeDetail(
+        header: String,
+        image: String,
+        episodeTypeImage: Int,
+        episodeTypeText: String,
+        episodeDate: String,
+        episodeDuration: String,
+    ){
         viewModelScope.launch(mainImmediate) {
-            navigator.toEpisodeDetail()
+            navigator.toEpisodeDetail(
+                header,
+                image,
+                episodeTypeImage,
+                episodeTypeText,
+                episodeDate,
+                episodeDuration
+            )
         }
     }
 

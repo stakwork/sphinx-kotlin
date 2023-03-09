@@ -10,7 +10,14 @@ abstract class VideoScreenNavigator(
 ): Navigator<NavController>(detailNavigationDriver) {
     abstract suspend fun closeDetailScreen()
 
-    abstract suspend fun toEpisodeDetail()
+    abstract suspend fun toEpisodeDetail(
+        header: String,
+        image: String,
+        episodeTypeImage: Int,
+        episodeTypeText: String,
+        episodeDate: String,
+        episodeDuration: String,
+    )
 
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())

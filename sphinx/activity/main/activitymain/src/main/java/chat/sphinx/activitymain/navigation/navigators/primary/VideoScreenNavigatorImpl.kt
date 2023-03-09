@@ -14,7 +14,22 @@ internal class VideoScreenNavigatorImpl @Inject constructor(
         (navigationDriver as DetailNavigationDriver).closeDetailScreen()
     }
 
-    override suspend fun toEpisodeDetail() {
-        (navigationDriver as DetailNavigationDriver).submitNavigationRequest(ToEpisodeDetail())
+    override suspend fun toEpisodeDetail(
+        header: String,
+        image: String,
+        episodeTypeImage: Int,
+        episodeTypeText: String,
+        episodeDate: String,
+        episodeDuration: String,
+    ) {
+        (navigationDriver as DetailNavigationDriver).submitNavigationRequest(
+            ToEpisodeDetail(
+                header,
+                image,
+                episodeTypeImage,
+                episodeTypeText,
+                episodeDate,
+                episodeDuration
+        ))
     }
 }

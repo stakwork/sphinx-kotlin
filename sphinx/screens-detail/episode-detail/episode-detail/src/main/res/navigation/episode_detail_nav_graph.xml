@@ -8,6 +8,26 @@
     <fragment
         android:id="@+id/navigation_episode_detail_fragment"
         android:name="chat.sphinx.episode_detail.ui.EpisodeDetailFragment"
-        tools:layout="@layout/fragment_episode_detail" />
+        tools:layout="@layout/fragment_episode_detail">
+        <argument
+            android:name="argHeader"
+            app:argType="string" />
+        <argument
+            android:name="argImage"
+            app:argType="string" />
+        <argument
+            android:name="argEpisodeTypeImage"
+            app:argType="integer" />
+        <argument
+            android:name="argEpisodeTypeText"
+            app:argType="string" />
+        <argument
+            android:name="argEpisodeDate"
+            app:argType="string" />
+        <argument
+            android:name="argEpisodeDuration"
+            app:argType="string" />
+
+    </fragment>
 
 </navigation>

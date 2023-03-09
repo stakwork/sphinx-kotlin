@@ -17,7 +17,11 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
+import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.invisible
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
@@ -187,10 +191,6 @@ class RecommendedItemsAdapter (
                     }
                 }
             }
-
-            binding.buttonAdditionalOptions.setOnClickListener {
-                viewModel.navigateToEpisodeDetail()
-            }
         }
 
         fun bind(position: Int) {
@@ -224,6 +224,8 @@ class RecommendedItemsAdapter (
 
                 textViewEpisodeHeader.text = podcastEpisode.description?.value ?: "-"
                 textViewEpisodeDescription.text = podcastEpisode.title.value
+                cardViewDownloadWrapper.gone
+
 
                 imageViewItemRowEpisodeType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, podcastEpisode.getIconType())
@@ -234,6 +236,23 @@ class RecommendedItemsAdapter (
                         if (podcastEpisode.playing) R.color.semiTransparentPrimaryBlue else R.color.headerBG
                     )
                 )
+                buttonAdditionalOptions.setOnClickListener {
+                    viewModel.navigateToEpisodeDetail(
+                        podcastEpisode.titleToShow,
+                        podcastEpisode.imageUrlToShow?.value ?: "",
+                        R.drawable.ic_podcast_type,
+                        getString(R.string.podcast),
+                        podcastEpisode.dateString,
+                        ""
+                    )
+                }
+                if (podcastEpisode.playing) {
+                    buttonPauseEpisode.visible
+                    buttonPlayEpisode.invisible
+                } else {
+                    buttonPauseEpisode.invisible
+                    buttonPlayEpisode.visible
+                }
             }
         }
     }

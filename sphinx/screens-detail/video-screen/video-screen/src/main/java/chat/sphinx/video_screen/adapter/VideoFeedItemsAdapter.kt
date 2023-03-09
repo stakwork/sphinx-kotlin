@@ -14,6 +14,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
 import chat.sphinx.resources.getColor
+import chat.sphinx.resources.getString
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
@@ -202,7 +203,7 @@ internal class VideoFeedItemsAdapter (
 
                 textViewEpisodeHeader.text = f.titleToShow
                 textViewEpisodeDate.text = f.datePublished?.hhmmElseDate()
-                imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_video_placeholder))
+                imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_youtube_type))
                 buttonPauseEpisode.invisible
 
                 buttonDownloadArrow.goneIfTrue(
@@ -210,7 +211,14 @@ internal class VideoFeedItemsAdapter (
                 )
 
                 buttonAdditionalOptions.setOnClickListener {
-                    viewModel.navigateToEpisodeDetail()
+                    viewModel.navigateToEpisodeDetail(
+                        f.titleToShow,
+                        f.thumbnailUrlToShow?.value ?: "",
+                        R.drawable.ic_youtube_type,
+                        getString(R.string.youtube),
+                        f.datePublished?.hhmmElseDate() ?: "",
+                        f.duration?.value?.toInt().toString()
+                    )
                 }
 
 //                swipeRevealLayoutVideoFeedItem.setLockDrag(!f.downloaded)

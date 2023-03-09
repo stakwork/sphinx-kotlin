@@ -146,6 +146,11 @@
     <string name="episode_detail_close">CLOSE</string>
     <string name="time_left">%s left</string>
 
+    <string name="youtube" translatable="false">Youtube</string>
+    <string name="podcast" translatable="false">Podcast</string>
+
+
+
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

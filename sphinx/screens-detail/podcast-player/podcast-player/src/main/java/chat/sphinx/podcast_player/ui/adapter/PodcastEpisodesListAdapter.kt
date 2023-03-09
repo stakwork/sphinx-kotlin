@@ -202,15 +202,11 @@ internal class PodcastEpisodesListAdapter(
                 disposable?.dispose()
 
                 // General info
-                textViewEpisodeHeader.text = podcastEpisode.title.value
+                textViewEpisodeHeader.text = podcastEpisode.titleToShow
                 textViewEpisodeDescription.text = podcastEpisode.descriptionToShow
                 textViewEpisodeDate.text = podcastEpisode.dateString
                 imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_podcast_type))
                 textViewItemEpisodeTime.text = podcastEpisode.getUpdatedContentEpisodeStatus().duration.value.toString()
-                buttonAdditionalOptions.setOnClickListener {
-                    viewModel.navigateToEpisodeDetail()
-                }
-
 
 
                 // Set Duration Time
@@ -228,6 +224,17 @@ internal class PodcastEpisodesListAdapter(
                     textViewItemEpisodeTime.text = binding.root.context.getString(R.string.time_left, "${timeLeft.toHrAndMin()}")
                 } else if (duration > 0) {
                     textViewItemEpisodeTime.text = "${duration.toHrAndMin()}"
+                }
+
+                buttonAdditionalOptions.setOnClickListener {
+                    viewModel.navigateToEpisodeDetail(
+                        podcastEpisode.titleToShow,
+                        podcastEpisode.imageUrlToShow?.value ?: "",
+                        R.drawable.ic_podcast_type,
+                        "Podcast",
+                        podcastEpisode.dateString,
+                        duration.toHrAndMin()
+                    )
                 }
 
 

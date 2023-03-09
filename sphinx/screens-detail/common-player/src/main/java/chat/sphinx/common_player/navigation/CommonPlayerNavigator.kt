@@ -16,7 +16,14 @@ abstract class CommonPlayerNavigator(
     internal suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }
-    abstract suspend fun toEpisodeDetail()
+    abstract suspend fun toEpisodeDetail(
+        header: String,
+        image: String,
+        episodeTypeImage: Int,
+        episodeTypeText: String,
+        episodeDate: String,
+        episodeDuration: String,
+    )
 
     abstract suspend fun closeDetailScreen()
 }
