@@ -26,5 +26,7 @@ abstract class PodcastPlayerNavigator(
         navigationDriver.submitNavigationRequest(PopBackStack())
     }
 
+    abstract suspend fun toEpisodeDetail()
+
     abstract suspend fun closeDetailScreen()
 }

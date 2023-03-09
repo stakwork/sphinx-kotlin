@@ -207,6 +207,10 @@ internal class PodcastEpisodesListAdapter(
                 textViewEpisodeDate.text = podcastEpisode.dateString
                 imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_podcast_type))
                 textViewItemEpisodeTime.text = podcastEpisode.getUpdatedContentEpisodeStatus().duration.value.toString()
+                buttonAdditionalOptions.setOnClickListener {
+                    viewModel.navigateToEpisodeDetail()
+                }
+
 
 
                 // Set Duration Time

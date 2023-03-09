@@ -591,6 +591,12 @@ internal class PodcastPlayerViewModel @Inject constructor(
         )
     }
 
+    fun navigateToEpisodeDetail(){
+        viewModelScope.launch(mainImmediate) {
+            navigator.toEpisodeDetail()
+        }
+    }
+
     suspend fun deleteDownloadedMedia(podcastEpisode: PodcastEpisode) {
         if (repositoryMedia.deleteDownloadedMediaIfApplicable(podcastEpisode)) {
             podcastEpisode.localFile = null
