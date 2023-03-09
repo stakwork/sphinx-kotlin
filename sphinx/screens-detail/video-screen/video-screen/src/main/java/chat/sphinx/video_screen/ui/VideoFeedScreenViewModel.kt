@@ -11,6 +11,7 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_screen.R
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
@@ -47,6 +48,7 @@ internal open class VideoFeedScreenViewModel(
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val lightningRepository: LightningRepository,
+    private val navigator: VideoScreenNavigator
 ): SideEffectViewModel<
     FragmentActivity,
     VideoFeedScreenSideEffect,
@@ -283,6 +285,12 @@ internal open class VideoFeedScreenViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun navigateToEpisodeDetail(){
+        viewModelScope.launch(mainImmediate) {
+            navigator.toEpisodeDetail()
         }
     }
 

@@ -13,6 +13,7 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
@@ -47,6 +48,7 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     lightningRepository: LightningRepository,
+    navigator: VideoScreenNavigator,
 ): VideoFeedScreenViewModel(
     dispatchers,
     app,
@@ -56,7 +58,8 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     actionsRepository,
     contactRepository,
     messageRepository,
-    lightningRepository
+    lightningRepository,
+    navigator
 )
 {
     private val args: VideoFeedWatchScreenFragmentArgs by savedStateHandle.navArgs()

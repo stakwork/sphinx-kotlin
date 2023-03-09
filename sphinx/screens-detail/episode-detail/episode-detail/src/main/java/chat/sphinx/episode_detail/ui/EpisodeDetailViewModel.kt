@@ -18,7 +18,6 @@ internal class EpisodeDetailViewModel @Inject constructor(
     EpisodeDetailViewState.Idle
 )
 {
-
     fun popBackStack(){
         viewModelScope.launch(mainImmediate) {
             navigator.popBackStack()

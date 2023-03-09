@@ -167,6 +167,7 @@
             android:id="@+id/card_view_download_wrapper"
             android:layout_width="@dimen/default_double_layout_margin"
             android:layout_height="@dimen/default_double_layout_margin"
+            app:cardElevation="0dp"
             android:layout_marginStart="@dimen/default_list_row_padding_vertical"
             app:cardBackgroundColor="@color/headerBG"
             app:layout_constraintStart_toStartOf="parent"
