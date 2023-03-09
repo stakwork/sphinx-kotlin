@@ -146,7 +146,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         })
     }
 
-
     override fun onDestroyView() {
         super.onDestroyView()
         viewModel.trackPodcastConsumed()

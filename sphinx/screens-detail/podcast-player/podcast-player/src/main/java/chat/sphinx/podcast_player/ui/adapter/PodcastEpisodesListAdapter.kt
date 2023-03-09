@@ -3,6 +3,7 @@ package chat.sphinx.podcast_player.ui.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,13 +14,12 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.podcast_player.R
-import chat.sphinx.podcast_player.databinding.LayoutEpisodeListItemHolderBinding
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewModel
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
+import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_podcast.PodcastEpisode
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
@@ -156,7 +156,7 @@ internal class PodcastEpisodesListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PodcastEpisodesListAdapter.EpisodeViewHolder {
-        val binding = LayoutEpisodeListItemHolderBinding.inflate(
+        val binding = LayoutEpisodeGenericListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -176,14 +176,14 @@ internal class PodcastEpisodesListAdapter(
     }
 
     inner class EpisodeViewHolder(
-        private val binding: LayoutEpisodeListItemHolderBinding
+        private val binding: LayoutEpisodeGenericListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var disposable: Disposable? = null
         private var episode: PodcastEpisode? = null
 
         init {
-            binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
+            binding.buttonPlayEpisode.setOnClickListener {
                 episode?.let { podcastEpisode ->
                     if (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded) {
                         viewModel.playEpisodeFromList(podcastEpisode)
@@ -201,24 +201,41 @@ internal class PodcastEpisodesListAdapter(
                 episode = podcastEpisode
                 disposable?.dispose()
 
-                val episodeAvailable = (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded)
-                root.alpha = if (episodeAvailable) 1.0f else 0.5f
+                // General info
+                textViewEpisodeHeader.text = podcastEpisode.title.value
+                textViewEpisodeDescription.text = podcastEpisode.descriptionToShow
+                textViewEpisodeDate.text = podcastEpisode.dateString
+                imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_podcast_type))
+                textViewItemEpisodeTime.text = podcastEpisode.getUpdatedContentEpisodeStatus().duration.value.toString()
 
-                swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
-                layoutConstraintDeleteButtonContainer.setOnClickListener {
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        viewModel.deleteDownloadedMedia(podcastEpisode)
-                        notifyItemChanged(position)
-                        swipeRevealLayoutPodcastFeedItem.close(true)
-                    }
+
+                // Set Duration Time
+                val currentTime = (podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0).toInt()
+                val duration = (podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0).toInt()
+
+                textViewItemEpisodeTime.goneIfFalse(currentTime > 0 || duration > 0)
+
+                val progress = getSeekbarProgress(duration, currentTime)
+                seekBarCurrentTimeEpisodeProgress.progress = progress
+                seekBarCurrentTimeEpisodeProgress.goneIfFalse(currentTime > 0)
+
+                if (currentTime > 0 && duration > 0) {
+                    val timeLeft = duration - currentTime
+                    textViewItemEpisodeTime.text = binding.root.context.getString(R.string.time_left, "${timeLeft.toHrAndMin()}")
+                } else if (duration > 0) {
+                    textViewItemEpisodeTime.text = "${duration.toHrAndMin()}"
                 }
+
+
                 //Playing State
-                layoutConstraintEpisodeListItemHolder.setBackgroundColor(
-                    root.context.getColor(
-                        if (podcastEpisode.playing) R.color.chatListSelected else R.color.headerBG
-                    )
-                )
-                textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
+                if (podcastEpisode.playing) {
+                    buttonPauseEpisode.visible
+                    buttonPlayEpisode.invisible
+                } else {
+                    buttonPauseEpisode.invisible
+                    buttonPlayEpisode.visible
+
+                }
 
                 // Image
                 podcastEpisode.imageUrlToShow?.value?.let { episodeImage ->
@@ -231,17 +248,18 @@ internal class PodcastEpisodesListAdapter(
                     }
                 }
 
-                //Name
-                textViewEpisodeTitle.text = podcastEpisode.title.value
+                //Download
+                val episodeAvailable = (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded)
+                root.alpha = if (episodeAvailable) 1.0f else 0.5f
 
-                //Download button
-                textViewDownloadEpisodeButton.setTextColor(
-                    root.context.getColor(
-                        if (podcastEpisode.downloaded) R.color.primaryGreen else R.color.secondaryText
-                    )
-                )
+                if (podcastEpisode.downloaded) {
+                    textViewDownloadedEpisode.visible
+                    buttonDownloadArrow.gone
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                }
 
-                textViewDownloadEpisodeButton.setOnClickListener {
+                buttonDownloadArrow.setOnClickListener {
                     viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             podcastEpisode.localFile = downloadedFile
@@ -251,10 +269,29 @@ internal class PodcastEpisodesListAdapter(
                     notifyItemChanged(position)
                 }
 
+                if (!podcastEpisode.downloaded) {
+                    buttonDownloadArrow.visible
+                    buttonStop.gone
+                    progressBarEpisodeDownload.gone
+                }
+
                 val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id) && !podcastEpisode.downloaded
 
-                textViewDownloadEpisodeButton.goneIfTrue(isFeedItemDownloadInProgress)
-                progressBarEpisodeDownload.goneIfFalse(isFeedItemDownloadInProgress)
+                if (isFeedItemDownloadInProgress) {
+                    buttonDownloadArrow.gone
+                    progressBarEpisodeDownload.visible
+                    textViewDownloadedEpisode.gone
+                    buttonStop.visible
+                }
+//                swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
+//                layoutConstraintDeleteButtonContainer.setOnClickListener {
+//                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+//                        viewModel.deleteDownloadedMedia(podcastEpisode)
+//                        notifyItemChanged(position)
+//                        swipeRevealLayoutPodcastFeedItem.close(true)
+//                    }
+//                }
+
             }
         }
     }
@@ -262,4 +299,21 @@ internal class PodcastEpisodesListAdapter(
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }
+}
+
+private fun getSeekbarProgress(duration: Int, currentTime: Int): Int {
+    return try {
+        currentTime * 100 / duration
+    } catch (e: ArithmeticException) {
+        0
+    }
+}
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
 }

@@ -59,6 +59,8 @@
     <string name="episode_detail_copy_link">Copiar Link</string>
     <string name="episode_detail_played">Marcar como escuchado</string>
     <string name="episode_detail_close">CERRAR</string>
+    <string name="time_left">Faltan %s</string>
+
 
     <string name="alias_allowed_characters">Solo se permiten letras, números y\nguiones bajos en el alias de la tribu</string>
 </resources>

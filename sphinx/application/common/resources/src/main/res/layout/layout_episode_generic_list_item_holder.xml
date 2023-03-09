@@ -201,6 +201,23 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_download_arrow" />
 
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_downloaded_episode"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fontFamily="@font/material_icons_regular"
+                android:gravity="center"
+                android:text="@string/material_icon_name_cloud_download"
+                android:textColor="@color/primaryGreen"
+                android:textSize="20sp"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
         </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -229,6 +246,16 @@
             android:src="@drawable/ic_play_episode"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/button_pause_episode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:src="@drawable/ic_pause_episode"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="gone" />
 
         <View
             android:id="@+id/divider_bottom"

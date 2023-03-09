@@ -127,7 +127,7 @@
                         tools:visibility="visible" />
 
                     <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/text_view_download_episode_button"
+                        android:id="@+id/text_view_downloaded_episode"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:fontFamily="@font/material_icons_regular"
