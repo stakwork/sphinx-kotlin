@@ -140,6 +140,7 @@
     <string name="tribe_member_profile_github">Github:</string>
 
     <string name="episode_detail_download">Download</string>
+    <string name="episode_detail_erase">Erase from device</string>
     <string name="episode_detail_share">Share</string>
     <string name="episode_detail_copy_link">Copy Link</string>
     <string name="episode_detail_played">Mark as Played</string>

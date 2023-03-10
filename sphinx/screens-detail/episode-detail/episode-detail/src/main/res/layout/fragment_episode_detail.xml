@@ -170,14 +170,82 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_episode_info_container">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/button_download_arrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view_download_wrapper"
+                android:layout_width="@dimen/default_double_layout_margin"
+                android:layout_height="@dimen/default_double_layout_margin"
+                app:cardElevation="0dp"
                 android:layout_marginTop="@dimen/default_layout_margin"
-                android:src="@drawable/ic_download_arrow"
+                app:cardBackgroundColor="@color/headerBG"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ProgressBar
+                    android:id="@+id/progress_bar_episode_download"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:indeterminateTint="@color/receivedIcon"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/button_stop"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="@dimen/default_medium_layout_margin"
+                    android:src="@drawable/ic_stop_icon"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/button_download_arrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_download_arrow" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_downloaded_episode"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:gravity="center"
+                    android:text="@string/material_icon_name_cloud_download"
+                    android:textColor="@color/primaryGreen"
+                    android:textSize="20sp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_delete_episode"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:gravity="center"
+                    android:text="@string/material_icon_name_message_action_delete"
+                    android:textColor="@color/primaryRed"
+                    android:textSize="20sp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+            </androidx.cardview.widget.CardView>
+
 
             <TextView
                 android:id="@+id/text_view_download"
@@ -190,9 +258,9 @@
                 android:text="@string/episode_detail_download"
                 android:textColor="@color/text"
                 android:textSize="@dimen/custom_boost_text_size"
-                app:layout_constraintBottom_toBottomOf="@+id/button_download_arrow"
-                app:layout_constraintStart_toEndOf="@+id/button_download_arrow"
-                app:layout_constraintTop_toTopOf="@+id/button_download_arrow"
+                app:layout_constraintBottom_toBottomOf="@+id/card_view_download_wrapper"
+                app:layout_constraintStart_toEndOf="@+id/card_view_download_wrapper"
+                app:layout_constraintTop_toTopOf="@+id/card_view_download_wrapper"
                 tools:text="Download" />
 
             <View
@@ -203,7 +271,7 @@
                 android:background="@color/lightEpisodeDivider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/button_download_arrow" />
+                app:layout_constraintTop_toBottomOf="@+id/card_view_download_wrapper" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_share_arrow"
