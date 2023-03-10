@@ -60,7 +60,6 @@ internal class CreateBadgeFragment: SideEffectFragment<
 
             (requireActivity() as InsetterActivity)
                 .addNavigationBarPadding(binding.root)
-//                .addNavigationBarPadding(binding.root)
 
             includeCreateBadgeHeader.textViewDetailScreenClose.gone
             includeCreateBadgeHeader.textViewDetailScreenHeaderNavBack.visible
