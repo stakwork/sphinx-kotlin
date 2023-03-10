@@ -73,6 +73,8 @@ internal class EpisodeDetailFragment: SideEffectFragment<
                         YOUTUBE_TYPE -> {
                             layoutConstraintDownloadRow.gone
                             layoutConstraintCheckMarkRow.gone
+                            circleSplitTwo.gone
+                            textViewEpisodeDuration.gone
                         }
                     }
 

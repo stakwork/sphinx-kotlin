@@ -252,9 +252,11 @@ class RecommendedItemsAdapter (
                 if (podcastEpisode.playing) {
                     buttonPauseEpisode.visible
                     buttonPlayEpisode.invisible
+                    layoutConstraintAlpha.visible
                 } else {
                     buttonPauseEpisode.invisible
                     buttonPlayEpisode.visible
+                    layoutConstraintAlpha.gone
                 }
 
                 //Navigation

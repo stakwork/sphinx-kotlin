@@ -33,7 +33,43 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:srcCompat="@drawable/ic_podcast_placeholder" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_alpha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+            <View
+                android:id="@+id/alpha_animation_image"
+                android:layout_width="@dimen/player_bar_image_xy"
+                android:layout_height="@dimen/player_bar_image_xy"
+                android:visibility="visible"
+                android:background="@color/black"
+                android:alpha="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/animation_view_play"
+                android:layout_width="@dimen/player_bar_image_xy"
+                android:layout_height="@dimen/player_bar_image_xy"
+                android:adjustViewBounds="true"
+                android:visibility="visible"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:lottie_autoPlay="true"
+                app:lottie_fileName="playing_bar_animation.json"
+                app:lottie_loop="true"
+                app:lottie_repeatMode="reverse"
+                app:lottie_speed="1"
+                tools:ignore="ContentDescription" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.cardview.widget.CardView>
+
 
         <TextView
             android:id="@+id/text_view_episode_header"
