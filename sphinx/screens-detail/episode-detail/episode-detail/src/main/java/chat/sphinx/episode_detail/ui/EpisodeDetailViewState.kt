@@ -11,4 +11,5 @@ internal sealed class EpisodeDetailViewState: ViewState<EpisodeDetailViewState>(
     data class ShowEpisode(
         val episodeDetail: EpisodeDetail
     ): EpisodeDetailViewState()
+
 }

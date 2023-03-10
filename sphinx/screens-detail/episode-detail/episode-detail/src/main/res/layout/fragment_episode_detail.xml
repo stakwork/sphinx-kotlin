@@ -135,7 +135,7 @@
                 tools:text="3 Apr 2022" />
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/appCompatImageViewTwo"
+                android:id="@+id/circle_split_two"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
                 android:layout_marginStart="8dp"
@@ -154,9 +154,9 @@
                 android:maxLines="2"
                 android:textColor="@color/text"
                 android:textSize="@dimen/default_text_size_body"
-                app:layout_constraintBottom_toBottomOf="@+id/appCompatImageViewTwo"
-                app:layout_constraintStart_toEndOf="@+id/appCompatImageViewTwo"
-                app:layout_constraintTop_toTopOf="@+id/appCompatImageViewTwo"
+                app:layout_constraintBottom_toBottomOf="@+id/circle_split_two"
+                app:layout_constraintStart_toEndOf="@+id/circle_split_two"
+                app:layout_constraintTop_toTopOf="@+id/circle_split_two"
                 tools:text="2 hrs 19 min" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -170,12 +170,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_episode_info_container">
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_download_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_view_download_wrapper"
                 android:layout_width="@dimen/default_double_layout_margin"
                 android:layout_height="@dimen/default_double_layout_margin"
                 app:cardElevation="0dp"
-                android:layout_marginTop="@dimen/default_layout_margin"
                 app:cardBackgroundColor="@color/headerBG"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
@@ -273,14 +280,24 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/card_view_download_wrapper" />
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_share_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_download_row">
+
+
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_share_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_layout_margin"
                 android:src="@drawable/ic_episode_share"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/divider_bottom" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/text_view_share"
@@ -308,14 +325,24 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/button_share_arrow" />
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_copy_link_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_share_row">
+
+
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_copy_link"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_layout_margin"
                 android:src="@drawable/ic_copy_link"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/divider_bottom_two" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/text_view_copy_link"
@@ -343,14 +370,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/button_copy_link" />
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_check_mark_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_copy_link_row">
+
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_check_mark"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_layout_margin"
                 android:src="@drawable/ic_check_mark"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/divider_bottom_three" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/text_view_check_mark"
@@ -377,17 +413,18 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/button_check_mark" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_close_container"
-            android:layout_width="@dimen/feed_fragment_bottom_padding"
-            android:layout_height="@dimen/search_bar_height"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/chat_footer_button_xy"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_buttons_container">
+            app:layout_constraintStart_toStartOf="parent">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_close"
@@ -395,10 +432,10 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/montserrat_regular"
                 android:gravity="center"
+                android:letterSpacing="0.2"
                 android:maxLines="1"
                 android:text="@string/episode_detail_close"
                 android:textColor="@color/text"
-                android:letterSpacing="0.2"
                 android:textSize="@dimen/custom_boost_text_size"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

@@ -17,6 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,6 +33,11 @@ internal class EpisodeDetailFragment: SideEffectFragment<
 {
     override val viewModel: EpisodeDetailViewModel by viewModels()
     override val binding: FragmentEpisodeDetailBinding by viewBinding(FragmentEpisodeDetailBinding::bind)
+
+    companion object {
+        const val YOUTUBE_TYPE = "Youtube"
+        const val PODCAST_TYPE = "Podcast"
+    }
 
     @Inject
     @Suppress("ProtectedInFinal")
@@ -52,28 +58,50 @@ internal class EpisodeDetailFragment: SideEffectFragment<
         when(viewState) {
             is EpisodeDetailViewState.Idle -> {}
             is EpisodeDetailViewState.ShowEpisode -> {
+                commonInfoBinding(viewState)
                 binding.apply {
-                    textViewMainEpisodeTitle.text = viewState.episodeDetail.header
-                    imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, viewState.episodeDetail.episodeTypeImage))
-                    textViewEpisodeType.text = viewState.episodeDetail.episodeTypeText
-                    textViewEpisodeDate.text = viewState.episodeDetail.episodeDate
-                    textViewEpisodeDuration.text = viewState.episodeDetail.episodeDuration
+                    when(viewState.episodeDetail.episodeTypeText) {
+                        PODCAST_TYPE -> {
+                            if (viewState.episodeDetail.feedId == null) {
+                                layoutConstraintDownloadRow.gone
+                                layoutConstraintCheckMarkRow.gone
+                            }
+                            else {
 
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        imageLoader.load(
-                            imageViewEpisodeDetailImage,
-                            viewState.episodeDetail.image,
-                            ImageLoaderOptions.Builder()
-                                .placeholderResId(R.drawable.ic_podcast_placeholder)
-                                .transformation(Transformation.CircleCrop)
-                                .build()
-                        )
+                            }
+                        }
+                        YOUTUBE_TYPE -> {
+                            layoutConstraintDownloadRow.gone
+                            layoutConstraintCheckMarkRow.gone
+                        }
                     }
+
                 }
             }
         }
     }
 
+
+    private fun commonInfoBinding(viewState: EpisodeDetailViewState.ShowEpisode) {
+        binding.apply {
+            textViewMainEpisodeTitle.text = viewState.episodeDetail.header
+            imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, viewState.episodeDetail.episodeTypeImage))
+            textViewEpisodeType.text = viewState.episodeDetail.episodeTypeText
+            textViewEpisodeDate.text = viewState.episodeDetail.episodeDate
+            textViewEpisodeDuration.text = viewState.episodeDetail.episodeDuration
+
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                imageLoader.load(
+                    imageViewEpisodeDetailImage,
+                    viewState.episodeDetail.image,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_podcast_placeholder)
+                        .transformation(Transformation.CircleCrop)
+                        .build()
+                )
+            }
+        }
+    }
 
 
 

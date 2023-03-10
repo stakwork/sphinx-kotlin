@@ -1,5 +1,7 @@
 package chat.sphinx.episode_detail.model
 
+import chat.sphinx.wrapper_common.feed.FeedId
+
 data class EpisodeDetail(
     val header: String,
     val image: String,
@@ -7,4 +9,5 @@ data class EpisodeDetail(
     val episodeTypeText: String,
     val episodeDate: String,
     val episodeDuration: String,
+    val feedId: FeedId?
 )

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.episode_detail.model.EpisodeDetail
 import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
+import chat.sphinx.wrapper_common.feed.toFeedId
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
@@ -28,9 +29,14 @@ internal class EpisodeDetailViewModel @Inject constructor(
 {
     private val args: EpisodeDetailFragmentArgs by savedStateHandle.navArgs()
 
+    companion object {
+        const val YOUTUBE_TYPE = "Youtube"
+        const val PODCAST_TYPE = "Podcast"
+    }
+
     fun popBackStack(){
         viewModelScope.launch(mainImmediate) {
-            if(args.argEpisodeTypeText == "Youtube"){
+            if(args.argEpisodeTypeText == YOUTUBE_TYPE){
                 navigator.closeDetailScreen()
             }
             else {
@@ -47,7 +53,8 @@ internal class EpisodeDetailViewModel @Inject constructor(
                 args.argEpisodeTypeImage,
                 args.argEpisodeTypeText,
                 args.argEpisodeDate,
-                args.argEpisodeDuration
+                args.argEpisodeDuration,
+                args.argFeedId?.toFeedId()
             )
         )
         )
