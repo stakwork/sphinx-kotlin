@@ -169,13 +169,21 @@ internal class VideoFeedItemsAdapter (
 
         init {
             binding.buttonPlayEpisode.setOnClickListener {
-                videoItem?.let { nnVideoItem ->
-                    lifecycleOwner.lifecycleScope.launch {
-                        viewModel.videoItemSelected(nnVideoItem)
-                    }
+                playEpisodeFromList()
+            }
+            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+                playEpisodeFromList()
+            }
+        }
+
+        private fun playEpisodeFromList(){
+            videoItem?.let { nnVideoItem ->
+                lifecycleOwner.lifecycleScope.launch {
+                    viewModel.videoItemSelected(nnVideoItem)
                 }
             }
         }
+
 
         fun bind(position: Int) {
             binding.apply {
@@ -187,6 +195,16 @@ internal class VideoFeedItemsAdapter (
                 disposable?.dispose()
                 holderJob?.cancel()
 
+                // General info
+                textViewEpisodeHeader.text = f.titleToShow
+                textViewEpisodeDescription.text = f.descriptionToShow
+                textViewEpisodeDate.text = f.datePublished?.hhmmElseDate()
+                buttonDownloadArrow.alpha = 0.3F
+                seekBarCurrentTimeEpisodeProgress.gone
+                textViewItemEpisodeTime.gone
+                circleSplit.gone
+
+                // Image
                 f.thumbnailUrlToShow?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
                         imageLoader.load(
@@ -201,15 +219,10 @@ internal class VideoFeedItemsAdapter (
                     }
                 }
 
-                textViewEpisodeHeader.text = f.titleToShow
-                textViewEpisodeDate.text = f.datePublished?.hhmmElseDate()
                 imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_youtube_type))
                 buttonPauseEpisode.invisible
 
-                buttonDownloadArrow.goneIfTrue(
-                    f.enclosureUrl.isYoutubeVideo()
-                )
-
+                //Navigation
                 buttonAdditionalOptions.setOnClickListener {
                     viewModel.navigateToEpisodeDetail(
                         f.titleToShow,
@@ -229,34 +242,6 @@ internal class VideoFeedItemsAdapter (
 //                        swipeRevealLayoutVideoFeedItem.close(true)
 //                    }
 //                }
-                if (f.downloaded) {
-                    textViewDownloadedEpisode.visible
-                    buttonStop.gone
-                    progressBarEpisodeDownload.gone
-                    buttonDownloadArrow.gone
-                } else {
-                    buttonDownloadArrow.visible
-                    buttonStop.gone
-                    progressBarEpisodeDownload.gone
-                    textViewDownloadedEpisode.gone
-                    buttonDownloadArrow.setOnClickListener {
-                        viewModel.downloadMedia(f)  { downloadedFile ->
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                f.localFile = downloadedFile
-                                notifyItemChanged(position)
-                            }
-                        }
-                        notifyItemChanged(position)
-                    }
-                }
-                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(f.id) && !f.downloaded
-
-                if (isFeedItemDownloadInProgress) {
-                    buttonDownloadArrow.gone
-                    progressBarEpisodeDownload.visible
-                    textViewDownloadedEpisode.gone
-                    buttonStop.visible
-                }
             }
         }
 

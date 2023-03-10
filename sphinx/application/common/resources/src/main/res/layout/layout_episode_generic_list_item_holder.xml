@@ -100,7 +100,7 @@
             tools:text="3 Apr 2022" />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/appCompatImageView"
+            android:id="@+id/circle_split"
             android:layout_width="4dp"
             android:layout_height="4dp"
             android:layout_marginStart="8dp"
@@ -118,9 +118,9 @@
             android:maxLines="1"
             android:textColor="@color/receivedIcon"
             android:textSize="@dimen/default_text_size_caption1"
-            app:layout_constraintBottom_toBottomOf="@+id/appCompatImageView"
-            app:layout_constraintStart_toEndOf="@+id/appCompatImageView"
-            app:layout_constraintTop_toTopOf="@+id/appCompatImageView"
+            app:layout_constraintBottom_toBottomOf="@+id/circle_split"
+            app:layout_constraintStart_toEndOf="@+id/circle_split"
+            app:layout_constraintTop_toTopOf="@+id/circle_split"
             tools:text="1h 19 min left" />
 
         <androidx.appcompat.widget.AppCompatSeekBar
@@ -180,7 +180,7 @@
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:indeterminateTint="@color/receivedIcon"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -193,13 +193,15 @@
                 android:layout_height="match_parent"
                 android:padding="@dimen/default_medium_layout_margin"
                 android:src="@drawable/ic_stop_icon"
-                android:visibility="visible" />
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_download_arrow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:visibility="visible"
                 android:src="@drawable/ic_download_arrow" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -217,7 +219,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible"/>
 
         </androidx.cardview.widget.CardView>
 

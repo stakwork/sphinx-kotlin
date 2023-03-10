@@ -184,10 +184,17 @@ internal class PodcastEpisodesListAdapter(
 
         init {
             binding.buttonPlayEpisode.setOnClickListener {
-                episode?.let { podcastEpisode ->
-                    if (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded) {
-                        viewModel.playEpisodeFromList(podcastEpisode)
-                    }
+                playEpisodeFromList()
+            }
+            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+                playEpisodeFromList()
+            }
+        }
+
+        private fun playEpisodeFromList(){
+            episode?.let { podcastEpisode ->
+                if (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded) {
+                    viewModel.playEpisodeFromList(podcastEpisode)
                 }
             }
         }
@@ -205,15 +212,13 @@ internal class PodcastEpisodesListAdapter(
                 textViewEpisodeHeader.text = podcastEpisode.titleToShow
                 textViewEpisodeDescription.text = podcastEpisode.descriptionToShow
                 textViewEpisodeDate.text = podcastEpisode.dateString
-                imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_podcast_type))
-                textViewItemEpisodeTime.text = podcastEpisode.getUpdatedContentEpisodeStatus().duration.value.toString()
-
 
                 // Set Duration Time
                 val currentTime = (podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0).toInt()
                 val duration = (podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0).toInt()
 
                 textViewItemEpisodeTime.goneIfFalse(currentTime > 0 || duration > 0)
+                circleSplit.goneIfFalse(currentTime > 0 || duration > 0)
 
                 val progress = getSeekbarProgress(duration, currentTime)
                 seekBarCurrentTimeEpisodeProgress.progress = progress
@@ -223,7 +228,7 @@ internal class PodcastEpisodesListAdapter(
                     val timeLeft = duration - currentTime
                     textViewItemEpisodeTime.text = binding.root.context.getString(R.string.time_left, "${timeLeft.toHrAndMin()}")
                 } else if (duration > 0) {
-                    textViewItemEpisodeTime.text = "${duration.toHrAndMin()}"
+                    textViewItemEpisodeTime.text = duration.toHrAndMin()
                 }
 
                 buttonAdditionalOptions.setOnClickListener {
@@ -237,7 +242,6 @@ internal class PodcastEpisodesListAdapter(
                     )
                 }
 
-
                 //Playing State
                 if (podcastEpisode.playing) {
                     buttonPauseEpisode.visible
@@ -245,7 +249,6 @@ internal class PodcastEpisodesListAdapter(
                 } else {
                     buttonPauseEpisode.invisible
                     buttonPlayEpisode.visible
-
                 }
 
                 // Image
@@ -258,6 +261,7 @@ internal class PodcastEpisodesListAdapter(
                         )
                     }
                 }
+                imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_podcast_type))
 
                 //Download
                 val episodeAvailable = (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded)
@@ -268,16 +272,6 @@ internal class PodcastEpisodesListAdapter(
                     buttonDownloadArrow.gone
                     progressBarEpisodeDownload.gone
                     buttonStop.gone
-                }
-
-                buttonDownloadArrow.setOnClickListener {
-                    viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            podcastEpisode.localFile = downloadedFile
-                            notifyItemChanged(position)
-                        }
-                    }
-                    notifyItemChanged(position)
                 }
 
                 if (!podcastEpisode.downloaded) {
@@ -294,6 +288,19 @@ internal class PodcastEpisodesListAdapter(
                     textViewDownloadedEpisode.gone
                     buttonStop.visible
                 }
+
+                //Navigation
+                buttonDownloadArrow.setOnClickListener {
+                    viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            podcastEpisode.localFile = downloadedFile
+                            notifyItemChanged(position)
+                        }
+                    }
+                    notifyItemChanged(position)
+                }
+
+
 //                swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
 //                layoutConstraintDeleteButtonContainer.setOnClickListener {
 //                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {

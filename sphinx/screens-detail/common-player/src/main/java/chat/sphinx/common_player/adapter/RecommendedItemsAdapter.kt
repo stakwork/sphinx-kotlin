@@ -20,6 +20,7 @@ import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBindi
 import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
@@ -185,10 +186,17 @@ class RecommendedItemsAdapter (
 
         init {
             binding.buttonPlayEpisode.setOnClickListener {
-                episode?.let { podcastEpisode ->
-                    if (connectivityHelper.isNetworkConnected()) {
-                        viewModel.playEpisodeFromList(podcastEpisode)
-                    }
+                playEpisodeFromList()
+            }
+            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+                playEpisodeFromList()
+            }
+        }
+
+        private fun playEpisodeFromList(){
+            episode?.let { podcastEpisode ->
+                if (connectivityHelper.isNetworkConnected()) {
+                    viewModel.playEpisodeFromList(podcastEpisode)
                 }
             }
         }
@@ -204,6 +212,20 @@ class RecommendedItemsAdapter (
                 disposable?.dispose()
                 holderJob?.cancel()
 
+                // General info
+                textViewEpisodeHeader.text = podcastEpisode.description?.value ?: "-"
+                textViewEpisodeDescription.text = podcastEpisode.title.value
+                textViewEpisodeDate.text = podcastEpisode.dateString
+                buttonDownloadArrow.alpha = 0.3F
+                seekBarCurrentTimeEpisodeProgress.gone
+
+                // Set Duration Time
+                val duration = (podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0).toInt()
+                textViewItemEpisodeTime.goneIfFalse( duration > 0)
+                circleSplit.goneIfFalse(duration > 0)
+                textViewItemEpisodeTime.text = duration.toHrAndMin()
+
+                // Image
                 podcastEpisode.image?.value?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
@@ -222,22 +244,20 @@ class RecommendedItemsAdapter (
                     )
                 }
 
-                textViewEpisodeHeader.text = podcastEpisode.description?.value ?: "-"
-                textViewEpisodeDescription.text = podcastEpisode.title.value
-                textViewEpisodeDate.text = podcastEpisode.dateString
-
-                cardViewDownloadWrapper.gone
-
-
                 imageViewItemRowEpisodeType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, podcastEpisode.getIconType())
                 )
 
-                root.setBackgroundColor(
-                    root.context.getColor(
-                        if (podcastEpisode.playing) R.color.semiTransparentPrimaryBlue else R.color.headerBG
-                    )
-                )
+                //Playing State
+                if (podcastEpisode.playing) {
+                    buttonPauseEpisode.visible
+                    buttonPlayEpisode.invisible
+                } else {
+                    buttonPauseEpisode.invisible
+                    buttonPlayEpisode.visible
+                }
+
+                //Navigation
                 buttonAdditionalOptions.setOnClickListener {
                     viewModel.navigateToEpisodeDetail(
                         podcastEpisode.titleToShow,
@@ -247,13 +267,6 @@ class RecommendedItemsAdapter (
                         podcastEpisode.dateString,
                         ""
                     )
-                }
-                if (podcastEpisode.playing) {
-                    buttonPauseEpisode.visible
-                    buttonPlayEpisode.invisible
-                } else {
-                    buttonPauseEpisode.invisible
-                    buttonPlayEpisode.visible
                 }
             }
         }
@@ -285,4 +298,14 @@ inline fun PodcastEpisode.getIconType(): Int {
         return R.drawable.ic_youtube_type
     }
     return R.drawable.ic_podcast_type
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
 }
