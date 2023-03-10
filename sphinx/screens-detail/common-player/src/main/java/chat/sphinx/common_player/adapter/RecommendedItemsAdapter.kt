@@ -224,6 +224,8 @@ class RecommendedItemsAdapter (
 
                 textViewEpisodeHeader.text = podcastEpisode.description?.value ?: "-"
                 textViewEpisodeDescription.text = podcastEpisode.title.value
+                textViewEpisodeDate.text = podcastEpisode.dateString
+
                 cardViewDownloadWrapper.gone
 
 
