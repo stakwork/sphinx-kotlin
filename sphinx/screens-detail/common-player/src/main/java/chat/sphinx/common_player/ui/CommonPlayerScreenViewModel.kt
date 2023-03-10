@@ -465,6 +465,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
+        feedItemId: FeedId?
     ){
         viewModelScope.launch(mainImmediate) {
             navigator.toEpisodeDetail(
@@ -473,7 +474,8 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 episodeTypeImage,
                 episodeTypeText,
                 episodeDate,
-                episodeDuration
+                episodeDuration,
+                feedItemId
             )
         }
     }

@@ -231,17 +231,6 @@ internal class PodcastEpisodesListAdapter(
                     textViewItemEpisodeTime.text = duration.toHrAndMin()
                 }
 
-                buttonAdditionalOptions.setOnClickListener {
-                    viewModel.navigateToEpisodeDetail(
-                        podcastEpisode.titleToShow,
-                        podcastEpisode.imageUrlToShow?.value ?: "",
-                        R.drawable.ic_podcast_type,
-                        "Podcast",
-                        podcastEpisode.dateString,
-                        duration.toHrAndMin()
-                    )
-                }
-
                 //Playing State
                 if (podcastEpisode.playing) {
                     buttonPauseEpisode.visible
@@ -289,7 +278,6 @@ internal class PodcastEpisodesListAdapter(
                     buttonStop.visible
                 }
 
-                //Navigation
                 buttonDownloadArrow.setOnClickListener {
                     viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -298,6 +286,19 @@ internal class PodcastEpisodesListAdapter(
                         }
                     }
                     notifyItemChanged(position)
+                }
+
+                //Navigation
+                buttonAdditionalOptions.setOnClickListener {
+                    viewModel.navigateToEpisodeDetail(
+                        podcastEpisode.titleToShow,
+                        podcastEpisode.imageUrlToShow?.value ?: "",
+                        R.drawable.ic_podcast_type,
+                        "Podcast",
+                        podcastEpisode.dateString,
+                        duration.toHrAndMin(),
+                        podcastEpisode.id
+                    )
                 }
 
 

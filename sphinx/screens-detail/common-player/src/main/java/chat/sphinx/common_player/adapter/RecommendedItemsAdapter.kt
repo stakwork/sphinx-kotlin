@@ -265,7 +265,8 @@ class RecommendedItemsAdapter (
                         R.drawable.ic_podcast_type,
                         getString(R.string.podcast),
                         podcastEpisode.dateString,
-                        ""
+                        "",
+                        null
                     )
                 }
             }

@@ -295,6 +295,7 @@ internal open class VideoFeedScreenViewModel(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
+        feedItemId: FeedId?
     ){
         viewModelScope.launch(mainImmediate) {
             navigator.toEpisodeDetail(
@@ -303,7 +304,8 @@ internal open class VideoFeedScreenViewModel(
                 episodeTypeImage,
                 episodeTypeText,
                 episodeDate,
-                episodeDuration
+                episodeDuration,
+                feedItemId
             )
         }
     }

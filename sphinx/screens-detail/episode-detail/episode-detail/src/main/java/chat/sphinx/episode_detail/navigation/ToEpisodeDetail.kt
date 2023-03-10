@@ -6,6 +6,7 @@ import chat.sphinx.detail_resources.DetailNavOptions
 import chat.sphinx.episode_detail.R
 import chat.sphinx.episode_detail.ui.EpisodeDetailFragment
 import chat.sphinx.episode_detail.ui.EpisodeDetailFragmentArgs
+import chat.sphinx.wrapper_common.feed.FeedId
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToEpisodeDetail(
@@ -15,22 +16,24 @@ class ToEpisodeDetail(
     private val episodeTypeText: String,
     private val episodeDate: String,
     private val episodeDuration: String,
+    private val feedItemId: FeedId?,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ): NavigationRequest<NavController>() {
-
-    private val args = EpisodeDetailFragmentArgs.Builder(
-        header,
-        image,
-        episodeTypeImage,
-        episodeTypeText,
-        episodeDate,
-        episodeDuration
-    ).build().toBundle()
-
     override fun navigate(controller: NavController) {
+
+        val args = EpisodeDetailFragmentArgs.Builder(
+            header,
+            image,
+            episodeTypeImage,
+            episodeTypeText,
+            episodeDate,
+            episodeDuration,
+        )
+        args.argFeedId = feedItemId?.value
+
         controller.navigate(
             R.id.episode_detail_nav_graph,
-            args,
+            args.build().toBundle(),
             options
         )
     }

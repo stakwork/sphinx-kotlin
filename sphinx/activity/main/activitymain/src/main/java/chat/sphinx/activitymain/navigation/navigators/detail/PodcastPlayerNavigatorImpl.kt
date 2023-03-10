@@ -3,6 +3,7 @@ package chat.sphinx.activitymain.navigation.navigators.detail
 import chat.sphinx.activitymain.navigation.drivers.DetailNavigationDriver
 import chat.sphinx.episode_detail.navigation.ToEpisodeDetail
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
+import chat.sphinx.wrapper_common.feed.FeedId
 import javax.inject.Inject
 
 internal class PodcastPlayerNavigatorImpl  @Inject constructor (
@@ -18,6 +19,7 @@ internal class PodcastPlayerNavigatorImpl  @Inject constructor (
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
+        feedItemId: FeedId?
     ) {
         (navigationDriver as DetailNavigationDriver).submitNavigationRequest(
             ToEpisodeDetail(
@@ -26,7 +28,8 @@ internal class PodcastPlayerNavigatorImpl  @Inject constructor (
                 episodeTypeImage,
                 episodeTypeText,
                 episodeDate,
-                episodeDuration
+                episodeDuration,
+                feedItemId
         ))
     }
 }

@@ -230,7 +230,8 @@ internal class VideoFeedItemsAdapter (
                         R.drawable.ic_youtube_type,
                         getString(R.string.youtube),
                         f.datePublished?.hhmmElseDate() ?: "",
-                        f.duration?.value?.toInt().toString()
+                        f.duration?.value?.toInt().toString(),
+                        null
                     )
                 }
 

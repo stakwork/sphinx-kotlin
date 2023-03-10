@@ -23,6 +23,7 @@ abstract class CommonPlayerNavigator(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
+        feedItemId: FeedId?
     )
 
     abstract suspend fun closeDetailScreen()
