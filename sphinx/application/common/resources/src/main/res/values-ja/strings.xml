@@ -62,6 +62,7 @@
     <string name="episode_detail_close">CLOSE</string>
     <string name="episode_detail_clipboard">Link copied to clipboard</string>
     <string name="episode_detail_share_link">Share episode link</string>
+    <string name="episode_detail_upplayed">Mark as Unplayed</string>
     <string name="time_left">%s left</string>
 
 

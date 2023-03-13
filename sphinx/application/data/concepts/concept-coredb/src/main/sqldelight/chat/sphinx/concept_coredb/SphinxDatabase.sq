@@ -1490,6 +1490,8 @@ CREATE TABLE contentEpisodeStatusDbo(
     feed_id                         TEXT            AS FeedId NOT NULL,
     duration                        INTEGER         AS FeedItemDuration NOT NULL,
     current_time                    INTEGER         AS FeedItemDuration NOT NULL,
+    played                          INTEGER         AS Boolean DEFAULT NULL,
+
     PRIMARY KEY (item_id, feed_id)
 );
 
@@ -1503,15 +1505,22 @@ contentEpisodeStatusUpsert {
            item_id,
            feed_id,
            duration,
-           current_time
+           current_time,
+           played
     )
     VALUES (
            :item_id,
            :feed_id,
            :duration,
-           :current_time
+           :current_time,
+           :played
     );
 }
+
+contentEpisodeStatusUpdatePlayed:
+UPDATE contentEpisodeStatusDbo
+SET played = :played
+WHERE item_id = :item_id;
 
 contentEpisodeStatusGetAll:
 SELECT *

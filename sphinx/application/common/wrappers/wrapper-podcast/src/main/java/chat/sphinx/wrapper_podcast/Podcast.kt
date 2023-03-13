@@ -136,6 +136,18 @@ data class Podcast(
             }
         }
 
+    private var played: Boolean?
+        get() {
+          return playingEpisode?.getUpdatedContentEpisodeStatus()?.played
+        }
+        set(value) {
+            value?.let {
+                playingEpisode?.contentEpisodeStatus = playingEpisode?.getUpdatedContentEpisodeStatus()?.copy(
+                    played = it
+                )
+            }
+        }
+
     @Volatile
     var playingEpisode: PodcastEpisode? = null
         get() {
@@ -224,7 +236,8 @@ data class Podcast(
             this.id,
             getCurrentEpisode().id,
             FeedItemDuration(0),
-            FeedItemDuration(0)
+            FeedItemDuration(0),
+            null
         )
 
     fun getSpeedString(): String {
@@ -390,6 +403,7 @@ data class Podcast(
         this.episodeId = nextEpisode.id.value
         this.episodeDurationMilliseconds = nextEpisode.durationMilliseconds ?: 0
         this.timeMilliSeconds = 0
+        this.played = true
 
         getCurrentEpisodeDuration(durationRetrieverHandle)
     }

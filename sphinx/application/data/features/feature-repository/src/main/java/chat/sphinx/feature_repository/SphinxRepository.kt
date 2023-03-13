@@ -6695,7 +6695,8 @@ abstract class SphinxRepository(
         itemId: FeedId,
         duration: FeedItemDuration,
         currentTime: FeedItemDuration,
-        shouldSync: Boolean
+        shouldSync: Boolean,
+        played: Boolean?
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6709,7 +6710,9 @@ abstract class SphinxRepository(
                     feed_id = feedId,
                     item_id = itemId,
                     duration = duration,
-                    current_time = currentTime
+                    current_time = currentTime,
+                    played = played
+
                 )
             }
 
@@ -6723,7 +6726,8 @@ abstract class SphinxRepository(
         itemId: FeedId,
         feedId: FeedId,
         duration: FeedItemDuration,
-        queries: SphinxDatabaseQueries
+        queries: SphinxDatabaseQueries,
+        played: Boolean? = null
     ) {
         applicationScope.launch(io) {
             contentEpisodeLock.withLock {
@@ -6732,6 +6736,7 @@ abstract class SphinxRepository(
                     FeedItemDuration(0),
                     itemId,
                     feedId,
+                    played
                 )
             }
         }
@@ -6997,7 +7002,8 @@ abstract class SphinxRepository(
                             FeedItemDuration(status.duration),
                             FeedItemDuration(status.current_time),
                             FeedId(episodeId),
-                            FeedId(contentFeedStatus.feed_id)
+                            FeedId(contentFeedStatus.feed_id),
+                            null
                         )
                     }
                 }

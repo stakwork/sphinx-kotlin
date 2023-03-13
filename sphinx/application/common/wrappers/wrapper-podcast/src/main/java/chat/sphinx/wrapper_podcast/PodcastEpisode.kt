@@ -65,7 +65,8 @@ data class PodcastEpisode(
             podcastId,
             this.id,
             FeedItemDuration(0),
-            FeedItemDuration((clipStartTime?.toLong() ?: 0) / 1000)
+            FeedItemDuration((clipStartTime?.toLong() ?: 0) / 1000),
+            null
         )
         return contentEpisodeStatus!!
     }
