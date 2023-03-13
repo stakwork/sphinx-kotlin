@@ -10,6 +10,11 @@
         android:name="chat.sphinx.episode_detail.ui.EpisodeDetailFragment"
         tools:layout="@layout/fragment_episode_detail">
         <argument
+            android:name="argFeedId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
+        <argument
             android:name="argHeader"
             app:argType="string" />
         <argument
@@ -28,10 +33,8 @@
             android:name="argEpisodeDuration"
             app:argType="string" />
         <argument
-            android:name="argFeedId"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null"/>
+            android:name="argDownloaded"
+            app:argType="boolean"/>
 
     </fragment>
 

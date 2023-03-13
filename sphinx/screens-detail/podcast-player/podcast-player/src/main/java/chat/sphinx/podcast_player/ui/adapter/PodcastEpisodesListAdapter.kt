@@ -77,7 +77,7 @@ internal class PodcastEpisodesListAdapter(
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                val same: Boolean = old.playing == new.playing
+                val same: Boolean = old.playing == new.playing && old.downloaded == new.downloaded
 
                 if (sameList) {
                     sameList = same
@@ -259,7 +259,7 @@ internal class PodcastEpisodesListAdapter(
                 root.alpha = if (episodeAvailable) 1.0f else 0.5f
 
                 if (podcastEpisode.downloaded) {
-                    textViewDownloadedEpisode.visible
+                    imageDownloadedEpisodeArrow.visible
                     buttonDownloadArrow.gone
                     progressBarEpisodeDownload.gone
                     buttonStop.gone
@@ -269,6 +269,8 @@ internal class PodcastEpisodesListAdapter(
                     buttonDownloadArrow.visible
                     buttonStop.gone
                     progressBarEpisodeDownload.gone
+                    imageDownloadedEpisodeArrow.gone
+
                 }
 
                 val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id) && !podcastEpisode.downloaded
@@ -276,7 +278,7 @@ internal class PodcastEpisodesListAdapter(
                 if (isFeedItemDownloadInProgress) {
                     buttonDownloadArrow.gone
                     progressBarEpisodeDownload.visible
-                    textViewDownloadedEpisode.gone
+                    imageDownloadedEpisodeArrow.gone
                     buttonStop.visible
                 }
 
@@ -284,6 +286,7 @@ internal class PodcastEpisodesListAdapter(
                     viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             podcastEpisode.localFile = downloadedFile
+                            // si esto no es null hay que hacer update
                             notifyItemChanged(position)
                         }
                     }
@@ -293,13 +296,14 @@ internal class PodcastEpisodesListAdapter(
                 //Navigation
                 buttonAdditionalOptions.setOnClickListener {
                     viewModel.navigateToEpisodeDetail(
+                        podcastEpisode.id,
                         podcastEpisode.titleToShow,
                         podcastEpisode.imageUrlToShow?.value ?: "",
                         R.drawable.ic_podcast_type,
                         "Podcast",
                         podcastEpisode.dateString,
                         duration.toHrAndMin(),
-                        podcastEpisode.id
+                        podcastEpisode.downloaded
                     )
                 }
 

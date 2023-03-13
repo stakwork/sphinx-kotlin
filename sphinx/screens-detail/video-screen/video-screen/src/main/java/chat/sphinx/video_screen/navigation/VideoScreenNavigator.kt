@@ -12,13 +12,14 @@ abstract class VideoScreenNavigator(
     abstract suspend fun closeDetailScreen()
 
     abstract suspend fun toEpisodeDetail(
+        feedItemId: FeedId?,
         header: String,
         image: String,
         episodeTypeImage: Int,
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        feedItemId: FeedId?
+        downloaded: Boolean?
     )
 
     suspend fun popBackStack() {

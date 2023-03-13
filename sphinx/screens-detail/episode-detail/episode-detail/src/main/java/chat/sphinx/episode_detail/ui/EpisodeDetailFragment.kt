@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewModelScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
@@ -18,6 +19,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,12 +45,15 @@ internal class EpisodeDetailFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var connectivityHelper: ConnectivityHelper
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.layoutConstraintCloseContainer.setOnClickListener {
-            viewModel.popBackStack()
-        }
+        setClickListeners()
+
     }
 
     override suspend fun onSideEffectCollect(sideEffect: EpisodeDetailSideEffect) {
@@ -62,13 +67,7 @@ internal class EpisodeDetailFragment: SideEffectFragment<
                 binding.apply {
                     when(viewState.episodeDetail.episodeTypeText) {
                         PODCAST_TYPE -> {
-                            if (viewState.episodeDetail.feedId == null) {
-                                layoutConstraintDownloadRow.gone
-                                layoutConstraintCheckMarkRow.gone
-                            }
-                            else {
-
-                            }
+                            setDownloadState(viewState)
                         }
                         YOUTUBE_TYPE -> {
                             layoutConstraintDownloadRow.gone
@@ -102,6 +101,46 @@ internal class EpisodeDetailFragment: SideEffectFragment<
                         .build()
                 )
             }
+        }
+    }
+
+    private fun setDownloadState(viewState: EpisodeDetailViewState.ShowEpisode) {
+        binding.apply {
+            if (viewState.episodeDetail.isDownloadInProgress == true) {
+                buttonDownloadArrow.gone
+                imageDownloadedEpisodeArrow.gone
+                progressBarEpisodeDownload.visible
+                buttonStop.visible
+            } else {
+                if (viewState.episodeDetail.downloaded == true) {
+                    buttonDownloadArrow.gone
+                    imageDownloadedEpisodeArrow.visible
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_erase)
+
+                    binding.layoutConstraintDownloadRow.setOnClickListener {
+                        viewModel.deleteDownloadedMedia()
+                    }
+                }
+                else {
+                    buttonDownloadArrow.visible
+                    imageDownloadedEpisodeArrow.gone
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_download)
+
+                    binding.layoutConstraintDownloadRow.setOnClickListener {
+                        viewModel.downloadMedia()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setClickListeners() {
+        binding.layoutConstraintCloseContainer.setOnClickListener {
+            viewModel.popBackStack()
         }
     }
 

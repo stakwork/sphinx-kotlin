@@ -29,7 +29,6 @@
             android:id="@+id/image_view_episode_detail_image"
             android:layout_width="@dimen/custom_boost_width"
             android:layout_height="@dimen/custom_boost_width"
-            android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@drawable/ic_podcast_placeholder" />
@@ -183,7 +182,7 @@
                 android:layout_width="@dimen/default_double_layout_margin"
                 android:layout_height="@dimen/default_double_layout_margin"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/headerBG"
+                app:cardBackgroundColor="@color/bodyTransparent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -217,22 +216,13 @@
                     android:layout_gravity="center"
                     android:src="@drawable/ic_download_arrow" />
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_view_downloaded_episode"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:fontFamily="@font/material_icons_regular"
-                    android:gravity="center"
-                    android:text="@string/material_icon_name_cloud_download"
-                    android:textColor="@color/primaryGreen"
-                    android:textSize="20sp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/image_downloaded_episode_arrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="visible"
+                    android:src="@drawable/ic_downloaded_arrow" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/text_view_delete_episode"

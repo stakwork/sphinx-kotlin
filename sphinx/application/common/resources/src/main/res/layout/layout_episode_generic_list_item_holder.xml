@@ -237,26 +237,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:visibility="visible"
-                android:src="@drawable/ic_download_arrow" />
+                android:src="@drawable/ic_download_arrow"
+                android:visibility="visible" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_downloaded_episode"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fontFamily="@font/material_icons_regular"
-                android:gravity="center"
-                android:text="@string/material_icon_name_cloud_download"
-                android:textColor="@color/primaryGreen"
-                android:textSize="20sp"
-                android:clickable="true"
-                android:focusable="true"
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_downloaded_episode_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:visibility="visible"/>
+                android:src="@drawable/ic_downloaded_arrow" />
+
+
 
         </androidx.cardview.widget.CardView>
 

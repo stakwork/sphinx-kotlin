@@ -27,13 +27,14 @@ abstract class PodcastPlayerNavigator(
     }
 
     abstract suspend fun toEpisodeDetail(
+        feedItemId: FeedId?,
         header: String,
         image: String,
         episodeTypeImage: Int,
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        feedItemId: FeedId?
+        downloaded: Boolean?
     )
 
     abstract suspend fun closeDetailScreen()

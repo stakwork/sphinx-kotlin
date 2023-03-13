@@ -592,23 +592,25 @@ internal class PodcastPlayerViewModel @Inject constructor(
     }
 
     fun navigateToEpisodeDetail(
+        feedItemId: FeedId?,
         header: String,
         image: String,
         episodeTypeImage: Int,
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        feedItemId: FeedId?
+        downloaded: Boolean?
     ){
         viewModelScope.launch(mainImmediate) {
             navigator.toEpisodeDetail(
+                feedItemId,
                 header,
                 image,
                 episodeTypeImage,
                 episodeTypeText,
                 episodeDate,
                 episodeDuration,
-                feedItemId
+                downloaded
             )
         }
     }

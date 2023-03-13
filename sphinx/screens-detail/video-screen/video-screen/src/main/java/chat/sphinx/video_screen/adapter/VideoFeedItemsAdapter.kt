@@ -225,6 +225,7 @@ internal class VideoFeedItemsAdapter (
                 //Navigation
                 buttonAdditionalOptions.setOnClickListener {
                     viewModel.navigateToEpisodeDetail(
+                        f.id,
                         f.titleToShow,
                         f.thumbnailUrlToShow?.value ?: "",
                         R.drawable.ic_youtube_type,

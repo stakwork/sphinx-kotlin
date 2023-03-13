@@ -262,6 +262,7 @@ class RecommendedItemsAdapter (
                 //Navigation
                 buttonAdditionalOptions.setOnClickListener {
                     viewModel.navigateToEpisodeDetail(
+                        podcastEpisode.id,
                         podcastEpisode.titleToShow,
                         podcastEpisode.imageUrlToShow?.value ?: "",
                         R.drawable.ic_podcast_type,
