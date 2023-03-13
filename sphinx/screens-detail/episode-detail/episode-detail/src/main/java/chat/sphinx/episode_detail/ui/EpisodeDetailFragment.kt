@@ -53,10 +53,7 @@ internal class EpisodeDetailFragment: SideEffectFragment<
         super.onViewCreated(view, savedInstanceState)
 
         setClickListeners()
-
     }
-
-
 
     override suspend fun onViewStateFlowCollect(viewState: EpisodeDetailViewState) {
         when(viewState) {
@@ -75,7 +72,6 @@ internal class EpisodeDetailFragment: SideEffectFragment<
                             textViewEpisodeDuration.gone
                         }
                     }
-
                 }
             }
         }
