@@ -269,7 +269,8 @@ class RecommendedItemsAdapter (
                         getString(R.string.podcast),
                         podcastEpisode.dateString,
                         "",
-                        null
+                        null,
+                        podcastEpisode.link
                     )
                 }
             }

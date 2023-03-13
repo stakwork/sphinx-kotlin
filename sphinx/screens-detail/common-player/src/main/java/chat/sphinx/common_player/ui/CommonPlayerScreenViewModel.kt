@@ -22,6 +22,7 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.*
@@ -466,7 +467,8 @@ class CommonPlayerScreenViewModel @Inject constructor(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        downloaded: Boolean?
+        downloaded: Boolean?,
+        link: FeedUrl?
     ){
         viewModelScope.launch(mainImmediate) {
             navigator.toEpisodeDetail(
@@ -477,7 +479,8 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 episodeTypeText,
                 episodeDate,
                 episodeDuration,
-                downloaded
+                downloaded,
+                link
             )
         }
     }

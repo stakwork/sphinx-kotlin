@@ -296,7 +296,8 @@ internal open class VideoFeedScreenViewModel(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        downloaded: Boolean?
+        downloaded: Boolean?,
+        link: FeedUrl?,
     ){
         viewModelScope.launch(mainImmediate) {
             navigator.toEpisodeDetail(
@@ -307,7 +308,8 @@ internal open class VideoFeedScreenViewModel(
                 episodeTypeText,
                 episodeDate,
                 episodeDuration,
-                downloaded
+                downloaded,
+                link
             )
         }
     }

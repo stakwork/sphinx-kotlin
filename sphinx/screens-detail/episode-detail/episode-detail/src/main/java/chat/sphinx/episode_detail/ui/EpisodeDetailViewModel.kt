@@ -67,7 +67,8 @@ internal class EpisodeDetailViewModel @Inject constructor(
                 args.argEpisodeDate,
                 args.argEpisodeDuration,
                 args.argDownloaded,
-                isFeedItemDownloadInProgress(args.argFeedId?.toFeedId())
+                isFeedItemDownloadInProgress(args.argFeedId?.toFeedId()),
+                args.argLink
             )
         )
     }

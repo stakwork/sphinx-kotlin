@@ -24,7 +24,8 @@ abstract class CommonPlayerNavigator(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        downloaded: Boolean?
+        downloaded: Boolean?,
+        link: FeedUrl?
     )
 
     abstract suspend fun closeDetailScreen()

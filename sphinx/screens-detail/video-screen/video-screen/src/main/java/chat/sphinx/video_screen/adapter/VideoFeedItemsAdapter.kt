@@ -232,7 +232,8 @@ internal class VideoFeedItemsAdapter (
                         getString(R.string.youtube),
                         f.datePublished?.hhmmElseDate() ?: "",
                         f.duration?.value?.toInt().toString(),
-                        null
+                        null,
+                        f.link
                     )
                 }
 

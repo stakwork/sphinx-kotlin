@@ -7,6 +7,7 @@ import chat.sphinx.episode_detail.R
 import chat.sphinx.episode_detail.ui.EpisodeDetailFragment
 import chat.sphinx.episode_detail.ui.EpisodeDetailFragmentArgs
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToEpisodeDetail(
@@ -18,6 +19,7 @@ class ToEpisodeDetail(
     private val episodeDate: String,
     private val episodeDuration: String,
     private val downloaded: Boolean?,
+    private val link: FeedUrl?,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
@@ -32,6 +34,7 @@ class ToEpisodeDetail(
             downloaded ?: false
         )
         args.argFeedId = feedItemId?.value
+        args.argLink = link?.value
 
         controller.navigate(
             R.id.episode_detail_nav_graph,

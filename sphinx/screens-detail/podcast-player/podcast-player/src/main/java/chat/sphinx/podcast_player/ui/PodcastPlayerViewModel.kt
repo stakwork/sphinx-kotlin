@@ -599,7 +599,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        downloaded: Boolean?
+        downloaded: Boolean?,
+        link: FeedUrl?
     ){
         viewModelScope.launch(mainImmediate) {
             navigator.toEpisodeDetail(
@@ -610,7 +611,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 episodeTypeText,
                 episodeDate,
                 episodeDuration,
-                downloaded
+                downloaded,
+                link
             )
         }
     }

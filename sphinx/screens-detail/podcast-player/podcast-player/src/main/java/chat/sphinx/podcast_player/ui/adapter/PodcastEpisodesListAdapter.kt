@@ -286,7 +286,6 @@ internal class PodcastEpisodesListAdapter(
                     viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             podcastEpisode.localFile = downloadedFile
-                            // si esto no es null hay que hacer update
                             notifyItemChanged(position)
                         }
                     }
@@ -303,20 +302,10 @@ internal class PodcastEpisodesListAdapter(
                         "Podcast",
                         podcastEpisode.dateString,
                         duration.toHrAndMin(),
-                        podcastEpisode.downloaded
+                        podcastEpisode.downloaded,
+                        podcastEpisode.link
                     )
                 }
-
-
-//                swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
-//                layoutConstraintDeleteButtonContainer.setOnClickListener {
-//                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                        viewModel.deleteDownloadedMedia(podcastEpisode)
-//                        notifyItemChanged(position)
-//                        swipeRevealLayoutPodcastFeedItem.close(true)
-//                    }
-//                }
-
             }
         }
     }

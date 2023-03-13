@@ -5,6 +5,7 @@ import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.episode_detail.navigation.ToEpisodeDetail
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import javax.inject.Inject
 
 internal class VideoScreenNavigatorImpl @Inject constructor(
@@ -23,7 +24,8 @@ internal class VideoScreenNavigatorImpl @Inject constructor(
         episodeTypeText: String,
         episodeDate: String,
         episodeDuration: String,
-        downloaded: Boolean?
+        downloaded: Boolean?,
+        link: FeedUrl?
     ) {
         (navigationDriver as DetailNavigationDriver).submitNavigationRequest(
             ToEpisodeDetail(
@@ -34,7 +36,8 @@ internal class VideoScreenNavigatorImpl @Inject constructor(
                 episodeTypeText,
                 episodeDate,
                 episodeDuration,
-                downloaded
+                downloaded,
+                link
         ))
     }
 }
