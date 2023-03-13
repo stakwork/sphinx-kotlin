@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
@@ -20,10 +21,7 @@ import chat.sphinx.wrapper_feed.toFeedTitle
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
-import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.android_feature_viewmodel.*
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -141,6 +139,18 @@ internal class EpisodeDetailViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    fun shareCodeThroughTextIntent(): Intent {
+        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, args.argLink)
+        }
+
+        return Intent.createChooser(
+            sharingIntent,
+            app.getString(R.string.episode_detail_share_link)
+        )
     }
 
 

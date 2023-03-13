@@ -61,6 +61,7 @@
     <string name="episode_detail_played">Marcar como escuchado</string>
     <string name="episode_detail_close">CERRAR</string>
     <string name="episode_detail_clipboard">Link copiado en portapapeles</string>
+    <string name="episode_detail_share_link">Compartir link del episodio</string>
     <string name="time_left">Faltan %s</string>
 
 

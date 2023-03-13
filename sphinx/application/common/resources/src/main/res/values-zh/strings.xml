@@ -60,6 +60,7 @@
     <string name="episode_detail_played">Mark as Played</string>
     <string name="episode_detail_close">CLOSE</string>
     <string name="episode_detail_clipboard">Link copied to clipboard</string>
+    <string name="episode_detail_share_link">Share episode link</string>
     <string name="time_left">%s left</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>

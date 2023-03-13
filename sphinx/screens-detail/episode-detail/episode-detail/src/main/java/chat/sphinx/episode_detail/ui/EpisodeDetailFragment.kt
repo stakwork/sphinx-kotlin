@@ -143,6 +143,9 @@ internal class EpisodeDetailFragment: SideEffectFragment<
         binding.layoutConstraintCopyLinkRow.setOnClickListener {
             viewModel.copyCodeToClipboard()
         }
+        binding.layoutConstraintShareRow.setOnClickListener {
+            binding.root.context.startActivity(viewModel.shareCodeThroughTextIntent())
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: EpisodeDetailSideEffect) {
