@@ -56,8 +56,7 @@ internal class EpisodeDetailFragment: SideEffectFragment<
 
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: EpisodeDetailSideEffect) {
-    }
+
 
     override suspend fun onViewStateFlowCollect(viewState: EpisodeDetailViewState) {
         when(viewState) {
@@ -97,7 +96,6 @@ internal class EpisodeDetailFragment: SideEffectFragment<
                     viewState.episodeDetail.image,
                     ImageLoaderOptions.Builder()
                         .placeholderResId(R.drawable.ic_podcast_placeholder)
-                        .transformation(Transformation.CircleCrop)
                         .build()
                 )
             }
@@ -142,8 +140,14 @@ internal class EpisodeDetailFragment: SideEffectFragment<
         binding.layoutConstraintCloseContainer.setOnClickListener {
             viewModel.popBackStack()
         }
+        binding.layoutConstraintCopyLinkRow.setOnClickListener {
+            viewModel.copyCodeToClipboard()
+        }
     }
 
+    override suspend fun onSideEffectCollect(sideEffect: EpisodeDetailSideEffect) {
+        sideEffect.execute(binding.root.context)
+    }
 
 
 }

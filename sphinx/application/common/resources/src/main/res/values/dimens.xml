@@ -99,6 +99,7 @@
     <dimen name="default_feed_image_play_text_size">40sp</dimen>
     <dimen name="default_radius">14dp</dimen>
     <dimen name="episode_image_radius">6dp</dimen>
+    <dimen name="episode_detail_image_radius">10dp</dimen>
     <dimen name="episode_type_radius">3dp</dimen>
 
     <dimen name="default_feed_watch_image_width">260dp</dimen>

@@ -145,6 +145,7 @@
     <string name="episode_detail_copy_link">Copy Link</string>
     <string name="episode_detail_played">Mark as Played</string>
     <string name="episode_detail_close">CLOSE</string>
+    <string name="episode_detail_clipboard">Link copied to clipboard</string>
     <string name="time_left">%s left</string>
 
     <string name="youtube" translatable="false">Youtube</string>

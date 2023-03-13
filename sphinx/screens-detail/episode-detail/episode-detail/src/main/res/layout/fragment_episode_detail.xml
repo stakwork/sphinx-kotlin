@@ -19,9 +19,9 @@
         android:id="@+id/card_view_image_episode_wrap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="@dimen/episode_image_radius"
         android:layout_marginTop="@dimen/player_bar_height"
         app:layout_constraintEnd_toEndOf="parent"
+        app:cardCornerRadius="@dimen/episode_detail_image_radius"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -29,6 +29,7 @@
             android:id="@+id/image_view_episode_detail_image"
             android:layout_width="@dimen/custom_boost_width"
             android:layout_height="@dimen/custom_boost_width"
+            android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@drawable/ic_podcast_placeholder" />

@@ -1,11 +1,15 @@
 package chat.sphinx.episode_detail.ui
 
+import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.episode_detail.R
 import chat.sphinx.episode_detail.model.EpisodeDetail
 import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -18,6 +22,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,6 +38,7 @@ import javax.inject.Inject
 internal class EpisodeDetailViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
+    private val app: Application,
     private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
     val navigator: EpisodeDetailNavigator,
@@ -123,6 +129,20 @@ internal class EpisodeDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun copyCodeToClipboard() {
+        (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+            val clipData = ClipData.newPlainText("text", args.argLink)
+            manager.setPrimaryClip(clipData)
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    EpisodeDetailSideEffect(app.getString(R.string.episode_detail_clipboard))
+                )
+            }
+        }
+    }
+
 
     fun popBackStack(){
         viewModelScope.launch(mainImmediate) {
