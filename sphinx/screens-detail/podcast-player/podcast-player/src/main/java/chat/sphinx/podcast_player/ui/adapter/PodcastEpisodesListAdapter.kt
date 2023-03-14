@@ -189,6 +189,24 @@ internal class PodcastEpisodesListAdapter(
             binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
                 playEpisodeFromList()
             }
+
+            binding.buttonDownloadArrow.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.downloadMedia(nnEpisode) { downloadedFile ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            nnEpisode.localFile = downloadedFile
+                            notifyItemChanged(position)
+                        }
+                    }
+                    notifyItemChanged(position)
+                }
+            }
+
+            binding.buttonAdditionalOptions.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.showOptionsFor(nnEpisode)
+                }
+            }
         }
 
         private fun playEpisodeFromList(){
@@ -277,7 +295,6 @@ internal class PodcastEpisodesListAdapter(
                     buttonStop.gone
                     progressBarEpisodeDownload.gone
                     imageDownloadedEpisodeArrow.gone
-
                 }
 
                 val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id) && !podcastEpisode.downloaded
@@ -287,31 +304,6 @@ internal class PodcastEpisodesListAdapter(
                     progressBarEpisodeDownload.visible
                     imageDownloadedEpisodeArrow.gone
                     buttonStop.visible
-                }
-
-                buttonDownloadArrow.setOnClickListener {
-                    viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            podcastEpisode.localFile = downloadedFile
-                            notifyItemChanged(position)
-                        }
-                    }
-                    notifyItemChanged(position)
-                }
-
-                //Navigation
-                buttonAdditionalOptions.setOnClickListener {
-                    viewModel.navigateToEpisodeDetail(
-                        podcastEpisode.id,
-                        podcastEpisode.titleToShow,
-                        podcastEpisode.imageUrlToShow?.value ?: "",
-                        R.drawable.ic_podcast_type,
-                        "Podcast",
-                        podcastEpisode.dateString,
-                        duration.toHrAndMin(),
-                        podcastEpisode.downloaded,
-                        podcastEpisode.link
-                    )
                 }
             }
         }

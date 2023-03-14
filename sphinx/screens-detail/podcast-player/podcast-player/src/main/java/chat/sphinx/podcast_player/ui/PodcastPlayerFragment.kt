@@ -9,9 +9,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
@@ -28,6 +30,7 @@ import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
 import chat.sphinx.podcast_player.ui.viewstates.BoostAnimationViewState
+import chat.sphinx.podcast_player.ui.viewstates.FeedItemDetailsViewState
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -45,6 +48,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -86,6 +90,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+
         binding.apply {
             textViewDismissButton.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
@@ -103,10 +109,41 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                     }
                 }
             }
+
+            includeLayoutFeedItem.includeLayoutFeedItemDetails.textViewClose.setOnClickListener {
+                viewModel.feedItemDetailsViewStateContainer.updateViewState(
+                    FeedItemDetailsViewState.Closed
+                )
+            }
         }
 
         setupBoost()
         setupEpisodes()
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.feedItemDetailsViewStateContainer.value is FeedItemDetailsViewState.Open) {
+                viewModel.feedItemDetailsViewStateContainer.updateViewState(FeedItemDetailsViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
     }
 
     private fun setupBoost() {
@@ -567,6 +604,24 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                             viewState.amount
                         )
                     }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.feedItemDetailsViewStateContainer.collect { viewState ->
+                binding.includeLayoutFeedItem.apply {
+                    when (viewState) {
+                        is FeedItemDetailsViewState.Open -> {
+                            includeLayoutFeedItemDetails.apply {
+                                textViewMainEpisodeTitle.text = viewState.feedItemDetail.header
+                            }
+                        }
+                        else -> {}
+                    }
+
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
                 }
             }
         }

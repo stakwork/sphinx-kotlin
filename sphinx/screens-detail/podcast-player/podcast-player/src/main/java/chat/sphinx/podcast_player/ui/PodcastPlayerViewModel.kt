@@ -25,6 +25,7 @@ import chat.sphinx.podcast_player.coordinator.PodcastPlayerViewModelCoordinator
 import chat.sphinx.podcast_player.navigation.BackType
 import chat.sphinx.podcast_player.navigation.PodcastPlayerNavigator
 import chat.sphinx.podcast_player.ui.viewstates.BoostAnimationViewState
+import chat.sphinx.podcast_player.ui.viewstates.FeedItemDetailsViewState
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.ChatHost
@@ -33,6 +34,8 @@ import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.FeedItemDetail
 import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
@@ -148,6 +151,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
         ViewStateContainer(BoostAnimationViewState.Idle)
+    }
+
+    val feedItemDetailsViewStateContainer: ViewStateContainer<FeedItemDetailsViewState> by lazy {
+        ViewStateContainer(FeedItemDetailsViewState.Closed)
     }
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
@@ -589,6 +596,26 @@ internal class PodcastPlayerViewModel @Inject constructor(
         repositoryMedia.downloadMediaIfApplicable(
             podcastEpisode,
             downloadCompleteCallback
+        )
+    }
+
+    fun showOptionsFor(episode: PodcastEpisode) {
+        feedItemDetailsViewStateContainer.updateViewState(
+            FeedItemDetailsViewState.Open(
+                FeedItemDetail(
+                    episode.id,
+                    episode.titleToShow,
+                    "",
+                    0,
+                    "",
+                    "",
+                    "",
+                    true,
+                    false,
+                    "",
+                    false
+                )
+            )
         )
     }
 

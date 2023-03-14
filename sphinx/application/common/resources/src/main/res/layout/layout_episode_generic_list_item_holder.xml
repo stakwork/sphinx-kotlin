@@ -248,8 +248,6 @@
                 android:visibility="gone"
                 android:src="@drawable/ic_downloaded_arrow" />
 
-
-
         </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatImageView
