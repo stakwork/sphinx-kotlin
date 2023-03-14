@@ -19,7 +19,9 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -64,6 +66,7 @@ internal class EpisodeDetailFragment: SideEffectFragment<
                     when(viewState.episodeDetail.episodeTypeText) {
                         PODCAST_TYPE -> {
                             setDownloadState(viewState)
+                            setPlayedMarkState(viewState)
                         }
                         YOUTUBE_TYPE -> {
                             layoutConstraintDownloadRow.gone
@@ -128,6 +131,23 @@ internal class EpisodeDetailFragment: SideEffectFragment<
                         viewModel.downloadMedia()
                     }
                 }
+            }
+        }
+    }
+
+    private fun setPlayedMarkState(viewState: EpisodeDetailViewState.ShowEpisode) {
+        binding.apply {
+            layoutConstraintCheckMarkRow.setOnClickListener {
+                viewModel.updatePlayedMark(!viewState.episodeDetail.played)
+            }
+            if (viewState.episodeDetail.played) {
+                buttonCheckMarkPlayed.visible
+                buttonCheckMark.invisible
+                textViewCheckMark.text = getString(R.string.episode_detail_upplayed)
+            } else {
+                buttonCheckMarkPlayed.invisible
+                buttonCheckMark.visible
+                textViewCheckMark.text = getString(R.string.episode_detail_played)
             }
         }
     }

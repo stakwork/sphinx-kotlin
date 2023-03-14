@@ -12,5 +12,6 @@ data class EpisodeDetail(
     val episodeDuration: String,
     val downloaded: Boolean?,
     var isDownloadInProgress: Boolean?,
-    val link: String?
+    val link: String?,
+    val played: Boolean
 )

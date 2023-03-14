@@ -6742,6 +6742,33 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun updatePlayedMark(
+        feedItemId: FeedId,
+        played: Boolean
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentEpisodeLock.withLock {
+                queries.contentEpisodeStatusUpdatePlayed(
+                    played,
+                    feedItemId
+                )
+            }
+        }
+    }
+
+    override fun getPlayedMark(feedItemId: FeedId): Flow<Boolean?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contentEpisodeStatusGetPlayedByItemId(feedItemId)
+                .asFlow()
+                .mapToOneOrNull()
+                .map { it?.played }
+                .distinctUntilChanged()
+        )
+    }
+
+
     override fun saveContentFeedStatuses() {
         applicationScope.launch(io) {
 

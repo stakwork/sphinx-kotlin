@@ -1522,6 +1522,12 @@ UPDATE contentEpisodeStatusDbo
 SET played = :played
 WHERE item_id = :item_id;
 
+contentEpisodeStatusGetPlayedByItemId:
+SELECT played
+FROM contentEpisodeStatusDbo
+WHERE item_id = :item_id;
+
+
 contentEpisodeStatusGetAll:
 SELECT *
 FROM contentEpisodeStatusDbo;

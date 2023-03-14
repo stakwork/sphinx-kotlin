@@ -23,10 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.*
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -60,6 +57,13 @@ internal class EpisodeDetailViewModel @Inject constructor(
     private val feedItemIdStateFlow: StateFlow<FeedItem?>
         get() = _feedItemIdStateFlow.asStateFlow()
 
+    private val _playedMarkStateFlow: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(false)
+    }
+
+    private val playedMarkStateFlow: StateFlow<Boolean>
+        get() = _playedMarkStateFlow.asStateFlow()
+
     private val _episodeDetailStateFlow: MutableStateFlow<EpisodeDetail> by lazy {
         MutableStateFlow(
             EpisodeDetail(
@@ -72,7 +76,8 @@ internal class EpisodeDetailViewModel @Inject constructor(
                 args.argEpisodeDuration,
                 args.argDownloaded,
                 isFeedItemDownloadInProgress(args.argFeedId?.toFeedId()),
-                args.argLink
+                args.argLink,
+                _playedMarkStateFlow.value
             )
         )
     }
@@ -80,10 +85,11 @@ internal class EpisodeDetailViewModel @Inject constructor(
     private val episodeDetailStateFlow: StateFlow<EpisodeDetail>
         get() = _episodeDetailStateFlow.asStateFlow()
 
-    init {
-        updateViewState(EpisodeDetailViewState.ShowEpisode(episodeDetailStateFlow.value))
-        getFeedItem(args.argFeedId?.toFeedId())
 
+    init {
+        getFeedItem(args.argFeedId?.toFeedId())
+        getPlayedMark()
+        updateViewState(EpisodeDetailViewState.ShowEpisode(episodeDetailStateFlow.value))
     }
 
     private fun getFeedItem(feedId: FeedId?) {
@@ -94,6 +100,26 @@ internal class EpisodeDetailViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun getPlayedMark() {
+        viewModelScope.launch(mainImmediate) {
+            args.argFeedId?.toFeedId()?.let { itemId ->
+                feedRepository.getPlayedMark(itemId).collect { played ->
+                    _episodeDetailStateFlow.value = _episodeDetailStateFlow.value.copy(
+                        played = played ?: false
+                    )
+                    updateViewState(EpisodeDetailViewState.ShowEpisode(episodeDetailStateFlow.value))
+                }
+            }
+        }
+    }
+
+    fun updatePlayedMark(played: Boolean) {
+        args.argFeedId?.toFeedId()?.let {itemId ->
+            feedRepository.updatePlayedMark(itemId, played)
+        }
+        getPlayedMark()
     }
 
     fun downloadMedia() {
