@@ -88,8 +88,8 @@ interface FeedRepository {
         itemId: FeedId,
         duration: FeedItemDuration,
         currentTime: FeedItemDuration,
-        shouldSync: Boolean = false,
-        played: Boolean? = null
+        played: Boolean = false,
+        shouldSync: Boolean = false
     )
 
     fun restoreContentFeedStatuses(

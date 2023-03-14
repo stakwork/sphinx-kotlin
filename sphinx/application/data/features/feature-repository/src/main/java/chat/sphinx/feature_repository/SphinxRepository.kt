@@ -6695,8 +6695,8 @@ abstract class SphinxRepository(
         itemId: FeedId,
         duration: FeedItemDuration,
         currentTime: FeedItemDuration,
-        shouldSync: Boolean,
-        played: Boolean?
+        played: Boolean,
+        shouldSync: Boolean
     ) {
         applicationScope.launch(io) {
             val queries = coreDB.getSphinxDatabaseQueries()
@@ -6727,7 +6727,7 @@ abstract class SphinxRepository(
         feedId: FeedId,
         duration: FeedItemDuration,
         queries: SphinxDatabaseQueries,
-        played: Boolean? = null
+        played: Boolean = false
     ) {
         applicationScope.launch(io) {
             contentEpisodeLock.withLock {
@@ -6791,15 +6791,9 @@ abstract class SphinxRepository(
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-
-                    }
-                    is Response.Error -> {
-
-                    }
-                    is Response.Success -> {
-
-                    }
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {}
                 }
             }
         }
