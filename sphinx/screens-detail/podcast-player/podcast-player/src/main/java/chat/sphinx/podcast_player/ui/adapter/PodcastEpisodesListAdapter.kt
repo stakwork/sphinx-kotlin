@@ -231,15 +231,22 @@ internal class PodcastEpisodesListAdapter(
                     textViewItemEpisodeTime.text = duration.toHrAndMin()
                 }
 
+                val seekBarDrawableEnable = ContextCompat.getDrawable(binding.root.context, R.drawable.podcast_episode_progress_bar_duration_holder)
+                val seekBarDrawableDisable = ContextCompat.getDrawable(binding.root.context, R.drawable.podcast_episode_disabled_progress_bar_duration_holder)
+
                 //Playing State
                 if (podcastEpisode.playing) {
                     buttonPauseEpisode.visible
                     buttonPlayEpisode.invisible
                     layoutConstraintAlpha.visible
+                    seekBarCurrentTimeEpisodeProgress.progressDrawable = seekBarDrawableEnable
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.receivedIcon))
                 } else {
                     buttonPauseEpisode.invisible
                     buttonPlayEpisode.visible
                     layoutConstraintAlpha.gone
+                    seekBarCurrentTimeEpisodeProgress.progressDrawable = seekBarDrawableDisable
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
                 }
 
                 // Image
