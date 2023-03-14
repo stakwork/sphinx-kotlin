@@ -221,7 +221,6 @@ internal class VideoFeedItemsAdapter (
                 }
 
                 imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_youtube_type))
-                buttonPauseEpisode.invisible
 
                 //Navigation
                 buttonAdditionalOptions.setOnClickListener {

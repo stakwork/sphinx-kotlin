@@ -207,6 +207,12 @@ internal class PodcastEpisodesListAdapter(
                     viewModel.showOptionsFor(nnEpisode)
                 }
             }
+
+            binding.buttonEpisodeShare.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.share(nnEpisode, binding.root.context)
+                }
+            }
         }
 
         private fun playEpisodeFromList(){
@@ -254,15 +260,21 @@ internal class PodcastEpisodesListAdapter(
 
                 //Playing State
                 if (podcastEpisode.playing) {
-                    buttonPauseEpisode.visible
-                    buttonPlayEpisode.invisible
                     layoutConstraintAlpha.visible
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
+                    )
+
                     seekBarCurrentTimeEpisodeProgress.progressDrawable = seekBarDrawableEnable
                     textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.receivedIcon))
                 } else {
-                    buttonPauseEpisode.invisible
-                    buttonPlayEpisode.visible
                     layoutConstraintAlpha.gone
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
+                    )
+
                     seekBarCurrentTimeEpisodeProgress.progressDrawable = seekBarDrawableDisable
                     textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
                 }

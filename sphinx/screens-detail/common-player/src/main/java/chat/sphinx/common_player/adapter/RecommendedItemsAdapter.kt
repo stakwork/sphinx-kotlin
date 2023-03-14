@@ -250,12 +250,19 @@ class RecommendedItemsAdapter (
 
                 //Playing State
                 if (podcastEpisode.playing) {
-                    buttonPauseEpisode.visible
-                    buttonPlayEpisode.invisible
+                    animationViewPlay.playAnimation()
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
+                    )
                     layoutConstraintAlpha.visible
                     textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.receivedIcon))
                 } else {
-                    buttonPauseEpisode.invisible
+                    animationViewPlay.pauseAnimation()
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
+                    )
                     buttonPlayEpisode.visible
                     layoutConstraintAlpha.gone
                     textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
