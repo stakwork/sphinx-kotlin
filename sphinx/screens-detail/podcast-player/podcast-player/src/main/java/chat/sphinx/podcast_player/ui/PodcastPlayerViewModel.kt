@@ -194,6 +194,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                                 serviceState
                             )
                         )
+                        feedRepository.updatePlayedMark(podcast.id, true)
                     }
                     is MediaPlayerServiceState.ServiceActive.ServiceConnected -> {
                         setPaymentsDestinations()
