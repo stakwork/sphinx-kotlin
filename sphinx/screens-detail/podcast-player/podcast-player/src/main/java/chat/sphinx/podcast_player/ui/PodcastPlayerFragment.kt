@@ -109,14 +109,9 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                     }
                 }
             }
-
-            includeLayoutFeedItem.includeLayoutFeedItemDetails.textViewClose.setOnClickListener {
-                viewModel.feedItemDetailsViewStateContainer.updateViewState(
-                    FeedItemDetailsViewState.Closed
-                )
-            }
         }
 
+        setupFeedItemDetails()
         setupBoost()
         setupEpisodes()
     }
@@ -142,6 +137,16 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
+            }
+        }
+    }
+
+    private fun setupFeedItemDetails() {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewClose.setOnClickListener {
+                viewModel.feedItemDetailsViewStateContainer.updateViewState(
+                    FeedItemDetailsViewState.Closed
+                )
             }
         }
     }
