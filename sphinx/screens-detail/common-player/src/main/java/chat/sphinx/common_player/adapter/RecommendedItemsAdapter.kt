@@ -253,10 +253,12 @@ class RecommendedItemsAdapter (
                     buttonPauseEpisode.visible
                     buttonPlayEpisode.invisible
                     layoutConstraintAlpha.visible
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.receivedIcon))
                 } else {
                     buttonPauseEpisode.invisible
                     buttonPlayEpisode.visible
                     layoutConstraintAlpha.gone
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
                 }
 
                 //Navigation

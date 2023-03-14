@@ -168,7 +168,7 @@ internal class VideoFeedItemsAdapter (
         private var videoItem: FeedItem? = null
 
         init {
-            binding.buttonPlayEpisode.setOnClickListener {
+            binding.layoutConstraintEpisodeIconsContainer.setOnClickListener {
                 playEpisodeFromList()
             }
             binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
@@ -203,6 +203,7 @@ internal class VideoFeedItemsAdapter (
                 seekBarCurrentTimeEpisodeProgress.gone
                 textViewItemEpisodeTime.gone
                 circleSplit.gone
+                buttonPlayEpisode.invisible
 
                 // Image
                 f.thumbnailUrlToShow?.let { imageUrl ->
@@ -236,15 +237,6 @@ internal class VideoFeedItemsAdapter (
                         f.link
                     )
                 }
-
-//                swipeRevealLayoutVideoFeedItem.setLockDrag(!f.downloaded)
-//                layoutConstraintDeleteButtonContainer.setOnClickListener {
-//                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-//                        viewModel.deleteDownloadedMedia(f)
-//                        notifyItemChanged(position)
-//                        swipeRevealLayoutVideoFeedItem.close(true)
-//                    }
-//                }
             }
         }
 
