@@ -96,6 +96,21 @@ data class PodcastEpisode(
             return null
         }
 
+    var played: Boolean
+        get() {
+            getUpdatedContentEpisodeStatus()?.played?.let {
+                return it
+            }
+            return false
+        }
+        set(value) {
+            value?.let {
+                contentEpisodeStatus = getUpdatedContentEpisodeStatus()?.copy(
+                    played = it
+                )
+            }
+        }
+
     var titleToShow: String = ""
         get() = title.value.trim()
 
