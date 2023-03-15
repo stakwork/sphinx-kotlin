@@ -1,6 +1,8 @@
 package chat.sphinx.podcast_player.ui
 
 import android.app.Application
+import android.content.Context
+import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -391,11 +393,13 @@ internal class PodcastPlayerViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             getPodcastFeed()?.let { podcast ->
                 podcast.getEpisodeWithId(episode.id.value)?.let {
-                    viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(it))
-
-                    delay(50L)
-
-                    playEpisode(it)
+                    if (mediaPlayerServiceController.getPlayingContent()?.second == episode.id.value) {
+                        pauseEpisode(it)
+                    } else {
+                        viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(it))
+                        delay(50L)
+                        playEpisode(it)
+                    }
                 }
             }
         }
@@ -669,30 +673,18 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun navigateToEpisodeDetail(
-        feedItemId: FeedId?,
-        header: String,
-        image: String,
-        episodeTypeImage: Int,
-        episodeTypeText: String,
-        episodeDate: String,
-        episodeDuration: String,
-        downloaded: Boolean?,
-        link: FeedUrl?
-    ){
-        viewModelScope.launch(mainImmediate) {
-            navigator.toEpisodeDetail(
-                feedItemId,
-                header,
-                image,
-                episodeTypeImage,
-                episodeTypeText,
-                episodeDate,
-                episodeDuration,
-                downloaded,
-                link
-            )
+    fun share(episode: PodcastEpisode, context: Context) {
+        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, episode.link?.value)
         }
+
+        context.startActivity(
+            Intent.createChooser(
+                sharingIntent,
+                app.getString(R.string.episode_detail_share_link)
+            )
+        )
     }
 
 

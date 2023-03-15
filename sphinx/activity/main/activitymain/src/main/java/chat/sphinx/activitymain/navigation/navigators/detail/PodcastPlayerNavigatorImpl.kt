@@ -13,28 +13,4 @@ internal class PodcastPlayerNavigatorImpl  @Inject constructor (
     override suspend fun closeDetailScreen() {
         (navigationDriver as DetailNavigationDriver).closeDetailScreen()
     }
-    override suspend fun toEpisodeDetail(
-        feedItemId: FeedId?,
-        header: String,
-        image: String,
-        episodeTypeImage: Int,
-        episodeTypeText: String,
-        episodeDate: String,
-        episodeDuration: String,
-        downloaded: Boolean?,
-        link: FeedUrl?
-    ) {
-        (navigationDriver as DetailNavigationDriver).submitNavigationRequest(
-            ToEpisodeDetail(
-                feedItemId,
-                header,
-                image,
-                episodeTypeImage,
-                episodeTypeText,
-                episodeDate,
-                episodeDuration,
-                downloaded,
-                link
-        ))
-    }
 }
