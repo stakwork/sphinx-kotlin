@@ -55,6 +55,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -629,9 +630,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
             _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
                 isDownloadInProgress = isFeedItemDownloadInProgress
             )
-            feedItemDetailsViewStateContainer.updateViewState(
-                FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
-            )
+            if (feedItemDetailsViewStateContainer.value is FeedItemDetailsViewState.Open) {
+                feedItemDetailsViewStateContainer.updateViewState(
+                    FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+                )
+            }
         }
     }
 
