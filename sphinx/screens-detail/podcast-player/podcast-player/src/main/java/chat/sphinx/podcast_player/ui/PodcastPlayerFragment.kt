@@ -156,7 +156,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                             viewModel.deleteDownloadedMediaByItemId(feedId)
                         } else {
                             viewModel.downloadMediaByItemId(feedId)
-                            binding.includeLayoutPodcastEpisodesList.recyclerViewEpisodesList.adapter?.notifyDataSetChanged()
                         }
                     }
                 }

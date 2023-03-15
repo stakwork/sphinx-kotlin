@@ -388,7 +388,7 @@
 
                 <TextView
                     android:id="@+id/text_view_check_mark"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/default_layout_margin"
                     android:fontFamily="@font/roboto_regular"
