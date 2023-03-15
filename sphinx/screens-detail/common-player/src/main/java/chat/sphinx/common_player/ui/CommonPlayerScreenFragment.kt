@@ -215,6 +215,20 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                     RecommendedFeedItemDetailsViewState.Closed
                 )
             }
+            layoutConstraintCopyLinkRow.setOnClickListener {
+                (viewModel.recommendedFeedItemDetailsViewState.value as? RecommendedFeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.copyCodeToClipboard(link)
+                    }
+                }
+            }
+            layoutConstraintShareRow.setOnClickListener {
+                (viewModel.recommendedFeedItemDetailsViewState.value as? RecommendedFeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.share(link, binding.root.context)
+                    }
+                }
+            }
         }
     }
 
@@ -611,6 +625,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         is RecommendedFeedItemDetailsViewState.Open -> {
                             includeLayoutFeedItemDetails.apply {
                                 feedItemDetailsCommonInfoBinding(viewState)
+                                layoutConstraintDownloadRow.gone
+                                layoutConstraintCheckMarkRow.gone
                             }
 
                         }

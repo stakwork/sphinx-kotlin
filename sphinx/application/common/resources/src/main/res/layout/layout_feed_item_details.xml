@@ -419,7 +419,8 @@
             android:id="@+id/layout_constraint_close_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_buttons_container"
+            android:layout_marginBottom="@dimen/chat_footer_button_xy"
+
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -437,8 +438,10 @@
                 android:textSize="@dimen/custom_boost_text_size"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0"
                 tools:text="CLOSE" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

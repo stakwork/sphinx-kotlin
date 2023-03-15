@@ -1,7 +1,10 @@
 package chat.sphinx.common_player.ui
 
 import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
@@ -486,7 +489,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
     fun showOptionsFor(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             val duration = episode.getUpdatedContentEpisodeStatus().duration.value.toInt().toHrAndMin()
-            val played = getPlayedMark(episode.id)
             val podcastName = getPodcast()?.title?.value ?: ""
 
             _feedItemDetailStateFlow.value = FeedItemDetail(
@@ -500,7 +502,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 episode.downloaded,
                 isFeedItemDownloadInProgress(episode.id),
                 episode.episodeUrl,
-                played,
+                false,
                 podcastName
             )
 
@@ -510,9 +512,35 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getPlayedMark(feedItemId: FeedId): Boolean {
-        return feedRepository.getPlayedMark(feedItemId).firstOrNull() ?: false
+    fun share(link: String, context: Context) {
+        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, link)
+        }
+
+        context.startActivity(
+            Intent.createChooser(
+                sharingIntent,
+                app.getString(R.string.episode_detail_share_link)
+            )
+        )
     }
+
+    fun copyCodeToClipboard(link: String) {
+        (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+            val clipData = ClipData.newPlainText("text", link)
+            manager.setPrimaryClip(clipData)
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    CommonPlayerScreenSideEffect.Notify.CopyClipboardLink(
+                        R.string.episode_detail_clipboard
+                    )
+                )
+            }
+        }
+    }
+
     fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
