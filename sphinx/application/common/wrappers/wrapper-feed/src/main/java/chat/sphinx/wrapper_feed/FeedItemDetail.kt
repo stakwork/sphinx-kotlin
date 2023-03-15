@@ -13,5 +13,6 @@ data class FeedItemDetail(
     val downloaded: Boolean?,
     var isDownloadInProgress: Boolean?,
     val link: String?,
-    val played: Boolean
+    val played: Boolean,
+    val podcastName: String?
 )

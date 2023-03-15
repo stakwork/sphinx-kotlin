@@ -665,7 +665,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 episode.downloaded,
                 isFeedItemDownloadInProgress(episode.id),
                 episode.episodeUrl,
-                played
+                played,
+                podcast?.title?.value
+
             )
             feedItemDetailsViewStateContainer.updateViewState(
                 FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)

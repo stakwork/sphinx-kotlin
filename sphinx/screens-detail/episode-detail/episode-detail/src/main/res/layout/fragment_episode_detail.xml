@@ -37,7 +37,7 @@
     </androidx.cardview.widget.CardView>
 
         <TextView
-            android:id="@+id/text_view_recommended_description"
+            android:id="@+id/text_view_podcast_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
@@ -63,7 +63,7 @@
             android:textSize="@dimen/chat_footer_episode_title_text_size"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_recommended_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_podcast_name"
             tools:text="DeFi Smart Contracts On The Bitcoin Network - Gabriel Kurman" />
 
         <androidx.constraintlayout.widget.ConstraintLayout

@@ -659,6 +659,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             textViewEpisodeType.text = viewState.feedItemDetail?.episodeTypeText
             textViewEpisodeDate.text = viewState.feedItemDetail?.episodeDate
             textViewEpisodeDuration.text = viewState.feedItemDetail?.episodeDuration
+            textViewPodcastName.text = viewState.feedItemDetail?.podcastName
 
             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                 viewState.feedItemDetail?.image?.let {
