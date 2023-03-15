@@ -196,6 +196,12 @@ class RecommendedItemsAdapter (
                     viewModel.showOptionsFor(nnEpisode)
                 }
             }
+
+            binding.buttonEpisodeShare.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.share(nnEpisode.episodeUrl, binding.root.context)
+                }
+            }
         }
 
         private fun playEpisodeFromList(){

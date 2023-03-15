@@ -174,6 +174,16 @@ internal class VideoFeedItemsAdapter (
             binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
                 playEpisodeFromList()
             }
+            binding.buttonAdditionalOptions.setOnClickListener {
+                videoItem?.let { nnVideoItem ->
+                    viewModel.showOptionsFor(nnVideoItem)
+                }
+            }
+            binding.buttonEpisodeShare.setOnClickListener {
+                videoItem?.let { nnEpisode ->
+                    nnEpisode.link?.value?.let { link -> viewModel.share(link, binding.root.context) }
+                }
+            }
         }
 
         private fun playEpisodeFromList(){
@@ -204,6 +214,8 @@ internal class VideoFeedItemsAdapter (
                 textViewItemEpisodeTime.gone
                 circleSplit.gone
                 buttonPlayEpisode.invisible
+                layoutConstraintAlpha.gone
+
 
                 // Image
                 f.thumbnailUrlToShow?.let { imageUrl ->
@@ -222,20 +234,6 @@ internal class VideoFeedItemsAdapter (
 
                 imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_youtube_type))
 
-                //Navigation
-                buttonAdditionalOptions.setOnClickListener {
-                    viewModel.navigateToEpisodeDetail(
-                        f.id,
-                        f.titleToShow,
-                        f.thumbnailUrlToShow?.value ?: "",
-                        R.drawable.ic_youtube_type,
-                        getString(R.string.youtube),
-                        f.datePublished?.hhmmElseDate() ?: "",
-                        f.duration?.value?.toInt().toString(),
-                        null,
-                        f.link
-                    )
-                }
             }
         }
 
