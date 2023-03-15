@@ -697,6 +697,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
             val played = feedItemDetailStateFlow.value?.played ?: false
             feedRepository.updatePlayedMark(itemId, !played)
 
+            _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
+                played = !played,
+            )
+
             feedItemDetailsViewStateContainer.updateViewState(
                 FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
             )

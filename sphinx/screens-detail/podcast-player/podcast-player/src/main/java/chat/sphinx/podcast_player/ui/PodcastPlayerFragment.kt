@@ -148,21 +148,21 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 viewModel.feedItemDetailsViewStateContainer.updateViewState(
                     FeedItemDetailsViewState.Closed
                 )
-                layoutConstraintDownloadRow.setOnClickListener {
-                     (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
-                         viewState.feedItemDetail?.feedId?.let { feedId ->
-                             if (viewState.feedItemDetail.downloaded == true) {
-                                 viewModel.deleteDownloadedMediaByItemId(feedId)
-                             }
-                             else {
-                                 viewModel.downloadMediaByItemId(feedId)
-                             }
-                         }
+            }
+            layoutConstraintDownloadRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.feedId?.let { feedId ->
+                        if (viewState.feedItemDetail.downloaded == true) {
+                            viewModel.deleteDownloadedMediaByItemId(feedId)
+                        }
+                        else {
+                            viewModel.downloadMediaByItemId(feedId)
+                        }
                     }
                 }
-                layoutConstraintCheckMarkRow.setOnClickListener {
-                    viewModel.updatePlayedMark()
-                }
+            }
+            layoutConstraintCheckMarkRow.setOnClickListener {
+                viewModel.updatePlayedMark()
             }
         }
 
