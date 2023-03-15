@@ -171,6 +171,17 @@
             app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time"
             app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time" />
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/button_check_mark_played"
+            android:layout_width="@dimen/default_layout_margin"
+            android:layout_height="@dimen/default_layout_margin"
+            android:layout_marginStart="@dimen/default_vertical_spacing_action_button_column"
+            android:src="@drawable/ic_mark_played"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_item_episode_time"
+            app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time"
+            app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time" />
+
         <TextView
             android:id="@+id/text_view_recommended_duration"
             android:layout_width="0dp"

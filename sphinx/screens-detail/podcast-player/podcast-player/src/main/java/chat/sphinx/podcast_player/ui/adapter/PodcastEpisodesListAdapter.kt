@@ -17,6 +17,7 @@ import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewModel
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
+import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.*
@@ -257,6 +258,19 @@ internal class PodcastEpisodesListAdapter(
 
                 val seekBarDrawableEnable = ContextCompat.getDrawable(binding.root.context, R.drawable.podcast_episode_progress_bar_duration_holder)
                 val seekBarDrawableDisable = ContextCompat.getDrawable(binding.root.context, R.drawable.podcast_episode_disabled_progress_bar_duration_holder)
+
+                // played
+
+                val played = (podcastEpisode.contentEpisodeStatus?.played)
+
+                if (played == true) {
+                    seekBarCurrentTimeEpisodeProgress.gone
+                    buttonCheckMarkPlayed.visible
+                    textViewItemEpisodeTime.text = getString(R.string.episode_detail_played_holder)
+                } else {
+                    buttonCheckMarkPlayed.gone
+                 }
+
 
                 //Playing State
                 if (podcastEpisode.playing) {

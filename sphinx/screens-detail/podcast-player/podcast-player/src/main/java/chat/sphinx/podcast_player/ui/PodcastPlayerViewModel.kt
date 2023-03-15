@@ -632,7 +632,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
             feedItemDetailsViewStateContainer.updateViewState(
                 FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
             )
-
         }
     }
 

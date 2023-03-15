@@ -156,6 +156,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                             viewModel.deleteDownloadedMediaByItemId(feedId)
                         } else {
                             viewModel.downloadMediaByItemId(feedId)
+                            binding.includeLayoutPodcastEpisodesList.recyclerViewEpisodesList.adapter?.notifyDataSetChanged()
                         }
                     }
                 }
@@ -163,7 +164,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             layoutConstraintCheckMarkRow.setOnClickListener {
                 viewModel.updatePlayedMark()
             }
-
             layoutConstraintCopyLinkRow.setOnClickListener {
                 (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
                     viewState.feedItemDetail?.link?.let { link ->
