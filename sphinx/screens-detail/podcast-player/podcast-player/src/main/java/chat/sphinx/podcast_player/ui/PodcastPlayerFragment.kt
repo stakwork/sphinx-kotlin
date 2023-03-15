@@ -154,8 +154,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                     viewState.feedItemDetail?.feedId?.let { feedId ->
                         if (viewState.feedItemDetail.downloaded == true) {
                             viewModel.deleteDownloadedMediaByItemId(feedId)
-                        }
-                        else {
+                        } else {
                             viewModel.downloadMediaByItemId(feedId)
                         }
                     }
@@ -164,8 +163,22 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             layoutConstraintCheckMarkRow.setOnClickListener {
                 viewModel.updatePlayedMark()
             }
-        }
 
+            layoutConstraintCopyLinkRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.copyCodeToClipboard(link)
+                    }
+                }
+            }
+            layoutConstraintShareRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.share(link, binding.root.context)
+                    }
+                }
+            }
+        }
     }
 
     private fun setupBoost() {

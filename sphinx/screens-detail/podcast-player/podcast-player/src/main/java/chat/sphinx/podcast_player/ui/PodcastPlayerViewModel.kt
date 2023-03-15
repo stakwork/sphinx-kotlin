@@ -1,6 +1,8 @@
 package chat.sphinx.podcast_player.ui
 
 import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
@@ -675,10 +677,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun share(episode: PodcastEpisode, context: Context) {
+    fun share(link: String, context: Context) {
         val sharingIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, episode.link?.value)
+            putExtra(Intent.EXTRA_TEXT, link)
         }
 
         context.startActivity(
@@ -687,6 +689,21 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 app.getString(R.string.episode_detail_share_link)
             )
         )
+    }
+
+    fun copyCodeToClipboard(link: String) {
+        (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+            val clipData = ClipData.newPlainText("text", link)
+            manager.setPrimaryClip(clipData)
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    PodcastPlayerSideEffect.Notify(
+                        app.getString(R.string.episode_detail_clipboard)
+                    )
+                )
+            }
+        }
     }
 
 
