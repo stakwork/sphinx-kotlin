@@ -167,3 +167,13 @@ data class PodcastEpisode(
             return recommendationPubKey?.toFeedDestinationAddress() != null
         }
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
+}

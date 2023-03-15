@@ -137,7 +137,6 @@ internal class EpisodeDetailViewModel @Inject constructor(
                     )
 
                 updateViewState(EpisodeDetailViewState.ShowEpisode(episodeDetailStateFlow.value))
-
             }
         }
     }

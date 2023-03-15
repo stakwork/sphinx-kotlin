@@ -18,7 +18,7 @@ sealed class FeedItemDetailsViewState: MotionLayoutViewState<FeedItemDetailsView
     }
 
     class Open(
-        val feedItemDetail: FeedItemDetail
+        val feedItemDetail: FeedItemDetail?
     ) : FeedItemDetailsViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_feed_item_details_closed

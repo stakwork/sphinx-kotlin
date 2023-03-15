@@ -34,7 +34,6 @@ import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_feed.FeedItemDetail
 import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -43,19 +42,18 @@ import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.toJson
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import chat.sphinx.wrapper_podcast.toHrAndMin
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -156,6 +154,13 @@ internal class PodcastPlayerViewModel @Inject constructor(
     val feedItemDetailsViewStateContainer: ViewStateContainer<FeedItemDetailsViewState> by lazy {
         ViewStateContainer(FeedItemDetailsViewState.Closed)
     }
+
+    private val _feedItemDetailStateFlow: MutableStateFlow<FeedItemDetail?> by lazy {
+        MutableStateFlow(null)
+    }
+
+    private val feedItemDetailStateFlow: StateFlow<FeedItemDetail?>
+        get() = _feedItemDetailStateFlow.asStateFlow()
 
     override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
         if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
@@ -599,24 +604,69 @@ internal class PodcastPlayerViewModel @Inject constructor(
         )
     }
 
-    fun showOptionsFor(episode: PodcastEpisode) {
-        feedItemDetailsViewStateContainer.updateViewState(
-            FeedItemDetailsViewState.Open(
-                FeedItemDetail(
-                    episode.id,
-                    episode.titleToShow,
-                    "",
-                    0,
-                    "",
-                    "",
-                    "",
-                    true,
-                    false,
-                    "",
-                    false
-                )
+    fun downloadMediaByItemId(feedId: FeedId) {
+        viewModelScope.launch(mainImmediate) {
+            feedRepository.getFeedItemById(feedId).firstOrNull()?.let { feedItem ->
+                repositoryMedia.downloadMediaIfApplicable(feedItem) { _ ->
+                    _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
+                        downloaded = true,
+                        isDownloadInProgress = false
+                    )
+                    feedItemDetailsViewStateContainer.updateViewState(
+                        FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+                    )
+                }
+            }
+            val isFeedItemDownloadInProgress = repositoryMedia.inProgressDownloadIds()
+                .contains(feedItemDetailStateFlow.value?.feedId)
+
+            _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
+                isDownloadInProgress = isFeedItemDownloadInProgress
             )
-        )
+            feedItemDetailsViewStateContainer.updateViewState(
+                FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+            )
+
+        }
+    }
+
+    fun deleteDownloadedMediaByItemId(feedId: FeedId) {
+        viewModelScope.launch(mainImmediate) {
+            feedRepository.getFeedItemById(feedId).firstOrNull()?.let { feedItem ->
+
+                if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
+                    _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(downloaded = false)
+                }
+                feedItemDetailsViewStateContainer.updateViewState(
+                    FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+                )
+            }
+        }
+    }
+
+
+    fun showOptionsFor(episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            val duration = episode.getUpdatedContentEpisodeStatus().duration.value.toInt().toHrAndMin()
+            val played = getPlayedMark(episode.id)
+
+            _feedItemDetailStateFlow.value = FeedItemDetail(
+                episode.id,
+                episode.titleToShow,
+                episode.image?.value ?: "",
+                R.drawable.ic_podcast_type,
+                "Podcast",
+                episode.dateString,
+                duration,
+                episode.downloaded,
+                isFeedItemDownloadInProgress(episode.id),
+                episode.episodeUrl,
+                played
+            )
+            feedItemDetailsViewStateContainer.updateViewState(
+                FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+            )
+        }
     }
 
     fun navigateToEpisodeDetail(
@@ -641,6 +691,22 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 episodeDuration,
                 downloaded,
                 link
+            )
+        }
+    }
+
+
+    private suspend fun getPlayedMark(feedItemId: FeedId): Boolean {
+       return feedRepository.getPlayedMark(feedItemId).firstOrNull() ?: false
+    }
+
+    fun updatePlayedMark() {
+        feedItemDetailStateFlow.value?.feedId?.let{ itemId ->
+            val played = feedItemDetailStateFlow.value?.played ?: false
+            feedRepository.updatePlayedMark(itemId, !played)
+
+            feedItemDetailsViewStateContainer.updateViewState(
+                FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
             )
         }
     }
