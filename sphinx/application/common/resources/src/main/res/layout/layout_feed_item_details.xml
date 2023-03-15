@@ -243,14 +243,13 @@
 
                 </androidx.cardview.widget.CardView>
 
-
                 <TextView
                     android:id="@+id/text_view_download"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/default_layout_margin"
                     android:fontFamily="@font/roboto_regular"
-                    android:gravity="center"
+                    android:gravity="left"
                     android:maxLines="1"
                     android:text="@string/episode_detail_download"
                     android:textColor="@color/text"
@@ -291,11 +290,11 @@
 
                 <TextView
                     android:id="@+id/text_view_share"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/default_layout_margin"
                     android:fontFamily="@font/roboto_regular"
-                    android:gravity="center"
+                    android:gravity="left"
                     android:maxLines="1"
                     android:text="@string/episode_detail_share"
                     android:textColor="@color/text"
@@ -336,11 +335,11 @@
 
                 <TextView
                     android:id="@+id/text_view_copy_link"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/default_layout_margin"
                     android:fontFamily="@font/roboto_regular"
-                    android:gravity="center"
+                    android:gravity="left"
                     android:maxLines="1"
                     android:text="@string/episode_detail_copy_link"
                     android:textColor="@color/text"
