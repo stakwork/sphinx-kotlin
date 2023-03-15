@@ -1178,6 +1178,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             currentViewState is ChatMenuViewState.Open -> {
                 updateViewState(ChatMenuViewState.Closed)
             }
+            moreOptionsMenuHandler.value is MenuBottomViewState.Open -> {
+                moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
+            }
+            callMenuHandler.value is MenuBottomViewState.Open -> {
+                callMenuHandler.updateViewState(MenuBottomViewState.Closed)
+            }
             attachmentFullscreenViewState is AttachmentFullscreenViewState.ImageFullscreen -> {
                 updateAttachmentFullscreenViewState(AttachmentFullscreenViewState.Idle)
             }

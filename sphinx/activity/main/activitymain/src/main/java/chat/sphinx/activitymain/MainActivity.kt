@@ -250,8 +250,12 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 // Downside to this is that DetailScreens cannot add
                 // back press callbacks, but that's why they're detail screens
                 if (!transitionInProgress) {
-                    lifecycleScope.launch {
-                        viewModel.detailDriver.submitNavigationRequest(PopBackStack())
+                    if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+                        super.onBackPressed()
+                    } else {
+                        lifecycleScope.launch {
+                            viewModel.detailDriver.submitNavigationRequest(PopBackStack())
+                        }
                     }
                 }
             }

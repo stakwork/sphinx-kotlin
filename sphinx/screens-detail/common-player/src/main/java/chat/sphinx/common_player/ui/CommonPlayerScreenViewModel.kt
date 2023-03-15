@@ -277,6 +277,14 @@ class CommonPlayerScreenViewModel @Inject constructor(
     fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
+
+                podcast.getEpisodeWithId(episode.id.value)?.let {
+                    if (mediaPlayerServiceController.getPlayingContent()?.second == episode.id.value) {
+                        pauseEpisode(episode)
+                        return@launch
+                    }
+                }
+
                 viewStateContainer.updateViewState(
                     RecommendationsPodcastPlayerViewState.PodcastViewState.LoadingEpisode(podcast, episode)
                 )
