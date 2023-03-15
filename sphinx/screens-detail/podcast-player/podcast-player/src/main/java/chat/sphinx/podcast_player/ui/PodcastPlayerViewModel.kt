@@ -670,8 +670,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 episode.episodeUrl,
                 played,
                 podcast?.title?.value
-
             )
+
             feedItemDetailsViewStateContainer.updateViewState(
                 FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
             )
@@ -699,12 +699,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun updatePlayedMark() {
         feedItemDetailStateFlow.value?.feedId?.let{ itemId ->
+
             val played = feedItemDetailStateFlow.value?.played ?: false
             feedRepository.updatePlayedMark(itemId, !played)
 
             _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
                 played = !played,
             )
+
+            getPodcastFeed()?.let { nnPodcast ->
+                nnPodcast.getEpisodeWithId(itemId.value)?.let { episode ->
+                    episode.played = !played
+                }
+            }
 
             feedItemDetailsViewStateContainer.updateViewState(
                 FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)

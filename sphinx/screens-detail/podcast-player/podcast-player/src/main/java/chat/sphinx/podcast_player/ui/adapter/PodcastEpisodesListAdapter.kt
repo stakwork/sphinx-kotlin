@@ -77,7 +77,9 @@ internal class PodcastEpisodesListAdapter(
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                val same: Boolean = old.playing == new.playing && old.downloaded == new.downloaded
+                val same: Boolean = old.playing == new.playing &&
+                                    old.downloaded == new.downloaded &&
+                                    old.played == new.played
 
                 if (sameList) {
                     sameList = same

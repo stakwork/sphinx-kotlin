@@ -632,6 +632,9 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.feedItemDetailsViewStateContainer.collect { viewState ->
+
+                binding.includeLayoutPodcastEpisodesList.recyclerViewEpisodesList.adapter?.notifyDataSetChanged()
+
                 binding.includeLayoutFeedItem.apply {
                     when (viewState) {
                         is FeedItemDetailsViewState.Open -> {
