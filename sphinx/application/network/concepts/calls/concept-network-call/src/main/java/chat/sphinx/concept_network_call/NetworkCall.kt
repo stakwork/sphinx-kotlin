@@ -96,6 +96,15 @@ abstract class NetworkCall {
         headers: Map<String, String>? = null,
     ): Flow<LoadResponse<T, ResponseError>>
 
+    abstract fun <T: Any, RequestBody: Any> postList(
+        url: String,
+        responseJsonClass: Class<T>,
+        requestBodyJsonClass: Class<RequestBody>,
+        requestBody: RequestBody,
+        mediaType: String? = "application/json",
+        headers: Map<String, String>? = null,
+    ): Flow<LoadResponse<List<T>, ResponseError>>
+
     /**
      * DELETE
      *

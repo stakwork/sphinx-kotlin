@@ -91,6 +91,8 @@ dependencies {
     api project(path: ':sphinx:screens-detail:video-screen:video-screen')
     api project(path: ':sphinx:screens-detail:notification-level:notification-level')
     api project(path: ':sphinx:screens-detail:add-tribe-member:add-tribe-member')
+    api project(path: ':sphinx:screens-detail:tribe-badge')
+    api project(path: ':sphinx:screens-detail:known-badges:known-badges')
 
     implementation deps.chrisbanes.insetter
 

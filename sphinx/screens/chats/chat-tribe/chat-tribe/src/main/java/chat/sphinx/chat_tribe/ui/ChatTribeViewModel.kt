@@ -20,6 +20,7 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.route.isRouteAvailable
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
+import chat.sphinx.concept_network_query_people.model.ChatLeaderboardDto
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -35,7 +36,6 @@ import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
-import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
@@ -51,6 +51,7 @@ import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -65,7 +66,7 @@ internal inline val ChatTribeFragmentArgs.chatId: ChatId
     get() = ChatId(argChatId)
 
 @HiltViewModel
-internal class ChatTribeViewModel @Inject constructor(
+class ChatTribeViewModel @Inject constructor(
     app: Application,
     dispatchers: CoroutineDispatchers,
     memeServerTokenHandler: MemeServerTokenHandler,
@@ -127,6 +128,10 @@ internal class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    private val leaderboardListStateFlow: MutableStateFlow<List<ChatLeaderboardDto>?> by lazy {
+        MutableStateFlow(null)
+    }
 
     val tribeMemberProfileViewStateContainer: ViewStateContainer<TribeMemberProfileViewState> by lazy {
         ViewStateContainer(TribeMemberProfileViewState.Closed)
@@ -270,7 +275,8 @@ internal class ChatTribeViewModel @Inject constructor(
                         tribeData.host,
                         tribeData.feedUrl,
                         tribeData.chatUUID,
-                        tribeData.feedType
+                        tribeData.feedType,
+                        tribeData.badges
                     )
 
                 } ?: run {
@@ -281,6 +287,7 @@ internal class ChatTribeViewModel @Inject constructor(
                 _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
             }
         }
+        getAllLeaderboards()
     }
 
     override suspend fun processMemberRequest(
@@ -356,6 +363,21 @@ internal class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    private fun getAllLeaderboards(){
+        viewModelScope.launch(mainImmediate) {
+           val tribeUUID = getChat().uuid
+            networkQueryPeople.getLeaderboard(tribeUUID).collect { loadResponse ->
+                when(loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {
+                        leaderboardListStateFlow.value = loadResponse.value
+                    }
+                }
+            }
+        }
+    }
+
     private fun loadPersonData(message: Message) {
         viewModelScope.launch(mainImmediate) {
             message.person?.let { person ->
@@ -368,13 +390,33 @@ internal class ChatTribeViewModel @Inject constructor(
                             tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
                         }
                         is Response.Success -> {
-                            tribeMemberDataViewStateContainer.updateViewState(
-                                TribeMemberDataViewState.TribeMemberProfile(
-                                    message.uuid,
-                                    person,
-                                    loadResponse.value
-                                )
-                            )
+                            val leaderboard = leaderboardListStateFlow.value?.find { it.alias == loadResponse.value.owner_alias  }
+
+                            networkQueryPeople.getBadgesByPerson(person).collect { badgesResponse ->
+                                when (badgesResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {
+                                        tribeMemberDataViewStateContainer.updateViewState(
+                                            TribeMemberDataViewState.TribeMemberProfile(
+                                                message.uuid,
+                                                loadResponse.value,
+                                                leaderboard,
+                                                null
+                                            )
+                                        )
+                                    }
+                                    is Response.Success -> {
+                                        tribeMemberDataViewStateContainer.updateViewState(
+                                            TribeMemberDataViewState.TribeMemberProfile(
+                                                message.uuid,
+                                                loadResponse.value,
+                                                leaderboard,
+                                                badgesResponse.value
+                                            )
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -405,6 +447,14 @@ internal class ChatTribeViewModel @Inject constructor(
                     TribeMemberProfileViewState.Closed
                 )
             }
+        }
+    }
+
+    fun goToKnownBadges() {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toKnownBadges(
+                badgeIds = (feedDataStateFlow.value as? TribeFeedData.Result.FeedData)?.badges ?: arrayOf()
+            )
         }
     }
 

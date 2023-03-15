@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/create_badge_nav_graph"
+    app:startDestination="@+id/navigation_create_badge_fragment">
+
+    <fragment
+        android:id="@+id/navigation_create_badge_fragment"
+        android:name="chat.sphinx.create_badge.ui.CreateBadgeFragment"
+        tools:layout="@layout/fragment_create_badge">
+        <argument
+            android:name="argName"
+            app:argType="string" />
+        <argument
+            android:name="argDescription"
+            app:argType="string" />
+        <argument
+            android:name="argImage"
+            app:argType="string" />
+        <argument
+            android:name="argRewardType"
+            app:argType="integer" />
+        <argument
+            android:name="argRewardRequirement"
+            app:argType="integer" />
+        <argument
+            android:name="argIsActive"
+            app:argType="boolean" />
+        <argument
+            android:name="argChatId"
+            app:argType="integer" />
+        <argument
+            android:name="argBadgeId"
+            app:argType="integer" />
+        <argument
+            android:name="argAmountCreated"
+            app:argType="integer" />
+        <argument
+            android:name="argAmountIssued"
+            app:argType="integer" />
+        <argument
+            android:name="argClaimAmount"
+            app:argType="integer" />
+        <argument
+            android:name="argHolderType"
+            app:argType="integer" />
+
+    </fragment>
+
+</navigation>

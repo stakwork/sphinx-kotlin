@@ -44,6 +44,18 @@
     <string name="feed_search_directory_section">DIRECTORIO</string>
     <string name="recommendations">Recomendaciones</string>
 
+    <string name="select_badges">Selecciona y customiza</string>
+    <string name="your_badges">tus tribe badges</string>
+    <string name="badges_template_description">%s al menos %s sats en esta tribe. </string>
+    <string name="badges_earn" >Ganar</string>
+    <string name="badges_spend" >Gastar</string>
+    <string name="badges_active">ACTIVO</string>
+    <string name="badges_inactive">INACTIVO</string>
+    <string name="badges_left" >de %s</string>
+    <string name="badges_create_error">Error al crear badge</string>
+    <string name="badges_state_error">Error al cambiar el estado del badge</string>
+
+
     <string name="balance_too_low">Balance demasiado bajo</string>
     <string name="boost_amount_too_low">El monto del Boost debe ser mayor a 0</string>
 
@@ -53,6 +65,10 @@
     <string name="tribe_member_profile_post">Publicaciones:</string>
     <string name="tribe_member_profile_twitter">Twitter:</string>
     <string name="tribe_member_profile_github">Github:</string>
+    <string name="tribe_member_profile_reputation">Reputación</string>
+    <string name="tribe_member_profile_contributions">Contribuciones:</string>
+
+
 
     <string name="episode_detail_download">Descargar</string>
     <string name="episode_detail_erase">Borrar del dispositivo</string>

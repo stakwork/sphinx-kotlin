@@ -29,8 +29,11 @@
     <include app:graph="@navigation/video_watch_nav_graph" />
     <include app:graph="@navigation/video_feed_details_nav_graph" />
     <include app:graph="@navigation/notification_level_nav_graph" />
+    <include app:graph="@navigation/tribe_badges_nav_graph" />
+    <include app:graph="@navigation/create_badge_nav_graph" />
     <include app:graph="@navigation/discover_tribes_nav_graph" />
     <include app:graph="@navigation/episode_detail_nav_graph" />
+    <include app:graph="@navigation/known_badges_nav_graph" />
 
     <fragment
         android:id="@+id/navigation_detail_blank_fragment"

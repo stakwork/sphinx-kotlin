@@ -232,7 +232,33 @@ class NetworkRelayCallImpl(
         } catch (e: Exception) {
             emit(handleException(LOG, POST, url, e))
         }
+    }
 
+    override fun <T: Any, V: Any> postList(
+        url: String,
+        responseJsonClass: Class<T>,
+        requestBodyJsonClass: Class<V>,
+        requestBody: V,
+        mediaType: String?,
+        headers: Map<String, String>?
+    ): Flow<LoadResponse<List<T>, ResponseError>> = flow {
+
+        emit(LoadResponse.Loading)
+
+        try {
+            val requestBuilder = buildRequest(url, headers)
+
+            val requestBodyJson: String = moshi
+                .requestBodyToJson(dispatchers, requestBodyJsonClass, requestBody)
+
+            val reqBody = requestBodyJson.toRequestBody(mediaType?.toMediaType())
+
+            val response = callList(responseJsonClass, requestBuilder.post(reqBody).build())
+
+            emit(Response.Success(response))
+        } catch (e: Exception) {
+            emit(handleException(LOG, POST, url, e))
+        }
     }
 
     override fun <T: Any, V: Any> delete(

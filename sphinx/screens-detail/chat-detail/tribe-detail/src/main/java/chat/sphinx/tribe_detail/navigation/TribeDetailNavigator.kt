@@ -18,6 +18,8 @@ abstract class TribeDetailNavigator(
         description: String? = null,
     )
 
+    abstract suspend fun toTribeBadgesScreen(chatId: ChatId)
+
     abstract suspend fun toEditTribeScreen(chatId: ChatId)
 
     abstract suspend fun toTribeMemberList(chatId: ChatId)

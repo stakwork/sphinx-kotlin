@@ -84,6 +84,21 @@
     <dimen name="pin_pad_backspace_text_size">24sp</dimen>
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>
+    <dimen name="badges_select_medium_text_view_size">20sp</dimen>
+    <dimen name="badges_select_light_text_view_size">19sp</dimen>
+    <dimen name="badges_icon_row_size">32dp</dimen>
+    <dimen name="badges_icon_create_size">128dp</dimen>
+    <dimen name="badges_icon_upload_button_height">40dp</dimen>
+    <dimen name="badges_icon_upload_button_width">140dp</dimen>
+    <dimen name="badges_icon_size">36dp</dimen>
+    <dimen name="badges_icon_radius">18dp</dimen>
+    <dimen name="badges_text_create_button_size">18sp</dimen>
+    <dimen name="badges_row_count_height">25dp</dimen>
+    <dimen name="badges_row_count_width">45dp</dimen>
+    <dimen name="badges_constraint_badge_quantity_width">180dp</dimen>
+    <dimen name="badges_constraint_badge_quantity_height">40dp</dimen>
+
+
 
     <!-- Menu option input lock -->
     <item name="options_menu_input_lock_alpha" type="dimen" format="float">.5</item>
@@ -145,6 +160,7 @@
     <dimen name="player_time_labels_horizontal_margin">18dp</dimen>
 
     <!-- Tribe Member Profile -->
+    <dimen name="tribe_member_collapsed_height">456dp</dimen>
     <dimen name="tribe_member_image_section_height">112dp</dimen>
     <dimen name="tribe_member_image_corner_radius">56dp</dimen>
     <dimen name="tribe_member_send_sats_button_width">147dp</dimen>

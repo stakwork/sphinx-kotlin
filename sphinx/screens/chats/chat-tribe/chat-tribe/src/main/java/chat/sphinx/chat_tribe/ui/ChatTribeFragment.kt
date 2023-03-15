@@ -14,6 +14,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -23,20 +24,20 @@ import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_tribe.R
+import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
 import chat.sphinx.chat_tribe.model.TribeFeedData
-import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
+import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addKeyboardPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
@@ -46,14 +47,16 @@ import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -103,7 +106,7 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutMenuBottomMore
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
-    val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
+    private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
 
     override val menuEnablePayments: Boolean
@@ -114,7 +117,6 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
-
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -191,14 +193,36 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         tribeMemberProfileBinding.apply {
+            (requireActivity() as InsetterActivity).addStatusBarPadding(root)
             (requireActivity() as InsetterActivity).addKeyboardPadding(root)
 
             includeLayoutTribeMemberProfileDetails.apply {
-                includeLayoutTribeSendSatsBar.layoutConstraintSendSatsButton.setOnClickListener {
-                    viewModel.goToPaymentSend()
+                includeLayoutTribeSendSatsBar.apply {
+                    layoutConstraintSendSatsButton.setOnClickListener {
+                        viewModel.goToPaymentSend()
+                    }
+
+                    layoutConstraintEarnBadges.setOnClickListener {
+                        viewModel.goToKnownBadges()
+                    }
                 }
+
                 layoutConstraintDismissLine.setOnClickListener {
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
+                }
+
+                includeLayoutTribeProfileInfoContainer.apply {
+                    constraintLayoutTribeRow1.setOnClickListener {
+                        viewModel.tribeMemberProfileViewStateContainer.updateViewState(
+                            TribeMemberProfileViewState.FullScreen
+                        )
+                    }
+
+                    layoutBadgesArrowDownContainer.setOnClickListener {
+                        viewModel.tribeMemberProfileViewStateContainer.updateViewState(
+                            TribeMemberProfileViewState.Open
+                        )
+                    }
                 }
             }
         }
@@ -230,6 +254,37 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         mentionMembersPopup.listviewMentionTribeMembers.adapter = MessageMentionsAdapter(binding.root.context, mutableListOf())
+
+        tribeMemberProfileBinding.includeLayoutTribeMemberProfileDetails
+            .includeLayoutTribeProfileInfoContainer.recyclerViewBadges
+            .apply {
+                val linearLayoutManager = LinearLayoutManager(context)
+                val badgesItemsAdapter = BadgesItemAdapter(
+                    imageLoader,
+                    viewLifecycleOwner,
+                    onStopSupervisor,
+                    viewModel
+                )
+                this.setHasFixedSize(false)
+                layoutManager = linearLayoutManager
+                adapter = badgesItemsAdapter
+                itemAnimator = null
+            }
+    }
+
+    private suspend fun loadBadgeImage(imageView: ImageView, photoUrl: String?) {
+        if (photoUrl == null) {
+            imageView.invisible
+        } else {
+            imageLoader.load(
+                imageView,
+                photoUrl,
+                ImageLoaderOptions.Builder()
+                    .placeholderResId(R.drawable.sphinx_icon)
+                    .transformation(Transformation.CircleCrop)
+                    .build()
+            )
+        }
     }
 
     override fun onDestroyView() {
@@ -253,11 +308,21 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.tribeMemberProfileViewStateContainer.value is TribeMemberProfileViewState.Open) {
-                viewModel.tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
-            } else {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.handleCommonChatOnBackPressed()
+            when (viewModel.tribeMemberProfileViewStateContainer.value) {
+                is TribeMemberProfileViewState.Open -> {
+                    viewModel.tribeMemberProfileViewStateContainer.updateViewState(
+                        TribeMemberProfileViewState.Closed
+                    )
+                }
+                is TribeMemberProfileViewState.FullScreen -> {
+                    viewModel.tribeMemberProfileViewStateContainer.updateViewState(
+                        TribeMemberProfileViewState.Open
+                    )
+                }
+                else -> {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.handleCommonChatOnBackPressed()
+                    }
                 }
             }
         }
@@ -429,6 +494,36 @@ internal class ChatTribeFragment: ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->
+
+                tribeMemberProfileBinding.includeLayoutTribeMemberProfileDetails.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is TribeMemberProfileViewState.Closed -> {
+                            includeLayoutTribeProfileInfoContainer.constraintLayoutTribeRecyclerRow.gone
+                        }
+                        is TribeMemberProfileViewState.Open -> {
+                            includeLayoutTribeProfileInfoContainer.apply {
+                                constraintLayoutTribeRecyclerRow.gone
+                                constraintLayoutBadgesImageContainer.visible
+                                layoutBadgesArrowDownContainer.gone
+                            }
+
+                            layoutConstraintTribeMemberContainer.layoutParams.height = resources.getDimensionPixelSize(R.dimen.tribe_member_collapsed_height)
+                        }
+                        is TribeMemberProfileViewState.FullScreen -> {
+                            includeLayoutTribeProfileInfoContainer.apply {
+                                constraintLayoutTribeRecyclerRow.visible
+                                constraintLayoutBadgesImageContainer.gone
+                                layoutBadgesArrowDownContainer.visible
+                            }
+
+                            delay(250L)
+
+                            layoutConstraintTribeMemberContainer.layoutParams.height = 0
+                        }
+                    }
+                }
+
                 tribeMemberProfileBinding.root.setTransitionDuration(250)
                 viewState.transitionToEndSet(tribeMemberProfileBinding.root)
             }
@@ -481,7 +576,7 @@ internal class ChatTribeFragment: ChatFragment<
 
                         tribeMemberProfileBinding.apply {
                             includeLayoutTribeMemberProfileDetails.apply {
-                                layoutConstraintProgressBarContainer.visible
+                                includeLayoutLoadingPlaceholder.root.visible
                             }
                         }
                     }
@@ -490,7 +585,7 @@ internal class ChatTribeFragment: ChatFragment<
 
                         tribeMemberProfileBinding.apply {
                             includeLayoutTribeMemberProfileDetails.apply {
-                                layoutConstraintProgressBarContainer.gone
+                                includeLayoutLoadingPlaceholder.root.gone
 
                                 includeLayoutTribeProfilePictureHolder.apply {
                                     textViewTribeProfileName.text = viewState.profile.owner_alias
@@ -512,11 +607,58 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
 
                                 includeLayoutTribeProfileInfoContainer.apply {
-                                    textViewCodingLanguages.text = viewState.profile.extras?.codingLanguages ?: "-"
-                                    textViewPriceToMeet.text = viewState.profile.price_to_meet.toLong().toSat()?.asFormattedString() ?: "0"
-                                    textViewPosts.text = (viewState.profile.extras?.post?.size ?: 0).toString()
-                                    textViewTwitterAccount.text = viewState.profile.extras?.twitter?.first()?.formattedValue ?: "-"
-                                    textViewGithubAccount.text = viewState.profile.extras?.github?.first()?.formattedValue ?: "-"
+                                    textViewReputation.text = (viewState.leaderboard?.reputation ?: 0).toString()
+                                    textViewSatsContributionsNumber.text = (viewState.leaderboard?.spent ?: 0).toString()
+                                    textViewSatsEarningsNumber.text = (viewState.leaderboard?.earned ?: 0).toString()
+
+                                    if (viewState.badges.isNullOrEmpty()) {
+                                        constraintLayoutTribeRow1.gone
+                                    } else {
+                                        val badgesList = viewState.badges
+
+                                        if (badgesList.size > 4) {
+                                            textViewTribeBadgePictureNum.visible
+                                            textViewTribeBadgePictureNum.text = "+${badgesList.size - 3}"
+
+                                            cardViewBadgeImage1.visible
+                                            cardViewBadgeImage2.visible
+                                            cardViewBadgeImage3.visible
+                                            cardViewBadgeImage4.invisible
+
+                                            loadBadgeImage(imageViewTribeBadgePicture1, badgesList.getOrNull(0)?.icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture2, badgesList.getOrNull(1)?.icon)
+                                            loadBadgeImage(imageViewTribeBadgePicture3, badgesList.getOrNull(2)?.icon)
+                                        }
+                                        else {
+                                            textViewTribeBadgePictureNum.invisible
+
+                                            cardViewBadgeImage1.invisible
+                                            cardViewBadgeImage2.invisible
+                                            cardViewBadgeImage3.invisible
+                                            cardViewBadgeImage4.invisible
+
+                                            badgesList.getOrNull(0)?.let {
+                                                cardViewBadgeImage4.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture4, it.icon)
+                                            }
+
+                                            badgesList.getOrNull(2)?.let {
+                                                cardViewBadgeImage3.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture3, it.icon)
+                                            }
+
+                                            badgesList.getOrNull(3)?.let {
+                                                cardViewBadgeImage2.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture2, it.icon)
+                                            }
+
+                                            badgesList.getOrNull(4)?.let {
+                                                cardViewBadgeImage1.visible
+                                                loadBadgeImage(imageViewTribeBadgePicture1, it.icon)
+                                            }
+                                        }
+                                    }
+
                                 }
                             }
                         }
