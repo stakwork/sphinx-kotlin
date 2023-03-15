@@ -12,9 +12,12 @@ import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
@@ -29,6 +32,7 @@ import chat.sphinx.common_player.databinding.FragmentCommonPlayerScreenBinding
 import chat.sphinx.common_player.viewstate.BoostAnimationViewState
 import chat.sphinx.common_player.viewstate.PlayerViewState
 import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
+import chat.sphinx.common_player.viewstate.RecommendedFeedItemDetailsViewState
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -87,6 +91,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+
         binding.apply {
 
             includeLayoutPlayerDescriptionAndControls.includeLayoutEpisodePlaybackControls.apply {
@@ -103,7 +109,34 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
         setupBoost()
         setupItems()
+        setupFeedItemDetails()
     }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.recommendedFeedItemDetailsViewState.value is RecommendedFeedItemDetailsViewState.Open) {
+                viewModel.recommendedFeedItemDetailsViewState.updateViewState(RecommendedFeedItemDetailsViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
+    }
+
     private fun setupBoost() {
         binding.apply {
             includeLayoutBoostFireworks.apply {
@@ -172,6 +205,16 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
             layoutManager = linearLayoutManager
             adapter = ConcatAdapter(recommendedItemsAdapter, recommendedListFooterAdapter)
             itemAnimator = null
+        }
+    }
+
+    private fun setupFeedItemDetails() {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewClose.setOnClickListener {
+                viewModel.recommendedFeedItemDetailsViewState.updateViewState(
+                    RecommendedFeedItemDetailsViewState.Closed
+                )
+            }
         }
     }
 
@@ -559,6 +602,29 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.recommendedFeedItemDetailsViewState.collect { viewState ->
+
+                binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
+
+                binding.includeLayoutFeedItem.apply {
+                    when (viewState) {
+                        is RecommendedFeedItemDetailsViewState.Open -> {
+                            includeLayoutFeedItemDetails.apply {
+                                feedItemDetailsCommonInfoBinding(viewState)
+                            }
+
+                        }
+                        else -> {}
+                    }
+
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.playerViewStateContainer.collect { viewState ->
                 binding.apply {
                     @Exhaustive
@@ -614,6 +680,29 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private fun feedItemDetailsCommonInfoBinding(viewState: RecommendedFeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewMainEpisodeTitle.text = viewState.feedItemDetail?.header
+            imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, viewState.feedItemDetail?.episodeTypeImage ?: R.drawable.ic_podcast_type))
+            textViewEpisodeType.text = viewState.feedItemDetail?.episodeTypeText
+            textViewEpisodeDate.text = viewState.feedItemDetail?.episodeDate
+            textViewEpisodeDuration.text = viewState.feedItemDetail?.episodeDuration
+            textViewPodcastName.text = viewState.feedItemDetail?.podcastName
+
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                viewState.feedItemDetail?.image?.let {
+                    imageLoader.load(
+                        imageViewEpisodeDetailImage,
+                        it,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
+                            .build()
+                    )
                 }
             }
         }

@@ -191,6 +191,11 @@ class RecommendedItemsAdapter (
             binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
                 playEpisodeFromList()
             }
+            binding.buttonAdditionalOptions.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.showOptionsFor(nnEpisode)
+                }
+            }
         }
 
         private fun playEpisodeFromList(){
@@ -266,21 +271,6 @@ class RecommendedItemsAdapter (
                     buttonPlayEpisode.visible
                     layoutConstraintAlpha.gone
                     textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
-                }
-
-                //Navigation
-                buttonAdditionalOptions.setOnClickListener {
-                    viewModel.navigateToEpisodeDetail(
-                        podcastEpisode.id,
-                        podcastEpisode.titleToShow,
-                        podcastEpisode.imageUrlToShow?.value ?: "",
-                        R.drawable.ic_podcast_type,
-                        getString(R.string.podcast),
-                        podcastEpisode.dateString,
-                        "",
-                        null,
-                        podcastEpisode.link
-                    )
                 }
             }
         }

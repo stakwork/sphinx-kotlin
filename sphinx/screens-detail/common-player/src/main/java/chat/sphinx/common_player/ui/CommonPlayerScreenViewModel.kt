@@ -8,14 +8,17 @@ import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.common_player.R
 import chat.sphinx.common_player.navigation.CommonPlayerNavigator
 import chat.sphinx.common_player.viewstate.BoostAnimationViewState
 import chat.sphinx.common_player.viewstate.PlayerViewState
 import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
+import chat.sphinx.common_player.viewstate.RecommendedFeedItemDetailsViewState
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
@@ -29,6 +32,7 @@ import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import chat.sphinx.wrapper_podcast.toHrAndMin
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -52,11 +56,12 @@ internal inline val CommonPlayerScreenFragmentArgs.episodeId: FeedId
 class CommonPlayerScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val app: Application,
-    private val navigator: CommonPlayerNavigator,
+    val navigator: CommonPlayerNavigator,
     private val contactRepository: ContactRepository,
     private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
     private val lightningRepository: LightningRepository,
+    private val repositoryMedia: RepositoryMedia,
     private val moshi: Moshi,
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     savedStateHandle: SavedStateHandle,
@@ -79,6 +84,17 @@ class CommonPlayerScreenViewModel @Inject constructor(
     val playerViewStateContainer: ViewStateContainer<PlayerViewState> by lazy {
         ViewStateContainer(PlayerViewState.Idle)
     }
+
+    val recommendedFeedItemDetailsViewState: ViewStateContainer<RecommendedFeedItemDetailsViewState> by lazy {
+        ViewStateContainer(RecommendedFeedItemDetailsViewState.Closed)
+    }
+
+    private val _feedItemDetailStateFlow: MutableStateFlow<FeedItemDetail?> by lazy {
+        MutableStateFlow(null)
+    }
+
+    private val feedItemDetailStateFlow: StateFlow<FeedItemDetail?>
+        get() = _feedItemDetailStateFlow.asStateFlow()
 
     private var videoRecordConsumed: VideoRecordConsumed? = null
 
@@ -150,6 +166,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 )
             )
         }
+
     }
 
     private fun loadRecommendationsPodcast() {
@@ -466,31 +483,38 @@ class CommonPlayerScreenViewModel @Inject constructor(
             }
         }
     }
-
-    fun navigateToEpisodeDetail(
-        feedItemId: FeedId?,
-        header: String,
-        image: String,
-        episodeTypeImage: Int,
-        episodeTypeText: String,
-        episodeDate: String,
-        episodeDuration: String,
-        downloaded: Boolean?,
-        link: FeedUrl?
-    ){
+    fun showOptionsFor(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
-            navigator.toEpisodeDetail(
-                feedItemId,
-                header,
-                image,
-                episodeTypeImage,
-                episodeTypeText,
-                episodeDate,
-                episodeDuration,
-                downloaded,
-                link
+            val duration = episode.getUpdatedContentEpisodeStatus().duration.value.toInt().toHrAndMin()
+            val played = getPlayedMark(episode.id)
+            val podcastName = getPodcast()?.title?.value ?: ""
+
+            _feedItemDetailStateFlow.value = FeedItemDetail(
+                episode.id,
+                episode.titleToShow,
+                episode.image?.value ?: "",
+                R.drawable.ic_podcast_type,
+                "Podcast",
+                episode.dateString,
+                duration,
+                episode.downloaded,
+                isFeedItemDownloadInProgress(episode.id),
+                episode.episodeUrl,
+                played,
+                podcastName
+            )
+
+            recommendedFeedItemDetailsViewState.updateViewState(
+                RecommendedFeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
             )
         }
+    }
+
+    private suspend fun getPlayedMark(feedItemId: FeedId): Boolean {
+        return feedRepository.getPlayedMark(feedItemId).firstOrNull() ?: false
+    }
+    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
+        return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
 
     fun sendPodcastBoost(
