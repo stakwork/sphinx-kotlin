@@ -16,8 +16,8 @@ import chat.sphinx.known_badges.R
 import chat.sphinx.known_badges.adapter.KnownBadgesListAdapter
 import chat.sphinx.known_badges.adapter.KnownBadgesListFooterAdapter
 import chat.sphinx.known_badges.databinding.FragmentKnownBadgesBinding
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class KnownBadgesFragment: SideEffectFragment<
+internal class KnownBadgesFragment: SideEffectDetailFragment<
         Context,
         KnownBadgesSideEffect,
         KnownBadgesViewState,
@@ -57,6 +57,12 @@ internal class KnownBadgesFragment: SideEffectFragment<
         }
 
         setupKnownBadgesListAdapter()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupKnownBadgesListAdapter(){

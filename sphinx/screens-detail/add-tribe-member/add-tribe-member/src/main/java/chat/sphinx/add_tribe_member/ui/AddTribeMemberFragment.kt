@@ -16,16 +16,13 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.OnImageLoadListener
 import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_repository_chat.model.AddMember
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
-import io.matthewnelson.android_feature_screens.util.dpToPX
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.pxToDp
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
@@ -33,7 +30,7 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class AddTribeMemberFragment: SideEffectFragment<
+internal class AddTribeMemberFragment: SideEffectDetailFragment<
         Context,
         AddTribeMemberSideEffect,
         AddTribeMemberViewState,
@@ -80,6 +77,12 @@ internal class AddTribeMemberFragment: SideEffectFragment<
             binding.includeLayoutMenuBottomMemberPic,
             viewLifecycleOwner
         )
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupFragmentLayout() {

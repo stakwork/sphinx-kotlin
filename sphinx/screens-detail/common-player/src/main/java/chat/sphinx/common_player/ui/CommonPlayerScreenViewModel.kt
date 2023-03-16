@@ -169,7 +169,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
                 )
             )
         }
-
     }
 
     private fun loadRecommendationsPodcast() {
@@ -541,7 +540,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
+    private fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
 

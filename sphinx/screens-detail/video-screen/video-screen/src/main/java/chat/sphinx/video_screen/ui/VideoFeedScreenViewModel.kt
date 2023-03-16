@@ -53,7 +53,7 @@ internal open class VideoFeedScreenViewModel(
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val lightningRepository: LightningRepository,
-    private val navigator: VideoScreenNavigator
+    val navigator: VideoScreenNavigator
 ): SideEffectViewModel<
     FragmentActivity,
     VideoFeedScreenSideEffect,

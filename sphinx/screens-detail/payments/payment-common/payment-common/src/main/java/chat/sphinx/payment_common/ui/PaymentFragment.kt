@@ -24,12 +24,12 @@ import chat.sphinx.payment_common.ui.viewstate.AmountViewState
 import chat.sphinx.resources.databinding.LayoutAmountPadBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_message.SenderAlias
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.ViewState
@@ -43,7 +43,7 @@ abstract class PaymentFragment<
         ARGS: NavArgs,
         VM: PaymentViewModel<ARGS, VS>,
         VS: ViewState<VS>,
-        >(@LayoutRes layoutId: Int): SideEffectFragment<
+        >(@LayoutRes layoutId: Int): SideEffectDetailFragment<
         FragmentActivity,
         PaymentSideEffect,
         VS,
@@ -80,6 +80,12 @@ abstract class PaymentFragment<
 
         setupFooter()
         setupNumberPad()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     protected abstract fun setupFooter();

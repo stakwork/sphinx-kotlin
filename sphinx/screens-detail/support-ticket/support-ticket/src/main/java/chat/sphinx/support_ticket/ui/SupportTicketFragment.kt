@@ -10,17 +10,17 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.support_ticket.R
 import chat.sphinx.support_ticket.databinding.*
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
-internal class SupportTicketFragment: SideEffectFragment<
+internal class SupportTicketFragment: SideEffectDetailFragment<
         Context,
         SupportTicketSideEffect,
         SupportTicketViewState,
@@ -44,6 +44,12 @@ internal class SupportTicketFragment: SideEffectFragment<
 
         setupFragmentLayout()
         setupSupportTicketFunctionality()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupFragmentLayout() {

@@ -12,12 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.tribe_members_list.R
 import chat.sphinx.tribe_members_list.databinding.FragmentTribeMembersListBinding
 import chat.sphinx.tribe_members_list.ui.adapter.TribeMembersListAdapter
 import chat.sphinx.tribe_members_list.ui.adapter.TribeMembersListFooterAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class TribeMembersListFragment: SideEffectFragment<
+internal class TribeMembersListFragment: SideEffectDetailFragment<
         Context,
         TribeMembersListSideEffect,
         TribeMembersListViewState,
@@ -56,6 +56,12 @@ internal class TribeMembersListFragment: SideEffectFragment<
         }
 
         setupTribeMembers()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupTribeMembers() {

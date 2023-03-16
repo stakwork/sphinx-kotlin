@@ -11,10 +11,13 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.activity.OnBackPressedCallback
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -91,6 +94,32 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         setupVideoPlayer()
         setupFeedItemDetails()
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.videoFeedItemDetailsViewState.value is VideoFeedItemDetailsViewState.Open) {
+                viewModel.videoFeedItemDetailsViewState.updateViewState(VideoFeedItemDetailsViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
