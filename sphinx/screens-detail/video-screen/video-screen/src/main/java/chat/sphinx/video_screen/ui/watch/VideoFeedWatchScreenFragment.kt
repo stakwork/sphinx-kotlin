@@ -25,6 +25,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
@@ -93,8 +94,14 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         setupItems()
         setupVideoPlayer()
         setupFeedItemDetails()
+        setupFragmentLayout()
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
+    }
+
+    private fun setupFragmentLayout() {
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.constraintLayoutFeedItem)
     }
 
     private inner class BackPressHandler(

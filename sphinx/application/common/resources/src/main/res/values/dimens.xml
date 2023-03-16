@@ -165,4 +165,9 @@
     <dimen name="tribe_member_image_corner_radius">56dp</dimen>
     <dimen name="tribe_member_send_sats_button_width">147dp</dimen>
     <dimen name="tribe_member_send_sats_button_height">40dp</dimen>
+
+    <!-- Feed Item Detail -->
+    <dimen name="feed_item_detail_row_height">65dp</dimen>
+    <dimen name="feed_item_detail_rows_container_height">260dp</dimen>
+    <dimen name="feed_item_detail_rows_container_margin_top">36dp</dimen>
 </resources>

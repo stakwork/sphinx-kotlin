@@ -7,10 +7,10 @@
     android:background="@color/body">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraintLayout"
+        android:id="@+id/constraint_layout_feed_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/default_header_margin_horizontal"
+        android:paddingHorizontal="@dimen/default_header_margin_horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -163,8 +163,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_buttons_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:layout_height="@dimen/feed_item_detail_rows_container_height"
+            android:layout_marginTop="@dimen/feed_item_detail_rows_container_margin_top"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_episode_info_container">
@@ -172,8 +172,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_constraint_download_row"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_layout_margin"
+                android:layout_height="@dimen/feed_item_detail_row_height"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -183,8 +182,9 @@
                     android:layout_height="@dimen/default_double_layout_margin"
                     app:cardElevation="0dp"
                     app:cardBackgroundColor="@color/bodyTransparent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
 
                     <ProgressBar
                         android:id="@+id/progress_bar_episode_download"
@@ -254,9 +254,9 @@
                     android:text="@string/episode_detail_download"
                     android:textColor="@color/text"
                     android:textSize="@dimen/custom_boost_text_size"
-                    app:layout_constraintBottom_toBottomOf="@+id/card_view_download_wrapper"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/card_view_download_wrapper"
-                    app:layout_constraintTop_toTopOf="@+id/card_view_download_wrapper"
                     tools:text="Download" />
 
                 <View
@@ -267,18 +267,16 @@
                     android:background="@color/lightEpisodeDivider"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/card_view_download_wrapper" />
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_constraint_share_row"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_layout_margin"
+                android:layout_height="@dimen/feed_item_detail_row_height"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/layout_constraint_download_row">
-
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/button_share_arrow"
@@ -286,7 +284,8 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_episode_share"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
 
                 <TextView
                     android:id="@+id/text_view_share"
@@ -299,9 +298,9 @@
                     android:text="@string/episode_detail_share"
                     android:textColor="@color/text"
                     android:textSize="@dimen/custom_boost_text_size"
-                    app:layout_constraintBottom_toBottomOf="@+id/button_share_arrow"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/button_share_arrow"
-                    app:layout_constraintTop_toTopOf="@+id/button_share_arrow"
                     tools:text="Share" />
 
                 <View
@@ -312,18 +311,16 @@
                     android:background="@color/lightEpisodeDivider"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/button_share_arrow" />
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_constraint_copy_link_row"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_layout_margin"
+                android:layout_height="@dimen/feed_item_detail_row_height"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/layout_constraint_share_row">
-
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/button_copy_link"
@@ -331,7 +328,8 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_copy_link"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
                 <TextView
                     android:id="@+id/text_view_copy_link"
@@ -344,9 +342,9 @@
                     android:text="@string/episode_detail_copy_link"
                     android:textColor="@color/text"
                     android:textSize="@dimen/custom_boost_text_size"
-                    app:layout_constraintBottom_toBottomOf="@+id/button_copy_link"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/button_copy_link"
-                    app:layout_constraintTop_toTopOf="@+id/button_copy_link"
                     tools:text="Copy Link" />
 
                 <View
@@ -357,15 +355,14 @@
                     android:background="@color/lightEpisodeDivider"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/button_copy_link" />
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_constraint_check_mark_row"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_layout_margin"
+                android:layout_height="@dimen/feed_item_detail_row_height"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/layout_constraint_copy_link_row">
 
@@ -375,7 +372,8 @@
                     android:layout_height="wrap_content"
                     android:src="@drawable/ic_check_mark"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/button_check_mark_played"
@@ -384,7 +382,8 @@
                     android:src="@drawable/ic_mark_played"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
                 <TextView
                     android:id="@+id/text_view_check_mark"
@@ -397,9 +396,9 @@
                     android:text="@string/episode_detail_played"
                     android:textColor="@color/text"
                     android:textSize="@dimen/custom_boost_text_size"
-                    app:layout_constraintBottom_toBottomOf="@+id/button_check_mark"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/button_check_mark"
-                    app:layout_constraintTop_toTopOf="@+id/button_check_mark"
                     tools:text="Mark as Played" />
 
                 <View
@@ -410,7 +409,8 @@
                     android:background="@color/lightEpisodeDivider"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/button_check_mark" />
+                    app:layout_constraintBottom_toBottomOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -418,9 +418,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_close_container"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/chat_footer_button_xy"
-
+            android:layout_height="0dp"
+            android:layout_marginVertical="@dimen/default_layout_margin"
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_buttons_container"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -428,7 +428,7 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_close"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:fontFamily="@font/montserrat_regular"
                 android:gravity="center"
                 android:letterSpacing="0.2"
@@ -438,10 +438,8 @@
                 android:textSize="@dimen/custom_boost_text_size"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.0"
                 tools:text="CLOSE" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
