@@ -824,6 +824,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: CommonPlayerScreenSideEffect) {
+        sideEffect.execute(requireActivity())
     }
 }
 
