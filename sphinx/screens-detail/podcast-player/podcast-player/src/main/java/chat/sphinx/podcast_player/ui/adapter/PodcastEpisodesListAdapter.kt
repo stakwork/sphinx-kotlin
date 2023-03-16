@@ -80,7 +80,9 @@ internal class PodcastEpisodesListAdapter(
 
                 val same: Boolean = old.playing == new.playing &&
                                     old.downloaded == new.downloaded &&
-                                    old.played == new.played
+                                    old.played == new.played &&
+                                    viewModel.isFeedItemDownloadInProgress(old.id) == viewModel.isFeedItemDownloadInProgress(new.id)
+
 
                 if (sameList) {
                     sameList = same
@@ -263,16 +265,13 @@ internal class PodcastEpisodesListAdapter(
 
                 // played
 
-                val played = (podcastEpisode.contentEpisodeStatus?.played)
-
-                if (played == true) {
+                if (podcastEpisode.played) {
                     seekBarCurrentTimeEpisodeProgress.gone
                     buttonCheckMarkPlayed.visible
                     textViewItemEpisodeTime.text = getString(R.string.episode_detail_played_holder)
                 } else {
                     buttonCheckMarkPlayed.gone
                  }
-
 
                 //Playing State
                 if (podcastEpisode.playing) {

@@ -634,6 +634,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                                 feedItemDetailsCommonInfoBinding(viewState)
                                 layoutConstraintDownloadRow.gone
                                 layoutConstraintCheckMarkRow.gone
+                                circleSplitTwo.gone
+                                textViewEpisodeDuration.gone
                             }
 
                         }

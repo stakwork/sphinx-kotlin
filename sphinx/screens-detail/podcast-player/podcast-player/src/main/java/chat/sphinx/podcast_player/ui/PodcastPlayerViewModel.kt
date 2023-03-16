@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -51,7 +52,9 @@ import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
@@ -613,27 +616,41 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun downloadMediaByItemId(feedId: FeedId) {
         viewModelScope.launch(mainImmediate) {
             feedRepository.getFeedItemById(feedId).firstOrNull()?.let { feedItem ->
-                repositoryMedia.downloadMediaIfApplicable(feedItem) { _ ->
+                repositoryMedia.downloadMediaIfApplicable(feedItem) { localFile ->
+                    
                     _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
                         downloaded = true,
                         isDownloadInProgress = false
                     )
-                    feedItemDetailsViewStateContainer.updateViewState(
-                        FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
-                    )
+
+                    getPodcastFeed()?.let { nnPodcast ->
+                        nnPodcast.getEpisodeWithId(feedId.value)?.let { episode ->
+                            episode.localFile = localFile
+                        }
+                    }
+
+                    if (feedItemDetailsViewStateContainer.value is FeedItemDetailsViewState.Open) {
+                        feedItemDetailsViewStateContainer.updateViewState(
+                            FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+                        )
+                    }
+
+                    forceListReload()
                 }
             }
+
             val isFeedItemDownloadInProgress = repositoryMedia.inProgressDownloadIds()
-                .contains(feedItemDetailStateFlow.value?.feedId)
+                .contains(feedId)
 
             _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
                 isDownloadInProgress = isFeedItemDownloadInProgress
             )
-            if (feedItemDetailsViewStateContainer.value is FeedItemDetailsViewState.Open) {
-                feedItemDetailsViewStateContainer.updateViewState(
-                    FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
-                )
-            }
+
+            feedItemDetailsViewStateContainer.updateViewState(
+                FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+            )
+
+            forceListReload()
         }
     }
 
@@ -643,10 +660,19 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
                 if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
                     _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(downloaded = false)
+
+                    getPodcastFeed()?.let { nnPodcast ->
+                        nnPodcast.getEpisodeWithId(feedId.value)?.let { episode ->
+                            episode.localFile = null
+                        }
+                    }
                 }
+
                 feedItemDetailsViewStateContainer.updateViewState(
                     FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
                 )
+
+                forceListReload()
             }
         }
     }
@@ -728,15 +754,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 }
             }
 
+            forceListReload()
+
             feedItemDetailsViewStateContainer.updateViewState(
                 FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
             )
-        }
-    }
-
-    suspend fun deleteDownloadedMedia(podcastEpisode: PodcastEpisode) {
-        if (repositoryMedia.deleteDownloadedMediaIfApplicable(podcastEpisode)) {
-            podcastEpisode.localFile = null
         }
     }
 
@@ -752,6 +774,33 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     if (podcast.subscribed.isTrue()) Subscribed.False else Subscribed.True,
                 )
             }
+        }
+    }
+
+    private fun forceListReload() {
+        when (val viewState = viewStateContainer.viewStateFlow.value) {
+            is PodcastPlayerViewState.PodcastLoaded -> {
+                viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
+
+                viewStateContainer.updateViewState(
+                    PodcastPlayerViewState.PodcastLoaded(viewState.podcast)
+                )
+            }
+            is PodcastPlayerViewState.EpisodePlayed -> {
+                viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
+
+                viewStateContainer.updateViewState(
+                    PodcastPlayerViewState.EpisodePlayed(viewState.podcast)
+                )
+            }
+            is PodcastPlayerViewState.MediaStateUpdate -> {
+                viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
+
+                viewStateContainer.updateViewState(
+                    PodcastPlayerViewState.MediaStateUpdate(viewState.podcast, viewState.state)
+                )
+            }
+            else -> {}
         }
     }
 }

@@ -23,7 +23,8 @@ data class Podcast(
     val datePublished: DateTime?,
     val chatId: ChatId,
     val feedUrl: FeedUrl,
-    val subscribed: Subscribed
+    val subscribed: Subscribed,
+    var forceUpdate: Boolean = false
 ) {
 
     companion object {
@@ -192,6 +193,7 @@ data class Podcast(
             val episodeCopy = episode.copy()
             episodeCopy.playing = episode.playing
             episodeCopy.contentEpisodeStatus = episode.contentEpisodeStatus
+            episodeCopy.played = episode.played
 
             episodesList.add(episodeCopy)
         }
