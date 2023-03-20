@@ -242,7 +242,10 @@ abstract class ContactFragment<
                     }
 
                     buttonQrCode.setOnClickListener {
-                        viewModel.toQrCodeLightningNodePubKey(sideEffect.pubKey.value)
+                        val key = sideEffect.routeHint?.let { routeHint ->
+                            "${sideEffect.pubKey.value}:${routeHint.value}"
+                        } ?: sideEffect.pubKey.value
+                        viewModel.toQrCodeLightningNodePubKey(key)
                     }
                 }
             }
