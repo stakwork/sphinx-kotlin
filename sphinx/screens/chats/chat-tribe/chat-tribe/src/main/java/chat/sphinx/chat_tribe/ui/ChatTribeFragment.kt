@@ -642,17 +642,17 @@ internal class ChatTribeFragment: ChatFragment<
                                                 loadBadgeImage(imageViewTribeBadgePicture4, it.icon)
                                             }
 
-                                            badgesList.getOrNull(2)?.let {
+                                            badgesList.getOrNull(1)?.let {
                                                 cardViewBadgeImage3.visible
                                                 loadBadgeImage(imageViewTribeBadgePicture3, it.icon)
                                             }
 
-                                            badgesList.getOrNull(3)?.let {
+                                            badgesList.getOrNull(2)?.let {
                                                 cardViewBadgeImage2.visible
                                                 loadBadgeImage(imageViewTribeBadgePicture2, it.icon)
                                             }
 
-                                            badgesList.getOrNull(4)?.let {
+                                            badgesList.getOrNull(3)?.let {
                                                 cardViewBadgeImage1.visible
                                                 loadBadgeImage(imageViewTribeBadgePicture1, it.icon)
                                             }

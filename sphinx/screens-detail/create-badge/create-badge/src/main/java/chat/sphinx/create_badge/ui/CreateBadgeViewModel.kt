@@ -70,6 +70,9 @@ internal class CreateBadgeViewModel @Inject constructor(
     companion object {
         const val DEFAULT_QUANTITY: Int = 100
         const val DEFAULT_PRICE_PER_BADGE: Int = 10
+
+        const val TYPE_TEMPLATE = 0
+        const val TYPE_BADGE = 1
     }
 
     private val args: CreateBadgeFragmentArgs by savedStateHandle.navArgs()
@@ -82,7 +85,7 @@ internal class CreateBadgeViewModel @Inject constructor(
     }
 
     init {
-        if (args.argHolderType == 1 ) {
+        if (args.argHolderType == TYPE_BADGE) {
             updateViewState(CreateBadgeViewState.ToggleBadge(args.badge))
         } else {
             updateViewState(
