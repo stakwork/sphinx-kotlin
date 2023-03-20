@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha85 (2023-03-20)
+- Adds new episodes layout on player
+- Fixes issues on tribe badges feature
+
 # Version 1.0.0-alpha84 (2023-03-08)
 - Adds support for tribe badges
 
