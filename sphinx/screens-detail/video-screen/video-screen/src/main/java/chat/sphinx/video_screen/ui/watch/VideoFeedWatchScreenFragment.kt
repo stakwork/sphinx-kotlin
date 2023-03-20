@@ -10,10 +10,14 @@ import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.core.content.ContextCompat
+import androidx.activity.OnBackPressedCallback
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -21,17 +25,18 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
 import chat.sphinx.video_screen.adapter.VideoFeedItemsFooterAdapter
 import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
 import chat.sphinx.video_screen.ui.VideoFeedScreenSideEffect
-import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.video_screen.BuildConfig
+import chat.sphinx.video_screen.ui.viewstate.*
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
-import chat.sphinx.video_screen.BuildConfig
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.isTrue
@@ -50,6 +55,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -87,7 +93,40 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         setupBoost()
         setupItems()
         setupVideoPlayer()
+        setupFeedItemDetails()
+        setupFragmentLayout()
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+    }
+
+    private fun setupFragmentLayout() {
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.constraintLayoutFeedItem)
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.videoFeedItemDetailsViewState.value is VideoFeedItemDetailsViewState.Open) {
+                viewModel.videoFeedItemDetailsViewState.updateViewState(VideoFeedItemDetailsViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
@@ -407,6 +446,31 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.videoFeedItemDetailsViewState.collect { viewState ->
+
+                binding.includeLayoutFeedItem.apply {
+                    when (viewState) {
+                        is VideoFeedItemDetailsViewState.Open -> {
+                            includeLayoutFeedItemDetails.apply {
+                                feedItemDetailsCommonInfoBinding(viewState)
+                                layoutConstraintDownloadRow.gone
+                                layoutConstraintCheckMarkRow.gone
+                                circleSplitTwo.gone
+                                textViewEpisodeDuration.gone
+                            }
+
+                        }
+                        else -> {}
+                    }
+
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -422,6 +486,53 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
             }
             requestLayout()
+        }
+    }
+
+    private fun feedItemDetailsCommonInfoBinding(viewState: VideoFeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewMainEpisodeTitle.text = viewState.feedItemDetail?.header
+            imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, viewState.feedItemDetail?.episodeTypeImage ?: R.drawable.ic_podcast_type))
+            textViewEpisodeType.text = viewState.feedItemDetail?.episodeTypeText
+            textViewEpisodeDate.text = viewState.feedItemDetail?.episodeDate
+            textViewEpisodeDuration.text = viewState.feedItemDetail?.episodeDuration
+            textViewPodcastName.text = viewState.feedItemDetail?.podcastName
+
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                viewState.feedItemDetail?.image?.let {
+                    imageLoader.load(
+                        imageViewEpisodeDetailImage,
+                        it,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
+                            .build()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun setupFeedItemDetails() {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewClose.setOnClickListener {
+                viewModel.videoFeedItemDetailsViewState.updateViewState(
+                    VideoFeedItemDetailsViewState.Closed
+                )
+            }
+            layoutConstraintCopyLinkRow.setOnClickListener {
+                (viewModel.videoFeedItemDetailsViewState.value as? VideoFeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.copyCodeToClipboard(link)
+                    }
+                }
+            }
+            layoutConstraintShareRow.setOnClickListener {
+                (viewModel.videoFeedItemDetailsViewState.value as? VideoFeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.share(link, binding.root.context)
+                    }
+                }
+            }
         }
     }
 

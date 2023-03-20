@@ -23,12 +23,12 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.wrapper_common.lightning.getPubKey
 import chat.sphinx.wrapper_common.lightning.getRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
 import chat.sphinx.wrapper_common.util.getInitials
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -38,7 +38,7 @@ abstract class ContactFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ContactViewModel<ARGS>,
-        >(@LayoutRes layoutId: Int) : SideEffectFragment<
+        >(@LayoutRes layoutId: Int) : SideEffectDetailFragment<
         Context,
         ContactSideEffect,
         ContactViewState,
@@ -156,6 +156,12 @@ abstract class ContactFragment<
         viewModel.initContactDetails()
     }
 
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private fun pastePubKey(s: Editable?) {
         s?.toString()?.toLightningNodePubKey()?.let { nnPubKey ->
@@ -236,7 +242,10 @@ abstract class ContactFragment<
                     }
 
                     buttonQrCode.setOnClickListener {
-                        viewModel.toQrCodeLightningNodePubKey(sideEffect.pubKey.value)
+                        val key = sideEffect.routeHint?.let { routeHint ->
+                            "${sideEffect.pubKey.value}:${routeHint.value}"
+                        } ?: sideEffect.pubKey.value
+                        viewModel.toQrCodeLightningNodePubKey(key)
                     }
                 }
             }

@@ -27,12 +27,12 @@ import chat.sphinx.scanner.R
 import chat.sphinx.scanner.databinding.FragmentScannerBinding
 import chat.sphinx.scanner.navigation.BackType
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import com.google.mlkit.vision.barcode.Barcode
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 typealias BarcodeListener = (barcode: String) -> Unit
 
 @AndroidEntryPoint
-internal class ScannerFragment: SideEffectFragment<
+internal class ScannerFragment: SideEffectDetailFragment<
         Context,
         NotifySideEffect,
         ScannerViewState,
@@ -66,6 +66,12 @@ internal class ScannerFragment: SideEffectFragment<
         // have to call it here so it gets injected and can
         // catch the request asap
         viewModel
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.goBack(BackType.CloseDetailScreen)
+        }
     }
 
     private val requestPermissionLauncher by lazy(LazyThreadSafetyMode.NONE) {

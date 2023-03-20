@@ -51,6 +51,8 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
+
 
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
 

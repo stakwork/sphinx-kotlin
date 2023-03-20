@@ -6699,6 +6699,7 @@ abstract class SphinxRepository(
         itemId: FeedId,
         duration: FeedItemDuration,
         currentTime: FeedItemDuration,
+        played: Boolean,
         shouldSync: Boolean
     ) {
         applicationScope.launch(io) {
@@ -6713,7 +6714,9 @@ abstract class SphinxRepository(
                     feed_id = feedId,
                     item_id = itemId,
                     duration = duration,
-                    current_time = currentTime
+                    current_time = currentTime,
+                    played = played
+
                 )
             }
 
@@ -6727,7 +6730,8 @@ abstract class SphinxRepository(
         itemId: FeedId,
         feedId: FeedId,
         duration: FeedItemDuration,
-        queries: SphinxDatabaseQueries
+        queries: SphinxDatabaseQueries,
+        played: Boolean = false
     ) {
         applicationScope.launch(io) {
             contentEpisodeLock.withLock {
@@ -6736,10 +6740,38 @@ abstract class SphinxRepository(
                     FeedItemDuration(0),
                     itemId,
                     feedId,
+                    played
                 )
             }
         }
     }
+
+    override fun updatePlayedMark(
+        feedItemId: FeedId,
+        played: Boolean
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentEpisodeLock.withLock {
+                queries.contentEpisodeStatusUpdatePlayed(
+                    played,
+                    feedItemId
+                )
+            }
+        }
+    }
+
+    override fun getPlayedMark(feedItemId: FeedId): Flow<Boolean?> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().contentEpisodeStatusGetPlayedByItemId(feedItemId)
+                .asFlow()
+                .mapToOneOrNull()
+                .map { it?.played }
+                .distinctUntilChanged()
+        )
+    }
+
 
     override fun saveContentFeedStatuses() {
         applicationScope.launch(io) {
@@ -6763,15 +6795,9 @@ abstract class SphinxRepository(
             ).collect { loadResponse ->
                 @Exhaustive
                 when (loadResponse) {
-                    is LoadResponse.Loading -> {
-
-                    }
-                    is Response.Error -> {
-
-                    }
-                    is Response.Success -> {
-
-                    }
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {}
+                    is Response.Success -> {}
                 }
             }
         }
@@ -7001,7 +7027,8 @@ abstract class SphinxRepository(
                             FeedItemDuration(status.duration),
                             FeedItemDuration(status.current_time),
                             FeedId(episodeId),
-                            FeedId(contentFeedStatus.feed_id)
+                            FeedId(contentFeedStatus.feed_id),
+                            null
                         )
                     }
                 }

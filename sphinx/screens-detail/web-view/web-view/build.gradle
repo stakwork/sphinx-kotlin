@@ -33,6 +33,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
+    implementation project(path: ':sphinx:application:common:screen-detail-fragment')
 
     // Sphinx
     api project(path: ':sphinx:activity:insetter-activity')

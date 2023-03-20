@@ -12,19 +12,17 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.notification_level.R
 import chat.sphinx.notification_level.databinding.FragmentNotificationLevelBinding
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.wrapper_chat.NotificationLevel
 import chat.sphinx.wrapper_chat.isMuteChat
 import chat.sphinx.wrapper_chat.isOnlyMentions
 import chat.sphinx.wrapper_chat.isSeeAll
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
-internal class NotificationLevelFragment: SideEffectFragment<
+internal class NotificationLevelFragment: SideEffectDetailFragment<
         Context,
         NotificationLevelSideEffect,
         NotificationLevelViewState,
@@ -48,6 +46,12 @@ internal class NotificationLevelFragment: SideEffectFragment<
         }
 
         setupFragmentLayout()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupFragmentLayout() {

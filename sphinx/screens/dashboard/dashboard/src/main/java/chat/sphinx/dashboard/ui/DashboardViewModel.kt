@@ -973,7 +973,7 @@ internal class DashboardViewModel @Inject constructor(
                             _restoreProgressStateFlow.value = RestoreProgressViewState(
                                 response.value.progress,
                                 R.string.dashboard_restore_progress_feeds,
-                                true
+                                false
                             )
                         } else {
                             _restoreProgressStateFlow.value = null

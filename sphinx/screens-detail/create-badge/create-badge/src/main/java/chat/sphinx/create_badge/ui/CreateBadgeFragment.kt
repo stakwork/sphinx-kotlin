@@ -2,43 +2,27 @@ package chat.sphinx.create_badge.ui
 
 import android.content.Context
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
-import android.view.KeyEvent
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.ImageView
-import android.widget.TextView
-import androidx.appcompat.widget.AppCompatEditText
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
-import chat.sphinx.concept_network_query_people.model.BadgeCreateDto
 import chat.sphinx.create_badge.R
 import chat.sphinx.create_badge.databinding.FragmentCreateBadgeBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.getString
-import chat.sphinx.resources.inputMethodManager
-import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class CreateBadgeFragment: SideEffectFragment<
+internal class CreateBadgeFragment: SideEffectDetailFragment<
         Context,
         CreateBadgeSideEffect,
         CreateBadgeViewState,
@@ -60,7 +44,6 @@ internal class CreateBadgeFragment: SideEffectFragment<
 
             (requireActivity() as InsetterActivity)
                 .addNavigationBarPadding(binding.root)
-//                .addNavigationBarPadding(binding.root)
 
             includeCreateBadgeHeader.textViewDetailScreenClose.gone
             includeCreateBadgeHeader.textViewDetailScreenHeaderNavBack.visible
@@ -91,6 +74,12 @@ internal class CreateBadgeFragment: SideEffectFragment<
             buttonBadgesQuantityPlus.setOnClickListener {
                 viewModel.increaseQuantity()
             }
+        }
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
         }
     }
 

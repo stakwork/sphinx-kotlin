@@ -1,6 +1,10 @@
 package chat.sphinx.video_screen.ui
 
 import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_actions.ActionsRepository
@@ -11,21 +15,23 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_screen.R
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
+import chat.sphinx.video_screen.ui.viewstate.VideoFeedItemDetailsViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedItem
-import chat.sphinx.wrapper_feed.FeedPlayerSpeed
-import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
+import chat.sphinx.wrapper_podcast.PodcastEpisode
+import chat.sphinx.wrapper_podcast.toHrAndMin
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -47,6 +53,7 @@ internal open class VideoFeedScreenViewModel(
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val lightningRepository: LightningRepository,
+    val navigator: VideoScreenNavigator
 ): SideEffectViewModel<
     FragmentActivity,
     VideoFeedScreenSideEffect,
@@ -123,6 +130,19 @@ internal open class VideoFeedScreenViewModel(
     open val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
         ViewStateContainer(BoostAnimationViewState.Idle)
     }
+
+    private val _feedItemDetailStateFlow: MutableStateFlow<FeedItemDetail?> by lazy {
+        MutableStateFlow(null)
+    }
+
+    private val feedItemDetailStateFlow: StateFlow<FeedItemDetail?>
+        get() = _feedItemDetailStateFlow.asStateFlow()
+
+
+    val videoFeedItemDetailsViewState: ViewStateContainer<VideoFeedItemDetailsViewState> by lazy {
+        ViewStateContainer(VideoFeedItemDetailsViewState.Closed)
+    }
+
 
     protected fun subscribeToViewStateFlow() {
         viewModelScope.launch(mainImmediate) {
@@ -283,6 +303,85 @@ internal open class VideoFeedScreenViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun showOptionsFor(video: FeedItem) {
+        viewModelScope.launch(mainImmediate) {
+            _feedItemDetailStateFlow.value = FeedItemDetail(
+                video.id,
+                video.titleToShow,
+                video.thumbnailUrlToShow?.value ?: "",
+                R.drawable.ic_youtube_type,
+                "Youtube",
+                video.datePublished?.hhmmElseDate() ?: "",
+                video.duration?.value?.toInt().toString(),
+                null,
+                false,
+                video.link?.value,
+                false,
+                null
+
+            )
+
+            videoFeedItemDetailsViewState.updateViewState(
+                VideoFeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+            )
+        }
+    }
+
+    fun share(link: String, context: Context) {
+        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, link)
+        }
+
+        context.startActivity(
+            Intent.createChooser(
+                sharingIntent,
+                app.getString(R.string.episode_detail_share_link)
+            )
+        )
+    }
+
+    fun copyCodeToClipboard(link: String) {
+        (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+            val clipData = ClipData.newPlainText("text", link)
+            manager.setPrimaryClip(clipData)
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    VideoFeedScreenSideEffect.Notify((app.getString(R.string.episode_detail_clipboard))
+                    )
+                )
+            }
+        }
+    }
+
+
+    fun navigateToEpisodeDetail(
+        feedItemId: FeedId?,
+        header: String,
+        image: String,
+        episodeTypeImage: Int,
+        episodeTypeText: String,
+        episodeDate: String,
+        episodeDuration: String,
+        downloaded: Boolean?,
+        link: FeedUrl?,
+    ){
+        viewModelScope.launch(mainImmediate) {
+            navigator.toEpisodeDetail(
+                feedItemId,
+                header,
+                image,
+                episodeTypeImage,
+                episodeTypeText,
+                episodeDate,
+                episodeDuration,
+                downloaded,
+                link
+            )
         }
     }
 

@@ -23,7 +23,8 @@ data class Podcast(
     val datePublished: DateTime?,
     val chatId: ChatId,
     val feedUrl: FeedUrl,
-    val subscribed: Subscribed
+    val subscribed: Subscribed,
+    var forceUpdate: Boolean = false
 ) {
 
     companion object {
@@ -136,6 +137,18 @@ data class Podcast(
             }
         }
 
+    private var played: Boolean?
+        get() {
+          return playingEpisode?.getUpdatedContentEpisodeStatus()?.played
+        }
+        set(value) {
+            value?.let {
+                playingEpisode?.contentEpisodeStatus = playingEpisode?.getUpdatedContentEpisodeStatus()?.copy(
+                    played = it
+                )
+            }
+        }
+
     @Volatile
     var playingEpisode: PodcastEpisode? = null
         get() {
@@ -179,6 +192,8 @@ data class Podcast(
         for (episode in this.episodes) {
             val episodeCopy = episode.copy()
             episodeCopy.playing = episode.playing
+            episodeCopy.contentEpisodeStatus = episode.contentEpisodeStatus
+            episodeCopy.played = episode.played
 
             episodesList.add(episodeCopy)
         }
@@ -223,7 +238,8 @@ data class Podcast(
             this.id,
             getCurrentEpisode().id,
             FeedItemDuration(0),
-            FeedItemDuration(0)
+            FeedItemDuration(0),
+            null
         )
 
     fun getSpeedString(): String {
@@ -389,6 +405,7 @@ data class Podcast(
         this.episodeId = nextEpisode.id.value
         this.episodeDurationMilliseconds = nextEpisode.durationMilliseconds ?: 0
         this.timeMilliSeconds = 0
+        this.played = true
 
         getCurrentEpisodeDuration(durationRetrieverHandle)
     }

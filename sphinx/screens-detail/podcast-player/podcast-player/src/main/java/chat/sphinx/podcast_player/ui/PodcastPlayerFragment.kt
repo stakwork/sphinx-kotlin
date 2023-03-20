@@ -9,9 +9,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
@@ -23,11 +25,13 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
 import chat.sphinx.podcast_player.ui.viewstates.BoostAnimationViewState
+import chat.sphinx.podcast_player.ui.viewstates.FeedItemDetailsViewState
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -43,8 +47,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -86,6 +92,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+
         binding.apply {
             textViewDismissButton.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
@@ -105,8 +113,78 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             }
         }
 
+        setupFeedItemDetails()
         setupBoost()
         setupEpisodes()
+        setupFragmentLayout()
+    }
+
+    private fun setupFragmentLayout() {
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.constraintLayoutFeedItem)
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.feedItemDetailsViewStateContainer.value is FeedItemDetailsViewState.Open) {
+                viewModel.feedItemDetailsViewStateContainer.updateViewState(FeedItemDetailsViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
+    }
+
+    private fun setupFeedItemDetails() {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewClose.setOnClickListener {
+                viewModel.feedItemDetailsViewStateContainer.updateViewState(
+                    FeedItemDetailsViewState.Closed
+                )
+            }
+            layoutConstraintDownloadRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.feedId?.let { feedId ->
+                        if (viewState.feedItemDetail.downloaded == true) {
+                            viewModel.deleteDownloadedMediaByItemId(feedId)
+                        } else {
+                            viewModel.downloadMediaByItemId(feedId)
+                        }
+                    }
+                }
+            }
+            layoutConstraintCheckMarkRow.setOnClickListener {
+                viewModel.updatePlayedMark()
+            }
+            layoutConstraintCopyLinkRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.copyCodeToClipboard(link)
+                    }
+                }
+            }
+            layoutConstraintShareRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.link?.let { link ->
+                        viewModel.share(link, binding.root.context)
+                    }
+                }
+            }
+        }
     }
 
     private fun setupBoost() {
@@ -568,6 +646,91 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                         )
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.feedItemDetailsViewStateContainer.collect { viewState ->
+
+                binding.includeLayoutFeedItem.apply {
+                    when (viewState) {
+                        is FeedItemDetailsViewState.Open -> {
+                            includeLayoutFeedItemDetails.apply {
+                                feedItemDetailsCommonInfoBinding(viewState)
+                                setFeedItemDetailsDownloadState(viewState)
+                                setPlayedMarkState(viewState)
+                            }
+
+                        }
+                        else -> {}
+                    }
+
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+    }
+
+    private fun feedItemDetailsCommonInfoBinding(viewState: FeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewMainEpisodeTitle.text = viewState.feedItemDetail?.header
+            imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, viewState.feedItemDetail?.episodeTypeImage ?: R.drawable.ic_podcast_type))
+            textViewEpisodeType.text = viewState.feedItemDetail?.episodeTypeText
+            textViewEpisodeDate.text = viewState.feedItemDetail?.episodeDate
+            textViewEpisodeDuration.text = viewState.feedItemDetail?.episodeDuration
+            textViewPodcastName.text = viewState.feedItemDetail?.podcastName
+
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                viewState.feedItemDetail?.image?.let {
+                    imageLoader.load(
+                        imageViewEpisodeDetailImage,
+                        it,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
+                            .build()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun setFeedItemDetailsDownloadState(viewState: FeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            if (viewState.feedItemDetail?.isDownloadInProgress == true) {
+                buttonDownloadArrow.gone
+                imageDownloadedEpisodeArrow.gone
+                progressBarEpisodeDownload.visible
+                buttonStop.visible
+            } else {
+                if (viewState.feedItemDetail?.downloaded == true) {
+                    buttonDownloadArrow.gone
+                    imageDownloadedEpisodeArrow.visible
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_erase)
+                }
+                else {
+                    buttonDownloadArrow.visible
+                    imageDownloadedEpisodeArrow.gone
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_download)
+                }
+            }
+        }
+    }
+
+    private fun setPlayedMarkState(viewState: FeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            if (viewState.feedItemDetail?.played == true) {
+                buttonCheckMarkPlayed.visible
+                buttonCheckMark.invisible
+                textViewCheckMark.text = getString(R.string.episode_detail_upplayed)
+            } else {
+                buttonCheckMarkPlayed.invisible
+                buttonCheckMark.visible
+                textViewCheckMark.text = getString(R.string.episode_detail_played)
             }
         }
     }

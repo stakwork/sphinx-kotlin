@@ -31,6 +31,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     api project(path: ':android:features:android-feature-screens')
+    api project(path: ':sphinx:application:common:screen-detail-fragment')
     // Sphinx
     api project(path: ':sphinx:activity:insetter-activity')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')

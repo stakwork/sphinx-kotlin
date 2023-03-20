@@ -84,6 +84,7 @@ dependencies {
     api project(path: ':sphinx:screens-detail:subscription:subscription')
     api project(path: ':sphinx:screens-detail:support-ticket:support-ticket')
     api project(path: ':sphinx:screens-detail:transactions:transactions')
+    api project(path: ':sphinx:screens-detail:episode-detail:episode-detail')
     api project(path: ':sphinx:screens-detail:tribe-members-list:tribe-members-list')
     api project(path: ':sphinx:screens-detail:web-view:web-view')
     api project(path: ':sphinx:screens-detail:newsletter-detail:newsletter-detail')

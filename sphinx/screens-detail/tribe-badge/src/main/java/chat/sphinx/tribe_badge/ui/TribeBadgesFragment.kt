@@ -11,12 +11,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.tribe_badge.R
 import chat.sphinx.tribe_badge.adapter.TribeBadgesListAdapter
 import chat.sphinx.tribe_badge.adapter.TribeBadgesListFooterAdapter
 import chat.sphinx.tribe_badge.databinding.FragmentTribeBadgesBinding
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
@@ -24,7 +24,7 @@ import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class TribeBadgesFragment: SideEffectFragment<
+internal class TribeBadgesFragment: SideEffectDetailFragment<
         Context,
         TribeBadgesSideEffect,
         TribeBadgesViewState,
@@ -43,6 +43,12 @@ internal class TribeBadgesFragment: SideEffectFragment<
         super.onViewCreated(view, savedInstanceState)
         setupHeaderScreen()
         setupTribeBadgesListAdapter()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: TribeBadgesViewState) {

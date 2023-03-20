@@ -44,6 +44,10 @@ interface FeedRepository {
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
+    fun updatePlayedMark(feedItemId: FeedId, played: Boolean)
+
+    fun getPlayedMark(feedItemId: FeedId): Flow<Boolean?>
+
     val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
     fun setRecommendationsToggle(enabled: Boolean)
     val recommendationsPodcast: MutableStateFlow<Podcast?>
@@ -84,6 +88,7 @@ interface FeedRepository {
         itemId: FeedId,
         duration: FeedItemDuration,
         currentTime: FeedItemDuration,
+        played: Boolean = false,
         shouldSync: Boolean = false
     )
 
