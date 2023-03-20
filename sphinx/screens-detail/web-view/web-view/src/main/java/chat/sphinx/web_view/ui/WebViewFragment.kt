@@ -23,6 +23,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.inputMethodManager
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.web_view.R
 import chat.sphinx.web_view.databinding.FragmentWebViewBinding
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -30,8 +31,6 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
@@ -39,7 +38,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class WebViewFragment: SideEffectFragment<
+internal class WebViewFragment: SideEffectDetailFragment<
         FragmentActivity,
         WebViewSideEffect,
         WebViewViewState,
@@ -89,6 +88,12 @@ internal class WebViewFragment: SideEffectFragment<
 
         setupBoost()
         setupFragmentLayout()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupFragmentLayout() {

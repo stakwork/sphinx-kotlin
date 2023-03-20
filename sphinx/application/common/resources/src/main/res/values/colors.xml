@@ -44,6 +44,7 @@
     <color name="selectedMessageBackground">#8C000000</color>
     <color name="divider">#151E27</color>
     <color name="lightDivider">#3B4755</color>
+    <color name="lightEpisodeDivider">#47515E</color>
     <color name="expiredInvoice">#FFFFFF</color>
     <color name="addressBookHeader">#222E3A</color>
     <color name="messageOptionDivider">#CCFFFFFF</color>

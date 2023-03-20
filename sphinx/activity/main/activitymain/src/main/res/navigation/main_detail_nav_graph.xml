@@ -32,6 +32,7 @@
     <include app:graph="@navigation/tribe_badges_nav_graph" />
     <include app:graph="@navigation/create_badge_nav_graph" />
     <include app:graph="@navigation/discover_tribes_nav_graph" />
+    <include app:graph="@navigation/episode_detail_nav_graph" />
     <include app:graph="@navigation/known_badges_nav_graph" />
 
     <fragment

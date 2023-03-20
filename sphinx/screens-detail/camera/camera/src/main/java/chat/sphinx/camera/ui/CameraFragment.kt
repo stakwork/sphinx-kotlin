@@ -34,8 +34,8 @@ import chat.sphinx.camera.ui.viewstate.CapturePreviewViewState
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
@@ -49,7 +49,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-internal class CameraFragment: SideEffectFragment<
+internal class CameraFragment: SideEffectDetailFragment<
         FragmentActivity,
         CameraSideEffect,
         CameraViewState,
@@ -228,6 +228,12 @@ internal class CameraFragment: SideEffectFragment<
         }
 
         binding.includeCameraFooter.textViewCameraFooterCancel.setOnClickListener {
+            viewModel.processCancellationResponse()
+        }
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
             viewModel.processCancellationResponse()
         }
     }

@@ -70,5 +70,17 @@
 
 
 
+    <string name="episode_detail_download">Descargar</string>
+    <string name="episode_detail_erase">Borrar del dispositivo</string>
+    <string name="episode_detail_share">Compartir</string>
+    <string name="episode_detail_copy_link">Copiar Link</string>
+    <string name="episode_detail_played">Desmarcar como escuchado</string>
+    <string name="episode_detail_upplayed">Mark as Unplayed</string>
+    <string name="episode_detail_close">CERRAR</string>
+    <string name="episode_detail_clipboard">Link copiado en portapapeles</string>
+    <string name="episode_detail_share_link">Compartir link del episodio</string>
+    <string name="time_left">Faltan %s</string>
+
+
     <string name="alias_allowed_characters">Solo se permiten letras, números y\nguiones bajos en el alias de la tribu</string>
 </resources>

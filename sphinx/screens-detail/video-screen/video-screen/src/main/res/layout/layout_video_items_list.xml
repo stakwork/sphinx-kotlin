@@ -50,8 +50,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@color/body"
-        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_videos_list"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/layout_video_list_item_holder" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_videos_list"
+        app:layout_constraintVertical_bias="0.0"
+        tools:listitem="@layout/layout_episode_generic_list_item_holder" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

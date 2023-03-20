@@ -14,6 +14,7 @@ include ':sphinx:application:common:menus:menu-bottom'
 include ':sphinx:application:common:menus:menu-bottom-picture'
 include ':sphinx:application:common:menus:menu-bottom-share-qr-code'
 include ':sphinx:application:common:menus:menu-bottom-tribe'
+include ':sphinx:application:common:screen-detail-fragment'
 
 include ':sphinx:application:common:wrappers:wrapper-chat'
 include ':sphinx:application:common:wrappers:wrapper-common'
@@ -196,6 +197,7 @@ include ':sphinx:screens-detail:common-player'
 include ':sphinx:screens-detail:tribe-badge'
 include ':sphinx:screens-detail:create-badge:create-badge'
 include ':sphinx:screens-detail:known-badges:known-badges'
+include ':sphinx:screens-detail:episode-detail:episode-detail'
 
 // Service
 include ':sphinx:service:concepts:concept-service-media-player'

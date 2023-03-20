@@ -19,9 +19,9 @@ import chat.sphinx.join_tribe.R
 import chat.sphinx.join_tribe.databinding.FragmentJoinTribeBinding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.wrapper_chat.fixedAlias
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import kotlinx.coroutines.launch
@@ -30,7 +30,7 @@ import javax.inject.Inject
 
 
 @AndroidEntryPoint
-internal class JoinTribeFragment: SideEffectFragment<
+internal class JoinTribeFragment: SideEffectDetailFragment<
         Context,
         JoinTribeSideEffect,
         JoinTribeViewState,
@@ -122,6 +122,12 @@ internal class JoinTribeFragment: SideEffectFragment<
         }
 
         viewModel.loadTribeData()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun allowedCharactersToast() {

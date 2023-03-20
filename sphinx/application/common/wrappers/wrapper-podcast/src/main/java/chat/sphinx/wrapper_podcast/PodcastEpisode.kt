@@ -65,7 +65,8 @@ data class PodcastEpisode(
             podcastId,
             this.id,
             FeedItemDuration(0),
-            FeedItemDuration((clipStartTime?.toLong() ?: 0) / 1000)
+            FeedItemDuration((clipStartTime?.toLong() ?: 0) / 1000),
+            null
         )
         return contentEpisodeStatus!!
     }
@@ -93,6 +94,21 @@ data class PodcastEpisode(
                 }
             }
             return null
+        }
+
+    var played: Boolean
+        get() {
+            getUpdatedContentEpisodeStatus()?.played?.let {
+                return it
+            }
+            return false
+        }
+        set(value) {
+            value?.let {
+                contentEpisodeStatus = getUpdatedContentEpisodeStatus()?.copy(
+                    played = it
+                )
+            }
         }
 
     var titleToShow: String = ""
@@ -165,4 +181,14 @@ data class PodcastEpisode(
         get() {
             return recommendationPubKey?.toFeedDestinationAddress() != null
         }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
 }

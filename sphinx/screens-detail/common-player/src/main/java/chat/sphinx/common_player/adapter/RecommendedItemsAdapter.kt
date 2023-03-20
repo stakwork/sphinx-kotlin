@@ -9,7 +9,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.common_player.R
-import chat.sphinx.common_player.databinding.LayoutRecommendedListItemHolderBinding
 import chat.sphinx.common_player.ui.CommonPlayerScreenViewModel
 import chat.sphinx.common_player.viewstate.RecommendationsPodcastPlayerViewState
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
@@ -17,10 +16,17 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
+import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
+import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_podcast.PodcastEpisode
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.invisible
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -129,7 +135,7 @@ class RecommendedItemsAdapter (
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecommendedItemViewHolder {
-        val binding = LayoutRecommendedListItemHolderBinding.inflate(
+        val binding = LayoutEpisodeGenericListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -171,7 +177,7 @@ class RecommendedItemsAdapter (
     }
 
     inner class RecommendedItemViewHolder(
-        private val binding: LayoutRecommendedListItemHolderBinding
+        private val binding: LayoutEpisodeGenericListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var holderJob: Job? = null
@@ -180,11 +186,29 @@ class RecommendedItemsAdapter (
         private var episode: PodcastEpisode? = null
 
         init {
-            binding.layoutConstraintRecommendedHolder.setOnClickListener {
-                episode?.let { podcastEpisode ->
-                    if (connectivityHelper.isNetworkConnected()) {
-                        viewModel.playEpisodeFromList(podcastEpisode)
-                    }
+            binding.buttonPlayEpisode.setOnClickListener {
+                playEpisodeFromList()
+            }
+            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+                playEpisodeFromList()
+            }
+            binding.buttonAdditionalOptions.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.showOptionsFor(nnEpisode)
+                }
+            }
+
+            binding.buttonEpisodeShare.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.share(nnEpisode.episodeUrl, binding.root.context)
+                }
+            }
+        }
+
+        private fun playEpisodeFromList(){
+            episode?.let { podcastEpisode ->
+                if (connectivityHelper.isNetworkConnected()) {
+                    viewModel.playEpisodeFromList(podcastEpisode)
                 }
             }
         }
@@ -200,10 +224,24 @@ class RecommendedItemsAdapter (
                 disposable?.dispose()
                 holderJob?.cancel()
 
+                // General info
+                textViewEpisodeHeader.text = podcastEpisode.description?.value ?: "-"
+                textViewEpisodeDescription.text = podcastEpisode.title.value
+                textViewEpisodeDate.text = podcastEpisode.dateString
+                buttonDownloadArrow.alpha = 0.3F
+                seekBarCurrentTimeEpisodeProgress.gone
+
+                // Set Duration Time
+                val duration = (podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0).toInt()
+                textViewItemEpisodeTime.goneIfFalse( duration > 0)
+                circleSplit.goneIfFalse(duration > 0)
+                textViewItemEpisodeTime.text = duration.toHrAndMin()
+
+                // Image
                 podcastEpisode.image?.value?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                         imageLoader.load(
-                            imageViewRecommendedImage,
+                            imageViewEpisodeImage,
                             imageUrl,
                             getImageLoaderOptions(podcastEpisode)
                         ).also {
@@ -213,23 +251,42 @@ class RecommendedItemsAdapter (
                         holderJob = job
                     }
                 } ?: run {
-                    imageViewRecommendedImage.setImageDrawable(
+                    imageViewEpisodeImage.setImageDrawable(
                         ContextCompat.getDrawable(root.context, podcastEpisode.getPlaceHolderImageRes())
                     )
                 }
 
-                textViewRecommendedTitle.text = podcastEpisode.description?.value ?: "-"
-                textViewRecommendedDescription.text = podcastEpisode.title.value
-
-                imageViewItemRowRecommendationType.setImageDrawable(
+                imageViewItemRowEpisodeType.setImageDrawable(
                     ContextCompat.getDrawable(root.context, podcastEpisode.getIconType())
                 )
 
-                root.setBackgroundColor(
-                    root.context.getColor(
-                        if (podcastEpisode.playing) R.color.semiTransparentPrimaryBlue else R.color.headerBG
+                //Playing State
+                if (podcastEpisode.playing) {
+                    layoutConstraintAlpha.visible
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
                     )
-                )
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.receivedIcon))
+                } else {
+                    layoutConstraintAlpha.gone
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
+                    )
+                    buttonPlayEpisode.visible
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
+                }
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    delay(100L)
+
+                    if (podcastEpisode.playing) {
+                        animationViewPlay.playAnimation()
+                    } else {
+                        animationViewPlay.pauseAnimation()
+                    }
+                }
             }
         }
     }
@@ -260,4 +317,14 @@ inline fun PodcastEpisode.getIconType(): Int {
         return R.drawable.ic_youtube_type
     }
     return R.drawable.ic_podcast_type
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
 }

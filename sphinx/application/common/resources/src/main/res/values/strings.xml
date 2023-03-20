@@ -173,5 +173,25 @@
     <string name="tribe_member" translatable="false">TRIBE MEMBER</string>
     <string name="known_badges_title" translatable="false">LIST OF KNOWN BADGES</string>
 
+    <string name="episode_detail_download">Download</string>
+    <string name="episode_detail_erase">Erase from device</string>
+    <string name="episode_detail_share">Share</string>
+    <string name="episode_detail_copy_link">Copy Link</string>
+    <string name="episode_detail_played">Mark as Played</string>
+    <string name="episode_detail_upplayed">Mark as Unplayed</string>
+    <string name="episode_detail_close">CLOSE</string>
+    <string name="episode_detail_clipboard">Link copied to clipboard</string>
+    <string name="episode_detail_share_link">Share episode link</string>
+    <string name="episode_detail_played_holder" translatable="false">Played</string>
+
+
+    <string name="time_left">%s left</string>
+
+    <string name="youtube" translatable="false">Youtube</string>
+    <string name="podcast" translatable="false">Podcast</string>
+
+
+
+
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

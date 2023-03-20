@@ -109,6 +109,10 @@ internal class TribesDiscoverFragment: SideEffectFragment<
                 viewModel.discoverTribesTagsViewStateContainer.updateViewState(
                     DiscoverTribesTagsViewState.Closed(null)
                 )
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
             }
         }
     }
