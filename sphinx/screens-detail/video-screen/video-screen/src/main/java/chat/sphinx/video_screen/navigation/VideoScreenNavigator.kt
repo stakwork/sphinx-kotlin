@@ -12,18 +12,6 @@ abstract class VideoScreenNavigator(
 ): Navigator<NavController>(detailNavigationDriver) {
     abstract suspend fun closeDetailScreen()
 
-    abstract suspend fun toEpisodeDetail(
-        feedItemId: FeedId?,
-        header: String,
-        image: String,
-        episodeTypeImage: Int,
-        episodeTypeText: String,
-        episodeDate: String,
-        episodeDuration: String,
-        downloaded: Boolean?,
-        link: FeedUrl?,
-        )
-
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
     }

@@ -358,33 +358,6 @@ internal open class VideoFeedScreenViewModel(
         }
     }
 
-
-    fun navigateToEpisodeDetail(
-        feedItemId: FeedId?,
-        header: String,
-        image: String,
-        episodeTypeImage: Int,
-        episodeTypeText: String,
-        episodeDate: String,
-        episodeDuration: String,
-        downloaded: Boolean?,
-        link: FeedUrl?,
-    ){
-        viewModelScope.launch(mainImmediate) {
-            navigator.toEpisodeDetail(
-                feedItemId,
-                header,
-                image,
-                episodeTypeImage,
-                episodeTypeText,
-                episodeDate,
-                episodeDuration,
-                downloaded,
-                link
-            )
-        }
-    }
-
     open fun getArgChatId(): ChatId {
         return ChatId(ChatId.NULL_CHAT_ID.toLong())
     }
