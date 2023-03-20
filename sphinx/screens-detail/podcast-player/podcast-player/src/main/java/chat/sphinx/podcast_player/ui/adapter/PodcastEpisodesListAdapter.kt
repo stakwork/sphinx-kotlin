@@ -23,6 +23,7 @@ import chat.sphinx.wrapper_podcast.PodcastEpisode
 import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -331,6 +332,16 @@ internal class PodcastEpisodesListAdapter(
                     progressBarEpisodeDownload.visible
                     imageDownloadedEpisodeArrow.gone
                     buttonStop.visible
+                }
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    delay(100L)
+
+                    if (podcastEpisode.playing) {
+                        animationViewPlay.playAnimation()
+                    } else {
+                        animationViewPlay.pauseAnimation()
+                    }
                 }
             }
         }

@@ -26,6 +26,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -261,22 +262,30 @@ class RecommendedItemsAdapter (
 
                 //Playing State
                 if (podcastEpisode.playing) {
-                    animationViewPlay.playAnimation()
+                    layoutConstraintAlpha.visible
 
                     buttonPlayEpisode.setImageDrawable(
                         ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
                     )
-                    layoutConstraintAlpha.visible
                     textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.receivedIcon))
                 } else {
-                    animationViewPlay.pauseAnimation()
+                    layoutConstraintAlpha.gone
 
                     buttonPlayEpisode.setImageDrawable(
                         ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
                     )
                     buttonPlayEpisode.visible
-                    layoutConstraintAlpha.gone
                     textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
+                }
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    delay(100L)
+
+                    if (podcastEpisode.playing) {
+                        animationViewPlay.playAnimation()
+                    } else {
+                        animationViewPlay.pauseAnimation()
+                    }
                 }
             }
         }
