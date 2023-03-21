@@ -176,6 +176,7 @@ internal class ProfileFragment: SideEffectFragment<
 
                 editTextProfileBasicContainerTip.setOnFocusChangeListener { _, hasFocus ->
                     if (hasFocus) {
+                        editTextProfileBasicContainerTip.setText(editTextProfileBasicContainerTip.text.toString().replace(" ", ""))
                         return@setOnFocusChangeListener
                     }
                     updateOwnerDetails()
