@@ -21,6 +21,11 @@
         android:layout_height="@dimen/search_bar_height"
         app:layout_constraintTop_toBottomOf="@+id/layout_address_book_header" />
 
+    <chat.sphinx.address_book.ui.CustomLinearLayout
+        android:background="@color/badgeRed"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"></chat.sphinx.address_book.ui.CustomLinearLayout>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/add_button_row_container"
         android:layout_width="match_parent"
