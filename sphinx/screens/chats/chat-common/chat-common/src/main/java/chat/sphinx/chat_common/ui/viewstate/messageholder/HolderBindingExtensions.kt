@@ -955,17 +955,39 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             includeMessageHolderBubble.textViewPaidMessageText.gone
 
-            visible
-            text = message.text ?: getString(R.string.decryption_error)
+            if (message.text?.hasTextInsideBackticks() == true){
+                gone
+                includeMessageHolderBubble.layoutLinearLayoutCodeSnippet.visible
 
-            val textColor = ContextCompat.getColor(
-                root.context,
-                if (message.decryptionError) R.color.primaryRed else R.color.textMessages
-            )
-            setTextColor(textColor)
+                val codeElements = message.text.retrieveCodeElementsList()
+                codeElements.forEach {
+                    if (it.first) {
+                        includeMessageHolderBubble.layoutLinearLayoutCodeSnippet.addCodeSnippet(it.second)
+                    }
+                    else {
+                        includeMessageHolderBubble.layoutLinearLayoutCodeSnippet.addTextView(it.second)
+                    }
+                }
+            } else {
+                visible
+                includeMessageHolderBubble.layoutLinearLayoutCodeSnippet.gone
+                text = message.text ?: getString(R.string.decryption_error)
+                message.text?.retrieveCodeElementsList()
 
-            if (onSphinxInteractionListener != null) {
-                SphinxLinkify.addLinks(this, SphinxLinkify.ALL, includeMessageHolderBubble.root.context, onSphinxInteractionListener)
+                val textColor = ContextCompat.getColor(
+                    root.context,
+                    if (message.decryptionError) R.color.primaryRed else R.color.textMessages
+                )
+                setTextColor(textColor)
+
+                if (onSphinxInteractionListener != null) {
+                    SphinxLinkify.addLinks(
+                        this,
+                        SphinxLinkify.ALL,
+                        includeMessageHolderBubble.root.context,
+                        onSphinxInteractionListener
+                    )
+                }
             }
         }
     }

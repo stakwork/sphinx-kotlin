@@ -50,6 +50,48 @@ inline fun Message.retrieveInvoiceTextToShow(): String? =
     }
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun String.retrieveCodeElementsList(): List<Pair<Boolean, String>> {
+    if (this.isNotEmpty()) {
+        var list: MutableList<Pair<Boolean, String>> = mutableListOf()
+
+        val message = this
+        var index = message.indexOf("```")
+        var indexesCount = 1
+
+        if (index > 0) {
+            list.add(Pair(false, message.substring(0, index)))
+        }
+
+        while (index >= 0) {
+            var newIndex = message.indexOf("```", index + 3)
+
+            if (newIndex >= 0) {
+                list.add(Pair(indexesCount % 2 != 0, message.substring(index + 3, newIndex)))
+            } else {
+                break
+            }
+
+            index = newIndex
+            indexesCount += 1
+        }
+
+        if (index > 0 && (index + 3 != message.length)) {
+            list.add(Pair(false, message.substring(index + 3, message.length)))
+        }
+
+        return list
+    }
+    else
+        return listOf()
+}
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.hasTextInsideBackticks(): Boolean {
+    val pattern = "```([\\s\\S]+?)```".toRegex()
+    return pattern.containsMatchIn(this)
+}
+
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveBotResponseHtmlString(): String? =
     messageContentDecrypted?.let { decrypted ->
         if (type.isBotRes()) {

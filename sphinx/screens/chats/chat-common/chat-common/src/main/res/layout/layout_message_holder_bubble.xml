@@ -129,6 +129,17 @@
             tools:text="Contrary to popular belief"
             tools:visibility="visible" />
 
+        <chat.sphinx.chat_common.util.CodeSnippetLinearLayout
+            android:id="@+id/layout_linear_layout_code_snippet"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
+            app:layout_constraintStart_toStartOf="parent"
+            android:visibility="visible">
+
+        </chat.sphinx.chat_common.util.CodeSnippetLinearLayout>
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_paid_message_text"
             android:layout_width="match_parent"
