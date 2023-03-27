@@ -6762,6 +6762,19 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun updateLastPlayed(feedId: FeedId) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentFeedLock.withLock {
+                queries.feedUpdateLastPlayed(
+                    DateTime.nowUTC().toDateTime(),
+                    feedId
+                )
+            }
+        }
+    }
+
     override fun getPlayedMark(feedItemId: FeedId): Flow<Boolean?> = flow {
         emitAll(
             coreDB.getSphinxDatabaseQueries().contentEpisodeStatusGetPlayedByItemId(feedItemId)

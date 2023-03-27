@@ -35,6 +35,7 @@ data class Feed(
     val currentItemId: FeedId?, //Not used anymore. Replaced by contentFeedEpisodeStatus.itemId
     val chatId: ChatId,
     val subscribed: Subscribed,
+    val lastPlayed: DateTime?
 ) {
 
     companion object {
