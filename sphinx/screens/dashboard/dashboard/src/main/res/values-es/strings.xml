@@ -120,6 +120,8 @@
     <string name="play">Jugar</string>
     <string name="listen_now">Escuchar ahora</string>
     <string name="following">Siguiendo</string>
+    <string name="recently_played">Recientes</string>
+
     <string name="read_now">Read Now</string>
     <string name="watch_now">Watch Now</string>
 
