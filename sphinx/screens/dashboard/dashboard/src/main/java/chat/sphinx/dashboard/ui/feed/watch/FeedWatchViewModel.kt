@@ -8,6 +8,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedWatchViewState
 import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +34,9 @@ class FeedWatchViewModel @Inject constructor(
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         repositoryDashboard.getAllFeedsOfType(FeedType.Video).collect { podcastFeeds ->
-            emit(podcastFeeds.toList())
+            emit(podcastFeeds.toList().sortedByDescending {
+                it.lastPublished?.datePublished?.time ?: 0
+            })
         }
     }.stateIn(
         viewModelScope,

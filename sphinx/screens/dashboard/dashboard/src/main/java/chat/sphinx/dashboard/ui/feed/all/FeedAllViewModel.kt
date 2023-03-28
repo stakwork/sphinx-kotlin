@@ -50,6 +50,15 @@ internal class FeedAllViewModel @Inject constructor(
 
     init {
         setRecommendationsVisibility()
+
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getAllFeeds().collect { feeds ->
+                _feedsHolderViewStateFlow.value = feeds.toList().sortedByDescending {
+                    it.lastPublished?.datePublished?.time ?: 0
+                }
+                _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList().sortedByDescending { it.lastPlayed?.time }
+            }
+        }
     }
 
     private fun setRecommendationsVisibility() {
@@ -95,15 +104,13 @@ internal class FeedAllViewModel @Inject constructor(
         }
     }
 
-    override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        repositoryDashboard.getAllFeeds().collect { feeds ->
-            emit(feeds.toList())
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
-    )
+    private val _feedsHolderViewStateFlow: MutableStateFlow<List<Feed>> by lazy {
+        MutableStateFlow(listOf())
+    }
+
+    override val feedsHolderViewStateFlow: StateFlow<List<Feed>>
+        get() = _feedsHolderViewStateFlow
+
 
     override fun feedSelected(feed: Feed) {
         @Exhaustive
@@ -121,15 +128,13 @@ internal class FeedAllViewModel @Inject constructor(
         }
     }
 
-    override val lastPlayedFeedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        repositoryDashboard.getAllFeeds().collect { feeds ->
-            emit(feeds.toList().sortedByDescending { it.lastPlayed?.time })
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
-    )
+    private val _lastPlayedFeedsHolderViewStateFlow: MutableStateFlow<List<Feed>> by lazy {
+        MutableStateFlow(listOf())
+    }
+
+    override val lastPlayedFeedsHolderViewStateFlow: StateFlow<List<Feed>>
+        get() = _lastPlayedFeedsHolderViewStateFlow
+
     override fun recentlyPlayedSelected(feed: Feed) {
         feedSelected(feed)
     }

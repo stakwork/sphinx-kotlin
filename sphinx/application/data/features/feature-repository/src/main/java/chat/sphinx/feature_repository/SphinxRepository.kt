@@ -4179,15 +4179,7 @@ abstract class SphinxRepository(
             )
         }
 
-        var sortedList: List<Feed>? = null
-
-        withContext(dispatchers.default) {
-            sortedList = list.sortedByDescending {
-                it.lastPublished?.datePublished?.time ?: 0
-            }
-        }
-
-        return sortedList ?: listOf()
+        return list
     }
 
     private suspend fun mapFeedDbo(
