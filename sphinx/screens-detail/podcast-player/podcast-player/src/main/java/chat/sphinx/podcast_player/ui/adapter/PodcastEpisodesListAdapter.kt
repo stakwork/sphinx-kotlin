@@ -337,7 +337,7 @@ internal class PodcastEpisodesListAdapter(
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                     delay(100L)
 
-                    if (podcastEpisode.playing) {
+                    if (viewModel.isSoundComingOut.value) {
                         animationViewPlay.playAnimation()
                     } else {
                         animationViewPlay.pauseAnimation()

@@ -16,6 +16,7 @@ internal class SphinxAudioManagerHandler(
                     false
                 }
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    mediaPlayerService.mediaPlayerHolder.soundIsComingOut()
                     true
                 }
                 else -> {
@@ -35,6 +36,7 @@ internal class SphinxAudioManagerHandler(
                     false
                 }
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
+                    mediaPlayerService.mediaPlayerHolder.soundIsNotComingOut()
                     true
                 }
                 else -> {

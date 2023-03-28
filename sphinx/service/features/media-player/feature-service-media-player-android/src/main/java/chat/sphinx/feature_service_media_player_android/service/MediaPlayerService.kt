@@ -27,7 +27,6 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.toFeedItemDuration
 import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.concept_foreground_state.ForegroundState
@@ -84,7 +83,6 @@ internal abstract class MediaPlayerService: SphinxService() {
         private var startTimestamp: Long = 0
         private var currentPauseTime: Long = 0
         private var history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
-
         @Synchronized
         fun audioFocusLost() {
             podData?.let { nnData ->
@@ -127,6 +125,15 @@ internal abstract class MediaPlayerService: SphinxService() {
                     }
                 }
             }
+        }
+        @Synchronized
+        fun soundIsComingOut(){
+            feedRepository.setSoundComingOut(true)
+        }
+
+        @Synchronized
+        fun soundIsNotComingOut(){
+            feedRepository.setSoundComingOut(false)
         }
 
         private fun trackPodcastConsumed(
