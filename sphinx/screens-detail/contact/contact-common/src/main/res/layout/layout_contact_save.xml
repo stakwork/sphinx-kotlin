@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_save_contact"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context="chat.sphinx.contact.ui.ContactFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_save_content"
+        android:layout_width="@dimen/save_to_contacts_button_width"
+        android:layout_height="@dimen/save_contact_button_height"
+        android:layout_marginBottom="@dimen/save_to_contacts_button_bottom_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_save"
+            style="@style/RoundedBlueButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/save_to_contacts_button_text_size"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_background_white_rad_48"
+            android:backgroundTint="@color/primaryBlue"
+            tools:text="SAVE"/>
+
+        <ProgressBar
+            android:layout_width="@dimen/save_progress_bar_xy"
+            android:layout_height="@dimen/save_progress_bar_xy"
+            android:layout_marginLeft="@dimen/save_progress_bar_margin_left"
+            android:id="@+id/progress_bar_contact_save"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
