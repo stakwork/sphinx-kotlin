@@ -35,6 +35,7 @@ data class Feed(
     val currentItemId: FeedId?, //Not used anymore. Replaced by contentFeedEpisodeStatus.itemId
     val chatId: ChatId,
     val subscribed: Subscribed,
+    val lastPlayed: DateTime?
 ) {
 
     companion object {
@@ -67,7 +68,8 @@ data class Feed(
                 other.chatId                                      == chatId                                      &&
                 other.subscribed                                  == subscribed                                  &&
                 other.lastItem?.contentEpisodeStatus?.duration    == lastItem?.contentEpisodeStatus?.duration    &&
-                other.lastItem?.contentEpisodeStatus?.currentTime == lastItem?.contentEpisodeStatus?.currentTime
+                other.lastItem?.contentEpisodeStatus?.currentTime == lastItem?.contentEpisodeStatus?.currentTime &&
+                other.lastPlayed                                  == lastPlayed
     }
 
     override fun hashCode(): Int {
@@ -92,6 +94,7 @@ data class Feed(
         result = _31 * result + subscribed.hashCode()
         result = _31 * result + lastItem?.contentEpisodeStatus?.duration.hashCode()
         result = _31 * result + lastItem?.contentEpisodeStatus?.currentTime.hashCode()
+        result = _31 * result + lastPlayed.hashCode()
         return result
     }
 

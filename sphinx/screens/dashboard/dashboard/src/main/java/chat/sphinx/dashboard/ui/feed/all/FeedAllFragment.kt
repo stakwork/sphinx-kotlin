@@ -11,6 +11,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedAllBinding
 import chat.sphinx.dashboard.ui.adapter.FeedFollowingAdapter
+import chat.sphinx.dashboard.ui.adapter.FeedRecentlyPlayedAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedRecommendationsAdapter
 import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
@@ -45,6 +46,7 @@ internal class FeedAllFragment : SideEffectFragment<
 
         setupRecommendationsAdapter()
         setupFollowingAdapter()
+        setupRecentlyPlayedAdapter()
         setupRefreshButton()
         setupNestedScrollView()
     }
@@ -72,6 +74,22 @@ internal class FeedAllFragment : SideEffectFragment<
     private fun setupFollowingAdapter() {
         binding.recyclerViewFollowing.apply {
             val listenNowAdapter = FeedFollowingAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+                viewModel
+            )
+
+            this.setHasFixedSize(false)
+            adapter = listenNowAdapter
+            itemAnimator = null
+        }
+    }
+
+    private fun setupRecentlyPlayedAdapter() {
+        binding.recyclerViewRecentlyPlayed.apply {
+            val listenNowAdapter = FeedRecentlyPlayedAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,

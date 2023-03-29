@@ -60,5 +60,5 @@ abstract class MediaPlayerServiceController {
 
     abstract suspend fun submitAction(userAction: UserAction)
 
-    abstract fun getPlayingContent(): Pair<String, String>?
+    abstract fun getPlayingContent(): Triple<String, String, Boolean>?
 }

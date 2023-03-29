@@ -4179,15 +4179,7 @@ abstract class SphinxRepository(
             )
         }
 
-        var sortedList: List<Feed>? = null
-
-        withContext(dispatchers.default) {
-            sortedList = list.sortedByDescending {
-                it.lastPublished?.datePublished?.time ?: 0
-            }
-        }
-
-        return sortedList ?: listOf()
+        return list
     }
 
     private suspend fun mapFeedDbo(
@@ -6757,6 +6749,19 @@ abstract class SphinxRepository(
                 queries.contentEpisodeStatusUpdatePlayed(
                     played,
                     feedItemId
+                )
+            }
+        }
+    }
+
+    override fun updateLastPlayed(feedId: FeedId) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            contentFeedLock.withLock {
+                queries.feedUpdateLastPlayed(
+                    DateTime.nowUTC().toDateTime(),
+                    feedId
                 )
             }
         }

@@ -27,7 +27,6 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.toFeedItemDuration
 import chat.sphinx.wrapper_feed.toFeedPlayerSpeed
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import io.matthewnelson.concept_foreground_state.ForegroundState
@@ -45,6 +44,8 @@ internal abstract class MediaPlayerService: SphinxService() {
 
     override val mustComplete: Boolean
         get() = true
+
+    var soundPlaying: Boolean = false
 
     abstract val serviceContext: Context
 
@@ -84,7 +85,6 @@ internal abstract class MediaPlayerService: SphinxService() {
         private var startTimestamp: Long = 0
         private var currentPauseTime: Long = 0
         private var history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
-
         @Synchronized
         fun audioFocusLost() {
             podData?.let { nnData ->
@@ -129,6 +129,17 @@ internal abstract class MediaPlayerService: SphinxService() {
             }
         }
 
+
+        @Synchronized
+        fun soundIsComingOut(){
+            soundPlaying = true
+        }
+
+        @Synchronized
+        fun soundIsNotComingOut(){
+            soundPlaying = false
+        }
+
         private fun trackPodcastConsumed(
             podcastId: String,
             episodeId: String
@@ -152,12 +163,12 @@ internal abstract class MediaPlayerService: SphinxService() {
             resetTrackSecondsConsumed()
         }
 
-        fun getPlayingContent(): Pair<String, String>? {
+        fun getPlayingContent(): Triple<String, String, Boolean>? {
             podData?.let { nnData ->
                 if (!nnData.mediaPlayer.isPlaying) {
                     return null
                 }
-                return Pair(nnData.podcastId, nnData.episodeId)
+                return Triple(nnData.podcastId, nnData.episodeId, soundPlaying)
             } ?: run {
                 return null
             }
@@ -257,6 +268,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                     serviceLifecycleScope.launch {
                         feedRepository.updateChatContentSeenAt(userAction.chatId)
+                        feedRepository.updateLastPlayed(userAction.contentFeedStatus.feedId)
                     }
 
                     podData?.let { nnData ->
@@ -708,7 +720,7 @@ internal abstract class MediaPlayerService: SphinxService() {
             mediaPlayerHolder.processUserAction(userAction)
         }
 
-        fun getPlayingContent(): Pair<String, String>? {
+        fun getPlayingContent(): Triple<String, String, Boolean>? {
             return mediaPlayerHolder.getPlayingContent()
         }
     }

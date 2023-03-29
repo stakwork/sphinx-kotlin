@@ -214,8 +214,8 @@ internal open class VideoFeedScreenViewModel(
                     satsPerMinute = null,
                     playerSpeed = null
                 )
+                updateVideoLastPlayed(video.feedId)
             }
-
 
             selectedVideoStateContainer.updateViewState(
                 SelectedVideoViewState.VideoSelected(
@@ -229,6 +229,10 @@ internal open class VideoFeedScreenViewModel(
                 )
             )
         }
+    }
+
+    fun updateVideoLastPlayed(feedId: FeedId) {
+        feedRepository.updateLastPlayed(feedId)
     }
 
     fun toggleSubscribeState() {
@@ -358,33 +362,6 @@ internal open class VideoFeedScreenViewModel(
         }
     }
 
-
-    fun navigateToEpisodeDetail(
-        feedItemId: FeedId?,
-        header: String,
-        image: String,
-        episodeTypeImage: Int,
-        episodeTypeText: String,
-        episodeDate: String,
-        episodeDuration: String,
-        downloaded: Boolean?,
-        link: FeedUrl?,
-    ){
-        viewModelScope.launch(mainImmediate) {
-            navigator.toEpisodeDetail(
-                feedItemId,
-                header,
-                image,
-                episodeTypeImage,
-                episodeTypeText,
-                episodeDate,
-                episodeDuration,
-                downloaded,
-                link
-            )
-        }
-    }
-
     open fun getArgChatId(): ChatId {
         return ChatId(ChatId.NULL_CHAT_ID.toLong())
     }
@@ -395,26 +372,6 @@ internal open class VideoFeedScreenViewModel(
 
     open fun getArgFeedId(): FeedId? {
         return null
-    }
-
-    fun downloadMedia(
-        feedItem: FeedItem,
-        downloadCompleteCallback: (downloadedFile: File) -> Unit
-    ) {
-        repositoryMedia.downloadMediaIfApplicable(
-            feedItem,
-            downloadCompleteCallback
-        )
-    }
-
-    suspend fun deleteDownloadedMedia(feedItem: FeedItem) {
-        if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
-            feedItem.localFile = null
-        }
-    }
-
-    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
-        return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
     }
 
     fun createVideoRecordConsumed(feedItemId: FeedId){

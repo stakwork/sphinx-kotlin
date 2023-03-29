@@ -194,7 +194,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     items_countAdapter = FeedItemsCountAdapter(),
                     current_item_idAdapter = FeedIdAdapter(),
                     chat_idAdapter = ChatIdAdapter.getInstance(),
-                    subscribedAdapter = SubscribedAdapter.getInstance()
+                    subscribedAdapter = SubscribedAdapter.getInstance(),
+                    last_playedAdapter = DateTimeAdapter.getInstance()
                 ),
                 feedItemDboAdapter = FeedItemDbo.Adapter(
                     idAdapter = FeedIdAdapter(),

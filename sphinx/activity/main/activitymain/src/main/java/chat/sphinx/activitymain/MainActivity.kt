@@ -1,16 +1,12 @@
 package chat.sphinx.activitymain
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
 import androidx.activity.viewModels
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.findFragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -19,7 +15,6 @@ import chat.sphinx.activitymain.databinding.ActivityMainBinding
 import chat.sphinx.activitymain.navigation.drivers.PrimaryNavigationDriver
 import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
-import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
 import dagger.hilt.android.AndroidEntryPoint
@@ -61,14 +56,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         private var statusBarInsets: InsetPadding? = null
         private var navigationBarInsets: InsetPadding? = null
         private var keyboardInsets: InsetPadding? = null
-    }
-
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        if (currentFocus != null && !isOnChatView){
-            val imm: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
-        }
-        return super.dispatchTouchEvent(ev)
     }
 
     override val statusBarInsetHeight: InsetPadding by lazy(LazyThreadSafetyMode.NONE) {
@@ -121,15 +108,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         addWindowInsetChangeListener()
     }
 
-    private var isOnChatView = false
-    private fun addDestinationListener() {
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            isOnChatView = destination.id == R.id.navigation_chat_contact_fragment ||
-                    destination.id == R.id.navigation_chat_tribe_fragment ||
-                    destination.id == R.id.navigation_chat_group_fragment
-        }
-    }
-
     override fun onStart() {
         super.onStart()
         // Authentication
@@ -169,8 +147,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         if (sessionDepth == 1){
             viewModel.restoreContentFeedStatuses()
         }
-
-        addDestinationListener()
     }
 
     override fun onStop() {
@@ -239,7 +215,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
     override fun onBackPressed() {
         when {
-
             // AuthenticationNavController
             authenticationNavController.previousBackStackEntry != null -> {
                 // Authentication Screen has a callback to handle it automatically

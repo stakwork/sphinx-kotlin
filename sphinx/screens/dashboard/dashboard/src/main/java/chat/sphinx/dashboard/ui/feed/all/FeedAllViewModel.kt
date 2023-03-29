@@ -8,12 +8,14 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
+import chat.sphinx.dashboard.ui.feed.FeedRecentlyPlayedViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.Podcast
@@ -41,13 +43,23 @@ internal class FeedAllViewModel @Inject constructor(
         FragmentActivity,
         FeedAllSideEffect,
         FeedAllViewState
-        >(dispatchers, FeedAllViewState.Disabled), FeedFollowingViewModel, FeedRecommendationsViewModel
+        >(dispatchers, FeedAllViewState.Disabled), FeedFollowingViewModel, FeedRecommendationsViewModel, FeedRecentlyPlayedViewModel
 {
 
     override val feedRecommendationsHolderViewStateFlow: MutableStateFlow<List<FeedRecommendation>> = MutableStateFlow(emptyList())
 
     init {
         setRecommendationsVisibility()
+
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getAllFeeds().collect { feeds ->
+                _feedsHolderViewStateFlow.value = feeds.toList()
+                    .sortedByDescending { it.lastPublished?.datePublished?.time ?: 0 }
+
+                _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList()
+                    .sortedWith(compareByDescending<Feed> { it.lastPlayed?.time }.thenByDescending { it.lastPublished?.datePublished?.time ?: 0 })
+            }
+        }
     }
 
     private fun setRecommendationsVisibility() {
@@ -93,15 +105,13 @@ internal class FeedAllViewModel @Inject constructor(
         }
     }
 
-    override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        repositoryDashboard.getAllFeeds().collect { feeds ->
-            emit(feeds.toList())
-        }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
-    )
+    private val _feedsHolderViewStateFlow: MutableStateFlow<List<Feed>> by lazy {
+        MutableStateFlow(listOf())
+    }
+
+    override val feedsHolderViewStateFlow: StateFlow<List<Feed>>
+        get() = _feedsHolderViewStateFlow
+
 
     override fun feedSelected(feed: Feed) {
         @Exhaustive
@@ -117,6 +127,17 @@ internal class FeedAllViewModel @Inject constructor(
             }
             is FeedType.Unknown -> {}
         }
+    }
+
+    private val _lastPlayedFeedsHolderViewStateFlow: MutableStateFlow<List<Feed>> by lazy {
+        MutableStateFlow(listOf())
+    }
+
+    override val lastPlayedFeedsHolderViewStateFlow: StateFlow<List<Feed>>
+        get() = _lastPlayedFeedsHolderViewStateFlow
+
+    override fun recentlyPlayedSelected(feed: Feed) {
+        feedSelected(feed)
     }
 
     private fun goToPodcastPlayer(

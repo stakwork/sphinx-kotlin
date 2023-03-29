@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha86 (2023-03-29)
+- Adds recently played section on feed
+- Fixes issues on add contact view
+- Fixes playing animation sync issues
+
 # Version 1.0.0-alpha85 (2023-03-20)
 - Adds new episodes layout on player
 - Fixes issues on tribe badges feature

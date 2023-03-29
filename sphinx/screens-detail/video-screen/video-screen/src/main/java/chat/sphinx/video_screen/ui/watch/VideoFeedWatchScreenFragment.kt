@@ -407,6 +407,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                     viewModel.createVideoRecordConsumed(viewState.id)
                                 } else {
                                     setupYoutubePlayer(viewState.id.youtubeVideoId())
+                                    viewModel.updateVideoLastPlayed(viewState.id)
                                     viewModel.createVideoRecordConsumed(viewState.id)
                                 }
 

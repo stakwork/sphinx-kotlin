@@ -28,7 +28,8 @@ internal class FeedDboPresenterMapper(
             value.items_count,
             value.current_item_id,
             value.chat_id,
-            value.subscribed
+            value.subscribed,
+            value.last_played
         )
     }
 
@@ -51,7 +52,8 @@ internal class FeedDboPresenterMapper(
             value.itemsCount,
             value.currentItemId,
             value.chatId,
-            value.subscribed
+            value.subscribed,
+            value.lastPlayed
         )
     }
 }

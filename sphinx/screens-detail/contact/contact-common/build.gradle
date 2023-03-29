@@ -32,6 +32,7 @@ dependencies {
     // KotlinAndroid
     api project(path: ':android:features:android-feature-screens')
     api project(path: ':sphinx:application:common:screen-detail-fragment')
+    api project(path: ':sphinx:application:common:keyboard-inset-fragment')
     // Sphinx
     api project(path: ':sphinx:activity:insetter-activity')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
