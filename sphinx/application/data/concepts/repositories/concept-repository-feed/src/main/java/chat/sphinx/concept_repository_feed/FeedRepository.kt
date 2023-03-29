@@ -50,8 +50,9 @@ interface FeedRepository {
 
     fun getPlayedMark(feedItemId: FeedId): Flow<Boolean?>
 
-    val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
     fun setRecommendationsToggle(enabled: Boolean)
+
+    val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
     val recommendationsPodcast: MutableStateFlow<Podcast?>
 
     suspend fun toggleFeedSubscribeState(feedId: FeedId, currentSubscribeState: Subscribed)

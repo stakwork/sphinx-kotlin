@@ -145,7 +145,7 @@ internal class MediaPlayerServiceControllerImpl(
         }
     }
 
-    override fun getPlayingContent(): Pair<String, String>? {
+    override fun getPlayingContent(): Triple<String, String, Boolean>? {
         return binder.value?.getPlayingContent()
     }
 

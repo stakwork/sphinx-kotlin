@@ -17,7 +17,7 @@ internal abstract class AudioManagerHandler(
             .serviceContext
             .getSystemService(Context.AUDIO_SERVICE) as? AudioManager
 
-    protected val attributes: AudioAttributesCompat by lazy {
+    private val attributes: AudioAttributesCompat by lazy {
         AudioAttributesCompat.Builder()
             .setUsage(AudioAttributesCompat.USAGE_MEDIA)
             .setContentType(AudioAttributesCompat.CONTENT_TYPE_SPEECH)
@@ -38,7 +38,7 @@ internal abstract class AudioManagerHandler(
     @JvmSynthetic
     abstract fun abandonAudioFocus(): Boolean
 
-    protected inline val telephonyManager: TelephonyManager?
+    private inline val telephonyManager: TelephonyManager?
         get() = mediaPlayerService
             .serviceContext
             .getSystemService(Context.TELEPHONY_SERVICE) as? TelephonyManager
