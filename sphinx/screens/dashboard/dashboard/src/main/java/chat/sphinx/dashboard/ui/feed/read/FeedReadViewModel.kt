@@ -38,9 +38,11 @@ class FeedReadViewModel @Inject constructor(
 {
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         repositoryDashboard.getAllFeedsOfType(FeedType.Newsletter).collect { newsletterFeeds ->
-            emit(newsletterFeeds.toList().sortedByDescending {
-                it.lastPublished?.datePublished?.time ?: 0
-            })
+            emit(
+                newsletterFeeds.toList().sortedByDescending {
+                    it.lastPublished?.datePublished?.time ?: 0
+                }
+            )
         }
     }.stateIn(
         viewModelScope,

@@ -53,10 +53,11 @@ internal class FeedAllViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             repositoryDashboard.getAllFeeds().collect { feeds ->
-                _feedsHolderViewStateFlow.value = feeds.toList().sortedByDescending {
-                    it.lastPublished?.datePublished?.time ?: 0
-                }
-                _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList().sortedByDescending { it.lastPlayed?.time }
+                _feedsHolderViewStateFlow.value = feeds.toList()
+                    .sortedByDescending { it.lastPublished?.datePublished?.time ?: 0 }
+
+                _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList()
+                    .sortedWith(compareByDescending<Feed> { it.lastPlayed?.time }.thenByDescending { it.lastPublished?.datePublished?.time ?: 0 })
             }
         }
     }
