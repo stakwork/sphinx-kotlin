@@ -98,5 +98,6 @@ internal class NewsletterDetailViewModel @Inject constructor(
             )
         }
         actionsRepository.trackNewsletterConsumed(item.id)
+        feedRepository.updateLastPlayed(item.feedId)
     }
 }

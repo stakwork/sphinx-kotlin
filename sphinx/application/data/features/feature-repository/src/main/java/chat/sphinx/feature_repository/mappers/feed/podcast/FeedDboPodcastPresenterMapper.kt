@@ -22,7 +22,7 @@ internal class FeedDboPodcastPresenterMapper(
             datePublished = value.date_published,
             chatId = value.chat_id,
             feedUrl = value.feed_url,
-            subscribed = value.subscribed
+            subscribed = value.subscribed,
         )
     }
 
@@ -45,7 +45,8 @@ internal class FeedDboPodcastPresenterMapper(
             items_count = FeedItemsCount(value.episodes.count().toLong()),
             current_item_id = value.episodeId?.toFeedId(),
             chat_id = value.chatId,
-            subscribed = value.subscribed
+            subscribed = value.subscribed,
+            last_played = null
         )
     }
 }

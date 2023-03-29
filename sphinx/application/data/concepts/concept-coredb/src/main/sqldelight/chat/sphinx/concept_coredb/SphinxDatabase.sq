@@ -1017,7 +1017,8 @@ CREATE TABLE feedDbo(
     items_count                 INTEGER            AS FeedItemsCount DEFAULT 0 NOT NULL,
     current_item_id             TEXT               AS FeedId,
     chat_id                     INTEGER            AS ChatId NOT NULL,
-    subscribed                  INTEGER            AS Subscribed NOT NULL DEFAULT 1
+    subscribed                  INTEGER            AS Subscribed NOT NULL DEFAULT 1,
+    last_played                 INTEGER            AS DateTime
 );
 
 feedUpsert {
@@ -1154,6 +1155,11 @@ WHERE id = ?;
 feedUpdateSubscribe:
 UPDATE feedDbo
 SET subscribed = :subscribed
+WHERE id = ?;
+
+feedUpdateLastPlayed:
+UPDATE feedDbo
+SET last_played = :last_played
 WHERE id = ?;
 
 feedBatchUnsubscribe:

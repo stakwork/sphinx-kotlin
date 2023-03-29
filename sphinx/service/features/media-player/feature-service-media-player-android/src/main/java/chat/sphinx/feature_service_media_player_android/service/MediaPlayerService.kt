@@ -257,6 +257,7 @@ internal abstract class MediaPlayerService: SphinxService() {
 
                     serviceLifecycleScope.launch {
                         feedRepository.updateChatContentSeenAt(userAction.chatId)
+                        feedRepository.updateLastPlayed(userAction.contentFeedStatus.feedId)
                     }
 
                     podData?.let { nnData ->

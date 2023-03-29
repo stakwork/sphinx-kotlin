@@ -46,6 +46,8 @@ interface FeedRepository {
 
     fun updatePlayedMark(feedItemId: FeedId, played: Boolean)
 
+    fun updateLastPlayed(feedId: FeedId)
+
     fun getPlayedMark(feedItemId: FeedId): Flow<Boolean?>
 
     val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
