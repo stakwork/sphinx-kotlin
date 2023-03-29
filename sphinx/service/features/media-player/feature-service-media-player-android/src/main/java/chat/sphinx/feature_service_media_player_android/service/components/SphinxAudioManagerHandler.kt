@@ -18,7 +18,6 @@ internal class SphinxAudioManagerHandler(
                 }
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
                     mediaPlayerService.mediaPlayerHolder.soundIsComingOut()
-                    Log.d("isAudioComingOut", "AUDIOFOCUS Sound")
                     true
                 }
                 else -> {
@@ -39,7 +38,6 @@ internal class SphinxAudioManagerHandler(
                 }
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
                     mediaPlayerService.mediaPlayerHolder.soundIsNotComingOut()
-                    Log.d("isAudioComingOut", "AUDIOFOCUS Not Sound")
                     true
                 }
                 else -> {

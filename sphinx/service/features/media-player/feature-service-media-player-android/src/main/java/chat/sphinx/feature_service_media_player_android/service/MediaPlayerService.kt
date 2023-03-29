@@ -45,6 +45,8 @@ internal abstract class MediaPlayerService: SphinxService() {
     override val mustComplete: Boolean
         get() = true
 
+    var soundPlaying: Boolean = false
+
     abstract val serviceContext: Context
 
     protected abstract val audioManagerHandler: AudioManagerHandler
@@ -126,14 +128,16 @@ internal abstract class MediaPlayerService: SphinxService() {
                 }
             }
         }
+
+
         @Synchronized
         fun soundIsComingOut(){
-            feedRepository.setSoundComingOut(true)
+            soundPlaying = true
         }
 
         @Synchronized
         fun soundIsNotComingOut(){
-            feedRepository.setSoundComingOut(false)
+            soundPlaying = false
         }
 
         private fun trackPodcastConsumed(
@@ -159,12 +163,12 @@ internal abstract class MediaPlayerService: SphinxService() {
             resetTrackSecondsConsumed()
         }
 
-        fun getPlayingContent(): Pair<String, String>? {
+        fun getPlayingContent(): Triple<String, String, Boolean>? {
             podData?.let { nnData ->
                 if (!nnData.mediaPlayer.isPlaying) {
                     return null
                 }
-                return Pair(nnData.podcastId, nnData.episodeId)
+                return Triple(nnData.podcastId, nnData.episodeId, soundPlaying)
             } ?: run {
                 return null
             }
@@ -716,7 +720,7 @@ internal abstract class MediaPlayerService: SphinxService() {
             mediaPlayerHolder.processUserAction(userAction)
         }
 
-        fun getPlayingContent(): Pair<String, String>? {
+        fun getPlayingContent(): Triple<String, String, Boolean>? {
             return mediaPlayerHolder.getPlayingContent()
         }
     }

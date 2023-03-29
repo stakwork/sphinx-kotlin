@@ -178,7 +178,7 @@ data class Podcast(
         }
 
     fun applyPlayingContentState(
-        playingContent: Pair<String, String>?
+        playingContent: Triple<String, String, Boolean>?
     ) {
         if (playingContent?.first == id.value) {
             episodeId = playingContent?.second

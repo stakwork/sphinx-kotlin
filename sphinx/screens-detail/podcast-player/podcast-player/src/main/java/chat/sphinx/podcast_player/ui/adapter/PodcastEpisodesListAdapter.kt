@@ -83,8 +83,10 @@ internal class PodcastEpisodesListAdapter(
                 val same: Boolean = old.playing == new.playing &&
                                     old.downloaded == new.downloaded &&
                                     old.played == new.played &&
-                                    viewModel.isFeedItemDownloadInProgress(old.id) == viewModel.isFeedItemDownloadInProgress(new.id)
-
+                                    old.durationMilliseconds == new.durationMilliseconds &&
+                                    old.currentTimeSeconds == new.currentTimeSeconds &&
+                                    viewModel.isFeedItemDownloadInProgress(old.id) == viewModel.isFeedItemDownloadInProgress(new.id) &&
+                                    viewModel.isEpisodeSoundPlaying(old) == viewModel.isEpisodeSoundPlaying(new)
 
                 if (sameList) {
                     sameList = same
@@ -118,9 +120,11 @@ internal class PodcastEpisodesListAdapter(
                 }
 
                 if (viewState is PodcastPlayerViewState.MediaStateUpdate) {
-                    if (viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Paused ||
-                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended)
-                    {
+                    if (
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Paused ||
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended ||
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Playing
+                    ) {
                         episodes = viewState.podcast.getEpisodesListCopy()
                     }
                 }
@@ -138,18 +142,9 @@ internal class PodcastEpisodesListAdapter(
                         }.let { result ->
 
                             if (!diff.sameList) {
-                                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
                                 podcastEpisodes.clear()
                                 podcastEpisodes.addAll(episodes)
                                 result.dispatchUpdatesTo(this@PodcastEpisodesListAdapter)
-
-                                if (
-                                    firstVisibleItemPosition == 0                               &&
-                                    recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE
-                                ) {
-                                    recyclerView.scrollToPosition(0)
-                                }
                             }
                         }
                     }
@@ -336,14 +331,12 @@ internal class PodcastEpisodesListAdapter(
                 }
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    delay(1000L)
+                    delay(100L)
 
-                    if (viewModel.isSoundComingOut.value) {
+                    if (viewModel.isEpisodeSoundPlaying(podcastEpisode)) {
                         animationViewPlay.playAnimation()
-                        Log.d("isAudioComingOut", "Play Animation ----- ${podcastEpisode.id.value}")
                     } else {
                         animationViewPlay.pauseAnimation()
-                        Log.d("isAudioComingOut", "Pause Animation ----- ${podcastEpisode.id.value}")
                     }
                 }
             }

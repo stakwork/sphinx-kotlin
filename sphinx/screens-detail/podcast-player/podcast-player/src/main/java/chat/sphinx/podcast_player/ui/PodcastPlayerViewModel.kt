@@ -167,12 +167,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
-    private val _isSoundComingOut: MutableStateFlow<Boolean> by lazy {
-        MutableStateFlow(false)
-    }
-    val isSoundComingOut: StateFlow<Boolean>
-        get() = _isSoundComingOut.asStateFlow()
-
     private val feedItemDetailStateFlow: StateFlow<FeedItemDetail?>
         get() = _feedItemDetailStateFlow.asStateFlow()
 
@@ -259,15 +253,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     owner.tipAmount
                 )
             )
-        }
-
-        viewModelScope.launch(mainImmediate) {
-            feedRepository.isSoundComingOut.collect {
-                _isSoundComingOut.value = it
-                Log.d("isAudioComingOut", "VIEWMODEL COLLECT: ${_isSoundComingOut.value}")
-                delay(1000L)
-                forceListReload()
-            }
         }
 
         updateFeedContentInBackground()
@@ -780,6 +765,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
     fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
+    }
+
+    fun isEpisodeSoundPlaying(episode: PodcastEpisode): Boolean {
+        return episode.playing && mediaPlayerServiceController.getPlayingContent()?.third == true
     }
 
     fun forceFeedReload() {

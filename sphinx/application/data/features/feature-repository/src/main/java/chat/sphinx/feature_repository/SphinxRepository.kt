@@ -4025,14 +4025,6 @@ abstract class SphinxRepository(
         MutableStateFlow(null)
     }
 
-    override val isSoundComingOut: MutableStateFlow<Boolean> by lazy {
-        MutableStateFlow(false)
-    }
-
-    override fun setSoundComingOut(enabled: Boolean) {
-        isSoundComingOut.value = enabled
-    }
-
     override fun getRecommendedFeeds(): Flow<List<FeedRecommendation>> = flow {
 
         var results: MutableList<FeedRecommendation> = mutableListOf()
