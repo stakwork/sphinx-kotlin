@@ -50,9 +50,10 @@ interface FeedRepository {
 
     fun getPlayedMark(feedItemId: FeedId): Flow<Boolean?>
 
-    val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
     fun setRecommendationsToggle(enabled: Boolean)
     fun setSoundComingOut(enabled: Boolean)
+
+    val recommendationsToggleStateFlow: MutableStateFlow<Boolean>
     val recommendationsPodcast: MutableStateFlow<Podcast?>
     val isSoundComingOut: MutableStateFlow<Boolean>
 

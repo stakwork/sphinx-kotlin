@@ -8,6 +8,7 @@ import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -263,6 +264,9 @@ internal class PodcastPlayerViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             feedRepository.isSoundComingOut.collect {
                 _isSoundComingOut.value = it
+                Log.d("isAudioComingOut", "VIEWMODEL COLLECT: ${_isSoundComingOut.value}")
+                delay(1000L)
+                forceListReload()
             }
         }
 
@@ -797,6 +801,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 viewStateContainer.updateViewState(
                     PodcastPlayerViewState.PodcastLoaded(viewState.podcast)
                 )
+                Log.d("isAudioComingOut", "UpdateState! PodcastLoaded")
             }
             is PodcastPlayerViewState.EpisodePlayed -> {
                 viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
@@ -804,6 +809,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 viewStateContainer.updateViewState(
                     PodcastPlayerViewState.EpisodePlayed(viewState.podcast)
                 )
+                Log.d("isAudioComingOut", "UpdateState! EpisodePlayed ")
             }
             is PodcastPlayerViewState.MediaStateUpdate -> {
                 viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
@@ -811,6 +817,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 viewStateContainer.updateViewState(
                     PodcastPlayerViewState.MediaStateUpdate(viewState.podcast, viewState.state)
                 )
+                Log.d("isAudioComingOut", "UpdateState! MediaStateUpdate")
             }
             else -> {}
         }

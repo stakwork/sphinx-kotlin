@@ -1,6 +1,7 @@
 package chat.sphinx.feature_service_media_player_android.service.components
 
 import android.media.AudioManager
+import android.util.Log
 import androidx.media.AudioManagerCompat
 import chat.sphinx.feature_service_media_player_android.service.MediaPlayerService
 
@@ -17,6 +18,7 @@ internal class SphinxAudioManagerHandler(
                 }
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
                     mediaPlayerService.mediaPlayerHolder.soundIsComingOut()
+                    Log.d("isAudioComingOut", "AUDIOFOCUS Sound")
                     true
                 }
                 else -> {
@@ -37,6 +39,7 @@ internal class SphinxAudioManagerHandler(
                 }
                 AudioManager.AUDIOFOCUS_REQUEST_GRANTED -> {
                     mediaPlayerService.mediaPlayerHolder.soundIsNotComingOut()
+                    Log.d("isAudioComingOut", "AUDIOFOCUS Not Sound")
                     true
                 }
                 else -> {

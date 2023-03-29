@@ -1,5 +1,6 @@
 package chat.sphinx.podcast_player.ui.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -335,12 +336,14 @@ internal class PodcastEpisodesListAdapter(
                 }
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                    delay(100L)
+                    delay(1000L)
 
                     if (viewModel.isSoundComingOut.value) {
                         animationViewPlay.playAnimation()
+                        Log.d("isAudioComingOut", "Play Animation ----- ${podcastEpisode.id.value}")
                     } else {
                         animationViewPlay.pauseAnimation()
+                        Log.d("isAudioComingOut", "Pause Animation ----- ${podcastEpisode.id.value}")
                     }
                 }
             }
