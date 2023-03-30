@@ -35,8 +35,6 @@ import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
-import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
-import chat.sphinx.menu_bottom_scanner.ScannerMenuBottomViewState
 import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
 import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
@@ -112,6 +110,10 @@ internal class DashboardViewModel @Inject constructor(
 
     val currentVersion: MutableStateFlow<String> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow("-")
+    }
+
+    val scannedContactLink: MutableStateFlow<Pair<LightningNodePubKey, LightningRouteHint?>?> by lazy(LazyThreadSafetyMode.NONE) {
+        MutableStateFlow(null)
     }
 
     init {
@@ -264,7 +266,11 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     override fun createContact() {
-        TODO("Not yet implemented")
+        viewModelScope.launch(default) {
+            scannedContactLink.value?.let { contact ->
+                dashboardNavigator.toAddContactDetail(contact.first, contact.second)
+            }
+        }
     }
 
     override fun sendDirectPayment() {
@@ -288,6 +294,7 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
+        scannedContactLink.value = Pair(pubKey, routeHint)
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
             // go to direct payment
             scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)

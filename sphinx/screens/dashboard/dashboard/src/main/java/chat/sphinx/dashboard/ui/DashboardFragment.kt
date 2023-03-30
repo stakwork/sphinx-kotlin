@@ -33,6 +33,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.wrapper_view.Px
@@ -96,6 +97,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupNavDrawer()
         setupPopups()
         setupRestorePopup()
+        setupBottomMenuScanner()
     }
 
     override fun onPause() {
@@ -245,6 +247,13 @@ internal class DashboardFragment : MotionLayoutFragment<
                 viewModel.toastIfNetworkConnected()
             }
         }
+    }
+
+    private fun setupBottomMenuScanner() {
+        bottomMenuScanner.initialize(
+            binding.includeLayoutMenuBottomScannerChoice,
+            viewLifecycleOwner
+        )
     }
 
     private fun setupFooter() {
