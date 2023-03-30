@@ -33,11 +33,11 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.wrapper_common.lightning.asFormattedString
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_view.Px
 import chat.sphinx.swipe_reveal_layout.SwipeRevealLayout
+import chat.sphinx.wrapper_common.lightning.*
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.motionlayout.MotionLayoutFragment
@@ -73,6 +73,13 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
         get() = binding.layoutPodcastPlayerFooter
+
+    private val bottomMenuScanner: BottomScannerMenu by lazy(LazyThreadSafetyMode.NONE) {
+        BottomScannerMenu(
+            onStopSupervisor,
+            viewModel
+        )
+    }
 
     var timeTrackerStart: Long = 0
 

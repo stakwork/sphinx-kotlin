@@ -34,6 +34,11 @@ import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_scanner.BottomScannerMenu
+import chat.sphinx.menu_bottom_scanner.ScannerMenuBottomViewState
+import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
+import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -96,7 +101,8 @@ internal class DashboardViewModel @Inject constructor(
         Context,
         ChatListSideEffect,
         DashboardMotionViewState
-        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible) {
+        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible),
+    ScannerMenuViewModel{
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
@@ -253,6 +259,18 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
+    override val scannerMenuHandler: ScannerMenuHandler by lazy {
+        ScannerMenuHandler()
+    }
+
+    override fun createContact() {
+        TODO("Not yet implemented")
+    }
+
+    override fun sendDirectPayment() {
+        TODO("Not yet implemented")
+    }
+
     private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
         val chat: Chat? = try {
             chatRepository.getChatByUUID(
@@ -271,10 +289,11 @@ internal class DashboardViewModel @Inject constructor(
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+            // go to direct payment
+            scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
 
-            goToContactChat(contact)
-
-        } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
+        } ?: scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+//        dashboardNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
     private suspend fun goToContactChat(contact: Contact) {
