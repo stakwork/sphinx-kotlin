@@ -1,24 +1,24 @@
 package chat.sphinx.dashboard.ui.feed
 
-import android.content.Context
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_common.feed.toFeedId
-import chat.sphinx.wrapper_common.feed.toFeedUrl
-import chat.sphinx.wrapper_common.feed.toSubscribed
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -26,6 +26,7 @@ import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,7 +37,7 @@ class FeedViewModel @Inject constructor(
     private val actionsRepository: ActionsRepository,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
-        Context,
+        FragmentActivity,
         FeedSideEffect,
         FeedViewState
         >(dispatchers, FeedViewState.Idle)
@@ -47,6 +48,8 @@ class FeedViewModel @Inject constructor(
     }
 
     private var searchFeedsJob: Job? = null
+    private var searchFeedsTerm: MutableList<String> = mutableListOf()
+
     suspend fun searchFeedsBy(
         searchTerm: String,
         feedType: FeedType?,
@@ -87,7 +90,7 @@ class FeedViewModel @Inject constructor(
                 feedType
             ).collect { searchResults ->
 
-                actionsRepository.trackFeedSearchAction(
+                addSearchTerm(
                     searchTerm.lowercase().trim()
                 )
 
@@ -118,6 +121,28 @@ class FeedViewModel @Inject constructor(
         }
     }
 
+    private fun addSearchTerm(searchTerm: String) {
+        searchFeedsTerm.lastOrNull()?.let { st ->
+            if (searchTerm.contains(st)) {
+                searchFeedsTerm.remove(st)
+            } else if (st.contains(searchTerm)) {
+                return
+            } else {}
+        }
+        searchFeedsTerm.add(searchTerm)
+    }
+
+    private fun trackSearches() {
+        for (searchTerm in searchFeedsTerm) {
+            actionsRepository.trackFeedSearchAction(searchTerm)
+        }
+        searchFeedsTerm.clear()
+    }
+
+    fun syncActions() {
+        actionsRepository.syncActions()
+    }
+
     fun toggleSearchState(searchFieldActive: Boolean) {
         val viewState = currentViewState
 
@@ -142,6 +167,8 @@ class FeedViewModel @Inject constructor(
         ) {
             updateViewState(FeedViewState.Idle)
         }
+
+        trackSearches()
     }
 
     private var searchResultSelectedJob: Job? = null
@@ -155,19 +182,8 @@ class FeedViewModel @Inject constructor(
         }
 
         searchResultSelectedJob = viewModelScope.launch(mainImmediate) {
-            searchResult.id.toFeedId()?.let { feedId ->
-                feedRepository.getFeedById(feedId).collect { feed ->
-                    feed?.let { nnFeed ->
-                        goToFeedDetailView(nnFeed)
-                        callback()
-                    }
-                }
-            }
-        }
-
-        viewModelScope.launch(mainImmediate) {
             searchResult.url.toFeedUrl()?.let { feedUrl ->
-                feedRepository.updateFeedContent(
+                val response = feedRepository.updateFeedContent(
                     chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
                     feedUrl = feedUrl,
@@ -175,8 +191,27 @@ class FeedViewModel @Inject constructor(
                     searchResultImageUrl = searchResult.imageUrl?.toPhotoUrl(),
                     chatUUID = null,
                     subscribed = false.toSubscribed(),
-                    currentEpisodeId = null
+                    currentItemId = null
                 )
+
+                @Exhaustive
+                when (response) {
+                    is Response.Success -> {
+                        feedRepository.getFeedById(response.value).firstOrNull()?.let { feed ->
+                            feed?.let { nnFeed ->
+                                goToFeedDetailView(nnFeed)
+                                callback()
+                            }
+                        }
+                    }
+                    is Response.Error -> {
+                        submitSideEffect(FeedSideEffect.FailedToLoadFeed)
+                        callback()
+                    }
+                }
+            } ?: run {
+                submitSideEffect(FeedSideEffect.FailedToLoadFeed)
+                callback()
             }
         }
     }
@@ -187,8 +222,7 @@ class FeedViewModel @Inject constructor(
                 dashboardNavigator.toPodcastPlayerScreen(
                     feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     feed.id,
-                    feed.feedUrl,
-                    0
+                    feed.feedUrl
                 )
             }
             feed.isVideo -> {
@@ -206,5 +240,7 @@ class FeedViewModel @Inject constructor(
             }
         }
         searchResultSelectedJob?.cancel()
+
+        trackSearches()
     }
 }

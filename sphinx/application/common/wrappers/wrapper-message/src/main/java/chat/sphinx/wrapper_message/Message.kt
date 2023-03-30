@@ -202,7 +202,11 @@ inline fun Message.retrievePurchaseStatus(): PurchaseStatus? {
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveSphinxCallLink(): SphinxCallLink? =
-    messageContentDecrypted?.value?.toSphinxCallLink()
+    messageContentDecrypted?.value?.toSphinxCallLink()?.let {
+        it
+    } ?: callLinkMessage?.let {
+        it.link
+    }
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.getColorKey(): String {
@@ -275,7 +279,15 @@ inline val Message.isPaidTextMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isSphinxText == true && (messageMedia?.price?.value ?: 0L) > 0L
 
 inline val Message.isSphinxCallLink: Boolean
-    get() = type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)
+    get() {
+        if (type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)) {
+            return true
+        }
+        if (type.isCallLink() && callLinkMessage != null) {
+            return true
+        }
+        return false
+    }
 
 inline val Message.isAudioMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isAudio == true
@@ -330,6 +342,7 @@ abstract class Message {
     abstract val messageDecryptionException: Exception?
     abstract val messageMedia: MessageMedia?
     abstract val feedBoost: FeedBoost?
+    abstract val callLinkMessage: CallLinkMessage?
     abstract val podcastClip: PodcastClip?
     abstract val giphyData: GiphyData?
     abstract val reactions: List<Message>?
@@ -362,6 +375,7 @@ abstract class Message {
                 other.messageDecryptionException    == messageDecryptionException   &&
                 other.messageMedia                  == messageMedia                 &&
                 other.feedBoost                     == feedBoost                    &&
+                other.callLinkMessage                      == callLinkMessage                    &&
                 other.podcastClip                   == podcastClip                  &&
                 other.giphyData                     == giphyData                    &&
                 other.recipientAlias                == recipientAlias               &&
@@ -415,6 +429,7 @@ abstract class Message {
         result = _31 * result + messageDecryptionException.hashCode()
         result = _31 * result + messageMedia.hashCode()
         result = _31 * result + feedBoost.hashCode()
+        result = _31 * result + callLinkMessage.hashCode()
         result = _31 * result + podcastClip.hashCode()
         result = _31 * result + giphyData.hashCode()
         result = _31 * result + recipientAlias.hashCode()
@@ -439,6 +454,6 @@ abstract class Message {
                 "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
                 "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
-                "recipientPic=$recipientPic,person=$person"
+                "recipientPic=$recipientPic,person=$person,callLink=$callLinkMessage"
     }
 }

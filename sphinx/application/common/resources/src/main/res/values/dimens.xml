@@ -36,6 +36,8 @@
     <dimen name="default_text_size_action_button_label">12sp</dimen>
     <dimen name="default_text_size_sub_headline">11sp</dimen>
     <dimen name="default_text_size_list_row_headline">13sp</dimen>
+    <dimen name="default_text_size_list_row_headline_variation">15sp</dimen>
+    <dimen name="default_text_size_list_recommendation_row_headline">12sp</dimen>
     <dimen name="default_text_size_caption1">10sp</dimen>
     <dimen name="default_text_size_caption2">9sp</dimen>
     <dimen name="default_text_size_tab">16sp</dimen>
@@ -48,12 +50,12 @@
     <dimen name="default_status_badge_inner_padding">3dp</dimen>
 
     <dimen name="default_tap_target_min_height">44dp</dimen>
-
     <dimen name="search_bar_height">50dp</dimen>
 
     <dimen name="add_buttons_height">50dp</dimen>
     <dimen name="add_buttons_text_size">15sp</dimen>
     <dimen name="add_buttons_icon_xy">25sp</dimen>
+    <dimen name="add_tribe_button_icon_">20sp</dimen>
     <dimen name="default_tap_target_xy">44dp</dimen>
     <dimen name="default_small_tap_target_xy">27dp</dimen>
     <dimen name="paid_attachment_view_height">50dp</dimen>
@@ -74,12 +76,29 @@
 
     <dimen name="default_progress_bar_xy">25dp</dimen>
     <dimen name="default_progress_bar_margin_left">10dp</dimen>
+    <dimen name="default_progress_bar_time_left_with">50dp</dimen>
+    <dimen name="default_progress_bar_time_left_height">4dp</dimen>
 
     <dimen name="amount_pad_text_size">25sp</dimen>
     <dimen name="pin_pad_text_size">27sp</dimen>
     <dimen name="pin_pad_backspace_text_size">24sp</dimen>
     <dimen name="pin_help_text_view_size">15sp</dimen>
     <dimen name="pin_text_view_size">17sp</dimen>
+    <dimen name="badges_select_medium_text_view_size">20sp</dimen>
+    <dimen name="badges_select_light_text_view_size">19sp</dimen>
+    <dimen name="badges_icon_row_size">32dp</dimen>
+    <dimen name="badges_icon_create_size">128dp</dimen>
+    <dimen name="badges_icon_upload_button_height">40dp</dimen>
+    <dimen name="badges_icon_upload_button_width">140dp</dimen>
+    <dimen name="badges_icon_size">36dp</dimen>
+    <dimen name="badges_icon_radius">18dp</dimen>
+    <dimen name="badges_text_create_button_size">18sp</dimen>
+    <dimen name="badges_row_count_height">25dp</dimen>
+    <dimen name="badges_row_count_width">45dp</dimen>
+    <dimen name="badges_constraint_badge_quantity_width">180dp</dimen>
+    <dimen name="badges_constraint_badge_quantity_height">40dp</dimen>
+
+
 
     <!-- Menu option input lock -->
     <item name="options_menu_input_lock_alpha" type="dimen" format="float">.5</item>
@@ -94,6 +113,9 @@
     <dimen name="default_feed_play_elevation">16dp</dimen>
     <dimen name="default_feed_image_play_text_size">40sp</dimen>
     <dimen name="default_radius">14dp</dimen>
+    <dimen name="episode_image_radius">6dp</dimen>
+    <dimen name="episode_detail_image_radius">10dp</dimen>
+    <dimen name="episode_type_radius">3dp</dimen>
 
     <dimen name="default_feed_watch_image_width">260dp</dimen>
     <dimen name="default_feed_watch_image_height">160dp</dimen>
@@ -133,9 +155,19 @@
     <dimen name="custom_boost_button_padding">2dp</dimen>
     <dimen name="custom_boost_button_xy">32dp</dimen>
 
+    <dimen name="player_details_small_control_button_xy">32dp</dimen>
+    <dimen name="player_details_large_control_button_xy">58dp</dimen>
+    <dimen name="player_time_labels_horizontal_margin">18dp</dimen>
+
     <!-- Tribe Member Profile -->
+    <dimen name="tribe_member_collapsed_height">456dp</dimen>
     <dimen name="tribe_member_image_section_height">112dp</dimen>
     <dimen name="tribe_member_image_corner_radius">56dp</dimen>
     <dimen name="tribe_member_send_sats_button_width">147dp</dimen>
     <dimen name="tribe_member_send_sats_button_height">40dp</dimen>
+
+    <!-- Feed Item Detail -->
+    <dimen name="feed_item_detail_row_height">65dp</dimen>
+    <dimen name="feed_item_detail_rows_container_height">260dp</dimen>
+    <dimen name="feed_item_detail_rows_container_margin_top">36dp</dimen>
 </resources>

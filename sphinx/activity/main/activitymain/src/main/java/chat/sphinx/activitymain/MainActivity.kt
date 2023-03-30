@@ -17,13 +17,13 @@ import chat.sphinx.activitymain.ui.MainViewState
 import chat.sphinx.activitymain.ui.MotionLayoutNavigationActivity
 import chat.sphinx.insetter_activity.InsetPadding
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.resources.R as R_common
 import dagger.hilt.android.AndroidEntryPoint
 import dev.chrisbanes.insetter.applyInsetter
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import chat.sphinx.resources.R as R_common
 
 @AndroidEntryPoint
 internal class MainActivity: MotionLayoutNavigationActivity<
@@ -35,6 +35,8 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         >(R.layout.activity_main), InsetterActivity
 {
     override val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::bind)
+
+    private var sessionDepth = 0
 
     override val navController: NavController by lazy(LazyThreadSafetyMode.NONE) {
         binding.navHostFragmentPrimary.findNavController()
@@ -85,6 +87,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R_common.style.AppPostLaunchTheme)
         super.onCreate(savedInstanceState)
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setTransitionListener(binding.layoutMotionMain)
 
@@ -138,6 +141,21 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                         }
                     }
                 }
+        }
+
+        sessionDepth++;
+        if (sessionDepth == 1){
+            viewModel.restoreContentFeedStatuses()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (sessionDepth > 0)
+            sessionDepth--;
+        if (sessionDepth == 0) {
+            viewModel.saveContentFeedStatuses()
         }
     }
 
@@ -197,7 +215,6 @@ internal class MainActivity: MotionLayoutNavigationActivity<
 
     override fun onBackPressed() {
         when {
-
             // AuthenticationNavController
             authenticationNavController.previousBackStackEntry != null -> {
                 // Authentication Screen has a callback to handle it automatically
@@ -208,8 +225,12 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 // Downside to this is that DetailScreens cannot add
                 // back press callbacks, but that's why they're detail screens
                 if (!transitionInProgress) {
-                    lifecycleScope.launch {
-                        viewModel.detailDriver.submitNavigationRequest(PopBackStack())
+                    if (onBackPressedDispatcher.hasEnabledCallbacks()) {
+                        super.onBackPressed()
+                    } else {
+                        lifecycleScope.launch {
+                            viewModel.detailDriver.submitNavigationRequest(PopBackStack())
+                        }
                     }
                 }
             }
@@ -231,6 +252,12 @@ internal class MainActivity: MotionLayoutNavigationActivity<
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        viewModel.syncActions()
     }
 
     override var isKeyboardVisible: Boolean = false

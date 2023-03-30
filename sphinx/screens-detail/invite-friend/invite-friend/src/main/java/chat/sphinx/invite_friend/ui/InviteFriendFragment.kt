@@ -11,15 +11,15 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.invite_friend.R
 import chat.sphinx.invite_friend.databinding.FragmentInviteFriendBinding
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-internal class InviteFriendFragment : SideEffectFragment<
+internal class InviteFriendFragment : SideEffectDetailFragment<
         Context,
         InviteFriendSideEffect,
         InviteFriendViewState,
@@ -64,6 +64,12 @@ internal class InviteFriendFragment : SideEffectFragment<
         }
 
         (requireActivity() as InsetterActivity).addNavigationBarPadding(binding.root)
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     override suspend fun onViewStateFlowCollect(viewState: InviteFriendViewState) {

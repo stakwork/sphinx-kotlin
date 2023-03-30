@@ -22,6 +22,7 @@
     <string name="profile_export_keys_pin_message">"Ingresa tu PIN para encriptar las claves. ¡Recuérdalo! Lo necesitarás para restaurar tu cuenta en otro dispositivo"</string>
     <string name="profile_keys_copied_clipboard">"Tus claves se copiarán al portapapeles. Guarda las claves y recuerda tu PIN antes de borrar la aplicación o toda la información se perderá"</string>
     <string name="profile_link_previews">Vista previa de enlaces activada</string>
+    <string name="profile_recommendations">Feed Recommendations</string>
     <string name="side_effect_backup_keys_exported">Claves copiadas al portapapeles</string>
     <string name="side_effect_wrong_pin">PIN incorrecto</string>
     <string name="side_effect_backup_keys_failed">Guardado de claves fallido</string>

@@ -35,4 +35,10 @@
         <item name="android:textSize">@dimen/pin_pad_text_size</item>
         <item name="android:fontFamily">@font/roboto_regular</item>
     </style>
+
+    <style name="speedMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:itemBackground">@color/sentMsgBG</item>
+        <item name="android:dropDownWidth">50dp</item>
+    </style>
 </resources>

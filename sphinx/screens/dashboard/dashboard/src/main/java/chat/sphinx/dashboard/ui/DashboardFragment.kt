@@ -1,13 +1,16 @@
 package chat.sphinx.dashboard.ui
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat.setBackgroundTintList
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
@@ -71,6 +74,8 @@ internal class DashboardFragment : MotionLayoutFragment<
     private val podcastPlayerBinding: LayoutPodcastPlayerFooterBinding
         get() = binding.layoutPodcastPlayerFooter
 
+    var timeTrackerStart: Long = 0
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -84,6 +89,12 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupNavDrawer()
         setupPopups()
         setupRestorePopup()
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        dashboardPodcastViewModel.trackPodcastConsumed()
     }
 
     override fun onResume() {
@@ -254,16 +265,21 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
     }
 
+    private fun onPodcastBarDismissed() {
+        dashboardPodcastViewModel.forcePodcastStop()
+        dashboardPodcastViewModel.trackPodcastConsumed()
+
+        podcastPlayerBinding.root.gone
+        binding.swipeRevealLayoutPlayer.gone
+        binding.imageViewBottomBarShadow.visible
+    }
+
     private fun setupPodcastPlayerFooter() {
         binding.swipeRevealLayoutPlayer.setSwipeListener(object: SwipeRevealLayout.SwipeListener {
             override fun onClosed(view: SwipeRevealLayout?) {}
 
             override fun onOpened(view: SwipeRevealLayout?) {
-                dashboardPodcastViewModel.forcePodcastStop()
-
-                podcastPlayerBinding.root.gone
-                binding.swipeRevealLayoutPlayer.gone
-                binding.imageViewBottomBarShadow.visible
+                onPodcastBarDismissed()
             }
 
             override fun onSlide(view: SwipeRevealLayout?, slideOffset: Float) {}
@@ -347,6 +363,18 @@ internal class DashboardFragment : MotionLayoutFragment<
             }
         }
 
+        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.apply {
+            textViewDashboardPopupClose.setOnClickListener {
+                viewModel.deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.PopupDismissed
+                )
+            }
+
+            buttonConfirm.setOnClickListener {
+                viewModel.redeemSats()
+            }
+        }
+
         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
             textViewDashboardPopupClose.setOnClickListener {
                 viewModel.deepLinkPopupViewStateContainer.updateViewState(
@@ -422,6 +450,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                         is LoadResponse.Loading -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(true)
                             dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(false)
+                            timeTrackerStart = System.currentTimeMillis()
                         }
                         is Response.Error -> {
                             dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(false)
@@ -442,6 +471,8 @@ internal class DashboardFragment : MotionLayoutFragment<
                                     R.color.primaryGreen
                                 )
                             )
+                            Log.d("TimeTracker", "Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+                            viewModel.sendAppLog("- Your node went online in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
                         }
                     }
                 }
@@ -449,14 +480,18 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.restoreStateFlow.collect { response ->
+            viewModel.restoreProgressStateFlow.collect { response ->
                 binding.layoutDashboardRestore.apply {
                     if (response != null) {
                         layoutDashboardRestoreProgress.apply {
                             val progressString = "${response.progress}%"
 
-                            textViewRestoreProgress.text = getString(R.string.dashboard_restore_progress, progressString)
+                            textViewRestoreProgress.text = getString(response.progressLabel, progressString)
                             progressBarRestore.progress = response.progress
+                            buttonStopRestore.isEnabled = response.continueButtonEnabled
+                            buttonStopRestore.backgroundTintList =
+                                if (response.continueButtonEnabled) ContextCompat.getColorStateList(root.context, R.color.primaryBlue)
+                                else ContextCompat.getColorStateList(root.context, R.color.secondaryTextInverted)
                         }
                         root.visible
                     } else {
@@ -640,8 +675,20 @@ internal class DashboardFragment : MotionLayoutFragment<
                         }
                         binding.layoutDashboardPopup.root.visible
                     }
+                    is DeepLinkPopupViewState.RedeemSatsPopup -> {
+                        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.apply {
+                            textViewDashboardPopupRedeemSatsName.text = viewState.link.host
+                            textViewDashboardPopupRedeemSatsTitle.text = getString(R.string.dashboard_redeem_sats_popup_title, viewState.link.amount)
+                            layoutConstraintRedeemSatsPopup.visible
+                            root.visible
+                        }
+                        binding.layoutDashboardPopup.root.visible
+                    }
                     is DeepLinkPopupViewState.ExternalAuthorizePopupProcessing -> {
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.progressBarAuthorize.visible
+                    }
+                    is DeepLinkPopupViewState.RedeemSatsPopupProcessing -> {
+                        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.progressBarRedeemSats.visible
                     }
                     is DeepLinkPopupViewState.LoadingExternalRequestPopup -> {
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {
@@ -748,6 +795,11 @@ internal class DashboardFragment : MotionLayoutFragment<
                         binding.layoutDashboardPopup.layoutDashboardAuthorizePopup.apply {
                             root.gone
                             progressBarAuthorize.gone
+                        }
+
+                        binding.layoutDashboardPopup.layoutDashboardRedeemSatsPopup.apply {
+                            root.gone
+                            progressBarRedeemSats.gone
                         }
 
                         binding.layoutDashboardPopup.layoutDashboardPeopleProfilePopup.apply {

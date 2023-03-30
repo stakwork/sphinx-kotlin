@@ -6,6 +6,7 @@ import android.net.Uri
 import android.text.Editable
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
@@ -24,6 +25,7 @@ import javax.inject.Inject
 internal class SupportTicketViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     val navigator: SupportTicketNavigator,
+    private val actionsRepository: ActionsRepository,
     private val networkQueryLightning: NetworkQueryLightning,
 ): SideEffectViewModel<
         Context,
@@ -44,7 +46,12 @@ internal class SupportTicketViewModel @Inject constructor(
                         updateViewState(SupportTicketViewState.Empty)
                     }
                     is Response.Success -> {
-                        updateViewState(SupportTicketViewState.Fetched(loadedResponse.value))
+                        updateViewState(
+                            SupportTicketViewState.Fetched(
+                                loadedResponse.value,
+                                actionsRepository.appLogsStateFlow.value
+                            )
+                        )
                     }
                 }
             }
@@ -67,9 +74,11 @@ internal class SupportTicketViewModel @Inject constructor(
                     null
                 }
                 is SupportTicketViewState.Fetched -> {
-                    logsViewState.logs
+                    "${logsViewState.logs}" +
+                    "\n\n\n" +
+                    "${actionsRepository.appLogsStateFlow.value}"
                 }
-                SupportTicketViewState.LoadingLogs -> {
+                is SupportTicketViewState.LoadingLogs -> {
                     null
                 }
             }
@@ -89,7 +98,6 @@ internal class SupportTicketViewModel @Inject constructor(
                     is SupportTicketViewState.Fetched -> {
                         "$text\n\n\n${logsViewState.logs}"
                     }
-
                 }
 
                 Intent(Intent.ACTION_SENDTO).apply {

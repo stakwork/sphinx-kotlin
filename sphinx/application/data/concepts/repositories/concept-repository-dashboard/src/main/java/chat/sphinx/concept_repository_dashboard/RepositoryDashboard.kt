@@ -8,15 +8,19 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.dashboard.InviteId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgress
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_feed.ContentFeedStatus
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_invite.Invite
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.Message
-import chat.sphinx.wrapper_rsa.RsaPublicKey
+import chat.sphinx.wrapper_podcast.FeedRecommendation
+import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 interface RepositoryDashboard {
@@ -41,13 +45,13 @@ interface RepositoryDashboard {
     fun getMessageById(messageId: MessageId): Flow<Message?>
     fun getInviteById(inviteId: InviteId): Flow<Invite?>
 
-    fun syncActions()
-
     suspend fun payForInvite(invite: Invite)
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>
 
     fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>>
     fun getAllFeeds(): Flow<List<Feed>>
+
+    fun getRecommendedFeeds(): Flow<List<FeedRecommendation>>
 
     suspend fun authorizeExternal(
         relayUrl: String,
@@ -60,6 +64,11 @@ interface RepositoryDashboard {
         id: String,
         challenge: String
     ): Response<String, ResponseError>
+
+    suspend fun redeemSats(
+        host: String,
+        token: String
+    ): Response<Boolean, ResponseError>
 
     suspend fun savePeopleProfile(
         body: String
@@ -76,6 +85,7 @@ interface RepositoryDashboard {
     val networkRefreshBalance: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshContacts: Flow<LoadResponse<Boolean, ResponseError>>
     val networkRefreshLatestContacts: Flow<LoadResponse<RestoreProgress, ResponseError>>
+    val networkRefreshFeedContent: Flow<LoadResponse<RestoreProgress, ResponseError>>
     val networkRefreshMessages: Flow<LoadResponse<RestoreProgress, ResponseError>>
 
     suspend fun didCancelRestore()

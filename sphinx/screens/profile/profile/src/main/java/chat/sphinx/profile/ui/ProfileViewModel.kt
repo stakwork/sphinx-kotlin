@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -30,6 +31,7 @@ import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
+import chat.sphinx.wrapper_common.FeedRecommendationsToggle
 import chat.sphinx.wrapper_common.PreviewsEnabled
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -78,6 +80,7 @@ internal class ProfileViewModel @Inject constructor(
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
+    private val feedRepository: FeedRepository,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val networkQueryCrypter: NetworkQueryCrypter,
     private val relayDataHandler: RelayDataHandler,
@@ -250,6 +253,25 @@ internal class ProfileViewModel @Inject constructor(
 
         withContext(dispatchers.io) {
             generalSettingsSharedPreferences.edit().putBoolean(PreviewsEnabled.LINK_PREVIEWS_ENABLED_KEY, enabled)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                }
+        }
+    }
+
+    suspend fun updateFeedRecommendationsToggle(enabled: Boolean) {
+        _feedRecommendationsStateFlow.value = enabled
+        feedRepository.setRecommendationsToggle(enabled)
+
+        delay(50L)
+
+        val appContext: Context = app.applicationContext
+        val generalSettingsSharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            generalSettingsSharedPreferences.edit().putBoolean(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, enabled)
                 .let { editor ->
                     if (!editor.commit()) {
                         editor.apply()
@@ -457,6 +479,10 @@ internal class ProfileViewModel @Inject constructor(
         MutableStateFlow(true)
     }
 
+    private val _feedRecommendationsStateFlow: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(false)
+    }
+
     val relayUrlStateFlow: StateFlow<String?>
         get() = _relayUrlStateFlow.asStateFlow()
     val pinTimeoutStateFlow: StateFlow<Int?>
@@ -467,6 +493,8 @@ internal class ProfileViewModel @Inject constructor(
         get() = contactRepository.accountOwner
     val linkPreviewsEnabledStateFlow: StateFlow<Boolean>
         get() = _linkPreviewsEnabledStateFlow.asStateFlow()
+    val feedRecommendationsStateFlow: StateFlow<Boolean>
+        get() = _feedRecommendationsStateFlow.asStateFlow()
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -475,6 +503,7 @@ internal class ProfileViewModel @Inject constructor(
 
             setServerUrls()
             setLinkPreviewsEnabled()
+            setFeedRecommendationsToggle()
         }
     }
 
@@ -500,6 +529,17 @@ internal class ProfileViewModel @Inject constructor(
         )
 
         _linkPreviewsEnabledStateFlow.value = linkPreviewsEnabled
+    }
+
+    private fun setFeedRecommendationsToggle() {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        val feedRecommendationsToggle = sharedPreferences.getBoolean(
+            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, false
+        )
+        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
+        _feedRecommendationsStateFlow.value = feedRecommendationsToggle
     }
 
     private var setupSigningDeviceJob: Job? = null

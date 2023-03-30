@@ -33,6 +33,7 @@ dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
+    api project(path: ':sphinx:application:common:screen-detail-fragment')
     // Sphinx
     api project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
     api project(path: ':sphinx:screens-detail:common:detail-resources')

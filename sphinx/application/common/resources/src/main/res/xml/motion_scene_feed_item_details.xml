@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--
+          Set 1: Feed Item Details Closed
+    -->
+
+    <ConstraintSet android:id="@+id/motion_scene_feed_item_details_closed">
+
+        <Constraint android:id="@+id/view_feed_item_details_lock">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_feed_item_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="parent" />
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <!--
+           Set 2: Feed Item Details Open
+    -->
+
+    <ConstraintSet
+        android:id="@+id/motion_scene_feed_item_details_open"
+        app:deriveConstraintsFrom="@+id/motion_scene_feed_item_details_closed">
+
+        <Constraint android:id="@+id/view_feed_item_details_lock">
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_feed_item_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <Transition
+        android:id="@+id/transition_feed_item_details_closed_to_open"
+        app:constraintSetEnd="@+id/motion_scene_feed_item_details_open"
+        app:constraintSetStart="@+id/motion_scene_feed_item_details_closed"
+        app:duration="300"
+        app:motionInterpolator="cubic(0.41,0.39,0,1)">
+    </Transition>
+
+</MotionScene>

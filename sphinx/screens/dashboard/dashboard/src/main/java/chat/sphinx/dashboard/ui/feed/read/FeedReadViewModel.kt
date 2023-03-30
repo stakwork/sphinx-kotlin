@@ -14,6 +14,7 @@ import chat.sphinx.dashboard.ui.viewstates.FeedReadViewState
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.time
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -37,7 +38,11 @@ class FeedReadViewModel @Inject constructor(
 {
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
         repositoryDashboard.getAllFeedsOfType(FeedType.Newsletter).collect { newsletterFeeds ->
-            emit(newsletterFeeds.toList())
+            emit(
+                newsletterFeeds.toList().sortedByDescending {
+                    it.lastPublished?.datePublished?.time ?: 0
+                }
+            )
         }
     }.stateIn(
         viewModelScope,

@@ -1,7 +1,10 @@
 package chat.sphinx.video_screen.ui
 
 import android.app.Application
-import android.util.Log
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_actions.ActionsRepository
@@ -12,23 +15,23 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_screen.R
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
+import chat.sphinx.video_screen.ui.viewstate.VideoFeedItemDetailsViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
-import chat.sphinx.video_screen.ui.watch.VideoRecordConsumed
-import chat.sphinx.wrapper_chat.ChatMetaData
-import chat.sphinx.wrapper_common.ItemId
+import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.dashboard.DashboardItemType
 import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
-import chat.sphinx.wrapper_feed.Feed
-import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
-import chat.sphinx.wrapper_podcast.Podcast
-import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import chat.sphinx.wrapper_podcast.PodcastEpisode
+import chat.sphinx.wrapper_podcast.toHrAndMin
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -50,6 +53,7 @@ internal open class VideoFeedScreenViewModel(
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val lightningRepository: LightningRepository,
+    val navigator: VideoScreenNavigator
 ): SideEffectViewModel<
     FragmentActivity,
     VideoFeedScreenSideEffect,
@@ -127,6 +131,19 @@ internal open class VideoFeedScreenViewModel(
         ViewStateContainer(BoostAnimationViewState.Idle)
     }
 
+    private val _feedItemDetailStateFlow: MutableStateFlow<FeedItemDetail?> by lazy {
+        MutableStateFlow(null)
+    }
+
+    private val feedItemDetailStateFlow: StateFlow<FeedItemDetail?>
+        get() = _feedItemDetailStateFlow.asStateFlow()
+
+
+    val videoFeedItemDetailsViewState: ViewStateContainer<VideoFeedItemDetailsViewState> by lazy {
+        ViewStateContainer(VideoFeedItemDetailsViewState.Closed)
+    }
+
+
     protected fun subscribeToViewStateFlow() {
         viewModelScope.launch(mainImmediate) {
             videoFeedSharedFlow.collect { feed ->
@@ -165,22 +182,21 @@ internal open class VideoFeedScreenViewModel(
     }
 
     private fun updateFeedContentInBackground() {
-        viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(getArgChatId()).firstOrNull()?.let { chat ->
-                chat.host?.let { chatHost ->
-                    getArgFeedUrl()?.let { feedUrl ->
-                        val subscribed = (chat != null || (getVideoFeed()?.subscribed?.isTrue() == true))
+        viewModelScope.launch(io) {
+            val chat = chatRepository.getChatById(getArgChatId()).firstOrNull()
+            val videoFeed = getVideoFeed()
+            val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
+            val subscribed = videoFeed?.subscribed?.isTrue() == true
 
-                        feedRepository.updateFeedContent(
-                            chatId = chat.id,
-                            host = chatHost,
-                            feedUrl = feedUrl,
-                            chatUUID = chat.uuid,
-                            subscribed = subscribed.toSubscribed(),
-                            currentEpisodeId = null
-                        )
-                    }
-                }
+            getArgFeedUrl()?.let { feedUrl ->
+                feedRepository.updateFeedContent(
+                    chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = chatHost,
+                    feedUrl = feedUrl,
+                    chatUUID = chat?.uuid,
+                    subscribed = subscribed.toSubscribed(),
+                    currentItemId = null
+                )
             }
         }
     }
@@ -188,17 +204,18 @@ internal open class VideoFeedScreenViewModel(
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
 
-            repositoryMedia.updateChatMetaData(
-                getArgChatId(),
-                video.feed?.id,
-                ChatMetaData(
+            video.feed?.let { feed ->
+                feedRepository.updateContentFeedStatus(
+                    feedId = feed.id,
+                    feedUrl = feed.feedUrl,
+                    subscriptionStatus = feed.subscribed,
+                    chatId = feed.chatId,
                     itemId = video.id,
-                    itemLongId = ItemId(-1),
-                    satsPerMinute = getOwner()?.tipAmount ?: Sat(0),
-                    timeSeconds = 0,
-                    speed = 1.0
+                    satsPerMinute = null,
+                    playerSpeed = null
                 )
-            )
+                updateVideoLastPlayed(video.feedId)
+            }
 
             selectedVideoStateContainer.updateViewState(
                 SelectedVideoViewState.VideoSelected(
@@ -212,6 +229,10 @@ internal open class VideoFeedScreenViewModel(
                 )
             )
         }
+    }
+
+    fun updateVideoLastPlayed(feedId: FeedId) {
+        feedRepository.updateLastPlayed(feedId)
     }
 
     fun toggleSubscribeState() {
@@ -271,17 +292,13 @@ internal open class VideoFeedScreenViewModel(
 
                                 videoFeed.destinations.let { destinations ->
 
-                                    repositoryMedia.streamFeedPayments(
+                                    feedRepository.streamFeedPayments(
                                         chatId,
-                                        ChatMetaData(
-                                            itemId = currentItem.id,
-                                            itemLongId = ItemId(-1),
-                                            satsPerMinute = amount,
-                                            timeSeconds = 0,
-                                            speed = 1.0
-                                        ),
                                         videoFeed.id.value,
                                         currentItem.id.value,
+                                        0,
+                                        amount,
+                                        FeedPlayerSpeed(1.0),
                                         destinations
                                     )
                                 }
@@ -289,6 +306,58 @@ internal open class VideoFeedScreenViewModel(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    fun showOptionsFor(video: FeedItem) {
+        viewModelScope.launch(mainImmediate) {
+            _feedItemDetailStateFlow.value = FeedItemDetail(
+                video.id,
+                video.titleToShow,
+                video.thumbnailUrlToShow?.value ?: "",
+                R.drawable.ic_youtube_type,
+                "Youtube",
+                video.datePublished?.hhmmElseDate() ?: "",
+                video.duration?.value?.toInt().toString(),
+                null,
+                false,
+                video.link?.value,
+                false,
+                null
+
+            )
+
+            videoFeedItemDetailsViewState.updateViewState(
+                VideoFeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
+            )
+        }
+    }
+
+    fun share(link: String, context: Context) {
+        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, link)
+        }
+
+        context.startActivity(
+            Intent.createChooser(
+                sharingIntent,
+                app.getString(R.string.episode_detail_share_link)
+            )
+        )
+    }
+
+    fun copyCodeToClipboard(link: String) {
+        (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+            val clipData = ClipData.newPlainText("text", link)
+            manager.setPrimaryClip(clipData)
+
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    VideoFeedScreenSideEffect.Notify((app.getString(R.string.episode_detail_clipboard))
+                    )
+                )
             }
         }
     }
@@ -305,26 +374,6 @@ internal open class VideoFeedScreenViewModel(
         return null
     }
 
-    fun downloadMedia(
-        feedItem: FeedItem,
-        downloadCompleteCallback: (downloadedFile: File) -> Unit
-    ) {
-        repositoryMedia.downloadMediaIfApplicable(
-            feedItem,
-            downloadCompleteCallback
-        )
-    }
-
-    suspend fun deleteDownloadedMedia(feedItem: FeedItem) {
-        if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
-            feedItem.localFile = null
-        }
-    }
-
-    fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
-        return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
-    }
-
     fun createVideoRecordConsumed(feedItemId: FeedId){
         if (videoRecordConsumed?.feedItemId == feedItemId){
             return
@@ -335,7 +384,7 @@ internal open class VideoFeedScreenViewModel(
     fun trackVideoConsumed(){
         videoRecordConsumed?.let { record ->
             if (record.history.isNotEmpty()) {
-                actionsRepository.trackVideoConsumed(
+                actionsRepository.trackMediaContentConsumed(
                     record.feedItemId,
                     record.history
                 )

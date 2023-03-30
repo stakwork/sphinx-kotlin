@@ -1,0 +1,76 @@
+plugins {
+    id 'app.cash.exhaustive'
+    id 'com.android.library'
+    id 'dagger.hilt.android.plugin'
+    id 'androidx.navigation.safeargs'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
+}
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    buildFeatures.viewBinding = true
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.compileSdk
+        versionCode VERSION_CODE.toInteger()
+        versionName VERSION_NAME
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments disableAnalytics: 'true'
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+
+    implementation files('libs/YouTubeAndroidPlayerApi.jar')
+
+    // KotlinAndroid
+    implementation project(path: ':android:features:android-feature-screens')
+
+    // Sphinx
+    implementation project(path: ':sphinx:activity:concepts:concept-connectivity-helper')
+    implementation project(path: ':sphinx:activity:insetter-activity')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-feed')
+    implementation project(path: ':sphinx:application:common:wrappers:wrapper-action-track')
+    implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
+
+
+    api project(path: ':sphinx:service:concepts:concept-service-media-player')
+
+    implementation deps.androidx.lifecycle.hilt
+    implementation deps.google.hilt
+    implementation deps.square.moshi
+    implementation deps.lottie.sdk
+    kapt kaptDeps.google.hilt
+
+    testImplementation testDeps.junit
+
+    androidTestImplementation testDeps.androidx.core
+    androidTestImplementation testDeps.androidx.espresso
+    androidTestImplementation testDeps.androidx.junit
+}
+
+secrets {
+    // A properties file containing default secret values. This file can be checked in version
+    // control.
+    defaultPropertiesFileName = 'local.defaults.properties'
+}

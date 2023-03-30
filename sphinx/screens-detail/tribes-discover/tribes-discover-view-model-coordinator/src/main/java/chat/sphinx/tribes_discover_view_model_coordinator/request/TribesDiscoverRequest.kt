@@ -1,0 +1,3 @@
+package chat.sphinx.tribes_discover_view_model_coordinator.request
+
+class TribesDiscoverRequest()

@@ -31,7 +31,7 @@ internal class FeedDboFeedSearchResultPresenterMapper(
             value.date_published?.time,
             value.content_type?.value,
             value.language?.value,
-            value.chat_id.value
+            value.chat_id.value,
         )
     }
 
@@ -54,7 +54,8 @@ internal class FeedDboFeedSearchResultPresenterMapper(
             items_count = FeedItemsCount(0),
             current_item_id = null,
             chat_id = ChatId(ChatId.NULL_CHAT_ID.toLong()),
-            subscribed = false.toSubscribed()
+            subscribed = false.toSubscribed(),
+            last_played = null
         )
     }
 }

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--
+      Set 1: Tag Screen Closed
+    -->
+
+    <ConstraintSet android:id="@+id/motion_scene_discover_tribes_closed">
+
+        <Constraint android:id="@+id/view_discover_tribes_lock">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_discover_tribes_tags_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <!--
+       Set 2: Tag Screen Open
+    -->
+
+    <ConstraintSet
+        android:id="@+id/motion_scene_discover_tribes_open"
+        app:deriveConstraintsFrom="@+id/motion_scene_discover_tribes_closed">
+
+        <Constraint android:id="@+id/view_discover_tribes_lock">
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_discover_tribes_tags_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent" />
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <Transition
+        android:id="@+id/transition_discover_tribes_tags_closed_to_open"
+        app:constraintSetEnd="@+id/motion_scene_discover_tribes_open"
+        app:constraintSetStart="@+id/motion_scene_discover_tribes_closed"
+        app:duration="300"
+        app:motionInterpolator="cubic(0.41,0.39,0,1)">
+    </Transition>
+
+
+</MotionScene>

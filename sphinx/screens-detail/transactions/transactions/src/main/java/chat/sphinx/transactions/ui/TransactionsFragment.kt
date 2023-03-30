@@ -10,17 +10,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.screen_detail_fragment.BaseDetailFragment
 import chat.sphinx.transactions.R
 import chat.sphinx.transactions.databinding.FragmentTransactionsBinding
 import chat.sphinx.transactions.ui.adapter.TransactionsFooterAdapter
 import chat.sphinx.transactions.ui.adapter.TransactionsListAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-internal class TransactionsFragment: BaseFragment<
+internal class TransactionsFragment: BaseDetailFragment<
         TransactionsViewState,
         TransactionsViewModel,
         FragmentTransactionsBinding
@@ -42,6 +42,12 @@ internal class TransactionsFragment: BaseFragment<
         }
 
         setupTransactions()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupTransactions() {

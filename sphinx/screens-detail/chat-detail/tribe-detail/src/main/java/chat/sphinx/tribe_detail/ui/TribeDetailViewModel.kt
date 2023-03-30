@@ -13,6 +13,7 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.e
@@ -87,6 +88,7 @@ internal class TribeDetailViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
 
     private inner class TribeDetailViewStateContainer: ViewStateContainer<TribeDetailViewState>(TribeDetailViewState.Idle) {
         override val viewStateFlow: StateFlow<TribeDetailViewState> by lazy {
@@ -229,31 +231,9 @@ internal class TribeDetailViewModel @Inject constructor(
             }
         )
     }
-
-    fun updateSatsPerMinute(sats: Long) {
-        val vs = currentViewState
-
-        if (vs !is TribeDetailViewState.TribeProfile) {
-            return
-        }
-
-        vs.chat.metaData?.let { nnMetaData ->
-
-            viewModelScope.launch(mainImmediate) {
-                mediaPlayerServiceController.submitAction(
-                    UserAction.AdjustSatsPerMinute(
-                        args.chatId,
-                        ChatMetaData(
-                            nnMetaData.itemId,
-                            nnMetaData.itemId?.value?.toLongOrNull()?.toItemId() ?: ItemId(-1),
-                            Sat(sats),
-                            nnMetaData.timeSeconds,
-                            nnMetaData.speed,
-                        )
-                    )
-                )
-            }
-
+    fun goToTribeBadgesScreen() {
+        viewModelScope.launch(mainImmediate) {
+            navigator.toTribeBadgesScreen(chatId)
         }
     }
 

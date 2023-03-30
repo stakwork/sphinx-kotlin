@@ -11,6 +11,8 @@
     <color name="listBG">#141E27</color>
     <color name="lightBG">#1A242E</color>
     <color name="profileBG">#1A242E</color>
+    <color name="inputBG1">#13181D</color>
+
 
     <color name="mainBottomIcons">#909BAA</color>
     <color name="chatListSelected">#151E27</color>
@@ -30,6 +32,7 @@
     <color name="placeholderText">#556171</color>
 
     <color name="primaryBlue">#618AFF</color>
+    <color name="semiTransparentPrimaryBlue">#1A618AFF</color>
     <color name="primaryBlueFocused">#B7C9FF</color>
     <color name="primaryBlueBorder">#5078F2</color>
     <color name="primaryBlueFontColor">#A3C1FF</color>
@@ -41,6 +44,7 @@
     <color name="selectedMessageBackground">#8C000000</color>
     <color name="divider">#151E27</color>
     <color name="lightDivider">#3B4755</color>
+    <color name="lightEpisodeDivider">#47515E</color>
     <color name="expiredInvoice">#FFFFFF</color>
     <color name="addressBookHeader">#222E3A</color>
     <color name="messageOptionDivider">#CCFFFFFF</color>
@@ -60,6 +64,7 @@
     <color name="whiteFiftyPercentOpacity">#80FFFFFF</color>
     <color name="whiteSeventyPercentOpacity">#B3FFFFFF</color>
     <color name="blackSemiTransparent">#80000000</color>
+    <color name="blackSemiTransparent70">#B3000000</color>
 
     <color name="greenBorder">#2EB379</color>
 

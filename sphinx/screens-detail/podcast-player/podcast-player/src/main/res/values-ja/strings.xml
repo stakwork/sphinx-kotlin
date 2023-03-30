@@ -2,4 +2,6 @@
 <resources>
     <string name="label_text_episodes_list_header">エピソード</string>
     <string name="boost_sent">投げ銭しました</string>
+    <string name="podcast_sats_per_minute">Sats per minute</string>
+
 </resources>

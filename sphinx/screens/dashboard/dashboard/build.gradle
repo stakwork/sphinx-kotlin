@@ -50,6 +50,7 @@ dependencies {
     implementation project(path: ':sphinx:application:common:swipe-reveal-layout')
 
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
@@ -61,6 +62,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
+    implementation project(path: ':sphinx:screens-detail:tribes-discover:tribes-discover-view-model-coordinator')
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
 
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
@@ -70,6 +72,7 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.lottie.sdk
+    implementation deps.square.moshi
     kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit

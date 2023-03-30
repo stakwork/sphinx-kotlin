@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="@color/headerBG">
+
+    <TextView
+        android:id="@+id/text_view_item_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginVertical="@dimen/default_half_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:maxLines="3"
+        android:textColor="@color/text"
+        android:textSize="@dimen/default_text_size_headline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Who Will Road the Builds? This is a large title to see how it works" />
+
+    <TextView
+        android:id="@+id/text_view_item_published_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginBottom="@dimen/default_half_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:maxLines="1"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/default_text_size_body"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_title"
+        tools:text="22 Sep" />
+
+    <TextView
+        android:id="@+id/text_view_item_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:maxLines="1"
+        android:textColor="@color/secondaryText"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_published_date"
+        tools:text="This video about setting up layouts on the Android view and all the jazz. This video about setting up layouts on the Android view and all the jazz." />
+
+    <include
+        android:id="@+id/include_layout_episode_playback_controls"
+        layout="@layout/layout_episode_playback_controls"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_item_description"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="visible"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,3 +9,9 @@ abstract class RelayResponse<T: Any> {
     abstract val response: T?
     abstract val error: String?
 }
+
+abstract class RelayListResponse<T: Any> {
+    abstract val success: Boolean
+    abstract val response: List<T>?
+    abstract val error: String?
+}

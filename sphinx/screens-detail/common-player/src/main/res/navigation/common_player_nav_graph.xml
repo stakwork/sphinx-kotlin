@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/common_player_nav_graph"
+    app:startDestination="@+id/navigation_common_player_fragment">
+
+    <fragment
+        android:id="@+id/navigation_common_player_fragment"
+        android:name="chat.sphinx.common_player.ui.CommonPlayerScreenFragment"
+        tools:layout="@layout/fragment_common_player_screen">
+        <argument
+            android:name="argPodcastId"
+            app:argType="string" />
+        <argument
+            android:name="argEpisodeId"
+            app:argType="string" />
+    </fragment>
+
+</navigation>

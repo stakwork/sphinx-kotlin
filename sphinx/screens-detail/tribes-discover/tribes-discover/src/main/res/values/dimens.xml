@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tag_button_size">28dp</dimen>
+    <dimen name="discover_tribe_image_size">96dp</dimen>
+    <dimen name="discover_tribe_tag_button_height">48dp</dimen>
+    <dimen name="discover_tribe_tag_button_width">75dp</dimen>
+
+    <dimen name="discover_tribes_progress_bar_xy">25dp</dimen>
+    <dimen name="discover_tribes_no_tribes_text_size">12sp</dimen>
+    <dimen name="discover_tribes_search_field_height">40dp</dimen>
+    <dimen name="discover_tribes_tags_button_width">93dp</dimen>
+
+    <dimen name="discover_tribes_list_item_height">128dp</dimen>
+    <dimen name="discover_tribes_loading_item_height">100dp</dimen>
+    <dimen name="discover_tribes_item_join_button_width">82dp</dimen>
+    <dimen name="discover_tribes_item_join_button_height">32dp</dimen>
+</resources>

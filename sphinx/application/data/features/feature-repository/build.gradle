@@ -33,6 +33,7 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-action-track')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-discover-tribes')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-invite')
@@ -43,6 +44,7 @@ dependencies {
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
     api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
+    api project(path: ':sphinx:application:network:concepts:queries:concept-network-query-feed-status')
 
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

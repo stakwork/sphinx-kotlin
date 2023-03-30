@@ -1,5 +1,7 @@
 package chat.sphinx.concept_service_media
 
+import chat.sphinx.wrapper_common.ItemId
+
 /**
  * This class is a service object to facilitate bi-directional communications
  * between the UI, and MediaPlayerService without leaking the services context. It
@@ -57,4 +59,6 @@ abstract class MediaPlayerServiceController {
     }
 
     abstract suspend fun submitAction(userAction: UserAction)
+
+    abstract fun getPlayingContent(): Triple<String, String, Boolean>?
 }

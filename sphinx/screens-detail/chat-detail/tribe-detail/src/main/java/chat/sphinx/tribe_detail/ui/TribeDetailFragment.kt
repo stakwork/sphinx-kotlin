@@ -61,10 +61,6 @@ internal class TribeDetailFragment: SideEffectFragment<
     private val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
 
-    companion object {
-        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,20,20,40,40,80,80,100)
-    }
-
     private val bottomMenuTribe: BottomMenuTribe by lazy(LazyThreadSafetyMode.NONE) {
         BottomMenuTribe(
             onStopSupervisor,
@@ -213,32 +209,6 @@ internal class TribeDetailFragment: SideEffectFragment<
                 }
             })
 
-            seekBarSatsPerMinute.setOnSeekBarChangeListener(
-                object : SeekBar.OnSeekBarChangeListener {
-
-                    override fun onProgressChanged(
-                        seekBar: SeekBar?,
-                        progress: Int,
-                        fromUser: Boolean
-                    ) {
-
-                        SLIDER_VALUES[progress].let {
-                            textViewPodcastSatsPerMinuteValue.text = it.toString()
-                        }
-                    }
-
-                    override fun onStartTrackingTouch(seekBar: SeekBar?) { }
-
-                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                        seekBar?.let {
-                            SLIDER_VALUES[seekBar.progress].let {
-                                viewModel.updateSatsPerMinute(it.toLong())
-                            }
-                        }
-                    }
-                }
-            )
-
             textViewMenuButton.setOnClickListener {
                 viewModel.tribeMenuHandler.viewStateContainer.updateViewState(
                     MenuBottomViewState.Open
@@ -253,6 +223,10 @@ internal class TribeDetailFragment: SideEffectFragment<
 
             buttonAdminViewMembers.setOnClickListener {
                 viewModel.toTribeMemberList()
+            }
+
+            layoutConstraintTribeBadges.setOnClickListener {
+                viewModel.goToTribeBadgesScreen()
             }
         }
     }
@@ -308,23 +282,12 @@ internal class TribeDetailFragment: SideEffectFragment<
                         )
                     }
 
-                    viewState.chat.metaData?.let { nnMetaData ->
-                        constrainLayoutPodcastLightningControls.visible
-
-                        val satsPerMinute = nnMetaData.satsPerMinute.value
-                        val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
-                        val index = SLIDER_VALUES.indexOf(closest)
-
-                        seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
-                        seekBarSatsPerMinute.progress = index
-                        textViewPodcastSatsPerMinuteValue.text = closest.toString()
-                    }
-
-
                     if (viewState.chat.isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)) {
                         buttonAdminViewMembers.visible
+                        layoutConstraintTribeBadges.visible
                     } else {
                         buttonAdminViewMembers.gone
+                        layoutConstraintTribeBadges.gone
                     }
                 }
             }

@@ -8,6 +8,7 @@ import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
+import chat.sphinx.known_badges.navigation.ToKnownBadges
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
 import chat.sphinx.notification_level.navigation.ToNotificationLevel
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
@@ -47,8 +48,8 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPaymentReceiveDetail(contactId, chatId))
     }
 
-    override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, currentEpisodeDuration: Long) {
-        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, currentEpisodeDuration, false))
+    override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, false))
     }
 
     override suspend fun toTribeDetailScreen(chatId: ChatId) {
@@ -112,6 +113,12 @@ internal class TribeChatNavigatorImpl @Inject constructor(
                 popUpToId = R.id.navigation_dashboard_fragment,
                 popUpToInclusive = false,
             )
+        )
+    }
+
+    override suspend fun toKnownBadges(badgeIds: Array<String>) {
+        detailDriver.submitNavigationRequest(
+            ToKnownBadges(badgeIds)
         )
     }
 }

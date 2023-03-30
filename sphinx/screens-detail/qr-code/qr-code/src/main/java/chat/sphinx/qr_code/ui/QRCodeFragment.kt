@@ -12,15 +12,15 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.qr_code.R
 import chat.sphinx.qr_code.databinding.FragmentQrCodeBinding
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.share_qr_code.BottomMenuShareQRCode
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-internal class QRCodeFragment: SideEffectFragment<
+internal class QRCodeFragment: SideEffectDetailFragment<
         Context,
         NotifySideEffect,
         QRCodeViewState,
@@ -41,6 +41,12 @@ internal class QRCodeFragment: SideEffectFragment<
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

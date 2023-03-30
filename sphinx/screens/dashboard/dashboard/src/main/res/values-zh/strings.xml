@@ -3,6 +3,9 @@
     <string name="add_icon"></string>
     <string name="join_tribe_link">加入 Tribe 連結</string>
     <string name="add_friend">加好友</string>
+    <string name="add_tribe">Add Tribe</string>
+    <string name="discover_tags">Tags</string>
+    <string name="discover_open">Open</string>
     <string name="create_tribe">新增 Tribe</string>
     <string name="contacts">好友</string>
     <string name="profile">個人檔案</string>
@@ -79,6 +82,9 @@
     <string name="dashboard_authorize_button">允許</string>
     <string name="dashboard_authorize_generic_error">外部連結失敗，請稍後再試</string>
 
+    <string name="dashboard_redeem_sats_popup_title">Redeem %s sats from:</string>
+    <string name="dashboard_redeem_sats_button">Confirm</string>
+
     <string name="dashboard_connect_button">連接</string>
     <string name="dashboard_connect_price_to_meet">會合費用: %s</string>
     <string name="dashboard_connect_description_missing">無細節</string>
@@ -114,8 +120,12 @@
     <string name="play">Play</string>
     <string name="listen_now">Listen Now</string>
     <string name="following">Following</string>
+    <string name="recently_played">Recently Played</string>
     <string name="read_now">Read Now</string>
     <string name="watch_now">Watch Now</string>
+
+    <string name="recommendations">Recommendations</string>
+    <string name="refresh">Refresh</string>
 
     <string name="all_place_holder">No \"Feed\" Results Found</string>
     <string name="listen_place_holder">No \"Listen\" Results Found</string>
@@ -126,6 +136,8 @@
     <string name="feed_search_placeholder_1">Search over</string>
     <string name="feed_search_placeholder_2">your subscribed feeds</string>
 
+    <string name="feed_search_result_load_error">Something went wrong while loading feed content, please try again later</string>
+
     <string name="video_search_placeholder_1">Search over</string>
     <string name="video_search_placeholder_2">thousand of videos</string>
     <string name="video_search_placeholder_3">on Youtube</string>
@@ -135,5 +147,13 @@
     <string name="podcast_search_placeholder_3">on the Podcast Index</string>
 
     <string name="dashboard_restore_progress">Restoring: %s</string>
+    <string name="dashboard_restore_progress_contacts">Restoring Contacts: %s</string>
+    <string name="dashboard_restore_progress_feeds">Restoring Feeds: %s</string>
+    <string name="dashboard_restore_progress_messages">Restoring Messages: %s</string>
     <string name="dashboard_stop_restore">Continue later</string>
+
+    <string name="loading_recommendations">Loading Recommendations...</string>
+    <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+
+    <string name="time_left">%s left</string>
 </resources>

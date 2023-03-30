@@ -39,6 +39,7 @@
             app:layout_constraintTop_toBottomOf="@+id/text_view_contact_nickname"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            android:imeOptions="actionNext"
             android:textSize="@dimen/default_form_edit_view_text_size"
             android:inputType="textVisiblePassword|textCapWords"
             android:layout_marginLeft="@dimen/default_edit_text_left_margin"
@@ -130,6 +131,7 @@
             android:inputType="textVisiblePassword"
             android:layout_marginLeft="@dimen/default_edit_text_left_margin"
             android:singleLine="true"
+            android:imeOptions="actionNext"
             tools:text= "Testing" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -209,6 +211,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:inputType="textVisiblePassword"
+            android:imeOptions="actionDone"
             android:textSize="@dimen/default_form_edit_view_size"
             android:layout_marginLeft="@dimen/default_edit_text_left_margin"
             android:singleLine="true" />
@@ -233,40 +236,5 @@
         android:layout_marginStart="@dimen/default_form_horizontal_margin"
         android:layout_marginEnd="@dimen/default_form_horizontal_margin"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_basic_container_route_hint_content" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_save_content"
-        android:layout_width="@dimen/save_to_contacts_button_width"
-        android:layout_height="@dimen/save_contact_button_height"
-        android:layout_marginBottom="@dimen/save_to_contacts_button_bottom_margin"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_save"
-            style="@style/RoundedBlueButton"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textSize="@dimen/save_to_contacts_button_text_size"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_background_white_rad_48"
-            android:backgroundTint="@color/primaryBlue"
-            tools:text="SAVE"/>
-
-        <ProgressBar
-            android:layout_width="@dimen/save_progress_bar_xy"
-            android:layout_height="@dimen/save_progress_bar_xy"
-            android:layout_marginLeft="@dimen/save_progress_bar_margin_left"
-            android:id="@+id/progress_bar_contact_save"
-            style="?android:attr/progressBarStyle"
-            android:indeterminateTint="@android:color/white"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:indeterminate="true"
-            android:visibility="gone" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

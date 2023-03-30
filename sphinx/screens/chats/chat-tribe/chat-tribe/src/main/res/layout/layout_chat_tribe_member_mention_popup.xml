@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:visibility="gone"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@color/headerBG"
+    android:elevation="@dimen/default_elevation"
+    tools:visibility="visible">
+
+    <ListView
+        android:id="@+id/listview_mention_tribe_members"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/message_mention_list_height"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

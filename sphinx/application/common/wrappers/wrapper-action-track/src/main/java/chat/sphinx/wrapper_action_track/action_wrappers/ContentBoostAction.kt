@@ -11,7 +11,12 @@ class ContentBoostAction(
     val feedUrl: String,
     val feedItemId: String,
     val feedItemUrl: String,
+    val showTitle: String,
+    val episodeTitle: String,
+    val description: String,
     val topics: ArrayList<String>,
+    val people: ArrayList<String>,
+    val publishDate: Long,
     val currentTimestamp: Long
 )
 
@@ -23,7 +28,12 @@ internal data class ContentBoostActionMoshi(
     val feedUrl: String,
     val feedItemId: String,
     val feedItemUrl: String,
+    val showTitle: String,
+    val episodeTitle: String,
+    val description: String,
     val topics: List<String>,
+    val people: List<String>,
+    val publishDate: Long,
     val currentTimestamp: Long
 )
 
@@ -50,7 +60,12 @@ fun String.toContentBoostAction(moshi: Moshi): ContentBoostAction =
                 it.feedUrl,
                 it.feedItemId,
                 it.feedItemUrl,
+                it.showTitle,
+                it.episodeTitle,
+                it.description,
                 ArrayList(it.topics),
+                ArrayList(it.people),
+                it.publishDate,
                 it.currentTimestamp
             )
         }
@@ -67,7 +82,12 @@ fun ContentBoostAction.toJson(moshi: Moshi): String =
                 feedUrl,
                 feedItemId,
                 feedItemUrl,
+                showTitle,
+                episodeTitle,
+                description,
                 topics,
+                people,
+                publishDate,
                 currentTimestamp
             )
         )

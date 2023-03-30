@@ -54,7 +54,7 @@
         android:background="@color/headerBG"
         app:layout_constraintTop_toBottomOf="@id/episodes_header"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/layout_episode_list_item_holder" />
+        tools:listitem="@layout/layout_episode_generic_list_item_holder" />
 
 
     <!--  Shadow overlay for the top of the list  -->

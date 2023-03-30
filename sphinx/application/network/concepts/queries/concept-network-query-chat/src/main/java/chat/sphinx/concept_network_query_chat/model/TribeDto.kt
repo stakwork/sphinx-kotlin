@@ -24,11 +24,14 @@ data class TribeDto(
     val app_url: String?,
     val feed_url: String?,
     val feed_type: Int?,
+    var badges: Array<String> = arrayOf()
 ) {
 
     var amount: Long? = null
     var host: String? = null
     var uuid: String? = null
+
+    var joined: Boolean? = null
 
     @Json(name = "my_alias")
     var myAlias: String? = null

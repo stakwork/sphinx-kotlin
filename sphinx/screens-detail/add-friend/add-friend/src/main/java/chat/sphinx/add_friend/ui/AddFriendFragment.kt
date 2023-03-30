@@ -7,12 +7,12 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.add_friend.R
 import chat.sphinx.add_friend.databinding.FragmentAddFriendBinding
+import chat.sphinx.screen_detail_fragment.BaseDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-internal class AddFriendFragment: BaseFragment<
+internal class AddFriendFragment: BaseDetailFragment<
         AddFriendViewState,
         AddFriendViewModel,
         FragmentAddFriendBinding
@@ -23,6 +23,7 @@ internal class AddFriendFragment: BaseFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding.includeAddFriendHeader.apply {
             textViewDetailScreenHeaderName.text = getString(R.string.add_friend_header_name)
             textViewDetailScreenClose.setOnClickListener {
@@ -34,6 +35,12 @@ internal class AddFriendFragment: BaseFragment<
         }
         binding.buttonAlreadyOnSphinx.setOnClickListener {
             lifecycleScope.launch { viewModel.navigator.toAddContactDetail() }
+        }
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
         }
     }
 

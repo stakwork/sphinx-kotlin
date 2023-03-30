@@ -23,4 +23,5 @@
     <string name="failed_to_exit_tribe">退出Tribe 失敗</string>
 
     <string name="tribe_members_list">會員列表</string>
+    <string name="tribe_badges">Tribe Badges</string>
 </resources>

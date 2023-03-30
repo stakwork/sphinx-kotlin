@@ -3,7 +3,6 @@ package chat.sphinx.chat_common.ui
 import android.app.Application
 import android.content.ContentValues
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -37,11 +36,9 @@ import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewS
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentSendViewState
 import chat.sphinx.chat_common.ui.viewstate.footer.FooterViewState
 import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
+import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
-import chat.sphinx.chat_common.ui.viewstate.messageholder.BubbleBackground
-import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
-import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -57,6 +54,7 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
@@ -72,9 +70,7 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.*
-import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.MessageUUID
-import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
@@ -87,6 +83,7 @@ import com.giphy.sdk.ui.themes.GPHTheme
 import com.giphy.sdk.ui.themes.GridType
 import com.giphy.sdk.ui.utils.aspectRatio
 import com.giphy.sdk.ui.views.GiphyDialogFragment
+import com.squareup.moshi.Moshi
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -101,7 +98,6 @@ import org.jitsi.meet.sdk.JitsiMeetActivity
 import org.jitsi.meet.sdk.JitsiMeetConferenceOptions
 import org.jitsi.meet.sdk.JitsiMeetUserInfo
 import java.io.*
-import kotlin.collections.ArrayList
 
 
 @JvmSynthetic
@@ -114,7 +110,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     dispatchers: CoroutineDispatchers,
     val memeServerTokenHandler: MemeServerTokenHandler,
     val chatNavigator: ChatNavigator,
-    private val repositoryMedia: RepositoryMedia,
+    protected val repositoryMedia: RepositoryMedia,
+    protected val feedRepository: FeedRepository,
     protected val chatRepository: ChatRepository,
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
@@ -126,6 +123,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     protected val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     protected val linkPreviewHandler: LinkPreviewHandler,
     private val memeInputStreamHandler: MemeInputStreamHandler,
+    val moshi: Moshi,
     protected val LOG: SphinxLogger,
 ) : MotionLayoutViewModel<
         Nothing,
@@ -162,6 +160,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     val moreOptionsMenuHandler: ViewStateContainer<MenuBottomViewState> by lazy {
         ViewStateContainer(MenuBottomViewState.Closed)
+    }
+
+    val messageMentionsViewStateContainer: ViewStateContainer<MessageMentionsViewState> by lazy {
+        ViewStateContainer(MessageMentionsViewState.MessageMentions(listOf()))
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
@@ -859,7 +861,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
      * then passes it off to the [MessageRepository] for processing.
      * */
     @CallSuper
-    open fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+    open suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         val msg = builder.build()
 
         msg.second?.let { validationError ->
@@ -886,10 +888,21 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         } ?: msg.first?.let { message ->
             messageRepository.sendMessage(message)
 
+            joinCallIfNeeded(message)
 //            trackMessage(message.text)
         }
 
         return msg.first
+    }
+
+    private fun joinCallIfNeeded(message: SendMessage) {
+        if (message.isCall) {
+            message.text
+                ?.replaceFirst(CallLinkMessage.MESSAGE_PREFIX, "")
+                ?.toCallLinkMessageOrNull(moshi)?.link?.let { link ->
+                    joinCall(link, link.startAudioOnly)
+            }
+        }
     }
 
 //    private fun trackMessage(text: String?) {
@@ -1164,6 +1177,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         when {
             currentViewState is ChatMenuViewState.Open -> {
                 updateViewState(ChatMenuViewState.Closed)
+            }
+            moreOptionsMenuHandler.value is MenuBottomViewState.Open -> {
+                moreOptionsMenuHandler.updateViewState(MenuBottomViewState.Closed)
+            }
+            callMenuHandler.value is MenuBottomViewState.Open -> {
+                callMenuHandler.updateViewState(MenuBottomViewState.Closed)
             }
             attachmentFullscreenViewState is AttachmentFullscreenViewState.ImageFullscreen -> {
                 updateAttachmentFullscreenViewState(AttachmentFullscreenViewState.Idle)
@@ -1599,10 +1618,23 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             SphinxCallLink.DEFAULT_CALL_SERVER_URL
         ) ?: SphinxCallLink.DEFAULT_CALL_SERVER_URL
 
-        SphinxCallLink.newCallInvite(meetingServerUrl, audioOnly)?.value?.let { newCallLink ->
-            val messageBuilder = SendMessage.Builder()
-            messageBuilder.setText(newCallLink)
-            sendMessage(messageBuilder)
+        viewModelScope.launch(mainImmediate) {
+            val chat = chatSharedFlow.firstOrNull()
+
+            val messageText = if (chat?.isConversation() == true) {
+                SphinxCallLink.newCallLinkMessage(meetingServerUrl, audioOnly, moshi)
+            } else {
+                SphinxCallLink.newCallLink(meetingServerUrl, audioOnly)
+            }
+
+            val isCall = (chat?.isConversation() == true)
+
+            messageText?.let { newCallLink ->
+                val messageBuilder = SendMessage.Builder()
+                messageBuilder.setText(newCallLink)
+                messageBuilder.setIsCall(isCall)
+                sendMessage(messageBuilder)
+            }
         }
     }
 
@@ -1618,36 +1650,35 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     fun joinCall(message: Message, audioOnly: Boolean) {
         message.retrieveSphinxCallLink()?.let { sphinxCallLink ->
+            joinCall(sphinxCallLink, audioOnly)
+        }
+    }
 
-            sphinxCallLink.callServerUrl?.let { nnCallUrl ->
+    private fun joinCall(link: SphinxCallLink, audioOnly: Boolean) {
+        link.callServerUrl?.let { nnCallUrl ->
 
-                viewModelScope.launch(mainImmediate) {
+            viewModelScope.launch(mainImmediate) {
 
-                    val owner = getOwner()
+                val owner = getOwner()
 
-                    val userInfo = JitsiMeetUserInfo()
-                    userInfo.displayName = owner.alias?.value ?: ""
+                val userInfo = JitsiMeetUserInfo()
+                userInfo.displayName = owner.alias?.value ?: ""
 
-                    owner.avatarUrl?.let { nnAvatarUrl ->
-                        userInfo.avatar = nnAvatarUrl
-                    }
-
-                    val options = JitsiMeetConferenceOptions.Builder()
-                        .setServerURL(nnCallUrl)
-                        .setRoom(sphinxCallLink.callRoom)
-                        .setAudioMuted(false)
-                        .setVideoMuted(false)
-                        .setFeatureFlag("welcomepage.enabled", false)
-                        .setAudioOnly(audioOnly)
-                        .setUserInfo(userInfo)
-                        .build()
-
-                    val intent = Intent(app, JitsiMeetActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    intent.action = "org.jitsi.meet.CONFERENCE"
-                    intent.putExtra("JitsiMeetConferenceOptions", options)
-                    app.startActivity(intent)
+                owner.avatarUrl?.let { nnAvatarUrl ->
+                    userInfo.avatar = nnAvatarUrl
                 }
+
+                val options = JitsiMeetConferenceOptions.Builder()
+                    .setServerURL(nnCallUrl)
+                    .setRoom(link.callRoom)
+                    .setAudioMuted(false)
+                    .setVideoMuted(false)
+                    .setFeatureFlag("welcomepage.enabled", false)
+                    .setAudioOnly(audioOnly)
+                    .setUserInfo(userInfo)
+                    .build()
+
+                JitsiMeetActivity.launch(app, options)
             }
         }
     }
@@ -1955,6 +1986,34 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(sideEffect)
         }
+    }
+
+    fun processMemberMention(s: CharSequence?) {
+        val lastWord = s?.split(" ")?.last()?.toString() ?: ""
+
+        if (lastWord.startsWith("@") && lastWord.length > 1) {
+            val matchingMessages = messageHolderViewStateFlow.value.filter { messageHolder ->
+                messageHolder.message?.senderAlias?.value?.let { member ->
+                    (member.startsWith(lastWord.replace("@", ""), true))
+                } ?: false
+            }
+
+            val matchingAliases = matchingMessages.map { it.message?.senderAlias?.value ?: "" }.distinct()
+
+            messageMentionsViewStateContainer.updateViewState(
+                MessageMentionsViewState.MessageMentions(matchingAliases)
+            )
+
+        } else {
+            messageMentionsViewStateContainer.updateViewState(
+                MessageMentionsViewState.MessageMentions(listOf())
+            )
+        }
+
+    }
+
+    fun sendAppLog(appLog: String) {
+        actionsRepository.setAppLog(appLog)
     }
 
     override fun onCleared() {

@@ -19,9 +19,11 @@ import chat.sphinx.concept_network_query_people.model.isSaveMethod
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
@@ -38,7 +40,7 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.dashboard.RestoreProgress
+import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
@@ -75,17 +77,19 @@ internal class DashboardViewModel @Inject constructor(
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
-
+    private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val networkQueryLightning: NetworkQueryLightning,
+
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQueryPeople: NetworkQueryPeople,
-
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
     private val relayDataHandler: RelayDataHandler,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+
     private val socketIOManager: SocketIOManager,
 ) : MotionLayoutViewModel<
         Any,
@@ -111,10 +115,14 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
+        syncFeedRecommendationsState()
+
         getRelayKeys()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
-        repositoryDashboard.syncActions()
+
+        actionsRepository.syncActions()
+        feedRepository.restoreContentFeedStatuses()
     }
     
     private fun getRelayKeys() {
@@ -138,8 +146,20 @@ internal class DashboardViewModel @Inject constructor(
                 handleStakworkAuthorizeLink(stakworkAuthorizeLink)
             } ?: deepLink?.toCreateInvoiceLink()?.let { createInvoiceLink ->
                 handleCreateInvoiceLink(createInvoiceLink)
+            } ?: deepLink?.toRedeemSatsLink()?.let { redeemSatsLink ->
+                handleRedeemSatsLink(redeemSatsLink)
             }
         }
+    }
+
+    private fun syncFeedRecommendationsState() {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        val feedRecommendationsToggle = sharedPreferences.getBoolean(
+            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, false
+        )
+        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
     }
 
     fun toScanner() {
@@ -274,6 +294,12 @@ internal class DashboardViewModel @Inject constructor(
     private fun handleStakworkAuthorizeLink(link: StakworkAuthorizeLink) {
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.StakworkAuthorizePopup(link)
+        )
+    }
+
+    private fun handleRedeemSatsLink(link: RedeemSatsLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.RedeemSatsPopup(link)
         )
     }
 
@@ -554,6 +580,40 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
+    fun redeemSats() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        viewModelScope.launch(mainImmediate) {
+
+            if (viewState is DeepLinkPopupViewState.RedeemSatsPopup) {
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.RedeemSatsPopupProcessing
+                )
+
+                val response = repositoryDashboard.redeemSats(
+                    viewState.link.host,
+                    viewState.link.token,
+
+                )
+
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(response.cause.message)
+                        )
+                    }
+                    is Response.Success -> {
+                        networkRefresh()
+                    }
+                }
+            }
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
+            )
+        }
+    }
+
     suspend fun updatePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
@@ -727,7 +787,8 @@ internal class DashboardViewModel @Inject constructor(
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = true,
-                    createTribeVisible = !owner.isOnVirtualNode()
+                    createTribeVisible = !owner.isOnVirtualNode(),
+                    discoverTribesVisible = false
                 )
             )
         }
@@ -837,7 +898,7 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(LoadResponse.Loading)
     }
 
-    private val _restoreStateFlow: MutableStateFlow<RestoreProgress?> by lazy {
+    private val _restoreProgressStateFlow: MutableStateFlow<RestoreProgressViewState?> by lazy {
         MutableStateFlow(null)
     }
 
@@ -854,8 +915,8 @@ internal class DashboardViewModel @Inject constructor(
     val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
         get() = _networkStateFlow.asStateFlow()
 
-    val restoreStateFlow: StateFlow<RestoreProgress?>
-        get() = _restoreStateFlow.asStateFlow()
+    val restoreProgressStateFlow: StateFlow<RestoreProgressViewState?>
+        get() = _restoreProgressStateFlow.asStateFlow()
 
     private var jobNetworkRefresh: Job? = null
     private var jobPushNotificationRegistration: Job? = null
@@ -891,11 +952,44 @@ internal class DashboardViewModel @Inject constructor(
                         val restoreProgress = response.value
 
                         if (restoreProgress.restoring) {
-                            _restoreStateFlow.value = restoreProgress
+
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_contacts,
+                                false
+                            )
                         }
                     }
                 }
             }
+
+            repositoryDashboard.networkRefreshFeedContent.collect { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Success -> {
+                        val restoreProgress = response.value
+
+                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_feeds,
+                                false
+                            )
+                        } else {
+                            _restoreProgressStateFlow.value = null
+
+                            _networkStateFlow.value = Response.Success(true)
+                        }
+                    }
+                    is Response.Error -> {
+                        _networkStateFlow.value = response
+                    }
+                    is LoadResponse.Loading -> {
+                        _networkStateFlow.value = response
+                    }
+                }
+            }
+
 
             if (_networkStateFlow.value is Response.Error) {
                 jobNetworkRefresh?.cancel()
@@ -925,9 +1019,13 @@ internal class DashboardViewModel @Inject constructor(
                         val restoreProgress = response.value
 
                         if (restoreProgress.restoring && restoreProgress.progress < 100) {
-                            _restoreStateFlow.value = restoreProgress
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_messages,
+                                true
+                            )
                         } else {
-                            _restoreStateFlow.value = null
+                            _restoreProgressStateFlow.value = null
 
                             _networkStateFlow.value = Response.Success(true)
                         }
@@ -949,7 +1047,7 @@ internal class DashboardViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
 
             _networkStateFlow.value = Response.Success(true)
-            _restoreStateFlow.value = null
+            _restoreProgressStateFlow.value = null
 
             repositoryDashboard.didCancelRestore()
         }
@@ -980,6 +1078,10 @@ internal class DashboardViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun sendAppLog(appLog: String) {
+        actionsRepository.setAppLog(appLog)
     }
 }
 

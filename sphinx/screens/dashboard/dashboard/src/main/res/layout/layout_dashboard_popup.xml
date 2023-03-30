@@ -28,4 +28,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <include
+        android:id="@+id/layout_dashboard_redeem_sats_popup"
+        layout="@layout/layout_chat_list_redeem_sats_popup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

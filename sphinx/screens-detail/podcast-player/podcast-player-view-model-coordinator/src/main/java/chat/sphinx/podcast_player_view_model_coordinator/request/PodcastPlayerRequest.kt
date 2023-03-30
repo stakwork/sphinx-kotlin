@@ -7,6 +7,5 @@ import chat.sphinx.wrapper_common.feed.FeedUrl
 class PodcastPlayerRequest(
     val chatId: ChatId,
     val feedId: FeedId,
-    val feedUrl: FeedUrl,
-    val currentEpisodeDuration: Long,
+    val feedUrl: FeedUrl
 )

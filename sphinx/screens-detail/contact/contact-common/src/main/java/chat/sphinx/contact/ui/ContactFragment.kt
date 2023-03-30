@@ -6,8 +6,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
 import androidx.annotation.LayoutRes
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavArgs
@@ -19,16 +23,20 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.contact.R
 import chat.sphinx.contact.databinding.LayoutContactBinding
 import chat.sphinx.contact.databinding.LayoutContactDetailScreenHeaderBinding
+import chat.sphinx.contact.databinding.LayoutContactSaveBinding
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addKeyboardPadding
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.keyboard_inset_fragment.KeyboardInsetLayoutDetailFragment
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.wrapper_common.lightning.getPubKey
 import chat.sphinx.wrapper_common.lightning.getRouteHint
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
 import chat.sphinx.wrapper_common.util.getInitials
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -38,7 +46,7 @@ abstract class ContactFragment<
         VB: ViewBinding,
         ARGS: NavArgs,
         VM: ContactViewModel<ARGS>,
-        >(@LayoutRes layoutId: Int) : SideEffectFragment<
+        >(@LayoutRes layoutId: Int) : KeyboardInsetLayoutDetailFragment<
         Context,
         ContactSideEffect,
         ContactViewState,
@@ -48,6 +56,7 @@ abstract class ContactFragment<
 {
     abstract val headerBinding: LayoutContactDetailScreenHeaderBinding
     abstract val contactBinding: LayoutContactBinding
+    abstract val contactSaveBinding: LayoutContactSaveBinding
 
     abstract val userColorsHelper: UserColorsHelper
 
@@ -57,14 +66,14 @@ abstract class ContactFragment<
             is ContactViewState.Idle -> {}
 
             is ContactViewState.Saving -> {
-                contactBinding.progressBarContactSave.visible
+                contactSaveBinding.progressBarContactSave.visible
             }
             is ContactViewState.Saved -> {
-                contactBinding.progressBarContactSave.gone
+                contactSaveBinding.progressBarContactSave.gone
                 viewModel.navigator.closeDetailScreen()
             }
             is ContactViewState.Error -> {
-                contactBinding.progressBarContactSave.gone
+                contactSaveBinding.progressBarContactSave.gone
             }
         }
     }
@@ -99,7 +108,7 @@ abstract class ContactFragment<
         }
 
         contactBinding.apply {
-            buttonSave.text = getSaveButtonText()
+            contactSaveBinding.buttonSave.text = getSaveButtonText()
             layoutGroupPinView.newContactPinQuestionMarkTextView.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.submitSideEffect(ContactSideEffect.Notify.PrivacyPinHelp)
@@ -142,7 +151,11 @@ abstract class ContactFragment<
                 }
             })
 
-            buttonSave.setOnClickListener {
+            addDoneKeyHandler(editTextContactNickname)
+            addDoneKeyHandler(editTextContactAddress)
+            addDoneKeyHandler(editTextContactRouteHint)
+
+            contactSaveBinding.buttonSave.setOnClickListener {
                 viewModel.saveContact(
                     editTextContactNickname.text?.toString(),
                     editTextContactAddress.text?.toString(),
@@ -151,9 +164,40 @@ abstract class ContactFragment<
             }
 
             (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintContact)
+            (requireActivity() as InsetterActivity).addNavigationBarPadding(contactSaveBinding.layoutConstraintSaveContact)
         }
 
         viewModel.initContactDetails()
+    }
+
+    private fun addDoneKeyHandler(editText: AppCompatEditText) {
+        editText.setOnEditorActionListener(object:
+            TextView.OnEditorActionListener {
+            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent?): Boolean {
+                if (actionId == EditorInfo.IME_ACTION_DONE || event?.keyCode == KeyEvent.KEYCODE_ENTER) {
+                    editText.let { editText ->
+                        binding.root.context.inputMethodManager?.let { imm ->
+                            if (imm.isActive(editText)) {
+                                imm.hideSoftInputFromWindow(editText.windowToken, 0)
+                                editText.clearFocus()
+                            }
+                        }
+                    }
+                    return true
+                }
+                return false
+            }
+        })
+    }
+
+    override fun onKeyboardToggle() {
+        (requireActivity() as InsetterActivity).addKeyboardPadding(contactBinding.layoutConstraintContact)
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -236,7 +280,10 @@ abstract class ContactFragment<
                     }
 
                     buttonQrCode.setOnClickListener {
-                        viewModel.toQrCodeLightningNodePubKey(sideEffect.pubKey.value)
+                        val key = sideEffect.routeHint?.let { routeHint ->
+                            "${sideEffect.pubKey.value}:${routeHint.value}"
+                        } ?: sideEffect.pubKey.value
+                        viewModel.toQrCodeLightningNodePubKey(key)
                     }
                 }
             }

@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.os.ParcelFileDescriptor
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
@@ -90,6 +91,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -134,6 +136,8 @@ abstract class ChatFragment<
 
     private val holderJobs: ArrayList<Job> = ArrayList(11)
     private val disposables: ArrayList<Disposable> = ArrayList(4)
+
+    private val timeTrackerStart = System.currentTimeMillis()
 
     override val chatFragmentContext: Context
         get() = binding.root.context
@@ -851,6 +855,8 @@ abstract class ChatFragment<
                 }
             })
         }
+        Log.d("TimeTracker", "Chat messages were displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+        viewModel.sendAppLog("- Chat messages were displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
     }
 
     protected fun scrollToBottom(
@@ -1068,6 +1074,9 @@ abstract class ChatFragment<
 
                             textViewChatHeaderName.text = viewState.chatHeaderName
                             textViewChatHeaderLock.goneIfFalse(viewState.showLock)
+
+                            Log.d("TimeTracker", "Chat contact/tribe name was displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
+                            viewModel.sendAppLog("- Chat contact/tribe name was displayed in ${System.currentTimeMillis() - timeTrackerStart} milliseconds")
 
                             imageViewChatHeaderMuted.apply {
                                 viewState.isMuted?.let { muted ->
@@ -1765,23 +1774,25 @@ abstract class ChatFragment<
     override fun onInteractionComplete() {
         viewModel.audioRecorderController.stopAudioRecording()
         viewModel.audioRecorderController.recordingTempFile?.let {
-            sendMessageBuilder.setAttachmentInfo(
-                AttachmentInfo(
-                    file = it,
-                    mediaType = MediaType.Audio(AudioRecorderController.AUDIO_FORMAT_MIME_TYPE),
-                    fileName = null,
-                    isLocalFile = true,
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                sendMessageBuilder.setAttachmentInfo(
+                    AttachmentInfo(
+                        file = it,
+                        mediaType = MediaType.Audio(AudioRecorderController.AUDIO_FORMAT_MIME_TYPE),
+                        fileName = null,
+                        isLocalFile = true,
+                    )
                 )
-            )
 
-            viewModel.sendMessage(sendMessageBuilder)?.let {
-                // if it did not return null that means it was valid
-                viewModel.updateFooterViewState(FooterViewState.Default)
+                viewModel.sendMessage(sendMessageBuilder)?.let {
+                    // if it did not return null that means it was valid
+                    viewModel.updateFooterViewState(FooterViewState.Default)
 
-                sendMessageBuilder.clear()
-                viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+                    sendMessageBuilder.clear()
+                    viewModel.messageReplyViewStateContainer.updateViewState(MessageReplyViewState.ReplyingDismissed)
+                }
+                viewModel.audioRecorderController.clear()
             }
-            viewModel.audioRecorderController.clear()
         }
     }
 }

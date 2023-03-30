@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_badges_holder"
+    android:layout_marginBottom="@dimen/default_header_headline_margin_horizontal"
+    android:padding="@dimen/default_header_navigation_padding">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view_tribe_badge_image"
+        android:layout_width="@dimen/tribe_member_image_section_height"
+        android:layout_height="@dimen/tribe_member_image_section_height"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:cardCornerRadius="@dimen/tribe_member_image_corner_radius">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_tribe_badge_picture"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="visible"
+            android:src="@drawable/ic_profile_avatar_circle" />
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_tribe_badge_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_header_margin_horizontal"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_medium"
+        android:paddingVertical="@dimen/default_small_layout_margin"
+        android:singleLine="true"
+        android:textColor="@color/text"
+        android:textSize="@dimen/default_text_size_headline"
+        app:layout_constraintBottom_toBottomOf="@+id/card_view_tribe_badge_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/card_view_tribe_badge_image"
+        app:layout_constraintTop_toTopOf="@+id/card_view_tribe_badge_image"
+        app:layout_constraintVertical_bias="0.13"
+        tools:text="Early Adopter" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_tribe_badge_description"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_header_margin_horizontal"
+        android:layout_marginTop="@dimen/default_header_headline_margin_vertical"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_medium"
+        android:maxLines="1"
+        android:text=""
+        android:textColor="@color/mainBottomIcons"
+        android:textSize="@dimen/default_header_text_size"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/card_view_tribe_badge_image"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_badge_name"
+        tools:text="3 / 100000" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_tribe_badge_state"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_header_margin_horizontal"
+        android:layout_marginTop="@dimen/default_header_headline_margin_vertical"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_medium"
+        android:maxLines="1"
+        android:textColor="@color/mainBottomIcons"
+        android:textSize="@dimen/default_text_size_caption2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/card_view_tribe_badge_image"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_badge_description"
+        tools:text="PENDING" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_earn_badges"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/default_double_layout_margin"
+        android:layout_marginStart="@dimen/default_header_margin_horizontal"
+        android:visibility="invisible"
+        android:background="@drawable/button_background_send_sats"
+        android:clickable="true"
+        app:layout_constraintStart_toEndOf="@+id/card_view_tribe_badge_image"
+        app:layout_constraintTop_toTopOf="@+id/text_view_tribe_badge_state">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_on_chain"
+            style="@style/RoundedBlueButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:clickable="false"
+            android:fontFamily="@font/roboto_light"
+            android:text="@string/tribe_member_profile_on_chain"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_caption2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/icon_tribe_badges"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/icon_tribe_badges"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:alpha="0.7"
+            android:src="@drawable/ic_on_chain"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:track="@drawable/switch_track_selector" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

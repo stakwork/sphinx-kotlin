@@ -1,10 +1,15 @@
 plugins {
     id 'java-library'
     id 'kotlin'
+    id 'kotlin-kapt'
 }
 
 dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-common')
     api project(path: ':sphinx:application:common:wrappers:wrapper-chat')
+
     api project(path: ':sphinx:application:common:wrappers:wrapper-feed')
+
+    implementation deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
 }

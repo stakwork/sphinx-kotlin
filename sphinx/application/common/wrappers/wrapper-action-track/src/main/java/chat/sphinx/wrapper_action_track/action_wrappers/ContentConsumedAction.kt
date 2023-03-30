@@ -9,7 +9,14 @@ data class ContentConsumedAction(
     val feedType: Long,
     val feedUrl: String,
     val feedItemId: String,
-    val feedItemUrl: String
+    val feedItemUrl: String,
+    val showTitle: String,
+    val episodeTitle: String,
+    val description: String,
+    val clipRank: Long,
+    val topics: ArrayList<String>,
+    val people: ArrayList<String>,
+    val publishedDate: Long,
 ) {
     var history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
 
@@ -25,6 +32,12 @@ internal data class ContentConsumedActionMoshi(
     val feedUrl: String,
     val feedItemId: String,
     val feedItemUrl: String,
+    val showTitle: String,
+    val episodeTitle: String,
+    val description: String,
+    val clipRank: Long,
+    val people: List<String>,
+    val publishedDate: Long,
     val history: List<ContentConsumedHistoryItemMoshi>
 )
 
@@ -49,7 +62,14 @@ fun String.toContentConsumedAction(moshi: Moshi): ContentConsumedAction {
                 it.feedType,
                 it.feedUrl,
                 it.feedItemId,
-                it.feedItemUrl
+                it.feedItemUrl,
+                it.showTitle,
+                it.episodeTitle,
+                it.description,
+                it.clipRank,
+                arrayListOf(),
+                ArrayList(it.people),
+                it.publishedDate
             )
 
             val history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
@@ -81,7 +101,7 @@ fun ContentConsumedAction.toJson(moshi: Moshi): String {
     for (item in this.history) {
         history.add(
             ContentConsumedHistoryItemMoshi(
-                item.topics,
+                topics,
                 item.startTimestamp,
                 item.endTimestamp,
                 item.currentTimestamp
@@ -97,6 +117,12 @@ fun ContentConsumedAction.toJson(moshi: Moshi): String {
                 feedUrl,
                 feedItemId,
                 feedItemUrl,
+                showTitle,
+                episodeTitle,
+                description,
+                clipRank,
+                people,
+                publishedDate,
                 history
             )
         )

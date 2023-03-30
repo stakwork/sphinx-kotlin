@@ -124,7 +124,7 @@ ext.deps = [
             sdk: "com.giphy.sdk:ui:2.1.2"
     ],
     jitsi: [
-            sdk: "org.jitsi.react:jitsi-meet-sdk:5.0.0"
+            sdk: "org.jitsi.react:jitsi-meet-sdk:7.0.0"
     ],
     lottie: [
             sdk: "com.airbnb.android:lottie:4.0.0"

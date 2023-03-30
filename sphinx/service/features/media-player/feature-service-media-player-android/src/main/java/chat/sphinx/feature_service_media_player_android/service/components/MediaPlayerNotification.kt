@@ -183,6 +183,7 @@ internal class MediaPlayerNotification(
                 notify(builder.setContentText("Media Service Connected"))
             }
             is MediaPlayerServiceState.ServiceInactive -> {}
+            else -> {}
         }
     }
 

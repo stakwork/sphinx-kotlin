@@ -141,6 +141,10 @@ inline fun MessageType.isQuery(): Boolean =
 inline fun MessageType.isQueryResponse(): Boolean =
     this is MessageType.QueryResponse
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun MessageType.isCallLink(): Boolean =
+    this is MessageType.CallLink
+
 /**
  * Converts the integer value returned over the wire to an object.
  * */
@@ -243,6 +247,9 @@ inline fun Int.toMessageType(): MessageType =
         MessageType.QUERY_RESPONSE -> {
             MessageType.QueryResponse
         }
+        MessageType.CALL_LINK -> {
+            MessageType.CallLink
+        }
         else -> {
             MessageType.Unknown(this)
         }
@@ -282,6 +289,7 @@ inline fun Int.toMessageType(): MessageType =
  *  - 29 (Boost)
  *  - 30 (Query)
  *  - 31 (Query Response)
+ *  - 32 (Call Link)
  *
  * https://github.com/stakwork/sphinx-relay/blob/7f8fd308101b5c279f6aac070533519160aa4a9f/src/constants.ts#L29
  * */
@@ -320,6 +328,7 @@ sealed class MessageType {
         const val BOOST = 29 // SHOW
         const val QUERY = 30
         const val QUERY_RESPONSE = 31
+        const val CALL_LINK = 32
 
         const val CAN_CONTAIN_MEDIA = true
         const val CAN_NOT_CONTAIN_MEDIA = false
@@ -698,6 +707,17 @@ sealed class MessageType {
 
         override val value: Int
             get() = QUERY_RESPONSE
+    }
+
+    object CallLink : MessageType() {
+        override val canContainMedia: Boolean
+            get() = CAN_NOT_CONTAIN_MEDIA
+
+        override val show: Boolean
+            get() = SHOW
+
+        override val value: Int
+            get() = CALL_LINK
     }
 
     data class Unknown(override val value: Int) : MessageType() {

@@ -23,6 +23,16 @@ inline fun Contact.isInviteContact(): Boolean =
 inline fun Contact.isOnVirtualNode(): Boolean =
     routeHint != null && routeHint.value.isNotEmpty()
 
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Contact.getNodeDescriptor(): String {
+    return nodePubKey?.let { pubKey ->
+        routeHint?.let { routeHint ->
+            "${pubKey.value}:${routeHint.value}"
+        } ?: pubKey.value
+    } ?: ""
+}
+
 inline val Contact.avatarUrl: URL?
     get() {
         return try {
