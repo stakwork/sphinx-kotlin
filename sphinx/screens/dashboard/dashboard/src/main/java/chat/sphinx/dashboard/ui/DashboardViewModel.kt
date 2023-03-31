@@ -270,14 +270,16 @@ internal class DashboardViewModel @Inject constructor(
             scannedContactLink.value?.let { contact ->
                 dashboardNavigator.toAddContactDetail(contact.first, contact.second)
             }
+            scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
         }
     }
 
     override fun sendDirectPayment() {
         viewModelScope.launch(default) {
             scannedContactLink.value?.let { contact ->
-                navBarNavigator.toPaymentSendDetail(contact.first, contact.second)
+                navBarNavigator.toPaymentSendDetail(contact.first, contact.second, null)
             }
+            scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
         }
     }
 
@@ -301,7 +303,7 @@ internal class DashboardViewModel @Inject constructor(
         scannedContactLink.value = Pair(pubKey, routeHint)
 
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
-            navBarNavigator.toPaymentSendDetail(pubKey, routeHint)
+            navBarNavigator.toPaymentSendDetail(null, null, contact.id)
 
         } ?: scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
     }
