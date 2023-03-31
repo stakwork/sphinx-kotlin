@@ -15,7 +15,7 @@ data class PostPaymentDto(
     val media_type: String? = null,
     val dimensions: String? = null,
     val memo: String? = null,
-    val remote_memo: String? = null,
+    val remote_memo: String? = null
 ) {
     init {
         require(!(chat_id == null && contact_id == null && destination_key == null)) {

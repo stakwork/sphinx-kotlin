@@ -21,10 +21,7 @@ import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
-import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.getColorKey
@@ -87,6 +84,8 @@ internal class PaymentSendViewModel @Inject constructor(
     override val contactId: ContactId? = args.contactId
     override val messageUUID: MessageUUID? = args.messageUUID
     override val lightningNodePubKey: LightningNodePubKey? = args.argLightningNodePubKey.toLightningNodePubKey()
+    override val routeHint: LightningRouteHint? = args.argLightningRouteHint.toLightningRouteHint()
+
 
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
@@ -140,6 +139,7 @@ internal class PaymentSendViewModel @Inject constructor(
         sendPaymentBuilder.setChatId(args.chatId)
         sendPaymentBuilder.setContactId(args.contactId)
         sendPaymentBuilder.setText(message)
+        sendPaymentBuilder.setRouteHint(routeHint)
 
         if (sendPaymentBuilder.isContactPayment) {
             viewModelScope.launch {

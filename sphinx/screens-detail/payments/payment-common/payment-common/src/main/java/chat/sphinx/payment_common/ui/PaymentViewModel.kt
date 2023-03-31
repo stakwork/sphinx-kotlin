@@ -12,6 +12,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
@@ -42,6 +43,7 @@ abstract class PaymentViewModel<ARGS: NavArgs, VS: ViewState<VS>>(
     protected abstract val contactId: ContactId?
     protected abstract val messageUUID: MessageUUID?
     protected abstract val lightningNodePubKey: LightningNodePubKey?
+    protected abstract val routeHint: LightningRouteHint?
 
     val amountViewStateContainer: ViewStateContainer<AmountViewState> by lazy {
         ViewStateContainer(AmountViewState.Idle)
