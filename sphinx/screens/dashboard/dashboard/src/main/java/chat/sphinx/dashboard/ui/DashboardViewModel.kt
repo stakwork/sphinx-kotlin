@@ -274,7 +274,11 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     override fun sendDirectPayment() {
-        TODO("Not yet implemented")
+        viewModelScope.launch(default) {
+            scannedContactLink.value?.let { contact ->
+                navBarNavigator.toPaymentSendDetail(contact.first.value.toLightningNodePubKey())
+            }
+        }
     }
 
     private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
@@ -295,12 +299,11 @@ internal class DashboardViewModel @Inject constructor(
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
         scannedContactLink.value = Pair(pubKey, routeHint)
+
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
-            // go to direct payment
-            scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+            navBarNavigator.toPaymentSendDetail(pubKey)
 
         } ?: scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
-//        dashboardNavigator.toAddContactDetail(pubKey, routeHint)
     }
 
     private suspend fun goToContactChat(contact: Contact) {

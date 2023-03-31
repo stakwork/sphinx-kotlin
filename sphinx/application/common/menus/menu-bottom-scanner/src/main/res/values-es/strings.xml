@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="bottom_menu_scanner_header_text"> Please Select a option </string>
+    <string name="bottom_menu_scanner_header_text">Public Key Options</string>
+    <string name="bottom_menu_scanner_select_option">Selecciona una opcion</string>
     <!-- Menu -->
-    <string name="bottom_menu_scanner_option_set_create_contact">Create Contact</string>
-    <string name="bottom_menu_scanner_option_set_direct_payment">Send Direct Payment</string>
+    <string name="bottom_menu_scanner_option_set_create_contact">Crear Contacto</string>
+    <string name="bottom_menu_scanner_option_set_direct_payment">Enviar Pago Directo</string>
 </resources>

@@ -85,6 +85,7 @@ internal class PaymentSendViewModel @Inject constructor(
     override val chatId: ChatId? = args.chatId
     override val contactId: ContactId? = args.contactId
     override val messageUUID: MessageUUID? = args.messageUUID
+    override val lightningNodePubKey: LightningNodePubKey? = args.argLightningNodePubKey.toLightningNodePubKey()
 
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()

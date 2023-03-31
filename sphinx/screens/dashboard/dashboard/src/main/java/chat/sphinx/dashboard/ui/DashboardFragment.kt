@@ -276,7 +276,7 @@ internal class DashboardFragment : MotionLayoutFragment<
                 viewModel.toScanner()
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
-                lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail() }
+                lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail(null) }
             }
         }
     }
