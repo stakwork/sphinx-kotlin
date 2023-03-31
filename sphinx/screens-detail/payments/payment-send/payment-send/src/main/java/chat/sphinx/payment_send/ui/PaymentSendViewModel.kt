@@ -23,6 +23,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.isValidLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -107,34 +108,6 @@ internal class PaymentSendViewModel @Inject constructor(
         }
     }
 
-    private fun requestScanner() {
-        viewModelScope.launch(mainImmediate) {
-            val response = scannerCoordinator.submitRequest(
-                ScannerRequest(
-                    filter = object : ScannerFilter() {
-                        override suspend fun checkData(data: String): Response<Any, String> {
-                            if (data.toLightningNodePubKey() != null) {
-                                return Response.Success(Any())
-                            }
-                            return Response.Error(app.getString(R.string.invalid_node_pub_key_qr_code))
-                        }
-                    },
-                    showBottomView = true,
-                    scannerModeLabel = app.getString(R.string.destination_key)
-                )
-            )
-            if (response is Response.Success) {
-                response.value.value.toLightningNodePubKey()?.let { destinationKey ->
-                    submitSideEffect(
-                        PaymentSideEffect.AlertConfirmPaymentSend(sendPaymentBuilder.paymentAmount, destinationKey.value) {
-                            sendDirectPayment(destinationKey)
-                        }
-                    )
-                }
-            }
-        }
-    }
-
     fun sendPayment(message: String? = null) {
         args.messageUUID?.let { messageUUID ->
             sendTribeDirectPayment(message, messageUUID)
@@ -178,7 +151,18 @@ internal class PaymentSendViewModel @Inject constructor(
                 )
             }
         } else {
-            requestScanner()
+            if (lightningNodePubKey != null) {
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        PaymentSideEffect.AlertConfirmPaymentSend(
+                            sendPaymentBuilder.paymentAmount,
+                            lightningNodePubKey.value
+                        ) {
+                            sendDirectPayment(lightningNodePubKey)
+                        }
+                    )
+                }
+            }
         }
     }
 
