@@ -270,7 +270,7 @@ internal class DashboardViewModel @Inject constructor(
             scannedContactLink.value?.let { contact ->
                 dashboardNavigator.toAddContactDetail(contact.first, contact.second)
             }
-            scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            scannerMenuDismiss()
         }
     }
 
@@ -279,7 +279,14 @@ internal class DashboardViewModel @Inject constructor(
             scannedContactLink.value?.let { contact ->
                 navBarNavigator.toPaymentSendDetail(contact.first, contact.second, null)
             }
+            scannerMenuDismiss()
+        }
+    }
+
+    override fun scannerMenuDismiss() {
+        viewModelScope.launch(default) {
             scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            scannedContactLink.value = null
         }
     }
 

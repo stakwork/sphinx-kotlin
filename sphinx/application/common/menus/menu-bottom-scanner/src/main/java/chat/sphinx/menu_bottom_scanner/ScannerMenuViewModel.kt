@@ -10,6 +10,7 @@ interface ScannerMenuViewModel {
 
     fun createContact()
     fun sendDirectPayment()
+    fun scannerMenuDismiss()
 }
 class ScannerMenuHandler {
     val viewStateContainer: ViewStateContainer<MenuBottomViewState> by lazy {

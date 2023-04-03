@@ -2,6 +2,7 @@ package chat.sphinx.menu_bottom_scanner
 
 import androidx.lifecycle.LifecycleOwner
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
+import chat.sphinx.menu_bottom.model.MenuBottomDismiss
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.resources.getString
@@ -39,9 +40,16 @@ class BottomScannerMenu(
             )
         )
 
+        val menuDismiss = MenuBottomDismiss(
+            R.string.menu_bottom_cancel,
+            R.color.primaryRed) {
+            scannerMenuViewModel.scannerMenuDismiss()
+        }
+
         super.newBuilder(binding, lifecycleOwner)
             .setHeaderText(binding.getString(R.string.bottom_menu_scanner_header_text))
             .setOptions(menuBottomOptions.toSet())
+            .setDismissOption(menuDismiss)
             .build()
     }
 
