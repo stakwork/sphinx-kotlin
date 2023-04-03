@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_scanner_header_text">Opciones de Public Key</string>
+    <!-- Menu -->
+    <string name="bottom_menu_scanner_option_set_create_contact">Crear Contacto</string>
+    <string name="bottom_menu_scanner_option_set_direct_payment">Enviar Pago Directo</string>
+</resources>
