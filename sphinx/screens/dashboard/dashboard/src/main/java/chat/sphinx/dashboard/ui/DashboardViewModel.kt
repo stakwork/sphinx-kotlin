@@ -170,7 +170,7 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
     }
 
-    fun toScanner() {
+    fun toScanner(isPayment: Boolean) {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
@@ -193,8 +193,8 @@ internal class DashboardViewModel @Inject constructor(
                             }
                         }
                     },
-                    showBottomView = true,
-                    scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
+                    showBottomView = isPayment,
+                    scannerModeLabel = app.getString(R.string.paste_invoice_or_public_key)
                 )
             )
 

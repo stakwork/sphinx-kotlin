@@ -27,6 +27,7 @@
     <string name="alert_confirm_delete_invite_message">招待コードを削除してよいですか？</string>
 
     <string name="paste_invoice_of_tribe_link">インボイスまたはTribe参加リンクを入力</string>
+    <string name="paste_invoice_or_public_key">Invoice or Public Key</string>
     <string name="alert_confirm_pay_invoice_title">インボイスに支払いをする</string>
     <string name="alert_confirm_pay_invoice_message">スキャンしたインボイスに支払いをしてよいですか？\n\n金額: %d sats\n\nメモ: %s</string>
 

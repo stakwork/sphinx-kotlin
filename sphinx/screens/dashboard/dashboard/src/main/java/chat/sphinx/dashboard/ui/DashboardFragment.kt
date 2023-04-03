@@ -273,10 +273,10 @@ internal class DashboardFragment : MotionLayoutFragment<
                 lifecycleScope.launch { viewModel.navBarNavigator.toTransactionsDetail() }
             }
             navBar.navBarButtonScanner.setOnClickListener {
-                viewModel.toScanner()
+                viewModel.toScanner(false)
             }
             navBar.navBarButtonPaymentSend.setOnClickListener {
-                lifecycleScope.launch { viewModel.navBarNavigator.toPaymentSendDetail(null, null, null) }
+                viewModel.toScanner(true)
             }
         }
     }
