@@ -193,8 +193,8 @@ internal class DashboardViewModel @Inject constructor(
                             }
                         }
                     },
-                    showBottomView = isPayment,
-                    scannerModeLabel = app.getString(R.string.paste_invoice_or_public_key)
+                    showBottomView = true,
+                    scannerModeLabel = if (isPayment) app.getString(R.string.paste_invoice_or_public_key) else " "
                 )
             )
 
