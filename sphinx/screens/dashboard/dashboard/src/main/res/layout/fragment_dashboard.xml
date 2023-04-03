@@ -138,4 +138,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <include
+        android:id="@+id/include_layout_menu_bottom_scanner_choice"
+        layout="@layout/layout_menu_bottom"
+        tools:visibility="gone" />
+
 </androidx.constraintlayout.motion.widget.MotionLayout>

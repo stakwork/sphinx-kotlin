@@ -34,6 +34,9 @@ import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
+import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
@@ -96,7 +99,8 @@ internal class DashboardViewModel @Inject constructor(
         Context,
         ChatListSideEffect,
         DashboardMotionViewState
-        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible) {
+        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible),
+    ScannerMenuViewModel{
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
@@ -106,6 +110,10 @@ internal class DashboardViewModel @Inject constructor(
 
     val currentVersion: MutableStateFlow<String> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow("-")
+    }
+
+    private val scannedNodeAddress: MutableStateFlow<Pair<LightningNodePubKey, LightningRouteHint?>?> by lazy(LazyThreadSafetyMode.NONE) {
+        MutableStateFlow(null)
     }
 
     init {
@@ -162,7 +170,7 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
     }
 
-    fun toScanner() {
+    fun toScanner(isPayment: Boolean) {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
@@ -186,7 +194,7 @@ internal class DashboardViewModel @Inject constructor(
                         }
                     },
                     showBottomView = true,
-                    scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
+                    scannerModeLabel = if (isPayment) app.getString(R.string.paste_invoice_or_public_key) else " "
                 )
             )
 
@@ -253,6 +261,35 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
+    override val scannerMenuHandler: ScannerMenuHandler by lazy {
+        ScannerMenuHandler()
+    }
+
+    override fun createContact() {
+        viewModelScope.launch(default) {
+            scannedNodeAddress.value?.let { address ->
+                dashboardNavigator.toAddContactDetail(address.first, address.second)
+            }
+            scannerMenuDismiss()
+        }
+    }
+
+    override fun sendDirectPayment() {
+        viewModelScope.launch(default) {
+            scannedNodeAddress.value?.let { address ->
+                navBarNavigator.toPaymentSendDetail(address.first, address.second, null)
+            }
+            scannerMenuDismiss()
+        }
+    }
+
+    override fun scannerMenuDismiss() {
+        viewModelScope.launch(default) {
+            scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            scannedNodeAddress.value = null
+        }
+    }
+
     private suspend fun handleTribeJoinLink(tribeJoinLink: TribeJoinLink) {
         val chat: Chat? = try {
             chatRepository.getChatByUUID(
@@ -270,11 +307,11 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
-        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+        scannedNodeAddress.value = Pair(pubKey, routeHint)
 
-            goToContactChat(contact)
-
-        } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { _ ->
+            navBarNavigator.toPaymentSendDetail(pubKey, routeHint, null)
+        } ?: scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
     }
 
     private suspend fun goToContactChat(contact: Contact) {

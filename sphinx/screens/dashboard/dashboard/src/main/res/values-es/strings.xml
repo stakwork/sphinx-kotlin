@@ -27,6 +27,7 @@
     <string name="alert_confirm_delete_invite_message">¿Estás seguro que deseas eliminar esta invitación?</string>
 
     <string name="paste_invoice_of_tribe_link">Pega la solicitud de pago o el enlace de la tribu</string>
+    <string name="paste_invoice_or_public_key">Solicitud de pago o Public Key</string>
     <string name="alert_confirm_pay_invoice_title">Pagar solicitud</string>
     <string name="alert_confirm_pay_invoice_message">¿Estás seguro que deseas pagar esta solicitud?\n\nMonto: %d sat\n\nMemo: %s</string>
 

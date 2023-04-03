@@ -18,6 +18,12 @@
         <argument
             android:name="argMessageUUID"
             app:argType="string" />
+        <argument
+            android:name="argLightningNodePubKey"
+            app:argType="string" />
+        <argument
+            android:name="argLightningRouteHint"
+            app:argType="string" />
     </fragment>
 
 </navigation>

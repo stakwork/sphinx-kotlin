@@ -27,6 +27,7 @@
     <string name="alert_confirm_delete_invite_message">確認 刪除邀請?</string>
 
     <string name="paste_invoice_of_tribe_link">貼上帳單 或 加入Tribe連結</string>
+    <string name="paste_invoice_or_public_key">Invoice or Public Key</string>
     <string name="alert_confirm_pay_invoice_title">付款</string>
     <string name="alert_confirm_pay_invoice_message">確定支付帳單??\n\n金額: %d sat\n\n附註: %s</string>
 

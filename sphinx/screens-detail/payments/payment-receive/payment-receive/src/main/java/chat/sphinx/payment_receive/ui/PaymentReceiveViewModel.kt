@@ -18,6 +18,8 @@ import chat.sphinx.payment_receive.R
 import chat.sphinx.payment_receive.navigation.PaymentReceiveNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageUUID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -67,6 +69,8 @@ internal class PaymentReceiveViewModel @Inject constructor(
     override val chatId: ChatId? = args.chatId
     override val contactId: ContactId? = args.contactId
     override val messageUUID: MessageUUID? = null
+    override val lightningNodePubKey: LightningNodePubKey? = null
+    override val routeHint: LightningRouteHint? = null
 
     private val sendPaymentRequestBuilder = SendPaymentRequest.Builder()
 
