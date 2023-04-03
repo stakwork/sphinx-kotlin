@@ -139,6 +139,7 @@ internal class PaymentSendViewModel @Inject constructor(
         sendPaymentBuilder.setChatId(args.chatId)
         sendPaymentBuilder.setContactId(args.contactId)
         sendPaymentBuilder.setText(message)
+        sendPaymentBuilder.setDestinationKey(lightningNodePubKey)
         sendPaymentBuilder.setRouteHint(routeHint)
 
         if (sendPaymentBuilder.isContactPayment) {
@@ -150,26 +151,18 @@ internal class PaymentSendViewModel @Inject constructor(
                     message ?: "",
                 )
             }
-        } else {
-            if (lightningNodePubKey != null) {
-                viewModelScope.launch(mainImmediate) {
-                    submitSideEffect(
-                        PaymentSideEffect.AlertConfirmPaymentSend(
-                            sendPaymentBuilder.paymentAmount,
-                            lightningNodePubKey.value
-                        ) {
-                            sendDirectPayment(lightningNodePubKey)
-                        }
-                    )
-                }
+        } else if (sendPaymentBuilder.isKeySendPayment) {
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(
+                    PaymentSideEffect.AlertConfirmPaymentSend(
+                        sendPaymentBuilder.paymentAmount,
+                        lightningNodePubKey?.value ?: ""
+                    ) {
+                        sendPayment()
+                    }
+                )
             }
         }
-    }
-
-    private fun sendDirectPayment(destinationKey: LightningNodePubKey) {
-        sendPaymentBuilder.setDestinationKey(destinationKey)
-
-        sendPayment()
     }
 
     private fun sendPayment() {
