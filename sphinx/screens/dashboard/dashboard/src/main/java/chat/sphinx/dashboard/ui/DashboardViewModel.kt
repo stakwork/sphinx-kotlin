@@ -112,7 +112,7 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow("-")
     }
 
-    val scannedContactLink: MutableStateFlow<Pair<LightningNodePubKey, LightningRouteHint?>?> by lazy(LazyThreadSafetyMode.NONE) {
+    private val scannedNodeAddress: MutableStateFlow<Pair<LightningNodePubKey, LightningRouteHint?>?> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow(null)
     }
 
@@ -267,8 +267,8 @@ internal class DashboardViewModel @Inject constructor(
 
     override fun createContact() {
         viewModelScope.launch(default) {
-            scannedContactLink.value?.let { contact ->
-                dashboardNavigator.toAddContactDetail(contact.first, contact.second)
+            scannedNodeAddress.value?.let { address ->
+                dashboardNavigator.toAddContactDetail(address.first, address.second)
             }
             scannerMenuDismiss()
         }
@@ -276,8 +276,8 @@ internal class DashboardViewModel @Inject constructor(
 
     override fun sendDirectPayment() {
         viewModelScope.launch(default) {
-            scannedContactLink.value?.let { contact ->
-                navBarNavigator.toPaymentSendDetail(contact.first, contact.second, null)
+            scannedNodeAddress.value?.let { address ->
+                navBarNavigator.toPaymentSendDetail(address.first, address.second, null)
             }
             scannerMenuDismiss()
         }
@@ -286,7 +286,7 @@ internal class DashboardViewModel @Inject constructor(
     override fun scannerMenuDismiss() {
         viewModelScope.launch(default) {
             scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-            scannedContactLink.value = null
+            scannedNodeAddress.value = null
         }
     }
 
@@ -307,11 +307,10 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
-        scannedContactLink.value = Pair(pubKey, routeHint)
+        scannedNodeAddress.value = Pair(pubKey, routeHint)
 
-        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
-            navBarNavigator.toPaymentSendDetail(null, null, contact.id)
-
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { _ ->
+            navBarNavigator.toPaymentSendDetail(pubKey, routeHint, null)
         } ?: scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
     }
 
