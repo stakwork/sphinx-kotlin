@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha86 (2023-04-03)
+- Improves payment flow
+
 # Version 1.0.0-alpha86 (2023-03-29)
 - Adds recently played section on feed
 - Fixes issues on add contact view
