@@ -42,18 +42,18 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:activity:concepts:concept-connectivity-helper')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
+    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:activity:features:feature-view-model-coordinator')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
-
-
-    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-message')
-
-    implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    api project(path: ':sphinx:service:concepts:concept-service-media-player')
 
     implementation deps.androidx.recyclerView
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
     kapt kaptDeps.google.hilt
 }
