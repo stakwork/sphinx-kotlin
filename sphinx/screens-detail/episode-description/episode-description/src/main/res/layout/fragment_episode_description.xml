@@ -148,21 +148,6 @@
                 app:layout_constraintTop_toTopOf="@+id/circle_split"
                 tools:text="1h 19 min left" />
 
-            <androidx.appcompat.widget.AppCompatSeekBar
-                android:id="@+id/seek_bar_current_time_episode_progress"
-                android:layout_width="@dimen/default_progress_bar_time_left_with"
-                android:layout_height="@dimen/default_progress_bar_time_left_height"
-                android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
-                android:paddingStart="0dp"
-                android:paddingEnd="0dp"
-                android:progressDrawable="@drawable/podcast_episode_disabled_progress_bar_duration_holder"
-                android:secondaryProgressTint="@color/receivedIcon"
-                android:splitTrack="false"
-                android:thumb="@null"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_item_episode_time"
-                app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time"
-                app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time" />
-
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_check_mark_played"
                 android:layout_width="@dimen/default_layout_margin"
@@ -306,17 +291,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/default_double_layout_margin"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:cardCornerRadius="@dimen/episode_detail_image_radius"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_show_more">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/image_view_episode_detail_image"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="@dimen/episode_description_image_height"
                     android:scaleType="centerCrop"
-                    app:layout_constraintDimensionRatio="1:1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:srcCompat="@drawable/ic_podcast_placeholder" />
