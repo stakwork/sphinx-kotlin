@@ -20,6 +20,7 @@ import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_feed.isNewsletter
 import chat.sphinx.wrapper_feed.isPodcast
 import chat.sphinx.wrapper_feed.isVideo
+import chat.sphinx.wrapper_podcast.toHrAndMin
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.concept_views.viewstate.value
@@ -49,6 +50,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         BackPressHandler(viewLifecycleOwner, requireActivity())
+        setAllClickListeners()
     }
 
     private inner class BackPressHandler(
@@ -77,8 +79,8 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 binding.apply {
                     textViewTitleHeader.text = viewState.feedItem.titleToShow
                     textViewDescriptionEpisode.text = viewState.feedItem.descriptionToShow
-                    textViewDescriptionEpisodeTitle.text = viewState.podcastTitle
-                    imageViewItemRowEpisodeType.setImageDrawable((ContextCompat.getDrawable(root.context, getFeedItemDrawableType(viewState.feedType))))
+                    textViewDescriptionEpisodeTitle.text = viewState.feed?.title?.value
+                    imageViewItemRowEpisodeType.setImageDrawable((ContextCompat.getDrawable(root.context, getFeedItemDrawableType(viewState.feed?.feedType))))
                     viewState.feedItem.imageUrlToShow?.value?.let {image ->
                         imageLoader.load(
                             imageViewEpisodeDetailImage,
@@ -88,7 +90,18 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                                 .build()
                         )
                     }
+                    val duration = viewState.podcastEpisode?.getUpdatedContentEpisodeStatus()?.duration?.value?.toInt()?.toHrAndMin()
+                    textViewEpisodeDate.text = viewState.podcastEpisode?.dateString
+                    textViewItemEpisodeTime.text = duration
                 }
+            }
+        }
+    }
+
+    private fun setAllClickListeners() {
+        binding.buttonNavBack.setOnClickListener {
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.navigator.popBackStack()
             }
         }
     }

@@ -42,9 +42,10 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             feedId?.let { nnFeedId ->
                 feedRepository.getFeedItemById(nnFeedId).collect { feedItem ->
-                    feedItem?.let {mmFeedItem ->
+                    feedItem?.let { mmFeedItem ->
                         val feed = feedRepository.getFeedById(feedItem.feedId).firstOrNull()
-                        updateViewState(EpisodeDescriptionViewState.FeedItemDescription(mmFeedItem, feed?.title?.value, feed?.feedType))
+                        val podcastEpisode = feedRepository.getPodcastById(feedItem.feedId).firstOrNull()?.getEpisodeWithId(feedItem.id.value)
+                        updateViewState(EpisodeDescriptionViewState.FeedItemDescription(mmFeedItem, feed, podcastEpisode))
                     }
                 }
             }

@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/button_back_mage"
+            android:id="@+id/button_nav_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:scaleType="fitCenter"
@@ -39,8 +39,8 @@
             android:maxLines="1"
             android:visibility="gone"
             android:layout_marginLeft="@dimen/default_small_layout_margin"
-            app:layout_constraintBottom_toBottomOf="@+id/button_back_mage"
-            app:layout_constraintStart_toEndOf="@+id/button_back_mage"
+            app:layout_constraintBottom_toBottomOf="@+id/button_nav_back"
+            app:layout_constraintStart_toEndOf="@+id/button_nav_back"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="DeFi Smart Contracts On "/>
 
@@ -142,7 +142,7 @@
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textColor="@color/secondaryText"
-                android:textSize="@dimen/default_text_size_caption1"
+                android:textSize="@dimen/default_text_size_body"
                 app:layout_constraintBottom_toBottomOf="@+id/circle_split"
                 app:layout_constraintStart_toEndOf="@+id/circle_split"
                 app:layout_constraintTop_toTopOf="@+id/circle_split"
