@@ -29,6 +29,6 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
         EpisodeDescriptionViewState,
         >(dispatchers, EpisodeDescriptionViewState.Idle)
 {
-//    private val args: EpisodeDetailFragmentArgs by savedStateHandle.navArgs()
+    private val args: EpisodeDescriptionFragmentArgs by savedStateHandle.navArgs()
 
 }

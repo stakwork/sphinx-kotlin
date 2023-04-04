@@ -54,6 +54,5 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
     kapt kaptDeps.google.hilt
 }

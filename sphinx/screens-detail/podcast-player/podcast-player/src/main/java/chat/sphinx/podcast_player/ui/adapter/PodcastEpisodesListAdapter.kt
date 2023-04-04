@@ -189,7 +189,11 @@ internal class PodcastEpisodesListAdapter(
                 playEpisodeFromList()
             }
             binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
-                playEpisodeFromList()
+                episode?.let { nnEpisode ->
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.toEpisodeDescriptionScreen(nnEpisode.id)
+                    }
+                }
             }
 
             binding.buttonDownloadArrow.setOnClickListener {
