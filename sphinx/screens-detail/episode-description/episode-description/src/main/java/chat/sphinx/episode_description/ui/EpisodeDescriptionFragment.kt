@@ -23,8 +23,11 @@ import chat.sphinx.wrapper_feed.isVideo
 import chat.sphinx.wrapper_podcast.toHrAndMin
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
+import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -106,6 +109,30 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 val numberOfLines = textViewDescriptionEpisode.lineCount
                 binding.constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
             }
+            val episodeAvailable = (connectivityHelper.isNetworkConnected() || viewState.podcastEpisode?.downloaded == true)
+
+            if (viewState.podcastEpisode?.downloaded == true) {
+                imageDownloadedEpisodeArrow.visible
+                buttonDownloadArrow.gone
+                progressBarEpisodeDownload.gone
+                buttonStop.gone
+            }
+
+            if (viewState.podcastEpisode?.downloaded == false) {
+                buttonDownloadArrow.visible
+                buttonStop.gone
+                progressBarEpisodeDownload.gone
+                imageDownloadedEpisodeArrow.gone
+            }
+
+            val isFeedItemDownloadInProgress = viewState.isFeedItemDownloadInProgress && viewState.podcastEpisode?.downloaded == false
+
+            if (isFeedItemDownloadInProgress) {
+                buttonDownloadArrow.gone
+                progressBarEpisodeDownload.visible
+                imageDownloadedEpisodeArrow.gone
+                buttonStop.visible
+            }
         }
     }
 
@@ -117,6 +144,12 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
         }
         binding.constraintShowMoreContainer.setOnClickListener {
             toggleShowMore()
+        }
+        binding.buttonEpisodeShare.setOnClickListener {
+            viewModel.share(binding.root.context, getString(R.string.episode_detail_clipboard))
+        }
+        binding.buttonDownloadArrow.setOnClickListener {
+            viewModel.downloadMedia()
         }
     }
 

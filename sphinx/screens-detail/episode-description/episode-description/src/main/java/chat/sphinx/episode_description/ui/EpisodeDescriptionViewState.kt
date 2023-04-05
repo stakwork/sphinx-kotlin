@@ -14,7 +14,8 @@ internal sealed class EpisodeDescriptionViewState: ViewState<EpisodeDescriptionV
     data class FeedItemDescription(
         val feedItem: FeedItem,
         val feed: Feed?,
-        val podcastEpisode: PodcastEpisode?
+        val podcastEpisode: PodcastEpisode?,
+        val isFeedItemDownloadInProgress: Boolean
     ) : EpisodeDescriptionViewState()
 
 }
