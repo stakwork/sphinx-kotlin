@@ -184,6 +184,7 @@
     <string name="episode_detail_share_link">Share episode link</string>
     <string name="episode_detail_played_holder" translatable="false">Played</string>
     <string name="episode_description_show_more">SHOW MORE</string>
+    <string name="episode_description_show_less">SHOW LESS</string>
 
     <string name="time_left">%s left</string>
 

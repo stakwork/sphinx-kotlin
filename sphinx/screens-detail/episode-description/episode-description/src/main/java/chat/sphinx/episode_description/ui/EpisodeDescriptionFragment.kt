@@ -23,6 +23,8 @@ import chat.sphinx.wrapper_feed.isVideo
 import chat.sphinx.wrapper_podcast.toHrAndMin
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -76,24 +78,33 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
         when(viewState) {
             is EpisodeDescriptionViewState.Idle -> {}
             is EpisodeDescriptionViewState.FeedItemDescription -> {
-                binding.apply {
-                    textViewTitleHeader.text = viewState.feedItem.titleToShow
-                    textViewDescriptionEpisode.text = viewState.feedItem.descriptionToShow
-                    textViewDescriptionEpisodeTitle.text = viewState.feed?.title?.value
-                    imageViewItemRowEpisodeType.setImageDrawable((ContextCompat.getDrawable(root.context, getFeedItemDrawableType(viewState.feed?.feedType))))
-                    viewState.feedItem.imageUrlToShow?.value?.let {image ->
-                        imageLoader.load(
-                            imageViewEpisodeDetailImage,
-                            image,
-                            ImageLoaderOptions.Builder()
-                                .placeholderResId(R.drawable.ic_podcast_placeholder)
-                                .build()
-                        )
-                    }
-                    val duration = viewState.podcastEpisode?.getUpdatedContentEpisodeStatus()?.duration?.value?.toInt()?.toHrAndMin()
-                    textViewEpisodeDate.text = viewState.podcastEpisode?.dateString
-                    textViewItemEpisodeTime.text = duration
-                }
+                bindFeedItemDescription(viewState)
+            }
+        }
+    }
+
+
+    private suspend fun bindFeedItemDescription(viewState: EpisodeDescriptionViewState.FeedItemDescription) {
+        binding.apply {
+            textViewTitleHeader.text = viewState.feedItem.titleToShow
+            textViewDescriptionEpisode.text = viewState.feedItem.descriptionToShow
+            textViewDescriptionEpisodeTitle.text = viewState.feed?.title?.value
+            imageViewItemRowEpisodeType.setImageDrawable((ContextCompat.getDrawable(root.context, getFeedItemDrawableType(viewState.feed?.feedType))))
+            viewState.feedItem.imageUrlToShow?.value?.let {image ->
+                imageLoader.load(
+                    imageViewEpisodeDetailImage,
+                    image,
+                    ImageLoaderOptions.Builder()
+                        .placeholderResId(R.drawable.ic_podcast_placeholder)
+                        .build()
+                )
+            }
+            val duration = viewState.podcastEpisode?.getUpdatedContentEpisodeStatus()?.duration?.value?.toInt()?.toHrAndMin()
+            textViewEpisodeDate.text = viewState.podcastEpisode?.dateString
+            textViewItemEpisodeTime.text = duration
+            binding.textViewDescriptionEpisode.post {
+                val numberOfLines = textViewDescriptionEpisode.lineCount
+                binding.constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
             }
         }
     }
@@ -102,6 +113,22 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
         binding.buttonNavBack.setOnClickListener {
             lifecycleScope.launch(viewModel.mainImmediate) {
                 viewModel.navigator.popBackStack()
+            }
+        }
+        binding.constraintShowMoreContainer.setOnClickListener {
+            toggleShowMore()
+        }
+    }
+
+    private fun toggleShowMore() {
+        binding.apply {
+            if (textViewDescriptionEpisode.maxLines > 5) {
+                textViewDescriptionEpisode.maxLines = 5
+                textViewShowMore.text = getString(R.string.episode_description_show_more)
+            }
+            else {
+                textViewDescriptionEpisode.maxLines = Int.MAX_VALUE
+                textViewShowMore.text = getString(R.string.episode_description_show_less)
             }
         }
     }

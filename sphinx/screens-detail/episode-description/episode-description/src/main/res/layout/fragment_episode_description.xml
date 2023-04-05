@@ -49,8 +49,9 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view_description"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraint_back_button_container">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -241,7 +242,6 @@
                     android:id="@+id/button_play_episode"
                     android:layout_width="@dimen/tribe_member_image_corner_radius"
                     android:layout_height="@dimen/tribe_member_image_corner_radius"
-                    android:layout_marginEnd="@dimen/default_layout_margin"
                     android:src="@drawable/ic_play_episode"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -271,30 +271,44 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_show_more"
-                android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraint_show_more_container"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_regular"
-                android:layout_marginTop="@dimen/default_layout_margin"
-                android:maxLines="1"
-                android:text="@string/episode_description_show_more"
-                android:textColor="@color/primaryText"
-                android:textSize="@dimen/default_text_size_caption1"
+                android:layout_marginTop="@dimen/default_half_layout_margin"
+                android:paddingVertical="@dimen/default_half_layout_margin"
+                android:paddingLeft="@dimen/default_half_layout_margin"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:letterSpacing="0.1"
-                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_description_text_container"
-                tools:text="SHOW MORE" />
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_description_text_container">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_show_more"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_regular"
+                    android:letterSpacing="0.1"
+                    android:maxLines="1"
+                    android:text="@string/episode_description_show_more"
+                    android:textColor="@color/primaryText"
+                    android:textSize="@dimen/default_text_size_caption1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="SHOW MORE" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_view_image_episode_wrap"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:layout_marginTop="@dimen/default_header_margin_horizontal"
                 app:cardCornerRadius="@dimen/episode_detail_image_radius"
+                android:layout_marginBottom="@dimen/default_large_layout_margin"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_show_more">
+                app:layout_constraintTop_toBottomOf="@+id/constraint_show_more_container">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/image_view_episode_detail_image"
