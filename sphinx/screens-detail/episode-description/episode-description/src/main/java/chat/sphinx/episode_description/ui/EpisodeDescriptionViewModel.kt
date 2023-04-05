@@ -1,27 +1,31 @@
 package chat.sphinx.episode_description.ui
 
 import android.app.Application
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.media.MediaMetadataRetriever
+import android.net.Uri
+import android.os.Build
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
+import chat.sphinx.concept_service_media.MediaPlayerServiceState
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
-import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.toFeedId
+import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.*
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,35 +41,112 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
         Context,
         EpisodeDescriptionSideEffect,
         EpisodeDescriptionViewState,
-        >(dispatchers, EpisodeDescriptionViewState.Idle) {
+        >(dispatchers, EpisodeDescriptionViewState.Idle),
+    MediaPlayerServiceController.MediaServiceListener {
     private val args: EpisodeDescriptionFragmentArgs by savedStateHandle.navArgs()
+    var podcast: Podcast? = null
 
     init {
-        getFeedItem(args.argFeedId.toFeedId())
-    }
-
-    private fun getFeedItem(feedId: FeedId?) {
+        mediaPlayerServiceController.addListener(this)
         viewModelScope.launch(mainImmediate) {
-            feedId?.let { nnFeedId ->
+            args.argFeedId.toFeedId()?.let { nnFeedId ->
                 feedRepository.getFeedItemById(nnFeedId).collect { feedItem ->
                     feedItem?.let { mmFeedItem ->
-                        val feed = feedRepository.getFeedById(feedItem.feedId).firstOrNull()
-                        val podcastEpisode = feedRepository.getPodcastById(feedItem.feedId).firstOrNull()?.getEpisodeWithId(feedItem.id.value)
-                        updateViewState(EpisodeDescriptionViewState.FeedItemDescription(mmFeedItem, feed, podcastEpisode, isFeedItemDownloadInProgress()))
+                        feedRepository.getPodcastById(feedItem.feedId).collect {
+                            podcast = it
+                            val feed = feedRepository.getFeedById(feedItem.feedId).firstOrNull()
+                            val podcastEpisode = podcast?.getEpisodeWithId(feedItem.id.value)
+                            updateViewState(
+                                EpisodeDescriptionViewState.FeedItemDescription(
+                                    mmFeedItem,
+                                    feed,
+                                    podcastEpisode,
+                                    isFeedItemDownloadInProgress(),
+                                    isEpisodeSoundPlaying()
+                                )
+                            )
+                        }
                     }
                 }
             }
         }
     }
 
-    fun isFeedItemDownloadInProgress(): Boolean {
+    private fun isFeedItemDownloadInProgress(): Boolean {
         (currentViewState as? EpisodeDescriptionViewState.FeedItemDescription)?.feedItem?.id.let { feedItemId  ->
             return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
         }
     }
 
-    fun isEpisodeSoundPlaying(episode: PodcastEpisode): Boolean {
-        return episode.playing && mediaPlayerServiceController.getPlayingContent()?.third == true
+    private fun isEpisodeSoundPlaying(): Boolean {
+        (currentViewState as? EpisodeDescriptionViewState.FeedItemDescription)?.podcastEpisode?.playing.let { playing ->
+            return playing == true && mediaPlayerServiceController.getPlayingContent()?.third == true
+        }
+    }
+
+    fun playEpisodeFromDescription() {
+        viewModelScope.launch(mainImmediate) {
+            val currentViewState = (currentViewState as? EpisodeDescriptionViewState.FeedItemDescription)
+                currentViewState?.podcastEpisode?.let { podcastEpisode ->
+                if (mediaPlayerServiceController.getPlayingContent()?.second == podcastEpisode.id.value) {
+                    pauseEpisode(podcastEpisode)
+                } else {
+                    delay(50L)
+                    playEpisode(podcastEpisode)
+                }
+            }
+        }
+    }
+    private fun playEpisode(episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            podcast?.let { nnPodcast ->
+                nnPodcast.willStartPlayingEpisode(
+                episode,
+                episode.currentTimeMilliseconds ?: 0,
+                ::retrieveEpisodeDuration
+            )
+                mediaPlayerServiceController.submitAction(
+                    UserAction.ServiceAction.Play(
+                        ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        episode.episodeUrl,
+                        nnPodcast.getUpdatedContentFeedStatus(),
+                        nnPodcast.getUpdatedContentEpisodeStatus()
+                    )
+                )
+            }
+        }
+    }
+
+    private fun pauseEpisode(episode: PodcastEpisode) {
+        viewModelScope.launch(mainImmediate) {
+            podcast?.didPausePlayingEpisode(episode)
+
+            mediaPlayerServiceController.submitAction(
+                UserAction.ServiceAction.Pause(
+                    ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    episode.id.value
+                )
+            )
+        }
+    }
+
+    private fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
+        }
+
+        return duration
     }
 
     fun share(context: Context, label: String) {
@@ -93,50 +174,91 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
             ) { downloadedFile ->
                 podcastEpisode.localFile = downloadedFile
             }
-            updateViewState(EpisodeDescriptionViewState.FeedItemDescription(currentViewState.feedItem, currentViewState.feed, podcastEpisode, isFeedItemDownloadInProgress()))
+            updateViewState(
+                EpisodeDescriptionViewState.FeedItemDescription(
+                    currentViewState.feedItem,
+                    currentViewState.feed,
+                    podcastEpisode,
+                    isFeedItemDownloadInProgress(),
+                    currentViewState.isEpisodeSoundPlaying
+                )
+            )
         }
     }
+    override fun mediaServiceState(serviceState: MediaPlayerServiceState) {
+        if (serviceState is MediaPlayerServiceState.ServiceActive.MediaState) {
+            if (serviceState.episodeId != args.argFeedId) {
+                return
+            }
+        }
+        viewModelScope.launch(mainImmediate) {
+            val currentViewState = (currentViewState as? EpisodeDescriptionViewState.FeedItemDescription)
+            currentViewState?.podcastEpisode?.let { podcastEpisode ->
+                podcast?.let { nnPodcast ->
+                    when (serviceState) {
+                        is MediaPlayerServiceState.ServiceActive.MediaState.Playing -> {
+                            nnPodcast.playingEpisodeUpdate(
+                                serviceState.episodeId,
+                                serviceState.currentTime,
+                                serviceState.episodeDuration.toLong(),
+                                serviceState.speed
+                            )
+                            updateViewState(EpisodeDescriptionViewState.FeedItemDescription(
+                                currentViewState.feedItem,
+                                currentViewState.feed,
+                                podcastEpisode,
+                                isFeedItemDownloadInProgress(),
+                                true
+                            ))
+                        }
+                        is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
+                            nnPodcast.pauseEpisodeUpdate()
+                            updateViewState(EpisodeDescriptionViewState.FeedItemDescription(
+                                currentViewState.feedItem,
+                                currentViewState.feed,
+                                podcastEpisode,
+                                isFeedItemDownloadInProgress(),
+                                false
+                            ))
+                        }
+                        is MediaPlayerServiceState.ServiceActive.MediaState.Ended -> {
+                            nnPodcast.endEpisodeUpdate(
+                                serviceState.episodeId,
+                                ::retrieveEpisodeDuration
+                            )
+                            updateViewState(EpisodeDescriptionViewState.FeedItemDescription(
+                                currentViewState.feedItem,
+                                currentViewState.feed,
+                                podcastEpisode,
+                                isFeedItemDownloadInProgress(),
+                                false
+                            ))
+                            feedRepository.updatePlayedMark(nnPodcast.id, true)
+                        }
+                        else -> {}
+                    }
+                }
+            }
+        }
+    }
+
+
 }
 
-//    fun downloadMediaByItemId(feedId: FeedId) {
-//        viewModelScope.launch(mainImmediate) {
-//            feedRepository.getFeedItemById(feedId).firstOrNull()?.let { feedItem ->
-//                repositoryMedia.downloadMediaIfApplicable(feedItem) { localFile ->
-//
-//                    _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
-//                        downloaded = true,
-//                        isDownloadInProgress = false
-//                    )
-//
-//                    getPodcastFeed()?.let { nnPodcast ->
-//                        nnPodcast.getEpisodeWithId(feedId.value)?.let { episode ->
-//                            episode.localFile = localFile
-//                        }
-//                    }
-//
-//                    if (feedItemDetailsViewStateContainer.value is FeedItemDetailsViewState.Open) {
-//                        feedItemDetailsViewStateContainer.updateViewState(
-//                            FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
-//                        )
-//                    }
-//
-//                    forceListReload()
-//                }
-//            }
-//
-//            val isFeedItemDownloadInProgress = repositoryMedia.inProgressDownloadIds()
-//                .contains(feedId)
-//
-//            _feedItemDetailStateFlow.value = _feedItemDetailStateFlow.value?.copy(
-//                isDownloadInProgress = isFeedItemDownloadInProgress
-//            )
-//
-//            feedItemDetailsViewStateContainer.updateViewState(
-//                FeedItemDetailsViewState.Open(feedItemDetailStateFlow.value)
-//            )
-//
-//            forceListReload()
-//        }
-//    }
-
-
+fun Uri.getMediaDuration(
+    isLocalFile: Boolean
+): Long {
+    val retriever = MediaMetadataRetriever()
+    return try {
+        if (Build.VERSION.SDK_INT >= 14 && !isLocalFile) {
+            retriever.setDataSource(this.toString(), HashMap<String, String>())
+        } else {
+            retriever.setDataSource(this.toString())
+        }
+        val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        retriever.release()
+        duration?.toLongOrNull() ?: 0
+    } catch (exception: Exception) {
+        0
+    }
+}

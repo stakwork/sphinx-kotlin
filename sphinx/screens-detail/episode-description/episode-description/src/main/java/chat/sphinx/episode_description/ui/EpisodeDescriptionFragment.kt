@@ -109,7 +109,6 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 val numberOfLines = textViewDescriptionEpisode.lineCount
                 binding.constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
             }
-            val episodeAvailable = (connectivityHelper.isNetworkConnected() || viewState.podcastEpisode?.downloaded == true)
 
             if (viewState.podcastEpisode?.downloaded == true) {
                 imageDownloadedEpisodeArrow.visible
@@ -133,6 +132,16 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 imageDownloadedEpisodeArrow.gone
                 buttonStop.visible
             }
+
+            if (viewState.isEpisodeSoundPlaying) {
+                buttonPlayEpisode.setImageDrawable(
+                    ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
+                )
+            } else {
+                buttonPlayEpisode.setImageDrawable(
+                    ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
+                )
+            }
         }
     }
 
@@ -150,6 +159,11 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
         }
         binding.buttonDownloadArrow.setOnClickListener {
             viewModel.downloadMedia()
+        }
+        binding.buttonPlayEpisode.setOnClickListener {
+            if (connectivityHelper.isNetworkConnected()) {
+                viewModel.playEpisodeFromDescription()
+            }
         }
     }
 
