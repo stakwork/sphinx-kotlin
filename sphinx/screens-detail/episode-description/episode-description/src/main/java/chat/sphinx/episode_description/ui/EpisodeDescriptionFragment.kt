@@ -17,6 +17,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.create_description.R
 import chat.sphinx.create_description.databinding.FragmentEpisodeDescriptionBinding
 import chat.sphinx.episode_description.model.EpisodeDescription
+import chat.sphinx.wrapper_common.feed.FeedType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -145,6 +146,12 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                     ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
                 )
             }
+            if (viewState.feedItemDescription.episodeType == FeedType.Podcast) {
+                buttonPlayEpisode.visible
+            }
+            else {
+                buttonPlayEpisode.gone
+            }
         }
     }
 
@@ -221,7 +228,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 toggleShowMore()
             }
             buttonEpisodeShare.setOnClickListener {
-                viewModel.share(binding.root.context, getString(R.string.episode_detail_clipboard))
+                viewModel.share(binding.root.context, getString(R.string.episode_detail_share_link))
             }
             buttonDownloadArrow.setOnClickListener {
                 viewModel.downloadMedia()
@@ -254,7 +261,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                     viewModel.updatePlayedMark()
                 }
                 layoutConstraintShareRow.setOnClickListener {
-                    viewModel.share(binding.root.context, getString(R.string.episode_detail_clipboard))
+                    viewModel.share(binding.root.context, getString(R.string.episode_detail_share_link))
                 }
                 layoutConstraintCopyLinkRow.setOnClickListener {
                     viewModel.copyCodeToClipboard()

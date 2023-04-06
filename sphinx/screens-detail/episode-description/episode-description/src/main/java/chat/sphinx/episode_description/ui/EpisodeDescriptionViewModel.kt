@@ -83,6 +83,7 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
                                 header = nnFeedItem.titleToShow,
                                 description = nnFeedItem.descriptionToShow,
                                 image = nnFeedItem.imageUrlToShow?.value ?: "",
+                                episodeType = feed?.feedType,
                                 episodeTypeImage = getFeedItemDrawableType(feed?.feedType),
                                 episodeTypeText = getFeedItemStringType(feed?.feedType),
                                 episodeDate = nnFeedItem.datePublished?.hhmmElseDate() ?: "",
