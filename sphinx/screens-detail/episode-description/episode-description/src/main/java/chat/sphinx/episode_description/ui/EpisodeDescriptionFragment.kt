@@ -16,18 +16,21 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.create_description.R
 import chat.sphinx.create_description.databinding.FragmentEpisodeDescriptionBinding
+import chat.sphinx.episode_description.model.EpisodeDescription
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class EpisodeDescriptionFragment: SideEffectFragment<
-        Context,
+        FragmentActivity,
         EpisodeDescriptionSideEffect,
         EpisodeDescriptionViewState,
         EpisodeDescriptionViewModel,
@@ -75,11 +78,16 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 bindFeedItemDescription(viewState)
             }
             is EpisodeDescriptionViewState.FeedItemDetails -> {
-                binding.includeLayoutFeedItem.apply {
 
+                binding.includeLayoutFeedItem.apply {
                     root.setTransitionDuration(300)
                     viewState.feedItemDescription.transitionToEndSet(root)
 
+                    if (viewState.feedItemDescription is FeedItemDescriptionDetailsViewState.Open) {
+                        feedItemDetailsCommonInfoBinding(viewState.feedItemDescription)
+                        setFeedItemDetailsDownloadState(viewState.feedItemDescription)
+                        setPlayedMarkState(viewState.feedItemDescription)
+                    }
                 }
             }
         }
@@ -140,6 +148,68 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
         }
     }
 
+    private fun feedItemDetailsCommonInfoBinding(viewState: FeedItemDescriptionDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewMainEpisodeTitle.text = viewState.feedItemDetail.header
+            imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, viewState.feedItemDetail.episodeTypeImage))
+            textViewEpisodeType.text = viewState.feedItemDetail.episodeTypeText
+            textViewEpisodeDate.text = viewState.feedItemDetail.episodeDate
+            textViewEpisodeDuration.text = viewState.feedItemDetail.episodeDuration
+            textViewPodcastName.text = viewState.feedItemDetail.feedName
+
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                viewState.feedItemDetail.image.let {
+                    imageLoader.load(
+                        imageViewEpisodeDetailImage,
+                        it,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
+                            .build()
+                    )
+                }
+            }
+        }
+    }
+    private fun setPlayedMarkState(viewState: FeedItemDescriptionDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            if (viewState.feedItemDetail.played) {
+                buttonCheckMarkPlayed.visible
+                buttonCheckMark.invisible
+                textViewCheckMark.text = getString(R.string.episode_detail_upplayed)
+            } else {
+                buttonCheckMarkPlayed.invisible
+                buttonCheckMark.visible
+                textViewCheckMark.text = getString(R.string.episode_detail_played)
+            }
+        }
+    }
+
+    private fun setFeedItemDetailsDownloadState(viewState: FeedItemDescriptionDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            if (viewState.feedItemDetail.isDownloadInProgress == true) {
+                buttonDownloadArrow.gone
+                imageDownloadedEpisodeArrow.gone
+                progressBarEpisodeDownload.visible
+                buttonStop.visible
+            } else {
+                if (viewState.feedItemDetail.downloaded == true) {
+                    buttonDownloadArrow.gone
+                    imageDownloadedEpisodeArrow.visible
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_erase)
+                }
+                else {
+                    buttonDownloadArrow.visible
+                    imageDownloadedEpisodeArrow.gone
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_download)
+                }
+            }
+        }
+    }
+
     private fun setAllClickListeners() {
         binding.apply {
             buttonNavBack.setOnClickListener {
@@ -164,8 +234,31 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
             buttonAdditionalOptions.setOnClickListener {
                 viewModel.openDetailScreen()
             }
-            includeLayoutFeedItem.includeLayoutFeedItemDetails.layoutConstraintCloseContainer.setOnClickListener {
+
+            includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+                layoutConstraintCloseContainer.setOnClickListener {
                 viewModel.closeScreen()
+            }
+                layoutConstraintDownloadRow.setOnClickListener {
+                    (viewModel.currentViewState as? EpisodeDescriptionViewState.FeedItemDetails)?.let { viewState ->
+                        if (viewState.feedItemDescription is FeedItemDescriptionDetailsViewState.Open) {
+                            if (viewState.feedItemDescription.feedItemDetail.downloaded == true) {
+                                viewModel.deleteDownloadedMediaByItemId()
+                            } else {
+                                viewModel.downloadMedia()
+                            }
+                        }
+                    }
+                }
+                layoutConstraintCheckMarkRow.setOnClickListener {
+                    viewModel.updatePlayedMark()
+                }
+                layoutConstraintShareRow.setOnClickListener {
+                    viewModel.share(binding.root.context, getString(R.string.episode_detail_clipboard))
+                }
+                layoutConstraintCopyLinkRow.setOnClickListener {
+                    viewModel.copyCodeToClipboard()
+                }
             }
         }
     }
@@ -184,7 +277,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
     }
 
     override suspend fun onSideEffectCollect(sideEffect: EpisodeDescriptionSideEffect) {
-        sideEffect.execute(binding.root.context)
+        sideEffect.execute(requireActivity())
     }
 
 

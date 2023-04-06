@@ -1,11 +1,14 @@
 package chat.sphinx.episode_description.ui
 
 import android.app.Application
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -45,7 +48,7 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
     private val mediaPlayerServiceController: MediaPlayerServiceController,
     val navigator: EpisodeDescriptionNavigator,
 ): SideEffectViewModel<
-        Context,
+        FragmentActivity,
         EpisodeDescriptionSideEffect,
         EpisodeDescriptionViewState,
         >(dispatchers, EpisodeDescriptionViewState.Idle),
@@ -162,6 +165,38 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
         return feedRepository.getPlayedMark(feedItemId).firstOrNull() ?: false
     }
 
+    fun updatePlayedMark() {
+        _feedItemEpisodeStateFlow.value?.first?.id?.let { itemId ->
+            val played = retrieveEpisodeDescription()?.played ?: false
+
+            feedRepository.updatePlayedMark(itemId, !played)
+            _feedItemEpisodeStateFlow.value?.second?.let { episode ->
+                episode.played = !played
+            }
+
+            retrieveEpisodeDescription()?.copy(played = !played)?.let { episodeDescription ->
+                handleUpdateViewState(episodeDescription)
+            }
+        }
+    }
+
+    fun copyCodeToClipboard() {
+        feedItemEpisodeStateFlow.value?.second?.episodeUrl?.let { link ->
+            (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+                val clipData = ClipData.newPlainText("text", link)
+                manager.setPrimaryClip(clipData)
+
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        EpisodeDescriptionSideEffect.Notify(
+                            app.getString(R.string.episode_detail_clipboard)
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     fun playEpisodeFromDescription() {
         viewModelScope.launch(mainImmediate) {
             feedItemEpisodeStateFlow.value?.second?.let { podcastEpisode ->
@@ -255,6 +290,21 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
             retrieveEpisodeDescription()?.copy(
                 downloaded = downloaded, isDownloadInProgress = isFeedItemDownloadInProgress())?.let { episodeDescription ->
                 handleUpdateViewState(episodeDescription)
+            }
+        }
+    }
+
+    fun deleteDownloadedMediaByItemId() {
+        viewModelScope.launch(mainImmediate) {
+            feedItemEpisodeStateFlow.value?.first?.let { feedItem ->
+                if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
+                    feedItemEpisodeStateFlow.value?.second?.let { podcastEpisode ->
+                        podcastEpisode.localFile = null
+                    }
+                }
+                retrieveEpisodeDescription()?.copy(downloaded = false)?.let { episodeDescription ->
+                    handleUpdateViewState(episodeDescription)
+                }
             }
         }
     }
