@@ -11,7 +11,6 @@ import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
-import chat.sphinx.concept_network_query_chat.model.feed.FeedItemDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
@@ -121,7 +120,6 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -3766,7 +3764,8 @@ abstract class SphinxRepository(
                                     chat.uuid,
                                     tribeDto.feed_url?.toFeedUrl(),
                                     feedType,
-                                    tribeDto.badges
+                                    tribeDto.badges,
+                                    tribeDto.pin?.toMessageUUID()
                                 )
                             }
                         }
