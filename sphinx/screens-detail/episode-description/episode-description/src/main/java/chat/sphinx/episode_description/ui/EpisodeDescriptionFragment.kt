@@ -17,17 +17,11 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.create_description.R
 import chat.sphinx.create_description.databinding.FragmentEpisodeDescriptionBinding
 import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_feed.isNewsletter
-import chat.sphinx.wrapper_feed.isPodcast
-import chat.sphinx.wrapper_feed.isVideo
-import chat.sphinx.wrapper_podcast.toHrAndMin
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -89,42 +83,39 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
 
     private suspend fun bindFeedItemDescription(viewState: EpisodeDescriptionViewState.FeedItemDescription) {
         binding.apply {
-            textViewTitleHeader.text = viewState.feedItem.titleToShow
-            textViewDescriptionEpisode.text = viewState.feedItem.descriptionToShow
-            textViewDescriptionEpisodeTitle.text = viewState.feed?.title?.value
-            imageViewItemRowEpisodeType.setImageDrawable((ContextCompat.getDrawable(root.context, getFeedItemDrawableType(viewState.feed?.feedType))))
-            viewState.feedItem.imageUrlToShow?.value?.let {image ->
-                imageLoader.load(
-                    imageViewEpisodeDetailImage,
-                    image,
-                    ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_podcast_placeholder)
-                        .build()
-                )
-            }
-            val duration = viewState.podcastEpisode?.getUpdatedContentEpisodeStatus()?.duration?.value?.toInt()?.toHrAndMin()
-            textViewEpisodeDate.text = viewState.podcastEpisode?.dateString
-            textViewItemEpisodeTime.text = duration
+            textViewTitleHeader.text = viewState.feedItemDescription.header
+            textViewDescriptionEpisode.text = viewState.feedItemDescription.description
+            textViewDescriptionEpisodeTitle.text = viewState.feedItemDescription.feedName
+            imageViewItemRowEpisodeType.setImageDrawable((ContextCompat.getDrawable(root.context, viewState.feedItemDescription.episodeTypeImage)))
+            imageLoader.load(
+                imageViewEpisodeDetailImage,
+                viewState.feedItemDescription.image,
+                ImageLoaderOptions.Builder()
+                    .placeholderResId(R.drawable.ic_podcast_placeholder)
+                    .build()
+            )
+            textViewEpisodeDate.text = viewState.feedItemDescription.episodeDate
+            textViewItemEpisodeTime.text = viewState.feedItemDescription.episodeDuration
             binding.textViewDescriptionEpisode.post {
                 val numberOfLines = textViewDescriptionEpisode.lineCount
                 binding.constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
             }
 
-            if (viewState.podcastEpisode?.downloaded == true) {
+            if (viewState.feedItemDescription.downloaded == true) {
                 imageDownloadedEpisodeArrow.visible
                 buttonDownloadArrow.gone
                 progressBarEpisodeDownload.gone
                 buttonStop.gone
             }
 
-            if (viewState.podcastEpisode?.downloaded == false) {
+            if (viewState.feedItemDescription.downloaded == false) {
                 buttonDownloadArrow.visible
                 buttonStop.gone
                 progressBarEpisodeDownload.gone
                 imageDownloadedEpisodeArrow.gone
             }
 
-            val isFeedItemDownloadInProgress = viewState.isFeedItemDownloadInProgress && viewState.podcastEpisode?.downloaded == false
+            val isFeedItemDownloadInProgress = viewState.feedItemDescription.isDownloadInProgress == true && viewState.feedItemDescription.downloaded == false
 
             if (isFeedItemDownloadInProgress) {
                 buttonDownloadArrow.gone
@@ -133,7 +124,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 buttonStop.visible
             }
 
-            if (viewState.isEpisodeSoundPlaying) {
+            if (viewState.feedItemDescription.isEpisodeSoundPlaying == true) {
                 buttonPlayEpisode.setImageDrawable(
                     ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
                 )
@@ -184,13 +175,5 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
         sideEffect.execute(binding.root.context)
     }
 
-    private fun getFeedItemDrawableType(feedType: FeedType?): Int {
-        return when (feedType) {
-            is FeedType.Podcast -> R.drawable.ic_podcast_type
-            is FeedType.Video -> R.drawable.ic_youtube_type
-            else -> {
-                R.drawable.ic_podcast_placeholder
-            }
-        }
-    }
+
 }

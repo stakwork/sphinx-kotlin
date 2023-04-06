@@ -1,5 +1,6 @@
 package chat.sphinx.episode_description.ui
 
+import chat.sphinx.episode_description.model.EpisodeDescription
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
@@ -12,11 +13,12 @@ internal sealed class EpisodeDescriptionViewState: ViewState<EpisodeDescriptionV
     object Idle: EpisodeDescriptionViewState()
 
     data class FeedItemDescription(
-        val feedItem: FeedItem,
-        val feed: Feed?,
-        val podcastEpisode: PodcastEpisode?,
-        val isFeedItemDownloadInProgress: Boolean,
-        val isEpisodeSoundPlaying: Boolean
+        val feedItemDescription: EpisodeDescription
     ) : EpisodeDescriptionViewState()
+
+    data class FeedItemDetails(
+        val feedItemDescription: EpisodeDescription
+    ) : EpisodeDescriptionViewState()
+
 
 }
