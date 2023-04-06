@@ -16,7 +16,6 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.create_description.R
 import chat.sphinx.create_description.databinding.FragmentEpisodeDescriptionBinding
-import chat.sphinx.wrapper_common.feed.FeedType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -65,9 +64,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
             }
         }
         override fun handleOnBackPressed() {
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.navigator.popBackStack()
-            }
+            viewModel.closeScreen()
         }
     }
 
@@ -77,9 +74,16 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
             is EpisodeDescriptionViewState.FeedItemDescription -> {
                 bindFeedItemDescription(viewState)
             }
+            is EpisodeDescriptionViewState.FeedItemDetails -> {
+                binding.includeLayoutFeedItem.apply {
+
+                    root.setTransitionDuration(300)
+                    viewState.feedItemDescription.transitionToEndSet(root)
+
+                }
+            }
         }
     }
-
 
     private suspend fun bindFeedItemDescription(viewState: EpisodeDescriptionViewState.FeedItemDescription) {
         binding.apply {
@@ -137,23 +141,31 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
     }
 
     private fun setAllClickListeners() {
-        binding.buttonNavBack.setOnClickListener {
-            lifecycleScope.launch(viewModel.mainImmediate) {
-                viewModel.navigator.popBackStack()
+        binding.apply {
+            buttonNavBack.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
             }
-        }
-        binding.constraintShowMoreContainer.setOnClickListener {
-            toggleShowMore()
-        }
-        binding.buttonEpisodeShare.setOnClickListener {
-            viewModel.share(binding.root.context, getString(R.string.episode_detail_clipboard))
-        }
-        binding.buttonDownloadArrow.setOnClickListener {
-            viewModel.downloadMedia()
-        }
-        binding.buttonPlayEpisode.setOnClickListener {
-            if (connectivityHelper.isNetworkConnected()) {
-                viewModel.playEpisodeFromDescription()
+            constraintShowMoreContainer.setOnClickListener {
+                toggleShowMore()
+            }
+            buttonEpisodeShare.setOnClickListener {
+                viewModel.share(binding.root.context, getString(R.string.episode_detail_clipboard))
+            }
+            buttonDownloadArrow.setOnClickListener {
+                viewModel.downloadMedia()
+            }
+            buttonPlayEpisode.setOnClickListener {
+                if (connectivityHelper.isNetworkConnected()) {
+                    viewModel.playEpisodeFromDescription()
+                }
+            }
+            buttonAdditionalOptions.setOnClickListener {
+                viewModel.openDetailScreen()
+            }
+            includeLayoutFeedItem.includeLayoutFeedItemDetails.layoutConstraintCloseContainer.setOnClickListener {
+                viewModel.closeScreen()
             }
         }
     }

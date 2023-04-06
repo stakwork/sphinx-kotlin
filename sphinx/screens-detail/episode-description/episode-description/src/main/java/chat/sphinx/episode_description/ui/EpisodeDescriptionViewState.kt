@@ -17,7 +17,7 @@ internal sealed class EpisodeDescriptionViewState: ViewState<EpisodeDescriptionV
     ) : EpisodeDescriptionViewState()
 
     data class FeedItemDetails(
-        val feedItemDescription: EpisodeDescription
+        val feedItemDescription: FeedItemDescriptionDetailsViewState
     ) : EpisodeDescriptionViewState()
 
 

@@ -22,7 +22,6 @@ import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.FeedItem
-import chat.sphinx.wrapper_feed.FeedItemDetail
 import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
@@ -103,7 +102,7 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
 
     private fun handleUpdateViewState(episodeDescription: EpisodeDescription) {
         if (currentViewState is EpisodeDescriptionViewState.FeedItemDetails) {
-            updateViewState(EpisodeDescriptionViewState.FeedItemDetails(episodeDescription))
+            updateViewState(EpisodeDescriptionViewState.FeedItemDetails(FeedItemDescriptionDetailsViewState.Open(episodeDescription)))
         } else
         {
             updateViewState(EpisodeDescriptionViewState.FeedItemDescription(episodeDescription))
@@ -112,9 +111,38 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
 
     private fun retrieveEpisodeDescription(): EpisodeDescription? {
         return when (val state = currentViewState) {
-            is EpisodeDescriptionViewState.FeedItemDetails -> state.feedItemDescription
+            is EpisodeDescriptionViewState.FeedItemDetails -> (state.feedItemDescription as FeedItemDescriptionDetailsViewState.Open).feedItemDetail
             is EpisodeDescriptionViewState.FeedItemDescription -> state.feedItemDescription
             else -> null
+        }
+    }
+
+    fun openDetailScreen(){
+        retrieveEpisodeDescription()?.let { episodeDescription ->
+            updateViewState(EpisodeDescriptionViewState.FeedItemDetails(FeedItemDescriptionDetailsViewState.Open(episodeDescription)))
+        }
+    }
+
+    fun closeScreen() {
+        viewModelScope.launch(mainImmediate) {
+            if (currentViewState is EpisodeDescriptionViewState.FeedItemDetails) {
+                retrieveEpisodeDescription()?.let { episodeDescription ->
+                    updateViewState(
+                        EpisodeDescriptionViewState.FeedItemDetails(
+                            FeedItemDescriptionDetailsViewState.Closed
+                        )
+                    )
+                    delay(400)
+                    updateViewState(
+                        EpisodeDescriptionViewState.FeedItemDescription(
+                            episodeDescription
+                        )
+                    )
+                }
+            }
+            else {
+                navigator.popBackStack()
+            }
         }
     }
 
