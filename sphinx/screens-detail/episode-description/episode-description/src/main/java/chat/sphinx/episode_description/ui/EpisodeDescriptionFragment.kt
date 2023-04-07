@@ -17,6 +17,7 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.create_description.R
 import chat.sphinx.create_description.databinding.FragmentEpisodeDescriptionBinding
 import chat.sphinx.episode_description.model.EpisodeDescription
+import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.feed.FeedType
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
@@ -109,6 +110,14 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
             )
             textViewEpisodeDate.text = viewState.feedItemDescription.episodeDate
             textViewItemEpisodeTime.text = viewState.feedItemDescription.episodeDuration
+
+            if (viewState.feedItemDescription.played) {
+                buttonCheckMarkPlayed.visible
+                textViewItemEpisodeTime.text = getString(R.string.episode_detail_played_holder)
+            } else {
+                buttonCheckMarkPlayed.gone
+            }
+
             binding.textViewDescriptionEpisode.post {
                 val numberOfLines = textViewDescriptionEpisode.lineCount
                 binding.constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
