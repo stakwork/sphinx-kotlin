@@ -8,8 +8,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_pinned_bottom"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:minHeight="450dp"
+        android:layout_height="wrap_content"
+        android:paddingBottom="60dp"
         android:background="@drawable/background_pin_bottom"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -32,7 +32,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:text="Pinned Message" />
+                android:text="@string/pinned_message" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/text_view_pinned_bottom_header_icon"
@@ -105,7 +105,8 @@
             tools:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/layout_constraint_pinned_bottom_body">
+            app:layout_constraintTop_toBottomOf="@id/layout_constraint_pinned_bottom_body"
+            android:focusable="true">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_unpin_message"
@@ -119,7 +120,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/text_view_unpin_icon"
-                android:text="Unpin Message" />
+                android:text="@string/unpin_message" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/text_view_unpin_icon"
