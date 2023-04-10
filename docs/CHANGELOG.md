@@ -1,6 +1,9 @@
 # ChangeLog
 
-# Version 1.0.0-alpha86 (2023-04-03)
+# Version 1.0.0-alpha88 (2023-04-10)
+- Adds feed item description view
+
+# Version 1.0.0-alpha87 (2023-04-03)
 - Improves payment flow
 
 # Version 1.0.0-alpha86 (2023-03-29)

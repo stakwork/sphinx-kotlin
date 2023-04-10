@@ -1,6 +1,7 @@
 package chat.sphinx.common_player.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.episode_description.navigation.ToEpisodeDescription
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
@@ -15,6 +16,12 @@ abstract class CommonPlayerNavigator(
     @JvmSynthetic
     internal suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
+    }
+    @JvmSynthetic
+    internal suspend fun toEpisodeDescriptionScreen(
+        feedId: FeedId,
+    ) {
+        navigationDriver.submitNavigationRequest(ToEpisodeDescription(feedId, true))
     }
     abstract suspend fun toEpisodeDetail(
         feedItemId: FeedId?,

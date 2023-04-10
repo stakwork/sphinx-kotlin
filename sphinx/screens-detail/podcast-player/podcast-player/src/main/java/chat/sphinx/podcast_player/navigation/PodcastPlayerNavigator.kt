@@ -1,6 +1,7 @@
 package chat.sphinx.podcast_player.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.episode_description.navigation.ToEpisodeDescription
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
@@ -19,6 +20,13 @@ abstract class PodcastPlayerNavigator(
         feedUrl: FeedUrl,
     ) {
         navigationDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, false))
+    }
+
+    @JvmSynthetic
+    internal suspend fun toEpisodeDescriptionScreen(
+        feedId: FeedId,
+    ) {
+        navigationDriver.submitNavigationRequest(ToEpisodeDescription(feedId, false))
     }
 
     @JvmSynthetic
