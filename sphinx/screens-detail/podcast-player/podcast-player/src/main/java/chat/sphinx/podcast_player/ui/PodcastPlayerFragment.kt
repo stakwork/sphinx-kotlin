@@ -117,6 +117,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         setupBoost()
         setupEpisodes()
         setupFragmentLayout()
+
+        viewModel.forceFeedReload()
     }
 
     private fun setupFragmentLayout() {

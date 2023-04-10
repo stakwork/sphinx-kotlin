@@ -1,6 +1,7 @@
 package chat.sphinx.video_screen.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.episode_description.navigation.ToEpisodeDescription
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
@@ -12,6 +13,7 @@ abstract class VideoScreenNavigator(
 ): Navigator<NavController>(detailNavigationDriver) {
     abstract suspend fun closeDetailScreen()
 
+    abstract suspend fun toEpisodeDescriptionScreen(feedId: FeedId)
     abstract suspend fun toEpisodeDetail(
         feedItemId: FeedId?,
         header: String,

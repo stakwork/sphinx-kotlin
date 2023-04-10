@@ -184,6 +184,13 @@ internal class VideoFeedItemsAdapter (
                     nnEpisode.link?.value?.let { link -> viewModel.share(link, binding.root.context) }
                 }
             }
+            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+                videoItem?.let { nnEpisode ->
+                    onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
+                        viewModel.navigator.toEpisodeDescriptionScreen(nnEpisode.id)
+                    }
+                }
+            }
         }
 
         private fun playEpisodeFromList(){

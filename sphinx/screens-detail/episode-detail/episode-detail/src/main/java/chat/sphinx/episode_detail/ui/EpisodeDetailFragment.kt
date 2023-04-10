@@ -80,7 +80,6 @@ internal class EpisodeDetailFragment: SideEffectFragment<
         }
     }
 
-
     private fun commonInfoBinding(viewState: EpisodeDetailViewState.ShowEpisode) {
         binding.apply {
             textViewMainEpisodeTitle.text = viewState.episodeDetail.header
