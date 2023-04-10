@@ -94,6 +94,8 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
     }
 
     init {
+        mediaPlayerServiceController.addListener(this)
+
         viewModelScope.launch(mainImmediate) {
             args.argFeedId.toFeedId()?.let { nnFeedId ->
 
@@ -127,14 +129,13 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
                             description = nnFeedItem.descriptionToShow,
                             descriptionExpanded = false,
                             image = nnFeedItem.imageUrlToShow?.value ?: "",
-                            isRecommendation =  args.argIsRecommendation
+                            isRecommendation =  args.argIsRecommendation,
+                            headerVisible = false
                         )
 
                         updateViewState(
                             EpisodeDescriptionViewState.ItemDescription(feedItemDescription)
                         )
-
-                        mediaPlayerServiceController.addListener(this@EpisodeDescriptionViewModel)
                     }
                 }
             }
@@ -172,10 +173,6 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
             return playingContent?.second == it.id.value
         }
         return false
-    }
-
-    private suspend fun getPlayedMark(feedItemId: FeedId): Boolean {
-        return feedRepository.getPlayedMark(feedItemId).firstOrNull() ?: false
     }
 
     fun updatePlayedMark() {
@@ -230,6 +227,16 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
                     playEpisode(feedItem.id)
                 }
             }
+        }
+    }
+
+    fun toggleHeader(show: Boolean) {
+        (currentViewState as? EpisodeDescriptionViewState.ItemDescription)?.feedItemDescription?.copy(
+            headerVisible = show
+        )?.let {
+            updateViewState(
+                EpisodeDescriptionViewState.ItemDescription(it)
+            )
         }
     }
 

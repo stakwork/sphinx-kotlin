@@ -1,6 +1,8 @@
 package chat.sphinx.episode_description.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -16,15 +18,18 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.create_description.R
 import chat.sphinx.create_description.databinding.FragmentEpisodeDescriptionBinding
 import chat.sphinx.episode_description.model.FeedItemDescription
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.isPodcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.*
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
+import java.lang.Integer.max
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -50,7 +55,29 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         BackPressHandler(viewLifecycleOwner, requireActivity())
+
         setAllClickListeners()
+        setupNestedScrollView()
+
+        (requireActivity() as InsetterActivity).addNavigationBarPadding(
+            binding.constraintScrollViewContent
+        )
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun setupNestedScrollView() {
+        binding.scrollViewDescription.setOnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+            binding.apply {
+                val shouldShowHeader = (scrollY + constraintHeaderContainer.height) >=
+                        constraintEpisodeInfoContainer.top + buttonPlayEpisode.top + (buttonPlayEpisode.height / 2)
+
+                (viewModel.viewStateContainer.value as? EpisodeDescriptionViewState.ItemDescription)?.feedItemDescription?.let { feedItemDescription ->
+                    if (feedItemDescription.headerVisible != shouldShowHeader) {
+                        viewModel.toggleHeader(shouldShowHeader)
+                    }
+                }
+            }
+        }
     }
 
     private inner class BackPressHandler(
@@ -84,6 +111,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
     private suspend fun bindFeedItemDescription(feedItemDescription: FeedItemDescription) {
         binding.apply {
             textViewItemTitle.text = feedItemDescription.feedItemTitle
+            textViewEpisodeTitleScroll.text = feedItemDescription.feedItemTitle
             textViewFeedTitle.text = feedItemDescription.feedTitle
             textViewDescriptionEpisode.text = feedItemDescription.description
 
@@ -94,9 +122,6 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 textViewDescriptionEpisode.maxLines = 5
                 textViewShowMore.text = getString(R.string.episode_description_show_more)
             }
-
-            val numberOfLines = textViewDescriptionEpisode.lineCount
-            constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
 
             imageViewItemRowEpisodeType.setImageDrawable(
                 ContextCompat.getDrawable(
@@ -144,15 +169,14 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 buttonStop.visible
             }
 
-            if (feedItemDescription.playing) {
-                buttonPlayEpisode.setImageDrawable(
-                    ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
-                )
+            val playButtonImage = if (feedItemDescription.playing) {
+                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
             } else {
-                buttonPlayEpisode.setImageDrawable(
-                    ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
-                )
+                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
             }
+
+            buttonPlayEpisode.setImageDrawable(playButtonImage)
+            buttonPlayEpisodeHeader.setImageDrawable(playButtonImage)
 
             val isPodcast = feedItemDescription.feedType?.isPodcast() == true
             buttonPlayEpisode.goneIfFalse(isPodcast)
@@ -169,6 +193,14 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
 
                 buttonDownloadArrow.alpha = 0.3F
                 buttonDownloadArrow.isEnabled = false
+            }
+
+            if (feedItemDescription.headerVisible) {
+                constraintHeaderContainer.visible
+                buttonPlayEpisodeHeader.goneIfFalse(isPodcast)
+            } else {
+                constraintHeaderContainer.invisible
+                buttonPlayEpisodeHeader.gone
             }
         }
     }
@@ -284,6 +316,12 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
             }
 
             buttonPlayEpisode.setOnClickListener {
+                if (connectivityHelper.isNetworkConnected()) {
+                    viewModel.togglePlayState()
+                }
+            }
+
+            buttonPlayEpisodeHeader.setOnClickListener {
                 if (connectivityHelper.isNetworkConnected()) {
                     viewModel.togglePlayState()
                 }

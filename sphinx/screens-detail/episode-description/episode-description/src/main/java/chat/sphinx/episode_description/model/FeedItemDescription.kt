@@ -16,5 +16,6 @@ data class FeedItemDescription(
     val description: String,
     val descriptionExpanded: Boolean,
     val image: String,
-    val isRecommendation: Boolean
+    val isRecommendation: Boolean,
+    val headerVisible: Boolean
 )

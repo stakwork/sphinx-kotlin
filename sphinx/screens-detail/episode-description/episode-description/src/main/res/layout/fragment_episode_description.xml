@@ -7,70 +7,34 @@
     android:background="@drawable/background_detail_screen"
     tools:context="chat.sphinx.episode_description.ui.EpisodeDescriptionFragment">
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint_back_button_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/default_small_layout_margin"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/button_nav_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_back_screen"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@drawable/ic_back_screen" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_episode_title_scroll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_medium"
-            android:textColor="@color/text"
-            android:ellipsize="end"
-            android:textSize="@dimen/custom_boost_text_size"
-            android:maxLines="1"
-            android:visibility="gone"
-            android:layout_marginLeft="@dimen/default_small_layout_margin"
-            app:layout_constraintBottom_toBottomOf="@+id/button_nav_back"
-            app:layout_constraintStart_toEndOf="@+id/button_nav_back"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="DeFi Smart Contracts On "/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view_description"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraint_back_button_container">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraint_text_header_container"
+            android:id="@+id/constraint_scroll_view_content"
+            android:paddingTop="@dimen/default_big_layout_margin"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_item_title"
                 android:paddingHorizontal="@dimen/default_layout_margin"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto_bold"
                 android:maxLines="6"
                 android:textColor="@color/text"
                 android:textSize="@dimen/chat_footer_button_icon_text_size"
+                android:gravity="start"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="DeFi Smart Contracts On The Bitcoin Network Gabriel Kurman" />
+                tools:text="DeFi Smart Contracts" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraint_episode_info_container"
@@ -242,6 +206,8 @@
                     android:layout_width="@dimen/tribe_member_image_corner_radius"
                     android:layout_height="@dimen/tribe_member_image_corner_radius"
                     android:src="@drawable/ic_play_episode"
+                    android:background="@drawable/circular_button"
+                    android:backgroundTint="@color/body"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/card_view_download_wrapper"
                     app:layout_constraintBottom_toBottomOf="@+id/card_view_download_wrapper" />
@@ -259,17 +225,16 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/text_view_description_episode"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/roboto_regular"
-                    android:ellipsize="end"
-                    android:maxLines="5"
                     android:textColor="@color/text"
                     android:alpha="0.75"
                     android:textSize="@dimen/chat_footer_episode_title_text_size"
+                    android:ellipsize="end"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Description text -  ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo lorem ipsum consequat ..." />
+                    tools:text="Description text -  ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo lorem ipsum consequat ... Description text -  ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo lorem ipsum consequat ..." />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -299,33 +264,99 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_view_image_episode_wrap"
-                android:layout_marginHorizontal="@dimen/default_layout_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/default_header_margin_horizontal"
-                app:cardCornerRadius="@dimen/episode_detail_image_radius"
-                android:layout_marginBottom="@dimen/default_large_layout_margin"
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                app:layout_constraintDimensionRatio="H,1:1"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraint_show_more_container">
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/image_view_episode_detail_image"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_view_image_episode_wrap"
+                    android:layout_marginHorizontal="@dimen/default_layout_margin"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/episode_description_image_height"
-                    android:scaleType="centerCrop"
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="@dimen/default_header_margin_horizontal"
+                    app:cardCornerRadius="@dimen/episode_detail_image_radius"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:srcCompat="@drawable/ic_podcast_placeholder" />
+                    app:layout_constraintTop_toBottomOf="@+id/constraint_show_more_container">
 
-            </androidx.cardview.widget.CardView>
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/image_view_episode_detail_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:srcCompat="@drawable/ic_podcast_placeholder" />
+
+                </androidx.cardview.widget.CardView>
+
+            </FrameLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_header_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_big_layout_margin"
+        android:visibility="visible"
+        android:paddingLeft="@dimen/default_large_layout_margin"
+        android:background="@color/body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_episode_title_scroll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="@color/text"
+            android:ellipsize="end"
+            android:textSize="@dimen/custom_boost_text_size"
+            android:maxLines="1"
+            android:layout_marginRight="88dp"
+            android:gravity="start"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="DeFi Smart Contracts On "/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_play_episode_header"
+        android:layout_width="@dimen/tribe_member_image_corner_radius"
+        android:layout_height="@dimen/tribe_member_image_corner_radius"
+        android:visibility="visible"
+        android:src="@drawable/ic_play_episode"
+        android:background="@drawable/circular_button"
+        android:backgroundTint="@color/body"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
+        android:layout_marginRight="@dimen/default_layout_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_nav_back"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/default_header_height"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_back_screen"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/ic_back_screen" />
 
     <include
         android:id="@+id/include_layout_feed_item"
