@@ -123,11 +123,6 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 buttonCheckMarkPlayed.gone
             }
 
-//            binding.textViewDescriptionEpisode.post {
-//                val numberOfLines = textViewDescriptionEpisode.lineCount
-//                binding.constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
-//            }
-
             if (feedItemDescription.downloaded) {
                 imageDownloadedEpisodeArrow.visible
                 buttonDownloadArrow.gone
@@ -184,6 +179,19 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
 
     private fun feedItemDetailsCommonInfoBinding(feedItemDescription: FeedItemDescription) {
         binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+
+            if (feedItemDescription.feedType?.isPodcast() == true) {
+                layoutConstraintDownloadRow.visible
+                layoutConstraintCheckMarkRow.visible
+                circleSplitTwo.visible
+                textViewEpisodeDuration.visible
+            } else {
+                layoutConstraintDownloadRow.gone
+                layoutConstraintCheckMarkRow.gone
+                circleSplitTwo.gone
+                textViewEpisodeDuration.gone
+            }
+
             textViewMainEpisodeTitle.text = feedItemDescription.feedItemTitle
             textViewEpisodeType.text = getFeedItemStringType(feedItemDescription.feedType)
             textViewEpisodeDate.text = feedItemDescription.itemDate

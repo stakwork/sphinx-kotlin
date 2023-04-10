@@ -22,6 +22,7 @@ import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
+import chat.sphinx.wrapper_common.feed.isPodcast
 import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.ContentEpisodeStatus
@@ -93,8 +94,6 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
     }
 
     init {
-        mediaPlayerServiceController.addListener(this)
-
         viewModelScope.launch(mainImmediate) {
             args.argFeedId.toFeedId()?.let { nnFeedId ->
                 feedRepository.getFeedItemById(nnFeedId).collect { feedItem ->
@@ -127,6 +126,8 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
                         updateViewState(
                             EpisodeDescriptionViewState.ItemDescription(feedItemDescription)
                         )
+
+                        mediaPlayerServiceController.addListener(this@EpisodeDescriptionViewModel)
                     }
                 }
             }

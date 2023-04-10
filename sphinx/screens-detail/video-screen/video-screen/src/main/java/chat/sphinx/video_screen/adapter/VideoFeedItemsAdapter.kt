@@ -187,7 +187,7 @@ internal class VideoFeedItemsAdapter (
             binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
                 videoItem?.let { nnEpisode ->
                     onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
-                        viewModel.navigator.toEpisodeDescriptionScreen(nnEpisode.feedId)
+                        viewModel.navigator.toEpisodeDescriptionScreen(nnEpisode.id)
                     }
                 }
             }
