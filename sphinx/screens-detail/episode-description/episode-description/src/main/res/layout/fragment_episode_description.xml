@@ -59,7 +59,7 @@
             android:layout_height="match_parent">
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_title_header"
+                android:id="@+id/text_view_item_title"
                 android:paddingHorizontal="@dimen/default_layout_margin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -76,12 +76,12 @@
                 android:id="@+id/constraint_episode_info_container"
                 android:paddingRight="@dimen/default_layout_margin"
                 android:layout_marginTop="@dimen/custom_boost_height"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_title_header"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_item_title"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_view_description_episode_title"
+                    android:id="@+id/text_view_feed_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/roboto_regular"
@@ -99,8 +99,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
                     app:cardCornerRadius="@dimen/episode_type_radius"
-                    app:layout_constraintStart_toStartOf="@+id/text_view_description_episode_title"
-                    app:layout_constraintTop_toBottomOf="@+id/text_view_description_episode_title">
+                    app:layout_constraintStart_toStartOf="@+id/text_view_feed_title"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_feed_title">
 
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/image_view_item_row_episode_type"

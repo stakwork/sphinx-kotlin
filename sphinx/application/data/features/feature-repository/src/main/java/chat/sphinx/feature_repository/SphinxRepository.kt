@@ -3963,7 +3963,9 @@ abstract class SphinxRepository(
             .distinctUntilChanged()
             .collect { value: FeedItem? ->
                 value?.let { feedItem ->
-                    emit(feedItem)
+                    emit(
+                        mapFeedItemDbo(feedItem, queries)
+                    )
                 } ?: run {
                     emit(null)
                 }
@@ -4262,6 +4264,29 @@ abstract class SphinxRepository(
         feed.contentFeedStatus = contentFeedStatus
 
         return feed
+    }
+
+    private suspend fun mapFeedItemDbo(
+        feedItem: FeedItem,
+        queries: SphinxDatabaseQueries
+    ): FeedItem {
+
+        var feed = queries.feedGetById(feedItem.feedId).executeAsOneOrNull()?.let {
+            feedDboPresenterMapper.mapFrom(it)
+        }
+
+        feed?.let {
+            feed = mapFeedDbo(it, queries)
+        }
+
+        val contentEpisodeStatus = queries.contentEpisodeStatusGetByFeedIdAndItemId(feedItem.feedId, feedItem.id).executeAsOneOrNull()?.let {
+            contentEpisodeStatusDboPresenterMapper.mapFrom(it)
+        }
+
+        feedItem.contentEpisodeStatus = contentEpisodeStatus
+        feedItem.feed = feed
+
+        return feedItem
     }
 
     private val podcastDboPresenterMapper: FeedDboPodcastPresenterMapper by lazy {

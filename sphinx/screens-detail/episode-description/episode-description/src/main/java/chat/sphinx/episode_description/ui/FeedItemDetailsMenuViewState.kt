@@ -2,13 +2,12 @@ package chat.sphinx.episode_description.ui
 
 import androidx.constraintlayout.motion.widget.MotionLayout
 import chat.sphinx.create_description.R
-import chat.sphinx.episode_description.model.EpisodeDescription
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
 
 
-sealed class FeedItemDescriptionDetailsViewState: MotionLayoutViewState<FeedItemDescriptionDetailsViewState>() {
+sealed class FeedItemDetailsMenuViewState: MotionLayoutViewState<FeedItemDetailsMenuViewState>() {
 
-    object Closed: FeedItemDescriptionDetailsViewState() {
+    object Closed: FeedItemDetailsMenuViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_feed_item_details_open
         override val endSetId: Int?
@@ -17,9 +16,7 @@ sealed class FeedItemDescriptionDetailsViewState: MotionLayoutViewState<FeedItem
         override fun restoreMotionScene(motionLayout: MotionLayout) {}
     }
 
-    class Open(
-        val feedItemDetail: EpisodeDescription
-    ) : FeedItemDescriptionDetailsViewState() {
+    object Open : FeedItemDetailsMenuViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_feed_item_details_closed
         override val endSetId: Int?
