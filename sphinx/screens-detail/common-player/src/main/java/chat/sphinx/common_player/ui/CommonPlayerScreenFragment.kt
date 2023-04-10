@@ -188,11 +188,16 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
+
         viewModel.trackPodcastConsumed()
         viewModel.createHistoryItem()
         viewModel.trackVideoConsumed()
+
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        youtubePlayer?.release()
+        youtubePlayer = null
     }
 
     private fun setupItems() {

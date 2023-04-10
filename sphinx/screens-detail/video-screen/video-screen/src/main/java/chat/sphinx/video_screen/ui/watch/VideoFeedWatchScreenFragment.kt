@@ -131,10 +131,15 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     override fun onDestroyView() {
         super.onDestroyView()
+
         viewModel.createHistoryItem()
         viewModel.trackVideoConsumed()
+        
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
+        youtubePlayer?.release()
+        youtubePlayer = null
     }
 
     private fun setupBoost() {
