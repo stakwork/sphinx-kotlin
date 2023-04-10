@@ -202,6 +202,10 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 constraintHeaderContainer.invisible
                 buttonPlayEpisodeHeader.gone
             }
+
+            if (!feedItemDescription.descriptionExpanded && !feedItemDescription.headerVisible) {
+                scrollViewDescription.smoothScrollTo(0,0)
+            }
         }
     }
 

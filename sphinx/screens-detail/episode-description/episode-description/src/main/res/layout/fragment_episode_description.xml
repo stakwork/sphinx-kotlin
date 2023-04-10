@@ -231,10 +231,11 @@
                     android:textColor="@color/text"
                     android:alpha="0.75"
                     android:textSize="@dimen/chat_footer_episode_title_text_size"
+                    android:maxLines="5"
                     android:ellipsize="end"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Description text -  ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo lorem ipsum consequat ... Description text -  ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo lorem ipsum consequat ..." />
+                    tools:text="" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -364,6 +365,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:visibility="gone"/>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

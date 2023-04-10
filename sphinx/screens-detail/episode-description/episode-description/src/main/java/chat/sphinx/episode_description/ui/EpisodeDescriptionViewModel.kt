@@ -343,10 +343,11 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
     fun toggleDescriptionExpanded() {
         (currentViewState as? EpisodeDescriptionViewState.ItemDescription)?.feedItemDescription?.let {
             it.copy(
-                descriptionExpanded = !it.descriptionExpanded
-            )?.let {
+                descriptionExpanded = !it.descriptionExpanded,
+                headerVisible = false
+            )?.let { updatedFeedItemDescription ->
                 updateViewState(
-                    EpisodeDescriptionViewState.ItemDescription(it)
+                    EpisodeDescriptionViewState.ItemDescription(updatedFeedItemDescription)
                 )
             }
         }
