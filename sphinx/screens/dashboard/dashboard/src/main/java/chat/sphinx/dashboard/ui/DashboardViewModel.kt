@@ -24,6 +24,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
@@ -43,13 +44,16 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
-import chat.sphinx.wrapper_common.feed.toFeedItemLink
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
+import chat.sphinx.wrapper_feed.FeedItemDuration
+import chat.sphinx.wrapper_feed.toFeedItemDuration
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -91,6 +95,7 @@ internal class DashboardViewModel @Inject constructor(
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
     private val relayDataHandler: RelayDataHandler,
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
 
@@ -158,7 +163,7 @@ internal class DashboardViewModel @Inject constructor(
             } ?: deepLink?.toRedeemSatsLink()?.let { redeemSatsLink ->
                 handleRedeemSatsLink(redeemSatsLink)
             } ?: deepLink?.toFeedItemLink()?.let { feedItemLink ->
-
+                handleFeedItemLink(feedItemLink)
             }
         }
     }
@@ -438,6 +443,50 @@ internal class DashboardViewModel @Inject constructor(
                 goToContactChat(contact)
 
             } ?: loadPeopleConnectPopup(link)
+        }
+    }
+
+    private suspend fun handleFeedItemLink(link: FeedItemLink) {
+        val feed = link.feedId.toFeedId()?.let { feedRepository.getFeedById(it) }?.firstOrNull()
+        feed?.let { nnFeed ->
+            (link.itemId.toFeedId())?.let { itemId ->
+                feedRepository.updateContentFeedStatus(
+                    feed.id,
+                    itemId
+                )
+                feedRepository.getPodcastById(nnFeed.id).firstOrNull()?.let { podcast ->
+                    (link.atTime).let { atTime ->
+                        val duration = podcast.getEpisodeWithId(itemId.value)?.contentEpisodeStatus?.duration ?: FeedItemDuration(0)
+                        val currentTime = atTime.toLong().toFeedItemDuration() ?: FeedItemDuration(0)
+                        feedRepository.updateContentEpisodeStatus(
+                            nnFeed.id,
+                            itemId,
+                            duration,
+                            currentTime
+                        )
+                    }
+                    goToPodcastPlayer(nnFeed.id, podcast.feedUrl)
+                }
+            }
+        }
+    }
+
+    private fun goToPodcastPlayer(
+        feedId: FeedId,
+        feedUrl: FeedUrl
+    ) {
+        val playingContent = mediaPlayerServiceController.getPlayingContent()
+
+        feedRepository.restoreContentFeedStatusByFeedId(
+            feedId,
+            playingContent?.first,
+            playingContent?.second
+        )
+
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toPodcastPlayerScreen(
+                ChatId(ChatId.NULL_CHAT_ID.toLong()), feedId, feedUrl
+            )
         }
     }
 
