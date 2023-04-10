@@ -18,7 +18,7 @@ internal class VideoScreenNavigatorImpl @Inject constructor(
     }
 
     override suspend fun toEpisodeDescriptionScreen(feedId: FeedId) {
-        (navigationDriver as DetailNavigationDriver).submitNavigationRequest(ToEpisodeDescription(feedId))
+        (navigationDriver as DetailNavigationDriver).submitNavigationRequest(ToEpisodeDescription(feedId, false))
     }
     override suspend fun toEpisodeDetail(
         feedItemId: FeedId?,

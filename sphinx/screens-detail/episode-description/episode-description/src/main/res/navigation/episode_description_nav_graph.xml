@@ -12,6 +12,9 @@
     <argument
         android:name="argFeedId"
         app:argType="string"/>
+    <argument
+        android:name="argIsRecommendation"
+        app:argType="boolean"/>
     </fragment>
 
 </navigation>

@@ -21,7 +21,7 @@ abstract class CommonPlayerNavigator(
     internal suspend fun toEpisodeDescriptionScreen(
         feedId: FeedId,
     ) {
-        navigationDriver.submitNavigationRequest(ToEpisodeDescription(feedId))
+        navigationDriver.submitNavigationRequest(ToEpisodeDescription(feedId, true))
     }
     abstract suspend fun toEpisodeDetail(
         feedItemId: FeedId?,

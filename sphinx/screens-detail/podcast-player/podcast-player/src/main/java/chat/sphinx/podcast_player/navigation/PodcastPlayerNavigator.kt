@@ -26,7 +26,7 @@ abstract class PodcastPlayerNavigator(
     internal suspend fun toEpisodeDescriptionScreen(
         feedId: FeedId,
     ) {
-        navigationDriver.submitNavigationRequest(ToEpisodeDescription(feedId))
+        navigationDriver.submitNavigationRequest(ToEpisodeDescription(feedId, false))
     }
 
     @JvmSynthetic

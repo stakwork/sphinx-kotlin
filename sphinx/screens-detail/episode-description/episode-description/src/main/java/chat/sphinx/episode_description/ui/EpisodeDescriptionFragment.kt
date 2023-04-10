@@ -21,10 +21,7 @@ import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.isPodcast
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
-import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
-import io.matthewnelson.android_feature_screens.util.invisible
-import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
@@ -98,6 +95,9 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                 textViewShowMore.text = getString(R.string.episode_description_show_more)
             }
 
+            val numberOfLines = textViewDescriptionEpisode.lineCount
+            constraintShowMoreContainer.goneIfTrue(numberOfLines < 5)
+
             imageViewItemRowEpisodeType.setImageDrawable(
                 ContextCompat.getDrawable(
                     root.context,
@@ -153,15 +153,17 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
                     ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
                 )
             }
-            if (feedItemDescription.feedType?.isPodcast() == true) {
-                buttonPlayEpisode.visible
+
+            val isPodcast = feedItemDescription.feedType?.isPodcast() == true
+            buttonPlayEpisode.goneIfFalse(isPodcast)
+
+            if (isPodcast && !feedItemDescription.isRecommendation) {
                 textViewItemEpisodeTime.visible
                 circleSplit.visible
 
                 buttonDownloadArrow.alpha = 1.0F
                 buttonDownloadArrow.isEnabled = true
             } else {
-                buttonPlayEpisode.gone
                 textViewItemEpisodeTime.gone
                 circleSplit.gone
 
@@ -180,7 +182,9 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
     private fun feedItemDetailsCommonInfoBinding(feedItemDescription: FeedItemDescription) {
         binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
 
-            if (feedItemDescription.feedType?.isPodcast() == true) {
+            val isPodcast = feedItemDescription.feedType?.isPodcast() == true
+
+            if (isPodcast && !feedItemDescription.isRecommendation) {
                 layoutConstraintDownloadRow.visible
                 layoutConstraintCheckMarkRow.visible
                 circleSplitTwo.visible
@@ -342,6 +346,7 @@ internal class EpisodeDescriptionFragment: SideEffectFragment<
         return when (feedType) {
             is FeedType.Podcast -> R.drawable.ic_podcast_type
             is FeedType.Video -> R.drawable.ic_youtube_type
+            is FeedType.Twitter -> R.drawable.ic_twitter_space_type
             else -> R.drawable.ic_podcast_placeholder
         }
     }

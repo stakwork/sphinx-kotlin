@@ -96,7 +96,13 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             args.argFeedId.toFeedId()?.let { nnFeedId ->
-                feedRepository.getFeedItemById(nnFeedId).collect { feedItem ->
+
+                if (args.argIsRecommendation) {
+                    feedRepository.getRecommendationFeedItemById(nnFeedId)
+                } else {
+                    feedRepository.getFeedItemById(nnFeedId)
+                }.collect { feedItem ->
+
                     feedItem?.let { nnFeedItem ->
 
                         _feedItemStateFlow.value = nnFeedItem
@@ -110,7 +116,7 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
                         val feedItemDescription = FeedItemDescription(
                             feedItemTitle = nnFeedItem.titleToShow,
                             feedTitle = nnFeedItem.feed?.titleToShow,
-                            feedType = nnFeedItem.feed?.feedType,
+                            feedType = nnFeedItem.feed?.feedType ?: nnFeedItem.feedType,
                             itemDate = nnFeedItem.datePublished?.hhmmElseDate() ?: "",
                             itemDuration = if ((itemDuration ?: 0) > 0) (itemDuration ?: 0).toHrAndMin() else "",
                             downloaded = nnFeedItem.localFile != null,
@@ -120,7 +126,8 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
                             link = nnFeedItem.link?.value ?: "",
                             description = nnFeedItem.descriptionToShow,
                             descriptionExpanded = false,
-                            image = nnFeedItem.imageUrlToShow?.value ?: ""
+                            image = nnFeedItem.imageUrlToShow?.value ?: "",
+                            isRecommendation =  args.argIsRecommendation
                         )
 
                         updateViewState(

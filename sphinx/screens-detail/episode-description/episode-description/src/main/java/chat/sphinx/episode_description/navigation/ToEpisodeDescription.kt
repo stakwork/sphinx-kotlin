@@ -10,10 +10,11 @@ import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToEpisodeDescription(
     private val feedItemId: FeedId,
+    private val isRecommendation: Boolean
 ) : NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {
 
-        val args = EpisodeDescriptionFragmentArgs.Builder(feedItemId.value)
+        val args = EpisodeDescriptionFragmentArgs.Builder(feedItemId.value, isRecommendation)
 
         controller.navigate(
             R.id.episode_description_nav_graph,

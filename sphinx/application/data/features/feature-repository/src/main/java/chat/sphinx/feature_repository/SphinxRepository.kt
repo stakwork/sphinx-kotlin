@@ -3972,6 +3972,38 @@ abstract class SphinxRepository(
             }
     }
 
+    override fun getRecommendationFeedItemById(
+        feedItemId: FeedId,
+    ): Flow<FeedItem?> = flow {
+        recommendationsPodcast.value?.getEpisodeWithId(feedItemId.value)?.let { episode ->
+            val item = FeedItem(
+                episode.id,
+                episode.description?.value?.toFeedTitle() ?: FeedTitle(""),
+                episode.title.value.toFeedDescription(),
+                episode.date,
+                episode.date,
+                null,
+                episode.feedType.toFeedContentType(),
+                null,
+                episode.link ?: FeedUrl(""),
+                null,
+                episode.imageUrlToShow,
+                episode.imageUrlToShow,
+                episode.link ?: FeedUrl(""),
+                FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID),
+                FeedItemDuration(0),
+                null
+            )
+
+            item.showTitle = episode.showTitle?.value
+            item.feedType = episode.feedType.toFeedType()
+
+            emit(
+                item
+            )
+        }
+    }
+
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }

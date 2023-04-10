@@ -134,7 +134,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
         viewModel.createHistoryItem()
         viewModel.trackVideoConsumed()
-        
+
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 

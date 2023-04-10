@@ -88,4 +88,7 @@ data class FeedItem(
         get()= localFile != null
 
     var contentEpisodeStatus: ContentEpisodeStatus? = null
+
+    var showTitle: String? = null
+    var feedType: FeedType? = null
 }
