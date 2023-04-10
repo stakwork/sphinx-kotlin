@@ -44,6 +44,7 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
+import chat.sphinx.wrapper_common.feed.toFeedItemLink
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
@@ -156,6 +157,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleCreateInvoiceLink(createInvoiceLink)
             } ?: deepLink?.toRedeemSatsLink()?.let { redeemSatsLink ->
                 handleRedeemSatsLink(redeemSatsLink)
+            } ?: deepLink?.toFeedItemLink()?.let { feedItemLink ->
+
             }
         }
     }

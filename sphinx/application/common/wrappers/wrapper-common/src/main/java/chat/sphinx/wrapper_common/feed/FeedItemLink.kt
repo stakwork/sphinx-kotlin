@@ -1,0 +1,51 @@
+package chat.sphinx.wrapper_common.feed
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toFeedItemLink(): FeedItemLink? =
+    try {
+        FeedItemLink(this)
+    } catch (e: IllegalArgumentException) {
+        null
+    }
+
+inline val String.isValidFeedItemLink: Boolean
+    get() = isNotEmpty() && matches("^${FeedItemLink.REGEX}\$".toRegex())
+
+@JvmInline
+value class FeedItemLink(val value: String) {
+
+    companion object {
+        const val REGEX = "sphinx\\.chat:\\/\\/\\?action=share_content&feedURL=.*feedID=.*itemID=.*"
+        const val FEED_ID = "feedID"
+        const val ITEM_ID = "itemID"
+        const val AT_TIME = "atTime"
+    }
+
+    init {
+        require(value.isValidFeedItemLink) {
+            "Invalid Tribe Join Link"
+        }
+    }
+
+    inline val feedId : String
+        get() = (getComponent(FEED_ID) ?: "").trim()
+
+    inline val itemId : String
+        get() = (getComponent(ITEM_ID) ?: "").trim()
+
+    inline val atTime : String
+        get() = (getComponent(AT_TIME) ?: "").trim()
+
+    fun getComponent(k: String): String? {
+        val components = value.replace("sphinx.chat://", "").split("&")
+        for (component in components) {
+            val subComponents = component.split("=")
+            val key:String? = if (subComponents.isNotEmpty()) subComponents.elementAtOrNull(0) else null
+            val value:String? = if (subComponents.size > 1) subComponents.elementAtOrNull(1) else null
+
+            if (key == k) return value
+        }
+        return null
+    }
+
+}
