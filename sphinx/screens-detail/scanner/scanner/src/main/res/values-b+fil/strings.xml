@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="scanner_header_name">SCAN</string>
+    <string name="scanner_bottom_content_label">OR ENTER MANUALLY</string>
+    <string name="scanner_edit_text_hint">Code</string>
+    <string name="scanner_verify_button">VERIFY</string>
+
+    <string name="scanner_notify_permissions_needed">Camera Permissions are required to use this feature, please enable them in Settings</string>
+</resources>

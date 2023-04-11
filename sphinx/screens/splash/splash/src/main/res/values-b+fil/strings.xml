@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_welcome">Welcome</string>
+    <string name="on_board_welcome_info_code">Paste the connection string\nor scan the QR code</string>
+    <string name="on_board_edit_text_hint_code">Enter Code…</string>
+
+    <string name="side_effect_generate_token_failed">Generate token failed</string>
+
+    <string name="on_board_welcome_info_decrypt">Enter PIN\nto decrypt</string>
+    <string name="on_board_edit_text_hint_decrypt">Enter PIN…</string>
+
+    <string name="side_effect_decryption_failure">Failed to decrypt</string>
+    <string name="side_effect_empty_input">Input must not be empty</string>
+    <string name="side_effect_pin_length">Invalid PIN length</string>
+    <string name="side_effect_invalid_code">Invalid Code</string>
+    <string name="side_effect_invalid_pin">Invalid PIN</string>
+    <string name="side_effect_feature_not_implemented">That feature is not yet implemented</string>
+</resources>

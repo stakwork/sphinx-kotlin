@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permissions_required">Camera and Audio Permissions are required to use this feature, please enable them in Settings.</string>
+    <string name="camera_retake">Retake</string>
+    <string name="camera_use_photo">Use Photo</string>
+    <string name="camera_use_video">Use Video</string>
+    <string name="camera_cancel">Cancel</string>
+    <string name="camera_shutter_instruction">Tap for picture, hold for video</string>
+</resources>

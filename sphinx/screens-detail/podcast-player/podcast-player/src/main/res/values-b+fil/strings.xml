@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_text_episodes_list_header">Episodes</string>
+    <string name="boost_sent">Boost sent</string>
+    <string name="podcast_sats_per_minute">Sats per minute</string>
+</resources>

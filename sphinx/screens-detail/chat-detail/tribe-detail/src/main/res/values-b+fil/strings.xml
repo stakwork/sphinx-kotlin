@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tribe_detail_header_name">TRIBE DETAIL</string>
+    <string name="qr_code_title">Join Tribe Link</string>
+    <string name="podcast_sats_per_minute">Podcast: sats per minute</string>
+    <string name="alias">Alias</string>
+
+    <string name="bottom_menu_tribe_profile_pic_header_text">Tribe Profile Picture</string>
+
+    <string name="tribe_created_on">Created on %s</string>
+    <string name="tribe_costs">Price per message: %d sat - Amount to Stake: %d sat</string>
+    <string name="profile_picture">Profile Picture</string>
+
+    <string name="failed_to_update_profile_alias">Failed to update tribe alias</string>
+    <string name="failed_to_update_profile_pic">Failed to update tribe profile picture</string>
+
+    <string name="alert_confirm_delete_tribe_heading">Delete %s</string>
+    <string name="alert_confirm_delete_tribe_message">Are you sure you want to delete the tribe?</string>
+    <string name="failed_to_delete_tribe">Failed to delete tribe</string>
+
+    <string name="alert_confirm_exit_tribe_heading">Exit %s</string>
+    <string name="alert_confirm_exit_tribe_message">Are you sure you want to exit the tribe?</string>
+    <string name="failed_to_exit_tribe">Failed to exit tribe</string>
+
+    <string name="tribe_members_list">MEMBERS LIST</string>
+    <string name="tribe_badges">Tribe Badges</string>
+</resources>

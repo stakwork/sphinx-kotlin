@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="address_book_header_name">Address Book</string>
+    <string name="search">Search</string>
+    <string name="add_icon"></string>
+    <string name="add_friend">Add Friend</string>
+    <string name="delete_contact">Delete</string>
+    <string name="block_contact">Block</string>
+    <string name="unblock_contact">Unblock</string>
+    <string name="swipe_left_to_delete">Swipe left to delete or block contact</string>
+    <string name="alert_confirm_delete_contact_title">Delete Contact</string>
+    <string name="alert_confirm_delete_contact">Are you sure you want to delete this contact?</string>
+    <string name="alert_confirm_block_contact_title">Block Contact</string>
+    <string name="alert_confirm_block_contact">Are you sure you want to block this contact?</string>
+    <string name="alert_confirm_unblock_contact_title">Unblock Contact</string>
+    <string name="alert_confirm_unblock_contact">Are you sure you want to unblock this contact?</string>
+</resources>

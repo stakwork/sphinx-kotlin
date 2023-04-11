@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="new_contact_header_name">NEW CONTACT</string>
+    <string name="save_to_contacts_button">SAVE TO CONTACTS</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="share">Share</string>
+    <string name="copy">Copy</string>
+    <string name="paid">PAID</string>
+    <string name="qr_code_notify_copied">%s copied to clipboard</string>
+    <string name="share_qr_code_as_image_plus_text">Share QR Code as Image+Text</string>
+    <string name="share_qr_code_as_text">Share QR Code as Text</string>
+</resources>

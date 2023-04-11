@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="edit_text_message_hint">Message...</string>
+    <string name="edit_text_optional_message_hint">Optional Message...</string>
+    <string name="text_view_loading_attachment">Loading/Decrypting...</string>
+    <string name="option_block_user">Block</string>
+    <string name="option_delete_user">Delete</string>
+    <string name="alert_confirm_delete_contact">Are you sure you want to delete this contact?</string>
+    <string name="alert_confirm_delete_contact_title">Delete Contact</string>
+    <string name="alert_confirm_block_contact_title">Block Contact</string>
+    <string name="alert_confirm_block_contact">Are you sure you want to block this contact?</string>
+    <string name="alert_confirm_unblock_contact_title">Unblock Contact</string>
+    <string name="alert_confirm_unblock_contact">Are you sure you want to unblock this contact?</string>
+    <string name="alert_not_encrypted_contact">You can\'t send a message to an unencrypted contact</string>
+
+    <string name="chat_muted_message"> Chat is now muted. You won\'t get push notifications for incoming messages on this chat</string>
+    <string name="chat_muted_waiting_on_network">Waiting on network…</string>
+    <string name="chat_tribe_contributed">Contributed:</string>
+    <string name="chat_tribe_earned">Earned:</string>
+
+    <string name="unsupported_message_type_placeholder_text">%1$s: Not supported yet</string>
+    <string name="deleted_message_label_text">This message has been deleted</string>
+    <string name="flagged_message_label_text">This message has been flagged</string>
+    <string name="join_call_header_label_text">Join call by…</string>
+
+    <string name="failed_message">Failed Message</string>
+
+    <string name="send_message_empty_destination_error">Contact or Chat is required</string>
+    <string name="send_message_empty_content_error">Message or Attachment is required</string>
+    <string name="send_message_empty_price_error">Price is required</string>
+
+    <!--  Separators  -->
+    <string name="unseen_messages">Unseen Messages</string>
+    <string name="today">Today</string>
+
+    <!--  Message type invoices  -->
+    <string name="request_expired">REQUEST EXPIRED</string>
+    <string name="request_expiration">EXPIRES AT: %s</string>
+    <string name="invoice_paid_on">Invoice paid on %s</string>
+    <string name="alert_confirm_pay_chat_invoice_title">Confirm Paying Invoice</string>
+    <string name="alert_confirm_pay_chat_invoice_message">Are you sure you want to pay for this invoice?</string>
+
+    <!--  Message type placeholder display names  -->
+    <string name="placeholder_display_name_message_type_attachment">Attachment Message</string>
+    <string name="placeholder_display_name_message_type_bot_response">Bot Response Message</string>
+    <string name="placeholder_display_name_message_type_invoice">Invoice Message</string>
+    <string name="placeholder_display_name_message_type_payment">Invoice Payment Message</string>
+    <string name="placeholder_display_name_message_type_tribe_delete">Tribe Delete Message</string>
+    <string name="placeholder_unsupported_message_type_default">Unsupported Message Type</string>
+
+    <!-- Paid Message Details: Status Labels   -->
+    <string name="paid_message_details_status_label_pay">Pay</string>
+    <string name="paid_message_details_status_label_payment_accepted">Purchase Succeeded</string>
+    <string name="paid_message_details_status_label_payment_denied">Purchase Denied</string>
+    <string name="paid_message_details_status_label_processing_payment">Processing payment…</string>
+
+    <!-- Paid Message Overlays -->
+    <string name="paywall_overlay_label_text_message_received">Pay to unlock Message</string>
+    <string name="paywall_overlay_content_description_image_message_received">Pay to unlock this Image</string>
+    <string name="paywall_overlay_content_description_video_message_received">Pay to unlock this Video</string>
+
+
+    <!-- Link Previews -->
+    <string name="link_preview_add_contact_banner_label">Add Contact</string>
+    <string name="link_preview_see_tribe_banner_label">See Tribe</string>
+
+    <!-- Replies -->
+    <string name="reply_message_media_content_description">Media content of the original message</string>
+    <string name="reply_message_close_button_content_description">Close</string>
+    <string name="share_audio_clip">"Share audio clip:"</string>
+
+    <!--  Purchase Status Labels: Paid Message Details  -->
+    <string name="purchase_status_label_paid_message_details_pending">Pending</string>
+    <string name="purchase_status_label_paid_message_details_accepted">Purchase Succeeded</string>
+    <string name="purchase_status_label_paid_message_details_denied">Purchase Denied</string>
+    <string name="purchase_status_label_paid_message_details_processing">Processing Payment</string>
+    <string name="purchase_status_label_paid_message_details_default">Pay</string>
+
+    <!--  Purchase Status Labels: Paid Message Sent Status  -->
+    <string name="purchase_status_label_paid_message_sent_status_pending">Pending</string>
+    <string name="purchase_status_label_paid_message_sent_status_accepted">Succeeded</string>
+    <string name="purchase_status_label_paid_message_sent_status_denied">Denied</string>
+    <string name="purchase_status_label_paid_message_sent_status_processing">Processing payment…</string>
+    <string name="purchase_status_label_paid_message_sent_status_default">Unknown</string>
+
+
+    <!--  Group Action  -->
+    <string name="tribe_request_admin_side">%1$s wants to\njoin the tribe</string>
+    <string name="tribe_request_approved_admin_side">You have approved\nthe request from %1$s</string>
+    <string name="tribe_request_rejected_admin_side">You have declined\nthe request from %1$s</string>
+    <string name="tribe_request_rejected_member_side">The admin\ndeclined your request</string>
+    <string name="tribe_join_announcement">%1$s has joined the tribe</string>
+    <string name="group_join_announcement">%1$s has joined the group</string>
+    <string name="tribe_leave_announcement">%1$s just left the tribe</string>
+    <string name="group_leave_announcement">%1$s just left the group</string>
+    <string name="tribe_deleted_announcement">The admin has deleted\nthis tribe</string>
+    <string name="group_kick_announcement_member_side">The admin has removed you from this group</string>
+    <string name="tribe_kick_announcement_member_side">The admin has removed you from this tribe</string>
+    <string name="tribe_welcome_announcement_member_side">Welcome! You are now a member</string>
+    <string name="tribe_deleted_announcement_button_delete">Delete Tribe</string>
+
+    <!-- Selected Item Menu Labels -->
+    <string name="selected_message_menu_item_boost">Boost</string>
+    <string name="selected_message_menu_item_copy_text">Copy Text</string>
+    <string name="selected_message_menu_item_copy_call_link">Copy Call Link</string>
+    <string name="selected_message_menu_item_copy_link">Copy Link</string>
+    <string name="selected_message_menu_item_delete">Delete Message</string>
+    <string name="selected_message_menu_item_reply">Reply</string>
+    <string name="selected_message_menu_item_save_file">Save File</string>
+    <string name="selected_message_menu_item_resend">Resend</string>
+    <string name="selected_message_menu_item_flag">Flag</string>
+
+    <string name="alert_confirm_flag_message_title">Confirm Flagging message</string>
+    <string name="alert_confirm_flag_message_message">Are you sure you want to flag this message? This action can not be undone</string>
+
+    <string name="alert_confirm_delete_message_title">Confirm Deleting message</string>
+    <string name="alert_confirm_delete_message_message">Are you sure you want to delete this message? This action can not be undone</string>
+
+    <!-- Notify -->
+    <string name="notify_boost_failure">Boost payment failed</string>
+    <string name="side_effect_text_copied">Text copied to clipboard</string>
+    <string name="side_effect_call_link_copied">Call link copied to clipboard</string>
+    <string name="side_effect_link_copied">Copied %s</string>
+    <string name="side_effect_no_link_to_copy">No link to copy</string>
+
+    <string name="file_name_loading">Loading...</string>
+    <string name="pdf_page">page</string>
+    <string name="pdf_pages">pages</string>
+    <string name="pdf_page_of">Page %d of %d</string>
+
+    <!-- Send Attachment -->
+    <string name="attachment_send_header_image">SEND IMAGE</string>
+    <string name="attachment_send_header_video">SEND VIDEO</string>
+    <string name="attachment_send_header_pdf">SEND PDF</string>
+    <string name="attachment_send_header_file">SEND FILE</string>
+    <string name="attachment_send_header_giphy">SEND GIPHY</string>
+    <string name="attachment_send_header_paid_message">SEND PAID MESSAGE</string>
+
+    <!-- Pay Attachment -->
+    <string name="paid_message_pay_to_unlock">PAY TO UNLOCK MESSAGE</string>
+    <string name="paid_file_pay_to_unlock">PAY TO UNLOCK FILE</string>
+    <string name="paid_message_loading">LOADING MESSAGE...</string>
+    <string name="paid_message_unable_to_load">UNABLE TO LOAD MESSAGE DATA</string>
+    <string name="attachment_price_label">Price: </string>
+    <string name="alert_confirm_pay_attachment_title">Confirm Purchase</string>
+    <string name="alert_confirm_pay_attachment_message">Are you sure you want to purchase this item?</string>
+
+    <!-- Save Attachment -->
+    <string name="saved_attachment_successfully">Saved attachment successfully</string>
+    <string name="failed_to_save_file">Failed to save file</string>
+
+    <!-- Exit Tribe -->
+    <string name="delete_own_tribe_not_supported">Delete own tribe is not supported yet</string>
+    <string name="alert_confirm_exit_tribe_title">Exit Tribe</string>
+    <string name="alert_confirm_exit_tribe_message">Are you sure you wat to exit and delete this tribe?</string>
+
+    <!-- Menu -->
+    <string name="attachments_menu_cancel" tools:ignore="ButtonCase">CANCEL</string>
+    <string name="camera_attachment_option">Camera</string>
+    <string name="library_attachment_option">Library</string>
+    <string name="gif_attachment_option">Gif</string>
+    <string name="file_attachment_option">File</string>
+    <string name="paid_message_attachment_option">Paid Message</string>
+    <string name="request_attachment_option">Request</string>
+    <string name="send_attachment_option">Send</string>
+    <string name="waiting_for_admin_approval">Waiting for admin approval</string>
+    <string name="failed_to_delete_tribe">Failed to delete Tribe</string>
+
+    <string name="podcast_boost_label">Boost!</string>
+
+    <string name="bottom_menu_call_header_text">Call Options</string>
+    <string name="bottom_menu_call_option_audio">Audio</string>
+    <string name="bottom_menu_call_option_video_or_audio">Video or Audio</string>
+
+    <string name="bottom_menu_more_header_text">Chat Options</string>
+    <string name="bottom_menu_more_option_call">Create Call</string>
+    <string name="bottom_menu_more_option_share">Share Tribe Link</string>
+    <string name="bottom_menu_more_option_search">Search Messages</string>
+    <string name="bottom_menu_more_option_notification">Notifications</string>
+
+    <string name="searching_messages">Searching...</string>
+    <string name="results_found">%d Results Found</string>
+
+    <string name="slide_to_cancel">&lt;&lt; Slide to cancel</string>
+    <string name="recording_permission_granted">Recording permission granted</string>
+    <string name="recording_permission_required">Recording permissions required</string>
+
+    <string name="send_sats">Send Sats</string>
+
+</resources>

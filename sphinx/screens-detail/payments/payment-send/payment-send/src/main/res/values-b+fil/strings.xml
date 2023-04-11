@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payment_send_header_name">SEND PAYMENT</string>
+
+    <string name="invalid_node_pub_key_qr_code">QR code is not a Lightning Node Public Key</string>
+    <string name="amount_too_high">Amount is too high</string>
+</resources>

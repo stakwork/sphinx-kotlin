@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_tribe_header_text">Tribe Options</string>
+    <!-- Menu -->
+    <string name="bottom_menu_tribe_option_share_tribe">Share Tribe QR code</string>
+    <string name="bottom_menu_tribe_option_delete_tribe">Delete Tribe</string>
+    <string name="bottom_menu_tribe_option_exit_tribe">Exit Tribe</string>
+    <string name="bottom_menu_tribe_option_edit_tribe">Edit Tribe</string>
+    <string name="bottom_menu_tribe_option_add_member">Add Member</string>
+</resources>

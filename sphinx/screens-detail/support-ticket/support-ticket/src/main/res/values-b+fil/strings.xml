@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="support_ticket_header_name">SUPPORT</string>
+    <string name="send_message">Send Message</string>
+    <string name="copy_logs">Copy Logs</string>
+    <string name="describe_your_problem_here">Describe your problem here…</string>
+    <string name="message_required">Message required</string>
+    <string name="fetch_logs_failed">Failed to fetch logs</string>
+    <string name="logs_copied_to_clipboard">Logs copied to clipboard</string>
+    <string name="no_logs_loaded">No logs loaded</string>
+</resources>

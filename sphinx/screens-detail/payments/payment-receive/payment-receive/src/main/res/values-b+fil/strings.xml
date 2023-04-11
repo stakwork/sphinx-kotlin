@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payment_receive_header_name">REQUEST AMOUNT</string>
+    <string name="requested_amount_too_high">Requested amount is too high</string>
+</resources>

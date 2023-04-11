@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="on_board_picture_bottom_menu_header">Profile Picture</string>
+    <string name="on_board_picture_side_effect_upload_failure">Failed to upload image</string>
+    <string name="on_board_select_picture">Select Image</string>
+</resources>

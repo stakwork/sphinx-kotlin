@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tribe_members_list">MEMBERS LIST</string>
+    <string name="tribe_members_list_header">TRIBE MEMBERS</string>
+    <string name="pending_tribe_members_header">PENDING MEMBERS</string>
+    <string name="loading_more">Loading more...</string>
+    <string name="delete_member">Delete</string>
+</resources>
