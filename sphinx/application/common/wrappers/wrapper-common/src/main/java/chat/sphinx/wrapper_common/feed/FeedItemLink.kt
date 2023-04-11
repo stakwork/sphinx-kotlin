@@ -15,7 +15,7 @@ inline val String.isValidFeedItemLink: Boolean
 value class FeedItemLink(val value: String) {
 
     companion object {
-        const val REGEX = "sphinx\\.chat:\\/\\/\\?action=share_content&feedURL=.*feedID=.*itemID=.*"
+        const val REGEX = "sphinx\\.chat:\\/\\/\\?action=share_content&feedURL=.*"
         const val FEED_URL = "feedURL"
         const val FEED_ID = "feedID"
         const val ITEM_ID = "itemID"
