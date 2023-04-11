@@ -476,25 +476,6 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun goToPodcastPlayer(
-        feedId: FeedId,
-        feedUrl: FeedUrl
-    ) {
-        val playingContent = mediaPlayerServiceController.getPlayingContent()
-
-        feedRepository.restoreContentFeedStatusByFeedId(
-            feedId,
-            playingContent?.first,
-            playingContent?.second
-        )
-
-        viewModelScope.launch(mainImmediate) {
-            dashboardNavigator.toPodcastPlayerScreen(
-                ChatId(ChatId.NULL_CHAT_ID.toLong()), feedId, feedUrl
-            )
-        }
-    }
-
     private suspend fun loadPeopleConnectPopup(link: PeopleConnectLink) {
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo

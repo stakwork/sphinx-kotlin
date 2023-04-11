@@ -367,7 +367,7 @@ object SphinxLinkify {
         )
 
         val LINK_PREVIEWS: Pattern = Pattern.compile(
-            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
+            "(${TribeJoinLink.REGEX}|${FeedItemLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
         )
             
         val COPYABLE_LINKS: Pattern = Pattern.compile(

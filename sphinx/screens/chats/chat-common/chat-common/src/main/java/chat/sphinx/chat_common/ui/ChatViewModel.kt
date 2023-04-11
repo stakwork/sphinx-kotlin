@@ -26,10 +26,7 @@ import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.chat_common.BuildConfig
 import chat.sphinx.chat_common.R
-import chat.sphinx.chat_common.model.MessageLinkPreview
-import chat.sphinx.chat_common.model.NodeDescriptor
-import chat.sphinx.chat_common.model.TribeLink
-import chat.sphinx.chat_common.model.UnspecifiedUrl
+import chat.sphinx.chat_common.model.*
 import chat.sphinx.chat_common.navigation.ChatNavigator
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.attachment.AttachmentFullscreenViewState
@@ -699,6 +696,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                         // no - op
                     }
                 }
+                is FeedItemPreview -> {}
                 is UnspecifiedUrl -> {
 
                     if (areUrlLinkPreviewsEnabled()) {
