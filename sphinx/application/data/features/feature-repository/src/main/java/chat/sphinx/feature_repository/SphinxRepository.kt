@@ -11,7 +11,6 @@ import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
-import chat.sphinx.concept_network_query_chat.model.feed.FeedItemDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
@@ -121,7 +120,6 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -3970,6 +3968,78 @@ abstract class SphinxRepository(
             }
     }
 
+    override fun handleFeedItemLink(link: FeedItemLink): Flow<Feed?> = flow {
+        val feed = link.feedId.toFeedId()?.let { getFeedById(it) }?.firstOrNull()
+        if (feed != null) {
+            link.itemId.toFeedId()?.let { itemId ->
+                updateContentFeedStatus(
+                    feed.id,
+                    itemId
+                )
+                getPodcastById(feed.id).firstOrNull()?.let { podcast ->
+                    link.atTime?.let { atTime ->
+                        val duration =
+                            podcast.getEpisodeWithId(itemId.value)?.contentEpisodeStatus?.duration
+                                ?: FeedItemDuration(0)
+                        val currentTime =
+                            atTime.toLong().toFeedItemDuration() ?: FeedItemDuration(0)
+                        updateContentEpisodeStatus(
+                            feed.id,
+                            itemId,
+                            duration,
+                            currentTime
+                        )
+                    }
+                    emit(feed)
+                }
+            }
+        } else {
+            link.feedUrl.toFeedUrl()?.let { feedUrl ->
+                val response = updateFeedContent(
+                    chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
+                    feedUrl = feedUrl,
+                    chatUUID = null,
+                    subscribed = false.toSubscribed(),
+                    currentItemId = null
+                )
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> { emit(null) }
+                    is Response.Success -> {
+                        val newFeed = getFeedById(response.value).firstOrNull()
+                        newFeed?.let { nnFeed ->
+                            link.itemId.toFeedId()?.let { itemId ->
+                                updateContentFeedStatus(
+                                    nnFeed.id,
+                                    itemId
+                                )
+                                getPodcastById(newFeed.id).firstOrNull()?.let { podcast ->
+                                    link.atTime?.let { atTime ->
+                                        val duration =
+                                            podcast.getEpisodeWithId(itemId.value)?.contentEpisodeStatus?.duration
+                                                ?: FeedItemDuration(0)
+                                        val currentTime = atTime.toLong().toFeedItemDuration()
+                                            ?: FeedItemDuration(0)
+                                        updateContentEpisodeStatus(
+                                            newFeed.id,
+                                            itemId,
+                                            duration,
+                                            currentTime
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    emit(newFeed)
+                    }
+                }
+            }
+        }
+    }
+
+
+
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }
@@ -4310,6 +4380,7 @@ abstract class SphinxRepository(
                 }
             }
     }
+
 
     private suspend fun mapPodcast(
         podcast: Podcast,

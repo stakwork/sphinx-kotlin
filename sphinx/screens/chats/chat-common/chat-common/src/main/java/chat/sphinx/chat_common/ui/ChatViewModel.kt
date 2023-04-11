@@ -69,6 +69,7 @@ import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedItemLink
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -1754,6 +1755,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
             }
 
+        }
+    }
+
+    private suspend fun handleFeedItemLink(link: FeedItemLink) {
+        feedRepository.handleFeedItemLink(link).firstOrNull()?.let {feed ->
+//            chatNavigator.goToPodcastPlayer(feed.id, feed.feedUrl)
         }
     }
 

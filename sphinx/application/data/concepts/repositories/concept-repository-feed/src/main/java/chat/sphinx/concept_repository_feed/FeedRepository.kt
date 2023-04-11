@@ -6,10 +6,7 @@ import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_common.feed.FeedUrl
-import chat.sphinx.wrapper_common.feed.Subscribed
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_feed.*
@@ -43,6 +40,8 @@ interface FeedRepository {
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
+
+    fun handleFeedItemLink(link: FeedItemLink): Flow<Feed?>
 
     fun updatePlayedMark(feedItemId: FeedId, played: Boolean)
 

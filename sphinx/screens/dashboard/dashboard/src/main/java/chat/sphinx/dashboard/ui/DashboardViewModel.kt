@@ -447,27 +447,8 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun handleFeedItemLink(link: FeedItemLink) {
-        val feed = link.feedId.toFeedId()?.let { feedRepository.getFeedById(it) }?.firstOrNull()
-        feed?.let { nnFeed ->
-            (link.itemId.toFeedId())?.let { itemId ->
-                feedRepository.updateContentFeedStatus(
-                    feed.id,
-                    itemId
-                )
-                feedRepository.getPodcastById(nnFeed.id).firstOrNull()?.let { podcast ->
-                    (link.atTime).let { atTime ->
-                        val duration = podcast.getEpisodeWithId(itemId.value)?.contentEpisodeStatus?.duration ?: FeedItemDuration(0)
-                        val currentTime = atTime.toLong().toFeedItemDuration() ?: FeedItemDuration(0)
-                        feedRepository.updateContentEpisodeStatus(
-                            nnFeed.id,
-                            itemId,
-                            duration,
-                            currentTime
-                        )
-                    }
-                    goToPodcastPlayer(nnFeed.id, podcast.feedUrl)
-                }
-            }
+        feedRepository.handleFeedItemLink(link).firstOrNull()?.let {feed ->
+            goToPodcastPlayer(feed.id, feed.feedUrl)
         }
     }
 

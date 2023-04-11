@@ -16,6 +16,7 @@ value class FeedItemLink(val value: String) {
 
     companion object {
         const val REGEX = "sphinx\\.chat:\\/\\/\\?action=share_content&feedURL=.*feedID=.*itemID=.*"
+        const val FEED_URL = "feedURL"
         const val FEED_ID = "feedID"
         const val ITEM_ID = "itemID"
         const val AT_TIME = "atTime"
@@ -27,14 +28,17 @@ value class FeedItemLink(val value: String) {
         }
     }
 
+    inline val feedUrl : String
+        get() = (getComponent(FEED_URL) ?: "").trim()
+
     inline val feedId : String
         get() = (getComponent(FEED_ID) ?: "").trim()
 
     inline val itemId : String
         get() = (getComponent(ITEM_ID) ?: "").trim()
 
-    inline val atTime : String
-        get() = (getComponent(AT_TIME) ?: "").trim()
+    inline val atTime : String?
+        get() = (getComponent(AT_TIME))?.trim()
 
     fun getComponent(k: String): String? {
         val components = value.replace("sphinx.chat://", "").split("&")
