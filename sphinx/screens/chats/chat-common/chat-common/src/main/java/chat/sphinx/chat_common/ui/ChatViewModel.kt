@@ -70,11 +70,16 @@ import chat.sphinx.wrapper_common.chat.ChatUUID
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedItemLink
+import chat.sphinx.wrapper_common.feed.toFeedItemLink
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
+import chat.sphinx.wrapper_feed.Feed
+import chat.sphinx.wrapper_feed.isNewsletter
+import chat.sphinx.wrapper_feed.isPodcast
+import chat.sphinx.wrapper_feed.isVideo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import com.giphy.sdk.core.models.Media
@@ -1752,15 +1757,42 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                     handleTribeLink(tribeJoinLink)
 
+                } ?: url.toFeedItemLink()?.let { feedItemLink ->
+                    handleFeedItemLink(feedItemLink)
                 }
             }
 
         }
     }
 
+    private suspend fun goToFeedDetailView(feed: Feed) {
+        when {
+            feed.isPodcast -> {
+                chatNavigator.toPodcastPlayer(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isVideo -> {
+                chatNavigator.toVideoWatchScreen(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isNewsletter -> {
+                chatNavigator.toNewsletterDetail(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.feedUrl
+                )
+            }
+        }
+    }
+
     private suspend fun handleFeedItemLink(link: FeedItemLink) {
-        feedRepository.handleFeedItemLink(link).firstOrNull()?.let {feed ->
-//            chatNavigator.goToPodcastPlayer(feed.id, feed.feedUrl)
+        feedRepository.handleFeedItemLink(link).firstOrNull()?.let { feed ->
+            goToFeedDetailView(feed)
         }
     }
 

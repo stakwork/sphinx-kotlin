@@ -52,8 +52,7 @@ import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
-import chat.sphinx.wrapper_feed.FeedItemDuration
-import chat.sphinx.wrapper_feed.toFeedItemDuration
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -447,8 +446,33 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun handleFeedItemLink(link: FeedItemLink) {
-        feedRepository.handleFeedItemLink(link).firstOrNull()?.let {feed ->
-            goToPodcastPlayer(feed.id, feed.feedUrl)
+        feedRepository.handleFeedItemLink(link).firstOrNull()?.let { feed ->
+            goToFeedDetailView(feed)
+        }
+    }
+
+    private suspend fun goToFeedDetailView(feed: Feed) {
+        when {
+            feed.isPodcast -> {
+                dashboardNavigator.toPodcastPlayerScreen(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isVideo -> {
+                dashboardNavigator.toVideoWatchScreen(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isNewsletter -> {
+                dashboardNavigator.toNewsletterDetail(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.feedUrl
+                )
+            }
         }
     }
 

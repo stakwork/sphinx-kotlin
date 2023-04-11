@@ -9,10 +9,15 @@ import chat.sphinx.chat_group.navigation.ToChatGroupScreen
 import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
+import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
+import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
+import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -82,5 +87,23 @@ internal class GroupChatNavigatorImpl @Inject constructor(
                 popUpToInclusive = false,
             )
         )
+    }
+
+    override suspend fun toVideoWatchScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
+            ToVideoWatchScreen(
+                chatId, feedId, feedUrl
+            )
+        )
+    }
+
+    override suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
+            ToNewsletterDetailScreen(chatId, feedUrl)
+        )
+    }
+
+    override suspend fun toPodcastPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, true))
     }
 }
