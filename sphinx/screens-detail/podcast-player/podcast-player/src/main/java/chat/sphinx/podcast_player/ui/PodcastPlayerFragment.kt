@@ -179,8 +179,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             }
             layoutConstraintShareRow.setOnClickListener {
                 (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
-                    viewState.feedItemDetail?.link?.let { link ->
-                        viewModel.share(link, binding.root.context)
+                    viewState.feedItemDetail?.feedId?.let { feedId ->
+                        viewModel.share(feedId, binding.root.context)
                     }
                 }
             }

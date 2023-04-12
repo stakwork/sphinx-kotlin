@@ -709,18 +709,21 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun share(link: String, context: Context) {
-        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, link)
-        }
+    fun share(itemId: FeedId, context: Context) {
+        viewModelScope.launch(mainImmediate) {
+            val link = generateSphinxFeedItemLink(itemId) ?: ""
+            val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, link)
+            }
 
-        context.startActivity(
-            Intent.createChooser(
-                sharingIntent,
-                app.getString(R.string.episode_detail_share_link)
+            context.startActivity(
+                Intent.createChooser(
+                    sharingIntent,
+                    app.getString(R.string.episode_detail_share_link)
+                )
             )
-        )
+        }
     }
 
     fun copyCodeToClipboard(itemId: FeedId) {
