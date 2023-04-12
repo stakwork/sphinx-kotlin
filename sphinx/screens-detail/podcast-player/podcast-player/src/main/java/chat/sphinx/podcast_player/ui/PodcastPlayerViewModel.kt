@@ -12,6 +12,8 @@ import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import kotlin.coroutines.suspendCoroutine
+import kotlin.coroutines.resume
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -64,6 +66,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import javax.inject.Inject
 
@@ -720,10 +723,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
         )
     }
 
-    fun copyCodeToClipboard(itemId: FeedId, shareAtTime: Boolean) {
+    fun copyCodeToClipboard(itemId: FeedId) {
         (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
             viewModelScope.launch(mainImmediate) {
-                val link = generateSphinxFeedItemLink(itemId, shareAtTime) ?: ""
+                val link = generateSphinxFeedItemLink(itemId) ?: ""
                 val clipData = ClipData.newPlainText("text", link)
                 manager.setPrimaryClip(clipData)
 
@@ -736,7 +739,15 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    suspend fun generateSphinxFeedItemLink(itemId: FeedId, shareAtTime: Boolean): String? {
+    private suspend fun generateSphinxFeedItemLink(itemId: FeedId): String? {
+        val shareAtTime = suspendCoroutine<Boolean> { continuation ->
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(PodcastPlayerSideEffect.CopyLinkSelection(viewModelScope) { result ->
+                    continuation.resume(result)
+                })
+            }
+        }
+
         val nnPodcast = getPodcastFeed() ?: return null
         val feed = feedRepository.getFeedById(nnPodcast.id).firstOrNull() ?: return null
         val currentTime = nnPodcast.getEpisodeWithId(itemId.value)?.getUpdatedContentEpisodeStatus()?.currentTime?.value

@@ -173,7 +173,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             layoutConstraintCopyLinkRow.setOnClickListener {
                 (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
                     viewState.feedItemDetail?.feedId?.let { feedId ->
-                        viewModel.copyCodeToClipboard(feedId, false)
+                        viewModel.copyCodeToClipboard(feedId)
                     }
                 }
             }

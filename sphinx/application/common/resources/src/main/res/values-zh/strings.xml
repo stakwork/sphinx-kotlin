@@ -42,6 +42,8 @@
     <string name="feed_search_following_section">FOLLOWING</string>
     <string name="feed_search_directory_section">DIRECTORY</string>
     <string name="recommendations">Recommendations</string>
+    <string name="share_from_beginning">Share from beginning</string>
+    <string name="share_from_current_time">Share from current time</string>
 
     <string name="select_badges">Select and customize</string>
     <string name="your_badges">your tribe badges</string>
