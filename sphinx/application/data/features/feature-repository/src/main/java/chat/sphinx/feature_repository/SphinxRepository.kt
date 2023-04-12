@@ -4038,8 +4038,6 @@ abstract class SphinxRepository(
         }
     }
 
-
-
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }

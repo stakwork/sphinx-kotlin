@@ -7,10 +7,27 @@ inline fun String.toFeedItemLink(): FeedItemLink? =
     } catch (e: IllegalArgumentException) {
         null
     }
-
+@Suppress("NOTHING_TO_INLINE")
 inline val String.isValidFeedItemLink: Boolean
     get() = isNotEmpty() && matches("^${FeedItemLink.REGEX}\$".toRegex())
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun generateFeedItemLink(
+    feedUrl: FeedUrl,
+    feedId: FeedId,
+    itemId: FeedId,
+    atTime: Long?
+): String {
+    val feedUrlComponent = "feedURL=${feedUrl.value}"
+    val feedIdComponent = "feedID=${feedId.value}"
+    val itemIdComponent = "itemID=${itemId.value}"
+    val atTimeComponent = atTime?.let { "atTime=$it" }
+
+    val components = mutableListOf(feedUrlComponent, feedIdComponent, itemIdComponent)
+    atTimeComponent?.let { components.add(it) }
+
+    return "sphinx.chat://?action=share_content&${components.joinToString("&")}"
+}
 @JvmInline
 value class FeedItemLink(val value: String) {
 

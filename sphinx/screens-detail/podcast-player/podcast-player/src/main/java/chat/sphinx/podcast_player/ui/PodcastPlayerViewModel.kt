@@ -35,6 +35,7 @@ import chat.sphinx.podcast_player.ui.viewstates.FeedItemDetailsViewState
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -719,12 +720,13 @@ internal class PodcastPlayerViewModel @Inject constructor(
         )
     }
 
-    fun copyCodeToClipboard(link: String) {
+    fun copyCodeToClipboard(itemId: FeedId, shareAtTime: Boolean) {
         (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
-            val clipData = ClipData.newPlainText("text", link)
-            manager.setPrimaryClip(clipData)
-
             viewModelScope.launch(mainImmediate) {
+                val link = generateSphinxFeedItemLink(itemId, shareAtTime) ?: ""
+                val clipData = ClipData.newPlainText("text", link)
+                manager.setPrimaryClip(clipData)
+
                 submitSideEffect(
                     PodcastPlayerSideEffect.Notify(
                         app.getString(R.string.episode_detail_clipboard)
@@ -734,6 +736,17 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
+    suspend fun generateSphinxFeedItemLink(itemId: FeedId, shareAtTime: Boolean): String? {
+        val nnPodcast = getPodcastFeed() ?: return null
+        val feed = feedRepository.getFeedById(nnPodcast.id).firstOrNull() ?: return null
+        val currentTime = nnPodcast.getEpisodeWithId(itemId.value)?.getUpdatedContentEpisodeStatus()?.currentTime?.value
+
+        return if (shareAtTime && currentTime != null) {
+            generateFeedItemLink(feed.feedUrl, feed.id, itemId, currentTime)
+        } else {
+            generateFeedItemLink(feed.feedUrl, feed.id, itemId, null)
+        }
+    }
 
     private suspend fun getPlayedMark(feedItemId: FeedId): Boolean {
        return feedRepository.getPlayedMark(feedItemId).firstOrNull() ?: false
