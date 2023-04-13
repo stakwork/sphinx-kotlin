@@ -20,10 +20,7 @@ import chat.sphinx.create_description.R
 import chat.sphinx.episode_description.model.FeedItemDescription
 import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedType
-import chat.sphinx.wrapper_common.feed.isPodcast
-import chat.sphinx.wrapper_common.feed.toFeedId
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.ContentEpisodeStatus
 import chat.sphinx.wrapper_feed.FeedItem
@@ -41,6 +38,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @HiltViewModel
 internal class EpisodeDescriptionViewModel @Inject constructor(
@@ -201,12 +200,17 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
     }
 
     fun copyCodeToClipboard() {
-        _feedItemStateFlow.value?.link?.value.let { feedItemLink ->
+        viewModelScope.launch(mainImmediate) {
             (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
-                val clipData = ClipData.newPlainText("text", feedItemLink)
-                manager.setPrimaryClip(clipData)
-
-                viewModelScope.launch(mainImmediate) {
+                (currentViewState as? EpisodeDescriptionViewState.ItemDescription)?.feedItemDescription?.let { feedItemDescription ->
+                    val link = when (feedItemDescription.feedType) {
+                        is FeedType.Podcast -> _feedItemStateFlow.value?.id?.let {
+                            generateSphinxFeedItemLink(it)
+                        } ?: ""
+                        else -> _feedItemStateFlow.value?.link?.value ?: ""
+                    }
+                    val clipData = ClipData.newPlainText("text", link)
+                    manager.setPrimaryClip(clipData)
                     submitSideEffect(
                         EpisodeDescriptionSideEffect.Notify(
                             app.getString(R.string.episode_detail_clipboard)
@@ -285,18 +289,41 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
         context: Context,
         label: String
     ) {
-        _feedItemStateFlow.value?.link?.value.let { feedItemLink ->
-            val sharingIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, feedItemLink)
-            }
+        viewModelScope.launch(mainImmediate) {
+            (currentViewState as? EpisodeDescriptionViewState.ItemDescription)?.feedItemDescription?.let { feedItemDescription ->
+                val link = when (feedItemDescription.feedType) {
 
-            context.startActivity(
-                Intent.createChooser(
-                    sharingIntent,
-                    label
-                )
-            )
+                    is FeedType.Podcast -> _feedItemStateFlow.value?.id?.let {
+                        generateSphinxFeedItemLink(it)
+                    } ?: ""
+                    else -> _feedItemStateFlow.value?.link?.value ?: ""
+                }
+                val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, link)
+                }
+                context.startActivity(Intent.createChooser(sharingIntent, label))
+            }
+        }
+    }
+
+    private suspend fun generateSphinxFeedItemLink(itemId: FeedId): String? {
+        val shareAtTime = suspendCoroutine<Boolean> { continuation ->
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(EpisodeDescriptionSideEffect.CopyLinkSelection(viewModelScope) { result ->
+                    continuation.resume(result)
+                })
+            }
+        }
+
+        val nnPodcast = getPodcastFeed() ?: return null
+        val feed = feedRepository.getFeedById(nnPodcast.id).firstOrNull() ?: return null
+        val currentTime = nnPodcast.getEpisodeWithId(itemId.value)?.getUpdatedContentEpisodeStatus()?.currentTime?.value
+
+        return if (shareAtTime && currentTime != null) {
+            generateFeedItemLink(feed.feedUrl, feed.id, itemId, currentTime)
+        } else {
+            generateFeedItemLink(feed.feedUrl, feed.id, itemId, null)
         }
     }
 
