@@ -1756,7 +1756,9 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     handleTribeLink(tribeJoinLink)
 
                 } ?: url.toFeedItemLink()?.let { feedItemLink ->
+
                     handleFeedItemLink(feedItemLink)
+
                 }
             }
 
@@ -1789,7 +1791,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     private suspend fun handleFeedItemLink(link: FeedItemLink) {
-        feedRepository.handleFeedItemLink(link).firstOrNull()?.let { feed ->
+        feedRepository.getFeedForLink(link).firstOrNull()?.let { feed ->
             goToFeedDetailView(feed)
         }
     }

@@ -446,7 +446,7 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun handleFeedItemLink(link: FeedItemLink) {
-        feedRepository.handleFeedItemLink(link).firstOrNull()?.let { feed ->
+        feedRepository.getFeedForLink(link).firstOrNull()?.let { feed ->
             goToFeedDetailView(feed)
         }
     }

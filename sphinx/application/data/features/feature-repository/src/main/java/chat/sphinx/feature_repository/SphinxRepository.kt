@@ -3970,32 +3970,11 @@ abstract class SphinxRepository(
             }
     }
 
-    override fun handleFeedItemLink(link: FeedItemLink): Flow<Feed?> = flow {
-        val feed = link.feedId.toFeedId()?.let { getFeedById(it) }?.firstOrNull()
-        if (feed != null) {
-            link.itemId.toFeedId()?.let { itemId ->
-                updateContentFeedStatus(
-                    feed.id,
-                    itemId
-                )
-                getPodcastById(feed.id).firstOrNull()?.let { podcast ->
-                    link.atTime?.let { atTime ->
-                        val duration =
-                            podcast.getEpisodeWithId(itemId.value)?.contentEpisodeStatus?.duration
-                                ?: FeedItemDuration(0)
-                        val currentTime =
-                            atTime.toLong().toFeedItemDuration() ?: FeedItemDuration(0)
-                        updateContentEpisodeStatus(
-                            feed.id,
-                            itemId,
-                            duration,
-                            currentTime
-                        )
-                    }
-                    emit(feed)
-                }
-            }
-        } else {
+    override fun getFeedForLink(link: FeedItemLink): Flow<Feed?> = flow {
+        link.feedId.toFeedId()?.let { getFeedById(it) }?.firstOrNull()?.let { feed ->
+            feedUpdateItemAndTime(feed, link)
+            emit(feed)
+        } ?: run {
             link.feedUrl.toFeedUrl()?.let { feedUrl ->
                 val response = updateFeedContent(
                     chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
@@ -4011,36 +3990,44 @@ abstract class SphinxRepository(
                         emit(null)
                     }
                     is Response.Success -> {
-                        val newFeed = getFeedById(response.value).firstOrNull()
-                        newFeed?.let { nnFeed ->
-                            link.itemId.toFeedId()?.let { itemId ->
-                                updateContentFeedStatus(
-                                    nnFeed.id,
-                                    itemId
-                                )
-                                getPodcastById(newFeed.id).firstOrNull()?.let { podcast ->
-                                    link.atTime?.let { atTime ->
-                                        val duration =
-                                            podcast.getEpisodeWithId(itemId.value)?.contentEpisodeStatus?.duration
-                                                ?: FeedItemDuration(0)
-                                        val currentTime = atTime.toLong().toFeedItemDuration()
-                                            ?: FeedItemDuration(0)
-                                        updateContentEpisodeStatus(
-                                            newFeed.id,
-                                            itemId,
-                                            duration,
-                                            currentTime
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        emit(newFeed)
+                        getFeedById(response.value).firstOrNull()?.let { feed ->
+                            feedUpdateItemAndTime(feed, link)
+                            emit(feed)
+                        }  ?: emit(null)
                     }
+                }
+            } ?: emit(null)
+        }
+    }
+
+    private fun feedUpdateItemAndTime(
+        feed: Feed,
+        link: FeedItemLink
+    ) {
+        link.itemId.toFeedId()?.let { itemId ->
+
+            updateContentFeedStatus(
+                feed.id,
+                itemId
+            )
+
+            link.atTime?.let { atTime ->
+                feed.items.firstOrNull {
+                    it.id == itemId
+                }?.let { feedItem ->
+                    updateContentEpisodeStatus(
+                        feedId = feed.id,
+                        itemId = itemId,
+                        duration = feedItem.contentEpisodeStatus?.duration ?: FeedItemDuration(0),
+                        currentTime =atTime.toLong().toFeedItemDuration() ?: FeedItemDuration(0),
+                        played = feedItem.contentEpisodeStatus?.played ?: false,
+                        shouldSync = false
+                    )
                 }
             }
         }
     }
+
     override fun getRecommendationFeedItemById(
         feedItemId: FeedId,
     ): Flow<FeedItem?> = flow {

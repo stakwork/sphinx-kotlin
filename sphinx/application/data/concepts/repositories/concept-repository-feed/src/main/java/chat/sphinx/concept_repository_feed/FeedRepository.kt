@@ -42,7 +42,7 @@ interface FeedRepository {
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
     fun getRecommendationFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
-    fun handleFeedItemLink(link: FeedItemLink): Flow<Feed?>
+    fun getFeedForLink(link: FeedItemLink): Flow<Feed?>
 
     fun updatePlayedMark(feedItemId: FeedId, played: Boolean)
 
