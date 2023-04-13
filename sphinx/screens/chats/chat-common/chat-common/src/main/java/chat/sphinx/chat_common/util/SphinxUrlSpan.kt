@@ -4,6 +4,7 @@ import android.text.TextPaint
 import android.text.style.URLSpan
 import android.view.View
 import androidx.annotation.ColorInt
+import chat.sphinx.wrapper_common.feed.isValidFeedItemLink
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import java.util.concurrent.atomic.AtomicInteger
@@ -12,7 +13,8 @@ inline val String.isSphinxUrl: Boolean
     get() = isValidLightningPaymentRequest ||
             isValidLightningNodePubKey ||
             isValidVirtualNodeAddress ||
-            isValidTribeJoinLink
+            isValidTribeJoinLink ||
+            isValidFeedItemLink
 
 open class SphinxUrlSpan(
     url: String?,
