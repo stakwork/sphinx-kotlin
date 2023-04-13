@@ -185,15 +185,13 @@
     <string name="episode_detail_clipboard">Link copied to clipboard</string>
     <string name="episode_detail_share_link">Share episode link</string>
     <string name="episode_detail_played_holder" translatable="false">Played</string>
-
+    <string name="episode_description_show_more">SHOW MORE</string>
+    <string name="episode_description_show_less">SHOW LESS</string>
 
     <string name="time_left">%s left</string>
 
     <string name="youtube" translatable="false">Youtube</string>
     <string name="podcast" translatable="false">Podcast</string>
-
-
-
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

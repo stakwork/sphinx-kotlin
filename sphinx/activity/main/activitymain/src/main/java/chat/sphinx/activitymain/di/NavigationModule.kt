@@ -21,6 +21,7 @@ import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.tribes_discover.navigation.TribesDiscoverNavigator
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
+import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
 import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
@@ -407,5 +408,11 @@ internal object NavigationModule {
         knownBadgesNavigatorImpl: KnownBadgesNavigatorImpl
     ): KnownBadgesNavigator =
         knownBadgesNavigatorImpl
+
+    @Provides
+    fun provideEpisodeDescriptionNavigator(
+        episodeDescriptionNavigatorImpl: EpisodeDescriptionNavigatorImpl
+    ): EpisodeDescriptionNavigator =
+        episodeDescriptionNavigatorImpl
 
 }

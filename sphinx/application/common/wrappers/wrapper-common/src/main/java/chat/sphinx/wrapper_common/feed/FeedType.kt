@@ -29,12 +29,34 @@ inline fun Int.toFeedType(): FeedType =
         }
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toFeedType(): FeedType =
+    when (this) {
+        FeedType.RECOMMENDATION_PODCAST_TYPE -> {
+            FeedType.Podcast
+        }
+        FeedType.RECOMMENDATION_YOUTUBE_VIDEO_TYPE -> {
+            FeedType.Video
+        }
+        FeedType.RECOMMENDATION_TWITTER_TYPE -> {
+            FeedType.Twitter
+        }
+        else -> {
+            FeedType.Unknown(-1)
+        }
+    }
+
 sealed class FeedType {
 
     companion object {
         const val PODCAST = 0 // SHOW
         const val VIDEO = 1
-        const val NEWSLETTER = 2 // SHOW
+        const val NEWSLETTER = 2
+        const val TWITTER = 3
+
+        const val RECOMMENDATION_PODCAST_TYPE = "podcast"
+        const val RECOMMENDATION_YOUTUBE_VIDEO_TYPE = "youtube"
+        const val RECOMMENDATION_TWITTER_TYPE = "twitter_space"
     }
 
     abstract val value: Int
@@ -52,6 +74,11 @@ sealed class FeedType {
     object Newsletter : FeedType() {
         override val value: Int
             get() = NEWSLETTER
+    }
+
+    object Twitter : FeedType() {
+        override val value: Int
+            get() = TWITTER
     }
 
     data class Unknown(override val value: Int) : FeedType()

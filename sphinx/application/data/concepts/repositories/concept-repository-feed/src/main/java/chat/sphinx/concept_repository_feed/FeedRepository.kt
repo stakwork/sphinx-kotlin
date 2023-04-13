@@ -40,6 +40,7 @@ interface FeedRepository {
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
+    fun getRecommendationFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
     fun handleFeedItemLink(link: FeedItemLink): Flow<Feed?>
 

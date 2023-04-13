@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/episode_description_nav_graph"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@+id/navigation_episode_description_fragment">
+
+<fragment
+        android:id="@+id/navigation_episode_description_fragment"
+        android:name="chat.sphinx.episode_description.ui.EpisodeDescriptionFragment"
+        tools:layout="@layout/fragment_episode_description">
+    <argument
+        android:name="argFeedId"
+        app:argType="string"/>
+    <argument
+        android:name="argIsRecommendation"
+        app:argType="boolean"/>
+    </fragment>
+
+</navigation>

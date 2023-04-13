@@ -3961,7 +3961,9 @@ abstract class SphinxRepository(
             .distinctUntilChanged()
             .collect { value: FeedItem? ->
                 value?.let { feedItem ->
-                    emit(feedItem)
+                    emit(
+                        mapFeedItemDbo(feedItem, queries)
+                    )
                 } ?: run {
                     emit(null)
                 }
@@ -4005,7 +4007,9 @@ abstract class SphinxRepository(
                 )
                 @Exhaustive
                 when (response) {
-                    is Response.Error -> { emit(null) }
+                    is Response.Error -> {
+                        emit(null)
+                    }
                     is Response.Success -> {
                         val newFeed = getFeedById(response.value).firstOrNull()
                         newFeed?.let { nnFeed ->
@@ -4031,10 +4035,41 @@ abstract class SphinxRepository(
                                 }
                             }
                         }
-                    emit(newFeed)
+                        emit(newFeed)
                     }
                 }
             }
+        }
+    }
+    override fun getRecommendationFeedItemById(
+        feedItemId: FeedId,
+    ): Flow<FeedItem?> = flow {
+        recommendationsPodcast.value?.getEpisodeWithId(feedItemId.value)?.let { episode ->
+            val item = FeedItem(
+                episode.id,
+                episode.description?.value?.toFeedTitle() ?: FeedTitle(""),
+                episode.title.value.toFeedDescription(),
+                episode.date,
+                episode.date,
+                null,
+                episode.feedType.toFeedContentType(),
+                null,
+                episode.link ?: FeedUrl(""),
+                null,
+                episode.imageUrlToShow,
+                episode.imageUrlToShow,
+                episode.link ?: FeedUrl(""),
+                FeedId(FeedRecommendation.RECOMMENDATION_PODCAST_ID),
+                FeedItemDuration(0),
+                null
+            )
+
+            item.showTitle = episode.showTitle?.value
+            item.feedType = episode.feedType.toFeedType()
+
+            emit(
+                item
+            )
         }
     }
 
@@ -4330,6 +4365,29 @@ abstract class SphinxRepository(
         feed.contentFeedStatus = contentFeedStatus
 
         return feed
+    }
+
+    private suspend fun mapFeedItemDbo(
+        feedItem: FeedItem,
+        queries: SphinxDatabaseQueries
+    ): FeedItem {
+
+        var feed = queries.feedGetById(feedItem.feedId).executeAsOneOrNull()?.let {
+            feedDboPresenterMapper.mapFrom(it)
+        }
+
+        feed?.let {
+            feed = mapFeedDbo(it, queries)
+        }
+
+        val contentEpisodeStatus = queries.contentEpisodeStatusGetByFeedIdAndItemId(feedItem.feedId, feedItem.id).executeAsOneOrNull()?.let {
+            contentEpisodeStatusDboPresenterMapper.mapFrom(it)
+        }
+
+        feedItem.contentEpisodeStatus = contentEpisodeStatus
+        feedItem.feed = feed
+
+        return feedItem
     }
 
     private val podcastDboPresenterMapper: FeedDboPodcastPresenterMapper by lazy {

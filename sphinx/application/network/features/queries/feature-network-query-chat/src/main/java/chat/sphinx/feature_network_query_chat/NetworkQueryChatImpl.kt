@@ -43,7 +43,7 @@ class NetworkQueryChatImpl(
         private const val ENDPOINT_ADD_TRIBE_MEMBER = "/tribe_member"
 
         private const val GET_TRIBE_INFO_URL = "https://%s/tribes/%s"
-        private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s"
+        private const val GET_FEED_CONTENT_URL = "https://%s/feed?url=%s&fulltext=true"
     }
 
     ///////////
