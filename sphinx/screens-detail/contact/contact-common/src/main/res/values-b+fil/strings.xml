@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="new_contact_nickname_label">Nickname *</string>
+    <string name="new_contact_nickname_label">Palayaw *</string>
     <string name="new_contact_address_label">Address *</string>
     <string name="new_contact_route_hint_label">Route Hint</string>
     <string name="new_contact_nickname_address_empty">Nickname and Address are required</string>

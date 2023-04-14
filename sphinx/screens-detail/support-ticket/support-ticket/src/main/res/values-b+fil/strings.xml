@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="support_ticket_header_name">SUPPORT</string>
-    <string name="send_message">Send Message</string>
-    <string name="copy_logs">Copy Logs</string>
+    <string name="support_ticket_header_name">SUPORTA</string>
+    <string name="send_message">Magpadala ng Mensahe</string>
+    <string name="copy_logs">Kopyahin ang Logs</string>
     <string name="describe_your_problem_here">Describe your problem here…</string>
     <string name="message_required">Message required</string>
     <string name="fetch_logs_failed">Failed to fetch logs</string>

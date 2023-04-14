@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="address_book_header_name">Address Book</string>
-    <string name="search">Search</string>
+    <string name="search">Maghanap</string>
     <string name="add_icon"></string>
-    <string name="add_friend">Add Friend</string>
+    <string name="add_friend">Magdagdag ng Kaibigan</string>
     <string name="delete_contact">Delete</string>
     <string name="block_contact">Block</string>
     <string name="unblock_contact">Unblock</string>

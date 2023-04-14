@@ -2,14 +2,14 @@
 <resources>
     <string name="add_icon"></string>
     <string name="join_tribe_link">Join Tribe Link</string>
-    <string name="add_friend">Add Friend</string>
-    <string name="add_tribe">Add Tribe</string>
-    <string name="create_tribe">Create Tribe</string>
+    <string name="add_friend">Magdagdag ng Kaibigan</string>
+    <string name="add_tribe">Mag-dagdag ng Tribo</string>
+    <string name="create_tribe">Gumawa ng Grupo</string>
     <string name="contacts">Mga contact</string>
     <string name="profile">Profile</string>
-    <string name="support">Support</string>
-    <string name="add_sats">ADD SATS</string>
-    <string name="search">Search</string>
+    <string name="support">Suporta</string>
+    <string name="add_sats">MAGDAGDAG NG  SATS</string>
+    <string name="search">Maghanap</string>
     <string name="upgrade_app">UPGRADE APP</string>
     <string name="not_valid_tribe_link">QR code is not a Join Tribe link</string>
     <string name="invite_name">Invite: %s</string>
@@ -65,11 +65,11 @@
     <string name="last_message_description_invite_signup_complete">Kumpleto na ang pag-sign up</string>
     <string name="last_message_description_invite_expired">Nag-expire na</string>
     <string name="dashboard_authorize_popup_title">Do you want to authorize with:</string>
-    <string name="dashboard_authorize_button">AUTHORIZE</string>
+    <string name="dashboard_authorize_button">PAHINTULUTAN</string>
     <string name="dashboard_authorize_generic_error">Something went wrong while authorizing external source, please try again later</string>
     <string name="dashboard_redeem_sats_popup_title">Redeem %s sats from:</string>
     <string name="dashboard_redeem_sats_button">Kumpirma</string>
-    <string name="dashboard_connect_button">CONNECT</string>
+    <string name="dashboard_connect_button">KONEKTA</string>
     <string name="dashboard_connect_price_to_meet">Price to meet: %s</string>
     <string name="dashboard_connect_description_missing">No description</string>
     <string name="dashboard_connect_initial_message_hint">Initial message to %s</string>
@@ -122,7 +122,7 @@
     <string name="dashboard_restore_progress_feeds">Restoring Feeds: %s</string>
     <string name="dashboard_restore_progress_messages">Restoring Messages: %s</string>
     <string name="dashboard_stop_restore">Continue later</string>
-    <string name="loading_recommendations">Loading Recommendations...</string>
+    <string name="loading_recommendations">Naglo-load ng Mga Rekomendasyon...</string>
     <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
     <string name="time_left">%s left</string>
 </resources>

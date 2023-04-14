@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="subscription_header_name">RECURRING</string>
+    <string name="subscription_header_name">INUULIT-ULIT</string>
     <string name="amount">Halaga</string>
     <string name="_500_sats">500 sats</string>
     <string name="_1000_sats">1000 sats</string>
     <string name="_2000_sats">2000 sats</string>
-    <string name="custom_amount">Custom amount:</string>
+    <string name="custom_amount">Mag-sadya ng halaga:</string>
     <string name="time_interval">TIME INTERVAL</string>
-    <string name="daily">Daily</string>
-    <string name="weekly">Weekly</string>
-    <string name="monthly">Monthly</string>
+    <string name="daily">Araw-araw</string>
+    <string name="weekly">Lingguhan</string>
+    <string name="monthly">Buwanan</string>
     <string name="end_rule">END RULE</string>
-    <string name="make">Make</string>
-    <string name="payments">Payments</string>
-    <string name="pay_until">Pay until</string>
+    <string name="make">Gawin</string>
+    <string name="payments">Mga Pagbabayad</string>
+    <string name="pay_until">Magbayad hanggang</string>
     <string name="delete_subscription">Delete subscription</string>
     <string name="are_you_sure_you_want_to_delete_subscription">Sigurado ka bang gusto mong tanggalin ang subscription na ito?</string>
     <string name="amount_is_required">Amount is required</string>

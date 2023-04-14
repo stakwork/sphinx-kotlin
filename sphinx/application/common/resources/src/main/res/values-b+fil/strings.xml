@@ -86,8 +86,8 @@
     <string name="material_icon_name_group_action_reject_join_request">close</string>
     <string name="media_type_label_audio">Audio</string>
     <string name="media_type_label_video">Video</string>
-    <string name="group_pin_label">Privacy Setting</string>
-    <string name="new_contact_pin_standard_private_label">Standard PIN / Privacy PIN</string>
+    <string name="group_pin_label">Setting ng Privacy</string>
+    <string name="new_contact_pin_standard_private_label">Karaniwang PIN / PribadongPIN</string>
     <string name="invalid_url">None</string>
     <string name="relay_url_http_message">The Relay URL to be saved is using \'http\'. Network traffic will not be encrypted. Https is strongly recommended. Please confirm the URL Scheme to use.</string>
     <string name="relay_url_http_negative_keep_http">http</string>
@@ -140,8 +140,8 @@
     <string name="tribe_member_profile_price_to_meet">Price to Meet:</string>
     <string name="tribe_member_profile_badges">Mga Badge</string>
     <string name="tribe_member_profile_reputation">Reputasyon</string>
-    <string name="tribe_member_profile_coding_languages">Coding Languages:</string>
-    <string name="tribe_member_profile_post">Posts:</string>
+    <string name="tribe_member_profile_coding_languages">Mga Lenguahe sa Coding:</string>
+    <string name="tribe_member_profile_post">Mga Post:</string>
     <string name="tribe_member_profile_twitter">Twitter:</string>
     <string name="tribe_member_profile_github">Github:</string>
     <string name="tribe_member_profile_contributions">Contributions</string>
@@ -154,7 +154,7 @@
     <string name="episode_detail_copy_link">Kopyahin ang Link</string>
     <string name="episode_detail_played">Markahan na na-play na</string>
     <string name="episode_detail_upplayed">Markahan bilang hindi na-play</string>
-    <string name="episode_detail_close">CLOSE</string>
+    <string name="episode_detail_close">ISARA</string>
     <string name="episode_detail_clipboard">Nakopya ang link sa clipboard</string>
     <string name="episode_detail_share_link">Share episode link</string>
     <string name="episode_detail_played_holder">Na-play</string>
