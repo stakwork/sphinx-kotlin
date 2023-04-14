@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha90 (2023-04-14)
+- Fixes recommendations issues
+
 # Version 1.0.0-alpha89 (2023-04-13)
 - Adds sharing inside Sphinx
 
