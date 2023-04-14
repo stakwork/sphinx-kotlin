@@ -4,6 +4,6 @@
     <string name="camera_retake">Retake</string>
     <string name="camera_use_photo">Use Photo</string>
     <string name="camera_use_video">Use Video</string>
-    <string name="camera_cancel">Cancel</string>
+    <string name="camera_cancel">Kanselahin</string>
     <string name="camera_shutter_instruction">Tap for picture, hold for video</string>
 </resources>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="share">Share</string>
+    <string name="share">Ibahagi</string>
     <string name="copy">Copy</string>
     <string name="paid">PAID</string>
     <string name="qr_code_notify_copied">%s copied to clipboard</string>

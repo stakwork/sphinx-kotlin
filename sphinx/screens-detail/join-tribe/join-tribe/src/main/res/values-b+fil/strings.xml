@@ -3,14 +3,12 @@
     <string name="join_tribe_header_name">JOIN TRIBE</string>
     <string name="loading_tribe_text_view">Loading Tribe info...</string>
     <string name="join_tribe_button">JOIN TRIBE</string>
-
     <string name="bottom_menu_tribe_profile_pic_header_text">Tribe Profile Picture</string>
-    <string name="profile_picture">Profile Picture</string>
+    <string name="profile_picture">Larawan sa Profile</string>
     <string name="price_to_join_label">Price to join:</string>
     <string name="price_per_message_label">Price per message:</string>
     <string name="amount_to_stake_label">Amount to stake:</string>
     <string name="time_to_stake_label">Time to stake (hours):</string>
-
     <string name="alias_edit_text_label">Alias</string>
     <string name="join_tribe_alias_empty">Alias is required.</string>
     <string name="invalid_tribe">Invalid Tribe</string>

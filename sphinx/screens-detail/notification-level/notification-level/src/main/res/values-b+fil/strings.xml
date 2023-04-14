@@ -2,7 +2,6 @@
 <resources>
     <string name="notification_level_header_name">NOTIFICATIONS</string>
     <string name="notification_level_failed">Failed to set notification level</string>
-
     <string name="notification_level_see_all">See all</string>
     <string name="notification_level_only_mentions">Only mentions</string>
     <string name="notification_level_mute_chat">Mute chat</string>
