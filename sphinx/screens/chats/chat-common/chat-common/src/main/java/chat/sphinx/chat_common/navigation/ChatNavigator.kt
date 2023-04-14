@@ -5,6 +5,8 @@ import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_chat.ChatType
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageId
@@ -30,6 +32,11 @@ abstract class ChatNavigator(
     )
 
     abstract suspend fun toJoinTribeDetail(tribeLink: TribeJoinLink)
+
+    abstract suspend fun toVideoWatchScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl)
+    abstract suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl)
+
+    abstract suspend fun toPodcastPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl)
 
     @JvmSynthetic
     suspend fun popBackStack() {

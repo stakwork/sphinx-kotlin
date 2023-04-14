@@ -215,8 +215,8 @@ internal class PodcastEpisodesListAdapter(
             }
 
             binding.buttonEpisodeShare.setOnClickListener {
-                episode?.let { nnEpisode ->
-                    viewModel.share(nnEpisode.episodeUrl, binding.root.context)
+                episode?.id?.let { feedId ->
+                    viewModel.share(feedId, binding.root.context)
                 }
             }
         }

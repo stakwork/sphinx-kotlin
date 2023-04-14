@@ -2,6 +2,8 @@ package chat.sphinx.chat_common.model
 
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.wrapper_common.feed.FeedItemLink
+import chat.sphinx.wrapper_common.feed.toFeedItemLink
 import chat.sphinx.wrapper_common.lightning.LightningNodeDescriptor
 import chat.sphinx.wrapper_common.lightning.toLightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.toVirtualLightningNodeAddress
@@ -36,6 +38,10 @@ sealed interface MessageLinkPreview {
                 } ?: group.toTribeJoinLink()?.let { nnTribeLink ->
 
                     TribeLink(nnTribeLink)
+
+                } ?: group.toFeedItemLink()?.let { nnFeedItemLink ->
+
+                    FeedItemPreview(nnFeedItemLink)
 
                 } ?: run {
                     if (!urlLinkPreviewsEnabled) {
@@ -74,7 +80,15 @@ value class NodeDescriptor(val nodeDescriptor: LightningNodeDescriptor): Message
 value class TribeLink(val tribeJoinLink: TribeJoinLink): MessageLinkPreview
 
 /**
+ * When a feed item is shared
+ * */
+@JvmInline
+value class FeedItemPreview(val feedItemLink: FeedItemLink): MessageLinkPreview
+
+/**
  * When a url is shared
  * */
 @JvmInline
 value class UnspecifiedUrl(val url: String): MessageLinkPreview
+
+

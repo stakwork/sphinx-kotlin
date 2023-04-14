@@ -128,6 +128,8 @@
     <string name="loading" translatable="false">Loading</string>
     <string name="refresh_icon" translatable="false">refresh</string>
     <string name="no_recommendations" translatable="false">No recommendations to show</string>
+    <string name="share_from_beginning">Share from beginning</string>
+    <string name="share_from_current_time">Share from current time</string>
 
     <string name="select_badges">Select and customize</string>
     <string name="your_badges">your tribe badges</string>

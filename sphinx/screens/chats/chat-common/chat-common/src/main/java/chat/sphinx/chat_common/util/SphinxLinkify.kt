@@ -16,6 +16,7 @@ import androidx.annotation.IntDef
 import androidx.annotation.RestrictTo
 import androidx.core.util.PatternsCompat
 import chat.sphinx.chat_common.R
+import chat.sphinx.wrapper_common.feed.FeedItemLink
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.VirtualLightningNodeAddress
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
@@ -68,6 +69,12 @@ object SphinxLinkify {
     const val MENTION: Int = 0x32
 
     /**
+     * Bit field indicating that [FeedItemLink] should be matched in methods that
+     * take an options mask
+     */
+    const val FEED_ITEM: Int = 0x64
+
+    /**
      * Bit mask indicating that all available patterns should be matched in
      * methods that take an options mask
      *
@@ -75,7 +82,7 @@ object SphinxLinkify {
      * Use [android.view.textclassifier.TextClassifier.generateLinks]
      * instead and avoid it even when targeting API levels where no alternative is available.
      */
-    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLIC_KEY or VIRTUAL_NODE_ADDRESS or MENTION
+    const val ALL: Int = WEB_URLS or EMAIL_ADDRESSES or PHONE_NUMBERS or LIGHTNING_NODE_PUBLIC_KEY or VIRTUAL_NODE_ADDRESS or MENTION or FEED_ITEM
 
     private val COMPARATOR: Comparator<LinkSpec> = object : Comparator<LinkSpec> {
         override fun compare(a: LinkSpec, b: LinkSpec): Int {
@@ -134,6 +141,13 @@ object SphinxLinkify {
         }
         if (mask and PHONE_NUMBERS != 0) {
             Linkify.addLinks(text, Linkify.PHONE_NUMBERS)
+        }
+
+        if (mask and FEED_ITEM != 0) {
+            gatherLinks(
+                links, text, SphinxPatterns.FEED_ITEM, arrayOf(),
+                null, null
+            )
         }
 
         if (mask and WEB_URLS != 0) {
@@ -353,7 +367,7 @@ object SphinxLinkify {
         )
 
         val LINK_PREVIEWS: Pattern = Pattern.compile(
-            "(${TribeJoinLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
+            "(${TribeJoinLink.REGEX}|${FeedItemLink.REGEX}|${PatternsCompat.AUTOLINK_WEB_URL.pattern()}|${VirtualLightningNodeAddress.REGEX}|${LightningNodePubKey.REGEX})"
         )
             
         val COPYABLE_LINKS: Pattern = Pattern.compile(
@@ -362,6 +376,10 @@ object SphinxLinkify {
 
         val MENTION: Pattern = Pattern.compile(
             "\\B@[^\\s]+"
+        )
+
+        val FEED_ITEM: Pattern = Pattern.compile(
+            FeedItemLink.REGEX
         )
     }
 }
