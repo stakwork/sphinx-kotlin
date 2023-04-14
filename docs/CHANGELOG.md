@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha89 (2023-04-13)
+- Adds sharing inside Sphinx
+
 # Version 1.0.0-alpha88 (2023-04-10)
 - Adds feed item description view
 
