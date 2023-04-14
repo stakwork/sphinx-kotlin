@@ -8,6 +8,7 @@ import android.content.Intent
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import androidx.core.view.ContentInfoCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -203,12 +204,15 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
                 (currentViewState as? EpisodeDescriptionViewState.ItemDescription)?.feedItemDescription?.let { feedItemDescription ->
-                    val link = when (feedItemDescription.feedType) {
-                        is FeedType.Podcast -> _feedItemStateFlow.value?.id?.let {
-                            generateSphinxFeedItemLink(it)
-                        } ?: ""
-                        else -> _feedItemStateFlow.value?.link?.value ?: ""
-                    }
+
+                   val link = _feedItemStateFlow.value?.id?.let { feedId ->
+                        if (feedItemDescription.feedType is FeedType.Podcast && !feedItemDescription.isRecommendation) {
+                            generateSphinxFeedItemLink(feedId)
+                        } else {
+                            _feedItemStateFlow.value?.link?.value ?: ""
+                        }
+                    } ?: _feedItemStateFlow.value?.link?.value ?: ""
+
                     val clipData = ClipData.newPlainText("text", link)
                     manager.setPrimaryClip(clipData)
                     submitSideEffect(
@@ -291,13 +295,15 @@ internal class EpisodeDescriptionViewModel @Inject constructor(
     ) {
         viewModelScope.launch(mainImmediate) {
             (currentViewState as? EpisodeDescriptionViewState.ItemDescription)?.feedItemDescription?.let { feedItemDescription ->
-                val link = when (feedItemDescription.feedType) {
 
-                    is FeedType.Podcast -> _feedItemStateFlow.value?.id?.let {
-                        generateSphinxFeedItemLink(it)
-                    } ?: ""
-                    else -> _feedItemStateFlow.value?.link?.value ?: ""
-                }
+                val link = _feedItemStateFlow.value?.id?.let { feedId ->
+                    if (feedItemDescription.feedType is FeedType.Podcast && !feedItemDescription.isRecommendation) {
+                        generateSphinxFeedItemLink(feedId)
+                    } else {
+                        _feedItemStateFlow.value?.link?.value ?: ""
+                    }
+                } ?: _feedItemStateFlow.value?.link?.value ?: ""
+
                 val sharingIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, link)
