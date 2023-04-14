@@ -200,6 +200,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     }
                     is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
                         podcast.pauseEpisodeUpdate()
+
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.MediaStateUpdate(
                                 podcast,
@@ -402,13 +403,13 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcastFeed()?.let { podcast ->
-                podcast.getEpisodeWithId(episode.id.value)?.let {
+                podcast.getEpisodeWithId(episode.id.value)?.let { episode ->
                     if (mediaPlayerServiceController.getPlayingContent()?.second == episode.id.value) {
-                        pauseEpisode(it)
+                        pauseEpisode(episode)
                     } else {
-                        viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(it))
+                        viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
                         delay(50L)
-                        playEpisode(it)
+                        playEpisode(episode)
                     }
                 }
             }

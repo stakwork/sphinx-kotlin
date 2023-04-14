@@ -543,16 +543,17 @@ internal abstract class MediaPlayerService: SphinxService() {
                     userAction.contentFeedStatus.subscriptionStatus
                 )
 
-                if (mp.duration == 0) {
+                mp.setOnErrorListener { _, _, _ ->
                     currentState = MediaPlayerServiceState.ServiceActive.MediaState.Failed(
                         userAction.chatId,
                         userAction.contentFeedStatus.feedId.value,
                         userAction.contentEpisodeStatus.itemId.value,
-                        0,
-                        0,
+                        userAction.contentEpisodeStatus.currentTime.value.toInt(),
+                        userAction.contentEpisodeStatus.duration.value.toInt(),
                         userAction.contentFeedStatus.playerSpeed?.value ?: 1.0
                     )
                     mediaServiceController.dispatchState(currentState)
+                    true
                 }
             }
         }
