@@ -15,4 +15,8 @@ inline val Response.Error<ResponseError>.message: String
 inline val Response.Error<ResponseError>.exception: Exception?
     get() = cause.exception
 
-data class ResponseError(val message: String, val exception: Exception? = null)
+data class ResponseError(
+    val message: String,
+    val exception: Exception? = null,
+    val statusCode: Long? = null
+)

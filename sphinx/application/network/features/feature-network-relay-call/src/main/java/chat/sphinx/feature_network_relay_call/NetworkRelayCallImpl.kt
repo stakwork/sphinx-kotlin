@@ -7,6 +7,7 @@ import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_network_relay_call.RelayListResponse
 import chat.sphinx.concept_network_relay_call.RelayResponse
+import chat.sphinx.concept_relay.CustomException
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.kotlin_response.LoadResponse
@@ -145,13 +146,15 @@ class NetworkRelayCallImpl(
 
         emit(LoadResponse.Loading)
 
+        var response: T?
+
         try {
             val requestBuilder = buildRequest(url, headers)
 
-            val response = call(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
+            response = call(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
 
             emit(Response.Success(response))
-        } catch (e: Exception) {
+        } catch (e: CustomException) {
             emit(handleException(LOG, GET, url, e))
         }
     }
@@ -305,7 +308,7 @@ class NetworkRelayCallImpl(
         networkClient.addListener(this)
     }
 
-    @Throws(NullPointerException::class, IOException::class)
+    @Throws(NullPointerException::class, CustomException::class)
     override suspend fun <T: Any> call(
         responseJsonClass: Class<T>,
         request: Request,
@@ -334,7 +337,7 @@ class NetworkRelayCallImpl(
 
         if (!networkResponse.isSuccessful) {
             networkResponse.body?.close()
-            throw IOException(networkResponse.toString())
+            throw CustomException(networkResponse.toString(), networkResponse.code)
         }
 
         val body = networkResponse.body ?: throw NullPointerException(
@@ -346,11 +349,12 @@ class NetworkRelayCallImpl(
 
         return withContext(default) {
             moshi.adapter(responseJsonClass).fromJson(body.source())
-        } ?: throw IOException(
+        } ?: throw CustomException(
             """
                 Failed to convert Json to ${responseJsonClass.simpleName}
                 NetworkResponse: $networkResponse
-            """.trimIndent()
+            """.trimIndent(),
+            networkResponse.code
         )
     }
 
