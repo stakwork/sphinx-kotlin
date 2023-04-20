@@ -52,7 +52,7 @@ inline fun BalanceDto.toNodeBalance(): NodeBalance =
     NodeBalance(
         Sat(reserve),
         Sat(full_balance),
-        Sat(0),
+        Sat(balance),
         Sat(pending_open_balance),
     )
 

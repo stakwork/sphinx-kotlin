@@ -20,6 +20,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -154,7 +155,7 @@ class NetworkRelayCallImpl(
             response = call(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
 
             emit(Response.Success(response))
-        } catch (e: CustomException) {
+        } catch (e: Exception) {
             emit(handleException(LOG, GET, url, e))
         }
     }
@@ -348,7 +349,17 @@ class NetworkRelayCallImpl(
         )
 
         return withContext(default) {
-            moshi.adapter(responseJsonClass).fromJson(body.source())
+            try{
+                moshi.adapter(responseJsonClass).fromJson(body.source())
+            } catch (e: Exception) {
+                throw CustomException(
+                    """
+                Failed to convert Json to ${responseJsonClass.simpleName}
+                NetworkResponse: $networkResponse
+            """.trimIndent(),
+                    networkResponse.code
+                )
+            }
         } ?: throw CustomException(
             """
                 Failed to convert Json to ${responseJsonClass.simpleName}
@@ -399,7 +410,17 @@ class NetworkRelayCallImpl(
         val listMyData = Types.newParameterizedType(List::class.java, responseJsonClass)
 
         return withContext(default) {
-            moshi.adapter<List<T>>(listMyData).fromJson(body.source())
+            try{
+                moshi.adapter<List<T>>(listMyData).fromJson(body.source())
+            } catch (e: Exception) {
+                throw CustomException(
+                    """
+                Failed to convert Json to ${responseJsonClass.simpleName}
+                NetworkResponse: $networkResponse
+            """.trimIndent(),
+                    networkResponse.code
+                )
+            }
         } ?: throw IOException(
             """
                 Failed to convert Json to ${responseJsonClass.simpleName}

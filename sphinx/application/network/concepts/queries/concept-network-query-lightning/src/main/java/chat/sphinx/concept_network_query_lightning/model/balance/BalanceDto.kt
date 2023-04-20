@@ -6,6 +6,6 @@ import com.squareup.moshi.JsonClass
 data class BalanceDto(
     val reserve: Long,
     val full_balance: Long,
-    val balance: Boolean,
+    val balance: Long,
     val pending_open_balance: Long
 )
