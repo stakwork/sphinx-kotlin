@@ -162,7 +162,9 @@ internal class DashboardFragment : MotionLayoutFragment<
             }.attach()
 
             viewPagerDashboardTabs.offscreenPageLimit = 3
-            
+
+            viewPagerDashboardTabs.setCurrentItem(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION,false)
+
             viewPagerDashboardTabs.post {
                 viewPagerDashboardTabs.currentItem = viewModel.getCurrentPagePosition()
 
@@ -206,7 +208,6 @@ internal class DashboardFragment : MotionLayoutFragment<
             val tribesTitle = DashboardFragmentsAdapter.TAB_TITLES[DashboardFragmentsAdapter.TRIBES_TAB_POSITION]
             tribesTab?.findViewById<TextView>(R.id.text_view_tab_title)?.text = getString(tribesTitle)
 
-            tabs.selectTab(tabs.getTabAt(DashboardFragmentsAdapter.FRIENDS_TAB_POSITION))
         }
     }
 
