@@ -31,4 +31,15 @@ internal sealed class TransactionHolderViewState(
         invoice,
         messageSenderName
     )
+
+    class Failed(
+        transaction: TransactionDto,
+        invoice: Message?,
+        messageSenderName: String?
+    ) : TransactionHolderViewState(
+        transaction,
+        invoice,
+        messageSenderName
+    )
+
 }

@@ -22,6 +22,7 @@ data class TransactionDto(
     val payment_request: String?,
     val date: String,
     val reply_uuid: String?,
+    val error_message: String?
 ) {
 
     fun isIncomingWithSender(ownerId: ContactId): Boolean {
@@ -55,4 +56,5 @@ data class TransactionDto(
     fun getChatId(): ChatId? {
         return chat_id?.toChatId()
     }
+
 }

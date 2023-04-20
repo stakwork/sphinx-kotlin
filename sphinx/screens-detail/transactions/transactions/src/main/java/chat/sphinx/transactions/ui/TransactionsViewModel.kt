@@ -216,21 +216,33 @@ internal class TransactionsViewModel @Inject constructor(
             val senderId = contactIdsMap[transaction.id]
             val senderAlias: String? = contactAliasMap[transaction.id]?.value ?: contactsMap[senderId?.value]?.alias?.value
 
-            transactionsHVSs.add(
-                if (transaction.sender == owner.id.value) {
+            if (transaction.sender == owner.id.value && transaction.error_message.isNullOrEmpty()) {
+                transactionsHVSs.add(
                     TransactionHolderViewState.Outgoing(
                         transaction,
                         null,
                         senderAlias ?: "-",
                     )
-                } else {
+                )
+            }
+            if (transaction.sender != owner.id.value) {
+                transactionsHVSs.add(
                     TransactionHolderViewState.Incoming(
                         transaction,
                         null,
                         senderAlias ?: "-",
                     )
-                }
-            )
+                )
+            }
+            if (!transaction.error_message.isNullOrEmpty()) {
+                transactionsHVSs.add(
+                    TransactionHolderViewState.Failed(
+                        transaction,
+                        null,
+                        senderAlias ?: "-",
+                    )
+                )
+            }
         }
 
         if (transactions.size == itemsPerPage) {

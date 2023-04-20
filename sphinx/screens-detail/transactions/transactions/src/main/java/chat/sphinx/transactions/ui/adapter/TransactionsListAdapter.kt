@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
-import chat.sphinx.concept_network_query_message.model.TransactionDto
 import chat.sphinx.transactions.databinding.LayoutTransactionHolderBinding
 import chat.sphinx.transactions.ui.TransactionsViewModel
 import chat.sphinx.transactions.ui.TransactionsViewState
@@ -16,6 +15,7 @@ import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toDateTime
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -166,6 +166,13 @@ internal class TransactionsListAdapter(
 
                 includeOutgoingTransaction.apply {
                     root.goneIfFalse(t is TransactionHolderViewState.Outgoing)
+
+                    textViewTransactionAmount.text = amount
+                    textViewTransactionDate.text = dateString
+                    textViewTransactionSenderReceiver.text = senderReceiverName
+                }
+                includeFailedTransaction.apply {
+                    root.goneIfFalse(t is TransactionHolderViewState.Failed)
 
                     textViewTransactionAmount.text = amount
                     textViewTransactionDate.text = dateString

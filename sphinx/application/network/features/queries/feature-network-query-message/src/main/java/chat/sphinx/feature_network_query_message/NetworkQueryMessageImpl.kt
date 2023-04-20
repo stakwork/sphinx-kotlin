@@ -57,7 +57,7 @@ class NetworkQueryMessageImpl(
     ): Flow<LoadResponse<List<TransactionDto>, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetPaymentsRelayResponse::class.java,
-            relayEndpoint = "$ENDPOINT_PAYMENTS?offset=$offset&limit=$limit",
+            relayEndpoint = "$ENDPOINT_PAYMENTS?offset=$offset&limit=$limit&include_failures=true",
             relayData = relayData
         )
 
