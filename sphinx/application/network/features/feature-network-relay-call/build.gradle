@@ -2,6 +2,7 @@ plugins {
     id 'app.cash.exhaustive'
     id 'java-library'
     id 'kotlin'
+    id 'kotlin-kapt'
 }
 
 dependencies {
@@ -17,4 +18,5 @@ dependencies {
     // needed to override moshi's use of 1.4.31
     api deps.kotlin.reflect
     api deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
 }

@@ -22,10 +22,7 @@ import chat.sphinx.wrapper_relay.TransportToken
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -332,25 +329,24 @@ class NetworkRelayCallImpl(
             client.newCall(request).execute()
         }
 
-        if (!networkResponse.isSuccessful) {
-            networkResponse.body?.let { body ->
-                val responseDto = try {
-                    moshi.adapter(NetworkRelayCallErrorDto::class.java).fromJson(body.source())
-                } catch (e: Exception) {
-                    networkResponse.body?.close()
-                    throw IOException(networkResponse.toString())
-                }
-                networkResponse.body?.close()
-                throw IOException(responseDto?.error ?: networkResponse.toString())
-            }
-        }
-
         val body = networkResponse.body ?: throw NullPointerException(
             """
                 NetworkResponse.body returned null
                 NetworkResponse: $networkResponse
             """.trimIndent()
         )
+
+        if (!networkResponse.isSuccessful) {
+            val response = try {
+                moshi.adapter(NetworkRelayErrorResponseDto::class.java).fromJson(body.source())
+            } catch (e: Exception) {
+                body.close()
+                throw IOException(networkResponse.toString())
+            }
+
+            body.close()
+            throw IOException(response?.error ?: networkResponse.toString())
+        }
 
         return withContext(default) {
             moshi.adapter(responseJsonClass).fromJson(body.source())
