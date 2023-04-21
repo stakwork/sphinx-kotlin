@@ -98,8 +98,6 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupPopups()
         setupRestorePopup()
         setupBottomMenuScanner()
-
-        viewModel.networkRefresh(true)
     }
 
     override fun onPause() {

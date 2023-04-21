@@ -136,6 +136,8 @@ internal class DashboardViewModel @Inject constructor(
 
         actionsRepository.syncActions()
         feedRepository.restoreContentFeedStatuses()
+
+        networkRefresh(true)
     }
     
     private fun getRelayKeys() {
