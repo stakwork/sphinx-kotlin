@@ -171,10 +171,11 @@ internal class PaymentSendViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val sendPayment = sendPaymentBuilder.build()
 
-            when (messageRepository.sendPayment(sendPayment)) {
+            when (val response = messageRepository.sendPayment(sendPayment)) {
                 is Response.Error -> {
                     submitSideEffect(
-                        PaymentSideEffect.Notify(app.getString(R.string.error_processing_payment))
+                        PaymentSideEffect.Notify(
+                            String.format(app.getString(R.string.error_payment_message), response.cause.message))
                     )
                     viewStateContainer.updateViewState(PaymentSendViewState.PaymentFailed)
                 }

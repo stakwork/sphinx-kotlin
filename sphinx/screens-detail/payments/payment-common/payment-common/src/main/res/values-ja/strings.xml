@@ -9,6 +9,7 @@
     <string name="continue_button">次へ</string>
     <string name="error_processing_payment">送金できませんでした。後ほど再度お試しください。</string>
     <string name="payment_sent">%2$sに%1$d sat 送金しました</string>
+    <string name="error_payment_message">Payment error: %s </string>
 
     <string name="alert_confirm_payment_send_title">送金</string>
     <string name="alert_confirm_payment_send_message">%2$sに%1$d sat 送金してよいですか？</string>
