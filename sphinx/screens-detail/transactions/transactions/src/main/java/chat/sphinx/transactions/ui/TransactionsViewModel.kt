@@ -216,7 +216,7 @@ internal class TransactionsViewModel @Inject constructor(
             val senderId = contactIdsMap[transaction.id]
             val senderAlias: String? = contactAliasMap[transaction.id]?.value ?: contactsMap[senderId?.value]?.alias?.value
 
-            if (transaction.sender == owner.id.value && transaction.error_message.isNullOrEmpty()) {
+            if (transaction.isOutgoingPayment(owner.id)) {
                 transactionsHVSs.add(
                     TransactionHolderViewState.Outgoing(
                         transaction,
@@ -225,7 +225,7 @@ internal class TransactionsViewModel @Inject constructor(
                     )
                 )
             }
-            if (transaction.sender != owner.id.value) {
+            if (transaction.isIncomingPayment(owner.id)) {
                 transactionsHVSs.add(
                     TransactionHolderViewState.Incoming(
                         transaction,
@@ -234,7 +234,7 @@ internal class TransactionsViewModel @Inject constructor(
                     )
                 )
             }
-            if (!transaction.error_message.isNullOrEmpty()) {
+            if (transaction.isFailedPayment()) {
                 transactionsHVSs.add(
                     TransactionHolderViewState.Failed(
                         transaction,

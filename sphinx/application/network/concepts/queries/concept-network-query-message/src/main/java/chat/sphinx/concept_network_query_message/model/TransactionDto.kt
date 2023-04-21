@@ -57,4 +57,16 @@ data class TransactionDto(
         return chat_id?.toChatId()
     }
 
+    fun isOutgoingPayment(ownerId: ContactId): Boolean {
+        return sender == ownerId.value && error_message.isNullOrEmpty()
+    }
+
+    fun isIncomingPayment(ownerId: ContactId): Boolean {
+        return sender != ownerId.value
+    }
+
+    fun isFailedPayment(): Boolean {
+        return !error_message.isNullOrEmpty()
+    }
+
 }
