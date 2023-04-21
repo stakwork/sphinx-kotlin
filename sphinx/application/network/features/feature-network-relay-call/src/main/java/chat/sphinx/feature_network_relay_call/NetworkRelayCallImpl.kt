@@ -334,16 +334,13 @@ class NetworkRelayCallImpl(
 
         if (!networkResponse.isSuccessful) {
             networkResponse.body?.let { body ->
-
-                networkResponse.body?.close()
-
                 val responseDto = try {
                     moshi.adapter(NetworkRelayCallErrorDto::class.java).fromJson(body.source())
                 } catch (e: Exception) {
                     networkResponse.body?.close()
                     throw IOException(networkResponse.toString())
                 }
-
+                networkResponse.body?.close()
                 throw IOException(responseDto?.error ?: networkResponse.toString())
             }
         }
