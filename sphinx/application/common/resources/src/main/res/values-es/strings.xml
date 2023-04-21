@@ -31,6 +31,7 @@
 
     <string name="amount_n_sats">Monto: %d sats</string>
     <string name="payment_request">Solicitud de Pago</string>
+    <string name="error_payment_message">Error de pago: %s </string>
     <string name="failed_to_request_payment">La solicitud de pago falló</string>
     <!-- Tribe Member error messages -->
     <string name="failed_to_approve_member">No se ha podido aprobar la solicitud</string>

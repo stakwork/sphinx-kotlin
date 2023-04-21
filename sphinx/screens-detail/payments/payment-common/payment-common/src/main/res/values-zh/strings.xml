@@ -9,7 +9,6 @@
     <string name="continue_button">繼續</string>
     <string name="error_processing_payment">支付遇到錯誤, 請稍後再試一次.</string>
     <string name="payment_sent"> %1$d sat 的支付已送達 %2$s</string>
-    <string name="error_payment_message">Payment error: %s </string>
 
     <string name="alert_confirm_payment_send_title">支付</string>
     <string name="alert_confirm_payment_send_message">你確定要支付 %1$d 給 %2$s 嗎?</string>
