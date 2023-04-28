@@ -24,10 +24,7 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -335,18 +332,25 @@ class NetworkRelayCallImpl(
         val networkResponse = withContext(io) {
             client.newCall(request).execute()
         }
-
-        if (!networkResponse.isSuccessful) {
-            networkResponse.body?.close()
-            throw CustomException(networkResponse.toString(), networkResponse.code)
-        }
-
+        
         val body = networkResponse.body ?: throw NullPointerException(
             """
                 NetworkResponse.body returned null
                 NetworkResponse: $networkResponse
             """.trimIndent()
         )
+
+        if (!networkResponse.isSuccessful) {
+            val response = try {
+                moshi.adapter(NetworkRelayErrorResponseDto::class.java).fromJson(body.source())
+            } catch (e: Exception) {
+                body.close()
+                throw IOException(networkResponse.toString())
+            }
+
+            body.close()
+            throw IOException(response?.error ?: networkResponse.toString())
+        }
 
         return withContext(default) {
             try{

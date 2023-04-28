@@ -958,7 +958,11 @@ internal class DashboardViewModel @Inject constructor(
                     }
                     is Response.Error -> {
                         submitSideEffect(
-                            ChatListSideEffect.Notify(app.getString(R.string.failed_to_pay_request), true)
+                            ChatListSideEffect.Notify(
+                                String.format(
+                                    app.getString(R.string.error_payment_message),
+                                    loadResponse.exception?.message ?: loadResponse.cause.message
+                                ), true)
                         )
                     }
                     is Response.Success -> {
