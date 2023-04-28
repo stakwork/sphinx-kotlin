@@ -5,6 +5,7 @@ import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import io.matthewnelson.crypto_common.clazzes.Password
+import java.io.IOException
 
 @Suppress("NOTHING_TO_INLINE")
 suspend inline fun RelayDataHandler.retrieveRelayUrlAndToken(
@@ -94,4 +95,17 @@ abstract class RelayDataHandler {
      * Returns a properly formatted [RelayUrl]
      * */
     abstract fun formatRelayUrl(relayUrl: RelayUrl): RelayUrl
+}
+
+open class CustomException : IOException {
+
+    var code: Int? = null
+
+    constructor(message: String?, code: Int?): super(message) {
+        this.code = code
+    }
+
+    companion object {
+        const val serialVersionUID = 7818375828146090155L
+    }
 }
