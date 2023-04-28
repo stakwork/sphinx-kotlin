@@ -32,6 +32,7 @@
 
     <string name="amount_n_sats">金額: %d sats</string>
     <string name="payment_request">送金をリクエスト</string>
+    <string name="error_payment_message">Payment error: %s </string>
     <string name="failed_to_request_payment">送金をリクエストできませんでした</string>
     <string name="failed_to_approve_member">メンバーを承認できませんでした</string>
     <string name="failed_to_reject_member">メンバーを拒否できませんでした</string>

@@ -2008,7 +2008,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 @Exhaustive
                 when (val response = messageRepository.payPaymentRequest(message)) {
                     is Response.Error -> {
-                        submitSideEffect(ChatSideEffect.Notify(response.cause.message))
+                        submitSideEffect(ChatSideEffect.Notify(
+                            String.format(
+                                app.getString(R.string.error_payment_message),
+                                response.exception?.message ?: response.cause.message
+                            )
+                        ))
                     }
                     is Response.Success -> {
                         delay(100L)

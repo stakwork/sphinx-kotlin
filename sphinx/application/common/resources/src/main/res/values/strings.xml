@@ -111,6 +111,7 @@
     <string name="relay_url_http_positive_change_to_https">https</string>
 
     <string name="payment_request">Payment Request</string>
+    <string name="error_payment_message">Payment error: %s </string>
     <string name="amount_n_sats">Amount: %d sats</string>
     <string name="failed_to_request_payment">Failed to request payment</string>
 

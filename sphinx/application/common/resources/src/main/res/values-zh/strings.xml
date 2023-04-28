@@ -31,6 +31,7 @@
 
     <string name="amount_n_sats">金額: %d sats</string>
     <string name="payment_request">收款帳單</string>
+    <string name="error_payment_message">Payment error: %s </string>
     <string name="failed_to_request_payment">無法收款</string>
     <string name="failed_to_approve_member">接受會員失敗</string>
     <string name="failed_to_reject_member">拒絕會員失敗</string>

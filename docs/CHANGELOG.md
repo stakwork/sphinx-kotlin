@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha91 (2023-04-28)
+- Improves payments error handling
+- Fixes crashes
+- Improves Dashboard loading
+
 # Version 1.0.0-alpha90 (2023-04-14)
 - Fixes recommendations issues
 

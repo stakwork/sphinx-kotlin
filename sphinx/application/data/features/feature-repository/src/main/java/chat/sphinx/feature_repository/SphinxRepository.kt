@@ -44,6 +44,7 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_verify_external.model.RedeemSatsDto
+import chat.sphinx.concept_relay.CustomException
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -209,6 +210,9 @@ abstract class SphinxRepository(
         const val MEDIA_PROVISIONAL_TOKEN = "Media_Provisional_Token"
 
         const val AUTHORIZE_EXTERNAL_BASE_64 = "U3BoaW54IFZlcmlmaWNhdGlvbg=="
+
+        const val AUTHENTICATION_ERROR = 401
+
     }
 
     ////////////////
@@ -1804,6 +1808,12 @@ abstract class SphinxRepository(
                     }
                     is Response.Error -> {
                         emit(loadResponse)
+
+                        (loadResponse.exception as? CustomException)?.let { exception ->
+                            if (exception.code == AUTHENTICATION_ERROR) {
+                                saveTransportKey()
+                            }
+                        }
                     }
                     is Response.Success -> {
 
@@ -6287,11 +6297,8 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
     }
 
-    override fun getAndSaveTransportKey() {
+    override fun saveTransportKey() {
         applicationScope.launch(io) {
-            relayDataHandler.retrieveRelayTransportKey()?.let {
-                return@launch
-            }
             relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
                 networkQueryRelayKeys.getRelayTransportKey(
                     relayUrl
@@ -6310,6 +6317,15 @@ abstract class SphinxRepository(
                     }
                 }
             }
+        }
+    }
+
+    override fun getAndSaveTransportKey() {
+        applicationScope.launch(io) {
+            relayDataHandler.retrieveRelayTransportKey()?.let {
+                return@launch
+            }
+            saveTransportKey()
         }
     }
 
