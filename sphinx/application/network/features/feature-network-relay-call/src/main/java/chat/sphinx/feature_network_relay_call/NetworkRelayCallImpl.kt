@@ -7,6 +7,7 @@ import chat.sphinx.concept_network_client.NetworkClientClearedListener
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.concept_network_relay_call.RelayListResponse
 import chat.sphinx.concept_network_relay_call.RelayResponse
+import chat.sphinx.concept_relay.CustomException
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_relay.retrieveRelayUrlAndToken
 import chat.sphinx.kotlin_response.LoadResponse
@@ -19,6 +20,7 @@ import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RequestSignature
 import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.TransportToken
+import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -79,9 +81,9 @@ private suspend inline fun RelayDataHandler.retrieveRelayData(
     path: String,
     bodyJsonString: String
 ): Triple<
-    Pair<AuthorizationToken, TransportToken?>,
-    RequestSignature?,
-    RelayUrl>
+        Pair<AuthorizationToken, TransportToken?>,
+        RequestSignature?,
+        RelayUrl>
 {
     val response = retrieveRelayUrlAndToken(method, path, bodyJsonString)
 
@@ -142,17 +144,19 @@ class NetworkRelayCallImpl(
 
         emit(LoadResponse.Loading)
 
+        var response: T?
+
         try {
             val requestBuilder = buildRequest(url, headers)
 
-            val response = call(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
+            response = call(responseJsonClass, requestBuilder.build(), useExtendedNetworkCallClient)
 
             emit(Response.Success(response))
         } catch (e: Exception) {
             emit(handleException(LOG, GET, url, e))
         }
     }
-    
+
     override fun <T: Any> getList(
         url: String,
         responseJsonClass: Class<T>,
@@ -302,7 +306,7 @@ class NetworkRelayCallImpl(
         networkClient.addListener(this)
     }
 
-    @Throws(NullPointerException::class, IOException::class)
+    @Throws(NullPointerException::class, CustomException::class)
     override suspend fun <T: Any> call(
         responseJsonClass: Class<T>,
         request: Request,
@@ -328,7 +332,7 @@ class NetworkRelayCallImpl(
         val networkResponse = withContext(io) {
             client.newCall(request).execute()
         }
-
+        
         val body = networkResponse.body ?: throw NullPointerException(
             """
                 NetworkResponse.body returned null
@@ -349,12 +353,23 @@ class NetworkRelayCallImpl(
         }
 
         return withContext(default) {
-            moshi.adapter(responseJsonClass).fromJson(body.source())
-        } ?: throw IOException(
+            try{
+                moshi.adapter(responseJsonClass).fromJson(body.source())
+            } catch (e: Exception) {
+                throw CustomException(
+                    """
+                Failed to convert Json to ${responseJsonClass.simpleName}
+                NetworkResponse: $networkResponse
+            """.trimIndent(),
+                    networkResponse.code
+                )
+            }
+        } ?: throw CustomException(
             """
                 Failed to convert Json to ${responseJsonClass.simpleName}
                 NetworkResponse: $networkResponse
-            """.trimIndent()
+            """.trimIndent(),
+            networkResponse.code
         )
     }
 
@@ -399,7 +414,17 @@ class NetworkRelayCallImpl(
         val listMyData = Types.newParameterizedType(List::class.java, responseJsonClass)
 
         return withContext(default) {
-            moshi.adapter<List<T>>(listMyData).fromJson(body.source())
+            try{
+                moshi.adapter<List<T>>(listMyData).fromJson(body.source())
+            } catch (e: Exception) {
+                throw CustomException(
+                    """
+                Failed to convert Json to ${responseJsonClass.simpleName}
+                NetworkResponse: $networkResponse
+            """.trimIndent(),
+                    networkResponse.code
+                )
+            }
         } ?: throw IOException(
             """
                 Failed to convert Json to ${responseJsonClass.simpleName}
