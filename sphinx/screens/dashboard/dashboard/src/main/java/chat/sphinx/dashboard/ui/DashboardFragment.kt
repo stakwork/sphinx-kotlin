@@ -109,7 +109,7 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onResume() {
         super.onResume()
 
-        viewModel.networkRefresh()
+        viewModel.networkRefresh(false)
 
         activity?.intent?.dataString?.let { deepLink ->
             viewModel.handleDeepLink(deepLink)
@@ -119,7 +119,7 @@ internal class DashboardFragment : MotionLayoutFragment<
 
     override fun onRefresh() {
         binding.swipeRefreshLayoutDataReload.isRefreshing = false
-        viewModel.networkRefresh()
+        viewModel.networkRefresh(true)
     }
 
     fun closeDrawerIfOpen(): Boolean {
@@ -462,13 +462,13 @@ internal class DashboardFragment : MotionLayoutFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.networkStateFlow.collect { loadResponse ->
+            viewModel.networkStateFlow.collect { (loadResponse, screenInit) ->
                 binding.layoutDashboardHeader.let { dashboardHeader ->
                     @Exhaustive
                     when (loadResponse) {
                         is LoadResponse.Loading -> {
-                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(true)
-                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(false)
+                            dashboardHeader.progressBarDashboardHeaderNetwork.invisibleIfFalse(screenInit)
+                            dashboardHeader.textViewDashboardHeaderNetwork.invisibleIfFalse(!screenInit)
                             timeTrackerStart = System.currentTimeMillis()
                         }
                         is Response.Error -> {
