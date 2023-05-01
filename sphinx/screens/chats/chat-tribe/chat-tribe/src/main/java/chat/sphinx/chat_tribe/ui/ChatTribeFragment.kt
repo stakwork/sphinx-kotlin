@@ -117,6 +117,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
+    private val appViewViewModel: AppViewModel by viewModels()
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -143,6 +144,10 @@ internal class ChatTribeFragment: ChatFragment<
                         is TribeFeedData.Loading -> {}
                         is TribeFeedData.Result -> {
                             tribeFeedViewModel.init(data)
+                            (data as? TribeFeedData.Result.FeedData)?.appUrl?.let { appUrl ->
+                                appViewViewModel.init(appUrl)
+                                binding.includeChatTribeHeader.imageViewChatWebView.visible
+                            }
                             throw Exception()
                         }
                     }

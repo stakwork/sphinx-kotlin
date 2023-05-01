@@ -273,6 +273,7 @@ internal class TribeFeedViewModel @Inject constructor(
                         }
                     }
                 }
+                data.appUrl?.let {}
             }
         }
     }

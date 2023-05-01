@@ -7,7 +7,8 @@ import chat.sphinx.wrapper_common.feed.FeedUrl
 data class TribeData(
     val host : ChatHost,
     val chatUUID: ChatUUID,
-    val feedUrl : FeedUrl?,
+    val feedUrl: FeedUrl?,
     val feedType: FeedType,
+    val appUrl: AppUrl?,
     val badges: Array<String>
 )
