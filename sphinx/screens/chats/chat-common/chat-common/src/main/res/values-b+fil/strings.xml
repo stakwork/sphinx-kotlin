@@ -133,7 +133,7 @@
     <string name="bottom_menu_more_option_notification">Notipikasyon</string>
     <string name="searching_messages">Searching...</string>
     <string name="results_found">%d Results Found</string>
-    <string name="slide_to_cancel"><< Slide to cancel</string>
+    <string name="slide_to_cancel">&lt;&lt; Slide to cancel</string>
     <string name="recording_permission_granted">Recording permission granted</string>
     <string name="recording_permission_required">Recording permissions required</string>
     <string name="send_sats">Magpadala</string>
