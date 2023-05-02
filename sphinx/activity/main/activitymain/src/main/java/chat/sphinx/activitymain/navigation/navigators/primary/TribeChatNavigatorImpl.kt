@@ -10,12 +10,14 @@ import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.known_badges.navigation.ToKnownBadges
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
+import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.notification_level.navigation.ToNotificationLevel
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
+import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -120,5 +122,23 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(
             ToKnownBadges(badgeIds)
         )
+    }
+
+    override suspend fun toVideoWatchScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
+            ToVideoWatchScreen(
+                chatId, feedId, feedUrl
+            )
+        )
+    }
+
+    override suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
+            ToNewsletterDetailScreen(chatId, feedUrl)
+        )
+    }
+
+    override suspend fun toPodcastPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, true))
     }
 }

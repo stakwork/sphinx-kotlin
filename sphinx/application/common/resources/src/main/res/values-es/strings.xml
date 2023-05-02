@@ -31,6 +31,7 @@
 
     <string name="amount_n_sats">Monto: %d sats</string>
     <string name="payment_request">Solicitud de Pago</string>
+    <string name="error_payment_message">Error de pago: %s </string>
     <string name="failed_to_request_payment">La solicitud de pago falló</string>
     <!-- Tribe Member error messages -->
     <string name="failed_to_approve_member">No se ha podido aprobar la solicitud</string>
@@ -43,6 +44,8 @@
     <string name="feed_search_following_section">SIGUIENDO</string>
     <string name="feed_search_directory_section">DIRECTORIO</string>
     <string name="recommendations">Recomendaciones</string>
+    <string name="share_from_beginning">Comparte desde el comienzo</string>
+    <string name="share_from_current_time">Comparte desde el tiempo actual</string>
 
     <string name="select_badges">Selecciona y customiza</string>
     <string name="your_badges">tus tribe badges</string>

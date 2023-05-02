@@ -12,6 +12,8 @@ import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import kotlin.coroutines.suspendCoroutine
+import kotlin.coroutines.resume
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -35,6 +37,7 @@ import chat.sphinx.podcast_player.ui.viewstates.FeedItemDetailsViewState
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -63,6 +66,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.io.File
 import javax.inject.Inject
 
@@ -196,6 +200,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                     }
                     is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
                         podcast.pauseEpisodeUpdate()
+
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.MediaStateUpdate(
                                 podcast,
@@ -398,13 +403,13 @@ internal class PodcastPlayerViewModel @Inject constructor(
     fun playEpisodeFromList(episode: PodcastEpisode) {
         viewModelScope.launch(mainImmediate) {
             getPodcastFeed()?.let { podcast ->
-                podcast.getEpisodeWithId(episode.id.value)?.let {
+                podcast.getEpisodeWithId(episode.id.value)?.let { episode ->
                     if (mediaPlayerServiceController.getPlayingContent()?.second == episode.id.value) {
-                        pauseEpisode(it)
+                        pauseEpisode(episode)
                     } else {
-                        viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(it))
+                        viewStateContainer.updateViewState(PodcastPlayerViewState.LoadingEpisode(episode))
                         delay(50L)
-                        playEpisode(it)
+                        playEpisode(episode)
                     }
                 }
             }
@@ -705,26 +710,30 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
-    fun share(link: String, context: Context) {
-        val sharingIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, link)
-        }
+    fun share(itemId: FeedId, context: Context) {
+        viewModelScope.launch(mainImmediate) {
+            val link = generateSphinxFeedItemLink(itemId) ?: ""
+            val sharingIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, link)
+            }
 
-        context.startActivity(
-            Intent.createChooser(
-                sharingIntent,
-                app.getString(R.string.episode_detail_share_link)
+            context.startActivity(
+                Intent.createChooser(
+                    sharingIntent,
+                    app.getString(R.string.episode_detail_share_link)
+                )
             )
-        )
+        }
     }
 
-    fun copyCodeToClipboard(link: String) {
+    fun copyCodeToClipboard(itemId: FeedId) {
         (app.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
-            val clipData = ClipData.newPlainText("text", link)
-            manager.setPrimaryClip(clipData)
-
             viewModelScope.launch(mainImmediate) {
+                val link = generateSphinxFeedItemLink(itemId) ?: ""
+                val clipData = ClipData.newPlainText("text", link)
+                manager.setPrimaryClip(clipData)
+
                 submitSideEffect(
                     PodcastPlayerSideEffect.Notify(
                         app.getString(R.string.episode_detail_clipboard)
@@ -734,6 +743,25 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
     }
 
+    private suspend fun generateSphinxFeedItemLink(itemId: FeedId): String? {
+        val shareAtTime = suspendCoroutine<Boolean> { continuation ->
+            viewModelScope.launch(mainImmediate) {
+                submitSideEffect(PodcastPlayerSideEffect.CopyLinkSelection(viewModelScope) { result ->
+                    continuation.resume(result)
+                })
+            }
+        }
+
+        val nnPodcast = getPodcastFeed() ?: return null
+        val feed = feedRepository.getFeedById(nnPodcast.id).firstOrNull() ?: return null
+        val currentTime = nnPodcast.getEpisodeWithId(itemId.value)?.getUpdatedContentEpisodeStatus()?.currentTime?.value
+
+        return if (shareAtTime && currentTime != null) {
+            generateFeedItemLink(feed.feedUrl, feed.id, itemId, currentTime)
+        } else {
+            generateFeedItemLink(feed.feedUrl, feed.id, itemId, null)
+        }
+    }
 
     private suspend fun getPlayedMark(feedItemId: FeedId): Boolean {
        return feedRepository.getPlayedMark(feedItemId).firstOrNull() ?: false

@@ -24,6 +24,7 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
@@ -43,12 +44,15 @@ import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -90,6 +94,7 @@ internal class DashboardViewModel @Inject constructor(
     private val pushNotificationRegistrar: PushNotificationRegistrar,
 
     private val relayDataHandler: RelayDataHandler,
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
 
@@ -131,6 +136,8 @@ internal class DashboardViewModel @Inject constructor(
 
         actionsRepository.syncActions()
         feedRepository.restoreContentFeedStatuses()
+
+        networkRefresh(true)
     }
     
     private fun getRelayKeys() {
@@ -156,6 +163,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleCreateInvoiceLink(createInvoiceLink)
             } ?: deepLink?.toRedeemSatsLink()?.let { redeemSatsLink ->
                 handleRedeemSatsLink(redeemSatsLink)
+            } ?: deepLink?.toFeedItemLink()?.let { feedItemLink ->
+                handleFeedItemLink(feedItemLink)
             }
         }
     }
@@ -438,6 +447,37 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
+    private suspend fun handleFeedItemLink(link: FeedItemLink) {
+        feedRepository.getFeedForLink(link).firstOrNull()?.let { feed ->
+            goToFeedDetailView(feed)
+        }
+    }
+
+    private suspend fun goToFeedDetailView(feed: Feed) {
+        when {
+            feed.isPodcast -> {
+                dashboardNavigator.toPodcastPlayerScreen(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isVideo -> {
+                dashboardNavigator.toVideoWatchScreen(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isNewsletter -> {
+                dashboardNavigator.toNewsletterDetail(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.feedUrl
+                )
+            }
+        }
+    }
+
     private suspend fun loadPeopleConnectPopup(link: PeopleConnectLink) {
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.PeopleConnectPopupLoadingPersonInfo
@@ -640,7 +680,7 @@ internal class DashboardViewModel @Inject constructor(
                         )
                     }
                     is Response.Success -> {
-                        networkRefresh()
+                        networkRefresh(false)
                     }
                 }
             }
@@ -918,7 +958,11 @@ internal class DashboardViewModel @Inject constructor(
                     }
                     is Response.Error -> {
                         submitSideEffect(
-                            ChatListSideEffect.Notify(app.getString(R.string.failed_to_pay_request), true)
+                            ChatListSideEffect.Notify(
+                                String.format(
+                                    app.getString(R.string.error_payment_message),
+                                    loadResponse.exception?.message ?: loadResponse.cause.message
+                                ), true)
                         )
                     }
                     is Response.Success -> {
@@ -931,8 +975,8 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
-        MutableStateFlow(LoadResponse.Loading)
+    private val _networkStateFlow: MutableStateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>> by lazy {
+        MutableStateFlow(Pair(LoadResponse.Loading, true))
     }
 
     private val _restoreProgressStateFlow: MutableStateFlow<RestoreProgressViewState?> by lazy {
@@ -949,7 +993,7 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
+    val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
         get() = _networkStateFlow.asStateFlow()
 
     val restoreProgressStateFlow: StateFlow<RestoreProgressViewState?>
@@ -957,7 +1001,10 @@ internal class DashboardViewModel @Inject constructor(
 
     private var jobNetworkRefresh: Job? = null
     private var jobPushNotificationRegistration: Job? = null
-    fun networkRefresh() {
+
+    fun networkRefresh(
+        screenStart: Boolean
+    ) {
         if (jobNetworkRefresh?.isActive == true) {
             return
         }
@@ -968,13 +1015,13 @@ internal class DashboardViewModel @Inject constructor(
                 when (response) {
                     is LoadResponse.Loading,
                     is Response.Error -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                     is Response.Success -> {}
                 }
             }
 
-            if (_networkStateFlow.value is Response.Error) {
+            if (_networkStateFlow.value.first is Response.Error) {
                 jobNetworkRefresh?.cancel()
             }
 
@@ -983,7 +1030,7 @@ internal class DashboardViewModel @Inject constructor(
                 when (response) {
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                     is Response.Success -> {
                         val restoreProgress = response.value
@@ -1015,20 +1062,20 @@ internal class DashboardViewModel @Inject constructor(
                         } else {
                             _restoreProgressStateFlow.value = null
 
-                            _networkStateFlow.value = Response.Success(true)
+                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
                         }
                     }
                     is Response.Error -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                     is LoadResponse.Loading -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                 }
             }
 
 
-            if (_networkStateFlow.value is Response.Error) {
+            if (_networkStateFlow.value.first is Response.Error) {
                 jobNetworkRefresh?.cancel()
             }
 
@@ -1064,14 +1111,14 @@ internal class DashboardViewModel @Inject constructor(
                         } else {
                             _restoreProgressStateFlow.value = null
 
-                            _networkStateFlow.value = Response.Success(true)
+                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
                         }
                     }
                     is Response.Error -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                     is LoadResponse.Loading -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                 }
             }
@@ -1083,7 +1130,7 @@ internal class DashboardViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
 
-            _networkStateFlow.value = Response.Success(true)
+            _networkStateFlow.value = Pair(Response.Success(true), true)
             _restoreProgressStateFlow.value = null
 
             repositoryDashboard.didCancelRestore()
@@ -1106,7 +1153,7 @@ internal class DashboardViewModel @Inject constructor(
             submitSideEffect(
                 ChatListSideEffect.Notify(
                     app.getString(
-                        if (_networkStateFlow.value is Response.Error) {
+                        if (_networkStateFlow.value.first is Response.Error) {
                             R.string.dashboard_network_disconnected_node_toast
                         } else {
                             R.string.dashboard_network_connected_node_toast

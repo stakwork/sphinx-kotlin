@@ -31,6 +31,7 @@
 
     <string name="amount_n_sats">金額: %d sats</string>
     <string name="payment_request">收款帳單</string>
+    <string name="error_payment_message">Payment error: %s </string>
     <string name="failed_to_request_payment">無法收款</string>
     <string name="failed_to_approve_member">接受會員失敗</string>
     <string name="failed_to_reject_member">拒絕會員失敗</string>
@@ -42,6 +43,8 @@
     <string name="feed_search_following_section">FOLLOWING</string>
     <string name="feed_search_directory_section">DIRECTORY</string>
     <string name="recommendations">Recommendations</string>
+    <string name="share_from_beginning">Share from beginning</string>
+    <string name="share_from_current_time">Share from current time</string>
 
     <string name="select_badges">Select and customize</string>
     <string name="your_badges">your tribe badges</string>

@@ -10,6 +10,7 @@ import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendPayment
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.exception
 import chat.sphinx.payment_common.ui.PaymentSideEffect
 import chat.sphinx.payment_common.ui.PaymentViewModel
 import chat.sphinx.payment_common.ui.viewstate.AmountViewState
@@ -171,10 +172,15 @@ internal class PaymentSendViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val sendPayment = sendPaymentBuilder.build()
 
-            when (messageRepository.sendPayment(sendPayment)) {
+            when (val response = messageRepository.sendPayment(sendPayment)) {
                 is Response.Error -> {
                     submitSideEffect(
-                        PaymentSideEffect.Notify(app.getString(R.string.error_processing_payment))
+                        PaymentSideEffect.Notify(
+                            String.format(
+                                app.getString(R.string.error_payment_message),
+                                response.exception?.message ?: response.cause.message
+                            )
+                        )
                     )
                     viewStateContainer.updateViewState(PaymentSendViewState.PaymentFailed)
                 }

@@ -28,7 +28,6 @@ import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.*
@@ -255,6 +254,7 @@ class CommonPlayerScreenViewModel @Inject constructor(
                     }
                     is MediaPlayerServiceState.ServiceActive.MediaState.Paused -> {
                         podcast.pauseEpisodeUpdate()
+
                         viewStateContainer.updateViewState(
                             RecommendationsPodcastPlayerViewState.PodcastViewState.MediaStateUpdate(
                                 podcast,
@@ -297,11 +297,16 @@ class CommonPlayerScreenViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             getPodcast()?.let { podcast ->
 
-                podcast.getEpisodeWithId(episode.id.value)?.let {
+                podcast.getEpisodeWithId(episode.id.value)?.let { episode ->
                     if (mediaPlayerServiceController.getPlayingContent()?.second == episode.id.value) {
                         pauseEpisode(episode)
                         return@launch
                     }
+                }
+
+                if (podcast.getCurrentEpisode().id == episode.id) {
+                    playEpisode(podcast.getCurrentEpisode(), podcast.timeMilliSeconds)
+                    return@launch
                 }
 
                 viewStateContainer.updateViewState(
@@ -542,6 +547,10 @@ class CommonPlayerScreenViewModel @Inject constructor(
 
     private fun isFeedItemDownloadInProgress(feedItemId: FeedId): Boolean {
         return repositoryMedia.inProgressDownloadIds().contains(feedItemId)
+    }
+
+    fun isEpisodeSoundPlaying(episode: PodcastEpisode): Boolean {
+        return episode.playing && mediaPlayerServiceController.getPlayingContent()?.third == true
     }
 
     fun sendPodcastBoost(

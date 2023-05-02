@@ -11,7 +11,6 @@ import chat.sphinx.concept_network_query_action_track.model.SyncActionsDto
 import chat.sphinx.concept_network_query_action_track.model.toActionTrackMetaDataDtoOrNull
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_chat.model.*
-import chat.sphinx.concept_network_query_chat.model.feed.FeedItemDto
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_contact.model.ContactDto
 import chat.sphinx.concept_network_query_contact.model.GithubPATDto
@@ -45,6 +44,7 @@ import chat.sphinx.concept_network_query_subscription.model.PutSubscriptionDto
 import chat.sphinx.concept_network_query_subscription.model.SubscriptionDto
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_verify_external.model.RedeemSatsDto
+import chat.sphinx.concept_relay.CustomException
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
@@ -121,7 +121,6 @@ import chat.sphinx.wrapper_message_media.token.MediaHost
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
-import chat.sphinx.wrapper_podcast.PodcastEpisode
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
@@ -211,6 +210,9 @@ abstract class SphinxRepository(
         const val MEDIA_PROVISIONAL_TOKEN = "Media_Provisional_Token"
 
         const val AUTHORIZE_EXTERNAL_BASE_64 = "U3BoaW54IFZlcmlmaWNhdGlvbg=="
+
+        const val AUTHENTICATION_ERROR = 401
+
     }
 
     ////////////////
@@ -1806,6 +1808,12 @@ abstract class SphinxRepository(
                     }
                     is Response.Error -> {
                         emit(loadResponse)
+
+                        (loadResponse.exception as? CustomException)?.let { exception ->
+                            if (exception.code == AUTHENTICATION_ERROR) {
+                                saveTransportKey()
+                            }
+                        }
                     }
                     is Response.Success -> {
 
@@ -3972,6 +3980,64 @@ abstract class SphinxRepository(
             }
     }
 
+    override fun getFeedForLink(link: FeedItemLink): Flow<Feed?> = flow {
+        link.feedId.toFeedId()?.let { getFeedById(it) }?.firstOrNull()?.let { feed ->
+            feedUpdateItemAndTime(feed, link)
+            emit(feed)
+        } ?: run {
+            link.feedUrl.toFeedUrl()?.let { feedUrl ->
+                val response = updateFeedContent(
+                    chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
+                    feedUrl = feedUrl,
+                    chatUUID = null,
+                    subscribed = false.toSubscribed(),
+                    currentItemId = null
+                )
+                @Exhaustive
+                when (response) {
+                    is Response.Error -> {
+                        emit(null)
+                    }
+                    is Response.Success -> {
+                        getFeedById(response.value).firstOrNull()?.let { feed ->
+                            feedUpdateItemAndTime(feed, link)
+                            emit(feed)
+                        }  ?: emit(null)
+                    }
+                }
+            } ?: emit(null)
+        }
+    }
+
+    private fun feedUpdateItemAndTime(
+        feed: Feed,
+        link: FeedItemLink
+    ) {
+        link.itemId.toFeedId()?.let { itemId ->
+
+            updateContentFeedStatus(
+                feed.id,
+                itemId
+            )
+
+            link.atTime?.let { atTime ->
+                feed.items.firstOrNull {
+                    it.id == itemId
+                }?.let { feedItem ->
+                    updateContentEpisodeStatus(
+                        feedId = feed.id,
+                        itemId = itemId,
+                        duration = feedItem.contentEpisodeStatus?.duration ?: FeedItemDuration(0),
+                        currentTime =atTime.toLong().toFeedItemDuration() ?: FeedItemDuration(0),
+                        played = feedItem.contentEpisodeStatus?.played ?: false,
+                        shouldSync = false
+                    )
+                }
+            }
+        }
+    }
+
     override fun getRecommendationFeedItemById(
         feedItemId: FeedId,
     ): Flow<FeedItem?> = flow {
@@ -4367,6 +4433,7 @@ abstract class SphinxRepository(
                 }
             }
     }
+
 
     private suspend fun mapPodcast(
         podcast: Podcast,
@@ -6230,11 +6297,8 @@ abstract class SphinxRepository(
         return response ?: Response.Error(ResponseError(("Failed to load payment templates")))
     }
 
-    override fun getAndSaveTransportKey() {
+    override fun saveTransportKey() {
         applicationScope.launch(io) {
-            relayDataHandler.retrieveRelayTransportKey()?.let {
-                return@launch
-            }
             relayDataHandler.retrieveRelayUrl()?.let { relayUrl ->
                 networkQueryRelayKeys.getRelayTransportKey(
                     relayUrl
@@ -6253,6 +6317,15 @@ abstract class SphinxRepository(
                     }
                 }
             }
+        }
+    }
+
+    override fun getAndSaveTransportKey() {
+        applicationScope.launch(io) {
+            relayDataHandler.retrieveRelayTransportKey()?.let {
+                return@launch
+            }
+            saveTransportKey()
         }
     }
 
