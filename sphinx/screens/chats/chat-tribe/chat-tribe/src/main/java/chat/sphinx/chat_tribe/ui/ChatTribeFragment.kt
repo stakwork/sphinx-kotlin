@@ -43,6 +43,7 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
+import chat.sphinx.resources.databinding.LayoutSecondBrainBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
@@ -77,7 +78,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutPopup
     private val tribeMemberProfileBinding: LayoutTribeMemberProfileBinding
         get() = binding.includeLayoutTribeMemberProfile
-
+    private val secondBrainBinding: LayoutSecondBrainBinding
+        get() = binding.includeLayoutSecondBrain
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
     override val searchFooterBinding: LayoutChatSearchFooterBinding
@@ -117,7 +119,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
-    private val appViewViewModel: AppViewModel by viewModels()
+    private val appViewViewModel: SecondBrainViewModel by viewModels()
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -168,6 +170,10 @@ internal class ChatTribeFragment: ChatFragment<
             layoutConstraintPodcastInfo.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickTitle?.invoke()
             }
+        }
+
+        binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
+            viewModel.secondBrainViewStateContainer.updateViewState(SecondBrainViewState.Open)
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
@@ -325,8 +331,12 @@ internal class ChatTribeFragment: ChatFragment<
                     )
                 }
                 else -> {
-                    lifecycleScope.launch(viewModel.mainImmediate) {
-                        viewModel.handleCommonChatOnBackPressed()
+                    if (viewModel.secondBrainViewStateContainer.value is SecondBrainViewState.Open) {
+                        viewModel.secondBrainViewStateContainer.updateViewState(SecondBrainViewState.Closed)
+                    } else {
+                        lifecycleScope.launch(viewModel.mainImmediate) {
+                            viewModel.handleCommonChatOnBackPressed()
+                        }
                     }
                 }
             }
@@ -531,6 +541,22 @@ internal class ChatTribeFragment: ChatFragment<
 
                 tribeMemberProfileBinding.root.setTransitionDuration(250)
                 viewState.transitionToEndSet(tribeMemberProfileBinding.root)
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.secondBrainViewStateContainer.collect { viewState ->
+                secondBrainBinding.includeLayoutSecondBrainDetails.apply {
+                    @Exhaustive
+                    when(viewState) {
+                        is SecondBrainViewState.Closed -> {
+                        }
+                        is SecondBrainViewState.Open -> {
+                        }
+                    }
+                    viewState.transitionToEndSet(secondBrainBinding.root)
+                    secondBrainBinding.root.setTransitionDuration(250)
+                }
             }
         }
 
