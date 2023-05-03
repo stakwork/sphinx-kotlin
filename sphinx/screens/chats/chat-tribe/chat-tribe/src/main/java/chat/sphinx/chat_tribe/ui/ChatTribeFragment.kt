@@ -1,11 +1,16 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -148,6 +153,7 @@ internal class ChatTribeFragment: ChatFragment<
                             tribeFeedViewModel.init(data)
                             (data as? TribeFeedData.Result.FeedData)?.appUrl?.let { appUrl ->
                                 appViewViewModel.init(appUrl)
+                                loadWebView(appUrl.value)
                                 binding.includeChatTribeHeader.imageViewChatWebView.visible
                             }
                             throw Exception()
@@ -295,6 +301,39 @@ internal class ChatTribeFragment: ChatFragment<
                     .transformation(Transformation.CircleCrop)
                     .build()
             )
+        }
+    }
+
+    private fun loadWebView(url: String) {
+        secondBrainBinding.includeLayoutSecondBrainDetails.apply {
+
+            webView.settings.javaScriptEnabled = true
+            webView.settings.loadWithOverviewMode = true
+            webView.settings.useWideViewPort = true
+            webView.settings.builtInZoomControls = true
+
+            webView.loadUrl(url)
+            webView.webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    val url = request?.url.toString()
+                    view?.loadUrl(url)
+                    return super.shouldOverrideUrlLoading(view, request)
+                }
+
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                }
+
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    progressBarLoading.gone
+                    super.onPageFinished(view, url)
+                }
+
+                override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
+                    progressBarLoading.gone
+                    super.onReceivedError(view, request, error)
+                }
+            }
         }
     }
 
