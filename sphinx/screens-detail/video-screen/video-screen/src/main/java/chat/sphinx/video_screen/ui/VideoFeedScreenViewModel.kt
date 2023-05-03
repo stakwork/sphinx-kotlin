@@ -164,6 +164,7 @@ internal open class VideoFeedScreenViewModel(
                             selectedVideoStateContainer.updateViewState(
                                 SelectedVideoViewState.VideoSelected(
                                     video.id,
+                                    nnFeed.id,
                                     video.title,
                                     video.description,
                                     video.enclosureUrl,
@@ -214,12 +215,12 @@ internal open class VideoFeedScreenViewModel(
                     satsPerMinute = null,
                     playerSpeed = null
                 )
-                updateVideoLastPlayed(video.feedId)
             }
 
             selectedVideoStateContainer.updateViewState(
                 SelectedVideoViewState.VideoSelected(
                     video.id,
+                    video.feed?.id,
                     video.title,
                     video.description,
                     video.enclosureUrl,
@@ -231,8 +232,12 @@ internal open class VideoFeedScreenViewModel(
         }
     }
 
-    fun updateVideoLastPlayed(feedId: FeedId) {
-        feedRepository.updateLastPlayed(feedId)
+    fun updateVideoLastPlayed() {
+        (selectedVideoStateContainer.value as? SelectedVideoViewState.VideoSelected)?.let {
+            it.feedId?.let { feedId ->
+                feedRepository.updateLastPlayed(feedId)
+            }
+        }
     }
 
     fun toggleSubscribeState() {

@@ -4106,7 +4106,40 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getAllSubscribedFeedsOfType(feedType: FeedType): Flow<List<Feed>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        emitAll(
+            queries.feedGetAllSubscribedByFeedType(feedType)
+                .asFlow()
+                .mapToList(io)
+                .map { listFeedDbo ->
+                    withContext(default) {
+                        mapFeedDboList(
+                            listFeedDbo, queries
+                        )
+                    }
+                }
+        )
+    }
+
     override fun getAllFeeds(): Flow<List<Feed>> = flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+        emitAll(
+            queries.feedGetAll()
+                .asFlow()
+                .mapToList(io)
+                .map { listFeedDbo ->
+                    withContext(default) {
+                        mapFeedDboList(
+                            listFeedDbo, queries
+                        )
+                    }
+                }
+        )
+    }
+
+    override fun getAllSubscribedFeeds(): Flow<List<Feed>> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
         emitAll(
             queries.feedGetAllSubscribed()
@@ -6914,7 +6947,7 @@ abstract class SphinxRepository(
 
             val contentFeedStatuses: MutableList<ContentFeedStatusDto> = mutableListOf()
 
-            getAllFeeds().firstOrNull()?.let { feeds ->
+            getAllSubscribedFeeds().firstOrNull()?.let { feeds ->
                 for (feed in feeds) {
                     getContentFeedStatusDtoFrom(feed)?.let { feedStatus ->
                         contentFeedStatuses.add(feedStatus)
@@ -7076,7 +7109,7 @@ abstract class SphinxRepository(
         durationRetrieverHandler: ((url: String) -> Long)? = null
     ) {
         applicationScope.launch(io) {
-            getAllFeeds().firstOrNull()?.let { feeds ->
+            getAllSubscribedFeeds().firstOrNull()?.let { feeds ->
                 for (feed in feeds) {
                     updateFeedContentItemsFor(
                         feed,

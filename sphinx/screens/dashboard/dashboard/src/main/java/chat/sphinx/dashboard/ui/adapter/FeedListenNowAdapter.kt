@@ -1,9 +1,6 @@
 package chat.sphinx.dashboard.ui.adapter
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
-import android.view.MotionEvent
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
@@ -206,8 +203,12 @@ class FeedListenNowAdapter(
                     )
                 }
 
+                textViewItemName.goneIfFalse(podcastEpisode.titleToShow.isNotEmpty())
+                textViewItemDescription.goneIfFalse(podcastEpisode.descriptionToShow.isNotEmpty())
+
                 textViewItemName.text = podcastEpisode.titleToShow
                 textViewItemDescription.text = podcastEpisode.descriptionToShow
+
                 textViewItemPublishTime.text = podcastEpisode.datePublished?.timeAgo()
 
                 val currentTime = (podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0).toInt()
