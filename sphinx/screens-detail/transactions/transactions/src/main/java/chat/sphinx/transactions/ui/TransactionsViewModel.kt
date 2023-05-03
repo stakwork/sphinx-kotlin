@@ -21,6 +21,7 @@ import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.SenderAlias
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
@@ -102,14 +103,14 @@ internal class TransactionsViewModel @Inject constructor(
         networkQueryMessage.getPayments(
             offset = page * itemsPerPage,
             limit = itemsPerPage
-        ).collect{ loadResponse ->
+        ).collect { loadResponse ->
             val firstPage = (page == 0)
 
             @Exhaustive
             when (loadResponse) {
                 is LoadResponse.Loading -> {
                     updateViewState(
-                        TransactionsViewState.ListMode(listOf(), true, firstPage)
+                        TransactionsViewState.ListMode(currentViewState.list, true, firstPage)
                     )
                 }
                 is Response.Error -> {
@@ -210,7 +211,11 @@ internal class TransactionsViewModel @Inject constructor(
             }
         }
 
-        val transactionsHVSs = ArrayList<TransactionHolderViewState>(transactions.size)
+        val transactionsHVSs: MutableList<TransactionHolderViewState> = currentViewState.list.toMutableList()
+
+        if (transactionsHVSs.lastOrNull() is TransactionHolderViewState.Loader) {
+            transactionsHVSs.removeLast()
+        }
 
         for (transaction in transactions) {
             val senderId = contactIdsMap[transaction.id]
@@ -236,7 +241,7 @@ internal class TransactionsViewModel @Inject constructor(
             }
             if (transaction.isFailedPayment()) {
                 transactionsHVSs.add(
-                    TransactionHolderViewState.Failed(
+                    TransactionHolderViewState.Failed.Closed(
                         transaction,
                         null,
                         senderAlias ?: "-",
@@ -252,5 +257,49 @@ internal class TransactionsViewModel @Inject constructor(
         }
 
         return transactionsHVSs
+    }
+
+    fun toggleFailed(
+        transactionViewHolder: TransactionHolderViewState,
+        position: Int
+    ) {
+        (currentViewState as? TransactionsViewState.ListMode)?.let { currentVS ->
+            var list: MutableList<TransactionHolderViewState> = currentVS.list.toMutableList()
+
+            transactionViewHolder.transaction?.let { nnTransaction ->
+
+                val toggledViewHolder = when (transactionViewHolder) {
+                    is TransactionHolderViewState.Failed.Open -> {
+                        TransactionHolderViewState.Failed.Closed(
+                            nnTransaction,
+                            transactionViewHolder.invoice,
+                            transactionViewHolder.messageSenderName
+                        )
+                    }
+                    is TransactionHolderViewState.Failed.Closed -> {
+                        TransactionHolderViewState.Failed.Open(
+                            nnTransaction,
+                            transactionViewHolder.invoice,
+                            transactionViewHolder.messageSenderName
+                        )
+                    }
+                    else -> {
+                        null
+                    }
+                }
+
+                toggledViewHolder?.let {
+                    list[position] = it
+
+                    updateViewState(
+                        TransactionsViewState.ListMode(
+                            list,
+                            currentVS.loading,
+                            currentVS.firstPage
+                        )
+                    )
+                }
+            }
+        }
     }
 }

@@ -66,7 +66,7 @@ data class TransactionDto(
     }
 
     fun isFailedPayment(): Boolean {
-        return !error_message.isNullOrEmpty()
+        return error_message?.isNotEmpty() == true
     }
 
 }

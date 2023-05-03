@@ -59,6 +59,7 @@
     <color name="sendAttachmentPreviewBackground">#D9000000</color>
 
     <color name="primaryGreen">#49C998</color>
+    <color name="primaryPurple">#A76CF3</color>
     <color name="whiteSemiTransparent">#B3FFFFFF</color>
     <color name="whiteTenPercentOpacity">#1AFFFFFF</color>
     <color name="whiteFiftyPercentOpacity">#80FFFFFF</color>

@@ -2,4 +2,5 @@
 <resources>
     <string name="transactions_header_name">TRANSACCIONES</string>
     <string name="loading_more">Cargando más...</string>
+    <string name="failed_payment">Pago fallido</string>
 </resources>
