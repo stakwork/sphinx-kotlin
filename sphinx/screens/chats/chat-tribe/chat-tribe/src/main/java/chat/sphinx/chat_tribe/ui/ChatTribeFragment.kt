@@ -48,7 +48,7 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
-import chat.sphinx.resources.databinding.LayoutSecondBrainBinding
+import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
@@ -59,7 +59,6 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
@@ -83,8 +82,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutPopup
     private val tribeMemberProfileBinding: LayoutTribeMemberProfileBinding
         get() = binding.includeLayoutTribeMemberProfile
-    private val secondBrainBinding: LayoutSecondBrainBinding
-        get() = binding.includeLayoutSecondBrain
+    private val tribeAppBinding: LayoutTribeAppBinding
+        get() = binding.includeLayoutTribeApp
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
     override val searchFooterBinding: LayoutChatSearchFooterBinding
@@ -124,7 +123,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
-    private val appViewViewModel: SecondBrainViewModel by viewModels()
+    private val appViewViewModel: TribeAppViewModel by viewModels()
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -179,7 +178,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
-            viewModel.secondBrainViewStateContainer.updateViewState(SecondBrainViewState.Open)
+            viewModel.secondBrainViewStateContainer.updateViewState(TribeAppViewState.Open)
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
@@ -305,12 +304,14 @@ internal class ChatTribeFragment: ChatFragment<
     }
 
     private fun loadWebView(url: String) {
-        secondBrainBinding.includeLayoutSecondBrainDetails.apply {
+        tribeAppBinding.includeLayoutTribeAppDetails.apply {
 
             webView.settings.javaScriptEnabled = true
             webView.settings.loadWithOverviewMode = true
             webView.settings.useWideViewPort = true
             webView.settings.builtInZoomControls = true
+
+//            webView.evaluateJavascript()
 
             webView.loadUrl(url)
             webView.webViewClient = object : WebViewClient() {
@@ -370,8 +371,8 @@ internal class ChatTribeFragment: ChatFragment<
                     )
                 }
                 else -> {
-                    if (viewModel.secondBrainViewStateContainer.value is SecondBrainViewState.Open) {
-                        viewModel.secondBrainViewStateContainer.updateViewState(SecondBrainViewState.Closed)
+                    if (viewModel.secondBrainViewStateContainer.value is TribeAppViewState.Open) {
+                        viewModel.secondBrainViewStateContainer.updateViewState(TribeAppViewState.Closed)
                     } else {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
@@ -585,16 +586,16 @@ internal class ChatTribeFragment: ChatFragment<
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.secondBrainViewStateContainer.collect { viewState ->
-                secondBrainBinding.includeLayoutSecondBrainDetails.apply {
+                tribeAppBinding.includeLayoutTribeAppDetails.apply {
                     @Exhaustive
                     when(viewState) {
-                        is SecondBrainViewState.Closed -> {
+                        is TribeAppViewState.Closed -> {
                         }
-                        is SecondBrainViewState.Open -> {
+                        is TribeAppViewState.Open -> {
                         }
                     }
-                    viewState.transitionToEndSet(secondBrainBinding.root)
-                    secondBrainBinding.root.setTransitionDuration(250)
+                    viewState.transitionToEndSet(tribeAppBinding.root)
+                    tribeAppBinding.root.setTransitionDuration(250)
                 }
             }
         }
