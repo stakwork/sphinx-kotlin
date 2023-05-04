@@ -257,6 +257,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
                     override fun onPlaying() {
                         viewModel.startTimer()
+                        viewModel.updateVideoLastPlayed()
                         Log.d("YouTubePlayer", "Youtube is playing")
                     }
                     override fun onStopped() {
@@ -412,10 +413,8 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                     viewModel.createVideoRecordConsumed(viewState.id)
                                 } else {
                                     setupYoutubePlayer(viewState.id.youtubeVideoId())
-                                    viewModel.updateVideoLastPlayed(viewState.id)
                                     viewModel.createVideoRecordConsumed(viewState.id)
                                 }
-
                             } else {
                                 layoutConstraintLoadingVideo.visible
                                 layoutConstraintVideoViewContainer.visible

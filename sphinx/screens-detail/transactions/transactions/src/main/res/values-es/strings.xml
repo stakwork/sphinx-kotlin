@@ -2,4 +2,6 @@
 <resources>
     <string name="transactions_header_name">TRANSACCIONES</string>
     <string name="loading_more">Cargando más...</string>
+    <string name="failed_payment">Pago fallido</string>
+    <string name="failure_reason">Causa de la falla: %s</string>
 </resources>

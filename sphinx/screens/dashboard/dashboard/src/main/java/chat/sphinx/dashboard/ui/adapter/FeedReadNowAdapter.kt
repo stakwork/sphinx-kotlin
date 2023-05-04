@@ -237,9 +237,10 @@ class FeedReadNowAdapter(
                         holderJobs.add(job)
                     }
                 }
-
+                
                 textViewItemName.text = newsletterItem.titleToShow
                 textViewItemDescription.text = newsletterItem.descriptionToShow
+
                 textViewEntryTimestamp.text = newsletterItem.datePublished?.hhmmElseDate()
 
                 val hasAuthor = newsletterItem.author != null && newsletterItem.author?.value?.isNotEmpty() == true
