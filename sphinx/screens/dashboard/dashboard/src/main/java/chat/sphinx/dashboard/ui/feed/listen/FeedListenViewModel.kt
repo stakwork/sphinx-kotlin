@@ -1,20 +1,20 @@
 package chat.sphinx.dashboard.ui.feed.listen
 
 import android.content.Context
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
+import chat.sphinx.dashboard.ui.feed.FeedRecentlyPlayedViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
@@ -37,21 +37,40 @@ class FeedListenViewModel @Inject constructor(
         Context,
         FeedListenSideEffect,
         FeedListenViewState
-        >(dispatchers, FeedListenViewState.Idle), FeedFollowingViewModel
+        >(dispatchers, FeedListenViewState.Idle), FeedFollowingViewModel, FeedRecentlyPlayedViewModel
 {
-    override val feedsHolderViewStateFlow: StateFlow<List<Feed>> = flow {
-        repositoryDashboard.getAllFeedsOfType(FeedType.Podcast).collect { podcastFeeds ->
-            emit(
-                podcastFeeds.toList().sortedByDescending {
-                    it.lastPublished?.datePublished?.time ?: 0
-                }
-            )
+
+    private val _feedsHolderViewStateFlow: MutableStateFlow<List<Feed>> by lazy {
+        MutableStateFlow(listOf())
+    }
+
+    override val feedsHolderViewStateFlow: StateFlow<List<Feed>>
+        get() = _feedsHolderViewStateFlow
+
+    private val _lastPlayedFeedsHolderViewStateFlow: MutableStateFlow<List<Feed>> by lazy {
+        MutableStateFlow(listOf())
+    }
+
+    override val lastPlayedFeedsHolderViewStateFlow: StateFlow<List<Feed>>
+        get() = _lastPlayedFeedsHolderViewStateFlow
+
+    init {
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getAllFeedsOfType(FeedType.Podcast).collect { feeds ->
+
+                _feedsHolderViewStateFlow.value = feeds.toList()
+                    .filter { it.subscribed.isTrue() || it.chatId.value.toInt() != ChatId.NULL_CHAT_ID }
+                    .sortedByDescending { it.lastPublished?.datePublished?.time ?: 0 }
+
+                _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList()
+                    .sortedWith(compareByDescending<Feed> { it.lastPlayed?.time }.thenByDescending { it.lastPublished?.datePublished?.time ?: 0 })
+            }
         }
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5_000),
-        emptyList()
-    )
+    }
+
+    override fun recentlyPlayedSelected(feed: Feed) {
+        feedSelected(feed)
+    }
 
     fun episodeItemSelected(episode: FeedItem) {
         episode.feed?.let { feed ->

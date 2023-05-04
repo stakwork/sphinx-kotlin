@@ -21,6 +21,7 @@ import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_common.timeAgo
 import chat.sphinx.wrapper_feed.Feed
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -224,6 +225,9 @@ class FeedFollowingAdapter(
                         ContextCompat.getDrawable(root.context, f.getPlaceHolderImageRes())
                     )
                 }
+
+                textViewItemName.goneIfFalse(f.titleToShow.isNotEmpty())
+                textViewItemDescription.goneIfFalse(f.descriptionToShow.isNotEmpty())
 
                 textViewItemName.text = f.titleToShow
                 textViewItemDescription.text = f.descriptionToShow

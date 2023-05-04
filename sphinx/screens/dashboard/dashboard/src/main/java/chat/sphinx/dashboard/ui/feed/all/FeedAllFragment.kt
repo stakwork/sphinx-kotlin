@@ -89,7 +89,7 @@ internal class FeedAllFragment : SideEffectFragment<
 
     private fun setupRecentlyPlayedAdapter() {
         binding.recyclerViewRecentlyPlayed.apply {
-            val listenNowAdapter = FeedRecentlyPlayedAdapter(
+            val recentlyPlayedAdapter = FeedRecentlyPlayedAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
@@ -98,7 +98,7 @@ internal class FeedAllFragment : SideEffectFragment<
             )
 
             this.setHasFixedSize(false)
-            adapter = listenNowAdapter
+            adapter = recentlyPlayedAdapter
             itemAnimator = null
         }
     }

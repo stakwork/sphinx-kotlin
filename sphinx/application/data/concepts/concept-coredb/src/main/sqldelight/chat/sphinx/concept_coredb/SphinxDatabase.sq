@@ -1111,11 +1111,17 @@ AND feed_type = ?
 ORDER BY id DESC
 LIMIT 1;
 
-feedGetAllByFeedType:
+feedGetAllSubscribedByFeedType:
 SELECT *
 FROM feedDbo
 WHERE feed_type = ?
 AND (subscribed = 1 OR chat_id != 2147483647)
+ORDER BY id DESC;
+
+feedGetAllByFeedType:
+SELECT *
+FROM feedDbo
+WHERE feed_type = ?
 ORDER BY id DESC;
 
 feedGetAllByIds:

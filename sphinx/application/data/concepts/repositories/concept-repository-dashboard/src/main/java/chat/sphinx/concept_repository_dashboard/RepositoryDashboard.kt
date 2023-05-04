@@ -49,7 +49,10 @@ interface RepositoryDashboard {
     suspend fun deleteInvite(invite: Invite): Response<Any, ResponseError>
 
     fun getAllFeedsOfType(feedType: FeedType): Flow<List<Feed>>
+    fun getAllSubscribedFeedsOfType(feedType: FeedType): Flow<List<Feed>>
+
     fun getAllFeeds(): Flow<List<Feed>>
+    fun getAllSubscribedFeeds(): Flow<List<Feed>>
 
     fun getRecommendedFeeds(): Flow<List<FeedRecommendation>>
 

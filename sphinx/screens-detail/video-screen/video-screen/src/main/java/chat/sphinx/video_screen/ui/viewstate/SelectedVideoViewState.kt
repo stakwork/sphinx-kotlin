@@ -15,6 +15,7 @@ internal sealed class SelectedVideoViewState: ViewState<SelectedVideoViewState>(
 
     class VideoSelected(
         val id: FeedId,
+        val feedId: FeedId?,
         val title: FeedTitle,
         val description: FeedDescription?,
         val url: FeedUrl,
