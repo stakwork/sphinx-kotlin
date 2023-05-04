@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="transactions_header_name">MGA TRANSAKSIYON</string>
+    <string name="loading_more">Loading more...</string>
+    <string name="failed_payment">Failed Payment</string>
+    <string name="failure_reason">Failure reason: %s</string>
+</resources>

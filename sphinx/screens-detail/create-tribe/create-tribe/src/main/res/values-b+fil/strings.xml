@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="create_tribe_header_name">BAGONG TRIBO</string>
+    <string name="edit_tribe_header_name">I-EDIT ANG TRIBO</string>
+    <string name="create_tribe">Gumawa ng Grupo</string>
+    <string name="save">Save</string>
+    <string name="add_icon"></string>
+    <string name="bottom_menu_tribe_pic_header_text">Tribe Picture</string>
+    <string name="name_and_description_required">Name and description required</string>
+    <string name="failed_to_create_tribe">Failed to create tribe</string>
+    <string name="failed_to_update_tribe">Failed to update tribe</string>
+    <string name="failed_to_load_tribe">Failed to load tribe</string>
+    <string name="failed_to_process_image">Failed to process image</string>
+    <string name="list_on_tribes_sphinx_chat">Listahan sa tribes.sphinx.chat?</string>
+    <string name="name">Pangalan *</string>
+    <string name="image">Imahe</string>
+    <string name="description">Paglalarawan*</string>
+    <string name="tags">Tags</string>
+    <string name="price_to_join_sats">Presyo sa Pagsali</string>
+    <string name="price_per_message_sats">Price Per Message</string>
+    <string name="amount_to_stake_sats">Halaga para sa Stake</string>
+    <string name="time_to_stake_hours">Oras para sa Stake (oras)</string>
+    <string name="app_url">App Url</string>
+    <string name="rss_feed_url">Feed URL</string>
+    <string name="feed_content_type">Uri ng Nilalaman ng Feed</string>
+    <string name="approve_each_membership_request">Aprubahan ang bawat kahilingan para sa membership?</string>
+    <string name="feed_type_podcast">Podcast</string>
+    <string name="feed_type_video">Video</string>
+    <string name="feed_type_newsletter">Newsletter</string>
+</resources>

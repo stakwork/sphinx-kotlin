@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="add_member_header_name">MAGDAGDAG NG MIYEMBRO SA GRUPO</string>
+    <string name="add_member">mag-dagdag ng Miyembro</string>
+    <string name="member_alias">Alyas *</string>
+    <string name="member_image">Imahe ng miyembro ng grupo</string>
+    <string name="member_public_key">Pampublikong Susi*</string>
+    <string name="member_route_hint">Route Hint</string>
+    <string name="member_contact_key">Susing Pang-contact *</string>
+    <string name="bottom_menu_member_pic_header_text">Member Picture</string>
+    <string name="member_info_required">Alias, Public Key and Contact Key are required</string>
+    <string name="invalid_public_key">Di-wastong pampublikong Susi</string>
+    <string name="invalid_route_hint">None</string>
+    <string name="failed_to_add_member">Failed to add member</string>
+    <string name="failed_to_process_image">Failed to process image</string>
+</resources>

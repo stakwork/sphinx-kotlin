@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="address_book_header_name">Address Book</string>
+    <string name="search">Maghanap</string>
+    <string name="add_icon"></string>
+    <string name="add_friend">Magdagdag ng Kaibigan</string>
+    <string name="delete_contact">Delete</string>
+    <string name="block_contact">Block</string>
+    <string name="unblock_contact">Unblock</string>
+    <string name="swipe_left_to_delete">Swipe left to delete or block contact</string>
+    <string name="alert_confirm_delete_contact_title">Tanggalin ang Kontak</string>
+    <string name="alert_confirm_delete_contact">Sigurado ka bang gusto mong tanggalin ang kontak na ito?</string>
+    <string name="alert_confirm_block_contact_title">I-block ang Kontak</string>
+    <string name="alert_confirm_block_contact">Sigurado ka bang gusto mong i-block ang kontak na ito?</string>
+    <string name="alert_confirm_unblock_contact_title">I-unblock ang Kontak</string>
+    <string name="alert_confirm_unblock_contact">Sigurado ka bang gusto mong i-unblock ang Kontak na ito?</string>
+</resources>

@@ -3,6 +3,7 @@
     <string name="payment_common_header_name">SEND PAYMENT</string>
 
     <string name="destination_key">Public Key</string>
+    <string name="balance_too_low">Balance too low</string>
     <string name="add_message_hint">Add Message</string>
     <string name="confirm_button">CONFIRM</string>
     <string name="continue_button">CONTINUE</string>
