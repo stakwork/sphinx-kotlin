@@ -8,6 +8,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
+import chat.sphinx.resources.getString
+import chat.sphinx.transactions.R
 import chat.sphinx.transactions.databinding.LayoutTransactionHolderBinding
 import chat.sphinx.transactions.ui.TransactionsViewModel
 import chat.sphinx.transactions.ui.TransactionsViewState
@@ -104,7 +106,7 @@ internal class TransactionsListAdapter(
 
                             withContext(viewModel.dispatchers.default) {
                                 DiffUtil.calculateDiff(diff)
-                            }.let { result ->
+                            }.let {
                                 if (!diff.sameList) {
                                     transactions.clear()
                                     transactions.addAll(viewState.list)
@@ -207,7 +209,7 @@ internal class TransactionsListAdapter(
                     textViewTransactionDayOfMonth.text = dayOfMonthString
                     textViewTransactionDayOfWeek.text = dayOfWeekString
 
-                    textViewTransactionFailure.text = t.transaction?.error_message ?: ""
+                    textViewTransactionFailure.text = binding.root.context.getString(R.string.failure_reason, t.transaction?.error_message ?: "")
                     layoutConstraintTransactionFailure.goneIfFalse(t is TransactionHolderViewState.Failed.Open)
                 }
             }

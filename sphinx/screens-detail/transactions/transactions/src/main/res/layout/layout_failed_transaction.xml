@@ -15,7 +15,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_transactions_list_transaction_arrow"
-            android:layout_width="@dimen/transactions_list_transaction_arrow_width"
+            android:layout_width="@dimen/transactions_list_transaction_icon_container_width"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -23,15 +23,15 @@
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_transaction_arrow"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/transactions_list_transaction_icon_width"
                 android:layout_height="wrap_content"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_transaction_failed"
                 android:tint="@color/primaryRed"
+                android:layout_marginStart="@dimen/default_layout_margin"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -196,8 +196,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/default_layout_margin"
-            android:layout_marginBottom="@dimen/default_layout_margin"
-            android:layout_marginStart="52dp"
+            android:layout_marginBottom="29dp"
+            android:layout_marginStart="@dimen/transactions_list_failed_message_start_margin"
             android:fontFamily="@font/roboto_regular"
             android:singleLine="true"
             android:textColor="@color/mainBottomIcons"
