@@ -2,4 +2,6 @@
 <resources>
     <string name="transactions_header_name">交易紀錄</string>
     <string name="loading_more">載入更多...</string>
+    <string name="failed_payment">Failed Payment</string>
+    <string name="failure_reason">Failure reason: %s</string>
 </resources>
