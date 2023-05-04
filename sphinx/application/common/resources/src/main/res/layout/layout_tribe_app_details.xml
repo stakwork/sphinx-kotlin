@@ -2,11 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_second_brain_detail"
+    android:id="@+id/layout_constraint_tribe_app_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background_top_rounded_corners">
-
 
     <WebView
         android:id="@+id/web_view"

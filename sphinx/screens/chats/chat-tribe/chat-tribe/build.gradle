@@ -54,4 +54,5 @@ dependencies {
     implementation deps.lottie.sdk
 
     kapt kaptDeps.google.hilt
+    kapt kaptDeps.square.moshiCodegen
 }

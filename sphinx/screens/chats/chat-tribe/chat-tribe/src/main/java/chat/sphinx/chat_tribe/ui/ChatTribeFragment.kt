@@ -1,16 +1,14 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -311,7 +309,8 @@ internal class ChatTribeFragment: ChatFragment<
             webView.settings.useWideViewPort = true
             webView.settings.builtInZoomControls = true
 
-//            webView.evaluateJavascript()
+
+            webView.addJavascriptInterface(appViewViewModel, "Android")
 
             webView.loadUrl(url)
             webView.webViewClient = object : WebViewClient() {
@@ -327,6 +326,12 @@ internal class ChatTribeFragment: ChatFragment<
 
                 override fun onPageFinished(view: WebView?, url: String?) {
                     progressBarLoading.gone
+                    webView.loadUrl(
+                        "javascript:(function() {" +
+                                "window.parent.addEventListener ('message', function(event) {" +
+                                " Android.receiveMessage(JSON.stringify(event.data));});" +
+                                "})()"
+                    )
                     super.onPageFinished(view, url)
                 }
 
@@ -334,6 +339,7 @@ internal class ChatTribeFragment: ChatFragment<
                     progressBarLoading.gone
                     super.onReceivedError(view, request, error)
                 }
+
             }
         }
     }
@@ -447,6 +453,14 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.moreOptionsMenuStateFlow.collect {
                 setupMoreOptionsMenu()
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            appViewViewModel.sphinxWebViewDtoStateFlow.collect {
+                when (it?.type) {
+                    "AUTHORIZE" -> {}
+                }
             }
         }
 
