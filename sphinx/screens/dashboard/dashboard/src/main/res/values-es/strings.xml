@@ -121,7 +121,10 @@
     <string name="play">Jugar</string>
     <string name="listen_now">Escuchar ahora</string>
     <string name="following">Siguiendo</string>
-    <string name="recently_played">Recientes</string>
+    <string name="recently_played">Consumido recientemente</string>
+    <string name="recently_read">Leido recientemente</string>
+    <string name="recently_released">Lanzado recientemente</string>
+    <string name="recently_published">Publicado recientemente</string>
 
     <string name="read_now">Read Now</string>
     <string name="watch_now">Watch Now</string>

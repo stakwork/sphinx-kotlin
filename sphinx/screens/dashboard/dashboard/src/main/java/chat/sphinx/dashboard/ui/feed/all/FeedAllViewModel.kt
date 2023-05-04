@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_podcast.FeedRecommendation
@@ -53,7 +54,9 @@ internal class FeedAllViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
             repositoryDashboard.getAllFeeds().collect { feeds ->
+
                 _feedsHolderViewStateFlow.value = feeds.toList()
+                    .filter { it.subscribed.isTrue() || it.chatId.value.toInt() != ChatId.NULL_CHAT_ID }
                     .sortedByDescending { it.lastPublished?.datePublished?.time ?: 0 }
 
                 _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList()
@@ -111,7 +114,6 @@ internal class FeedAllViewModel @Inject constructor(
 
     override val feedsHolderViewStateFlow: StateFlow<List<Feed>>
         get() = _feedsHolderViewStateFlow
-
 
     override fun feedSelected(feed: Feed) {
         @Exhaustive

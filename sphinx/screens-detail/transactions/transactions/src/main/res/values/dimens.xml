@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="transactions_list_transaction_holder_height">85dp</dimen>
-    <dimen name="transactions_list_transaction_arrow_width">60dp</dimen>
-    <dimen name="transactions_list_transaction_icon_width">45dp</dimen>
+    <dimen name="transactions_list_transaction_holder_height">80dp</dimen>
+    <dimen name="transactions_list_transaction_icon_container_width">55dp</dimen>
+    <dimen name="transactions_list_transaction_icon_width">20dp</dimen>
     <dimen name="transactions_list_transaction_amount_unit_margin">5dp</dimen>
     <dimen name="transactions_list_transaction_arrow_margin">24dp</dimen>
     <dimen name="transactions_list_transaction_icon_margin">14dp</dimen>
     <dimen name="transactions_list_progress_bar_xy">25dp</dimen>
+    <dimen name="transactions_list_failed_message_start_margin">55dp</dimen>
 
     <dimen name="transactions_list_transaction_amount_unit_text_size">14sp</dimen>
     <dimen name="transactions_list_transaction_sender_receiver_text_size">14sp</dimen>
-    <dimen name="transactions_list_transaction_date_text_size">10sp</dimen>
+    <dimen name="transactions_list_transaction_date_text_size">11sp</dimen>
     <dimen name="transactions_list_no_transactions_text_size">12sp</dimen>
     <dimen name="transactions_list_loading_more_text_size">15sp</dimen>
 </resources>

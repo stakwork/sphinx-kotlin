@@ -15,6 +15,7 @@ import chat.sphinx.dashboard.databinding.FragmentFeedListenBinding
 import chat.sphinx.dashboard.ui.DashboardFragment
 import chat.sphinx.dashboard.ui.adapter.FeedListenNowAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedFollowingAdapter
+import chat.sphinx.dashboard.ui.adapter.FeedRecentlyPlayedAdapter
 import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.dashboard.ui.placeholder.PlaceholderContent
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
@@ -46,8 +47,8 @@ internal class FeedListenFragment : SideEffectFragment<
         super.onViewCreated(view, savedInstanceState)
 
         setupNestedScrollView()
-        setupListenNowAdapter()
-        setupFollowingAdapter()
+        setupRecentlyReleaseAdapter()
+        setupRecentlyPlayedAdapter()
     }
 
     @SuppressLint("RestrictedApi")
@@ -65,7 +66,7 @@ internal class FeedListenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupListenNowAdapter() {
+    private fun setupRecentlyReleaseAdapter() {
         binding.recyclerViewListenNow.apply {
             val listenNowAdapter = FeedListenNowAdapter(
                 imageLoader,
@@ -80,9 +81,9 @@ internal class FeedListenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupFollowingAdapter() {
-        binding.recyclerViewFollowing.apply {
-            val listenNowAdapter = FeedFollowingAdapter(
+    private fun setupRecentlyPlayedAdapter() {
+        binding.recyclerViewRecentlyPlayed.apply {
+            val recentlyPlayedAdapter = FeedRecentlyPlayedAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
@@ -91,7 +92,7 @@ internal class FeedListenFragment : SideEffectFragment<
             )
 
             this.setHasFixedSize(false)
-            adapter = listenNowAdapter
+            adapter = recentlyPlayedAdapter
             itemAnimator = null
         }
     }

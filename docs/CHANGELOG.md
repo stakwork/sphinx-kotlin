@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-alpha92 (2023-05-04)
+- Improves payments error handling
+- Improves transactions list UI
+- Adds Philippine language
+- Adds Recently Played sections in feed
+
 # Version 1.0.0-alpha91 (2023-04-28)
 - Improves payments error handling
 - Fixes crashes

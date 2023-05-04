@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_transaction_holder"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/transactions_list_transaction_holder_height">
+    android:layout_height="wrap_content">
 
     <include
         android:id="@+id/include_outgoing_transaction"
         layout="@layout/layout_outgoing_transaction"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/transactions_list_transaction_holder_height"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -18,7 +18,7 @@
         android:id="@+id/include_incoming_transaction"
         layout="@layout/layout_incoming_transaction"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/transactions_list_transaction_holder_height"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible"/>
@@ -27,8 +27,17 @@
         android:id="@+id/include_loading_more_transactions"
         layout="@layout/layout_loading_more_transactions"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/transactions_list_transaction_holder_height"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/include_failed_transaction"
+        layout="@layout/layout_failed_transaction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

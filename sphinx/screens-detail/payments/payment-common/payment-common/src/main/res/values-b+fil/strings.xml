@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="payment_common_header_name">MAGPADALA NG BAYAD</string>
+    <string name="destination_key">Pampublikong susi</string>
+    <string name="balance_too_low">Masyadong mababa ang balanse</string>
+    <string name="add_message_hint">Magdagdag ng Mensahe</string>
+    <string name="confirm_button">KUMPIRMAHIN</string>
+    <string name="continue_button">IPAGPATULOY</string>
+    <string name="error_processing_payment">There was an error processing payment, please try again later.</string>
+    <string name="payment_sent">Payment of %1$d sat sent to %2$s</string>
+    <string name="alert_confirm_payment_send_title">None</string>
+    <string name="alert_confirm_payment_send_message">Are you sure you want to send a payment of %1$d sat to %2$s?</string>
+</resources>
