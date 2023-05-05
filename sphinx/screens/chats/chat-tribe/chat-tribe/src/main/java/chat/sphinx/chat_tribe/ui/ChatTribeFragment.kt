@@ -457,14 +457,6 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            appViewViewModel.sphinxWebViewDtoStateFlow.collect {
-                when (it?.type) {
-                    "AUTHORIZE" -> {}
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             tribeFeedViewModel.boostAnimationViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
@@ -597,6 +589,19 @@ internal class ChatTribeFragment: ChatFragment<
                 viewState.transitionToEndSet(tribeMemberProfileBinding.root)
             }
         }
+
+        onStopSupervisor.scope.launch(appViewViewModel.mainImmediate) {
+            appViewViewModel.webViewViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when(viewState) {
+                    is WebViewViewState.Idle -> {}
+                    is WebViewViewState.Authorization -> {
+                        // Show popup
+                    }
+                }
+            }
+        }
+
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.secondBrainViewStateContainer.collect { viewState ->
