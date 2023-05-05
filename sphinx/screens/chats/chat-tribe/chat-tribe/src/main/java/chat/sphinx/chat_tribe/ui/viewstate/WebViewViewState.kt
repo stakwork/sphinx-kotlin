@@ -1,5 +1,6 @@
 package chat.sphinx.chat_tribe.ui.viewstate
 
+import chat.sphinx.chat_tribe.model.SendAuth
 import chat.sphinx.concept_network_query_people.model.BadgeDto
 import chat.sphinx.concept_network_query_people.model.ChatLeaderboardDto
 import chat.sphinx.concept_network_query_people.model.TribeMemberProfileDto
@@ -14,5 +15,7 @@ sealed class WebViewViewState: ViewState<WebViewViewState>() {
 
     object Idle: WebViewViewState()
     object Authorization: WebViewViewState()
+
+    class SendAuthorization(val script: String): WebViewViewState()
 
 }

@@ -10,8 +10,7 @@ data class SendAuth(
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun SendAuth.generateSendAuthString(): String =
-    "window.sphinxMessage('{\"budget\":${this.budget},\"pubkey\":\"${this.pubkey}\",\"type\":\"${this.type}\",\"application\":\"${this.application}\",\"password\":\"${this.password}\"}')"
-
+    "window.sphinxMessage(\\'{\\\"password\\\":\\\"${this.password}\\\",\\\"type\\\":\\\"${this.type}\\\",\\\"budget\\\":${this.budget},\\\"application\\\":\\\"${this.application}\\\",\\\"pubkey\\\":\\\"${this.pubkey}\\\"}\\')"
 
 fun generateRandomPass(): String {
     val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')

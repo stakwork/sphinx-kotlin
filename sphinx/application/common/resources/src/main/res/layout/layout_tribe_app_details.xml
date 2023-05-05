@@ -164,7 +164,7 @@
                 app:layout_constraintStart_toEndOf="parent">
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/button_profile_basic_container_key_backup"
+                    android:id="@+id/button_authorize"
                     style="@style/RoundedBlueButton"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

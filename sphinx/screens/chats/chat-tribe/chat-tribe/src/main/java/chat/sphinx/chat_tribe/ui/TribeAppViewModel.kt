@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_tribe.model.SendAuth
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto
 import chat.sphinx.chat_tribe.model.generateRandomPass
+import chat.sphinx.chat_tribe.model.generateSendAuthString
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
@@ -15,6 +16,7 @@ import chat.sphinx.wrapper_chat.AppUrl
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +40,8 @@ internal class TribeAppViewModel @Inject constructor(
     @Volatile
     private var initialized: Boolean = false
     private var appUrl: AppUrl? = null
+
+    private var challenge: String? = null
 
     private val _sphinxWebViewDtoStateFlow: MutableStateFlow<SphinxWebViewDto?> by lazy {
         MutableStateFlow(null)
@@ -79,6 +83,30 @@ internal class TribeAppViewModel @Inject constructor(
         }
     }
 
+    fun authorizeWebApp(amount: Int) {
+        if (amount > 0) {
+            if (!challenge.isNullOrEmpty()) {
+                // Sign challenge
+            } else {
+                contactRepository.accountOwner.value?.nodePubKey?.let {
+                    val sendAuth = SendAuth(
+                        budget = amount.toString(),
+                        pubkey = it.value,
+                        type = "AUTHORIZE",
+                        password = generateRandomPass(),
+                        application = "Sphinx"
+                    ).generateSendAuthString()
+
+                    webViewViewStateContainer.updateViewState(
+                        WebViewViewState.SendAuthorization(
+                            sendAuth
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private fun handleWebAppJson() {
         viewModelScope.launch(mainImmediate) {
             sphinxWebViewDtoStateFlow.collect {
@@ -95,6 +123,5 @@ internal class TribeAppViewModel @Inject constructor(
     fun receiveMessage(data: String) {
         createSphinxWebViewDto(data)
     }
-
 
 }

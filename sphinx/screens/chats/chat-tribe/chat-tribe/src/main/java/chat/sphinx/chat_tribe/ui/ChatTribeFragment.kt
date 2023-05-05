@@ -113,6 +113,9 @@ internal class ChatTribeFragment: ChatFragment<
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
 
+    private val webView: WebView
+        get() = tribeAppBinding.includeLayoutTribeAppDetails.webView
+
     override val menuEnablePayments: Boolean
         get() = false
 
@@ -134,6 +137,8 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -159,6 +164,8 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             } catch (_: Exception) {}
         }
+
+        webViewClickListener()
 
         podcastPlayerBinding.apply {
             imageViewForward30Button.setOnClickListener {
@@ -300,46 +307,61 @@ internal class ChatTribeFragment: ChatFragment<
             )
         }
     }
-
     private fun loadWebView(url: String) {
+
+        webView.settings.javaScriptEnabled = true
+        webView.settings.loadWithOverviewMode = true
+        webView.settings.useWideViewPort = true
+        webView.settings.builtInZoomControls = true
+
+
+        webView.addJavascriptInterface(appViewViewModel, "Android")
+
+        webView.loadUrl(url)
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                val url = request?.url.toString()
+                view?.loadUrl(url)
+                return super.shouldOverrideUrlLoading(view, request)
+            }
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                tribeAppBinding.includeLayoutTribeAppDetails.progressBarLoading.gone
+                webView.loadUrl(
+                    "javascript:(function() {" +
+                            "window.parent.addEventListener ('message', function(event) {" +
+                            " Android.receiveMessage(JSON.stringify(event.data));});" +
+                            "})()"
+                )
+                super.onPageFinished(view, url)
+            }
+
+            override fun onReceivedError(
+                view: WebView,
+                request: WebResourceRequest,
+                error: WebResourceError
+            ) {
+                tribeAppBinding.includeLayoutTribeAppDetails.progressBarLoading.gone
+                super.onReceivedError(view, request, error)
+            }
+
+        }
+    }
+
+    private fun webViewClickListener() {
         tribeAppBinding.includeLayoutTribeAppDetails.apply {
-
-            webView.settings.javaScriptEnabled = true
-            webView.settings.loadWithOverviewMode = true
-            webView.settings.useWideViewPort = true
-            webView.settings.builtInZoomControls = true
-
-
-            webView.addJavascriptInterface(appViewViewModel, "Android")
-
-            webView.loadUrl(url)
-            webView.webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                    val url = request?.url.toString()
-                    view?.loadUrl(url)
-                    return super.shouldOverrideUrlLoading(view, request)
-                }
-
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                }
-
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    progressBarLoading.gone
-                    webView.loadUrl(
-                        "javascript:(function() {" +
-                                "window.parent.addEventListener ('message', function(event) {" +
-                                " Android.receiveMessage(JSON.stringify(event.data));});" +
-                                "})()"
-                    )
-                    super.onPageFinished(view, url)
-                }
-
-                override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
-                    progressBarLoading.gone
-                    super.onReceivedError(view, request, error)
-                }
-
+            buttonAuthorize.setOnClickListener {
+                appViewViewModel.authorizeWebApp(editTextSatsAmount.text.toString().toInt())
+            }
+            textViewDetailScreenClose.setOnClickListener {
+                layoutConstraintAuthorizePopup.gone
             }
         }
     }
@@ -597,6 +619,10 @@ internal class ChatTribeFragment: ChatFragment<
                     is WebViewViewState.Idle -> {}
                     is WebViewViewState.Authorization -> {
                         tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.visible
+                    }
+                    is WebViewViewState.SendAuthorization -> {
+                        tribeAppBinding.includeLayoutTribeAppDetails.progressBarAuthLoading.visible
+                        webView.evaluateJavascript(viewState.script, null)
                     }
                 }
             }
