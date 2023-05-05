@@ -72,7 +72,6 @@
     <string name="tribe_member_profile_contributions">Contribuciones:</string>
 
 
-
     <string name="episode_detail_download">Descargar</string>
     <string name="episode_detail_erase">Borrar del dispositivo</string>
     <string name="episode_detail_share">Compartir</string>
@@ -86,6 +85,11 @@
 
     <string name="episode_description_show_more">MOSTRAR MAS</string>
     <string name="episode_description_show_less">MOSTRAR MENOS</string>
+
+    <string name="web_view_authorize">Autorizar</string>
+    <string name="web_view_withdraw">retirar hasta</string>
+    <string name="web_view_reauthorizing">sats antes de reautorizar</string>
+
 
     <string name="alias_allowed_characters">Solo se permiten letras, números y\nguiones bajos en el alias de la tribu</string>
 </resources>

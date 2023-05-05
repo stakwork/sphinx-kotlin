@@ -84,5 +84,10 @@
     <string name="episode_description_show_more">SHOW MORE</string>
     <string name="episode_description_show_less">SHOW LESS</string>
 
+    <string name="web_view_authorize">Authorize</string>
+    <string name="web_view_withdraw">retirar hasta</string>
+    <string name="web_view_reauthorizing">sats antes de reautorizar</string>
+
+
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>
