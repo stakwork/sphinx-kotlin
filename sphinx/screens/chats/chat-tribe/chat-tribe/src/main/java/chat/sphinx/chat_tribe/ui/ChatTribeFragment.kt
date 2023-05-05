@@ -596,7 +596,7 @@ internal class ChatTribeFragment: ChatFragment<
                 when(viewState) {
                     is WebViewViewState.Idle -> {}
                     is WebViewViewState.Authorization -> {
-                        // Show popup
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.visible
                     }
                 }
             }
