@@ -12,7 +12,6 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.TribeAppViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
@@ -141,9 +140,6 @@ class ChatTribeViewModel @Inject constructor(
         ViewStateContainer(TribeMemberDataViewState.Idle)
     }
 
-    val secondBrainViewStateContainer: ViewStateContainer<TribeAppViewState> by lazy {
-        ViewStateContainer(TribeAppViewState.Closed)
-    }
 
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->

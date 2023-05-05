@@ -4,11 +4,10 @@ import android.app.Application
 import android.webkit.JavascriptInterface
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import chat.sphinx.chat_tribe.model.SendAuth
-import chat.sphinx.chat_tribe.model.SphinxWebViewDto
-import chat.sphinx.chat_tribe.model.generateRandomPass
-import chat.sphinx.chat_tribe.model.generateSendAuthString
+import chat.sphinx.chat_tribe.model.*
+import chat.sphinx.chat_tribe.ui.viewstate.WebViewLayoutScreenViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
+import chat.sphinx.chat_tribe.ui.viewstate.CurrentWebVieViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -16,7 +15,6 @@ import chat.sphinx.wrapper_chat.AppUrl
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,24 +45,34 @@ internal class TribeAppViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
+    val sphinxWebViewDtoStateFlow: StateFlow<SphinxWebViewDto?>
+        get() = _sphinxWebViewDtoStateFlow.asStateFlow()
+
     val webViewViewStateContainer: ViewStateContainer<WebViewViewState> by lazy {
         ViewStateContainer(WebViewViewState.Idle)
+    }
+
+    val webViewLayoutScreenViewStateContainer: ViewStateContainer<WebViewLayoutScreenViewState> by lazy {
+        ViewStateContainer(WebViewLayoutScreenViewState.Closed)
+    }
+
+    val currentWebViewViewStateContainer: ViewStateContainer<CurrentWebVieViewState> by lazy {
+        ViewStateContainer(CurrentWebVieViewState.NoWebView)
     }
 
     init {
         handleWebAppJson()
     }
 
-    val sphinxWebViewDtoStateFlow: StateFlow<SphinxWebViewDto?>
-        get() = _sphinxWebViewDtoStateFlow.asStateFlow()
-
-
-    fun init(url: AppUrl) {
+    fun init(url: TribeFeedData.Result) {
         if (initialized) {
             return
         } else {
+            (url as? TribeFeedData.Result.FeedData)?.appUrl?.let { url ->
+                appUrl = url
+                currentWebViewViewStateContainer.updateViewState(CurrentWebVieViewState.WebViewAvailable(url))
+            }
             initialized = true
-            appUrl = url
         }
     }
 

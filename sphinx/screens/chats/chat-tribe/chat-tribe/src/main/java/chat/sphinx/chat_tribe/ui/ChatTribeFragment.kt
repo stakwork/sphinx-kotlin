@@ -1,7 +1,6 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
@@ -13,6 +12,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -153,11 +153,7 @@ internal class ChatTribeFragment: ChatFragment<
                         is TribeFeedData.Loading -> {}
                         is TribeFeedData.Result -> {
                             tribeFeedViewModel.init(data)
-                            (data as? TribeFeedData.Result.FeedData)?.appUrl?.let { appUrl ->
-                                appViewViewModel.init(appUrl)
-                                loadWebView(appUrl.value)
-                                binding.includeChatTribeHeader.imageViewChatWebView.visible
-                            }
+                            appViewViewModel.init(data)
                             throw Exception()
                         }
                     }
@@ -183,7 +179,15 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
-            viewModel.secondBrainViewStateContainer.updateViewState(TribeAppViewState.Open)
+            when(appViewViewModel.currentWebViewViewStateContainer.value) {
+                is CurrentWebVieViewState.WebViewAvailable -> {
+                    appViewViewModel.currentWebViewViewStateContainer.updateViewState(CurrentWebVieViewState.WebViewOpen)
+                }
+                is CurrentWebVieViewState.WebViewOpen -> {
+                    appViewViewModel.currentWebViewViewStateContainer.updateViewState(CurrentWebVieViewState.WebViewAvailable())
+                }
+                is CurrentWebVieViewState.NoWebView -> {}
+            }
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
@@ -314,7 +318,6 @@ internal class ChatTribeFragment: ChatFragment<
         webView.settings.useWideViewPort = true
         webView.settings.builtInZoomControls = true
 
-
         webView.addJavascriptInterface(appViewViewModel, "Android")
 
         webView.loadUrl(url)
@@ -399,8 +402,8 @@ internal class ChatTribeFragment: ChatFragment<
                     )
                 }
                 else -> {
-                    if (viewModel.secondBrainViewStateContainer.value is TribeAppViewState.Open) {
-                        viewModel.secondBrainViewStateContainer.updateViewState(TribeAppViewState.Closed)
+                    if (appViewViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
+                        appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                     } else {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
@@ -613,6 +616,29 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(appViewViewModel.mainImmediate) {
+            appViewViewModel.currentWebViewViewStateContainer.collect { viewState ->
+                    @Exhaustive
+                    when (viewState) {
+                        is CurrentWebVieViewState.NoWebView -> {
+                            binding.includeChatTribeHeader.imageViewChatWebView.gone
+                        }
+                        is CurrentWebVieViewState.WebViewAvailable -> {
+                            binding.includeChatTribeHeader.imageViewChatWebView.visible
+                            viewState.appUrl?.value?.let { loadWebView(it) }
+                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view))
+                            appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
+                        }
+                        is CurrentWebVieViewState.WebViewOpen -> {
+                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view_chat))
+                            appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Open)
+                        }
+                    }
+            }
+        }
+
+        onStopSupervisor.scope.launch(appViewViewModel.mainImmediate) {
             appViewViewModel.webViewViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when(viewState) {
@@ -628,15 +654,14 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
-
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.secondBrainViewStateContainer.collect { viewState ->
+            appViewViewModel.webViewLayoutScreenViewStateContainer.collect { viewState ->
                 tribeAppBinding.includeLayoutTribeAppDetails.apply {
                     @Exhaustive
                     when(viewState) {
-                        is TribeAppViewState.Closed -> {
+                        is WebViewLayoutScreenViewState.Closed -> {
                         }
-                        is TribeAppViewState.Open -> {
+                        is WebViewLayoutScreenViewState.Open -> {
                         }
                     }
                     viewState.transitionToEndSet(tribeAppBinding.root)
