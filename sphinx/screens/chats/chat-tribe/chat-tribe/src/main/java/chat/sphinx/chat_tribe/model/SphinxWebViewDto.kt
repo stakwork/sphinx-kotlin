@@ -1,6 +1,5 @@
 package chat.sphinx.chat_tribe.model
 
-import chat.sphinx.wrapper_message.MessageType
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -16,5 +15,4 @@ data class SphinxWebViewDto(
         const val TYPE_AUTHORIZE = "AUTHORIZE"
         const val TYPE_LSAT = "LSAT"
     }
-
 }

@@ -328,7 +328,7 @@ internal class ChatTribeFragment: ChatFragment<
                 view?.loadUrl(url)
                 return super.shouldOverrideUrlLoading(view, request)
             }
-            
+
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
             }

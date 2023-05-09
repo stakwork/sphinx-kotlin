@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_tribe.model.*
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.APPLICATION_NAME
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_AUTHORIZE
+import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_LSAT
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewLayoutScreenViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.chat_tribe.ui.viewstate.CurrentWebVieViewState
@@ -14,11 +15,14 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.wrapper_chat.AppUrl
+import chat.sphinx.wrapper_relay.AuthorizationToken
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
+import io.matthewnelson.crypto_common.clazzes.PasswordGenerator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -75,18 +79,21 @@ internal class TribeAppViewModel @Inject constructor(
             if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
                 // Sign challenge
             } else {
+                @OptIn(RawPasswordAccess::class)
+                val password = PasswordGenerator(passwordLength = 16).password.value.joinToString("")
+
                 contactRepository.accountOwner.value?.nodePubKey?.let {
                     val sendAuth = SendAuth(
-                        budget = amount.toString(),
+                        budget = amount,
                         pubkey = it.value,
                         type = TYPE_AUTHORIZE,
-                        password = generateRandomPass(),
+                        password = password,
                         application = APPLICATION_NAME
-                    ).generateSendAuthString()
+                    ).toJson(moshi)
 
                     webViewViewStateContainer.updateViewState(
                         WebViewViewState.SendAuthorization(
-                            sendAuth
+                            "window.sphinxMessage('$sendAuth')"
                         )
                     )
                 }
@@ -100,6 +107,9 @@ internal class TribeAppViewModel @Inject constructor(
                 when (it?.type) {
                     TYPE_AUTHORIZE -> {
                         webViewViewStateContainer.updateViewState(WebViewViewState.Authorization)
+                    }
+                    TYPE_LSAT -> {
+
                     }
                 }
             }

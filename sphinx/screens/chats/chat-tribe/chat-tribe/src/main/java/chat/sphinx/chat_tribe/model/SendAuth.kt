@@ -1,7 +1,11 @@
 package chat.sphinx.chat_tribe.model
 
+import com.squareup.moshi.JsonClass
+import com.squareup.moshi.Moshi
+
+@JsonClass(generateAdapter = true)
 data class SendAuth(
-    val budget: String,
+    val budget: Int,
     val pubkey: String,
     val type: String,
     val application: String,
@@ -12,9 +16,15 @@ data class SendAuth(
 inline fun SendAuth.generateSendAuthString(): String =
     "window.sphinxMessage(\\\'{\\\"password\\\":\\\"${this.password}\\\",\\\"type\\\":\\\"${this.type}\\\",\\\"budget\\\":${this.budget},\\\"application\\\":\\\"${this.application}\\\",\\\"pubkey\\\":\\\"${this.pubkey}\\\"}\\\')"
 
-fun generateRandomPass(): String {
-    val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-    return (1..16)
-        .map { allowedChars.random() }
-        .joinToString("")
-}
+@Throws(AssertionError::class)
+fun SendAuth.toJson(moshi: Moshi): String =
+    moshi.adapter(SendAuth::class.java)
+        .toJson(
+            SendAuth(
+                budget,
+                pubkey,
+                type,
+                application,
+                password
+            )
+        )
