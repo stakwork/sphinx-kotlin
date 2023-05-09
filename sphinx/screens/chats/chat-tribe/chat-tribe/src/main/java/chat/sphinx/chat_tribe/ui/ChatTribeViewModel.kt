@@ -38,6 +38,7 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -142,6 +143,15 @@ class ChatTribeViewModel @Inject constructor(
 
     fun getContactById(contactId: ContactId): SharedFlow<Contact> = flow {
         contactRepository.getContactById(contactId).firstOrNull()?.let { contact ->
+            emit(contact)
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000)
+    )
+
+    fun getContactByPubKey(pubKey: LightningNodePubKey): SharedFlow<Contact> = flow {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
             emit(contact)
         }
     }.distinctUntilChanged().shareIn(

@@ -618,22 +618,24 @@ internal class ChatTribeFragment: ChatFragment<
                                         }
                                     }
 
-                                    viewModel.getContactById(viewModel.getOwner().id).firstOrNull()?.let { owner ->
-                                        owner.photoUrl?.let { ownerPhoto ->
-                                            imageLoader.load(
-                                                messageHolderPinImageInitialHolder.imageViewChatPicture,
-                                                ownerPhoto.value,
-                                                ImageLoaderOptions.Builder()
-                                                    .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
-                                                    .transformation(Transformation.CircleCrop)
-                                                    .build()
-                                            )
-                                        }
+                                    viewModel.getChat().ownerPubKey?.let { pubKey ->
+                                        viewModel.getContactByPubKey(pubKey).firstOrNull()?.let { owner ->
+                                            owner.photoUrl?.let { ownerPhoto ->
+                                                imageLoader.load(
+                                                    messageHolderPinImageInitialHolder.imageViewChatPicture,
+                                                    ownerPhoto.value,
+                                                    ImageLoaderOptions.Builder()
+                                                        .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                        .transformation(Transformation.CircleCrop)
+                                                        .build()
+                                                )
+                                            }
 
-                                        owner.alias?.let { ownerAlias ->
-                                            textViewPinnedBottomBodyUsername.text = ownerAlias.value
-                                        }
+                                            owner.alias?.let { ownerAlias ->
+                                                textViewPinnedBottomBodyUsername.text = ownerAlias.value
+                                            }
 
+                                        }
                                     }
 
                                 } else {
