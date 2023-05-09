@@ -168,7 +168,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         pinedMessageHeader.apply {
-            textViewChatHeaderName.setOnClickListener {
+            layoutConstraintChatPinedMessageHeader.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.updatePinMessageData.collect {  message ->
                         viewModel.pinedMessageDataViewState.updateViewState(
