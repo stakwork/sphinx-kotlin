@@ -5,6 +5,8 @@ import android.webkit.JavascriptInterface
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_tribe.model.*
+import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.APPLICATION_NAME
+import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_AUTHORIZE
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewLayoutScreenViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.chat_tribe.ui.viewstate.CurrentWebVieViewState
@@ -28,24 +30,18 @@ import javax.inject.Inject
 @HiltViewModel
 internal class TribeAppViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
-    handle: SavedStateHandle,
-    private val networkQueryMemeServer: NetworkQueryMemeServer,
     private val contactRepository: ContactRepository,
-    private val app: Application,
     private val moshi: Moshi
     ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle) {
 
     @Volatile
-    private var initialized: Boolean = false
     private var appUrl: AppUrl? = null
-
-    private var challenge: String? = null
 
     private val _sphinxWebViewDtoStateFlow: MutableStateFlow<SphinxWebViewDto?> by lazy {
         MutableStateFlow(null)
     }
 
-    val sphinxWebViewDtoStateFlow: StateFlow<SphinxWebViewDto?>
+    private val sphinxWebViewDtoStateFlow: StateFlow<SphinxWebViewDto?>
         get() = _sphinxWebViewDtoStateFlow.asStateFlow()
 
     val webViewViewStateContainer: ViewStateContainer<WebViewViewState> by lazy {
@@ -65,44 +61,27 @@ internal class TribeAppViewModel @Inject constructor(
     }
 
     fun init(url: TribeFeedData.Result) {
-        if (initialized) {
-            return
-        } else {
+        if (appUrl == null) {
             (url as? TribeFeedData.Result.FeedData)?.appUrl?.let { url ->
                 appUrl = url
-                currentWebViewViewStateContainer.updateViewState(CurrentWebVieViewState.WebViewAvailable(url))
-            }
-            initialized = true
-        }
-    }
 
-   private fun createSphinxWebViewDto(data: String) {
-        viewModelScope.launch(mainImmediate) {
-            withContext(default) {
-                if (data.contains("type")) {
-                    try {
-                        _sphinxWebViewDtoStateFlow.value =
-                            moshi.adapter(SphinxWebViewDto::class.java).fromJson(data)
-                    } catch (e: java.lang.Exception) {
-                        e.printStackTrace()
-                    }
-                }
+                currentWebViewViewStateContainer.updateViewState(CurrentWebVieViewState.WebViewAvailable(url))
             }
         }
     }
 
     fun authorizeWebApp(amount: Int) {
         if (amount > 0) {
-            if (!challenge.isNullOrEmpty()) {
+            if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
                 // Sign challenge
             } else {
                 contactRepository.accountOwner.value?.nodePubKey?.let {
                     val sendAuth = SendAuth(
                         budget = amount.toString(),
                         pubkey = it.value,
-                        type = "AUTHORIZE",
+                        type = TYPE_AUTHORIZE,
                         password = generateRandomPass(),
-                        application = "Sphinx"
+                        application = APPLICATION_NAME
                     ).generateSendAuthString()
 
                     webViewViewStateContainer.updateViewState(
@@ -119,7 +98,7 @@ internal class TribeAppViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             sphinxWebViewDtoStateFlow.collect {
                 when (it?.type) {
-                    "AUTHORIZE" -> {
+                    TYPE_AUTHORIZE -> {
                         webViewViewStateContainer.updateViewState(WebViewViewState.Authorization)
                     }
                 }
@@ -129,7 +108,11 @@ internal class TribeAppViewModel @Inject constructor(
 
     @JavascriptInterface
     fun receiveMessage(data: String) {
-        createSphinxWebViewDto(data)
+        try {
+            _sphinxWebViewDtoStateFlow.value =
+                moshi.adapter(SphinxWebViewDto::class.java).fromJson(data)
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+        }
     }
-
 }

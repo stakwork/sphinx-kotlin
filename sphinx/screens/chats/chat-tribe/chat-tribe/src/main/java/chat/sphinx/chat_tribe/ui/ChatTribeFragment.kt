@@ -3,9 +3,11 @@ package chat.sphinx.chat_tribe.ui
 import android.animation.Animator
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.webkit.*
 import android.widget.ArrayAdapter
@@ -63,6 +65,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 internal class ChatTribeFragment: ChatFragment<
@@ -314,13 +317,8 @@ internal class ChatTribeFragment: ChatFragment<
     private fun loadWebView(url: String) {
 
         webView.settings.javaScriptEnabled = true
-        webView.settings.loadWithOverviewMode = true
-        webView.settings.useWideViewPort = true
-        webView.settings.builtInZoomControls = true
-
         webView.addJavascriptInterface(appViewViewModel, "Android")
 
-        webView.loadUrl(url)
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
@@ -330,19 +328,13 @@ internal class ChatTribeFragment: ChatFragment<
                 view?.loadUrl(url)
                 return super.shouldOverrideUrlLoading(view, request)
             }
-
+            
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 tribeAppBinding.includeLayoutTribeAppDetails.progressBarLoading.gone
-                webView.loadUrl(
-                    "javascript:(function() {" +
-                            "window.parent.addEventListener ('message', function(event) {" +
-                            " Android.receiveMessage(JSON.stringify(event.data));});" +
-                            "})()"
-                )
                 super.onPageFinished(view, url)
             }
 
@@ -356,6 +348,8 @@ internal class ChatTribeFragment: ChatFragment<
             }
 
         }
+
+        webView.loadUrl(url)
     }
 
     private fun webViewClickListener() {
@@ -648,7 +642,10 @@ internal class ChatTribeFragment: ChatFragment<
                     }
                     is WebViewViewState.SendAuthorization -> {
                         tribeAppBinding.includeLayoutTribeAppDetails.progressBarAuthLoading.visible
-                        webView.evaluateJavascript(viewState.script, null)
+
+                        webView.evaluateJavascript(viewState.script) {
+                            println(it)
+                        }
                     }
                 }
             }
