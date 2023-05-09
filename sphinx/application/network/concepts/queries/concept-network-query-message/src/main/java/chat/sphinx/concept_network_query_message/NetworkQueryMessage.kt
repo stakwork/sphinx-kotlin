@@ -60,6 +60,7 @@ abstract class NetworkQueryMessage {
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
     ): Flow<LoadResponse<KeySendPaymentDto, ResponseError>>
 
+
     abstract fun payAttachment(
         chatId: ChatId,
         contactId: ContactId?,

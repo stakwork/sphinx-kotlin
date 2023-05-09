@@ -3775,7 +3775,8 @@ abstract class SphinxRepository(
                                     chat.uuid,
                                     tribeDto.feed_url?.toFeedUrl(),
                                     feedType,
-                                    tribeDto.badges
+                                    tribeDto.badges,
+                                    tribeDto.pin?.toMessageUUID()
                                 )
                             }
                         }
@@ -5632,6 +5633,93 @@ abstract class SphinxRepository(
         return response
     }
 
+    override suspend fun pinMessage(
+        chatId: ChatId,
+        message: Message?
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pin message"))
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+                networkQueryChat.pinMessage(
+                    chatId,
+                    PutPinMessageDto(message?.uuid?.value)
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when(loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            response = Response.Success(loadResponse)
+                            chatLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertChat(
+                                            loadResponse.value,
+                                            moshi,
+                                            chatSeenMap,
+                                            queries,
+                                            null,
+                                            accountOwner.value?.nodePubKey
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }
+
+
+        }.join()
+        return response
+    }
+
+    override suspend fun unPinMessage(
+        chatId: ChatId,
+        message: Message?
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError("Failed to pin message"))
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+                networkQueryChat.pinMessage(
+                    chatId,
+                    PutPinMessageDto("")
+                ).collect { loadResponse ->
+                    @Exhaustive
+                    when(loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            response = loadResponse
+                        }
+                        is Response.Success -> {
+                            response = Response.Success(loadResponse)
+                            chatLock.withLock {
+                                withContext(io) {
+                                    queries.transaction {
+                                        upsertChat(
+                                            loadResponse.value,
+                                            moshi,
+                                            chatSeenMap,
+                                            queries,
+                                            null,
+                                            accountOwner.value?.nodePubKey
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }
+
+
+        }.join()
+        return response
+    }
     override suspend fun processMemberRequest(
         contactId: ContactId,
         messageId: MessageId,

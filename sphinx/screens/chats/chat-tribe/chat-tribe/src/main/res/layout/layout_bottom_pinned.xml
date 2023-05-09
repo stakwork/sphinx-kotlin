@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_motion_bottom_pinned"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:elevation="@dimen/menu_bottom_default_elevation"
+    app:layoutDescription="@xml/layout_bottom_pinned_scene">
+
+    <View
+        android:id="@+id/view_pin_bottom_input_lock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black" />
+
+    <include
+        android:id="@+id/include_layout_pin_bottom_template"
+        layout="@layout/layout_bottom_pinned_template"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintTop_toBottomOf="parent" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

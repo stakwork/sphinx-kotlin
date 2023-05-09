@@ -3,6 +3,8 @@ package chat.sphinx.chat_tribe.ui
 import android.animation.Animator
 import android.graphics.Color
 import android.os.Bundle
+import android.system.Os.bind
+import android.util.Log
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -29,7 +31,12 @@ import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
+import chat.sphinx.chat_tribe.databinding.*
 import chat.sphinx.chat_tribe.model.TribeFeedData
+import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
+import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -46,8 +53,10 @@ import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -58,6 +67,7 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -109,6 +119,13 @@ internal class ChatTribeFragment: ChatFragment<
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
 
+    override val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
+        get() = binding.includeChatPinedMessageHeader
+    private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
+        get() = binding.includePinMessagePopup
+    private val layoutBottomPinned: LayoutBottomPinnedBinding
+        get() = binding.includeLayoutBottomPinned
+
     override val menuEnablePayments: Boolean
         get() = false
 
@@ -148,6 +165,24 @@ internal class ChatTribeFragment: ChatFragment<
                     }
                 }
             } catch (_: Exception) {}
+        }
+
+        pinedMessageHeader.apply {
+            textViewChatHeaderName.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.updatePinMessageData.collect {  message ->
+                        viewModel.pinedMessageDataViewState.updateViewState(
+                            PinedMessageDataViewState.Data(
+                                message
+                            )
+                        )
+                    }
+                }
+
+                viewModel.pinedMessageBottomViewState.updateViewState(
+                    PinMessageBottomViewState.Open
+                )
+            }
         }
 
         podcastPlayerBinding.apply {
@@ -486,6 +521,142 @@ internal class ChatTribeFragment: ChatFragment<
                         is PodcastContributionsViewState.None -> {
                             textViewChatHeaderContributionsIcon.gone
                             textViewChatHeaderContributions.gone
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageHeaderViewState.collect { viewState ->
+                pinedMessageHeader.apply {
+
+                    @Exhaustive
+                    when(viewState) {
+                        is PinedMessageHeaderViewState.Idle -> {
+                            root.goneIfFalse(false)
+                        }
+
+                        is PinedMessageHeaderViewState.PinedMessageHeader -> {
+                            root.goneIfFalse(true)
+
+                            textViewChatHeaderName.text = viewState.message.messageContentDecrypted?.value
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessagePopupViewState.collect { viewState ->
+                layoutChatPinPopupBinding.apply {
+
+                    @Exhaustive
+                    when(viewState) {
+                        is PinedMessagePopupViewState.Idle -> {
+                            root.goneIfFalse(false)
+                        }
+                        is PinedMessagePopupViewState.PinnedMessage -> {
+                            root.goneIfFalse(true)
+
+                            includePinedMessagePopup.textViewPinedMessage.text =viewState.text
+                        }
+                        is PinedMessagePopupViewState.UnpinnedMessage -> {
+                            root.goneIfFalse(true)
+
+                            includePinedMessagePopup.textViewPinedMessage.text =viewState.text
+                        }
+                    }
+                }
+
+            }
+        }
+
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageBottomViewState.collect { viewState ->
+                layoutBottomPinned.apply {
+
+                    @Exhaustive
+                    when(viewState) {
+                        is PinMessageBottomViewState.Open -> {
+                            layoutMotionBottomPinned.setTransitionDuration(150)
+                        }
+
+                        is PinMessageBottomViewState.Closed -> {
+                            layoutMotionBottomPinned.setTransitionDuration(150)
+                        }
+
+                    }
+
+                    viewState.transitionToEndSet(layoutMotionBottomPinned)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageDataViewState.collect { viewState ->
+                layoutBottomPinned.apply {
+
+                    viewPinBottomInputLock.setOnClickListener {
+                        viewModel.pinedMessageBottomViewState.updateViewState(
+                            PinMessageBottomViewState.Closed
+                        )
+                    }
+
+                    @Exhaustive
+                    when (viewState) {
+                        is PinedMessageDataViewState.Idle -> {}
+                        is PinedMessageDataViewState.Data -> {
+                            includeLayoutPinBottomTemplate.apply {
+                                val isOwner = viewModel.getChat().isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)
+                                if (isOwner) {
+                                    layoutConstraintPinnedBottomUnpinButton.apply {
+                                        visible
+                                        setOnClickListener {
+                                            viewModel.unPinMessage(viewState.message)
+                                        }
+                                    }
+
+                                    viewModel.getContactById(viewModel.getOwner().id).firstOrNull()?.let { owner ->
+                                        owner.photoUrl?.let { ownerPhoto ->
+                                            imageLoader.load(
+                                                messageHolderPinImageInitialHolder.imageViewChatPicture,
+                                                ownerPhoto.value,
+                                                ImageLoaderOptions.Builder()
+                                                    .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                    .transformation(Transformation.CircleCrop)
+                                                    .build()
+                                            )
+                                        }
+
+                                        owner.alias?.let { ownerAlias ->
+                                            textViewPinnedBottomBodyUsername.text = ownerAlias.value
+                                        }
+
+                                    }
+
+                                } else {
+
+                                    viewState.message.senderPic?.let { photoUrl ->
+                                        imageLoader.load(
+                                            messageHolderPinImageInitialHolder.imageViewChatPicture,
+                                            photoUrl.value,
+                                            ImageLoaderOptions.Builder()
+                                                .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                .transformation(Transformation.CircleCrop)
+                                                .build()
+                                        )
+
+                                    }
+
+                                    textViewPinnedBottomBodyUsername.text = viewState.message.senderAlias?.value
+                                }
+
+                                includePinnedBottomMessageHolder.apply {
+                                    textViewPinnedBottomHeaderText.text = viewState.message.messageContentDecrypted?.value
+                                }
+                            }
                         }
                     }
                 }

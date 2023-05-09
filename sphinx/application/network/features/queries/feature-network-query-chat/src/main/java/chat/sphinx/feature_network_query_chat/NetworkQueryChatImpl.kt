@@ -36,6 +36,7 @@ class NetworkQueryChatImpl(
         private const val UN_MUTE_CHAT = "unmute"
         private const val ENDPOINT_GROUP = "/group"
         private const val ENDPOINT_EDIT_GROUP = "/group/%d"
+        private const val ENDPOINT_PIN_MESSAGE = "/chat_pin/%d"
         private const val ENDPOINT_KICK = "/kick/%d/%d"
         private const val ENDPOINT_MEMBER = "/member"
         private const val ENDPOINT_TRIBE = "/tribe"
@@ -135,6 +136,19 @@ class NetworkQueryChatImpl(
             relayEndpoint = String.format(ENDPOINT_EDIT_GROUP, chatId.value),
             requestBodyJsonClass = PostGroupDto::class.java,
             requestBody = postGroupDto,
+            relayData = relayData
+        )
+
+    override fun pinMessage(
+        chatId: ChatId,
+        putPinMessageDto: PutPinMessageDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<ChatDto, ResponseError>>  =
+        networkRelayCall.relayPut(
+            responseJsonClass = PinMessageRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_PIN_MESSAGE, chatId.value),
+            requestBodyJsonClass = PutPinMessageDto::class.java,
+            requestBody = putPinMessageDto,
             relayData = relayData
         )
 

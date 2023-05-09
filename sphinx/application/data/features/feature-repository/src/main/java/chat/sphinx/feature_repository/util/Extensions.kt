@@ -1,7 +1,6 @@
 package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.podcast.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
@@ -24,6 +23,7 @@ import chat.sphinx.wrapper_common.invite.isProcessingPayment
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.toMessageId
 import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_common.subscription.Cron
 import chat.sphinx.wrapper_common.subscription.EndNumber
@@ -164,6 +164,7 @@ inline fun TransactionCallbacks.upsertChat(
     val escrowAmount = dto.escrow_amount?.toSat()
     val chatName = dto.name?.toChatName()
     val adminPubKey = dto.owner_pub_key?.toLightningNodePubKey()
+    val pinedMessage = dto.pin?.toMessageUUID()
 
     queries.chatUpsert(
         chatName,
@@ -183,12 +184,13 @@ inline fun TransactionCallbacks.upsertChat(
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },
         dto.notify?.toNotificationLevel(),
+        pinedMessage,
         chatId,
         ChatUUID(dto.uuid),
         chatType,
         createdAt,
         pricePerMessage,
-        escrowAmount,
+        escrowAmount
     )
 
     if (chatType.isTribe() && (ownerPubKey == adminPubKey) && (pricePerMessage != null || escrowAmount != null)) {

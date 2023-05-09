@@ -1830,6 +1830,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     open fun onSmallProfileImageClick(message: Message) {}
 
+    open fun pinMessage(message: Message) {}
+
+    open fun unPinMessage(message: Message) {}
+
+
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused
     }
