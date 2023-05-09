@@ -917,7 +917,7 @@ internal class DashboardViewModel @Inject constructor(
                 else -> DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
             }
         }
-        return DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+        return DashboardFragmentsAdapter.FIRST_INIT
     }
 
     private suspend fun getOwner(): Contact {
