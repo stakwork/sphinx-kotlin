@@ -34,7 +34,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:backgroundTint="@color/popupBackground"
-        android:visibility="gone"
+        android:visibility="visible"
         android:background="@color/black">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -126,6 +126,7 @@
                 android:fontFamily="@font/roboto_regular"
                 android:gravity="center"
                 android:hint="0"
+                android:imeOptions="actionDone"
                 android:inputType="number"
                 android:padding="@dimen/default_list_row_padding_vertical"
                 android:singleLine="true"

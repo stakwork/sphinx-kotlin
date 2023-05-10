@@ -648,7 +648,10 @@ internal class ChatTribeFragment: ChatFragment<
                         }
                         is CurrentWebVieViewState.WebViewAvailable -> {
                             binding.includeChatTribeHeader.imageViewChatWebView.visible
-                            viewState.appUrl?.value?.let { loadWebView(it) }
+                            viewState.appUrl?.value?.let {url ->
+                                loadWebView(url)
+                                tribeAppBinding.includeLayoutTribeAppDetails.textViewWebUrl.text = url}
+
                             appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                         }
                         is CurrentWebVieViewState.WebViewOpen -> {
