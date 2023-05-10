@@ -89,6 +89,8 @@
     <string name="web_view_authorize">Autorizar</string>
     <string name="web_view_withdraw">retirar hasta</string>
     <string name="web_view_reauthorizing">sats antes de reautorizar</string>
+    <string name="web_view_remaining_budget">Presupuesto Restante: %s</string>
+
 
 
     <string name="alias_allowed_characters">Solo se permiten letras, números y\nguiones bajos en el alias de la tribu</string>

@@ -15,6 +15,8 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.wrapper_chat.AppUrl
+import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_feed.FeedItemDetail
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import com.squareup.moshi.Moshi
@@ -61,6 +63,13 @@ internal class TribeAppViewModel @Inject constructor(
         ViewStateContainer(CurrentWebVieViewState.NoWebView)
     }
 
+    private val _budgetStateFlow: MutableStateFlow<Sat> by lazy {
+        MutableStateFlow(Sat(0))
+    }
+
+    val budgetStateFlow: StateFlow<Sat>
+        get() = _budgetStateFlow.asStateFlow()
+
     init {
         handleWebAppJson()
     }
@@ -97,6 +106,7 @@ internal class TribeAppViewModel @Inject constructor(
                             "window.sphinxMessage('$sendAuth')"
                         )
                     )
+                    _budgetStateFlow.value = Sat(amount.toLong())
                 }
             }
         }

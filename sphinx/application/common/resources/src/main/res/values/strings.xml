@@ -193,6 +193,7 @@
     <string name="web_view_dots" translatable="false">...</string>
     <string name="web_view_withdraw">to withdraw up to</string>
     <string name="web_view_reauthorizing">sats before reauthorizing</string>
+    <string name="web_view_remaining_budget">Remaining Budget: %s</string>
 
 
     <string name="time_left">%s left</string>

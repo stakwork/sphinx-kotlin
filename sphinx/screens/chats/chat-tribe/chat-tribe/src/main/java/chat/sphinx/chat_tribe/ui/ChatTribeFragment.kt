@@ -18,7 +18,6 @@ import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -518,6 +517,15 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            appViewViewModel.budgetStateFlow.collect { sats ->
+                tribeAppBinding.includeLayoutTribeAppDetails.textViewRemainingBudget.text =
+                    String.format(getString(R.string.web_view_remaining_budget),
+                    sats.value.toString()
+                )
+            }
+        }
+
         // TODO: Remove hackery (utilized now to update podcast object's sats per minute
         //  value if it's changed from tribe detail screen)
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -634,10 +642,10 @@ internal class ChatTribeFragment: ChatFragment<
                         }
                         is CurrentWebVieViewState.WebViewAvailable -> {
                             binding.includeChatTribeHeader.imageViewChatWebView.visible
-                            viewState.appUrl?.value?.let {url ->
+                            viewState.appUrl?.value?.let { url ->
                                 loadWebView(url)
-                                tribeAppBinding.includeLayoutTribeAppDetails.textViewWebUrl.text = url}
-
+                                tribeAppBinding.includeLayoutTribeAppDetails.textViewWebUrl.text = url
+                            }
                             appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                         }
                         is CurrentWebVieViewState.WebViewOpen -> {
@@ -656,11 +664,10 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.visible
                     }
                     is WebViewViewState.SendAuthorization -> {
-                        tribeAppBinding.includeLayoutTribeAppDetails.progressBarAuthLoading.visible
-
                         webView.evaluateJavascript(viewState.script) {
                             println(it)
                         }
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.gone
                     }
                 }
             }
