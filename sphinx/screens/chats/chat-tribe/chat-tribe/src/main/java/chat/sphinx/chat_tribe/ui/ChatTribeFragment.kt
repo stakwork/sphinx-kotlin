@@ -619,13 +619,9 @@ internal class ChatTribeFragment: ChatFragment<
                         is CurrentWebVieViewState.WebViewAvailable -> {
                             binding.includeChatTribeHeader.imageViewChatWebView.visible
                             viewState.appUrl?.value?.let { loadWebView(it) }
-                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
-                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view))
                             appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                         }
                         is CurrentWebVieViewState.WebViewOpen -> {
-                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
-                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view_chat))
                             appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Open)
                         }
                     }
@@ -657,8 +653,12 @@ internal class ChatTribeFragment: ChatFragment<
                     @Exhaustive
                     when(viewState) {
                         is WebViewLayoutScreenViewState.Closed -> {
+                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view))
                         }
                         is WebViewLayoutScreenViewState.Open -> {
+                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view_chat))
                         }
                     }
                     viewState.transitionToEndSet(tribeAppBinding.root)
