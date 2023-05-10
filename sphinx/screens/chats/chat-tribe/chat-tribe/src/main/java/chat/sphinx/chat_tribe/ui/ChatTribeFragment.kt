@@ -51,6 +51,7 @@ import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
@@ -335,6 +336,23 @@ internal class ChatTribeFragment: ChatFragment<
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 tribeAppBinding.includeLayoutTribeAppDetails.progressBarLoading.gone
+                view?.evaluateJavascript(
+                    """
+            (function() {
+                var editTexts = document.getElementsByTagName('input');
+                for (var i = 0; i < editTexts.length; i++) {
+                    if (editTexts[i].type === 'text') {
+                        editTexts[i].addEventListener('keydown', function(event) {
+                            if (event.keyCode === 13) {
+                                Android.hideKeyboard();
+                                event.preventDefault();
+                            }
+                        });
+                    }
+                }
+            })();
+        """.trimIndent(), null
+                )
                 super.onPageFinished(view, url)
             }
 
@@ -472,6 +490,18 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.moreOptionsMenuStateFlow.collect {
                 setupMoreOptionsMenu()
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            appViewViewModel.hideKeyboardStateFlow.collect {
+                if (it == true) {
+//                    tribeAppBinding.root.context.inputMethodManager?.let { imm ->
+//                        imm.hideSoftInputFromWindow(view?.windowToken, 0)
+//                        delay(250L)
+//                        appViewViewModel.resetHideKeyboard()
+//                    }
+                }
             }
         }
 

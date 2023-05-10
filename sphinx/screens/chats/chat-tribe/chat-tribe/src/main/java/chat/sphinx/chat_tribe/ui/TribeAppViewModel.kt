@@ -15,6 +15,7 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.wrapper_chat.AppUrl
+import chat.sphinx.wrapper_feed.FeedItemDetail
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -59,6 +60,13 @@ internal class TribeAppViewModel @Inject constructor(
     val currentWebViewViewStateContainer: ViewStateContainer<CurrentWebVieViewState> by lazy {
         ViewStateContainer(CurrentWebVieViewState.NoWebView)
     }
+
+    private val _hideKeyboardStateFlow: MutableStateFlow<Boolean?> by lazy {
+        MutableStateFlow(null)
+    }
+
+    val hideKeyboardStateFlow: StateFlow<Boolean?>
+        get() = _hideKeyboardStateFlow.asStateFlow()
 
     init {
         handleWebAppJson()
@@ -124,5 +132,14 @@ internal class TribeAppViewModel @Inject constructor(
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
+    }
+
+    @JavascriptInterface
+    fun hideKeyboard() {
+        _hideKeyboardStateFlow.value = true
+    }
+
+    fun resetHideKeyboard() {
+        _hideKeyboardStateFlow.value = null
     }
 }
