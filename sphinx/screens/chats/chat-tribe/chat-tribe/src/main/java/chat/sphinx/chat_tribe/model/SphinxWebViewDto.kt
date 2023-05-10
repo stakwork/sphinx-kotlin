@@ -6,7 +6,11 @@ import com.squareup.moshi.JsonClass
 data class SphinxWebViewDto(
     val application: String,
     val type: String,
-    val challenge: String?
+    val challenge: String?,
+    val paymentRequest: String?,
+    val macaroon: String?,
+    val issuer: String?
+
 ) {
 
     companion object {

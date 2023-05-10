@@ -1,6 +1,7 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.app.Application
+import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -15,13 +16,17 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.wrapper_chat.AppUrl
+import chat.sphinx.wrapper_common.lightning.Bolt11
+import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toLightningPaymentRequestOrNull
 import chat.sphinx.wrapper_feed.FeedItem
 import chat.sphinx.wrapper_feed.FeedItemDetail
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.BaseViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
@@ -112,6 +117,21 @@ internal class TribeAppViewModel @Inject constructor(
         }
     }
 
+    private fun decodePaymentRequest(paymentRequest: String) {
+        paymentRequest.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
+            try {
+                val bolt11 = Bolt11.decode(lightningPaymentRequest)
+                val amount = bolt11.getSatsAmount()
+
+                if (budgetStateFlow.value.value >= (amount?.value ?: 0)) {
+
+                } else {
+
+                }
+            } catch (e: Exception) {}
+        }
+    }
+
     private fun handleWebAppJson() {
         viewModelScope.launch(mainImmediate) {
             sphinxWebViewDtoStateFlow.collect {
@@ -120,7 +140,9 @@ internal class TribeAppViewModel @Inject constructor(
                         webViewViewStateContainer.updateViewState(WebViewViewState.Authorization)
                     }
                     TYPE_LSAT -> {
-
+                        sphinxWebViewDtoStateFlow.value?.paymentRequest?.let {
+                            decodePaymentRequest(it)
+                        }
                     }
                 }
             }
