@@ -1,6 +1,7 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
@@ -8,13 +9,16 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.webkit.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -336,23 +340,6 @@ internal class ChatTribeFragment: ChatFragment<
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 tribeAppBinding.includeLayoutTribeAppDetails.progressBarLoading.gone
-                view?.evaluateJavascript(
-                    """
-            (function() {
-                var editTexts = document.getElementsByTagName('input');
-                for (var i = 0; i < editTexts.length; i++) {
-                    if (editTexts[i].type === 'text') {
-                        editTexts[i].addEventListener('keydown', function(event) {
-                            if (event.keyCode === 13) {
-                                Android.hideKeyboard();
-                                event.preventDefault();
-                            }
-                        });
-                    }
-                }
-            })();
-        """.trimIndent(), null
-                )
                 super.onPageFinished(view, url)
             }
 
@@ -365,6 +352,15 @@ internal class ChatTribeFragment: ChatFragment<
                 super.onReceivedError(view, request, error)
             }
 
+            override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
+                if (event?.keyCode == KeyEvent.KEYCODE_ENTER || event?.keyCode == KeyEvent.ACTION_DOWN ) {
+                    val imm = tribeAppBinding.root.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(view?.windowToken, 0)
+                    return true
+                }
+                return super.shouldOverrideKeyEvent(view, event)
+            }
+
         }
 
         webView.loadUrl(url)
@@ -373,7 +369,9 @@ internal class ChatTribeFragment: ChatFragment<
     private fun webViewClickListener() {
         tribeAppBinding.includeLayoutTribeAppDetails.apply {
             buttonAuthorize.setOnClickListener {
-                appViewViewModel.authorizeWebApp(editTextSatsAmount.text.toString().toInt())
+                if (editTextSatsAmount.text.toString().isNotEmpty()) {
+                    appViewViewModel.authorizeWebApp(editTextSatsAmount.text.toString().toInt())
+                }
             }
             textViewDetailScreenClose.setOnClickListener {
                 layoutConstraintAuthorizePopup.gone
@@ -490,18 +488,6 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.moreOptionsMenuStateFlow.collect {
                 setupMoreOptionsMenu()
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            appViewViewModel.hideKeyboardStateFlow.collect {
-                if (it == true) {
-//                    tribeAppBinding.root.context.inputMethodManager?.let { imm ->
-//                        imm.hideSoftInputFromWindow(view?.windowToken, 0)
-//                        delay(250L)
-//                        appViewViewModel.resetHideKeyboard()
-//                    }
-                }
             }
         }
 

@@ -61,13 +61,6 @@ internal class TribeAppViewModel @Inject constructor(
         ViewStateContainer(CurrentWebVieViewState.NoWebView)
     }
 
-    private val _hideKeyboardStateFlow: MutableStateFlow<Boolean?> by lazy {
-        MutableStateFlow(null)
-    }
-
-    val hideKeyboardStateFlow: StateFlow<Boolean?>
-        get() = _hideKeyboardStateFlow.asStateFlow()
-
     init {
         handleWebAppJson()
     }
@@ -132,14 +125,5 @@ internal class TribeAppViewModel @Inject constructor(
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
-    }
-
-    @JavascriptInterface
-    fun hideKeyboard() {
-        _hideKeyboardStateFlow.value = true
-    }
-
-    fun resetHideKeyboard() {
-        _hideKeyboardStateFlow.value = null
     }
 }
