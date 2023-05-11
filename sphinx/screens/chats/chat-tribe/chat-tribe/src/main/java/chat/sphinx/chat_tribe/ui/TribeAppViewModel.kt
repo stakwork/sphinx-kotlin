@@ -13,6 +13,8 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebViewLayoutScreenViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
 import chat.sphinx.chat_tribe.ui.viewstate.CurrentWebVieViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
+import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
+import chat.sphinx.concept_network_query_lightning.model.webview.LsatWebViewDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.wrapper_chat.AppUrl
@@ -43,7 +45,8 @@ import javax.inject.Inject
 internal class TribeAppViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     private val contactRepository: ContactRepository,
-    private val moshi: Moshi
+    private val moshi: Moshi,
+    private val networkQueryLightning: NetworkQueryLightning
     ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle) {
 
     @Volatile
@@ -124,7 +127,19 @@ internal class TribeAppViewModel @Inject constructor(
                 val amount = bolt11.getSatsAmount()
 
                 if (budgetStateFlow.value.value >= (amount?.value ?: 0)) {
+                    viewModelScope.launch(mainImmediate) {
+                        networkQueryLightning.payLsat(
+                            LsatWebViewDto(
+                                sphinxWebViewDtoStateFlow.value?.paymentRequest,
+                                sphinxWebViewDtoStateFlow.value?.macaroon,
+                                sphinxWebViewDtoStateFlow.value?.issuer
 
+                            )
+                        ).collect {
+                            Log.d("myTesteo", it.toString())
+                        }
+
+                    }
                 } else {
 
                 }
@@ -154,6 +169,7 @@ internal class TribeAppViewModel @Inject constructor(
         try {
             _sphinxWebViewDtoStateFlow.value =
                 moshi.adapter(SphinxWebViewDto::class.java).fromJson(data)
+            Log.d("myTesteo", sphinxWebViewDtoStateFlow.value.toString())
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
