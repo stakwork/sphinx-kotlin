@@ -113,7 +113,6 @@ internal class TribeAppViewModel @Inject constructor(
                                     sphinxWebViewDtoStateFlow.value?.paymentRequest,
                                     sphinxWebViewDtoStateFlow.value?.macaroon,
                                     sphinxWebViewDtoStateFlow.value?.issuer
-
                                 )
                             ).collect { loadResponse ->
                                 @Exhaustive
@@ -158,11 +157,9 @@ internal class TribeAppViewModel @Inject constructor(
                                                 null
                                             )
                                         )
-                                        Log.d("myTesteo", sendLsat)
                                     }
                                 }
                             }
-
                         }
                     } else {
                         val password = generatePassword()
@@ -182,6 +179,7 @@ internal class TribeAppViewModel @Inject constructor(
                                 app.getString(R.string.side_effect_insufficient_budget)
                             )
                         )
+                        webViewViewStateContainer.updateViewState(WebViewViewState.Authorization)
                     }
                 }
 
@@ -194,11 +192,13 @@ internal class TribeAppViewModel @Inject constructor(
             if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
                 // Sign challenge
             } else {
+                _budgetStateFlow.value = Sat(budgetStateFlow.value.value + amount.toLong())
+
                 val password = generatePassword()
 
                 contactRepository.accountOwner.value?.nodePubKey?.let {
                     val sendAuth = SendAuth(
-                        budget = amount,
+                        budget = budgetStateFlow.value.value.toInt(),
                         pubkey = it.value,
                         type = TYPE_AUTHORIZE,
                         password = password,
@@ -210,7 +210,6 @@ internal class TribeAppViewModel @Inject constructor(
                             "window.sphinxMessage('$sendAuth')"
                         )
                     )
-                    _budgetStateFlow.value = Sat(amount.toLong())
                 }
             }
         }
@@ -243,7 +242,6 @@ internal class TribeAppViewModel @Inject constructor(
         try {
             _sphinxWebViewDtoStateFlow.value =
                 moshi.adapter(SphinxWebViewDto::class.java).fromJson(data)
-            Log.d("myTesteo", sphinxWebViewDtoStateFlow.value.toString())
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
