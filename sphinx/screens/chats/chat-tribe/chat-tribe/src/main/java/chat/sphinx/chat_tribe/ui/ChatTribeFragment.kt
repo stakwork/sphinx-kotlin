@@ -356,9 +356,7 @@ internal class ChatTribeFragment: ChatFragment<
                 }
                 return super.shouldOverrideKeyEvent(view, event)
             }
-
         }
-
         webView.loadUrl(url)
     }
 

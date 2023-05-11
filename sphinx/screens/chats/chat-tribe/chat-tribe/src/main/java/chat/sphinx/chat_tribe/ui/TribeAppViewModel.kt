@@ -99,6 +99,51 @@ internal class TribeAppViewModel @Inject constructor(
         }
     }
 
+    private fun handleWebAppJson() {
+        viewModelScope.launch(mainImmediate) {
+            sphinxWebViewDtoStateFlow.collect {
+                when (it?.type) {
+                    TYPE_AUTHORIZE -> {
+                        webViewViewStateContainer.updateViewState(WebViewViewState.Authorization)
+                    }
+                    TYPE_LSAT -> {
+                        sphinxWebViewDtoStateFlow.value?.paymentRequest?.let {
+                            decodePaymentRequest(it)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun authorizeWebApp(amount: Int) {
+        if (amount > 0) {
+            if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
+                // Sign challenge
+            } else {
+                _budgetStateFlow.value = Sat(budgetStateFlow.value.value + amount.toLong())
+
+                val password = generatePassword()
+
+                contactRepository.accountOwner.value?.nodePubKey?.let {
+                    val sendAuth = SendAuth(
+                        budget = budgetStateFlow.value.value.toInt(),
+                        pubkey = it.value,
+                        type = TYPE_AUTHORIZE,
+                        password = password,
+                        application = APPLICATION_NAME
+                    ).toJson(moshi)
+
+                    webViewViewStateContainer.updateViewState(
+                        WebViewViewState.SendAuthorization(
+                            "window.sphinxMessage('$sendAuth')"
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     private fun decodePaymentRequest(paymentRequest: String) {
         paymentRequest.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
             try {
@@ -187,56 +232,6 @@ internal class TribeAppViewModel @Inject constructor(
         }
     }
 
-    fun authorizeWebApp(amount: Int) {
-        if (amount > 0) {
-            if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
-                // Sign challenge
-            } else {
-                _budgetStateFlow.value = Sat(budgetStateFlow.value.value + amount.toLong())
-
-                val password = generatePassword()
-
-                contactRepository.accountOwner.value?.nodePubKey?.let {
-                    val sendAuth = SendAuth(
-                        budget = budgetStateFlow.value.value.toInt(),
-                        pubkey = it.value,
-                        type = TYPE_AUTHORIZE,
-                        password = password,
-                        application = APPLICATION_NAME
-                    ).toJson(moshi)
-
-                    webViewViewStateContainer.updateViewState(
-                        WebViewViewState.SendAuthorization(
-                            "window.sphinxMessage('$sendAuth')"
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    private fun generatePassword(): String {
-        @OptIn(RawPasswordAccess::class)
-        return PasswordGenerator(passwordLength = 16).password.value.joinToString("")
-    }
-
-    private fun handleWebAppJson() {
-        viewModelScope.launch(mainImmediate) {
-            sphinxWebViewDtoStateFlow.collect {
-                when (it?.type) {
-                    TYPE_AUTHORIZE -> {
-                        webViewViewStateContainer.updateViewState(WebViewViewState.Authorization)
-                    }
-                    TYPE_LSAT -> {
-                        sphinxWebViewDtoStateFlow.value?.paymentRequest?.let {
-                            decodePaymentRequest(it)
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     @JavascriptInterface
     fun receiveMessage(data: String) {
         try {
@@ -247,4 +242,8 @@ internal class TribeAppViewModel @Inject constructor(
         }
     }
 
+    private fun generatePassword(): String {
+        @OptIn(RawPasswordAccess::class)
+        return PasswordGenerator(passwordLength = 16).password.value.joinToString("")
+    }
 }

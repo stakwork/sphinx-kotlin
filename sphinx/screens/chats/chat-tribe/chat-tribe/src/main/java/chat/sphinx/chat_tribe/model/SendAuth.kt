@@ -11,11 +11,6 @@ data class SendAuth(
     val application: String,
     val password: String
 )
-
-@Suppress("NOTHING_TO_INLINE")
-inline fun SendAuth.generateSendAuthString(): String =
-    "window.sphinxMessage(\\\'{\\\"password\\\":\\\"${this.password}\\\",\\\"type\\\":\\\"${this.type}\\\",\\\"budget\\\":${this.budget},\\\"application\\\":\\\"${this.application}\\\",\\\"pubkey\\\":\\\"${this.pubkey}\\\"}\\\')"
-
 @Throws(AssertionError::class)
 fun SendAuth.toJson(moshi: Moshi): String =
     moshi.adapter(SendAuth::class.java)
