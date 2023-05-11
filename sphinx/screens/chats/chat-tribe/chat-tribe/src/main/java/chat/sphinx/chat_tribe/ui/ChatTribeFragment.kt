@@ -669,6 +669,11 @@ internal class ChatTribeFragment: ChatFragment<
                         }
                         tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.gone
                     }
+                    is WebViewViewState.SendLsat -> {
+                        webView.evaluateJavascript(viewState.script) {
+                            println(it)
+                        }
+                    }
                 }
             }
         }

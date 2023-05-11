@@ -5,6 +5,7 @@ import android.util.Log
 import android.webkit.JavascriptInterface
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import app.cash.exhaustive.Exhaustive
 import chat.sphinx.chat_tribe.model.*
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.APPLICATION_NAME
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_AUTHORIZE
@@ -17,6 +18,10 @@ import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.webview.LsatWebViewDto
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
+import chat.sphinx.kotlin_response.exception
+import chat.sphinx.kotlin_response.message
 import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_common.lightning.Bolt11
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
@@ -97,8 +102,7 @@ internal class TribeAppViewModel @Inject constructor(
             if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
                 // Sign challenge
             } else {
-                @OptIn(RawPasswordAccess::class)
-                val password = PasswordGenerator(passwordLength = 16).password.value.joinToString("")
+                val password = generatePassword()
 
                 contactRepository.accountOwner.value?.nodePubKey?.let {
                     val sendAuth = SendAuth(
@@ -126,25 +130,75 @@ internal class TribeAppViewModel @Inject constructor(
                 val bolt11 = Bolt11.decode(lightningPaymentRequest)
                 val amount = bolt11.getSatsAmount()
 
-                if (budgetStateFlow.value.value >= (amount?.value ?: 0)) {
-                    viewModelScope.launch(mainImmediate) {
-                        networkQueryLightning.payLsat(
-                            LsatWebViewDto(
-                                sphinxWebViewDtoStateFlow.value?.paymentRequest,
-                                sphinxWebViewDtoStateFlow.value?.macaroon,
-                                sphinxWebViewDtoStateFlow.value?.issuer
+                amount?.let { nnAmount ->
+                    if (budgetStateFlow.value.value >= (nnAmount.value)) {
+                        viewModelScope.launch(mainImmediate) {
+                            networkQueryLightning.payLsat(
+                                LsatWebViewDto(
+                                    sphinxWebViewDtoStateFlow.value?.paymentRequest,
+                                    sphinxWebViewDtoStateFlow.value?.macaroon,
+                                    sphinxWebViewDtoStateFlow.value?.issuer
 
-                            )
-                        ).collect {
-                            Log.d("myTesteo", it.toString())
+                                )
+                            ).collect { loadResponse ->
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is Response.Error -> {
+                                        val password = generatePassword()
+
+                                        val sendLsat = SendLsat(
+                                            password = password,
+                                            budget = budgetStateFlow.value.value.toString(),
+                                            type = TYPE_LSAT,
+                                            application = APPLICATION_NAME,
+                                            lsat = null,
+                                            success = "0"
+                                        ).toJson(moshi)
+
+                                        webViewViewStateContainer.updateViewState(
+                                            WebViewViewState.SendLsat(
+                                                "window.sphinxMessage('$sendLsat')"
+                                            )
+                                        )
+                                    }
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Success -> {
+                                        val password = generatePassword()
+
+                                        _budgetStateFlow.value = Sat(budgetStateFlow.value.value - nnAmount.value)
+
+                                        val sendLsat = SendLsat(
+                                            password = password,
+                                            budget = budgetStateFlow.value.value.toString(),
+                                            type = TYPE_LSAT,
+                                            application = APPLICATION_NAME,
+                                            lsat = loadResponse.value.lsat,
+                                            success = "1"
+                                        ).toJson(moshi)
+
+                                        webViewViewStateContainer.updateViewState(
+                                            WebViewViewState.SendLsat(
+                                                "window.sphinxMessage('$sendLsat')"
+                                            )
+                                        )
+                                        Log.d("myTesteo", sendLsat)
+                                    }
+                                }
+                            }
+
                         }
+                    } else {
 
                     }
-                } else {
-
                 }
+
             } catch (e: Exception) {}
         }
+    }
+
+    private fun generatePassword(): String {
+        @OptIn(RawPasswordAccess::class)
+        return PasswordGenerator(passwordLength = 16).password.value.joinToString("")
     }
 
     private fun handleWebAppJson() {
