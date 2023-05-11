@@ -97,33 +97,6 @@ internal class TribeAppViewModel @Inject constructor(
         }
     }
 
-    fun authorizeWebApp(amount: Int) {
-        if (amount > 0) {
-            if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
-                // Sign challenge
-            } else {
-                val password = generatePassword()
-
-                contactRepository.accountOwner.value?.nodePubKey?.let {
-                    val sendAuth = SendAuth(
-                        budget = amount,
-                        pubkey = it.value,
-                        type = TYPE_AUTHORIZE,
-                        password = password,
-                        application = APPLICATION_NAME
-                    ).toJson(moshi)
-
-                    webViewViewStateContainer.updateViewState(
-                        WebViewViewState.SendAuthorization(
-                            "window.sphinxMessage('$sendAuth')"
-                        )
-                    )
-                    _budgetStateFlow.value = Sat(amount.toLong())
-                }
-            }
-        }
-    }
-
     private fun decodePaymentRequest(paymentRequest: String) {
         paymentRequest.toLightningPaymentRequestOrNull()?.let { lightningPaymentRequest ->
             try {
@@ -188,11 +161,53 @@ internal class TribeAppViewModel @Inject constructor(
 
                         }
                     } else {
+                        val password = generatePassword()
 
+                        val sendLsat = SendLsat(
+                            password = password,
+                            budget = budgetStateFlow.value.value.toString(),
+                            type = TYPE_LSAT,
+                            application = APPLICATION_NAME,
+                            lsat = null,
+                            success = "0"
+                        ).toJson(moshi)
+
+                        webViewViewStateContainer.updateViewState(
+                            WebViewViewState.SendLsat(
+                                "window.sphinxMessage('$sendLsat')"
+                            )
+                        )
                     }
                 }
 
             } catch (e: Exception) {}
+        }
+    }
+
+    fun authorizeWebApp(amount: Int) {
+        if (amount > 0) {
+            if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
+                // Sign challenge
+            } else {
+                val password = generatePassword()
+
+                contactRepository.accountOwner.value?.nodePubKey?.let {
+                    val sendAuth = SendAuth(
+                        budget = amount,
+                        pubkey = it.value,
+                        type = TYPE_AUTHORIZE,
+                        password = password,
+                        application = APPLICATION_NAME
+                    ).toJson(moshi)
+
+                    webViewViewStateContainer.updateViewState(
+                        WebViewViewState.SendAuthorization(
+                            "window.sphinxMessage('$sendAuth')"
+                        )
+                    )
+                    _budgetStateFlow.value = Sat(amount.toLong())
+                }
+            }
         }
     }
 
