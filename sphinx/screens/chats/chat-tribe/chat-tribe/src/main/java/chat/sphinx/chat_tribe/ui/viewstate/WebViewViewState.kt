@@ -10,6 +10,6 @@ sealed class WebViewViewState: ViewState<WebViewViewState>() {
 
     class SendAuthorization(val script: String): WebViewViewState()
 
-    class SendLsat(val script: String): WebViewViewState()
+    class SendLsat(val script: String, val error: String?): WebViewViewState()
 
 }

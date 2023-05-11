@@ -482,4 +482,12 @@ class ChatTribeViewModel @Inject constructor(
             (chatNavigator as TribeChatNavigator).toNotificationsLevel(chatId)
         }
     }
+
+    fun lsatToastError(errorMessage: String) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatSideEffect.Notify(errorMessage)
+                )
+            }
+        }
 }

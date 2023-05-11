@@ -4,11 +4,9 @@ import android.animation.Animator
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
@@ -54,7 +52,6 @@ import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
-import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
@@ -664,14 +661,14 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.visible
                     }
                     is WebViewViewState.SendAuthorization -> {
-                        webView.evaluateJavascript(viewState.script) {
-                            println(it)
-                        }
+                        webView.evaluateJavascript(viewState.script, null)
+
                         tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.gone
                     }
                     is WebViewViewState.SendLsat -> {
-                        webView.evaluateJavascript(viewState.script) {
-                            println(it)
+                        webView.evaluateJavascript(viewState.script, null)
+                        if (!viewState.error.isNullOrEmpty()) {
+                            viewModel.lsatToastError(viewState.error)
                         }
                     }
                 }

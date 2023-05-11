@@ -6,6 +6,7 @@ import android.webkit.JavascriptInterface
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.*
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.APPLICATION_NAME
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_AUTHORIZE
@@ -49,6 +50,7 @@ import javax.inject.Inject
 @HiltViewModel
 internal class TribeAppViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
+    private val app: Application,
     private val contactRepository: ContactRepository,
     private val moshi: Moshi,
     private val networkQueryLightning: NetworkQueryLightning
@@ -130,7 +132,8 @@ internal class TribeAppViewModel @Inject constructor(
 
                                         webViewViewStateContainer.updateViewState(
                                             WebViewViewState.SendLsat(
-                                                "window.sphinxMessage('$sendLsat')"
+                                                "window.sphinxMessage('$sendLsat')",
+                                                app.getString(R.string.side_effect_error_pay_lsat)
                                             )
                                         )
                                     }
@@ -151,7 +154,8 @@ internal class TribeAppViewModel @Inject constructor(
 
                                         webViewViewStateContainer.updateViewState(
                                             WebViewViewState.SendLsat(
-                                                "window.sphinxMessage('$sendLsat')"
+                                                "window.sphinxMessage('$sendLsat')",
+                                                null
                                             )
                                         )
                                         Log.d("myTesteo", sendLsat)
@@ -174,7 +178,8 @@ internal class TribeAppViewModel @Inject constructor(
 
                         webViewViewStateContainer.updateViewState(
                             WebViewViewState.SendLsat(
-                                "window.sphinxMessage('$sendLsat')"
+                                "window.sphinxMessage('$sendLsat')",
+                                app.getString(R.string.side_effect_insufficient_budget)
                             )
                         )
                     }
@@ -243,4 +248,5 @@ internal class TribeAppViewModel @Inject constructor(
             e.printStackTrace()
         }
     }
+
 }
