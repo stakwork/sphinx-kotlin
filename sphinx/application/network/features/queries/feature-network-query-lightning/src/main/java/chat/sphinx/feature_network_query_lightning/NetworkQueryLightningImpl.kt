@@ -10,6 +10,8 @@ import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PaymentMessageDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
 import chat.sphinx.concept_network_query_lightning.model.route.RouteSuccessProbabilityDto
+import chat.sphinx.concept_network_query_lightning.model.webview.LsatWebViewDto
+import chat.sphinx.concept_network_query_lightning.model.webview.PayLsatDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
 import chat.sphinx.feature_network_query_lightning.model.*
 import chat.sphinx.kotlin_response.LoadResponse
@@ -40,6 +42,8 @@ class NetworkQueryLightningImpl(
         private const val ENDPOINT_INFO = "/info"
         private const val ENDPOINT_QUERY_ONCHAIN_ADDRESS = "/query/onchain_address"
         private const val ENDPOINT_UTXOS = "/utxos"
+        private const val ENDPOINT_LSATS = "/lsats"
+
     }
 
     ///////////
@@ -185,6 +189,18 @@ class NetworkQueryLightningImpl(
             relayEndpoint = ENDPOINT_INVOICES,
             requestBodyJsonClass = PostRequestPaymentDto::class.java,
             requestBody = postPaymentDto,
+            relayData = relayData
+        )
+
+    override fun payLsat(
+        postLsatDto: LsatWebViewDto,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<PayLsatDto, ResponseError>> =
+        networkRelayCall.relayPost(
+            responseJsonClass = PayLsatRelayResponse::class.java,
+            relayEndpoint = ENDPOINT_LSATS,
+            requestBodyJsonClass = LsatWebViewDto::class.java,
+            requestBody = postLsatDto,
             relayData = relayData
         )
 

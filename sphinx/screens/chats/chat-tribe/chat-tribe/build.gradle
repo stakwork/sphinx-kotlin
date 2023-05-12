@@ -44,6 +44,7 @@ dependencies {
     // TODO: Remove dependency on other screens
     implementation project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
     implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
 
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
 
@@ -54,4 +55,6 @@ dependencies {
     implementation deps.lottie.sdk
 
     kapt kaptDeps.google.hilt
+    kapt kaptDeps.square.moshiCodegen
+
 }

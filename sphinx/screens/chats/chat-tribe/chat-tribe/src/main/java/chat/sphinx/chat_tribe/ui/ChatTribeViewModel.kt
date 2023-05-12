@@ -51,7 +51,6 @@ import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -140,6 +139,7 @@ class ChatTribeViewModel @Inject constructor(
     val tribeMemberDataViewStateContainer: ViewStateContainer<TribeMemberDataViewState> by lazy {
         ViewStateContainer(TribeMemberDataViewState.Idle)
     }
+
 
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
@@ -276,6 +276,7 @@ class ChatTribeViewModel @Inject constructor(
                         tribeData.feedUrl,
                         tribeData.chatUUID,
                         tribeData.feedType,
+                        tribeData.appUrl,
                         tribeData.badges
                     )
 

@@ -118,6 +118,9 @@
     <dimen name="episode_type_radius">3dp</dimen>
     <dimen name="episode_description_image_height">343dp</dimen>
 
+    <dimen name="web_view_auth_popup_width">350dp</dimen>
+    <dimen name="web_view_auth_popup_height">550dp</dimen>
+
     <dimen name="default_feed_watch_image_width">260dp</dimen>
     <dimen name="default_feed_watch_image_height">160dp</dimen>
     <dimen name="default_feed_watch_channel_image_xy">30dp</dimen>
