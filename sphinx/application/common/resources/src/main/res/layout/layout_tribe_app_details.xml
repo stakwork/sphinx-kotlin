@@ -16,18 +16,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ProgressBar
-        android:id="@+id/progress_bar_loading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/progressBarStyle"
-        android:indeterminateTint="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:indeterminate="true"
-        android:visibility="visible" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_progress_bar_container"
+        android:background="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone">
+
+        <ProgressBar
+            android:id="@+id/progress_bar_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="?android:attr/progressBarStyle"
+            android:indeterminateTint="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:indeterminate="true"
+            android:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_authorize_popup"
@@ -35,17 +44,18 @@
         android:layout_height="match_parent"
         android:backgroundTint="@color/popupBackground"
         android:visibility="gone"
-        android:background="@color/black">
+        tools:visibility="visible">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_popup_container"
             android:layout_width="@dimen/web_view_auth_popup_width"
             android:layout_height="@dimen/web_view_auth_popup_height"
-            android:background="@color/headerBG"
-            android:layout_marginTop="@dimen/player_bar_image_xy"
+            android:background="@drawable/background_popup"
+            android:backgroundTint="@color/headerBG"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_detail_screen_close"
@@ -82,7 +92,7 @@
                 android:fontFamily="@font/roboto_regular"
                 android:singleLine="true"
                 android:text="@string/web_view_authorize"
-                android:textColor="@color/secondaryTextSent"
+                android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_large_title_chevron_icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -110,7 +120,7 @@
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="2"
                 android:text="@string/web_view_withdraw"
-                android:textColor="@color/secondaryTextSent"
+                android:textColor="@color/secondaryText"
                 android:textSize="@dimen/chat_footer_episode_title_text_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -145,7 +155,7 @@
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:text="@string/web_view_reauthorizing"
-                android:textColor="@color/secondaryTextSent"
+                android:textColor="@color/secondaryText"
                 android:textSize="@dimen/chat_footer_episode_title_text_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -214,5 +224,13 @@
             app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></View>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

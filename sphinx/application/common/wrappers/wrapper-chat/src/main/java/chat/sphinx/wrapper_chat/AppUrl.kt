@@ -16,3 +16,9 @@ value class AppUrl(val value: String) {
         }
     }
 }
+
+inline val AppUrl.protocolLessUrl: String
+    get() = this
+        .value
+        .replaceFirst("http://", "")
+        .replaceFirst("https://", "")

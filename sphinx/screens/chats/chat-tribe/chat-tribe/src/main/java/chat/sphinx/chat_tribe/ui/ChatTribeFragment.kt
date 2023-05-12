@@ -26,6 +26,7 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -43,6 +44,7 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addKeyboardPadding
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
@@ -53,6 +55,7 @@ import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_chat.protocolLessUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,6 +63,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
@@ -128,7 +132,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
-    private val appViewViewModel: TribeAppViewModel by viewModels()
+    private val tribeAppViewModel: TribeAppViewModel by viewModels()
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -157,15 +161,13 @@ internal class ChatTribeFragment: ChatFragment<
                         is TribeFeedData.Loading -> {}
                         is TribeFeedData.Result -> {
                             tribeFeedViewModel.init(data)
-                            appViewViewModel.init(data)
+                            tribeAppViewModel.init(data)
                             throw Exception()
                         }
                     }
                 }
             } catch (_: Exception) {}
         }
-
-        webViewClickListener()
 
         podcastPlayerBinding.apply {
             imageViewForward30Button.setOnClickListener {
@@ -183,15 +185,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
-            when(appViewViewModel.currentWebViewViewStateContainer.value) {
-                is CurrentWebVieViewState.WebViewAvailable -> {
-                    appViewViewModel.currentWebViewViewStateContainer.updateViewState(CurrentWebVieViewState.WebViewOpen)
-                }
-                is CurrentWebVieViewState.WebViewOpen -> {
-                    appViewViewModel.currentWebViewViewStateContainer.updateViewState(CurrentWebVieViewState.WebViewAvailable())
-                }
-                is CurrentWebVieViewState.NoWebView -> {}
-            }
+            tribeAppViewModel.toggleWebAppView()
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
@@ -266,6 +260,17 @@ internal class ChatTribeFragment: ChatFragment<
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        tribeAppBinding.includeLayoutTribeAppDetails.apply {
+            (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintBudget)
+
+            buttonAuthorize.setOnClickListener {
+                tribeAppViewModel.authorizeWebApp(editTextSatsAmount.text.toString())
+            }
+            textViewDetailScreenClose.setOnClickListener {
+                tribeAppViewModel.hideAuthorizePopup()
+            }
+        }
+
         mentionMembersPopup.listviewMentionTribeMembers.setOnItemClickListener { parent, _, position, _ ->
             (parent.adapter as? ArrayAdapter<String>?)?.let {
                 it.getItem(position)?.let { selectedAlias ->
@@ -316,9 +321,8 @@ internal class ChatTribeFragment: ChatFragment<
         }
     }
     private fun loadWebView(url: String) {
-
         webView.settings.javaScriptEnabled = true
-        webView.addJavascriptInterface(appViewViewModel, "Android")
+        webView.addJavascriptInterface(tribeAppViewModel, "Android")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
@@ -335,7 +339,7 @@ internal class ChatTribeFragment: ChatFragment<
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
-                tribeAppBinding.includeLayoutTribeAppDetails.progressBarLoading.gone
+                tribeAppViewModel.didFinishLoadingWebView()
                 super.onPageFinished(view, url)
             }
 
@@ -344,33 +348,21 @@ internal class ChatTribeFragment: ChatFragment<
                 request: WebResourceRequest,
                 error: WebResourceError
             ) {
-                tribeAppBinding.includeLayoutTribeAppDetails.progressBarLoading.gone
+                tribeAppViewModel.didFinishLoadingWebView()
                 super.onReceivedError(view, request, error)
             }
 
-            override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
-                if (event?.keyCode == KeyEvent.KEYCODE_ENTER || event?.keyCode == KeyEvent.ACTION_DOWN ) {
-                    val imm = tribeAppBinding.root.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            override fun onUnhandledKeyEvent(view: WebView?, event: KeyEvent?) {
+                super.onUnhandledKeyEvent(view, event)
+
+                if (event?.keyCode == KeyEvent.KEYCODE_ENTER || event?.keyCode == KeyEvent.ACTION_DOWN) {
+                    val imm =
+                        tribeAppBinding.root.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                     imm.hideSoftInputFromWindow(view?.windowToken, 0)
-                    return true
                 }
-                return super.shouldOverrideKeyEvent(view, event)
             }
         }
         webView.loadUrl(url)
-    }
-
-    private fun webViewClickListener() {
-        tribeAppBinding.includeLayoutTribeAppDetails.apply {
-            buttonAuthorize.setOnClickListener {
-                if (editTextSatsAmount.text.toString().isNotEmpty()) {
-                    appViewViewModel.authorizeWebApp(editTextSatsAmount.text.toString().toInt())
-                }
-            }
-            textViewDetailScreenClose.setOnClickListener {
-                layoutConstraintAuthorizePopup.gone
-            }
-        }
     }
 
     override fun onDestroyView() {
@@ -406,8 +398,8 @@ internal class ChatTribeFragment: ChatFragment<
                     )
                 }
                 else -> {
-                    if (appViewViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
-                        appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
+                    if (tribeAppViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
+                        tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                     } else {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
@@ -513,7 +505,7 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            appViewViewModel.budgetStateFlow.collect { sats ->
+            tribeAppViewModel.budgetStateFlow.collect { sats ->
                 tribeAppBinding.includeLayoutTribeAppDetails.textViewRemainingBudget.text =
                     String.format(getString(R.string.web_view_remaining_budget),
                     sats.value.toString()
@@ -628,67 +620,85 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
-        onStopSupervisor.scope.launch(appViewViewModel.mainImmediate) {
-            appViewViewModel.currentWebViewViewStateContainer.collect { viewState ->
-                    @Exhaustive
-                    when (viewState) {
-                        is CurrentWebVieViewState.NoWebView -> {
-                            binding.includeChatTribeHeader.imageViewChatWebView.gone
-                        }
-                        is CurrentWebVieViewState.WebViewAvailable -> {
-                            binding.includeChatTribeHeader.imageViewChatWebView.visible
-                            viewState.appUrl?.value?.let { url ->
-                                loadWebView(url)
-                                tribeAppBinding.includeLayoutTribeAppDetails.textViewWebUrl.text = url
-                            }
-                            appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
-                        }
-                        is CurrentWebVieViewState.WebViewOpen -> {
-                            appViewViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Open)
-                        }
-                    }
-            }
-        }
-
-        onStopSupervisor.scope.launch(appViewViewModel.mainImmediate) {
-            appViewViewModel.webViewViewStateContainer.collect { viewState ->
+        onStopSupervisor.scope.launch(tribeAppViewModel.mainImmediate) {
+            tribeAppViewModel.webAppViewStateContainer.collect { viewState ->
                 @Exhaustive
-                when(viewState) {
-                    is WebViewViewState.Idle -> {}
-                    is WebViewViewState.Authorization -> {
-                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.visible
+                when (viewState) {
+                    is WebAppViewState.NoApp -> {
+                        binding.includeChatTribeHeader.imageViewChatWebView.gone
                     }
-                    is WebViewViewState.SendAuthorization -> {
-                        webView.evaluateJavascript(viewState.script, null)
+                    is WebAppViewState.AppAvailable.WebViewClosed -> {
+                        binding.includeChatTribeHeader.imageViewChatWebView.visible
 
-                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.gone
+                        binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                            ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view)
+                        )
                     }
-                    is WebViewViewState.SendLsat -> {
-                        webView.evaluateJavascript(viewState.script, null)
-                        if (!viewState.error.isNullOrEmpty()) {
-                            viewModel.lsatToastError(viewState.error)
+                    is WebAppViewState.AppAvailable.WebViewOpen.Loading -> {
+                        binding.includeChatTribeHeader.imageViewChatWebView.visible
+
+                        binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                            ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view_chat)
+                        )
+
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintBudget.gone
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintProgressBarContainer.visible
+
+                        viewState.appUrl?.let { url ->
+                            loadWebView(url.value)
+                            tribeAppBinding.includeLayoutTribeAppDetails.textViewWebUrl.text = url.protocolLessUrl
                         }
+                    }
+
+                    is WebAppViewState.AppAvailable.WebViewOpen.Loaded -> {
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintProgressBarContainer.gone
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintBudget.visible
                     }
                 }
             }
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            appViewViewModel.webViewLayoutScreenViewStateContainer.collect { viewState ->
+            tribeAppViewModel.webViewLayoutScreenViewStateContainer.collect { viewState ->
                 tribeAppBinding.includeLayoutTribeAppDetails.apply {
-                    @Exhaustive
-                    when(viewState) {
-                        is WebViewLayoutScreenViewState.Closed -> {
-                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
-                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view))
-                        }
-                        is WebViewLayoutScreenViewState.Open -> {
-                            binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
-                                ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view_chat))
-                        }
-                    }
                     viewState.transitionToEndSet(tribeAppBinding.root)
                     tribeAppBinding.root.setTransitionDuration(250)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(tribeAppViewModel.mainImmediate) {
+            tribeAppViewModel.webViewViewStateContainer.collect { viewState ->
+
+                @Exhaustive
+                when(viewState) {
+                    is WebViewViewState.Idle -> {
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.gone
+                    }
+
+                    is WebViewViewState.RequestAuthorization -> {
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.visible
+                    }
+                    is WebViewViewState.SendAuthorization -> {
+                        webView.evaluateJavascript(
+                            viewState.script,
+                            null
+                        )
+                    }
+                    is WebViewViewState.SendLsat -> {
+                        webView.evaluateJavascript(
+                            viewState.script,
+                            null
+                        )
+
+                        viewState.error?.let {
+                            if (!it.isNullOrEmpty()) {
+                                viewModel.submitSideEffect(
+                                    ChatSideEffect.Notify(it)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
