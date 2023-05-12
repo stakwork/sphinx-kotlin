@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha93 (2023-05-12)
+- Adds javascript bridge for tribe web apps
+- Fixes issue on youtube player
+
 # Version 1.0.0-alpha92 (2023-05-04)
 - Improves payments error handling
 - Improves transactions list UI
