@@ -189,6 +189,13 @@
     <string name="episode_description_show_more">SHOW MORE</string>
     <string name="episode_description_show_less">SHOW LESS</string>
 
+    <string name="web_view_authorize">Authorize</string>
+    <string name="web_view_dots" translatable="false">...</string>
+    <string name="web_view_withdraw">to withdraw up to</string>
+    <string name="web_view_reauthorizing">sats before reauthorizing</string>
+    <string name="web_view_remaining_budget">Remaining Budget: %s</string>
+
+
     <string name="time_left">%s left</string>
 
     <string name="youtube" translatable="false">Youtube</string>

@@ -219,6 +219,17 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         }
     }
 
+    class InsufficientBudget(private val text: String): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            copyToClipBoard(
+                value,
+                text,
+                "text",
+                value.chatFragmentContext.getString(R.string.side_effect_text_copied)
+            )
+        }
+    }
+
     companion object {
         fun copyToClipBoard(
             chatSideEffectFragment: ChatSideEffectFragment,

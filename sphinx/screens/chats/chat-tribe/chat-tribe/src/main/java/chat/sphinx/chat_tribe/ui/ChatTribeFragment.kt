@@ -1,15 +1,21 @@
 package chat.sphinx.chat_tribe.ui
 
 import android.animation.Animator
+import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.KeyEvent
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.webkit.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -20,6 +26,7 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.ui.ChatFragment
+import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
@@ -37,15 +44,18 @@ import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addKeyboardPadding
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.menu_bottom.databinding.LayoutMenuBottomBinding
 import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.databinding.LayoutBoostFireworksBinding
 import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
+import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_chat.protocolLessUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,13 +63,14 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.updateViewState
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 internal class ChatTribeFragment: ChatFragment<
@@ -77,7 +88,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutPopup
     private val tribeMemberProfileBinding: LayoutTribeMemberProfileBinding
         get() = binding.includeLayoutTribeMemberProfile
-
+    private val tribeAppBinding: LayoutTribeAppBinding
+        get() = binding.includeLayoutTribeApp
     override val footerBinding: LayoutChatFooterBinding
         get() = binding.includeChatTribeFooter
     override val searchFooterBinding: LayoutChatSearchFooterBinding
@@ -109,6 +121,9 @@ internal class ChatTribeFragment: ChatFragment<
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
 
+    private val webView: WebView
+        get() = tribeAppBinding.includeLayoutTribeAppDetails.webView
+
     override val menuEnablePayments: Boolean
         get() = false
 
@@ -117,6 +132,7 @@ internal class ChatTribeFragment: ChatFragment<
 
     override val viewModel: ChatTribeViewModel by viewModels()
     private val tribeFeedViewModel: TribeFeedViewModel by viewModels()
+    private val tribeAppViewModel: TribeAppViewModel by viewModels()
 
     @Inject
     @Suppress("ProtectedInFinal", "PropertyName")
@@ -129,6 +145,8 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
+
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -143,6 +161,7 @@ internal class ChatTribeFragment: ChatFragment<
                         is TribeFeedData.Loading -> {}
                         is TribeFeedData.Result -> {
                             tribeFeedViewModel.init(data)
+                            tribeAppViewModel.init(data)
                             throw Exception()
                         }
                     }
@@ -163,6 +182,10 @@ internal class ChatTribeFragment: ChatFragment<
             layoutConstraintPodcastInfo.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickTitle?.invoke()
             }
+        }
+
+        binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
+            tribeAppViewModel.toggleWebAppView()
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
@@ -237,6 +260,17 @@ internal class ChatTribeFragment: ChatFragment<
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        tribeAppBinding.includeLayoutTribeAppDetails.apply {
+            (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintBudget)
+
+            buttonAuthorize.setOnClickListener {
+                tribeAppViewModel.authorizeWebApp(editTextSatsAmount.text.toString())
+            }
+            textViewDetailScreenClose.setOnClickListener {
+                tribeAppViewModel.hideAuthorizePopup()
+            }
+        }
+
         mentionMembersPopup.listviewMentionTribeMembers.setOnItemClickListener { parent, _, position, _ ->
             (parent.adapter as? ArrayAdapter<String>?)?.let {
                 it.getItem(position)?.let { selectedAlias ->
@@ -286,6 +320,50 @@ internal class ChatTribeFragment: ChatFragment<
             )
         }
     }
+    private fun loadWebView(url: String) {
+        webView.settings.javaScriptEnabled = true
+        webView.addJavascriptInterface(tribeAppViewModel, "Android")
+
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                val url = request?.url.toString()
+                view?.loadUrl(url)
+                return super.shouldOverrideUrlLoading(view, request)
+            }
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                tribeAppViewModel.didFinishLoadingWebView()
+                super.onPageFinished(view, url)
+            }
+
+            override fun onReceivedError(
+                view: WebView,
+                request: WebResourceRequest,
+                error: WebResourceError
+            ) {
+                tribeAppViewModel.didFinishLoadingWebView()
+                super.onReceivedError(view, request, error)
+            }
+
+            override fun onUnhandledKeyEvent(view: WebView?, event: KeyEvent?) {
+                super.onUnhandledKeyEvent(view, event)
+
+                if (event?.keyCode == KeyEvent.KEYCODE_ENTER || event?.keyCode == KeyEvent.ACTION_DOWN) {
+                    val imm =
+                        tribeAppBinding.root.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.hideSoftInputFromWindow(view?.windowToken, 0)
+                }
+            }
+        }
+        webView.loadUrl(url)
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -320,8 +398,12 @@ internal class ChatTribeFragment: ChatFragment<
                     )
                 }
                 else -> {
-                    lifecycleScope.launch(viewModel.mainImmediate) {
-                        viewModel.handleCommonChatOnBackPressed()
+                    if (tribeAppViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
+                        tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
+                    } else {
+                        lifecycleScope.launch(viewModel.mainImmediate) {
+                            viewModel.handleCommonChatOnBackPressed()
+                        }
                     }
                 }
             }
@@ -419,6 +501,15 @@ internal class ChatTribeFragment: ChatFragment<
                         }
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            tribeAppViewModel.budgetStateFlow.collect { sats ->
+                tribeAppBinding.includeLayoutTribeAppDetails.textViewRemainingBudget.text =
+                    String.format(getString(R.string.web_view_remaining_budget),
+                    sats.value.toString()
+                )
             }
         }
 
@@ -526,6 +617,89 @@ internal class ChatTribeFragment: ChatFragment<
 
                 tribeMemberProfileBinding.root.setTransitionDuration(250)
                 viewState.transitionToEndSet(tribeMemberProfileBinding.root)
+            }
+        }
+
+        onStopSupervisor.scope.launch(tribeAppViewModel.mainImmediate) {
+            tribeAppViewModel.webAppViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is WebAppViewState.NoApp -> {
+                        binding.includeChatTribeHeader.imageViewChatWebView.gone
+                    }
+                    is WebAppViewState.AppAvailable.WebViewClosed -> {
+                        binding.includeChatTribeHeader.imageViewChatWebView.visible
+
+                        binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                            ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view)
+                        )
+                    }
+                    is WebAppViewState.AppAvailable.WebViewOpen.Loading -> {
+                        binding.includeChatTribeHeader.imageViewChatWebView.visible
+
+                        binding.includeChatTribeHeader.imageViewChatWebView.setImageDrawable(
+                            ContextCompat.getDrawable(binding.root.context, R.drawable.ic_icon_web_view_chat)
+                        )
+
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintBudget.gone
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintProgressBarContainer.visible
+
+                        viewState.appUrl?.let { url ->
+                            loadWebView(url.value)
+                            tribeAppBinding.includeLayoutTribeAppDetails.textViewWebUrl.text = url.protocolLessUrl
+                        }
+                    }
+
+                    is WebAppViewState.AppAvailable.WebViewOpen.Loaded -> {
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintProgressBarContainer.gone
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintBudget.visible
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            tribeAppViewModel.webViewLayoutScreenViewStateContainer.collect { viewState ->
+                tribeAppBinding.includeLayoutTribeAppDetails.apply {
+                    viewState.transitionToEndSet(tribeAppBinding.root)
+                    tribeAppBinding.root.setTransitionDuration(250)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(tribeAppViewModel.mainImmediate) {
+            tribeAppViewModel.webViewViewStateContainer.collect { viewState ->
+
+                @Exhaustive
+                when(viewState) {
+                    is WebViewViewState.Idle -> {
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.gone
+                    }
+
+                    is WebViewViewState.RequestAuthorization -> {
+                        tribeAppBinding.includeLayoutTribeAppDetails.layoutConstraintAuthorizePopup.visible
+                    }
+                    is WebViewViewState.SendAuthorization -> {
+                        webView.evaluateJavascript(
+                            viewState.script,
+                            null
+                        )
+                    }
+                    is WebViewViewState.SendLsat -> {
+                        webView.evaluateJavascript(
+                            viewState.script,
+                            null
+                        )
+
+                        viewState.error?.let {
+                            if (!it.isNullOrEmpty()) {
+                                viewModel.submitSideEffect(
+                                    ChatSideEffect.Notify(it)
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
 

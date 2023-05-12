@@ -172,4 +172,14 @@
         android:layout_height="match_parent"
         tools:visibility="gone"/>
 
+    <include
+        android:id="@+id/include_layout_tribe_app"
+        layout="@layout/layout_tribe_app"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
+        tools:visibility="gone" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

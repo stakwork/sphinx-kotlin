@@ -3775,6 +3775,7 @@ abstract class SphinxRepository(
                                     chat.uuid,
                                     tribeDto.feed_url?.toFeedUrl(),
                                     feedType,
+                                    tribeDto.app_url?.toAppUrl(),
                                     tribeDto.badges
                                 )
                             }
