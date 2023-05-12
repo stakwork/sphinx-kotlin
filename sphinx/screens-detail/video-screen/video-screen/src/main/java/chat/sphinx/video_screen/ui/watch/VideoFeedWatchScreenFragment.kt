@@ -56,6 +56,7 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -456,22 +457,25 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
             viewModel.videoFeedItemDetailsViewState.collect { viewState ->
 
                 binding.includeLayoutFeedItem.apply {
-                    when (viewState) {
-                        is VideoFeedItemDetailsViewState.Open -> {
-                            includeLayoutFeedItemDetails.apply {
-                                feedItemDetailsCommonInfoBinding(viewState)
-                                layoutConstraintDownloadRow.gone
-                                layoutConstraintCheckMarkRow.gone
-                                circleSplitTwo.gone
-                                textViewEpisodeDuration.gone
-                            }
+                    (viewState as? VideoFeedItemDetailsViewState.Open)?.let {
+                        root.visible
 
+                        includeLayoutFeedItemDetails.apply {
+                            feedItemDetailsCommonInfoBinding(viewState)
+                            layoutConstraintDownloadRow.gone
+                            layoutConstraintCheckMarkRow.gone
+                            circleSplitTwo.gone
+                            textViewEpisodeDuration.gone
                         }
-                        else -> {}
                     }
 
                     root.setTransitionDuration(300)
                     viewState.transitionToEndSet(root)
+
+                    (viewState as? VideoFeedItemDetailsViewState.Closed)?.let {
+                        delay(300L)
+                        root.gone
+                    }
                 }
             }
         }
