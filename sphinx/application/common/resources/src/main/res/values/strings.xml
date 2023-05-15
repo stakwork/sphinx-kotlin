@@ -195,6 +195,9 @@
     <string name="web_view_reauthorizing">sats before reauthorizing</string>
     <string name="web_view_remaining_budget">Remaining Budget: %s</string>
 
+    <string name="video_sats_per_minute">Sats per minute</string>
+
+
 
     <string name="time_left">%s left</string>
 
