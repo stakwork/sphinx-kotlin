@@ -158,7 +158,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 })
             }
 
-            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
+            includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
                 removeFocusOnEnter(editTextCustomBoost)
 
                 imageViewFeedBoostButton.setOnClickListener {
@@ -215,7 +215,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
             controller.setMediaPlayer(videoViewVideoPlayer)
             videoViewVideoPlayer.setMediaController(controller)
 
-            textViewSubscribeButton.setOnClickListener {
+            binding.includeLayoutDescriptionBox.textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
             }
         }
@@ -281,7 +281,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         amount: Sat?
     ) {
         binding.apply {
-            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
+            includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
                 editTextCustomBoost.setText(
                     (amount ?: Sat(100)).asFormattedString()
                 )
@@ -336,35 +336,39 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                         viewState.items.count().toString()
 
                     includeLayoutVideoPlayer.apply {
-                        textViewContributorName.text = viewState.title.value
+                        includeLayoutDescriptionBox.apply {
+                            textViewContributorName.text = viewState.title.value
 
-                        viewState.imageToShow?.let {
-                            imageLoader.load(
-                                imageViewContributorImage,
-                                it.value,
-                                imageLoaderOptions
-                            )
+                            viewState.imageToShow?.let {
+                                imageLoader.load(
+                                    imageViewContributorImage,
+                                    it.value,
+                                    imageLoaderOptions
+                                )
+                            }
                         }
                     }
 
                     includeLayoutVideoPlayer.apply {
-                        val notLinkedToChat =
-                            viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
-                        textViewSubscribeButton.goneIfFalse(notLinkedToChat)
+                        includeLayoutDescriptionBox.apply {
+                            val notLinkedToChat =
+                                viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
+                            textViewSubscribeButton.goneIfFalse(notLinkedToChat)
 
-                        textViewSubscribeButton.text = if (viewState.subscribed.isTrue()) {
-                            getString(R.string.unsubscribe)
-                        } else {
-                            getString(R.string.subscribe)
-                        }
+                            textViewSubscribeButton.text = if (viewState.subscribed.isTrue()) {
+                                getString(R.string.unsubscribe)
+                            } else {
+                                getString(R.string.subscribe)
+                            }
 
-                        includeLayoutCustomBoost.apply customBoost@{
-                            this@customBoost.layoutConstraintBoostButtonContainer.alpha =
-                                if (viewState.hasDestinations) 1.0f else 0.3f
-                            this@customBoost.imageViewFeedBoostButton.isEnabled =
-                                viewState.hasDestinations
-                            this@customBoost.editTextCustomBoost.isEnabled =
-                                viewState.hasDestinations
+                            includeLayoutCustomBoost.apply customBoost@{
+                                this@customBoost.layoutConstraintBoostButtonContainer.alpha =
+                                    if (viewState.hasDestinations) 1.0f else 0.3f
+                                this@customBoost.imageViewFeedBoostButton.isEnabled =
+                                    viewState.hasDestinations
+                                this@customBoost.editTextCustomBoost.isEnabled =
+                                    viewState.hasDestinations
+                            }
                         }
                     }
                 }
@@ -399,41 +403,42 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
                     is SelectedVideoViewState.VideoSelected -> {
                         binding.includeLayoutVideoPlayer.apply {
+                            binding.includeLayoutDescriptionBox.apply {
+                                textViewVideoTitle.text = viewState.title.value
+                                textViewVideoDescription.text = viewState.description?.value ?: ""
+                                textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
 
-                            textViewVideoTitle.text = viewState.title.value
-                            textViewVideoDescription.text = viewState.description?.value ?: ""
-                            textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
+                                if (viewState.url.isYoutubeVideo()) {
 
-                            if (viewState.url.isYoutubeVideo()) {
+                                    layoutConstraintVideoViewContainer.gone
+                                    frameLayoutYoutubePlayer.visible
 
-                                layoutConstraintVideoViewContainer.gone
-                                frameLayoutYoutubePlayer.visible
+                                    if (youtubePlayer != null) {
+                                        youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
 
-                                if (youtubePlayer != null) {
-                                    youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
-
-                                    viewModel.createHistoryItem()
-                                    viewModel.trackVideoConsumed()
-                                    viewModel.createVideoRecordConsumed(viewState.id)
+                                        viewModel.createHistoryItem()
+                                        viewModel.trackVideoConsumed()
+                                        viewModel.createVideoRecordConsumed(viewState.id)
+                                    } else {
+                                        setupYoutubePlayer(viewState.id.youtubeVideoId())
+                                        viewModel.createVideoRecordConsumed(viewState.id)
+                                    }
                                 } else {
-                                    setupYoutubePlayer(viewState.id.youtubeVideoId())
-                                    viewModel.createVideoRecordConsumed(viewState.id)
-                                }
-                            } else {
-                                layoutConstraintLoadingVideo.visible
-                                layoutConstraintVideoViewContainer.visible
-                                frameLayoutYoutubePlayer.gone
+                                    layoutConstraintLoadingVideo.visible
+                                    layoutConstraintVideoViewContainer.visible
+                                    frameLayoutYoutubePlayer.gone
 
-                                val videoUri = if (viewState.localFile != null) {
-                                    viewState.localFile.toUri()
-                                } else {
-                                    viewState.url.value.toUri()
-                                }
+                                    val videoUri = if (viewState.localFile != null) {
+                                        viewState.localFile.toUri()
+                                    } else {
+                                        viewState.url.value.toUri()
+                                    }
 
-                                viewModel.initializeVideo(
-                                    videoUri,
-                                    viewState.duration?.value?.toInt()
-                                )
+                                    viewModel.initializeVideo(
+                                        videoUri,
+                                        viewState.duration?.value?.toInt()
+                                    )
+                                }
                             }
                         }
                     }
