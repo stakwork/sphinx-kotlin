@@ -14,7 +14,7 @@ class VideoStreamSatsTimer(
             override fun run() {
                 currentTimeWatched++
 
-                if (currentTimeWatched >= 6000L) {
+                if (currentTimeWatched >= 60000L) {
                     onStreamSats()
                     currentTimeWatched = 0
                 }

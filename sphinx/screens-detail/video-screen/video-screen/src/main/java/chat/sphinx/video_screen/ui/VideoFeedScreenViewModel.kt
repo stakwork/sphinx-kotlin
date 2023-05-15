@@ -381,7 +381,19 @@ internal open class VideoFeedScreenViewModel(
         return null
     }
 
-    private fun streamSatsPayments(){}
+    private fun streamSatsPayments() {
+        (selectedVideoStateContainer.value as? SelectedVideoViewState.VideoSelected)?.let { video ->
+            feedRepository.streamFeedPayments(
+                ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                video.feedId?.value ?: "",
+                video.id.value,
+                0,
+                Sat(21),
+                null,
+                listOf()
+            )
+        }
+    }
 
     fun createVideoRecordConsumed(feedItemId: FeedId){
         if (videoRecordConsumed?.feedItemId == feedItemId){
@@ -403,6 +415,7 @@ internal open class VideoFeedScreenViewModel(
             }
         }
     }
+
     fun setNewHistoryItem(videoPosition: Long){
         videoRecordConsumed?.setNewHistoryItem(videoPosition)
     }
