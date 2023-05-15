@@ -754,6 +754,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     private fun setupYoutubePlayer(
         videoId: String
     ) {
+        var isSeeking = false
         val youtubePlayerFragment = YouTubeCommonPlayerSupportFragmentXKt()
 
         childFragmentManager.beginTransaction()
@@ -782,6 +783,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                 private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
                     override fun onSeekTo(p0: Int) {
+                        isSeeking = true
                         viewModel.setNewHistoryItem(p0.toLong())
                     }
 
@@ -794,7 +796,8 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         }
 
                         seekToStartTime()
-                        viewModel.startTimer()
+                        viewModel.startTimer(isSeeking)
+                        isSeeking = false
                     }
                     override fun onStopped() {
                         viewModel.stopTimer()

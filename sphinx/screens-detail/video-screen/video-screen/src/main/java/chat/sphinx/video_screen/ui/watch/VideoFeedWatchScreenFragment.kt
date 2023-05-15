@@ -222,7 +222,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     }
 
     private fun setupYoutubePlayer(videoId: String) {
-
+        var isSeeking = false
         val youtubePlayerFragment = YouTubeVideoPlayerSupportFragmentXKt()
 
         childFragmentManager.beginTransaction()
@@ -232,6 +232,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         youtubePlayerFragment.initialize(
             BuildConfig.YOUTUBE_API_KEY,
             object : YouTubePlayer.OnInitializedListener {
+
                 override fun onInitializationSuccess(
                     p0: YouTubePlayer.Provider?,
                     p1: YouTubePlayer?,
@@ -251,14 +252,16 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                    private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
                     override fun onSeekTo(p0: Int) {
+                        isSeeking = true
                         viewModel.setNewHistoryItem(p0.toLong())
                         Log.d("YouTubePlayer", "Youtube has seek $p0")
                     }
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
-                        viewModel.startTimer()
+                        viewModel.startTimer(isSeeking)
                         viewModel.updateVideoLastPlayed()
+                        isSeeking = false
                         Log.d("YouTubePlayer", "Youtube is playing")
                     }
                     override fun onStopped() {

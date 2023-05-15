@@ -21,6 +21,7 @@ import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedItemDetailsViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
+import chat.sphinx.wrapper_action_track.action_wrappers.VideoStreamSatsTimer
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
@@ -77,6 +78,7 @@ internal open class VideoFeedScreenViewModel(
     )
 
     private var videoRecordConsumed: VideoRecordConsumed? = null
+    private var videoStreamSatsTimer: VideoStreamSatsTimer? = null
 
     suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -379,11 +381,16 @@ internal open class VideoFeedScreenViewModel(
         return null
     }
 
+    private fun streamSatsPayments(){}
+
     fun createVideoRecordConsumed(feedItemId: FeedId){
         if (videoRecordConsumed?.feedItemId == feedItemId){
             return
         }
         videoRecordConsumed = VideoRecordConsumed(feedItemId)
+        videoStreamSatsTimer = VideoStreamSatsTimer {
+            streamSatsPayments()
+        }
     }
 
     fun trackVideoConsumed(){
@@ -400,8 +407,11 @@ internal open class VideoFeedScreenViewModel(
         videoRecordConsumed?.setNewHistoryItem(videoPosition)
     }
 
-    fun startTimer() {
+    fun startTimer(isSeeking: Boolean) {
         videoRecordConsumed?.startTimer()
+        if (!isSeeking) {
+            videoStreamSatsTimer?.startTimer()
+        }
     }
 
     fun createHistoryItem() {
@@ -410,6 +420,7 @@ internal open class VideoFeedScreenViewModel(
 
     fun stopTimer(){
         videoRecordConsumed?.stopTimer()
+        videoStreamSatsTimer?.stopTimer()
     }
 
 
