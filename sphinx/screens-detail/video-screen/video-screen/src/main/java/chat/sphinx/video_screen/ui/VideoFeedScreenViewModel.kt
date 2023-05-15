@@ -172,7 +172,8 @@ internal open class VideoFeedScreenViewModel(
                                     video.enclosureUrl,
                                     video.localFile,
                                     video.dateUpdated,
-                                    video.duration
+                                    video.duration,
+                                    nnFeed.destinations
                                 )
                             )
                         }
@@ -228,7 +229,8 @@ internal open class VideoFeedScreenViewModel(
                     video.enclosureUrl,
                     video.localFile,
                     video.dateUpdated,
-                    video.duration
+                    video.duration,
+                    video.feed?.destinations
                 )
             )
         }
@@ -390,7 +392,7 @@ internal open class VideoFeedScreenViewModel(
                 0,
                 Sat(21),
                 null,
-                listOf()
+                video.destinations ?: listOf()
             )
         }
     }
