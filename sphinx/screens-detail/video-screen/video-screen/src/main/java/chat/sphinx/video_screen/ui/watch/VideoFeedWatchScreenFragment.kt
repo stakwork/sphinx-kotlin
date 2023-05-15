@@ -158,7 +158,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 })
             }
 
-            includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
+            includeLayoutVideoItemsList.includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
                 removeFocusOnEnter(editTextCustomBoost)
 
                 imageViewFeedBoostButton.setOnClickListener {
@@ -215,7 +215,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
             controller.setMediaPlayer(videoViewVideoPlayer)
             videoViewVideoPlayer.setMediaController(controller)
 
-            binding.includeLayoutDescriptionBox.textViewSubscribeButton.setOnClickListener {
+            binding.includeLayoutVideoItemsList.includeLayoutDescriptionBox.textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
             }
         }
@@ -281,7 +281,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         amount: Sat?
     ) {
         binding.apply {
-            includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
+            includeLayoutVideoItemsList.includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
                 editTextCustomBoost.setText(
                     (amount ?: Sat(100)).asFormattedString()
                 )
@@ -336,7 +336,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                         viewState.items.count().toString()
 
                     includeLayoutVideoPlayer.apply {
-                        includeLayoutDescriptionBox.apply {
+                        includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
                             textViewContributorName.text = viewState.title.value
 
                             viewState.imageToShow?.let {
@@ -350,7 +350,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                     }
 
                     includeLayoutVideoPlayer.apply {
-                        includeLayoutDescriptionBox.apply {
+                        includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
                             val notLinkedToChat =
                                 viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
                             textViewSubscribeButton.goneIfFalse(notLinkedToChat)
@@ -403,7 +403,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
                     is SelectedVideoViewState.VideoSelected -> {
                         binding.includeLayoutVideoPlayer.apply {
-                            binding.includeLayoutDescriptionBox.apply {
+                            binding.includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
                                 textViewVideoTitle.text = viewState.title.value
                                 textViewVideoDescription.text = viewState.description?.value ?: ""
                                 textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
