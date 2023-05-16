@@ -85,6 +85,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     override val viewModel: VideoFeedWatchScreenViewModel by viewModels()
     private var youtubePlayer: YouTubePlayer? = null
 
+    companion object {
+        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,20,20,40,40,80,80,100)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -92,6 +96,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
         setupBoost()
+        setupSeekBar()
         setupItems()
         setupVideoPlayer()
         setupFeedItemDetails()
@@ -141,6 +146,39 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
         youtubePlayer?.release()
         youtubePlayer = null
+    }
+
+    private var draggingSatsSlider: Boolean = false
+    private fun setupSeekBar() {
+        binding.includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
+            seekBarSatsPerMinute.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                    ) {
+                        SLIDER_VALUES[progress].let {
+                            textViewVideoSatsPerMinuteValue.text = it.toString()
+                        }
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = true
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = false
+
+                        seekBar?.let {
+                            SLIDER_VALUES[seekBar.progress].let {
+                                viewModel.updateSatsPerMinute(it.toLong())
+                            }
+                        }
+                    }
+                }
+            )
+        }
     }
 
     private fun setupBoost() {
@@ -408,6 +446,15 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 textViewVideoDescription.text = viewState.description?.value ?: ""
                                 textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
 
+                                if (!draggingSatsSlider) {
+                                    val satsPerMinute = viewState.satsPerMinute?.value ?: 0
+                                    val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+                                    val index = SLIDER_VALUES.indexOf(closest)
+                                    seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+                                    seekBarSatsPerMinute.progress = index
+                                    textViewVideoSatsPerMinuteValue.text = viewState.satsPerMinute?.value.toString()
+                                }
+
                                 if (viewState.url.isYoutubeVideo()) {
 
                                     layoutConstraintVideoViewContainer.gone
@@ -551,6 +598,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 }
             }
         }
+    }
+
+    private fun List<Int>.closestValue(value: Int) = minByOrNull {
+        kotlin.math.abs(value - it)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: VideoFeedScreenSideEffect) {

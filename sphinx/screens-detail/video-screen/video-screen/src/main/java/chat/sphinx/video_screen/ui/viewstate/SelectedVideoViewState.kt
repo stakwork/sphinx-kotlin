@@ -3,6 +3,7 @@ package chat.sphinx.video_screen.ui.viewstate
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_feed.FeedDescription
 import chat.sphinx.wrapper_feed.FeedDestination
 import chat.sphinx.wrapper_feed.FeedItemDuration
@@ -23,6 +24,7 @@ internal sealed class SelectedVideoViewState: ViewState<SelectedVideoViewState>(
         val localFile: File?,
         val date: DateTime?,
         val duration: FeedItemDuration?,
-        val destinations: List<FeedDestination>?
+        val destinations: List<FeedDestination>?,
+        val satsPerMinute: Sat?
     ): SelectedVideoViewState()
 }

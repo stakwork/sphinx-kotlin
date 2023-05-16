@@ -14,6 +14,7 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
@@ -27,6 +28,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -133,6 +135,13 @@ internal open class VideoFeedScreenViewModel(
         ViewStateContainer(BoostAnimationViewState.Idle)
     }
 
+    private val _satsPerMinuteStateFlow: MutableStateFlow<Sat?> by lazy {
+        MutableStateFlow(Sat(0))
+    }
+
+    private val satsPerMinuteStateFlow: StateFlow<Sat?>
+        get() = _satsPerMinuteStateFlow.asStateFlow()
+
     private val _feedItemDetailStateFlow: MutableStateFlow<FeedItemDetail?> by lazy {
         MutableStateFlow(null)
     }
@@ -160,6 +169,8 @@ internal open class VideoFeedScreenViewModel(
                             nnFeed.hasDestinations
                         )
                     )
+                    val satsPerMinute = feed.contentFeedStatus?.satsPerMinute?.value ?: feed.model?.suggestedSats
+                    _satsPerMinuteStateFlow.value = satsPerMinute?.let { Sat(it) }
 
                     if (selectedVideoStateContainer.value is SelectedVideoViewState.Idle) {
                         nnFeed.items.firstOrNull()?.let { video ->
@@ -173,7 +184,8 @@ internal open class VideoFeedScreenViewModel(
                                     video.localFile,
                                     video.dateUpdated,
                                     video.duration,
-                                    nnFeed.destinations
+                                    nnFeed.destinations,
+                                    satsPerMinuteStateFlow.value
                                 )
                             )
                         }
@@ -207,15 +219,17 @@ internal open class VideoFeedScreenViewModel(
 
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
-
             video.feed?.let { feed ->
+                val satsPerMinute = feed.contentFeedStatus?.satsPerMinute?.value ?: feed.model?.suggestedSats
+                _satsPerMinuteStateFlow.value = satsPerMinute?.let { Sat(it) }
+
                 feedRepository.updateContentFeedStatus(
                     feedId = feed.id,
                     feedUrl = feed.feedUrl,
                     subscriptionStatus = feed.subscribed,
                     chatId = feed.chatId,
                     itemId = video.id,
-                    satsPerMinute = null,
+                    satsPerMinute = satsPerMinuteStateFlow.value,
                     playerSpeed = null
                 )
             }
@@ -230,7 +244,8 @@ internal open class VideoFeedScreenViewModel(
                     video.localFile,
                     video.dateUpdated,
                     video.duration,
-                    video.feed?.destinations
+                    video.feed?.destinations,
+                    satsPerMinuteStateFlow.value,
                 )
             )
         }
@@ -252,6 +267,26 @@ internal open class VideoFeedScreenViewModel(
                     feed.subscribed
                 )
             }
+        }
+    }
+
+    fun updateSatsPerMinute(sats: Long) {
+        viewModelScope.launch(mainImmediate) {
+            (selectedVideoStateContainer.value as? SelectedVideoViewState.VideoSelected)?.let { video ->
+                getVideoFeed()?.let { feed ->
+                    feedRepository.updateContentFeedStatus(
+                        feed.id,
+                        feed.feedUrl,
+                        feed.subscribed,
+                        feed.chatId,
+                        video.id,
+                        Sat(sats),
+                        null,
+                        true
+                    )
+                }
+            }
+            _satsPerMinuteStateFlow.value = Sat(sats)
         }
     }
 
@@ -390,7 +425,7 @@ internal open class VideoFeedScreenViewModel(
                 video.feedId?.value ?: "",
                 video.id.value,
                 0,
-                Sat(21),
+                satsPerMinuteStateFlow.value,
                 null,
                 video.destinations ?: listOf()
             )

@@ -57,7 +57,7 @@
         app:layout_constraintTop_toBottomOf="@id/text_view_video_description" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint_layout_podcast_lightning_controls"
+        android:id="@+id/constraint_layout_video_lightning_controls"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:background="@color/headerBG"
@@ -67,7 +67,7 @@
         app:layout_constraintTop_toTopOf="@+id/include_layout_custom_boost">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constrain_layout_podcast_controls_text"
+            android:id="@+id/constrain_layout_video_controls_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/player_time_labels_horizontal_margin"
@@ -75,19 +75,19 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_podcast_sats_per_minute_field"
+                android:id="@+id/text_view_video_sats_per_minute_field"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto_medium"
                 android:text="@string/video_sats_per_minute"
                 android:textColor="@color/textMessages"
                 android:textSize="@dimen/default_text_size_body"
-                app:layout_constraintEnd_toStartOf="@+id/text_view_podcast_sats_per_minute_value"
+                app:layout_constraintEnd_toStartOf="@+id/text_view_video_sats_per_minute_value"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_podcast_sats_per_minute_value"
+                android:id="@+id/text_view_video_sats_per_minute_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto_medium"
@@ -104,7 +104,7 @@
             style="?android:attr/seekBarStyle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="@dimen/seek_bar_sats_per_minute_margin_vertical"
+            android:layout_marginVertical="@dimen/default_elevation"
             android:progressDrawable="@drawable/sats_seek_bar_progress"
             android:secondaryProgressTint="@android:color/white"
             android:thumb="@drawable/podcast_player_seek_bar_thumb"
@@ -112,7 +112,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constrain_layout_podcast_controls_text" />
+            app:layout_constraintTop_toBottomOf="@+id/constrain_layout_video_controls_text" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
