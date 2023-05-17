@@ -685,7 +685,7 @@ internal class ChatTribeFragment: ChatFragment<
                             null
                         )
                     }
-                    is WebViewViewState.SendLsat -> {
+                    is WebViewViewState.SendMessage -> {
                         webView.evaluateJavascript(
                             viewState.script,
                             null
@@ -698,6 +698,11 @@ internal class ChatTribeFragment: ChatFragment<
                                 )
                             }
                         }
+                    }
+                    is WebViewViewState.ChallengeError -> {
+                        viewModel.submitSideEffect(
+                            ChatSideEffect.Notify(viewState.error)
+                        )
                     }
                 }
             }

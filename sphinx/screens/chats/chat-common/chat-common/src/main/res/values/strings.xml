@@ -124,6 +124,8 @@
     <string name="side_effect_no_link_to_copy">No link to copy</string>
     <string name="side_effect_insufficient_budget">Budget is not enough to perform the search</string>
     <string name="side_effect_error_pay_lsat">There was an error trying to pay Lsat</string>
+    <string name="side_effect_keysend_error" translatable="false">Keysend error</string>
+    <string name="side_effect_challenge_error" translatable="false">Challenge error</string>
 
 
     <string name="file_name_loading">Loading...</string>
