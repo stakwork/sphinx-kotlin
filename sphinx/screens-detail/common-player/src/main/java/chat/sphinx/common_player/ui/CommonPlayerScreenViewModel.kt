@@ -26,7 +26,6 @@ import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
-import chat.sphinx.wrapper_action_track.action_wrappers.VideoStreamSatsTimer
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -100,7 +99,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
         get() = _feedItemDetailStateFlow.asStateFlow()
 
     private var videoRecordConsumed: VideoRecordConsumed? = null
-    private var videoStreamSatsTimer: VideoStreamSatsTimer? = null
 
     private val podcastSharedFlow: SharedFlow<Podcast?> = flow {
         emitAll(feedRepository.getPodcastById(args.podcastId))
@@ -482,9 +480,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
             return
         }
         videoRecordConsumed = VideoRecordConsumed(feedItemId)
-        videoStreamSatsTimer = VideoStreamSatsTimer {
-            streamSatsPayments()
-        }
     }
 
     fun trackVideoConsumed(){
@@ -622,11 +617,8 @@ class CommonPlayerScreenViewModel @Inject constructor(
         videoRecordConsumed?.setNewHistoryItem(videoPosition)
     }
 
-    fun startTimer(isSeeking: Boolean) {
+    fun startTimer() {
         videoRecordConsumed?.startTimer()
-        if (!isSeeking) {
-            videoStreamSatsTimer?.startTimer()
-        }
     }
 
     fun createHistoryItem() {
