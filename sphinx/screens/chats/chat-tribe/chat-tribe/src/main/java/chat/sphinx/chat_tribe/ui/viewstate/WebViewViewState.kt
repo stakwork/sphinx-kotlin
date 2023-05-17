@@ -10,7 +10,6 @@ sealed class WebViewViewState: ViewState<WebViewViewState>() {
     object RequestAuthorization: WebViewViewState()
     class ChallengeError(val error: String): WebViewViewState()
 
-
     class SendAuthorization(
         val script: String
     ): WebViewViewState()

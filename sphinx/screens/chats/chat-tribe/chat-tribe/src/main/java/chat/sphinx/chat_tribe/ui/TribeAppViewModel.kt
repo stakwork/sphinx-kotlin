@@ -227,14 +227,14 @@ internal class TribeAppViewModel @Inject constructor(
                                 is Response.Error -> {
                                     sendMessage(
                                         type = TYPE_KEYSEND,
-                                        success = 0,
+                                        success = false,
                                         error = app.getString(R.string.side_effect_keysend_error)
                                     )
                                 }
                                 is Response.Success -> {
                                     sendMessage(
                                         type = TYPE_KEYSEND,
-                                        success = 1,
+                                        success = true,
                                         error = null
                                     )
                                 }
@@ -268,17 +268,15 @@ internal class TribeAppViewModel @Inject constructor(
                                     is Response.Error -> {
                                         sendMessage(
                                             type = TYPE_LSAT,
-                                            success = 0,
-                                            lsat = null,
+                                            success = false,
                                             error = app.getString(R.string.side_effect_error_pay_lsat)
                                         )
                                     }
                                     is Response.Success -> {
                                         _budgetStateFlow.value = Sat(budgetStateFlow.value.value - nnAmount.value)
-
                                         sendMessage(
                                             type = TYPE_LSAT,
-                                            success = 1,
+                                            success = true,
                                             lsat = loadResponse.value.lsat,
                                             error = null
                                         )
@@ -289,7 +287,7 @@ internal class TribeAppViewModel @Inject constructor(
                     } else {
                         sendMessage(
                             type = TYPE_LSAT,
-                            success = 0,
+                            success = false,
                             lsat = null,
                             error = app.getString(R.string.side_effect_insufficient_budget)
                         )
@@ -299,7 +297,7 @@ internal class TribeAppViewModel @Inject constructor(
             } catch (e: Exception) {
                 sendMessage(
                     type = TYPE_LSAT,
-                    success = 0,
+                    success = false,
                     lsat = null,
                     error = app.getString(R.string.side_effect_error_pay_lsat)
                 )
@@ -309,7 +307,7 @@ internal class TribeAppViewModel @Inject constructor(
 
     private fun sendMessage(
         type: String,
-        success: Int,
+        success: Boolean,
         lsat: String? = null,
         error: String? = null
     ) {

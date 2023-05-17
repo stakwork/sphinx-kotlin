@@ -8,7 +8,7 @@ data class SendKeySend(
     val password: String,
     val type: String,
     val application: String,
-    val success: Int
+    val success: Boolean
 )
 
 
