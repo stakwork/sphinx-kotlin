@@ -1,6 +1,7 @@
 package chat.sphinx.podcast_player.ui
 
 import android.animation.Animator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.ContextThemeWrapper
@@ -69,7 +70,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     override val binding: FragmentPodcastPlayerBinding by viewBinding(FragmentPodcastPlayerBinding::bind)
 
     companion object {
-        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,20,20,40,40,80,80,100)
+        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,15,20,20,40,40,80,80,100)
     }
 
     @Inject
@@ -403,6 +404,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private suspend fun showPodcastInfo(podcast: Podcast) {
         binding.apply {
 
@@ -461,6 +463,14 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
                 seekBarSatsPerMinute.progress = index
                 textViewPodcastSatsPerMinuteValue.text = closest.toString()
+
+                constraintLayoutPodcastLightningControls.alpha = if (podcast.hasDestinations) 1.0F else 0.5F
+
+                if (!podcast.hasDestinations) {
+                    seekBarSatsPerMinute.setOnTouchListener { _, _ -> true }
+                } else {
+                    seekBarSatsPerMinute.setOnTouchListener(null)
+                }
             }
 
             togglePlayPauseButton(podcast.isPlaying)

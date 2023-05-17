@@ -58,7 +58,9 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout_video_lightning_controls"
-        android:layout_width="250dp"
+        android:layout_width="0dp"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:layout_marginStart="@dimen/default_half_layout_margin"
         android:layout_height="wrap_content"
         android:background="@color/headerBG"
         app:layout_constraintBottom_toBottomOf="@+id/include_layout_custom_boost"

@@ -159,6 +159,10 @@ internal open class VideoFeedScreenViewModel(
         viewModelScope.launch(mainImmediate) {
             videoFeedSharedFlow.collect { feed ->
                 feed?.let { nnFeed ->
+
+                    val satsPerMinute = feed.contentFeedStatus?.satsPerMinute?.value ?: feed.model?.suggestedSats
+                    _satsPerMinuteStateFlow.value = satsPerMinute?.let { Sat(it) }
+
                     updateViewState(
                         VideoFeedScreenViewState.FeedLoaded(
                             nnFeed.title,
@@ -166,11 +170,10 @@ internal open class VideoFeedScreenViewModel(
                             nnFeed.chatId,
                             nnFeed.subscribed,
                             nnFeed.items,
-                            nnFeed.hasDestinations
+                            nnFeed.hasDestinations,
+                            satsPerMinuteStateFlow.value,
                         )
                     )
-                    val satsPerMinute = feed.contentFeedStatus?.satsPerMinute?.value ?: feed.model?.suggestedSats
-                    _satsPerMinuteStateFlow.value = satsPerMinute?.let { Sat(it) }
 
                     if (selectedVideoStateContainer.value is SelectedVideoViewState.Idle) {
                         nnFeed.items.firstOrNull()?.let { video ->
@@ -183,9 +186,7 @@ internal open class VideoFeedScreenViewModel(
                                     video.enclosureUrl,
                                     video.localFile,
                                     video.dateUpdated,
-                                    video.duration,
-                                    nnFeed.destinations,
-                                    satsPerMinuteStateFlow.value
+                                    video.duration
                                 )
                             )
                         }
@@ -220,9 +221,6 @@ internal open class VideoFeedScreenViewModel(
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
             video.feed?.let { feed ->
-                val satsPerMinute = feed.contentFeedStatus?.satsPerMinute?.value ?: feed.model?.suggestedSats
-                _satsPerMinuteStateFlow.value = satsPerMinute?.let { Sat(it) }
-
                 feedRepository.updateContentFeedStatus(
                     feedId = feed.id,
                     feedUrl = feed.feedUrl,
@@ -243,9 +241,7 @@ internal open class VideoFeedScreenViewModel(
                     video.enclosureUrl,
                     video.localFile,
                     video.dateUpdated,
-                    video.duration,
-                    video.feed?.destinations,
-                    satsPerMinuteStateFlow.value,
+                    video.duration
                 )
             )
         }
@@ -419,16 +415,20 @@ internal open class VideoFeedScreenViewModel(
     }
 
     private fun streamSatsPayments() {
-        (selectedVideoStateContainer.value as? SelectedVideoViewState.VideoSelected)?.let { video ->
-            feedRepository.streamFeedPayments(
-                ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                video.feedId?.value ?: "",
-                video.id.value,
-                0,
-                satsPerMinuteStateFlow.value,
-                null,
-                video.destinations ?: listOf()
-            )
+        viewModelScope.launch(mainImmediate) {
+            videoFeedSharedFlow.firstOrNull()?.let { feed ->
+                (selectedVideoStateContainer.value as? SelectedVideoViewState.VideoSelected)?.let { videoState ->
+                    feedRepository.streamFeedPayments(
+                        chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        feedId = videoState.feedId?.value ?: "",
+                        feedItemId = videoState.id.value,
+                        currentTime = 0,
+                        satsPerMinute = satsPerMinuteStateFlow.value,
+                        playerSpeed = null,
+                        destinations = feed.destinations
+                    )
+                }
+            }
         }
     }
 
@@ -472,6 +472,4 @@ internal open class VideoFeedScreenViewModel(
         videoRecordConsumed?.stopTimer()
         videoStreamSatsTimer?.stopTimer()
     }
-
-
 }

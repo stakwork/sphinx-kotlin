@@ -86,7 +86,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     private var youtubePlayer: YouTubePlayer? = null
 
     companion object {
-        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,20,20,40,40,80,80,100)
+        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,15,20,20,40,40,80,80,100)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -154,9 +154,9 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
             seekBarSatsPerMinute.setOnSeekBarChangeListener(
                 object : SeekBar.OnSeekBarChangeListener {
                     override fun onProgressChanged(
-                    seekBar: SeekBar?,
-                    progress: Int,
-                    fromUser: Boolean
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
                     ) {
                         SLIDER_VALUES[progress].let {
                             textViewVideoSatsPerMinuteValue.text = it.toString()
@@ -407,6 +407,23 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 this@customBoost.editTextCustomBoost.isEnabled =
                                     viewState.hasDestinations
                             }
+
+                            if (!draggingSatsSlider) {
+                                val satsPerMinute = viewState.satsPerMinute?.value ?: 0
+                                val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+                                val index = SLIDER_VALUES.indexOf(closest)
+                                seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+                                seekBarSatsPerMinute.progress = index
+                                textViewVideoSatsPerMinuteValue.text = viewState.satsPerMinute?.value.toString()
+
+                                seekBarSatsPerMinute.alpha = if (viewState.hasDestinations) 1.0F else 0.5F
+
+                                if (!viewState.hasDestinations) {
+                                    seekBarSatsPerMinute.setOnTouchListener { _, _ -> true }
+                                } else {
+                                    seekBarSatsPerMinute.setOnTouchListener(null)
+                                }
+                            }
                         }
                     }
                 }
@@ -445,15 +462,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 textViewVideoTitle.text = viewState.title.value
                                 textViewVideoDescription.text = viewState.description?.value ?: ""
                                 textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
-
-                                if (!draggingSatsSlider) {
-                                    val satsPerMinute = viewState.satsPerMinute?.value ?: 0
-                                    val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
-                                    val index = SLIDER_VALUES.indexOf(closest)
-                                    seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
-                                    seekBarSatsPerMinute.progress = index
-                                    textViewVideoSatsPerMinuteValue.text = viewState.satsPerMinute?.value.toString()
-                                }
 
                                 if (viewState.url.isYoutubeVideo()) {
 
@@ -544,8 +552,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
         binding.includeLayoutVideoPlayer.layoutConstraintVideoPlayers.apply {
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                layoutParams.height =
-                    binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+                layoutParams.height = binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
             } else {
                 layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
             }

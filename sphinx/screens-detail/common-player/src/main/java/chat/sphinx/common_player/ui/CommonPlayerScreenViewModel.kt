@@ -473,8 +473,6 @@ class CommonPlayerScreenViewModel @Inject constructor(
         }
     }
 
-    private fun streamSatsPayments() {}
-
     fun createVideoRecordConsumed(feedItemId: FeedId){
         if (videoRecordConsumed?.feedItemId == feedItemId){
             return

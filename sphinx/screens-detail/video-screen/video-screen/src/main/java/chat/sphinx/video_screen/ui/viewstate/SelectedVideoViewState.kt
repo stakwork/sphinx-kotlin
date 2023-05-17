@@ -24,7 +24,5 @@ internal sealed class SelectedVideoViewState: ViewState<SelectedVideoViewState>(
         val localFile: File?,
         val date: DateTime?,
         val duration: FeedItemDuration?,
-        val destinations: List<FeedDestination>?,
-        val satsPerMinute: Sat?
     ): SelectedVideoViewState()
 }
