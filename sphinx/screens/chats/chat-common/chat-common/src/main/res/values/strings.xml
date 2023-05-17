@@ -124,6 +124,9 @@
     <string name="side_effect_call_link_copied">Call link copied to clipboard</string>
     <string name="side_effect_link_copied">Copied %s</string>
     <string name="side_effect_no_link_to_copy">No link to copy</string>
+    <string name="side_effect_insufficient_budget">Budget is not enough to perform the search</string>
+    <string name="side_effect_error_pay_lsat">There was an error trying to pay Lsat</string>
+
 
     <string name="file_name_loading">Loading...</string>
     <string name="pdf_page">page</string>

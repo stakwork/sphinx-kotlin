@@ -8,8 +8,9 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 data class TribeData(
     val host : ChatHost,
     val chatUUID: ChatUUID,
-    val feedUrl : FeedUrl?,
+    val feedUrl: FeedUrl?,
     val feedType: FeedType,
-    val badges: Array<String>,
-    val pin: MessageUUID?
+    val pin: MessageUUID?,
+    val appUrl: AppUrl?,
+    val badges: Array<String>
 )

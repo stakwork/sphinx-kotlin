@@ -114,6 +114,9 @@
     <string name="side_effect_call_link_copied">Enlace de llamada copiado al portapapeles</string>
     <string name="side_effect_link_copied">Copiado %s</string>
     <string name="side_effect_no_link_to_copy">Sin enlace para copiar</string>
+    <string name="side_effect_insufficient_budget">El presupuesto no es suficiente para realizar la búsqueda</string>
+    <string name="side_effect_error_pay_lsat">Hubo un error al tratar de pagar Lsat</string>
+
 
     <string name="file_name_loading">Cargando...</string>
     <string name="pdf_page">página</string>
