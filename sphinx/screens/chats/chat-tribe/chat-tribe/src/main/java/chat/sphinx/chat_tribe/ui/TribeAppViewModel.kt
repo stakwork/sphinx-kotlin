@@ -15,10 +15,10 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebAppViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.webview.LsatWebViewDto
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_common.lightning.Bolt11
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toLightningPaymentRequestOrNull
@@ -43,7 +43,9 @@ internal class TribeAppViewModel @Inject constructor(
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val moshi: Moshi,
-    private val networkQueryLightning: NetworkQueryLightning
+    private val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+
     ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle) {
 
     private val _sphinxWebViewDtoStateFlow: MutableStateFlow<SphinxWebViewDto?> by lazy {
@@ -137,34 +139,55 @@ internal class TribeAppViewModel @Inject constructor(
         webViewViewStateContainer.updateViewState(WebViewViewState.Idle)
     }
 
+    private fun sendAuthorization(amount: Long, pubKey: String, signature: String?) {
+
+        _budgetStateFlow.value = Sat(amount)
+        val password = generatePassword()
+        val sendAuth = SendAuth(
+            budget = budgetStateFlow.value.value.toInt(),
+            pubkey = pubKey,
+            type = TYPE_AUTHORIZE,
+            password = password,
+            application = APPLICATION_NAME,
+            signature = signature
+        ).toJson(moshi)
+
+        webViewViewStateContainer.updateViewState(
+            WebViewViewState.SendAuthorization("window.sphinxMessage('$sendAuth')")
+        )
+    }
+
     fun authorizeWebApp(amountString: String) {
         hideAuthorizePopup()
 
-        if (amountString.isNotEmpty()) {
-            amountString.toIntOrNull()?.let { amount ->
-                if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
-                    // Sign challenge
-                } else {
-                    contactRepository.accountOwner.value?.nodePubKey?.let {
+        if (amountString.isEmpty()) return
 
-                        _budgetStateFlow.value = Sat(amount.toLong())
+        amountString.toIntOrNull()?.let { amount ->
+            contactRepository.accountOwner.value?.nodePubKey?.let { pubKey ->
+                val challenge = sphinxWebViewDtoStateFlow.value?.challenge
 
-                        val password = generatePassword()
+                if (challenge?.isNotEmpty() == false) {
+                    viewModelScope.launch(mainImmediate) {
+                        networkQueryAuthorizeExternal.signBase64(challenge)
+                            .collect { loadResponse ->
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {}
+                                    is Response.Success -> {
+                                        val signature = loadResponse.value.sig
 
-                        val sendAuth = SendAuth(
-                            budget = budgetStateFlow.value.value.toInt(),
-                            pubkey = it.value,
-                            type = TYPE_AUTHORIZE,
-                            password = password,
-                            application = APPLICATION_NAME
-                        ).toJson(moshi)
-
-                        webViewViewStateContainer.updateViewState(
-                            WebViewViewState.SendAuthorization(
-                                "window.sphinxMessage('$sendAuth')"
-                            )
-                        )
+                                        sendAuthorization(
+                                            amount.toLong(),
+                                            pubKey.value,
+                                            signature
+                                        )
+                                    }
+                                }
+                            }
                     }
+                } else {
+                    sendAuthorization(amount.toLong(), pubKey.value, null)
                 }
             }
         }
