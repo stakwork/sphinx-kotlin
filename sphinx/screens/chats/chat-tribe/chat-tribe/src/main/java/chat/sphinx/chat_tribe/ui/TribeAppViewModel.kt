@@ -214,7 +214,7 @@ internal class TribeAppViewModel @Inject constructor(
                                     is LoadResponse.Loading -> {}
                                     is Response.Error -> {
                                         sendLSatMessage(
-                                            success = 0,
+                                            success = false,
                                             lsat = null,
                                             error = app.getString(R.string.side_effect_error_pay_lsat)
                                         )
@@ -223,7 +223,7 @@ internal class TribeAppViewModel @Inject constructor(
                                         _budgetStateFlow.value = Sat(budgetStateFlow.value.value - nnAmount.value)
 
                                         sendLSatMessage(
-                                            success = 1,
+                                            success = true,
                                             lsat = loadResponse.value.lsat,
                                             error = null
                                         )
@@ -233,7 +233,7 @@ internal class TribeAppViewModel @Inject constructor(
                         }
                     } else {
                         sendLSatMessage(
-                            success = 0,
+                            success = false,
                             lsat = null,
                             error = app.getString(R.string.side_effect_insufficient_budget)
                         )
@@ -242,7 +242,7 @@ internal class TribeAppViewModel @Inject constructor(
 
             } catch (e: Exception) {
                 sendLSatMessage(
-                    success = 0,
+                    success = false,
                     lsat = null,
                     error = app.getString(R.string.side_effect_error_pay_lsat)
                 )
@@ -251,7 +251,7 @@ internal class TribeAppViewModel @Inject constructor(
     }
 
     private fun sendLSatMessage(
-        success: Int,
+        success: Boolean,
         lsat: String? = null,
         error: String? = null
     ) {

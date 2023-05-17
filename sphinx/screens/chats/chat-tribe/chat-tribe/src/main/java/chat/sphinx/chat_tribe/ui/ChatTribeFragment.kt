@@ -398,9 +398,12 @@ internal class ChatTribeFragment: ChatFragment<
                     )
                 }
                 else -> {
-                    if (tribeAppViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
+                    (tribeAppViewModel.webAppViewStateContainer.value as? WebAppViewState.AppAvailable.WebViewOpen)?.let {
+                        tribeAppViewModel.webAppViewStateContainer.updateViewState(
+                            WebAppViewState.AppAvailable.WebViewClosed(it.appUrl)
+                        )
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
-                    } else {
+                    } ?: run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
