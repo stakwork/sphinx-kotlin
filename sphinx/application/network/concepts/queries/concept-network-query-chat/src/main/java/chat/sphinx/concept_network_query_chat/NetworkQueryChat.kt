@@ -66,7 +66,7 @@ abstract class NetworkQueryChat {
         chatId: ChatId,
         putPinMessageDto: PutPinMessageDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
-    ): Flow<LoadResponse<ChatDto, ResponseError>>
+    ): Flow<LoadResponse<PutPinMessageDto, ResponseError>>
 
     ////////////
     /// POST ///

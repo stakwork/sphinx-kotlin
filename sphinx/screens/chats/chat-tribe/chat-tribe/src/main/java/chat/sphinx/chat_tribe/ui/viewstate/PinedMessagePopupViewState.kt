@@ -6,11 +6,7 @@ sealed class PinedMessagePopupViewState: ViewState<PinedMessagePopupViewState>()
 
     object Idle: PinedMessagePopupViewState()
 
-    data class PinnedMessage(
-        val text: String
-    ): PinedMessagePopupViewState()
-
-    data class UnpinnedMessage(
+    data class Visible(
         val text: String
     ): PinedMessagePopupViewState()
 }

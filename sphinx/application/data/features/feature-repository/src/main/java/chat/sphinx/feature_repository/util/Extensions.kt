@@ -23,7 +23,6 @@ import chat.sphinx.wrapper_common.invite.isProcessingPayment
 import chat.sphinx.wrapper_common.invite.toInviteStatus
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_common.message.toMessageId
 import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_common.subscription.Cron
 import chat.sphinx.wrapper_common.subscription.EndNumber
@@ -179,7 +178,6 @@ inline fun TransactionCallbacks.upsertChat(
         dto.owner_pub_key?.toLightningNodePubKey(),
         seen,
         null,
-//        dto.meta?.toChatMetaDataOrNull(moshi), (it was replaced with the line above)
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },

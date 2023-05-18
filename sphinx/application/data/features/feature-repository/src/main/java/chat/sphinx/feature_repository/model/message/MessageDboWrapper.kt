@@ -15,7 +15,9 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 
-class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
+class MessageDboWrapper(
+    val messageDbo: MessageDbo
+): Message() {
     override val id: MessageId
         get() = messageDbo.id
     override val uuid: MessageUUID?
@@ -127,4 +129,10 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
     var _replyMessage: Message? = null
     override val replyMessage: Message?
         get() = _replyMessage
+
+    @Volatile
+    @Suppress("PropertyName")
+    var _isPinned: Boolean = false
+    override val isPinned: Boolean
+        get() = _isPinned
 }

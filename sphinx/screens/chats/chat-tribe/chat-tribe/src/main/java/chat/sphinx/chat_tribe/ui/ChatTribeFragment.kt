@@ -62,11 +62,9 @@ import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
-import chat.sphinx.wrapper_chat.isTribeOwnedByAccount
 import chat.sphinx.wrapper_chat.protocolLessUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
-import chat.sphinx.wrapper_message.Message
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -187,19 +185,7 @@ internal class ChatTribeFragment: ChatFragment<
 
         pinedMessageHeader.apply {
             layoutConstraintChatPinedMessageHeader.setOnClickListener {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.updatePinMessageData.collect {  message ->
-                        viewModel.pinedMessageDataViewState.updateViewState(
-                            PinedMessageDataViewState.Data(
-                                message
-                            )
-                        )
-                    }
-                }
-
-                viewModel.pinedMessageBottomViewState.updateViewState(
-                    PinMessageBottomViewState.Open
-                )
+                viewModel.showPinnedBottomView()
             }
         }
 
@@ -281,6 +267,24 @@ internal class ChatTribeFragment: ChatFragment<
                         )
                     }
                 }
+            }
+        }
+
+        layoutBottomPinned.apply {
+            (requireActivity() as InsetterActivity).addNavigationBarPadding(root)
+
+            includeLayoutPinBottomTemplate.apply {
+                layoutConstraintPinnedBottomUnpinButton.apply {
+                    setOnClickListener {
+                        viewModel.unPinMessage()
+                    }
+                }
+            }
+
+            viewPinBottomInputLock.setOnClickListener {
+                viewModel.pinedMessageBottomViewState.updateViewState(
+                    PinMessageBottomViewState.Closed
+                )
             }
         }
 
@@ -434,6 +438,8 @@ internal class ChatTribeFragment: ChatFragment<
                 else -> {
                     if (tribeAppViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
+                    } else if (viewModel.pinedMessageBottomViewState.value is PinMessageBottomViewState.Open) {
+                        viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
                     } else {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
@@ -618,47 +624,19 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.pinedMessageHeaderViewState.collect { viewState ->
-                pinedMessageHeader.apply {
-
-                    @Exhaustive
-                    when(viewState) {
-                        is PinedMessageHeaderViewState.Idle -> {
-                            root.goneIfFalse(false)
-                        }
-
-                        is PinedMessageHeaderViewState.PinedMessageHeader -> {
-                            root.goneIfFalse(true)
-
-                            textViewChatHeaderName.text = viewState.message.messageContentDecrypted?.value
-                        }
-                    }
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.pinedMessagePopupViewState.collect { viewState ->
                 layoutChatPinPopupBinding.apply {
-
                     @Exhaustive
                     when(viewState) {
                         is PinedMessagePopupViewState.Idle -> {
                             root.goneIfFalse(false)
                         }
-                        is PinedMessagePopupViewState.PinnedMessage -> {
+                        is PinedMessagePopupViewState.Visible -> {
                             root.goneIfFalse(true)
-
-                            includePinedMessagePopup.textViewPinedMessage.text =viewState.text
-                        }
-                        is PinedMessagePopupViewState.UnpinnedMessage -> {
-                            root.goneIfFalse(true)
-
-                            includePinedMessagePopup.textViewPinedMessage.text =viewState.text
+                            includePinedMessagePopup.textViewPinedMessage.text = viewState.text
                         }
                     }
                 }
-
             }
         }
 
@@ -666,19 +644,7 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.pinedMessageBottomViewState.collect { viewState ->
                 layoutBottomPinned.apply {
-
-                    @Exhaustive
-                    when(viewState) {
-                        is PinMessageBottomViewState.Open -> {
-                            layoutMotionBottomPinned.setTransitionDuration(150)
-                        }
-
-                        is PinMessageBottomViewState.Closed -> {
-                            layoutMotionBottomPinned.setTransitionDuration(150)
-                        }
-
-                    }
-
+                    layoutMotionBottomPinned.setTransitionDuration(150)
                     viewState.transitionToEndSet(layoutMotionBottomPinned)
                 }
             }
@@ -687,66 +653,37 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.pinedMessageDataViewState.collect { viewState ->
                 layoutBottomPinned.apply {
-
-                    viewPinBottomInputLock.setOnClickListener {
-                        viewModel.pinedMessageBottomViewState.updateViewState(
-                            PinMessageBottomViewState.Closed
-                        )
-                    }
-
                     @Exhaustive
                     when (viewState) {
-                        is PinedMessageDataViewState.Idle -> {}
+                        is PinedMessageDataViewState.Idle -> {
+                            pinedMessageHeader.root.goneIfFalse(false)
+                        }
                         is PinedMessageDataViewState.Data -> {
+                            pinedMessageHeader.apply {
+                                root.goneIfFalse(true)
+                                textViewChatHeaderName.text = viewState.messageContent
+                            }
+
                             includeLayoutPinBottomTemplate.apply {
-                                val isOwner = viewModel.getChat().isTribeOwnedByAccount(viewModel.getOwner().nodePubKey)
-                                if (isOwner) {
-                                    layoutConstraintPinnedBottomUnpinButton.apply {
-                                        visible
-                                        setOnClickListener {
-                                            viewModel.unPinMessage(viewState.message)
-                                        }
-                                    }
+                                layoutConstraintPinnedBottomUnpinButton.goneIfFalse(viewState.isOwnTribe)
 
-                                    viewModel.getChat().ownerPubKey?.let { pubKey ->
-                                        viewModel.getContactByPubKey(pubKey).firstOrNull()?.let { owner ->
-                                            owner.photoUrl?.let { ownerPhoto ->
-                                                imageLoader.load(
-                                                    messageHolderPinImageInitialHolder.imageViewChatPicture,
-                                                    ownerPhoto.value,
-                                                    ImageLoaderOptions.Builder()
-                                                        .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
-                                                        .transformation(Transformation.CircleCrop)
-                                                        .build()
-                                                )
-                                            }
+                                viewState.senderPic?.let { senderPhotoUrl ->
+                                    imageLoader.load(
+                                        messageHolderPinImageInitialHolder.imageViewChatPicture,
+                                        senderPhotoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
+                                }
 
-                                            owner.alias?.let { ownerAlias ->
-                                                textViewPinnedBottomBodyUsername.text = ownerAlias.value
-                                            }
-
-                                        }
-                                    }
-
-                                } else {
-
-                                    viewState.message.senderPic?.let { photoUrl ->
-                                        imageLoader.load(
-                                            messageHolderPinImageInitialHolder.imageViewChatPicture,
-                                            photoUrl.value,
-                                            ImageLoaderOptions.Builder()
-                                                .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
-                                                .transformation(Transformation.CircleCrop)
-                                                .build()
-                                        )
-
-                                    }
-
-                                    textViewPinnedBottomBodyUsername.text = viewState.message.senderAlias?.value
+                                viewState.senderAlias?.let { senderAlias ->
+                                    textViewPinnedBottomBodyUsername.text = senderAlias
                                 }
 
                                 includePinnedBottomMessageHolder.apply {
-                                    textViewPinnedBottomHeaderText.text = viewState.message.messageContentDecrypted?.value
+                                    textViewPinnedBottomHeaderText.text = viewState.messageContent
                                 }
                             }
                         }

@@ -78,9 +78,17 @@ interface ChatRepository {
     suspend fun updateTribeInfo(chat: Chat): TribeData?
     suspend fun createTribe(createTribe: CreateTribe): Response<Any, ResponseError>
     suspend fun updateTribe(chatId: ChatId, createTribe: CreateTribe): Response<Any, ResponseError>
-    suspend fun pinMessage(chatId: ChatId, message: Message?): Response<Any, ResponseError>
-    suspend fun unPinMessage(chatId: ChatId, message: Message?): Response<Any, ResponseError>
     suspend fun exitAndDeleteTribe(chat: Chat): Response<Boolean, ResponseError>
+
+    suspend fun pinMessage(
+        chatId: ChatId,
+        message: Message
+    ): Response<Any, ResponseError>
+
+    suspend fun unPinMessage(
+        chatId: ChatId,
+        message: Message
+    ): Response<Any, ResponseError>
 
     suspend fun addTribeMember(addMember: AddMember): Response<Any, ResponseError>
 

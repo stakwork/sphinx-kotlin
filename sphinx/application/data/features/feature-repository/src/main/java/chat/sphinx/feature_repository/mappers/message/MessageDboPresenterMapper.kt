@@ -16,7 +16,9 @@ internal class MessageDboPresenterMapper(
     dispatchers: CoroutineDispatchers,
     private val moshi: Moshi,
 ): ClassMapper<MessageDbo, MessageDboWrapper>(dispatchers) {
-    override suspend fun mapFrom(value: MessageDbo): MessageDboWrapper {
+    override suspend fun mapFrom(
+        value: MessageDbo
+    ): MessageDboWrapper {
         return MessageDboWrapper(value).also { message ->
             value.message_content_decrypted?.let { decrypted ->
                 if (message.type.isMessage()) {

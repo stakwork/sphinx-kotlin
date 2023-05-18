@@ -104,9 +104,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
                     }
                     old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
-                        old.background                         == new.background        &&
-                        old.message                            == new.message           &&
-                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
+                        old.background                         == new.background                    &&
+                        old.message                            == new.message                       &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState   &&
+                        old.isPinned                           == new.isPinned
                     }
                     else -> {
                         false
@@ -312,18 +313,20 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerViewWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.measuredWidth.toFloat())
     }
+
     private val headerHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(headerBinding.root.measuredHeight.toFloat())
     }
+
     private val screenHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.rootView.measuredHeight.toFloat())
     }
-    private val pinedMessageHeader: Px by lazy(LazyThreadSafetyMode.NONE) {
-        if (pinedHeaderBinding.root.isVisible) {
-            Px(pinedHeaderBinding.root.measuredHeight.toFloat())
-        }else {
-            Px(0f)
-        }
+
+    private val pinedMessageHeader: Px
+    get() = if (pinedHeaderBinding.root.isVisible) {
+        Px(pinedHeaderBinding.root.measuredHeight.toFloat())
+    } else {
+        Px(0f)
     }
 
     inner class MessageViewHolder(

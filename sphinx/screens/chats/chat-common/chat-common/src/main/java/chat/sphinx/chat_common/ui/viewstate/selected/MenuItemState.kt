@@ -32,8 +32,8 @@ sealed class MenuItemState(
     object Reply: MenuItemState(FALSE, PRIORITY_5)
     object SaveFile: MenuItemState(FALSE, PRIORITY_6)
     object Resend: MenuItemState(FALSE, PRIORITY_7)
-    object PinMessage: MenuItemState(FALSE, PRIORITY_8)
-    object UnpinMessage: MenuItemState(FALSE, PRIORITY_9)
+    object PinMessage: MenuItemState(TRUE, PRIORITY_8)
+    object UnpinMessage: MenuItemState(TRUE, PRIORITY_9)
     object Flag: MenuItemState(FALSE, PRIORITY_10)
     object Delete: MenuItemState(FALSE, PRIORITY_11)
 

@@ -190,4 +190,10 @@
     <string name="alert_confirm_unblock_contact_title">Desbloquear Contacto</string>
     <string name="alert_confirm_unblock_contact">¿Estás seguro que deseas desbloquear este contacto?</string>
     <string name="alert_not_encrypted_contact">No puedes mandar un mensaje a un contacto no encriptado</string>
+
+    <string name="unpin_message">Remover Mensaje Fijado</string>
+    <string name="pinned_message">Mensaje Fijado</string>
+    <string name="message_pinned">Mensaje Fijado</string>
+    <string name="message_unpinned">Mensaje removido</string>
+    <string name="pin_message_error">Ocurrió un error. Por favor inténtalo luego</string>
 </resources>

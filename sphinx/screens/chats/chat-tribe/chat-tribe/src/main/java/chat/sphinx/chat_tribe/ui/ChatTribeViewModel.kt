@@ -55,7 +55,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.concept_views.viewstate.value
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -141,15 +140,6 @@ class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000)
     )
 
-    fun getContactById(contactId: ContactId): SharedFlow<Contact> = flow {
-        contactRepository.getContactById(contactId).firstOrNull()?.let { contact ->
-            emit(contact)
-        }
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000)
-    )
-
     fun getContactByPubKey(pubKey: LightningNodePubKey): SharedFlow<Contact> = flow {
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
             emit(contact)
@@ -172,9 +162,6 @@ class ChatTribeViewModel @Inject constructor(
         ViewStateContainer(TribeMemberDataViewState.Idle)
     }
 
-    val pinedMessageHeaderViewState: ViewStateContainer<PinedMessageHeaderViewState> by lazy {
-        ViewStateContainer(PinedMessageHeaderViewState.Idle)
-    }
     val pinedMessagePopupViewState: ViewStateContainer<PinedMessagePopupViewState> by lazy {
         ViewStateContainer(PinedMessagePopupViewState.Idle)
     }
@@ -389,61 +376,91 @@ class ChatTribeViewModel @Inject constructor(
     override fun pinMessage(message: Message) {
 
         viewModelScope.launch(mainImmediate) {
-            chatRepository.pinMessage(chatId, message)
 
-            pinedMessagePopupViewState.updateViewState(
-                PinedMessagePopupViewState.PinnedMessage(
-                    "Pinned Message"
-                )
-            )
+            val response = chatRepository.pinMessage(chatId, message)
 
-            delay(1000)
+            if (response is Response.Success) {
+                getPinnedMessageData(message)?.let { messageData ->
+                    pinedMessageDataViewState.updateViewState(
+                        messageData
+                    )
+                }
 
-
-            pinedMessageHeaderViewState.updateViewState(
-                PinedMessageHeaderViewState.PinedMessageHeader(
-                    message
-                )
-            )
-
-            pinedMessageDataViewState.updateViewState(
-                PinedMessageDataViewState.Data(
-                    message
-                )
-            )
-
-            pinedMessagePopupViewState.updateViewState(
-                PinedMessagePopupViewState.Idle
-            )
-
+                showPinMessagePopup(app.getString(R.string.message_pinned))
+            } else {
+                submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.pin_message_error)))
+            }
         }
-
     }
 
-
-    override fun unPinMessage(message: Message) {
+    override fun unPinMessage(message: Message?) {
         viewModelScope.launch(mainImmediate) {
-            chatRepository.unPinMessage(chatId, message)
 
-            pinedMessagePopupViewState.updateViewState(
-                PinedMessagePopupViewState.PinnedMessage(
-                    "Unpinned Message"
+            (message ?: (pinedMessageDataViewState.value as? PinedMessageDataViewState.Data)?.message)?.let { nnMessage ->
+
+                pinedMessageBottomViewState.updateViewState(
+                    PinMessageBottomViewState.Closed
                 )
-            )
-            pinedMessageBottomViewState.updateViewState(
-                PinMessageBottomViewState.Closed
+
+                val response = chatRepository.unPinMessage(chatId, nnMessage)
+
+                if (response is Response.Success) {
+                    pinedMessageDataViewState.updateViewState(
+                        PinedMessageDataViewState.Idle
+                    )
+
+                    showPinMessagePopup(app.getString(R.string.message_unpinned))
+                } else {
+                    submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.pin_message_error)))
+                }
+            }
+        }
+    }
+
+    private fun showPinMessagePopup(
+        text: String
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.Visible(text)
             )
 
-            delay(1000)
-
-            pinedMessageHeaderViewState.updateViewState(
-                PinedMessageHeaderViewState.Idle
-            )
+            delay(1000L)
 
             pinedMessagePopupViewState.updateViewState(
                 PinedMessagePopupViewState.Idle
             )
         }
+    }
+
+    fun showPinnedBottomView() {
+        pinedMessageBottomViewState.updateViewState(
+            PinMessageBottomViewState.Open
+        )
+    }
+
+    private suspend fun getPinnedMessageData(message: Message): PinedMessageDataViewState {
+        var pinnedMessageData: PinedMessageDataViewState = PinedMessageDataViewState.Idle
+
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+            val isOwner = getChat().isTribeOwnedByAccount(getOwner().nodePubKey)
+            val messageContent = message.messageContentDecrypted?.value
+            val senderAlias = if (isOwner) owner.alias?.value else message.senderAlias?.value
+            val senderPic = if (isOwner) owner.photoUrl else message.senderPic
+
+            messageContent?.let {
+                pinnedMessageData = PinedMessageDataViewState.Data(
+                    message = message,
+                    messageContent = messageContent,
+                    isOwnTribe = isOwner,
+                    senderAlias = senderAlias ?: "Unknown",
+                    senderPic = senderPic
+                )
+            }
+        }.join()
+
+        return pinnedMessageData
     }
 
     private fun showMemberPopup(message: Message) {
@@ -599,27 +616,16 @@ class ChatTribeViewModel @Inject constructor(
     ) {
         tribeData.pin?.let { uuid ->
             messageRepository.getMessageByUUID(uuid).firstOrNull()?.let { message ->
-                pinedMessageHeaderViewState.updateViewState(
-                    PinedMessageHeaderViewState.PinedMessageHeader(
-                        message
+                getPinnedMessageData(message)?.let { pinnedMessageViewState ->
+                    pinedMessageDataViewState.updateViewState(
+                        pinnedMessageViewState
                     )
-                )
-
-                pinedMessageDataViewState.updateViewState(
-                    PinedMessageDataViewState.Data(
-                        message
-                    )
-                )
-            } ?: run {
-                pinedMessageHeaderViewState.updateViewState(
-                    PinedMessageHeaderViewState.Idle
-                )
-
-                pinedMessageDataViewState.updateViewState(
-                    PinedMessageDataViewState.Idle
-                )
+                    return
+                }
             }
-
         }
+        pinedMessageDataViewState.updateViewState(
+            PinedMessageDataViewState.Idle
+        )
     }
 }

@@ -143,7 +143,7 @@ class NetworkQueryChatImpl(
         chatId: ChatId,
         putPinMessageDto: PutPinMessageDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
-    ): Flow<LoadResponse<ChatDto, ResponseError>>  =
+    ): Flow<LoadResponse<PutPinMessageDto, ResponseError>>  =
         networkRelayCall.relayPut(
             responseJsonClass = PinMessageRelayResponse::class.java,
             relayEndpoint = String.format(ENDPOINT_PIN_MESSAGE, chatId.value),

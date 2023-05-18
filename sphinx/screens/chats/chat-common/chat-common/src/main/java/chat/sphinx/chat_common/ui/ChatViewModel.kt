@@ -452,7 +452,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     (sent && !message.isPaidInvoice) ||
                     (!sent && message.isPaidInvoice)
                 ) {
-
                     newList.add(
                         MessageHolderViewState.Sent(
                             message,
@@ -831,8 +830,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
             delay(1000L)
 
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000)
-                .distinctUntilChanged().collect { messages ->
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
                 messageHolderViewStateFlow.value =
                     getMessageHolderViewStateList(messages).toList()
             }
@@ -1832,8 +1830,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     open fun pinMessage(message: Message) {}
 
-    open fun unPinMessage(message: Message) {}
-
+    open fun unPinMessage(message: Message? = null) {}
 
     override suspend fun onMotionSceneCompletion(value: Nothing) {
         // unused

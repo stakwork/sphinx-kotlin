@@ -256,6 +256,11 @@ UPDATE chatDbo
 SET seen = :seen
 WHERE id = ?;
 
+chatUpdatePinMessage:
+UPDATE chatDbo
+SET pin_message = :pin_message
+WHERE id = ?;
+
 chatUpdateTribeData:
 UPDATE chatDbo
 SET price_per_message = :price_per_message,

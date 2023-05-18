@@ -192,8 +192,11 @@
 
     <string name="send_sats">Send Sats</string>
 
-    <string name="pined_message">Pinned Message</string>
-    <string name="unpined_message">Unpinned Message</string>
+    <string name="unpin_message">Unpin Message</string>
+    <string name="pinned_message">Pinned Message</string>
+    <string name="message_pinned">Message Pinned</string>
+    <string name="message_unpinned">Message Unpinned</string>
+    <string name="pin_message_error">Something went wrong. Please try again later</string>
 
 
 
