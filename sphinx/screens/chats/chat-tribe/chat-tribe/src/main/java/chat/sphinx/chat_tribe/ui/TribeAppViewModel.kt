@@ -8,6 +8,7 @@ import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.*
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.APPLICATION_NAME
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_AUTHORIZE
+import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_KEYSEND
 import chat.sphinx.chat_tribe.model.SphinxWebViewDto.Companion.TYPE_LSAT
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewLayoutScreenViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeFeedViewState
@@ -15,10 +16,12 @@ import chat.sphinx.chat_tribe.ui.viewstate.WebAppViewState
 import chat.sphinx.chat_tribe.ui.viewstate.WebViewViewState
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.webview.LsatWebViewDto
+import chat.sphinx.concept_network_query_message.NetworkQueryMessage
+import chat.sphinx.concept_network_query_message.model.PostPaymentDto
+import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
-import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_common.lightning.Bolt11
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toLightningPaymentRequestOrNull
@@ -43,7 +46,11 @@ internal class TribeAppViewModel @Inject constructor(
     private val app: Application,
     private val contactRepository: ContactRepository,
     private val moshi: Moshi,
-    private val networkQueryLightning: NetworkQueryLightning
+    private val networkQueryLightning: NetworkQueryLightning,
+    private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
+    private val networkQueryMessage: NetworkQueryMessage,
+
+
     ) : BaseViewModel<TribeFeedViewState>(dispatchers, TribeFeedViewState.Idle) {
 
     private val _sphinxWebViewDtoStateFlow: MutableStateFlow<SphinxWebViewDto?> by lazy {
@@ -120,13 +127,15 @@ internal class TribeAppViewModel @Inject constructor(
                 when (dto?.type) {
                     TYPE_AUTHORIZE -> {
                         _budgetStateFlow.value = Sat(0)
-
                         webViewViewStateContainer.updateViewState(WebViewViewState.RequestAuthorization)
                     }
                     TYPE_LSAT -> {
                         sphinxWebViewDtoStateFlow.value?.paymentRequest?.let {
                             decodePaymentRequest(it)
                         }
+                    }
+                    TYPE_KEYSEND -> {
+                        sendKeySend()
                     }
                 }
             }
@@ -137,37 +146,111 @@ internal class TribeAppViewModel @Inject constructor(
         webViewViewStateContainer.updateViewState(WebViewViewState.Idle)
     }
 
+    private fun sendAuthorization(amount: Long, pubKey: String, signature: String?) {
+        _budgetStateFlow.value = Sat(amount)
+
+        val password = generatePassword()
+
+        val sendAuth = SendAuth(
+            budget = budgetStateFlow.value.value.toInt(),
+            pubkey = pubKey,
+            type = TYPE_AUTHORIZE,
+            password = password,
+            application = APPLICATION_NAME,
+            signature = signature
+        ).toJson(moshi)
+
+        webViewViewStateContainer.updateViewState(
+            WebViewViewState.SendAuthorization("window.sphinxMessage('$sendAuth')")
+        )
+    }
+
     fun authorizeWebApp(amountString: String) {
         hideAuthorizePopup()
 
-        if (amountString.isNotEmpty()) {
-            amountString.toIntOrNull()?.let { amount ->
-                if (sphinxWebViewDtoStateFlow.value?.challenge?.isNullOrEmpty() == false) {
-                    // Sign challenge
-                } else {
-                    contactRepository.accountOwner.value?.nodePubKey?.let {
+        if (amountString.isEmpty()) return
 
-                        _budgetStateFlow.value = Sat(amount.toLong())
+        amountString.toIntOrNull()?.let { amount ->
+            contactRepository.accountOwner.value?.nodePubKey?.let { pubKey ->
+                val challenge = sphinxWebViewDtoStateFlow.value?.challenge
 
-                        val password = generatePassword()
+                if (challenge?.isNotEmpty() == false) {
+                    viewModelScope.launch(mainImmediate) {
+                        networkQueryAuthorizeExternal.signBase64(challenge)
+                            .collect { loadResponse ->
+                                @Exhaustive
+                                when (loadResponse) {
+                                    is LoadResponse.Loading -> {}
+                                    is Response.Error -> {
+                                        webViewViewStateContainer.updateViewState(
+                                            WebViewViewState.ChallengeError(
+                                                error = app.getString(R.string.side_effect_challenge_error))
+                                        )
+                                    }
+                                    is Response.Success -> {
+                                        val signature = loadResponse.value.sig
 
-                        val sendAuth = SendAuth(
-                            budget = budgetStateFlow.value.value.toInt(),
-                            pubkey = it.value,
-                            type = TYPE_AUTHORIZE,
-                            password = password,
-                            application = APPLICATION_NAME
-                        ).toJson(moshi)
-
-                        webViewViewStateContainer.updateViewState(
-                            WebViewViewState.SendAuthorization(
-                                "window.sphinxMessage('$sendAuth')"
-                            )
-                        )
+                                        sendAuthorization(
+                                            amount.toLong(),
+                                            pubKey.value,
+                                            signature
+                                        )
+                                    }
+                                }
+                            }
                     }
+                } else {
+                    sendAuthorization(amount.toLong(), pubKey.value, null)
                 }
             }
         }
+    }
+
+    private fun sendKeySend(){
+        sphinxWebViewDtoStateFlow.value?.amt?.let { amount ->
+            sphinxWebViewDtoStateFlow.value?.dest?.let { destination ->
+                if (budgetStateFlow.value.value >= amount) {
+                    viewModelScope.launch(mainImmediate) {
+                        networkQueryMessage.sendPayment(
+                            PostPaymentDto(
+                                chat_id = null,
+                                contact_id = null,
+                                text = null,
+                                remote_text = null,
+                                amount = amount.toLong(),
+                                destination_key = destination
+                            )
+                        ).collect { loadResponse ->
+                            @Exhaustive
+                            when (loadResponse) {
+                                is LoadResponse.Loading -> {}
+                                is Response.Error -> {
+                                    sendMessage(
+                                        type = TYPE_KEYSEND,
+                                        success = false,
+                                        error = app.getString(R.string.side_effect_keysend_error)
+                                    )
+                                }
+                                is Response.Success -> {
+                                    sendMessage(
+                                        type = TYPE_KEYSEND,
+                                        success = true,
+                                        error = null
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    return
+                }
+            }
+        }
+
+        sendMessage(
+            type = TYPE_KEYSEND,
+            success = false,
+            error = app.getString(R.string.side_effect_insufficient_budget)
+        )
     }
 
     private fun decodePaymentRequest(paymentRequest: String) {
@@ -190,17 +273,17 @@ internal class TribeAppViewModel @Inject constructor(
                                 when (loadResponse) {
                                     is LoadResponse.Loading -> {}
                                     is Response.Error -> {
-                                        sendLSatMessage(
-                                            success = 0,
-                                            lsat = null,
+                                        sendMessage(
+                                            type = TYPE_LSAT,
+                                            success = false,
                                             error = app.getString(R.string.side_effect_error_pay_lsat)
                                         )
                                     }
                                     is Response.Success -> {
                                         _budgetStateFlow.value = Sat(budgetStateFlow.value.value - nnAmount.value)
-
-                                        sendLSatMessage(
-                                            success = 1,
+                                        sendMessage(
+                                            type = TYPE_LSAT,
+                                            success = true,
                                             lsat = loadResponse.value.lsat,
                                             error = null
                                         )
@@ -209,8 +292,9 @@ internal class TribeAppViewModel @Inject constructor(
                             }
                         }
                     } else {
-                        sendLSatMessage(
-                            success = 0,
+                        sendMessage(
+                            type = TYPE_LSAT,
+                            success = false,
                             lsat = null,
                             error = app.getString(R.string.side_effect_insufficient_budget)
                         )
@@ -218,8 +302,9 @@ internal class TribeAppViewModel @Inject constructor(
                 }
 
             } catch (e: Exception) {
-                sendLSatMessage(
-                    success = 0,
+                sendMessage(
+                    type = TYPE_LSAT,
+                    success = false,
                     lsat = null,
                     error = app.getString(R.string.side_effect_error_pay_lsat)
                 )
@@ -227,28 +312,46 @@ internal class TribeAppViewModel @Inject constructor(
         }
     }
 
-    private fun sendLSatMessage(
-        success: Int,
+    private fun sendMessage(
+        type: String,
+        success: Boolean,
         lsat: String? = null,
         error: String? = null
     ) {
         val password = generatePassword()
 
-        val sendLsat = SendLsat(
-            password = password,
-            budget = budgetStateFlow.value.value.toString(),
-            type = TYPE_LSAT,
-            application = APPLICATION_NAME,
-            lsat = lsat,
-            success = success
-        ).toJson(moshi)
+        val message = when (type) {
+            TYPE_LSAT -> {
+                SendLsat(
+                    password = password,
+                    budget = budgetStateFlow.value.value.toString(),
+                    type = TYPE_LSAT,
+                    application = APPLICATION_NAME,
+                    lsat = lsat,
+                    success = success
+                ).toJson(moshi)
+            }
+            TYPE_KEYSEND -> {
+                SendKeySend(
+                    password = password,
+                    type = TYPE_KEYSEND,
+                    application = APPLICATION_NAME,
+                    success = success
+                ).toJson(moshi)
+            }
+            else -> {
+                null
+            }
+        }
 
-        webViewViewStateContainer.updateViewState(
-            WebViewViewState.SendLsat(
-                "window.sphinxMessage('$sendLsat')",
-                error
+        message?.let { nnMessage ->
+            webViewViewStateContainer.updateViewState(
+                WebViewViewState.SendMessage(
+                    "window.sphinxMessage('$nnMessage')",
+                    error
+                )
             )
-        )
+        }
     }
 
     @JavascriptInterface

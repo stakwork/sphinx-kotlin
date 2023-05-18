@@ -85,6 +85,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     override val viewModel: VideoFeedWatchScreenViewModel by viewModels()
     private var youtubePlayer: YouTubePlayer? = null
 
+    companion object {
+        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,15,20,20,40,40,80,80,100)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -92,6 +96,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
 
         setupBoost()
+        setupSeekBar()
         setupItems()
         setupVideoPlayer()
         setupFeedItemDetails()
@@ -143,6 +148,39 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         youtubePlayer = null
     }
 
+    private var draggingSatsSlider: Boolean = false
+    private fun setupSeekBar() {
+        binding.includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
+            seekBarSatsPerMinute.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+                        SLIDER_VALUES[progress].let {
+                            textViewVideoSatsPerMinuteValue.text = it.toString()
+                        }
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = true
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = false
+
+                        seekBar?.let {
+                            SLIDER_VALUES[seekBar.progress].let {
+                                viewModel.updateSatsPerMinute(it.toLong())
+                            }
+                        }
+                    }
+                }
+            )
+        }
+    }
+
     private fun setupBoost() {
         binding.apply {
             includeLayoutBoostFireworks.apply {
@@ -158,7 +196,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 })
             }
 
-            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
+            includeLayoutVideoItemsList.includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
                 removeFocusOnEnter(editTextCustomBoost)
 
                 imageViewFeedBoostButton.setOnClickListener {
@@ -215,14 +253,14 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
             controller.setMediaPlayer(videoViewVideoPlayer)
             videoViewVideoPlayer.setMediaController(controller)
 
-            textViewSubscribeButton.setOnClickListener {
+            binding.includeLayoutVideoItemsList.includeLayoutDescriptionBox.textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
             }
         }
     }
 
     private fun setupYoutubePlayer(videoId: String) {
-
+        var isSeeking = false
         val youtubePlayerFragment = YouTubeVideoPlayerSupportFragmentXKt()
 
         childFragmentManager.beginTransaction()
@@ -232,6 +270,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         youtubePlayerFragment.initialize(
             BuildConfig.YOUTUBE_API_KEY,
             object : YouTubePlayer.OnInitializedListener {
+
                 override fun onInitializationSuccess(
                     p0: YouTubePlayer.Provider?,
                     p1: YouTubePlayer?,
@@ -251,14 +290,16 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                    private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
 
                     override fun onSeekTo(p0: Int) {
+                        isSeeking = true
                         viewModel.setNewHistoryItem(p0.toLong())
                         Log.d("YouTubePlayer", "Youtube has seek $p0")
                     }
                     override fun onBuffering(p0: Boolean) {}
 
                     override fun onPlaying() {
-                        viewModel.startTimer()
+                        viewModel.startTimer(isSeeking)
                         viewModel.updateVideoLastPlayed()
+                        isSeeking = false
                         Log.d("YouTubePlayer", "Youtube is playing")
                     }
                     override fun onStopped() {
@@ -278,7 +319,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         amount: Sat?
     ) {
         binding.apply {
-            includeLayoutVideoPlayer.includeLayoutCustomBoost.apply {
+            includeLayoutVideoItemsList.includeLayoutDescriptionBox.includeLayoutCustomBoost.apply {
                 editTextCustomBoost.setText(
                     (amount ?: Sat(100)).asFormattedString()
                 )
@@ -333,35 +374,56 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                         viewState.items.count().toString()
 
                     includeLayoutVideoPlayer.apply {
-                        textViewContributorName.text = viewState.title.value
+                        includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
+                            textViewContributorName.text = viewState.title.value
 
-                        viewState.imageToShow?.let {
-                            imageLoader.load(
-                                imageViewContributorImage,
-                                it.value,
-                                imageLoaderOptions
-                            )
+                            viewState.imageToShow?.let {
+                                imageLoader.load(
+                                    imageViewContributorImage,
+                                    it.value,
+                                    imageLoaderOptions
+                                )
+                            }
                         }
                     }
 
                     includeLayoutVideoPlayer.apply {
-                        val notLinkedToChat =
-                            viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
-                        textViewSubscribeButton.goneIfFalse(notLinkedToChat)
+                        includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
+                            val notLinkedToChat =
+                                viewState.chatId?.value == ChatId.NULL_CHAT_ID.toLong()
+                            textViewSubscribeButton.goneIfFalse(notLinkedToChat)
 
-                        textViewSubscribeButton.text = if (viewState.subscribed.isTrue()) {
-                            getString(R.string.unsubscribe)
-                        } else {
-                            getString(R.string.subscribe)
-                        }
+                            textViewSubscribeButton.text = if (viewState.subscribed.isTrue()) {
+                                getString(R.string.unsubscribe)
+                            } else {
+                                getString(R.string.subscribe)
+                            }
 
-                        includeLayoutCustomBoost.apply customBoost@{
-                            this@customBoost.layoutConstraintBoostButtonContainer.alpha =
-                                if (viewState.hasDestinations) 1.0f else 0.3f
-                            this@customBoost.imageViewFeedBoostButton.isEnabled =
-                                viewState.hasDestinations
-                            this@customBoost.editTextCustomBoost.isEnabled =
-                                viewState.hasDestinations
+                            includeLayoutCustomBoost.apply customBoost@{
+                                this@customBoost.layoutConstraintBoostButtonContainer.alpha =
+                                    if (viewState.hasDestinations) 1.0f else 0.3f
+                                this@customBoost.imageViewFeedBoostButton.isEnabled =
+                                    viewState.hasDestinations
+                                this@customBoost.editTextCustomBoost.isEnabled =
+                                    viewState.hasDestinations
+                            }
+
+                            if (!draggingSatsSlider) {
+                                val satsPerMinute = viewState.satsPerMinute?.value ?: 0
+                                val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+                                val index = SLIDER_VALUES.indexOf(closest)
+                                seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+                                seekBarSatsPerMinute.progress = index
+                                textViewVideoSatsPerMinuteValue.text = viewState.satsPerMinute?.value.toString()
+
+                                seekBarSatsPerMinute.alpha = if (viewState.hasDestinations) 1.0F else 0.5F
+
+                                if (!viewState.hasDestinations) {
+                                    seekBarSatsPerMinute.setOnTouchListener { _, _ -> true }
+                                } else {
+                                    seekBarSatsPerMinute.setOnTouchListener(null)
+                                }
+                            }
                         }
                     }
                 }
@@ -396,41 +458,42 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
                     is SelectedVideoViewState.VideoSelected -> {
                         binding.includeLayoutVideoPlayer.apply {
+                            binding.includeLayoutVideoItemsList.includeLayoutDescriptionBox.apply {
+                                textViewVideoTitle.text = viewState.title.value
+                                textViewVideoDescription.text = viewState.description?.value ?: ""
+                                textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
 
-                            textViewVideoTitle.text = viewState.title.value
-                            textViewVideoDescription.text = viewState.description?.value ?: ""
-                            textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
+                                if (viewState.url.isYoutubeVideo()) {
 
-                            if (viewState.url.isYoutubeVideo()) {
+                                    layoutConstraintVideoViewContainer.gone
+                                    frameLayoutYoutubePlayer.visible
 
-                                layoutConstraintVideoViewContainer.gone
-                                frameLayoutYoutubePlayer.visible
+                                    if (youtubePlayer != null) {
+                                        youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
 
-                                if (youtubePlayer != null) {
-                                    youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
-
-                                    viewModel.createHistoryItem()
-                                    viewModel.trackVideoConsumed()
-                                    viewModel.createVideoRecordConsumed(viewState.id)
+                                        viewModel.createHistoryItem()
+                                        viewModel.trackVideoConsumed()
+                                        viewModel.createVideoRecordConsumed(viewState.id)
+                                    } else {
+                                        setupYoutubePlayer(viewState.id.youtubeVideoId())
+                                        viewModel.createVideoRecordConsumed(viewState.id)
+                                    }
                                 } else {
-                                    setupYoutubePlayer(viewState.id.youtubeVideoId())
-                                    viewModel.createVideoRecordConsumed(viewState.id)
-                                }
-                            } else {
-                                layoutConstraintLoadingVideo.visible
-                                layoutConstraintVideoViewContainer.visible
-                                frameLayoutYoutubePlayer.gone
+                                    layoutConstraintLoadingVideo.visible
+                                    layoutConstraintVideoViewContainer.visible
+                                    frameLayoutYoutubePlayer.gone
 
-                                val videoUri = if (viewState.localFile != null) {
-                                    viewState.localFile.toUri()
-                                } else {
-                                    viewState.url.value.toUri()
-                                }
+                                    val videoUri = if (viewState.localFile != null) {
+                                        viewState.localFile.toUri()
+                                    } else {
+                                        viewState.url.value.toUri()
+                                    }
 
-                                viewModel.initializeVideo(
-                                    videoUri,
-                                    viewState.duration?.value?.toInt()
-                                )
+                                    viewModel.initializeVideo(
+                                        videoUri,
+                                        viewState.duration?.value?.toInt()
+                                    )
+                                }
                             }
                         }
                     }
@@ -489,8 +552,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
         binding.includeLayoutVideoPlayer.layoutConstraintVideoPlayers.apply {
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                layoutParams.height =
-                    binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
+                layoutParams.height = binding.root.measuredWidth - (requireActivity() as InsetterActivity).statusBarInsetHeight.top
             } else {
                 layoutParams.height = resources.getDimension(R.dimen.video_player_height).toInt()
             }
@@ -543,6 +605,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 }
             }
         }
+    }
+
+    private fun List<Int>.closestValue(value: Int) = minByOrNull {
+        kotlin.math.abs(value - it)
     }
 
     override suspend fun onSideEffectCollect(sideEffect: VideoFeedScreenSideEffect) {

@@ -9,7 +9,9 @@ data class SphinxWebViewDto(
     val challenge: String?,
     val paymentRequest: String?,
     val macaroon: String?,
-    val issuer: String?
+    val issuer: String?,
+    val dest: String?,
+    val amt: Int?
 
 ) {
     companion object {
@@ -17,5 +19,6 @@ data class SphinxWebViewDto(
 
         const val TYPE_AUTHORIZE = "AUTHORIZE"
         const val TYPE_LSAT = "LSAT"
+        const val TYPE_KEYSEND = "KEYSEND"
     }
 }

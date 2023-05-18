@@ -14,6 +14,7 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
@@ -21,11 +22,13 @@ import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedItemDetailsViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
+import chat.sphinx.wrapper_action_track.action_wrappers.VideoStreamSatsTimer
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -77,6 +80,7 @@ internal open class VideoFeedScreenViewModel(
     )
 
     private var videoRecordConsumed: VideoRecordConsumed? = null
+    private var videoStreamSatsTimer: VideoStreamSatsTimer? = null
 
     suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -131,6 +135,13 @@ internal open class VideoFeedScreenViewModel(
         ViewStateContainer(BoostAnimationViewState.Idle)
     }
 
+    private val _satsPerMinuteStateFlow: MutableStateFlow<Sat?> by lazy {
+        MutableStateFlow(Sat(0))
+    }
+
+    private val satsPerMinuteStateFlow: StateFlow<Sat?>
+        get() = _satsPerMinuteStateFlow.asStateFlow()
+
     private val _feedItemDetailStateFlow: MutableStateFlow<FeedItemDetail?> by lazy {
         MutableStateFlow(null)
     }
@@ -148,6 +159,10 @@ internal open class VideoFeedScreenViewModel(
         viewModelScope.launch(mainImmediate) {
             videoFeedSharedFlow.collect { feed ->
                 feed?.let { nnFeed ->
+
+                    val satsPerMinute = feed.contentFeedStatus?.satsPerMinute?.value ?: feed.model?.suggestedSats
+                    _satsPerMinuteStateFlow.value = satsPerMinute?.let { Sat(it) }
+
                     updateViewState(
                         VideoFeedScreenViewState.FeedLoaded(
                             nnFeed.title,
@@ -155,7 +170,8 @@ internal open class VideoFeedScreenViewModel(
                             nnFeed.chatId,
                             nnFeed.subscribed,
                             nnFeed.items,
-                            nnFeed.hasDestinations
+                            nnFeed.hasDestinations,
+                            satsPerMinuteStateFlow.value,
                         )
                     )
 
@@ -204,7 +220,6 @@ internal open class VideoFeedScreenViewModel(
 
     fun videoItemSelected(video: FeedItem) {
         viewModelScope.launch(mainImmediate) {
-
             video.feed?.let { feed ->
                 feedRepository.updateContentFeedStatus(
                     feedId = feed.id,
@@ -212,7 +227,7 @@ internal open class VideoFeedScreenViewModel(
                     subscriptionStatus = feed.subscribed,
                     chatId = feed.chatId,
                     itemId = video.id,
-                    satsPerMinute = null,
+                    satsPerMinute = satsPerMinuteStateFlow.value,
                     playerSpeed = null
                 )
             }
@@ -248,6 +263,26 @@ internal open class VideoFeedScreenViewModel(
                     feed.subscribed
                 )
             }
+        }
+    }
+
+    fun updateSatsPerMinute(sats: Long) {
+        viewModelScope.launch(mainImmediate) {
+            (selectedVideoStateContainer.value as? SelectedVideoViewState.VideoSelected)?.let { video ->
+                getVideoFeed()?.let { feed ->
+                    feedRepository.updateContentFeedStatus(
+                        feed.id,
+                        feed.feedUrl,
+                        feed.subscribed,
+                        feed.chatId,
+                        video.id,
+                        Sat(sats),
+                        null,
+                        true
+                    )
+                }
+            }
+            _satsPerMinuteStateFlow.value = Sat(sats)
         }
     }
 
@@ -379,11 +414,32 @@ internal open class VideoFeedScreenViewModel(
         return null
     }
 
+    private fun streamSatsPayments() {
+        viewModelScope.launch(mainImmediate) {
+            videoFeedSharedFlow.firstOrNull()?.let { feed ->
+                (selectedVideoStateContainer.value as? SelectedVideoViewState.VideoSelected)?.let { videoState ->
+                    feedRepository.streamFeedPayments(
+                        chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        feedId = videoState.feedId?.value ?: "",
+                        feedItemId = videoState.id.value,
+                        currentTime = 0,
+                        satsPerMinute = satsPerMinuteStateFlow.value,
+                        playerSpeed = null,
+                        destinations = feed.destinations
+                    )
+                }
+            }
+        }
+    }
+
     fun createVideoRecordConsumed(feedItemId: FeedId){
         if (videoRecordConsumed?.feedItemId == feedItemId){
             return
         }
         videoRecordConsumed = VideoRecordConsumed(feedItemId)
+        videoStreamSatsTimer = VideoStreamSatsTimer {
+            streamSatsPayments()
+        }
     }
 
     fun trackVideoConsumed(){
@@ -396,12 +452,16 @@ internal open class VideoFeedScreenViewModel(
             }
         }
     }
+
     fun setNewHistoryItem(videoPosition: Long){
         videoRecordConsumed?.setNewHistoryItem(videoPosition)
     }
 
-    fun startTimer() {
+    fun startTimer(isSeeking: Boolean) {
         videoRecordConsumed?.startTimer()
+        if (!isSeeking) {
+            videoStreamSatsTimer?.startTimer()
+        }
     }
 
     fun createHistoryItem() {
@@ -410,7 +470,6 @@ internal open class VideoFeedScreenViewModel(
 
     fun stopTimer(){
         videoRecordConsumed?.stopTimer()
+        videoStreamSatsTimer?.stopTimer()
     }
-
-
 }

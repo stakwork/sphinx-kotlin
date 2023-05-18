@@ -9,7 +9,8 @@ data class SendAuth(
     val pubkey: String,
     val type: String,
     val application: String,
-    val password: String
+    val password: String,
+    val signature: String?
 )
 @Throws(AssertionError::class)
 fun SendAuth.toJson(moshi: Moshi): String =
@@ -20,6 +21,7 @@ fun SendAuth.toJson(moshi: Moshi): String =
                 pubkey,
                 type,
                 application,
-                password
+                password,
+                signature
             )
         )

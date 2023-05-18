@@ -434,13 +434,15 @@ internal class ChatTribeFragment: ChatFragment<
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(
                         TribeMemberProfileViewState.Open
                     )
-                }
-                else -> {
-                    if (tribeAppViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
+                } else -> {
+                    (tribeAppViewModel.webAppViewStateContainer.value as? WebAppViewState.AppAvailable.WebViewOpen)?.let {
+                        tribeAppViewModel.webAppViewStateContainer.updateViewState(
+                            WebAppViewState.AppAvailable.WebViewClosed(it.appUrl)
+                        )
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
-                    } else if (viewModel.pinedMessageBottomViewState.value is PinMessageBottomViewState.Open) {
+                    } ?: (viewModel.pinedMessageBottomViewState.value as? PinMessageBottomViewState.Open)?.let {
                         viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
-                    } else {
+                    } ?: run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
@@ -794,7 +796,7 @@ internal class ChatTribeFragment: ChatFragment<
                             null
                         )
                     }
-                    is WebViewViewState.SendLsat -> {
+                    is WebViewViewState.SendMessage -> {
                         webView.evaluateJavascript(
                             viewState.script,
                             null
@@ -807,6 +809,11 @@ internal class ChatTribeFragment: ChatFragment<
                                 )
                             }
                         }
+                    }
+                    is WebViewViewState.ChallengeError -> {
+                        viewModel.submitSideEffect(
+                            ChatSideEffect.Notify(viewState.error)
+                        )
                     }
                 }
             }
