@@ -1,5 +1,10 @@
 # ChangeLog
 
+# Version 1.0.0-alpha94 (2023-05-18)
+- Improves javascript bridge for tribe web apps
+- Adds support for tribe pinned message
+- Adds sats streaming while playing videos
+
 # Version 1.0.0-alpha93 (2023-05-12)
 - Adds javascript bridge for tribe web apps
 - Fixes issue on youtube player
