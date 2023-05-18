@@ -6,6 +6,7 @@
     <string name="profile_user_name">User Name</string>
     <string name="profile_address">Address</string>
     <string name="profile_route_hint">Route Hint</string>
+    <string name="profile_manage_storage">Manage Storage</string>
     <string name="profile_share_picture">Share my profile photo with contacts</string>
     <string name="profile_tip">Default tip amount</string>
     <string name="profile_meeting_server">Meeting Server</string>

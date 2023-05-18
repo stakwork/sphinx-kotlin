@@ -88,6 +88,8 @@
     <string name="web_view_reauthorizing">sats antes de reautorizar</string>
     <string name="web_view_remaining_budget">Remaining Budget: %s</string>
 
+    <string name="manage_storage_total_storage">of %s</string>
+
     <string name="video_sats_per_minute">Sats per minute</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>

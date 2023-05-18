@@ -6,6 +6,7 @@
     <string name="profile_user_name">ユーザーネーム</string>
     <string name="profile_address">Lightningノードの公開鍵</string>
     <string name="profile_route_hint">ルートヒント</string>
+    <string name="profile_manage_storage">Manage Storage</string>
     <string name="profile_share_picture">プロフィール写真を友だちにシェア</string>
     <string name="profile_tip">デフォルトの投げ銭金額</string>
     <string name="profile_meeting_server">オンライン会議サーバー</string>

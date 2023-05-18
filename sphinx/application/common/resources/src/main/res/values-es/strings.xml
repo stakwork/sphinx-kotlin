@@ -91,6 +91,9 @@
     <string name="web_view_reauthorizing">sats antes de reautorizar</string>
     <string name="web_view_remaining_budget">Presupuesto Restante: %s</string>
 
+    <string name="manage_storage_total_storage">de %s</string>
+
+
     <string name="video_sats_per_minute">Sats por minuto</string>
 
 

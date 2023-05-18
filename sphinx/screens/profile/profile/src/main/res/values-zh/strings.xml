@@ -6,6 +6,7 @@
     <string name="profile_user_name">姓名</string>
     <string name="profile_address">節點住址</string>
     <string name="profile_route_hint">通路秘密</string>
+    <string name="profile_manage_storage">Manage Storage</string>
     <string name="profile_share_picture">分享個人圖片</string>
     <string name="profile_tip">小費</string>
     <string name="profile_meeting_server">會議伺服器</string>
