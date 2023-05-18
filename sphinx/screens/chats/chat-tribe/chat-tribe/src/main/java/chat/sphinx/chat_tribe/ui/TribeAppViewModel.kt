@@ -127,7 +127,6 @@ internal class TribeAppViewModel @Inject constructor(
                 when (dto?.type) {
                     TYPE_AUTHORIZE -> {
                         _budgetStateFlow.value = Sat(0)
-
                         webViewViewStateContainer.updateViewState(WebViewViewState.RequestAuthorization)
                     }
                     TYPE_LSAT -> {
@@ -148,9 +147,10 @@ internal class TribeAppViewModel @Inject constructor(
     }
 
     private fun sendAuthorization(amount: Long, pubKey: String, signature: String?) {
-
         _budgetStateFlow.value = Sat(amount)
+
         val password = generatePassword()
+
         val sendAuth = SendAuth(
             budget = budgetStateFlow.value.value.toInt(),
             pubkey = pubKey,
@@ -241,9 +241,16 @@ internal class TribeAppViewModel @Inject constructor(
                             }
                         }
                     }
+                    return
                 }
             }
         }
+
+        sendMessage(
+            type = TYPE_KEYSEND,
+            success = false,
+            error = app.getString(R.string.side_effect_insufficient_budget)
+        )
     }
 
     private fun decodePaymentRequest(paymentRequest: String) {
@@ -313,9 +320,9 @@ internal class TribeAppViewModel @Inject constructor(
     ) {
         val password = generatePassword()
 
-        when (type) {
+        val message = when (type) {
             TYPE_LSAT -> {
-                val sendLsat = SendLsat(
+                SendLsat(
                     password = password,
                     budget = budgetStateFlow.value.value.toString(),
                     type = TYPE_LSAT,
@@ -323,29 +330,27 @@ internal class TribeAppViewModel @Inject constructor(
                     lsat = lsat,
                     success = success
                 ).toJson(moshi)
-
-                webViewViewStateContainer.updateViewState(
-                    WebViewViewState.SendMessage(
-                        "window.sphinxMessage('$sendLsat')",
-                        error
-                    )
-                )
             }
             TYPE_KEYSEND -> {
-                val sendKeySend = SendKeySend(
+                SendKeySend(
                     password = password,
-                    type = TYPE_LSAT,
+                    type = TYPE_KEYSEND,
                     application = APPLICATION_NAME,
                     success = success
                 ).toJson(moshi)
-
-                webViewViewStateContainer.updateViewState(
-                    WebViewViewState.SendMessage(
-                        "window.sphinxMessage('$sendKeySend')",
-                        error
-                    )
-                )
             }
+            else -> {
+                null
+            }
+        }
+
+        message?.let { nnMessage ->
+            webViewViewStateContainer.updateViewState(
+                WebViewViewState.SendMessage(
+                    "window.sphinxMessage('$nnMessage')",
+                    error
+                )
+            )
         }
     }
 
