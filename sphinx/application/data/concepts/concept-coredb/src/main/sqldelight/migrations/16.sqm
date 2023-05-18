@@ -1,0 +1,3 @@
+import chat.sphinx.wrapper_common.message.MessageUUID;
+
+ALTER TABLE chatDbo ADD COLUMN pin_message TEXT AS MessageUUID DEFAULT NULL;

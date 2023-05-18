@@ -244,6 +244,26 @@ inline fun Message.shouldAvoidGrouping(): Boolean {
 }
 
 //Message Actions
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.isPinAllowed(chatPinnedMessage: MessageUUID?): Boolean {
+    chatPinnedMessage?.let {
+        if (it == this.uuid) {
+            return false
+        }
+    }
+    return true
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.isUnPinAllowed(chatPinnedMessage: MessageUUID?): Boolean {
+    chatPinnedMessage?.let {
+        if (it == this.uuid) {
+            return true
+        }
+    }
+    return false
+}
+
 inline val Message.isBoostAllowed: Boolean
     get() = status.isReceived() &&
             !type.isInvoice() &&
@@ -336,6 +356,7 @@ abstract class Message {
     abstract val recipientAlias: RecipientAlias?
     abstract val recipientPic: PhotoUrl?
     abstract val person: MessagePerson?
+    abstract val isPinned: Boolean
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
     abstract val messageDecryptionError: Boolean
@@ -381,6 +402,7 @@ abstract class Message {
                 other.recipientAlias                == recipientAlias               &&
                 other.recipientPic                  == recipientPic                 &&
                 other.person                        == person                       &&
+                other.isPinned                      == isPinned                     &&
                 other.reactions.let { a ->
                     reactions.let { b ->
                         (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
@@ -435,6 +457,7 @@ abstract class Message {
         result = _31 * result + recipientAlias.hashCode()
         result = _31 * result + recipientPic.hashCode()
         result = _31 * result + person.hashCode()
+        result = _31 * result + isPinned.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
         result = _31 * result + replyMessage.hashCode()
@@ -454,6 +477,7 @@ abstract class Message {
                 "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
                 "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
-                "recipientPic=$recipientPic,person=$person,callLink=$callLinkMessage"
+                "recipientPic=$recipientPic,person=$person,callLink=$callLinkMessage"           +
+                "isPinned=$isPinned"
     }
 }

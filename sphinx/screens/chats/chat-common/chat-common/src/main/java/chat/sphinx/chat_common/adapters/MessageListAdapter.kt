@@ -3,8 +3,10 @@ package chat.sphinx.chat_common.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.view.isVisible
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -42,6 +44,7 @@ import kotlinx.coroutines.withContext
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
     private val headerBinding: LayoutChatHeaderBinding,
+    private val pinedHeaderBinding: LayoutChatPinedMessageHeaderBinding,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -101,9 +104,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
                     }
                     old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
-                        old.background                         == new.background        &&
-                        old.message                            == new.message           &&
-                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
+                        old.background                         == new.background                    &&
+                        old.message                            == new.message                       &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState   &&
+                        old.isPinned                           == new.isPinned
                     }
                     else -> {
                         false
@@ -309,11 +313,20 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerViewWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.measuredWidth.toFloat())
     }
+
     private val headerHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(headerBinding.root.measuredHeight.toFloat())
     }
+
     private val screenHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.rootView.measuredHeight.toFloat())
+    }
+
+    private val pinedMessageHeader: Px
+    get() = if (pinedHeaderBinding.root.isVisible) {
+        Px(pinedHeaderBinding.root.measuredHeight.toFloat())
+    } else {
+        Px(0f)
     }
 
     inner class MessageViewHolder(
@@ -349,7 +362,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         bubbleHeight = Px(root.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
                         recyclerViewWidth = recyclerViewWidth,
-                        screenHeight = screenHeight
+                        screenHeight = screenHeight,
+                        pinedHeaderHeight = pinedMessageHeader
                     ).let { vs ->
                         viewModel.updateSelectedMessageViewState(vs)
                     }

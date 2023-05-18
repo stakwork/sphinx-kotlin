@@ -81,6 +81,8 @@
     <string name="selected_message_menu_item_save_file">I-Save ang File</string>
     <string name="selected_message_menu_item_resend">Resend</string>
     <string name="selected_message_menu_item_flag">Flag</string>
+    <string name="selected_message_menu_item_pin">Pin</string>
+    <string name="selected_message_menu_item_unpin">Unpin</string>
     <string name="alert_confirm_flag_message_title">Kumpirmahin ang Pag-flag ng mensahe</string>
     <string name="alert_confirm_flag_message_message">Sigurado ka bang gusto mong i-flag ang mensaheng ito? ang aksyon na ito ay hindi pwedeng baguhin</string>
     <string name="alert_confirm_delete_message_title">Kumpirmahin ang Pagtanggal ng mensahe</string>
@@ -90,6 +92,8 @@
     <string name="side_effect_call_link_copied">Call link copied to clipboard</string>
     <string name="side_effect_link_copied">Copied %s</string>
     <string name="side_effect_no_link_to_copy">No link to copy</string>
+    <string name="side_effect_insufficient_budget">Budget is not enough to perform the search</string>
+    <string name="side_effect_error_pay_lsat">There was an error trying to pay Lsat</string>
     <string name="file_name_loading">Loading...</string>
     <string name="pdf_page">pahina</string>
     <string name="pdf_pages">mga pahina</string>
@@ -137,4 +141,9 @@
     <string name="recording_permission_granted">Recording permission granted</string>
     <string name="recording_permission_required">Recording permissions required</string>
     <string name="send_sats">Magpadala</string>
+    <string name="unpin_message">Unpin Message</string>
+    <string name="pinned_message">Pinned Message</string>
+    <string name="message_pinned">Message Pinned</string>
+    <string name="message_unpinned">Message Unpinned</string>
+    <string name="pin_message_error">Something went wrong. Please try again later</string>
 </resources>

@@ -150,6 +150,20 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
                 textViewSelectedMessageMenuItem.text =
                     getString(R.string.selected_message_menu_item_flag)
             }
+            is MenuItemState.PinMessage -> {
+                imageViewSelectedMessageMenuItemIcon.setImageDrawable(
+                    ContextCompat.getDrawable(root.context, R.drawable.ic_pin)
+                )
+                textViewSelectedMessageMenuItem.text =
+                    getString(R.string.selected_message_menu_item_pin)
+            }
+            is MenuItemState.UnpinMessage -> {
+                imageViewSelectedMessageMenuItemIcon.setImageDrawable(
+                    ContextCompat.getDrawable(root.context, R.drawable.ic_pin)
+                )
+                textViewSelectedMessageMenuItem.text =
+                    getString(R.string.selected_message_menu_item_unpin)
+            }
         }
     }
 }

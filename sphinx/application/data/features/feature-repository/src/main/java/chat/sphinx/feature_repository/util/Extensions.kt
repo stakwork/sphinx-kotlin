@@ -1,7 +1,6 @@
 package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.podcast.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
@@ -164,6 +163,7 @@ inline fun TransactionCallbacks.upsertChat(
     val escrowAmount = dto.escrow_amount?.toSat()
     val chatName = dto.name?.toChatName()
     val adminPubKey = dto.owner_pub_key?.toLightningNodePubKey()
+    val pinedMessage = dto.pin?.toMessageUUID()
 
     queries.chatUpsert(
         chatName,
@@ -178,17 +178,17 @@ inline fun TransactionCallbacks.upsertChat(
         dto.owner_pub_key?.toLightningNodePubKey(),
         seen,
         null,
-//        dto.meta?.toChatMetaDataOrNull(moshi), (it was replaced with the line above)
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },
         dto.notify?.toNotificationLevel(),
+        pinedMessage,
         chatId,
         ChatUUID(dto.uuid),
         chatType,
         createdAt,
         pricePerMessage,
-        escrowAmount,
+        escrowAmount
     )
 
     if (chatType.isTribe() && (ownerPubKey == adminPubKey) && (pricePerMessage != null || escrowAmount != null)) {

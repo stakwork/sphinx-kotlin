@@ -24,6 +24,7 @@ data class TribeDto(
     val app_url: String?,
     val feed_url: String?,
     val feed_type: Int?,
+    val pin: String?,
     var badges: Array<String> = arrayOf()
 ) {
 

@@ -77,6 +77,10 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val isPinned: Boolean by lazy(LazyThreadSafetyMode.NONE) {
+        (message?.uuid?.value == chat.pinedMessage?.value)
+    }
+
     val searchHighlightedStatus: LayoutState.SearchHighlightedStatus?
     get() = if (highlightedText != null && highlightedText?.isEmpty() == false) {
                 LayoutState.SearchHighlightedStatus(
@@ -659,6 +663,17 @@ internal sealed class MessageHolderViewState(
             if (this is Received) {
                 list.add(MenuItemState.Flag)
             }
+
+            if(chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
+                if (nnMessage.isPinAllowed(chat.pinedMessage)) {
+                    list.add(MenuItemState.PinMessage)
+                }
+
+                if (nnMessage.isUnPinAllowed(chat.pinedMessage)) {
+                    list.add(MenuItemState.UnpinMessage)
+                }
+            }
+
 
             if (list.isEmpty()) {
                 null
