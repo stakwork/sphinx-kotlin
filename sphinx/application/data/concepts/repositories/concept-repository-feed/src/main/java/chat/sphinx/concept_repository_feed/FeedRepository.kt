@@ -12,7 +12,6 @@ import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
-import chat.sphinx.wrapper_podcast.PodcastEpisode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -61,8 +60,8 @@ interface FeedRepository {
 
     fun streamFeedPayments(
         chatId: ChatId,
-        podcastId: String,
-        episodeId: String,
+        feedId: String,
+        feedItemId: String,
         currentTime: Long,
         satsPerMinute: Sat?,
         playerSpeed: FeedPlayerSpeed?,

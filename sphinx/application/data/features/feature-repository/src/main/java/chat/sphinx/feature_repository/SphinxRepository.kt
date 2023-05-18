@@ -671,8 +671,8 @@ abstract class SphinxRepository(
 
     override fun streamFeedPayments(
         chatId: ChatId,
-        podcastId: String,
-        episodeId: String,
+        feedId: String,
+        feedItemId: String,
         currentTime: Long,
         satsPerMinute: Sat?,
         playerSpeed: FeedPlayerSpeed?,
@@ -700,8 +700,8 @@ abstract class SphinxRepository(
 
             val streamSatsText =
                 StreamSatsText(
-                    podcastId,
-                    episodeId,
+                    feedId,
+                    feedItemId,
                     currentTime,
                     playerSpeed?.value ?: 1.0,
                     clipMessageUUID?.value
