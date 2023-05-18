@@ -671,8 +671,8 @@ abstract class SphinxRepository(
 
     override fun streamFeedPayments(
         chatId: ChatId,
-        podcastId: String,
-        episodeId: String,
+        feedId: String,
+        feedItemId: String,
         currentTime: Long,
         satsPerMinute: Sat?,
         playerSpeed: FeedPlayerSpeed?,
@@ -700,8 +700,8 @@ abstract class SphinxRepository(
 
             val streamSatsText =
                 StreamSatsText(
-                    podcastId,
-                    episodeId,
+                    feedId,
+                    feedItemId,
                     currentTime,
                     playerSpeed?.value ?: 1.0,
                     clipMessageUUID?.value
@@ -1627,7 +1627,7 @@ abstract class SphinxRepository(
         return response
     }
 
-    suspend fun updateChatProfilePic(
+    private suspend fun updateChatProfilePic(
         chatId: ChatId,
         stream: InputStreamProvider,
         mediaType: MediaType,
@@ -1931,6 +1931,7 @@ abstract class SphinxRepository(
         reactions: List<Message>? = null,
         purchaseItems: List<Message>? = null,
         replyMessage: ReplyUUID? = null,
+        chat: ChatDbo? = null
     ): Message {
 
         val message: MessageDboWrapper = messageDbo.message_content?.let { messageContent ->
@@ -2057,6 +2058,7 @@ abstract class SphinxRepository(
 
         message._reactions = reactions
         message._purchaseItems = purchaseItems
+        message._isPinned = chat?.pin_message?.value == messageDbo.uuid?.value
 
         replyMessage?.value?.toMessageUUID()?.let { uuid ->
             queries.messageGetToShowByUUID(uuid).executeAsOneOrNull()?.let { replyDbo ->
@@ -2073,12 +2075,12 @@ abstract class SphinxRepository(
 
             emitAll(
                 (
-                        if (limit > 0) {
-                            queries.messageGetAllToShowByChatIdWithLimit(chatId, limit)
-                        } else {
-                            queries.messageGetAllToShowByChatId(chatId)
-                        }
-                        )
+                    if (limit > 0) {
+                        queries.messageGetAllToShowByChatIdWithLimit(chatId, limit)
+                    } else {
+                        queries.messageGetAllToShowByChatId(chatId)
+                    }
+                )
                     .asFlow()
                     .mapToList(io)
                     .map { listMessageDbo ->
@@ -2150,6 +2152,8 @@ abstract class SphinxRepository(
                                     }
                             }
 
+                            val chat = queries.chatGetById(chatId).executeAsOneOrNull()
+
                             listMessageDbo.reversed().map { dbo ->
                                 mapMessageDboAndDecryptContentIfNeeded(
                                     queries,
@@ -2157,6 +2161,7 @@ abstract class SphinxRepository(
                                     dbo.uuid?.let { reactionsMap[it] },
                                     dbo.muid?.let { purchaseItemsMap[it] },
                                     dbo.reply_uuid,
+                                    chat
                                 )
                             }
 
@@ -3775,6 +3780,7 @@ abstract class SphinxRepository(
                                     chat.uuid,
                                     tribeDto.feed_url?.toFeedUrl(),
                                     feedType,
+                                    tribeDto.pin?.toMessageUUID(),
                                     tribeDto.app_url?.toAppUrl(),
                                     tribeDto.badges
                                 )
@@ -5631,6 +5637,66 @@ abstract class SphinxRepository(
         }.join()
 
         return response
+    }
+
+    private suspend fun togglePinMessage(
+        chatId: ChatId,
+        message: Message,
+        pinMessageDto: PutPinMessageDto,
+        errorMessage: String
+    ): Response<Any, ResponseError> {
+        var response: Response<Any, ResponseError> = Response.Error(ResponseError(errorMessage))
+
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            networkQueryChat.pinMessage(
+                chatId,
+                pinMessageDto
+            ).collect { loadResponse ->
+                @Exhaustive
+                when(loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        response = loadResponse
+                    }
+                    is Response.Success -> {
+                        response = Response.Success(loadResponse)
+
+                        chatLock.withLock {
+                            messageLock.withLock {
+                                withContext(io) {
+                                    loadResponse.value?.pin?.toMessageUUID()?.let { messageUUID ->
+                                        queries.chatUpdatePinMessage(messageUUID, chatId)
+                                    } ?: run {
+                                        queries.chatUpdatePinMessage(null, chatId)
+                                    }
+
+                                    //Force Message list update
+                                    queries.messageUpdateStatus(message.status, message.id)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }.join()
+
+        return response
+    }
+
+    override suspend fun pinMessage(
+        chatId: ChatId,
+        message: Message
+    ): Response<Any, ResponseError> {
+        return togglePinMessage(chatId, message, PutPinMessageDto(message.uuid?.value),"Failed to pin message")
+    }
+
+    override suspend fun unPinMessage(
+        chatId: ChatId,
+        message: Message
+    ): Response<Any, ResponseError> {
+        return togglePinMessage(chatId, message, PutPinMessageDto(""), "Failed to unpin message")
     }
 
     override suspend fun processMemberRequest(

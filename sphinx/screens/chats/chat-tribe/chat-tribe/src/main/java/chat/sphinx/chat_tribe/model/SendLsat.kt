@@ -10,7 +10,7 @@ data class SendLsat(
     val type: String,
     val application: String,
     val lsat: String?,
-    val success: Int
+    val success: Boolean
 )
 
 

@@ -12,8 +12,7 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
-import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
-import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
+import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_meme_input_stream.MemeInputStreamHandler
 import chat.sphinx.concept_meme_server.MemeServerTokenHandler
@@ -39,6 +38,7 @@ import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -105,8 +105,7 @@ class ChatTribeViewModel @Inject constructor(
     memeInputStreamHandler,
     moshi,
     LOG,
-)
-{
+) {
     override val args: ChatTribeFragmentArgs by savedStateHandle.navArgs()
     override val chatId: ChatId = args.chatId
     override val contactId: ContactId?
@@ -128,6 +127,29 @@ class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
+    val updatePinMessageData: SharedFlow<Message> = flow {
+        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
+            chat.pinedMessage?.let { messageUUID ->
+                messageRepository.getMessageByUUID(messageUUID).firstOrNull()?.let { message ->
+                    emit(message)
+                }
+            }
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000)
+    )
+
+    fun getContactByPubKey(pubKey: LightningNodePubKey): SharedFlow<Contact> = flow {
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+            emit(contact)
+        }
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000)
+    )
+
+
     private val leaderboardListStateFlow: MutableStateFlow<List<ChatLeaderboardDto>?> by lazy {
         MutableStateFlow(null)
     }
@@ -140,6 +162,17 @@ class ChatTribeViewModel @Inject constructor(
         ViewStateContainer(TribeMemberDataViewState.Idle)
     }
 
+    val pinedMessagePopupViewState: ViewStateContainer<PinedMessagePopupViewState> by lazy {
+        ViewStateContainer(PinedMessagePopupViewState.Idle)
+    }
+
+    val pinedMessageBottomViewState: ViewStateContainer<PinMessageBottomViewState> by lazy {
+        ViewStateContainer(PinMessageBottomViewState.Closed)
+    }
+
+    val pinedMessageDataViewState: ViewStateContainer<PinedMessageDataViewState> by lazy {
+        ViewStateContainer(PinedMessageDataViewState.Idle)
+    }
 
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
@@ -159,7 +192,8 @@ class ChatTribeViewModel @Inject constructor(
                     throw Exception()
                 }
             }
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
         delay(25L)
         return podcast
     }
@@ -210,7 +244,7 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    override fun forceKeyExchange() { }
+    override fun forceKeyExchange() {}
 
     override suspend fun getInitialHolderViewStateForReceivedMessage(
         message: Message,
@@ -258,16 +292,16 @@ class ChatTribeViewModel @Inject constructor(
     val feedDataStateFlow: StateFlow<TribeFeedData>
         get() = _feedDataStateFlow.asStateFlow()
 
-
     init {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
 
-                moreOptionsMenuStateFlow.value = if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
-                    MoreMenuOptionsViewState.OwnTribe
-                } else {
-                    MoreMenuOptionsViewState.NotOwnTribe
-                }
+                moreOptionsMenuStateFlow.value =
+                    if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
+                        MoreMenuOptionsViewState.OwnTribe
+                    } else {
+                        MoreMenuOptionsViewState.NotOwnTribe
+                    }
 
                 chatRepository.updateTribeInfo(chat)?.let { tribeData ->
 
@@ -279,6 +313,8 @@ class ChatTribeViewModel @Inject constructor(
                         tribeData.appUrl,
                         tribeData.badges
                     )
+
+                    updatePinnedMessageState(tribeData)
 
                 } ?: run {
                     _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
@@ -304,7 +340,7 @@ class ChatTribeViewModel @Inject constructor(
             }
 
             if (type.isMemberApprove() || type.isMemberReject()) {
-                when(messageRepository.processMemberRequest(contactId, messageId, type)) {
+                when (messageRepository.processMemberRequest(contactId, messageId, type)) {
                     is LoadResponse.Loading -> {}
                     is Response.Success -> {}
 
@@ -335,6 +371,96 @@ class ChatTribeViewModel @Inject constructor(
 
     override fun onSmallProfileImageClick(message: Message) {
         showMemberPopup(message)
+    }
+
+    override fun pinMessage(message: Message) {
+
+        viewModelScope.launch(mainImmediate) {
+
+            val response = chatRepository.pinMessage(chatId, message)
+
+            if (response is Response.Success) {
+                getPinnedMessageData(message)?.let { messageData ->
+                    pinedMessageDataViewState.updateViewState(
+                        messageData
+                    )
+                }
+
+                showPinMessagePopup(app.getString(R.string.message_pinned))
+            } else {
+                submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.pin_message_error)))
+            }
+        }
+    }
+
+    override fun unPinMessage(message: Message?) {
+        viewModelScope.launch(mainImmediate) {
+
+            (message ?: (pinedMessageDataViewState.value as? PinedMessageDataViewState.Data)?.message)?.let { nnMessage ->
+
+                pinedMessageBottomViewState.updateViewState(
+                    PinMessageBottomViewState.Closed
+                )
+
+                val response = chatRepository.unPinMessage(chatId, nnMessage)
+
+                if (response is Response.Success) {
+                    pinedMessageDataViewState.updateViewState(
+                        PinedMessageDataViewState.Idle
+                    )
+
+                    showPinMessagePopup(app.getString(R.string.message_unpinned))
+                } else {
+                    submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.pin_message_error)))
+                }
+            }
+        }
+    }
+
+    private fun showPinMessagePopup(
+        text: String
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.Visible(text)
+            )
+
+            delay(1000L)
+
+            pinedMessagePopupViewState.updateViewState(
+                PinedMessagePopupViewState.Idle
+            )
+        }
+    }
+
+    fun showPinnedBottomView() {
+        pinedMessageBottomViewState.updateViewState(
+            PinMessageBottomViewState.Open
+        )
+    }
+
+    private suspend fun getPinnedMessageData(message: Message): PinedMessageDataViewState {
+        var pinnedMessageData: PinedMessageDataViewState = PinedMessageDataViewState.Idle
+
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+            val isOwner = getChat().isTribeOwnedByAccount(getOwner().nodePubKey)
+            val messageContent = message.messageContentDecrypted?.value
+            val senderAlias = if (isOwner) owner.alias?.value else message.senderAlias?.value
+            val senderPic = if (isOwner) owner.photoUrl else message.senderPic
+
+            messageContent?.let {
+                pinnedMessageData = PinedMessageDataViewState.Data(
+                    message = message,
+                    messageContent = messageContent,
+                    isOwnTribe = isOwner,
+                    senderAlias = senderAlias ?: "Unknown",
+                    senderPic = senderPic
+                )
+            }
+        }.join()
+
+        return pinnedMessageData
     }
 
     private fun showMemberPopup(message: Message) {
@@ -388,7 +514,9 @@ class ChatTribeViewModel @Inject constructor(
 
                         is Response.Error -> {
                             submitSideEffect(ChatSideEffect.Notify(loadResponse.message))
-                            tribeMemberProfileViewStateContainer.updateViewState(TribeMemberProfileViewState.Closed)
+                            tribeMemberProfileViewStateContainer.updateViewState(
+                                TribeMemberProfileViewState.Closed
+                            )
                         }
                         is Response.Success -> {
                             val leaderboard = leaderboardListStateFlow.value?.find { it.alias == loadResponse.value.owner_alias  }
@@ -481,5 +609,23 @@ class ChatTribeViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             (chatNavigator as TribeChatNavigator).toNotificationsLevel(chatId)
         }
+    }
+
+    private suspend fun updatePinnedMessageState(
+        tribeData: TribeData
+    ) {
+        tribeData.pin?.let { uuid ->
+            messageRepository.getMessageByUUID(uuid).firstOrNull()?.let { message ->
+                getPinnedMessageData(message)?.let { pinnedMessageViewState ->
+                    pinedMessageDataViewState.updateViewState(
+                        pinnedMessageViewState
+                    )
+                    return
+                }
+            }
+        }
+        pinedMessageDataViewState.updateViewState(
+            PinedMessageDataViewState.Idle
+        )
     }
 }

@@ -109,6 +109,8 @@
     <string name="selected_message_menu_item_save_file">Save File</string>
     <string name="selected_message_menu_item_resend">Resend</string>
     <string name="selected_message_menu_item_flag">Flag</string>
+    <string name="selected_message_menu_item_pin">Pin</string>
+    <string name="selected_message_menu_item_unpin">Unpin</string>
 
     <string name="alert_confirm_flag_message_title">Confirm Flagging message</string>
     <string name="alert_confirm_flag_message_message">Are you sure you want to flag this message? This action can not be undone</string>
@@ -124,6 +126,8 @@
     <string name="side_effect_no_link_to_copy">No link to copy</string>
     <string name="side_effect_insufficient_budget">Budget is not enough to perform the search</string>
     <string name="side_effect_error_pay_lsat">There was an error trying to pay Lsat</string>
+    <string name="side_effect_keysend_error" translatable="false">Keysend error</string>
+    <string name="side_effect_challenge_error" translatable="false">Challenge error</string>
 
 
     <string name="file_name_loading">Loading...</string>
@@ -189,5 +193,13 @@
     <string name="recording_permission_required">Recording permissions required</string>
 
     <string name="send_sats">Send Sats</string>
+
+    <string name="unpin_message">Unpin Message</string>
+    <string name="pinned_message">Pinned Message</string>
+    <string name="message_pinned">Message Pinned</string>
+    <string name="message_unpinned">Message Unpinned</string>
+    <string name="pin_message_error">Something went wrong. Please try again later</string>
+
+
 
 </resources>

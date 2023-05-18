@@ -34,6 +34,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                 bubbleWidth: Px,
 
                 headerHeight: Px,
+                pinedHeaderHeight: Px,
 
                 recyclerViewWidth: Px,
 
@@ -47,7 +48,7 @@ internal sealed class SelectedMessageViewState: ViewState<SelectedMessageViewSta
                     return null
                 }
 
-                val spaceTop = holderYPosTop.add(headerHeight)
+                val spaceTop = holderYPosTop.add(headerHeight.add(pinedHeaderHeight))
                 val spaceBottom = screenHeight.subtract(spaceTop.add(holderHeight))
                 val margin = recyclerViewWidth.subtract(holderWidth).divideBy(2F)
 

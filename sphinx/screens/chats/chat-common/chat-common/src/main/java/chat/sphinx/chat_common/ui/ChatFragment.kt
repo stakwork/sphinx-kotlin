@@ -113,6 +113,7 @@ abstract class ChatFragment<
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val searchFooterBinding: LayoutChatSearchFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
+    protected abstract val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
     protected abstract val searchHeaderBinding: LayoutChatSearchHeaderBinding
     protected abstract val recordingAudioContainer: ConstraintLayout
     protected abstract val recordingCircleBinding: LayoutChatRecordingCircleBinding
@@ -806,6 +807,12 @@ abstract class ChatFragment<
                                 is MenuItemState.Flag -> {
                                     viewModel.flagMessage(message)
                                 }
+                                is MenuItemState.PinMessage -> {
+                                    viewModel.pinMessage(message)
+                                }
+                                is MenuItemState.UnpinMessage -> {
+                                    viewModel.unPinMessage(message)
+                                }
                             }
                         }
                     }
@@ -821,6 +828,7 @@ abstract class ChatFragment<
         val messageListAdapter = MessageListAdapter(
             recyclerView,
             headerBinding,
+            pinedMessageHeader,
             linearLayoutManager,
             viewLifecycleOwner,
             onStopSupervisor,

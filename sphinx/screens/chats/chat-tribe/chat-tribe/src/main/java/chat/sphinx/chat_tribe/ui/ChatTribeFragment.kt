@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
+import android.system.Os.bind
+import android.util.Log
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -36,7 +38,12 @@ import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
 import chat.sphinx.chat_tribe.databinding.FragmentChatTribeBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribeMemberMentionPopupBinding
 import chat.sphinx.chat_tribe.databinding.LayoutChatTribePopupBinding
+import chat.sphinx.chat_tribe.databinding.*
 import chat.sphinx.chat_tribe.model.TribeFeedData
+import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
+import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
+import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -68,6 +75,7 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -121,6 +129,12 @@ internal class ChatTribeFragment: ChatFragment<
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
 
+    override val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
+        get() = binding.includeChatPinedMessageHeader
+    private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
+        get() = binding.includePinMessagePopup
+    private val layoutBottomPinned: LayoutBottomPinnedBinding
+        get() = binding.includeLayoutBottomPinned
     private val webView: WebView
         get() = tribeAppBinding.includeLayoutTribeAppDetails.webView
 
@@ -167,6 +181,12 @@ internal class ChatTribeFragment: ChatFragment<
                     }
                 }
             } catch (_: Exception) {}
+        }
+
+        pinedMessageHeader.apply {
+            layoutConstraintChatPinedMessageHeader.setOnClickListener {
+                viewModel.showPinnedBottomView()
+            }
         }
 
         podcastPlayerBinding.apply {
@@ -247,6 +267,24 @@ internal class ChatTribeFragment: ChatFragment<
                         )
                     }
                 }
+            }
+        }
+
+        layoutBottomPinned.apply {
+            (requireActivity() as InsetterActivity).addNavigationBarPadding(root)
+
+            includeLayoutPinBottomTemplate.apply {
+                layoutConstraintPinnedBottomUnpinButton.apply {
+                    setOnClickListener {
+                        viewModel.unPinMessage()
+                    }
+                }
+            }
+
+            viewPinBottomInputLock.setOnClickListener {
+                viewModel.pinedMessageBottomViewState.updateViewState(
+                    PinMessageBottomViewState.Closed
+                )
             }
         }
 
@@ -396,11 +434,15 @@ internal class ChatTribeFragment: ChatFragment<
                     viewModel.tribeMemberProfileViewStateContainer.updateViewState(
                         TribeMemberProfileViewState.Open
                     )
-                }
-                else -> {
-                    if (tribeAppViewModel.webViewLayoutScreenViewStateContainer.value is WebViewLayoutScreenViewState.Open) {
+                } else -> {
+                    (tribeAppViewModel.webAppViewStateContainer.value as? WebAppViewState.AppAvailable.WebViewOpen)?.let {
+                        tribeAppViewModel.webAppViewStateContainer.updateViewState(
+                            WebAppViewState.AppAvailable.WebViewClosed(it.appUrl)
+                        )
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
-                    } else {
+                    } ?: (viewModel.pinedMessageBottomViewState.value as? PinMessageBottomViewState.Open)?.let {
+                        viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
+                    } ?: run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
@@ -584,6 +626,75 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessagePopupViewState.collect { viewState ->
+                layoutChatPinPopupBinding.apply {
+                    @Exhaustive
+                    when(viewState) {
+                        is PinedMessagePopupViewState.Idle -> {
+                            root.goneIfFalse(false)
+                        }
+                        is PinedMessagePopupViewState.Visible -> {
+                            root.goneIfFalse(true)
+                            includePinedMessagePopup.textViewPinedMessage.text = viewState.text
+                        }
+                    }
+                }
+            }
+        }
+
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageBottomViewState.collect { viewState ->
+                layoutBottomPinned.apply {
+                    layoutMotionBottomPinned.setTransitionDuration(150)
+                    viewState.transitionToEndSet(layoutMotionBottomPinned)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.pinedMessageDataViewState.collect { viewState ->
+                layoutBottomPinned.apply {
+                    @Exhaustive
+                    when (viewState) {
+                        is PinedMessageDataViewState.Idle -> {
+                            pinedMessageHeader.root.goneIfFalse(false)
+                        }
+                        is PinedMessageDataViewState.Data -> {
+                            pinedMessageHeader.apply {
+                                root.goneIfFalse(true)
+                                textViewChatHeaderName.text = viewState.messageContent
+                            }
+
+                            includeLayoutPinBottomTemplate.apply {
+                                layoutConstraintPinnedBottomUnpinButton.goneIfFalse(viewState.isOwnTribe)
+
+                                viewState.senderPic?.let { senderPhotoUrl ->
+                                    imageLoader.load(
+                                        messageHolderPinImageInitialHolder.imageViewChatPicture,
+                                        senderPhotoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
+                                }
+
+                                viewState.senderAlias?.let { senderAlias ->
+                                    textViewPinnedBottomBodyUsername.text = senderAlias
+                                }
+
+                                includePinnedBottomMessageHolder.apply {
+                                    textViewPinnedBottomHeaderText.text = viewState.messageContent
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->
 
                 tribeMemberProfileBinding.includeLayoutTribeMemberProfileDetails.apply {
@@ -685,7 +796,7 @@ internal class ChatTribeFragment: ChatFragment<
                             null
                         )
                     }
-                    is WebViewViewState.SendLsat -> {
+                    is WebViewViewState.SendMessage -> {
                         webView.evaluateJavascript(
                             viewState.script,
                             null
@@ -698,6 +809,11 @@ internal class ChatTribeFragment: ChatFragment<
                                 )
                             }
                         }
+                    }
+                    is WebViewViewState.ChallengeError -> {
+                        viewModel.submitSideEffect(
+                            ChatSideEffect.Notify(viewState.error)
+                        )
                     }
                 }
             }
