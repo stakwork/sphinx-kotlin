@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="default_super_tiny_layout_margin">1dp</dimen>
     <dimen name="default_tiny_layout_margin">2dp</dimen>
     <dimen name="default_small_layout_margin">4dp</dimen>
     <dimen name="default_half_layout_margin">8dp</dimen>
