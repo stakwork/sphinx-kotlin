@@ -167,5 +167,7 @@
     <string name="video_sats_per_minute">Sats per minute</string>
     <string name="manage_storage_total_storage">of %s</string>
     <string name="loading_dots">Loading ...</string>
+    <string name="manage_storage_save">Save</string>
+    <string name="manage_storage_cancel">Cancel</string>
 
 </resources>

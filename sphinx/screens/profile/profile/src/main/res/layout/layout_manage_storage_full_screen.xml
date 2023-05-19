@@ -29,7 +29,7 @@
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
             android:text="@string/profile_manage_storage_used"
-            android:textColor="@color/secondaryText"
+            android:textColor="@color/mainBottomIcons"
             android:textSize="@dimen/pin_help_text_view_size"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -54,11 +54,11 @@
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
             android:text="@string/profile_manage_storage_used"
-            android:textColor="@color/secondaryText"
+            android:textColor="@color/mainBottomIcons"
             android:textSize="@dimen/default_text_size_tab"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_occupied_number"
             app:layout_constraintEnd_toEndOf="parent"
-            tools:text="77.88 GB Free" />
+            tools:text="120 GB Free" />
 
         <include
             android:id="@+id/include_profile_manage_storage_bar"
@@ -89,7 +89,7 @@
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/button_send_sats" />
+                app:layout_constraintTop_toTopOf="@+id/button_change_storage_limit" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_loading"
@@ -106,7 +106,7 @@
                 app:layout_constraintStart_toEndOf="@+id/progress_bar_loading"/>
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_send_sats"
+                android:id="@+id/button_change_storage_limit"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/button_background_send_sats"

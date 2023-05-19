@@ -91,6 +91,8 @@
     <string name="web_view_remaining_budget">Remaining Budget: %s</string>
 
     <string name="manage_storage_total_storage">of %s</string>
+    <string name="manage_storage_save">Save</string>
+    <string name="manage_storage_cancel">Cancel</string>
 
     <string name="video_sats_per_minute">Sats per minute</string>
 
