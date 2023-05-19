@@ -249,8 +249,8 @@
 
                     <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/button_profile_right_arrow"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="@dimen/default_form_scan_icon_width"
+                        android:layout_height="@dimen/default_form_scan_icon_width"
                         android:background="@drawable/ic_arrow_right"
                         android:backgroundTint="@color/secondaryText"
                         app:layout_constraintBottom_toBottomOf="@+id/text_view_profile_total_storage_number"

@@ -166,5 +166,6 @@
     <string name="alias_allowed_characters">Mga titik, numero at underscore lamang ang pinapayagan sa mga alias ng tribo</string>
     <string name="video_sats_per_minute">Sats per minute</string>
     <string name="manage_storage_total_storage">of %s</string>
+    <string name="loading_dots">Loading ...</string>
 
 </resources>

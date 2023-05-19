@@ -15,6 +15,7 @@
     <string name="decryption_error">復号エラー</string>
     <string name="null_name_error">エラー: NULL NAME</string>
     <string name="public_key">公開鍵</string>
+    <string name="loading_dots">Loading ...</string>
 
     <!--  Media Type Labels -->
     <string name="media_type_label_audio">音声</string>

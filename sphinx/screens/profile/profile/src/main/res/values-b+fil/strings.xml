@@ -7,6 +7,11 @@
     <string name="profile_address">Address</string>
     <string name="profile_route_hint">Route Hint</string>
     <string name="profile_manage_storage">Manage Storage</string>
+    <string name="profile_manage_storage_used">Used</string>
+    <string name="profile_manage_storage_limit">Change Storage Limit</string>
+    <string name="profile_manage_storage_images">Images</string>
+    <string name="profile_manage_storage_video">Video</string>
+    <string name="profile_manage_storage_audio">Audio</string>
     <string name="profile_share_picture">Ibahagi ang aking larawan sa profile sa mga contact</string>
     <string name="profile_tip">Mag-default na halaga ng tip</string>
     <string name="profile_meeting_server">Meeting Server</string>

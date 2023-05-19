@@ -127,6 +127,7 @@
     <string name="recommendations">Recommendations</string>
     <string name="refresh" translatable="false">Refresh</string>
     <string name="loading" translatable="false">Loading</string>
+    <string name="loading_dots">Loading ...</string>
     <string name="refresh_icon" translatable="false">refresh</string>
     <string name="no_recommendations" translatable="false">No recommendations to show</string>
     <string name="share_from_beginning">Share from beginning</string>
