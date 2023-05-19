@@ -96,6 +96,11 @@
     <color name="lightPopupBackground">#33ffffff</color>
     <color name="popupBackground">#80000000</color>
 
+    <color name="storageBarBlue">#618AFF</color>
+    <color name="storageBarPurple">#A76CF3</color>
+    <color name="storageBarYellow">#FAE676</color>
+    <color name="storageBarBackground">#222E3A</color>
+
     <!-- Random users colors-->
     <color name="randomColor1">#7077FF</color>
     <color name="randomColor2">#DBD23C</color>
