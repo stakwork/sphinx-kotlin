@@ -214,7 +214,7 @@
                         android:fontFamily="@font/roboto_regular"
                         android:textSize="@dimen/pin_text_view_size"
                         android:maxLines="1"
-                        android:text="@string/profile_manage_storage"
+                        android:text="@string/manage_storage"
                         android:layout_marginEnd="@dimen/default_layout_margin"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />

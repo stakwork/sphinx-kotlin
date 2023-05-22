@@ -51,7 +51,7 @@
             android:layout_marginStart="@dimen/default_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
-            android:text="@string/profile_manage_storage_images"
+            android:text="@string/manage_storage_images"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/pin_help_text_view_size"
             app:layout_constraintBottom_toBottomOf="parent"

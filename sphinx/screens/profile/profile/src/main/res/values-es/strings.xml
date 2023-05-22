@@ -6,12 +6,6 @@
     <string name="profile_user_name">Nombre de Usuario</string>
     <string name="profile_address">Dirección</string>
     <string name="profile_route_hint">Pista de Ruta</string>
-    <string name="profile_manage_storage">Administrar Almacenamiento</string>
-    <string name="profile_manage_storage_used">Usado</string>
-    <string name="profile_manage_storage_limit">Cambiar límite de almacenamiento</string>
-    <string name="profile_manage_storage_images">Imágenes</string>
-    <string name="profile_manage_storage_video">Video</string>
-    <string name="profile_manage_storage_audio">Audio</string>
     <string name="profile_share_picture">Compartir mi foto de perfil con mis contactos</string>
     <string name="profile_tip">Valor de recompensa</string>
     <string name="profile_meeting_server">Servidor de Llamadas</string>

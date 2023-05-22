@@ -92,6 +92,12 @@
     <string name="web_view_reauthorizing">sats antes de reautorizar</string>
     <string name="web_view_remaining_budget">Presupuesto Restante: %s</string>
 
+    <string name="manage_storage">Administrar Almaceniamiento</string>
+    <string name="manage_storage_used">Usado</string>
+    <string name="manage_storage_limit">Cambiar Límite de almacenamiento</string>
+    <string name="manage_storage_images">Imágenes</string>
+    <string name="manage_storage_video">Video</string>
+    <string name="manage_storage_audio">Audio</string>
     <string name="manage_storage_total_storage">de %s</string>
     <string name="manage_storage_save">Guardar</string>
     <string name="manage_storage_delete">Borrar</string>

@@ -281,6 +281,12 @@ internal class ProfileFragment: SideEffectFragment<
                     viewModel.resetPIN()
                 }
 
+                includeProfileBasicContainerHolder.layoutConstraintProfileBasicContainerManageStorage.setOnClickListener {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                    profileNavigator.toManageStorageDetail()
+                    }
+                }
+
             }
         }
     }

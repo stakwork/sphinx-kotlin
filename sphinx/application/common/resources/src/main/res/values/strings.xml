@@ -196,11 +196,18 @@
     <string name="web_view_reauthorizing">sats before reauthorizing</string>
     <string name="web_view_remaining_budget">Remaining Budget: %s</string>
 
+    <string name="manage_storage">Manage Storage</string>
+    <string name="manage_storage_used">Used</string>
+    <string name="manage_storage_limit">Change Storage Limit</string>
+    <string name="manage_storage_images">Images</string>
+    <string name="manage_storage_video">Video</string>
+    <string name="manage_storage_audio">Audio</string>
     <string name="manage_storage_total_storage">of %s</string>
     <string name="manage_storage_save">Save</string>
     <string name="manage_storage_delete">Delete</string>
     <string name="manage_storage_cancel">Cancel</string>
     <string name="manage_storage_got_it">Got it</string>
+
 
     <string name="video_sats_per_minute">Sats per minute</string>
 

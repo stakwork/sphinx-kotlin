@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/manage_storage_nav_graph"
+    app:startDestination="@+id/navigation_manage_storage_fragment">
+
+    <fragment
+        android:id="@+id/navigation_manage_storage_fragment"
+        android:name="chat.sphinx.example.manage_storage.ui.ManageStorageFragment"
+        tools:layout="@layout/fragment_manage_storage" >
+    </fragment>
+
+</navigation>

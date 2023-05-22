@@ -336,3 +336,4 @@ project(':kotlin:test:test-k-openssl').projectDir =
 //project(':sample').projectDir = file(new File(rootDir, 'kotlin-android/sample'))
 include ':sphinx:application:common:menus:menu-bottom-scanner'
 include ':sphinx:screens-detail:episode-description:episode-description'
+include ':sphinx:screens-detail:manage-storage:manage-storage'

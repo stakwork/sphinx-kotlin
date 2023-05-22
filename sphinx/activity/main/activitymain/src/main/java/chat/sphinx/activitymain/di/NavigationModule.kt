@@ -23,6 +23,7 @@ import chat.sphinx.tribes_discover.navigation.TribesDiscoverNavigator
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
 import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
+import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
@@ -288,6 +289,12 @@ internal object NavigationModule {
         qrCodeNavigatorImpl: QRCodeNavigatorImpl
     ): QRCodeNavigator =
         qrCodeNavigatorImpl
+
+    @Provides
+    fun provideManageStorageNavigator(
+        manageStorageNavigatorImpl: ManageStorageNavigatorImpl
+    ): ManageStorageNavigator =
+        manageStorageNavigatorImpl
 
     @Provides
     fun provideProfileNavigator(
