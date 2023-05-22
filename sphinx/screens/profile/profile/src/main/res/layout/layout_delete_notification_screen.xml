@@ -19,26 +19,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <!-- Choose screen Box -->
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_choose_delete_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:visibility="gone">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_view_check_mark"
+                android:id="@+id/image_view_tash_choose"
                 android:layout_width="35dp"
                 android:layout_height="31dp"
                 android:layout_marginTop="6dp"
                 android:src="@drawable/ic_delete"
                 android:tint="@color/primaryRed"
-                app:layout_constraintBottom_toBottomOf="@+id/image_view_alpha"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_red_circule_bg"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
             <View
-                android:id="@+id/image_view_alpha"
+                android:id="@+id/image_view_red_circule_bg"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:background="@drawable/background_red_circular_trash"
@@ -58,7 +61,7 @@
                 android:textSize="@dimen/pin_text_view_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/image_view_alpha"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_red_circule_bg"
                 tools:text="You've chosen to" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -134,10 +137,73 @@
                     android:textColor="@color/text"
                     android:textSize="@dimen/chat_footer_episode_title_text_size" />
             </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Deleting in process-->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_delete_progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tash_progress"
+                android:layout_width="@dimen/default_form_horizontal_margin"
+                android:layout_height="@dimen/default_message_action_image_xy"
+                android:src="@drawable/ic_delete"
+                android:tint="@color/primaryText"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_red_progress_bar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/image_view_red_progress_bar"
+                android:layout_width="@dimen/feed_fragment_bottom_padding"
+                android:layout_height="@dimen/feed_fragment_bottom_padding"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryRed"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_deleting_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:fontFamily="@font/roboto_bold"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/default_text_size_large_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_red_progress_bar"
+                tools:text="Deleting" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_waiting_message_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_small_headline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_deleting_text"
+                tools:text="It may take up to a minute..." />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
 
