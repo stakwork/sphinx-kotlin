@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layoutDescription="@xml/motion_scene_tribe_app">
+    app:layoutDescription="@xml/motion_manage_storage_delete">
 
     <View
-        android:id="@+id/view_storage_delete_lock"
+        android:id="@+id/view_tribe_member_profile_lock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
         android:background="@android:color/black" />
 
     <include
-        android:id="@+id/include_layout_tribe_app_details"
-        layout="@layout/layout_tribe_app_details"
+        android:id="@+id/include_layout_manage_storage_delete_details"
+        layout="@layout/layout_manage_storage_delete_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="parent" />
