@@ -25,7 +25,7 @@
             android:id="@+id/constraint_choose_delete_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_tash_choose"
@@ -142,11 +142,11 @@
         <!-- Deleting in process-->
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraint_delete_progress"
+            android:id="@+id/constraint_delete_progress_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/default_double_layout_margin"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_tash_progress"
@@ -200,16 +200,102 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_deleting_text"
                 tools:text="It may take up to a minute..." />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <!-- Successfully Deleted Box -->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_delete_successfully_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_successfully_checkmark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_successful_checkmark"
+                android:tint="@color/primaryText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_all_type_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:fontFamily="@font/roboto_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_text_view_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_successfully_checkmark"
+                tools:text="All podcast episodes" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_successfully_deleted_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/roboto_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/primaryRed"
+                android:textSize="@dimen/pin_text_view_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_all_type_text"
+                tools:text="successfully deleted" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_free_space_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:maxLines="2"
+                android:minLines="2"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/chat_footer_episode_title_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_successfully_deleted_text"
+                tools:text="You have freed up 12.5 GB of storage space" />
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/button_got_it_container"
+                android:layout_width="@dimen/tribe_member_send_sats_button_width"
+                android:layout_height="@dimen/default_large_layout_margin"
+                android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_got_it"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/button_background_send_sats"
+                    android:fontFamily="@font/roboto_medium"
+                    android:gravity="center"
+                    android:text="@string/manage_storage_got_it"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text"
+                    android:textSize="@dimen/chat_footer_episode_title_text_size" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

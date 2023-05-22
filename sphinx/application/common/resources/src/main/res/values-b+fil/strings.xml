@@ -170,6 +170,6 @@
     <string name="manage_storage_save">Save</string>
     <string name="manage_storage_cancel">Cancel</string>
     <string name="manage_storage_delete">Delete</string>
-
+    <string name="manage_storage_got_it">Got it</string>
 
 </resources>

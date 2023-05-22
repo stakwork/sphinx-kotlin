@@ -96,7 +96,7 @@
     <string name="manage_storage_save">Guardar</string>
     <string name="manage_storage_delete">Borrar</string>
     <string name="manage_storage_cancel">Cancelar</string>
-
+    <string name="manage_storage_got_it">Aceptar</string>
 
     <string name="video_sats_per_minute">Sats por minuto</string>
 
