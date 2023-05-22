@@ -21,16 +21,16 @@
             android:fontFamily="@font/material_icons_regular"
             android:gravity="center"
             android:text="@string/material_icon_name_close"
-            android:textColor="@color/primaryRed"
+            android:textColor="@color/placeholderText"
             android:textSize="@dimen/default_text_size_back_arrow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_manage_storage_images_text"
+            android:id="@+id/text_view_manage_storage_delete_type_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_form_scan_icon_width"
+            android:layout_marginStart="@dimen/default_elevation"
             android:fontFamily="@font/roboto_medium"
             android:maxLines="1"
             android:text="@string/profile_manage_storage_limit"

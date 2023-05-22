@@ -169,5 +169,7 @@
     <string name="loading_dots">Loading ...</string>
     <string name="manage_storage_save">Save</string>
     <string name="manage_storage_cancel">Cancel</string>
+    <string name="manage_storage_delete">Delete</string>
+
 
 </resources>
