@@ -685,6 +685,14 @@ internal class ChatTribeFragment: ChatFragment<
 
                                 viewState.senderAlias?.let { senderAlias ->
                                     textViewPinnedBottomBodyUsername.text = senderAlias
+                                    textViewPinnedBottomBodyUsername.setTextColor(
+                                        Color.parseColor(
+                                            userColorsHelper.getHexCodeForKey(
+                                                viewState.senderColorKey,
+                                                root.context.getRandomHexCode(),
+                                            )
+                                        )
+                                    )
                                 }
 
                                 includePinnedBottomMessageHolder.apply {

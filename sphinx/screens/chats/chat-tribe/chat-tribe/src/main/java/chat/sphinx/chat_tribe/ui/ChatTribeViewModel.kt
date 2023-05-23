@@ -455,7 +455,8 @@ class ChatTribeViewModel @Inject constructor(
                     messageContent = messageContent,
                     isOwnTribe = isOwner,
                     senderAlias = senderAlias ?: "Unknown",
-                    senderPic = senderPic
+                    senderPic = senderPic,
+                    senderColorKey = message.getColorKey()
                 )
             }
         }.join()
