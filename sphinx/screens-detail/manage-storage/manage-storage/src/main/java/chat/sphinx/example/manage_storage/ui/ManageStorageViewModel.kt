@@ -24,10 +24,8 @@ internal class ManageStorageViewModel @Inject constructor(
         Context,
         StorageNotifySideEffect,
         ManageStorageViewState
-        >(dispatchers, ManageStorageViewState.Idle)
+        >(dispatchers, ManageStorageViewState.Loading)
 {
-//    private val args: QRCodeFragmentArgs by handle.navArgs()
-
 
 
 }

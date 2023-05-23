@@ -7,4 +7,6 @@ internal sealed class ManageStorageViewState: ViewState<ManageStorageViewState>(
 
     object Idle : ManageStorageViewState()
 
+    object Loading : ManageStorageViewState()
+
 }
