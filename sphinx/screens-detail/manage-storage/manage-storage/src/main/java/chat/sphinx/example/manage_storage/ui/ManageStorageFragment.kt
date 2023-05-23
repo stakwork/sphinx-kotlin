@@ -3,8 +3,11 @@ package chat.sphinx.example.manage_storage.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -14,9 +17,12 @@ import chat.sphinx.manage.storage.R
 import chat.sphinx.manage.storage.databinding.FragmentManageStorageBinding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.share_qr_code.BottomMenuShareQRCode
+import chat.sphinx.wrapper_feed.FeedDestination
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -45,6 +51,9 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        BackPressHandler(viewLifecycleOwner, requireActivity())
+        setClickListeners()
 
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.layoutConstraintManageStorage)
@@ -83,8 +92,42 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             buttonProfileTrashImages.gone
             buttonProfileTrashAudio.gone
             buttonProfileTrashVideo.gone
+        }
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.changeStorageLimitViewStateContainer.value is ChangeStorageLimitViewState.Open) {
+                viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
+    }
 
 
+    private fun setClickListeners() {
+        binding.apply {
+            buttonChangeStorageLimit.setOnClickListener {
+                viewModel.changeStorageLimitViewStateContainer.updateViewState(
+                    ChangeStorageLimitViewState.Open
+                )
+            }
         }
     }
 
@@ -96,6 +139,25 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 loadingStorage()
             }
         }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.changeStorageLimitViewStateContainer.collect { viewState ->
+                binding.includeLayoutChangeLimit.apply {
+                    when (viewState) {
+                        is ChangeStorageLimitViewState.Open -> {
+                            // bind al the data
+                        }
+                        else -> {}
+                    }
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+
+        super.subscribeToViewStateFlow()
     }
 
     override suspend fun onSideEffectCollect(sideEffect: StorageNotifySideEffect) {

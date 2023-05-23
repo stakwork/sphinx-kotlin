@@ -10,6 +10,7 @@ import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
+import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import javax.inject.Inject
 
 @HiltViewModel
@@ -24,8 +25,11 @@ internal class ManageStorageViewModel @Inject constructor(
         Context,
         StorageNotifySideEffect,
         ManageStorageViewState
-        >(dispatchers, ManageStorageViewState.Loading)
+        >(dispatchers, ManageStorageViewState.Idle)
 {
 
+    val changeStorageLimitViewStateContainer: ViewStateContainer<ChangeStorageLimitViewState> by lazy {
+        ViewStateContainer(ChangeStorageLimitViewState.Closed)
+    }
 
 }
