@@ -31,7 +31,7 @@
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_chat_header_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/roboto_regular"
@@ -41,6 +41,7 @@
         android:textColor="@color/textMessages"
         android:textSize="@dimen/chat_header_pined_message_text_size"
         app:layout_constraintStart_toEndOf="@id/text_view_chat_pined_message_header"
+        app:layout_constraintEnd_toEndOf="parent"
         tools:text="Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
