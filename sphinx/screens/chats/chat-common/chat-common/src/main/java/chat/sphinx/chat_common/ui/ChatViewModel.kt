@@ -1175,6 +1175,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     suspend fun handleCommonChatOnBackPressed() {
         val attachmentSendViewState = getAttachmentSendViewStateFlow().value
         val attachmentFullscreenViewState = getAttachmentFullscreenViewStateFlow().value
+        val messageSearchViewState = messagesSearchViewStateContainer.value
 
         when {
             currentViewState is ChatMenuViewState.Open -> {
@@ -1200,6 +1201,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             }
             getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                 updateSelectedMessageViewState(SelectedMessageViewState.None)
+            }
+            messageSearchViewState is MessagesSearchViewState.Searching -> {
+                messagesSearchViewStateContainer.updateViewState(MessagesSearchViewState.Idle)
+            }
+            messageSearchViewState is MessagesSearchViewState.Loading -> {
+                messagesSearchViewStateContainer.updateViewState(MessagesSearchViewState.Idle)
             }
             else -> {
                 chatNavigator.popBackStack()

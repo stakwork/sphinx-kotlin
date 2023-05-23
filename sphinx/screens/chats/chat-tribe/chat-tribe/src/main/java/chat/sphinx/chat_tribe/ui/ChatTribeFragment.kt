@@ -22,6 +22,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import app.cash.exhaustive.Exhaustive
@@ -32,6 +33,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -61,6 +63,7 @@ import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_chat.protocolLessUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -128,9 +131,9 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeChatTribeAttachmentFullscreen
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
-
-    override val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
+    override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
         get() = binding.includeChatPinedMessageHeader
+
     private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
         get() = binding.includePinMessagePopup
     private val layoutBottomPinned: LayoutBottomPinnedBinding
@@ -183,7 +186,7 @@ internal class ChatTribeFragment: ChatFragment<
             } catch (_: Exception) {}
         }
 
-        pinedMessageHeader.apply {
+        binding.includeChatPinedMessageHeader.apply {
             layoutConstraintChatPinedMessageHeader.setOnClickListener {
                 viewModel.showPinnedBottomView()
             }
@@ -658,10 +661,10 @@ internal class ChatTribeFragment: ChatFragment<
                     @Exhaustive
                     when (viewState) {
                         is PinedMessageDataViewState.Idle -> {
-                            pinedMessageHeader.root.goneIfFalse(false)
+                            binding.includeChatPinedMessageHeader.root.goneIfFalse(false)
                         }
                         is PinedMessageDataViewState.Data -> {
-                            pinedMessageHeader.apply {
+                            binding.includeChatPinedMessageHeader.apply {
                                 root.goneIfFalse(true)
                                 textViewChatHeaderName.text = viewState.messageContent
                             }
@@ -814,6 +817,23 @@ internal class ChatTribeFragment: ChatFragment<
                         viewModel.submitSideEffect(
                             ChatSideEffect.Notify(viewState.error)
                         )
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.messagesSearchViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is MessagesSearchViewState.Idle -> {
+                        binding.layoutConstraintChatHeader.visible
+                    }
+                    is MessagesSearchViewState.Loading -> {
+                        binding.layoutConstraintChatHeader.gone
+                    }
+                    is MessagesSearchViewState.Searching -> {
+                        binding.layoutConstraintChatHeader.gone
                     }
                 }
             }

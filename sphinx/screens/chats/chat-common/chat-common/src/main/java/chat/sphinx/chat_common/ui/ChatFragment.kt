@@ -113,7 +113,6 @@ abstract class ChatFragment<
     protected abstract val footerBinding: LayoutChatFooterBinding
     protected abstract val searchFooterBinding: LayoutChatSearchFooterBinding
     protected abstract val headerBinding: LayoutChatHeaderBinding
-    protected abstract val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
     protected abstract val searchHeaderBinding: LayoutChatSearchHeaderBinding
     protected abstract val recordingAudioContainer: ConstraintLayout
     protected abstract val recordingCircleBinding: LayoutChatRecordingCircleBinding
@@ -126,6 +125,7 @@ abstract class ChatFragment<
     protected abstract val callMenuBinding: LayoutMenuBottomBinding
     protected abstract val moreMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
+    protected abstract val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
 
     protected abstract val menuEnablePayments: Boolean
 
@@ -828,7 +828,7 @@ abstract class ChatFragment<
         val messageListAdapter = MessageListAdapter(
             recyclerView,
             headerBinding,
-            pinedMessageHeader,
+            pinHeaderBinding,
             linearLayoutManager,
             viewLifecycleOwner,
             onStopSupervisor,
