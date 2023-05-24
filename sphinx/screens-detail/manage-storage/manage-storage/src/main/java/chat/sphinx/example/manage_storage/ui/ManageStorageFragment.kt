@@ -133,7 +133,7 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 )
             }
             includeManageStorageHeader.textViewDetailScreenClose.setOnClickListener {
-                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
             }
@@ -143,7 +143,11 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.buttonCancel.setOnClickListener {
                 viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
             }
-
+            constraintLayoutStorageImageContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.toDeleteMediaDetail()
+                }
+            }
         }
     }
 

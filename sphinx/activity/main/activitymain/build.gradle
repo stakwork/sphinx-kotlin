@@ -81,6 +81,7 @@ dependencies {
     api project(path: ':sphinx:screens-detail:common-player')
     api project(path: ':sphinx:screens-detail:qr-code:qr-code')
     api project(path: ':sphinx:screens-detail:manage-storage:manage-storage')
+    api project(path: ':sphinx:screens-detail:delete-media:delete-media')
     api project(path: ':sphinx:screens-detail:scanner:scanner')
     api project(path: ':sphinx:screens-detail:subscription:subscription')
     api project(path: ':sphinx:screens-detail:support-ticket:support-ticket')
