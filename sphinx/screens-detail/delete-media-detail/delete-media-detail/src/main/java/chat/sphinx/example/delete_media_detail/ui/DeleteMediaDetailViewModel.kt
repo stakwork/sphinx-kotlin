@@ -28,8 +28,11 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         ViewStateContainer(DeleteNotificationViewState.Closed)
     }
 
-    fun deleteItem() {
+    fun openDeleteItemPopUp() {
         deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
+    }
+    fun closeDeleteItemPopUp() {
+        deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
     }
 
 }

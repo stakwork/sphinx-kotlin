@@ -98,6 +98,9 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
+            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
+                viewModel.closeDeleteItemPopUp()
+            }
         }
     }
 

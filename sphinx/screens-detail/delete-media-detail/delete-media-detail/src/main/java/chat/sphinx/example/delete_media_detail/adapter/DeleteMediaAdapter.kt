@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
@@ -141,7 +140,7 @@ internal class DeleteMediaAdapter(
 
         init {
             binding.root.setOnClickListener {
-                viewModel.deleteItem()
+                viewModel.openDeleteItemPopUp()
             }
         }
 
