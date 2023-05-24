@@ -24,6 +24,7 @@ import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
 import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
 import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
+import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
 import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
@@ -302,6 +303,12 @@ internal object NavigationModule {
         deleteMediaNavigatorImpl: DeleteMediaNavigatorImpl
     ): DeleteMediaNavigator =
         deleteMediaNavigatorImpl
+
+    @Provides
+    fun provideDeleteDetailMediaNavigator(
+        deleteMediaDetailNavigatorImpl: DeleteMediaDetailNavigatorImpl
+    ): DeleteMediaDetailNavigator =
+        deleteMediaDetailNavigatorImpl
 
     @Provides
     fun provideProfileNavigator(

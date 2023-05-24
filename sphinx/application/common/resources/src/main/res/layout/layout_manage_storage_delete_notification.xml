@@ -6,7 +6,7 @@
     app:layoutDescription="@xml/motion_manage_storage_delete">
 
     <View
-        android:id="@+id/view_tribe_member_profile_lock"
+        android:id="@+id/view_manage_storage_notification_lock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"
@@ -14,7 +14,7 @@
 
     <include
         android:id="@+id/include_layout_manage_storage_delete_details"
-        layout="@layout/layout_manage_storage_delete_details"
+        layout="@layout/layout_manage_storage_delete_notification_details"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="parent" />

@@ -1,4 +1,4 @@
-package chat.sphinx.example.delete_media.adapter
+package chat.sphinx.example.delete_media_detail.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,25 +11,25 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.delete.media.R
-import chat.sphinx.delete.media.databinding.StorageElementListItemHolderBinding
-import chat.sphinx.example.delete_media.ui.DeleteMediaViewModel
-import chat.sphinx.example.delete_media.viewstate.SectionHolderViewState
+import chat.sphinx.delete.media.detail.R
+import chat.sphinx.delete.media.detail.databinding.MediaStorageListItemHolderBinding
+import chat.sphinx.example.delete_media_detail.ui.DeleteMediaDetailViewModel
+import chat.sphinx.example.delete_media_detail.viewstate.MediaItemHolderViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-internal class MediaSectionAdapter(
+internal class DeleteMediaAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: DeleteMediaViewModel,
-): RecyclerView.Adapter<MediaSectionAdapter.DiscoverTribeViewHolder>(), DefaultLifecycleObserver {
+    private val viewModel: DeleteMediaDetailViewModel,
+): RecyclerView.Adapter<DeleteMediaAdapter.DiscoverTribeViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<SectionHolderViewState>,
-        private val newList: List<SectionHolderViewState>,
+        private val oldList: List<MediaItemHolderViewState>,
+        private val newList: List<MediaItemHolderViewState>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -49,7 +49,7 @@ internal class MediaSectionAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.mediaSection?.name == new.mediaSection?.name
+                    old.mediaItem?.name == new.mediaItem?.name
 
                 if (sameList) {
                     sameList = same
@@ -68,7 +68,7 @@ internal class MediaSectionAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.mediaSection?.name  == new.mediaSection?.name
+                    old.mediaItem?.name  == new.mediaItem?.name
 
                 if (sameList) {
                     sameList = same
@@ -83,7 +83,7 @@ internal class MediaSectionAdapter(
 
     }
 
-    private val sectionItems = ArrayList<SectionHolderViewState>(listOf())
+    private val sectionItems = ArrayList<MediaItemHolderViewState>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -101,7 +101,7 @@ internal class MediaSectionAdapter(
 //                    sectionItems.clear()
 //                }
 
-                this@MediaSectionAdapter.notifyDataSetChanged()
+                this@DeleteMediaAdapter.notifyDataSetChanged()
             }
         }
     }
@@ -110,8 +110,8 @@ internal class MediaSectionAdapter(
         return 5
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaSectionAdapter.DiscoverTribeViewHolder {
-        val binding = StorageElementListItemHolderBinding.inflate(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeleteMediaAdapter.DiscoverTribeViewHolder {
+        val binding = MediaStorageListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -120,7 +120,7 @@ internal class MediaSectionAdapter(
         return DiscoverTribeViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: MediaSectionAdapter.DiscoverTribeViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: DeleteMediaAdapter.DiscoverTribeViewHolder, position: Int) {
         holder.bind(position)
     }
 
@@ -131,19 +131,17 @@ internal class MediaSectionAdapter(
     }
 
     inner class DiscoverTribeViewHolder(
-        private val binding: StorageElementListItemHolderBinding
+        private val binding: MediaStorageListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private val holderJobs: ArrayList<Job> = ArrayList(2)
         private val disposables: ArrayList<Disposable> = ArrayList(2)
 
-        private var section: SectionHolderViewState? = null
+        private var section: MediaItemHolderViewState? = null
 
         init {
             binding.root.setOnClickListener {
-                lifecycleOwner.lifecycleScope.launch {
-                    viewModel.navigator.toDeleteMediaDetail()
-                }
+                viewModel.deleteItem()
             }
         }
 
@@ -158,7 +156,7 @@ internal class MediaSectionAdapter(
                     disposable.dispose()
                 }
 
-                val tribeItem: SectionHolderViewState = sectionItems.getOrNull(position) ?: let {
+                val tribeItem: MediaItemHolderViewState = sectionItems.getOrNull(position) ?: let {
                     section = null
                     return
                 }

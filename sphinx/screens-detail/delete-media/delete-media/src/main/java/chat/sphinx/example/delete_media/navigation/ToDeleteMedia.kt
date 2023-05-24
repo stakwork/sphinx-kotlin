@@ -7,7 +7,7 @@ import chat.sphinx.detail_resources.DetailNavOptions
 import io.matthewnelson.concept_navigation.NavigationRequest
 import io.matthewnelson.android_feature_navigation.R as nav_R
 
-class ToDeleteMediaDetails(
+class ToDeleteMedia(
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ): NavigationRequest<NavController>() {
     override fun navigate(controller: NavController) {

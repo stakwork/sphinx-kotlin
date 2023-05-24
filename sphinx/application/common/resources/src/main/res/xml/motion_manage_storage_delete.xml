@@ -4,12 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!--
-          Set 1: Member Profile Closed
+          Set 1: Manage Storage Closed
     -->
 
     <ConstraintSet android:id="@+id/motion_scene_storage_delete_closed">
 
-        <Constraint android:id="@+id/view_storage_delete_lock">
+        <Constraint android:id="@+id/view_manage_storage_notification_lock">
             <Layout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
@@ -27,14 +27,14 @@
     </ConstraintSet>
 
     <!--
-           Set 2: Member Profile Open
+           Set 2: Manage Storage Open
     -->
 
     <ConstraintSet
         android:id="@+id/motion_scene_storage_delete_open"
         app:deriveConstraintsFrom="@+id/motion_scene_storage_delete_closed">
 
-        <Constraint android:id="@+id/view_storage_delete_lock">
+        <Constraint android:id="@+id/view_manage_storage_notification_lock">
             <PropertySet
                 android:alpha="@dimen/options_menu_input_lock_alpha"
                 android:visibility="visible" />
