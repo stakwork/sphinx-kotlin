@@ -65,7 +65,7 @@
                 tools:text="You've chosen to" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_manage_storage_delete_type_text"
+                android:id="@+id/text_view_header"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -91,7 +91,7 @@
                 android:textSize="@dimen/chat_footer_episode_title_text_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_delete_type_text"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_header"
                 tools:text="This action deletes all of the selected files permanently and cannot be undone." />
 
             <androidx.constraintlayout.widget.ConstraintLayout

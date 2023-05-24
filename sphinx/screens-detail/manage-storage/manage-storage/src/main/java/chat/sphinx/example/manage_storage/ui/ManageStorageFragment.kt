@@ -53,6 +53,7 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         super.onViewCreated(view, savedInstanceState)
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
+        setUpHeader()
         setClickListeners()
 
         (requireActivity() as InsetterActivity)
@@ -77,9 +78,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             storageProgressPointAudio.backgroundTintList =
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)
 
-            textViewManageStorageDeleteTypeText.setTextColor(
-                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
-            )
             textViewManageStorageVideoText.setTextColor(
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)
             )
@@ -120,6 +118,12 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         }
     }
 
+    private fun setUpHeader() {
+        binding.apply {
+            includeManageStorageHeader.textViewHeader.text = getString(R.string.manage_storage)
+            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.textViewHeader.text = getString(R.string.manage_storage_limit)
+        }
+    }
 
     private fun setClickListeners() {
         binding.apply {
@@ -128,6 +132,18 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                     ChangeStorageLimitViewState.Open
                 )
             }
+            includeManageStorageHeader.textViewDetailScreenClose.setOnClickListener {
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.textViewDetailScreenClose.setOnClickListener {
+                viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
+            }
+            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.buttonCancel.setOnClickListener {
+                viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
+            }
+
         }
     }
 

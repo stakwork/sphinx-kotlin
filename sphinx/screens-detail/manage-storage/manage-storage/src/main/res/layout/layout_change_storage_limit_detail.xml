@@ -6,61 +6,24 @@
     android:layout_height="match_parent"
     android:background="@color/headerBG">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/change_storage_header_container"
+    <include
+        android:id="@+id/include_manage_change_limit_header"
+        layout="@layout/layout_detail_screen_alternative_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_detail_screen_close"
-            android:layout_width="@dimen/default_header_navigation_xy"
-            android:layout_height="@dimen/default_header_navigation_xy"
-            android:fontFamily="@font/material_icons_regular"
-            android:gravity="center"
-            android:text="@string/material_icon_name_close"
-            android:textColor="@color/placeholderText"
-            android:textSize="@dimen/default_text_size_back_arrow"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_manage_storage_delete_type_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_elevation"
-            android:fontFamily="@font/roboto_medium"
-            android:maxLines="1"
-            android:text="@string/manage_storage_limit"
-            android:textColor="@color/primaryText"
-            android:textSize="@dimen/pin_help_text_view_size"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_detail_screen_close"
-            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_close"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <View
-            android:id="@+id/view_storage_separator_divider_one"
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_marginTop="32dp"
-            android:background="@color/black"
-            android:visibility="invisible"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_detail_screen_close" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout_manage_bar_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="@dimen/default_layout_margin"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/change_storage_header_container">
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_change_limit_header">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_used"
@@ -93,7 +56,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_medium"
             android:maxLines="1"
-            android:text="@string/manage_storage_used"
             android:textColor="@color/mainBottomIcons"
             android:textSize="@dimen/default_text_size_tap_target_material_icon"
             app:layout_constraintStart_toStartOf="parent"
