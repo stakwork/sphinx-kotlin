@@ -25,7 +25,6 @@ internal class ManageStorageViewModel @Inject constructor(
         ManageStorageViewState
         >(dispatchers, ManageStorageViewState.Idle)
 {
-
     val changeStorageLimitViewStateContainer: ViewStateContainer<ChangeStorageLimitViewState> by lazy {
         ViewStateContainer(ChangeStorageLimitViewState.Closed)
     }

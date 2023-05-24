@@ -3,15 +3,19 @@ package chat.sphinx.example.delete_media.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.delete.media.R
 import chat.sphinx.delete.media.databinding.FragmentDeleteMediaBinding
+import chat.sphinx.example.delete_media.adapter.MediaSectionAdapter
 import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -22,6 +26,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class DeleteMediaFragment: SideEffectDetailFragment<
@@ -32,6 +37,10 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
         FragmentDeleteMediaBinding
         >(R.layout.fragment_delete_media)
 {
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var imageLoader: ImageLoader<ImageView>
+
     override val binding: FragmentDeleteMediaBinding by viewBinding(FragmentDeleteMediaBinding::bind)
     override val viewModel: DeleteMediaViewModel by viewModels()
 
@@ -50,6 +59,7 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
         super.onViewCreated(view, savedInstanceState)
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
+        setupMediaSectionAdapter()
         setUpHeader()
         setClickListeners()
 
@@ -139,6 +149,19 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
             }
         }
         super.subscribeToViewStateFlow()
+    }
+
+    private fun setupMediaSectionAdapter() {
+        binding.recyclerViewStorageElementList.apply {
+            val mediaSectionAdapter = MediaSectionAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel
+            )
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = mediaSectionAdapter
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: DeleteNotifySideEffect) {
