@@ -8,13 +8,19 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.delete.media.R
 import chat.sphinx.delete.media.databinding.FragmentDeleteMediaBinding
+import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
+import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -83,13 +89,55 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
+            includeLayoutDeleteNotificationScreen.apply {
+                buttonDelete.setOnClickListener {
+                    viewModel.deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
+                }
+                buttonGotIt.setOnClickListener {
+                    viewModel.deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
+                }
+                buttonCancel.setOnClickListener {
+                    viewModel.deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
+                }
+            }
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: DeleteMediaViewState) {}
+    override suspend fun onViewStateFlowCollect(viewState: DeleteMediaViewState) {
+        @Exhaustive
+        when (viewState) {
+            is DeleteMediaViewState.Idle -> {}
+        }
+    }
 
     override fun subscribeToViewStateFlow() {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {}
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.deleteNotificationViewStateContainer.collect { viewState ->
+                binding.includeLayoutDeleteNotificationScreen.apply {
+                    when (viewState) {
+                        is DeleteNotificationViewState.Closed -> {
+                            root.gone
+                        }
+                        is DeleteNotificationViewState.Open -> {
+                            root.visible
+                            constraintChooseDeleteContainer.visible
+                            constraintDeleteProgressContainer.gone
+                            constraintDeleteSuccessfullyContainer.gone
+                        }
+                        is DeleteNotificationViewState.Deleting -> {
+                            constraintChooseDeleteContainer.gone
+                            constraintDeleteProgressContainer.visible
+                            constraintDeleteSuccessfullyContainer.gone
+                        }
+                        is DeleteNotificationViewState.SuccessfullyDeleted -> {
+                            constraintChooseDeleteContainer.gone
+                            constraintDeleteProgressContainer.gone
+                            constraintDeleteSuccessfullyContainer.visible
+                        }
+                    }
+                }
+            }
+        }
         super.subscribeToViewStateFlow()
     }
 

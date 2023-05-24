@@ -1,4 +1,4 @@
-package chat.sphinx.example.delete_media.ui
+package chat.sphinx.example.delete_media.viewstate
 
 import io.matthewnelson.concept_views.viewstate.ViewState
 

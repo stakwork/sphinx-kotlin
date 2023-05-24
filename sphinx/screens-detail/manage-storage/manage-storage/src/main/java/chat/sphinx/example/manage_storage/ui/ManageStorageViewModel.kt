@@ -17,8 +17,6 @@ import javax.inject.Inject
 internal class ManageStorageViewModel @Inject constructor(
     private val app: Application,
     val navigator: ManageStorageNavigator,
-    private val socketIOManager: SocketIOManager,
-    private val mediaCacheHandler: MediaCacheHandler,
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
 ): SideEffectViewModel<

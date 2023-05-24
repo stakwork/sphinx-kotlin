@@ -25,6 +25,16 @@
         app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header"
         tools:listitem="@layout/storage_element_list_item_holder" />
 
+    <include
+        android:id="@+id/include_layout_delete_notification_screen"
+        layout="@layout/layout_delete_notification_screen"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
