@@ -822,17 +822,16 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     var messagesLoadJob: Job? = null
     fun screenInit() {
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()
-                ?.let { messages ->
-                    messageHolderViewStateFlow.value =
-                        getMessageHolderViewStateList(messages).toList()
-                }
+            messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
+                messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+            }
 
             delay(1000L)
 
             messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
-                messageHolderViewStateFlow.value =
-                    getMessageHolderViewStateList(messages).toList()
+                messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+
+                reloadPinnedMessage()
             }
         }
     }
@@ -840,6 +839,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>
 
     abstract fun readMessages()
+
+    abstract fun reloadPinnedMessage()
 
     suspend fun createPaidMessageFile(text: String?): File? {
         if (text.isNullOrEmpty()) {
@@ -1175,6 +1176,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     suspend fun handleCommonChatOnBackPressed() {
         val attachmentSendViewState = getAttachmentSendViewStateFlow().value
         val attachmentFullscreenViewState = getAttachmentFullscreenViewStateFlow().value
+        val messageSearchViewState = messagesSearchViewStateContainer.value
 
         when {
             currentViewState is ChatMenuViewState.Open -> {
@@ -1200,6 +1202,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             }
             getSelectedMessageViewStateFlow().value is SelectedMessageViewState.SelectedMessage -> {
                 updateSelectedMessageViewState(SelectedMessageViewState.None)
+            }
+            messageSearchViewState is MessagesSearchViewState.Searching -> {
+                messagesSearchViewStateContainer.updateViewState(MessagesSearchViewState.Idle)
+            }
+            messageSearchViewState is MessagesSearchViewState.Loading -> {
+                messagesSearchViewStateContainer.updateViewState(MessagesSearchViewState.Idle)
             }
             else -> {
                 chatNavigator.popBackStack()

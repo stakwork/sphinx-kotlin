@@ -33,6 +33,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -126,29 +127,6 @@ class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
-
-    val updatePinMessageData: SharedFlow<Message> = flow {
-        chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-            chat.pinedMessage?.let { messageUUID ->
-                messageRepository.getMessageByUUID(messageUUID).firstOrNull()?.let { message ->
-                    emit(message)
-                }
-            }
-        }
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000)
-    )
-
-    fun getContactByPubKey(pubKey: LightningNodePubKey): SharedFlow<Contact> = flow {
-        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
-            emit(contact)
-        }
-    }.distinctUntilChanged().shareIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(2_000)
-    )
-
 
     private val leaderboardListStateFlow: MutableStateFlow<List<ChatLeaderboardDto>?> by lazy {
         MutableStateFlow(null)
@@ -295,7 +273,6 @@ class ChatTribeViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             chatRepository.getChatById(chatId).firstOrNull()?.let { chat ->
-
                 moreOptionsMenuStateFlow.value =
                     if (chat.isTribeOwnedByAccount(getOwner().nodePubKey)) {
                         MoreMenuOptionsViewState.OwnTribe
@@ -314,7 +291,7 @@ class ChatTribeViewModel @Inject constructor(
                         tribeData.badges
                     )
 
-                    updatePinnedMessageState(tribeData)
+                    updatePinnedMessageState(tribeData.pin, chat.id)
 
                 } ?: run {
                     _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
@@ -324,6 +301,7 @@ class ChatTribeViewModel @Inject constructor(
                 _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
             }
         }
+
         getAllLeaderboards()
     }
 
@@ -380,12 +358,6 @@ class ChatTribeViewModel @Inject constructor(
             val response = chatRepository.pinMessage(chatId, message)
 
             if (response is Response.Success) {
-                getPinnedMessageData(message)?.let { messageData ->
-                    pinedMessageDataViewState.updateViewState(
-                        messageData
-                    )
-                }
-
                 showPinMessagePopup(app.getString(R.string.message_pinned))
             } else {
                 submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.pin_message_error)))
@@ -405,10 +377,6 @@ class ChatTribeViewModel @Inject constructor(
                 val response = chatRepository.unPinMessage(chatId, nnMessage)
 
                 if (response is Response.Success) {
-                    pinedMessageDataViewState.updateViewState(
-                        PinedMessageDataViewState.Idle
-                    )
-
                     showPinMessagePopup(app.getString(R.string.message_unpinned))
                 } else {
                     submitSideEffect(ChatSideEffect.Notify(app.getString(R.string.pin_message_error)))
@@ -433,34 +401,10 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun showPinnedBottomView() {
+    fun showPinBottomView() {
         pinedMessageBottomViewState.updateViewState(
             PinMessageBottomViewState.Open
         )
-    }
-
-    private suspend fun getPinnedMessageData(message: Message): PinedMessageDataViewState {
-        var pinnedMessageData: PinedMessageDataViewState = PinedMessageDataViewState.Idle
-
-        viewModelScope.launch(mainImmediate) {
-            val owner = getOwner()
-            val isOwner = getChat().isTribeOwnedByAccount(getOwner().nodePubKey)
-            val messageContent = message.messageContentDecrypted?.value
-            val senderAlias = if (isOwner) owner.alias?.value else message.senderAlias?.value
-            val senderPic = if (isOwner) owner.photoUrl else message.senderPic
-
-            messageContent?.let {
-                pinnedMessageData = PinedMessageDataViewState.Data(
-                    message = message,
-                    messageContent = messageContent,
-                    isOwnTribe = isOwner,
-                    senderAlias = senderAlias ?: "Unknown",
-                    senderPic = senderPic
-                )
-            }
-        }.join()
-
-        return pinnedMessageData
     }
 
     private fun showMemberPopup(message: Message) {
@@ -611,21 +555,64 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    override fun reloadPinnedMessage() {
+        viewModelScope.launch(mainImmediate) {
+            getChat()?.let { nnChat ->
+
+                (pinedMessageDataViewState.value as? PinedMessageDataViewState.Data)?.let { viewState ->
+                    if (viewState.message.uuid == nnChat.pinedMessage) {
+                        return@launch
+                    }
+                }
+
+                updatePinnedMessageState(nnChat.pinedMessage, nnChat.id)
+            }
+        }
+    }
+
     private suspend fun updatePinnedMessageState(
-        tribeData: TribeData
+        messageUUID: MessageUUID?,
+        chatId: ChatId
     ) {
-        tribeData.pin?.let { uuid ->
-            messageRepository.getMessageByUUID(uuid).firstOrNull()?.let { message ->
-                getPinnedMessageData(message)?.let { pinnedMessageViewState ->
+        messageUUID?.let { uuid ->
+            if (uuid.value.isNotEmpty()) {
+                messageRepository.getMessageByUUID(uuid).firstOrNull()?.let { message ->
                     pinedMessageDataViewState.updateViewState(
-                        pinnedMessageViewState
+                        getPinnedMessageData(message)
                     )
                     return
+                } ?: run {
+                    messageRepository.fetchPinnedMessageByUUID(uuid, chatId)
                 }
             }
         }
         pinedMessageDataViewState.updateViewState(
             PinedMessageDataViewState.Idle
         )
+    }
+
+    private suspend fun getPinnedMessageData(message: Message): PinedMessageDataViewState {
+        var pinnedMessageData: PinedMessageDataViewState = PinedMessageDataViewState.Idle
+
+        viewModelScope.launch(mainImmediate) {
+            val owner = getOwner()
+            val isOwner = getChat().isTribeOwnedByAccount(getOwner().nodePubKey)
+            val messageContent = message.retrieveTextToShow()
+            val senderAlias = if (isOwner) owner.alias?.value else message.senderAlias?.value
+            val senderPic = if (isOwner) owner.photoUrl else message.senderPic
+
+            messageContent?.let {
+                pinnedMessageData = PinedMessageDataViewState.Data(
+                    message = message,
+                    messageContent = messageContent,
+                    isOwnTribe = isOwner,
+                    senderAlias = senderAlias ?: "Unknown",
+                    senderPic = senderPic,
+                    senderColorKey = message.getColorKey()
+                )
+            }
+        }.join()
+
+        return pinnedMessageData
     }
 }

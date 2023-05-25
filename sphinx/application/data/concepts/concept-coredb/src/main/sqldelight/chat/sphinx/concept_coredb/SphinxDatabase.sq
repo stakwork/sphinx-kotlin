@@ -266,7 +266,8 @@ UPDATE chatDbo
 SET price_per_message = :price_per_message,
     escrow_amount = :escrow_amount,
     name = :name,
-    photo_url = :photo_url
+    photo_url = :photo_url,
+    pin_message = :pin_message
 WHERE id = ?;
 
 CREATE TABLE contactDbo(

@@ -2248,6 +2248,37 @@ abstract class SphinxRepository(
             .map { messageDboPresenterMapper.mapFrom(it) }
     }
 
+    override suspend fun fetchPinnedMessageByUUID(
+        messageUUID: MessageUUID,
+        chatId: ChatId
+    ) {
+        networkQueryMessage.getMessage(messageUUID).collect { loadResponse ->
+            @Exhaustive
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {}
+                is Response.Success -> {
+
+                    val queries = coreDB.getSphinxDatabaseQueries()
+
+                    messageLock.withLock {
+                        chatLock.withLock {
+                            withContext(io) {
+                                queries.transaction {
+                                    upsertMessage(
+                                        loadResponse.value.message,
+                                        queries
+                                    )
+                                }
+                                queries.chatUpdatePinMessage(messageUUID, chatId)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     override fun updateMessageContentDecrypted(
         messageId: MessageId,
         messageContentDecrypted: MessageContentDecrypted
@@ -3748,10 +3779,11 @@ abstract class SphinxRepository(
                             val tribeDto = loadResponse.value
 
                             if (owner?.nodePubKey != chat.ownerPubKey) {
+
                                 val didChangeNameOrPhotoUrl = (
-                                        tribeDto.name != chat.name?.value ?: "" ||
-                                                tribeDto.img != chat.photoUrl?.value ?: ""
-                                        )
+                                    tribeDto.name != chat.name?.value ?: "" ||
+                                    tribeDto.img != chat.photoUrl?.value ?: ""
+                                )
 
                                 chatLock.withLock {
                                     queries.transaction {

@@ -44,7 +44,7 @@ import kotlinx.coroutines.withContext
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
     private val headerBinding: LayoutChatHeaderBinding,
-    private val pinedHeaderBinding: LayoutChatPinedMessageHeaderBinding,
+    private val headerPinBinding: LayoutChatPinedMessageHeaderBinding?,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -323,10 +323,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     private val pinedMessageHeader: Px
-    get() = if (pinedHeaderBinding.root.isVisible) {
-        Px(pinedHeaderBinding.root.measuredHeight.toFloat())
-    } else {
-        Px(0f)
+    get() {
+        return headerPinBinding?.let {
+            if (headerPinBinding.root.isVisible) {
+                Px(headerPinBinding.root.measuredHeight.toFloat())
+            } else {
+                Px(0f)
+            }
+        } ?: Px(0f)
     }
 
     inner class MessageViewHolder(

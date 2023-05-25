@@ -32,6 +32,8 @@ interface MessageRepository {
 
     suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
 
+    suspend fun fetchPinnedMessageByUUID(messageUUID: MessageUUID, chatId: ChatId)
+
     fun updateMessageContentDecrypted(messageId: MessageId, messageContentDecrypted: MessageContentDecrypted)
 
     suspend fun readMessages(chatId: ChatId)

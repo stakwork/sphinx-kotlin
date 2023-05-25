@@ -331,6 +331,8 @@ internal class ChatContactViewModel @Inject constructor(
         }
     }
 
+    override fun reloadPinnedMessage() {}
+
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         getContact()?.let { nnContact ->
             if (nnContact.rsaPublicKey == null) {
