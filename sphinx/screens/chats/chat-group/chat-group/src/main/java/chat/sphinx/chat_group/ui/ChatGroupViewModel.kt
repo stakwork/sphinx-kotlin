@@ -159,6 +159,8 @@ class ChatGroupViewModel @Inject constructor(
         }
     }
 
+    override fun reloadPinnedMessage() {}
+
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)
         return super.sendMessage(builder)

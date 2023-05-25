@@ -127,12 +127,14 @@ inline fun TransactionCallbacks.updateChatTribeData(
     val escrowAmount = tribe.escrow_amount.toSat()
     val name = tribe.name.toChatName()
     val photoUrl = tribe.img?.toPhotoUrl()
+    val pinMessage = tribe.pin?.toMessageUUID()
 
     queries.chatUpdateTribeData(
         pricePerMessage,
         escrowAmount,
         name,
         photoUrl,
+        pinMessage,
         chatId,
     )
 
@@ -191,8 +193,19 @@ inline fun TransactionCallbacks.upsertChat(
         escrowAmount
     )
 
-    if (chatType.isTribe() && (ownerPubKey == adminPubKey) && (pricePerMessage != null || escrowAmount != null)) {
-        queries.chatUpdateTribeData(pricePerMessage, escrowAmount, chatName, chatPhotoUrl, chatId)
+    if (
+        chatType.isTribe() &&
+        (ownerPubKey == adminPubKey) &&
+        (pricePerMessage != null || escrowAmount != null || pinedMessage != null)
+    ) {
+        queries.chatUpdateTribeData(
+            pricePerMessage,
+            escrowAmount,
+            chatName,
+            chatPhotoUrl,
+            pinedMessage,
+            chatId
+        )
     }
 
     val conversationContactId: ContactId? = if (chatType.isConversation()) {

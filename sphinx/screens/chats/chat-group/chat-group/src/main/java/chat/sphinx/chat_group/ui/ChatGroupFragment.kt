@@ -71,8 +71,8 @@ internal class ChatGroupFragment: ChatFragment<
         LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_more
     )
 
-    override val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
-       get() = binding.includeChatPinedMessageHeader
+    override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+        get() = null
 
     override val menuEnablePayments: Boolean
         get() = false

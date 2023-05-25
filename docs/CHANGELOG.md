@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-alpha95 (2023-05-25)
+- Improves pin message feature
+- Fixes issue on Dashboard tabs selection
+
 # Version 1.0.0-alpha94 (2023-05-18)
 - Improves javascript bridge for tribe web apps
 - Adds support for tribe pinned message

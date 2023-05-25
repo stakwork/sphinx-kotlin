@@ -5,8 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
-import android.system.Os.bind
-import android.util.Log
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.KeyEvent
@@ -32,6 +30,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -43,7 +42,6 @@ import chat.sphinx.chat_tribe.model.TribeFeedData
 import chat.sphinx.chat_tribe.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberDataViewState
 import chat.sphinx.chat_tribe.ui.viewstate.TribeMemberProfileViewState
-import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.chat_tribe.ui.viewstate.*
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
@@ -75,7 +73,6 @@ import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -128,9 +125,9 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeChatTribeAttachmentFullscreen
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
-
-    override val pinedMessageHeader: LayoutChatPinedMessageHeaderBinding
+    override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
         get() = binding.includeChatPinedMessageHeader
+
     private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
         get() = binding.includePinMessagePopup
     private val layoutBottomPinned: LayoutBottomPinnedBinding
@@ -183,9 +180,9 @@ internal class ChatTribeFragment: ChatFragment<
             } catch (_: Exception) {}
         }
 
-        pinedMessageHeader.apply {
+        binding.includeChatPinedMessageHeader.apply {
             layoutConstraintChatPinedMessageHeader.setOnClickListener {
-                viewModel.showPinnedBottomView()
+                viewModel.showPinBottomView()
             }
         }
 
@@ -658,10 +655,10 @@ internal class ChatTribeFragment: ChatFragment<
                     @Exhaustive
                     when (viewState) {
                         is PinedMessageDataViewState.Idle -> {
-                            pinedMessageHeader.root.goneIfFalse(false)
+                            binding.includeChatPinedMessageHeader.root.goneIfFalse(false)
                         }
                         is PinedMessageDataViewState.Data -> {
-                            pinedMessageHeader.apply {
+                            binding.includeChatPinedMessageHeader.apply {
                                 root.goneIfFalse(true)
                                 textViewChatHeaderName.text = viewState.messageContent
                             }
@@ -682,6 +679,14 @@ internal class ChatTribeFragment: ChatFragment<
 
                                 viewState.senderAlias?.let { senderAlias ->
                                     textViewPinnedBottomBodyUsername.text = senderAlias
+                                    textViewPinnedBottomBodyUsername.setTextColor(
+                                        Color.parseColor(
+                                            userColorsHelper.getHexCodeForKey(
+                                                viewState.senderColorKey,
+                                                root.context.getRandomHexCode(),
+                                            )
+                                        )
+                                    )
                                 }
 
                                 includePinnedBottomMessageHolder.apply {
@@ -814,6 +819,23 @@ internal class ChatTribeFragment: ChatFragment<
                         viewModel.submitSideEffect(
                             ChatSideEffect.Notify(viewState.error)
                         )
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.messagesSearchViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is MessagesSearchViewState.Idle -> {
+                        binding.layoutConstraintChatHeader.visible
+                    }
+                    is MessagesSearchViewState.Loading -> {
+                        binding.layoutConstraintChatHeader.gone
+                    }
+                    is MessagesSearchViewState.Searching -> {
+                        binding.layoutConstraintChatHeader.gone
                     }
                 }
             }

@@ -12,7 +12,8 @@ sealed class PinedMessageDataViewState: ViewState<PinedMessageDataViewState>() {
         val messageContent: String,
         val isOwnTribe: Boolean,
         val senderAlias: String,
-        val senderPic: PhotoUrl?
+        val senderPic: PhotoUrl?,
+        val senderColorKey: String
     ): PinedMessageDataViewState()
 
 
