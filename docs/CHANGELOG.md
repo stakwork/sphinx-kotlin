@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha96 (2023-05-26)
+- Improves pin message feature
+
 # Version 1.0.0-alpha95 (2023-05-25)
 - Improves pin message feature
 - Fixes issue on Dashboard tabs selection
