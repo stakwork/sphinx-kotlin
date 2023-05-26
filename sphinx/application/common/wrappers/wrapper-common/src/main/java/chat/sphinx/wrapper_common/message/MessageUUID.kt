@@ -11,7 +11,7 @@ inline fun String.toMessageUUID(): MessageUUID? =
 @JvmInline
 value class MessageUUID(val value: String) {
     init {
-        require(value.isNotEmpty()) {
+        require(value.isNotEmpty() && value != "_") {
             "MessageUUID cannot be empty"
         }
     }
