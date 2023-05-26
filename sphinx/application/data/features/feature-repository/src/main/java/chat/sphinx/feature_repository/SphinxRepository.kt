@@ -5728,7 +5728,7 @@ abstract class SphinxRepository(
         chatId: ChatId,
         message: Message
     ): Response<Any, ResponseError> {
-        return togglePinMessage(chatId, message, PutPinMessageDto(""), "Failed to unpin message")
+        return togglePinMessage(chatId, message, PutPinMessageDto("_"), "Failed to unpin message")
     }
 
     override suspend fun processMemberRequest(
