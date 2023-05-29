@@ -584,23 +584,27 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     }
 
     private fun setupFeedItemDetails() {
-        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
-            textViewClose.setOnClickListener {
-                viewModel.videoFeedItemDetailsViewState.updateViewState(
-                    VideoFeedItemDetailsViewState.Closed
-                )
-            }
-            layoutConstraintCopyLinkRow.setOnClickListener {
-                (viewModel.videoFeedItemDetailsViewState.value as? VideoFeedItemDetailsViewState.Open)?.let { viewState ->
-                    viewState.feedItemDetail?.link?.let { link ->
-                        viewModel.copyCodeToClipboard(link)
+        binding.includeLayoutFeedItem.apply {
+            root.gone
+
+            includeLayoutFeedItemDetails.apply {
+                textViewClose.setOnClickListener {
+                    viewModel.videoFeedItemDetailsViewState.updateViewState(
+                        VideoFeedItemDetailsViewState.Closed
+                    )
+                }
+                layoutConstraintCopyLinkRow.setOnClickListener {
+                    (viewModel.videoFeedItemDetailsViewState.value as? VideoFeedItemDetailsViewState.Open)?.let { viewState ->
+                        viewState.feedItemDetail?.link?.let { link ->
+                            viewModel.copyCodeToClipboard(link)
+                        }
                     }
                 }
-            }
-            layoutConstraintShareRow.setOnClickListener {
-                (viewModel.videoFeedItemDetailsViewState.value as? VideoFeedItemDetailsViewState.Open)?.let { viewState ->
-                    viewState.feedItemDetail?.link?.let { link ->
-                        viewModel.share(link, binding.root.context)
+                layoutConstraintShareRow.setOnClickListener {
+                    (viewModel.videoFeedItemDetailsViewState.value as? VideoFeedItemDetailsViewState.Open)?.let { viewState ->
+                        viewState.feedItemDetail?.link?.let { link ->
+                            viewModel.share(link, binding.root.context)
+                        }
                     }
                 }
             }
