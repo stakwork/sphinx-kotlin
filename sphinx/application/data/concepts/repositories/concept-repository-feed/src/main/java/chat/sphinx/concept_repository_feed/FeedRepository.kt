@@ -41,6 +41,10 @@ interface FeedRepository {
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
     fun getRecommendationFeedItemById(feedItemId: FeedId): Flow<FeedItem?>
 
+    fun getAllFeedLocalFiles(): Flow<List<FeedItem>>
+
+    fun getLocalFilesByFeedId(feedId: FeedId): Flow<List<FeedItem>>
+
     fun getFeedForLink(link: FeedItemLink): Flow<Feed?>
 
     fun updatePlayedMark(feedItemId: FeedId, played: Boolean)

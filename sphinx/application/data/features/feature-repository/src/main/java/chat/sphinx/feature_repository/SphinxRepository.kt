@@ -4077,6 +4077,21 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun getAllFeedLocalFiles(): Flow<List<FeedItem>> =
+        flow {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            queries.feedItemGetAllLocalFiles()
+                .executeAsList()
+                .map {
+                    feedItemDboPresenterMapper.mapFrom(it)
+                }
+        }
+
+    override fun getLocalFilesByFeedId(feedId: FeedId): Flow<List<FeedItem>> {
+        TODO("Not yet implemented")
+    }
+
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }

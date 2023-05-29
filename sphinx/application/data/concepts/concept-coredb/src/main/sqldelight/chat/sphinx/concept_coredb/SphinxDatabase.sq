@@ -1282,6 +1282,16 @@ FROM feedItemDbo
 WHERE feed_id IN ?
 ORDER BY date_published DESC;
 
+feedItemGetAllLocalFiles:
+SELECT *
+FROM feedItemDbo
+WHERE local_file IS NOT NULL;
+
+feedItemGetLocalFilesByFeedId:
+SELECT *
+FROM feedItemDbo
+WHERE feed_id = ? AND local_file IS NOT NULL;
+
 feedItemDeleteById:
 DELETE
 FROM feedItemDbo
@@ -1302,6 +1312,7 @@ feedItemUpdateLocalFile:
 UPDATE feedItemDbo
 SET local_file = :local_file
 WHERE id = ?;
+
 
 CREATE TABLE feedModelDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
