@@ -872,6 +872,11 @@ SET local_file = :local_file,
     file_name = ?
 WHERE id = ?;
 
+messageMediaGetByChatId:
+SELECT *
+FROM messageMediaDbo
+WHERE chat_id = ?;
+
 messageMediaUpsert {
     UPDATE messageMediaDbo
     SET media_key = :media_key,

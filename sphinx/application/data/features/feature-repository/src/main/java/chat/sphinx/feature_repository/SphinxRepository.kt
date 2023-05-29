@@ -6322,6 +6322,17 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
+        flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+            val messageMediaList = queries.messageMediaGetByChatId(chatId).executeAsList()
+            val messageMedia = messageMediaList.map { messageMediaDbo ->
+                MessageMediaDboWrapper(messageMediaDbo)
+            }
+            emit(messageMedia)
+        }
+
 
     override suspend fun deleteDownloadedMediaIfApplicable(
         feedItem: DownloadableFeedItem
