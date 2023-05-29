@@ -1285,12 +1285,12 @@ ORDER BY date_published DESC;
 feedItemGetAllDownloaded:
 SELECT *
 FROM feedItemDbo
-WHERE local_file != NULL;
+WHERE local_file IS NOT NULL;
 
 feedItemGetDownloadedByFeedId:
 SELECT *
 FROM feedItemDbo
-WHERE feed_id = ? AND local_file != NULL;
+WHERE feed_id = ? AND local_file IS NOT NULL;
 
 feedItemDeleteById:
 DELETE

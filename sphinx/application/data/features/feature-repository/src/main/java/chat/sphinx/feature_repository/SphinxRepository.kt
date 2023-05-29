@@ -4079,7 +4079,7 @@ abstract class SphinxRepository(
 
     override fun getAllDownloadedFeedItems(): Flow<List<FeedItem>> = flow {
         emitAll(
-            coreDB.getSphinxDatabaseQueries().feedItemGetAllDownloaded()
+            coreDB.getSphinxDatabaseQueries().feedItemGetAllDownloaded(::FeedItemDbo)
                 .asFlow()
                 .mapToList(io)
                 .map { listFeedItemDbo ->
@@ -4093,7 +4093,7 @@ abstract class SphinxRepository(
 
     override fun getDownloadedFeedItemsByFeedId(feedId: FeedId): Flow<List<FeedItem>> = flow {
         emitAll(
-            coreDB.getSphinxDatabaseQueries().feedItemGetDownloadedByFeedId(feedId)
+            coreDB.getSphinxDatabaseQueries().feedItemGetDownloadedByFeedId(feedId, ::FeedItemDbo)
                 .asFlow()
                 .mapToList(io)
                 .map { listFeedItemDbo ->
