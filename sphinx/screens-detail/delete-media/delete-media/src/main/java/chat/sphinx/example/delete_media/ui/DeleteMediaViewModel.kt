@@ -3,6 +3,7 @@ package chat.sphinx.example.delete_media.ui
 import android.app.Application
 import android.content.*
 import androidx.lifecycle.SavedStateHandle
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
 import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
@@ -16,6 +17,7 @@ import javax.inject.Inject
 internal class DeleteMediaViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteMediaNavigator,
+    private val feedRepository: FeedRepository,
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
 ): SideEffectViewModel<
