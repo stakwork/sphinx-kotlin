@@ -3,6 +3,7 @@ package chat.sphinx.example.delete_media.ui
 import android.app.Application
 import android.content.*
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
 import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
@@ -11,6 +12,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,6 +31,13 @@ internal class DeleteMediaViewModel @Inject constructor(
 {
     val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
+    }
+    init {
+        viewModelScope.launch(mainImmediate) {
+            feedRepository.getAllDownloadedFeedItems().collect {
+
+            }
+        }
     }
 
 
