@@ -117,6 +117,18 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                     DeleteAllNotificationViewStateContainer.Open
                 )
             }
+
+            includeLayoutDeleteAllNotificationScreen.buttonDelete.setOnClickListener {
+                viewModel.deleteAllFeedItems()
+            }
+            includeLayoutDeleteAllNotificationScreen.buttonGotIt.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
+            }
+            includeLayoutDeleteAllNotificationScreen.buttonCancel.setOnClickListener {
+                viewModel.deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Closed)
+            }
         }
     }
 
@@ -132,6 +144,14 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                     includeManageMediaElementHeader.textViewManageStorageElementNumber.text = viewState.totalSize
 
                     includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
+
+                    if (viewState.totalSize.split(" ")[0].toDouble().toInt() > 0) {
+                        includeLayoutDeleteAllNotificationScreen.textViewManageStorageFreeSpaceText.text =
+                            String.format(
+                                getString(R.string.manage_storage_deleted_free_space),
+                                viewState.totalSize
+                            )
+                    }
                 }
             }
         }
@@ -159,6 +179,17 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                         }
                         is DeleteAllNotificationViewStateContainer.Open -> {
                             root.visible
+                        }
+                        is DeleteAllNotificationViewStateContainer.Deleting -> {
+                            root.visible
+                            constraintChooseDeleteContainer.gone
+                            constraintDeleteProgressContainer.visible
+                        }
+                        is DeleteAllNotificationViewStateContainer.Deleted -> {
+                            root.visible
+                            constraintChooseDeleteContainer.gone
+                            constraintDeleteProgressContainer.gone
+                            constraintDeleteSuccessfullyContainer.visible
                         }
                     }
                 }

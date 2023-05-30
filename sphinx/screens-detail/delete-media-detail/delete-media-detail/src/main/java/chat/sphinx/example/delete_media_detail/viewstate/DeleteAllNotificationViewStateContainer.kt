@@ -6,5 +6,7 @@ sealed class DeleteAllNotificationViewStateContainer : ViewState<DeleteAllNotifi
 
     object Closed: DeleteAllNotificationViewStateContainer()
     object Open: DeleteAllNotificationViewStateContainer()
+    object Deleting: DeleteAllNotificationViewStateContainer()
+    object Deleted: DeleteAllNotificationViewStateContainer()
 
 }

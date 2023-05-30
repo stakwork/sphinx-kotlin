@@ -77,9 +77,15 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         }
 
     fun deleteAllFeedItems() {
+        deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleting)
         viewModelScope.launch(mainImmediate) {
             currentFeed?.let { nnFeed ->
-                repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
+                if (repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)) {
+                    deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleted)
+                }
+                else {
+                    // handle toast
+                }
             }
         }
     }

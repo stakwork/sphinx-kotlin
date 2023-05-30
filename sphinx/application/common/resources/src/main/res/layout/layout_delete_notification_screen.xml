@@ -181,11 +181,11 @@
                 android:gravity="center"
                 android:maxLines="1"
                 android:textColor="@color/primaryText"
+                android:text="@string/manage_storage_deleting"
                 android:textSize="@dimen/default_text_size_large_title"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/image_view_red_progress_bar"
-                tools:text="Deleting" />
+                app:layout_constraintTop_toBottomOf="@+id/image_view_red_progress_bar" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_waiting_message_text"
@@ -210,7 +210,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="@dimen/default_double_layout_margin"
-            android:visibility="gone">
+            android:visibility="invisible">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image_view_successfully_checkmark"
@@ -223,7 +223,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:visibility="visible" />
 
-
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_all_type_text"
                 android:layout_width="0dp"
@@ -232,12 +231,12 @@
                 android:fontFamily="@font/roboto_light"
                 android:gravity="center"
                 android:maxLines="1"
+                android:text="@string/manage_storage_deleted_all_podcast"
                 android:textColor="@color/primaryText"
                 android:textSize="@dimen/pin_text_view_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/image_view_successfully_checkmark"
-                tools:text="All podcast episodes" />
+                app:layout_constraintTop_toBottomOf="@+id/image_view_successfully_checkmark" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_successfully_deleted_text"
@@ -247,12 +246,12 @@
                 android:fontFamily="@font/roboto_light"
                 android:gravity="center"
                 android:maxLines="1"
+                android:text="@string/manage_storage_deleted_successfully"
                 android:textColor="@color/primaryRed"
                 android:textSize="@dimen/pin_text_view_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_all_type_text"
-                tools:text="successfully deleted" />
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_all_type_text" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_free_space_text"
@@ -269,7 +268,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_successfully_deleted_text"
                 tools:text="You have freed up 12.5 GB of storage space" />
-
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/button_got_it_container"
