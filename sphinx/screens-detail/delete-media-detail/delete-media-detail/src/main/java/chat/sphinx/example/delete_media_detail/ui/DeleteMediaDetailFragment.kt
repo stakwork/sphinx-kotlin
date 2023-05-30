@@ -18,14 +18,17 @@ import chat.sphinx.delete.media.detail.R
 import chat.sphinx.delete.media.detail.databinding.FragmentDeleteMediaDetailsBinding
 import chat.sphinx.example.delete_media_detail.adapter.DeleteMediaDetailAdapter
 import chat.sphinx.example.delete_media_detail.adapter.DeleteMediaFooterAdapter
+import chat.sphinx.example.delete_media_detail.viewstate.DeleteAllNotificationViewStateContainer
+import chat.sphinx.example.delete_media_detail.viewstate.DeleteItemNotificationViewState
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
-import chat.sphinx.example.delete_media_detail.viewstate.DeleteNotificationViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -83,8 +86,14 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
         }
 
         override fun handleOnBackPressed() {
+            if (viewModel.deleteAllNotificationViewStateContainer.value is DeleteAllNotificationViewStateContainer.Open) {
+                viewModel.deleteAllNotificationViewStateContainer.updateViewState(
+                    DeleteAllNotificationViewStateContainer.Closed
+                )
+            } else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
+                }
             }
         }
     }
@@ -104,10 +113,10 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                 viewModel.closeDeleteItemPopUp()
             }
             includeManageMediaElementHeader.buttonProfileDelete.setOnClickListener {
-
+                viewModel.deleteAllNotificationViewStateContainer.updateViewState(
+                    DeleteAllNotificationViewStateContainer.Open
+                )
             }
-
-
         }
     }
 
@@ -122,6 +131,7 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                     includeManageMediaElementHeader.buttonProfileDelete.visible
                     includeManageMediaElementHeader.textViewManageStorageElementNumber.text = viewState.totalSize
 
+                    includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
                 }
             }
         }
@@ -129,14 +139,28 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
 
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.deleteNotificationViewStateContainer.collect { viewState ->
+            viewModel.deleteItemNotificationViewStateContainer.collect { viewState ->
                 binding.includeLayoutManageStorageDeleteNotification.apply {
                     when (viewState) {
-                        is DeleteNotificationViewState.Closed -> {}
-                        is DeleteNotificationViewState.Open -> {}
+                        is DeleteItemNotificationViewState.Closed -> {}
+                        is DeleteItemNotificationViewState.Open -> {}
                     }
                     root.setTransitionDuration(300)
                     viewState.transitionToEndSet(root)
+                }
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.deleteAllNotificationViewStateContainer.collect { viewState ->
+                binding.includeLayoutDeleteAllNotificationScreen.apply {
+                    when (viewState) {
+                        is DeleteAllNotificationViewStateContainer.Closed -> {
+                            root.gone
+                        }
+                        is DeleteAllNotificationViewStateContainer.Open -> {
+                            root.visible
+                        }
+                    }
                 }
             }
         }

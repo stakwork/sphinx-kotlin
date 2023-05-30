@@ -8,13 +8,13 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.example.delete_media_detail.model.EpisodeToDelete
 import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
+import chat.sphinx.example.delete_media_detail.viewstate.DeleteAllNotificationViewStateContainer
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
-import chat.sphinx.example.delete_media_detail.viewstate.DeleteNotificationViewState
+import chat.sphinx.example.delete_media_detail.viewstate.DeleteItemNotificationViewState
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.calculateTotalSize
 import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_common.feed.toFeedId
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,8 +26,6 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import java.io.File
-import java.text.DecimalFormat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,9 +42,16 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         DeleteMediaDetailViewState
         >(dispatchers, DeleteMediaDetailViewState.Idle)
 {
-
     private val args: DeleteMediaDetailFragmentArgs by savedStateHandle.navArgs()
     private var currentFeed: Feed? = null
+
+    val deleteAllNotificationViewStateContainer: ViewStateContainer<DeleteAllNotificationViewStateContainer> by lazy {
+        ViewStateContainer(DeleteAllNotificationViewStateContainer.Closed)
+    }
+
+    val deleteItemNotificationViewStateContainer: ViewStateContainer<DeleteItemNotificationViewState> by lazy {
+        ViewStateContainer(DeleteItemNotificationViewState.Closed)
+    }
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -62,7 +67,6 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
                 }
                 updateViewState(DeleteMediaDetailViewState.EpisodeList(feed?.titleToShow ?: "", totalSize, episodeToDeleteList))
             }
-
         }
     }
 
@@ -81,15 +85,11 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
     }
 
     fun openDeleteItemPopUp() {
-        deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
+        deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Open)
     }
     fun closeDeleteItemPopUp() {
-        deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
+        deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
     }
 
-
-    val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
-        ViewStateContainer(DeleteNotificationViewState.Closed)
-    }
 
 }

@@ -38,7 +38,7 @@ internal class DeleteMediaViewModel @Inject constructor(
         DeleteMediaViewState
         >(dispatchers, DeleteMediaViewState.Loading)
 {
-    val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
+     val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
     }
 

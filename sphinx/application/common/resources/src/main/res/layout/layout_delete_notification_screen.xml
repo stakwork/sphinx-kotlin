@@ -57,15 +57,15 @@
                 android:fontFamily="@font/roboto_light"
                 android:gravity="center"
                 android:maxLines="1"
+                android:text="@string/manage_storage_you_have_chosen"
                 android:textColor="@color/primaryText"
                 android:textSize="@dimen/pin_text_view_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/image_view_red_circule_bg"
-                tools:text="You've chosen to" />
+                app:layout_constraintTop_toBottomOf="@+id/image_view_red_circule_bg"/>
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_header"
+                android:id="@+id/text_view_delete_description"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
@@ -88,10 +88,11 @@
                 android:gravity="center"
                 android:maxLines="2"
                 android:textColor="@color/secondaryText"
+                android:text="@string/manage_storage_notification_description"
                 android:textSize="@dimen/chat_footer_episode_title_text_size"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_header"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_delete_description"
                 tools:text="This action deletes all of the selected files permanently and cannot be undone." />
 
             <androidx.constraintlayout.widget.ConstraintLayout

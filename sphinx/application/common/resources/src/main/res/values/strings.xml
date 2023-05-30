@@ -207,6 +207,9 @@
     <string name="manage_storage_delete">Delete</string>
     <string name="manage_storage_cancel">Cancel</string>
     <string name="manage_storage_got_it">Got it</string>
+    <string name="manage_storage_you_have_chosen">You\'ve chosen to</string>
+    <string name="manage_storage_delete_description">delete all podcast episodes</string>
+    <string name="manage_storage_notification_description">This action deletes all of the selected files permanently and cannot be undone.</string>
 
 
     <string name="video_sats_per_minute">Sats per minute</string>

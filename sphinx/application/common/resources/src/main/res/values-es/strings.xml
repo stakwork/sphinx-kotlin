@@ -103,6 +103,10 @@
     <string name="manage_storage_delete">Borrar</string>
     <string name="manage_storage_cancel">Cancelar</string>
     <string name="manage_storage_got_it">Aceptar</string>
+    <string name="manage_storage_you_have_chosen">Has elegido</string>
+    <string name="manage_storage_delete_description">Eliminar todos los episodios de podcast.</string>
+    <string name="manage_storage_notification_description">Esta acción elimina todos los archivos seleccionados de forma permanente y no se puede deshacer.</string>
+
 
     <string name="video_sats_per_minute">Sats por minuto</string>
 

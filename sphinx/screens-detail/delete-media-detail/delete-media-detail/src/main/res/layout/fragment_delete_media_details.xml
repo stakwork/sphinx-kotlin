@@ -26,11 +26,23 @@
         tools:listitem="@layout/media_storage_list_item_holder" />
 
     <include
+        android:id="@+id/include_layout_delete_all_notification_screen"
+        layout="@layout/layout_delete_notification_screen"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header" />
+
+    <include
         android:id="@+id/include_layout_manage_storage_delete_notification"
         layout="@layout/layout_manage_storage_delete_notification"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:visibility="gone"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

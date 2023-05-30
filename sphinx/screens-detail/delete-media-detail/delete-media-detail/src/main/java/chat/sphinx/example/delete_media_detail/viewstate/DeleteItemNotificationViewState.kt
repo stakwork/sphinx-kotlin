@@ -5,9 +5,9 @@ import chat.sphinx.delete.media.detail.R
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
 
 
-sealed class DeleteNotificationViewState: MotionLayoutViewState<DeleteNotificationViewState>() {
+sealed class DeleteItemNotificationViewState: MotionLayoutViewState<DeleteItemNotificationViewState>() {
 
-    object Closed: DeleteNotificationViewState() {
+    object Closed: DeleteItemNotificationViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_storage_delete_open
         override val endSetId: Int?
@@ -16,7 +16,7 @@ sealed class DeleteNotificationViewState: MotionLayoutViewState<DeleteNotificati
         override fun restoreMotionScene(motionLayout: MotionLayout) {}
     }
 
-    object Open: DeleteNotificationViewState() {
+    object Open: DeleteItemNotificationViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_storage_delete_closed
         override val endSetId: Int?
