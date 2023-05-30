@@ -10,18 +10,18 @@ import chat.sphinx.example.delete_media.model.MediaSection
 import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
 import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
+import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.calculateTotalSize
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
-import java.text.DecimalFormat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,10 +52,11 @@ internal class DeleteMediaViewModel @Inject constructor(
                     val listOfFiles = feedList[feedId]
 
                     if (podcast != null && listOfFiles != null) {
+                        val totalSize = listOfFiles.map { FileSize(it.length()) }.calculateTotalSize()
                         MediaSection(
                             podcast.title.value,
                             podcast.imageToShow?.value.orEmpty(),
-                            calculateTotalSize(listOfFiles),
+                            totalSize,
                             podcast.id
                         )
                     } else null
@@ -66,41 +67,8 @@ internal class DeleteMediaViewModel @Inject constructor(
         }
     }
 
-    fun deleteAllFeedItems(feedId: FeedId) {
-        viewModelScope.launch(mainImmediate) {
-            val feed = feedRepository.getFeedById(feedId).firstOrNull()
-            feed?.let { nnFeed ->
-                repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
-            }
-        }
-    
-    }
-
     private fun getLocalFilesGroupedByFeed(feedItems: List<FeedItem>): Map<FeedId?, List<File>> {
         return feedItems.groupBy({ it.feedId }, { it.localFile as File })
-    }
-
-    private fun calculateTotalSize(files: List<File>): String {
-        var totalSize = 0L
-
-        for (file in files) {
-            if (file.exists()) {
-                totalSize += file.length()
-            }
-        }
-
-        val kb: Double = 1024.0
-        val mb: Double = kb * 1024
-        val gb: Double = mb * 1024
-
-        val decimalFormat = DecimalFormat("#.##")
-
-        return when {
-            totalSize < kb -> "$totalSize Bytes"
-            totalSize < mb -> "${decimalFormat.format(totalSize / kb)} KB"
-            totalSize < gb -> "${decimalFormat.format(totalSize / mb)} MB"
-            else -> "${decimalFormat.format(totalSize / gb)} GB"
-        }
     }
 
 

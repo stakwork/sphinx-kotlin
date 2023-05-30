@@ -2,6 +2,7 @@ package chat.sphinx.wrapper_common
 
 import java.io.File
 import java.text.CharacterIterator
+import java.text.DecimalFormat
 import java.text.StringCharacterIterator
 import java.util.*
 
@@ -20,6 +21,47 @@ inline fun FileSize.asFormattedString(): String{
     }
     return String.format(Locale.ENGLISH,"%.1f %cB", bytes / 1000.0, ci.current())
 }
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun FileSize.calculateSize(): String {
+    val totalSize = value
+
+    val kb: Double = 1024.0
+    val mb: Double = kb * 1024
+    val gb: Double = mb * 1024
+
+    val decimalFormat = DecimalFormat("#.##")
+
+    return when {
+        totalSize < kb -> "$totalSize Bytes"
+        totalSize < mb -> "${decimalFormat.format(totalSize / kb)} KB"
+        totalSize < gb -> "${decimalFormat.format(totalSize / mb)} MB"
+        else -> "${decimalFormat.format(totalSize / gb)} GB"
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun List<FileSize>.calculateTotalSize(): String {
+    var totalSize = 0L
+
+    for (fileSize in this) {
+        totalSize += fileSize.value
+    }
+
+    val kb: Double = 1024.0
+    val mb: Double = kb * 1024
+    val gb: Double = mb * 1024
+
+    val decimalFormat = DecimalFormat("#.##")
+
+    return when {
+        totalSize < kb -> "$totalSize Bytes"
+        totalSize < mb -> "${decimalFormat.format(totalSize / kb)} KB"
+        totalSize < gb -> "${decimalFormat.format(totalSize / mb)} MB"
+        else -> "${decimalFormat.format(totalSize / gb)} GB"
+    }
+}
+
 
 @JvmInline
 value class FileSize(val value: Long)

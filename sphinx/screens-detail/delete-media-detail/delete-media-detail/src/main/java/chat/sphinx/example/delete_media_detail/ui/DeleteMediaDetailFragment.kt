@@ -24,6 +24,7 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -102,6 +103,11 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
                 viewModel.closeDeleteItemPopUp()
             }
+            includeManageMediaElementHeader.buttonProfileDelete.setOnClickListener {
+
+            }
+
+
         }
     }
 
@@ -111,7 +117,11 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             is DeleteMediaDetailViewState.Idle -> {}
             is DeleteMediaDetailViewState.EpisodeList -> {
                 binding.apply {
-                    binding.includeManageMediaElementHeader.textViewHeader.text = viewState.feedName
+                    includeManageMediaElementHeader.textViewHeader.text = viewState.feedName
+                    includeManageMediaElementHeader.textViewManageStorageElementNumber.visible
+                    includeManageMediaElementHeader.buttonProfileDelete.visible
+                    includeManageMediaElementHeader.textViewManageStorageElementNumber.text = viewState.totalSize
+
                 }
             }
         }

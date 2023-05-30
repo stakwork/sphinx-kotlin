@@ -8,6 +8,7 @@ internal sealed class DeleteMediaDetailViewState : ViewState<DeleteMediaDetailVi
 
     class EpisodeList(
         val feedName: String,
+        val totalSize: String,
         val episodes: List<EpisodeToDelete>
     ): DeleteMediaDetailViewState()
 }

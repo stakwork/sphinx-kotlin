@@ -10,8 +10,12 @@ import chat.sphinx.example.delete_media_detail.model.EpisodeToDelete
 import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteNotificationViewState
+import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.calculateSize
+import chat.sphinx.wrapper_common.calculateTotalSize
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.toFeedId
+import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -42,18 +46,21 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
 {
 
     private val args: DeleteMediaDetailFragmentArgs by savedStateHandle.navArgs()
+    private var currentFeed: Feed? = null
 
     init {
         viewModelScope.launch(mainImmediate) {
             feedRepository.getDownloadedFeedItemsByFeedId(FeedId(args.argFeedId)).collect { feedItemList ->
-                val feedName = feedRepository.getFeedById(FeedId(args.argFeedId)).firstOrNull()?.titleToShow ?: ""
+                val feed = feedRepository.getFeedById(FeedId(args.argFeedId)).firstOrNull()
+                currentFeed = feed
+                val totalSize = feedItemList.map { FileSize(it.localFile?.length() ?: 0L) }.calculateTotalSize()
                 val episodeToDeleteList: List<EpisodeToDelete> = feedItemList.map { feedItem ->
                     EpisodeToDelete(
                         feedItem,
-                        calculateFileSize(feedItem.localFile)
+                        FileSize(feedItem.localFile?.length() ?: 0L).calculateSize()
                     )
                 }
-                updateViewState(DeleteMediaDetailViewState.EpisodeList(feedName, episodeToDeleteList))
+                updateViewState(DeleteMediaDetailViewState.EpisodeList(feed?.titleToShow ?: "", totalSize, episodeToDeleteList))
             }
 
         }
@@ -65,6 +72,13 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
             }
         }
 
+    fun deleteAllFeedItems() {
+        viewModelScope.launch(mainImmediate) {
+            currentFeed?.let { nnFeed ->
+                repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
+            }
+        }
+    }
 
     fun openDeleteItemPopUp() {
         deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
@@ -73,25 +87,6 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
     }
 
-
-    private fun calculateFileSize(file: File?): String {
-        if (file == null) return ""
-
-        val totalSize = if (file.exists()) file.length() else 0L
-
-        val kb: Double = 1024.0
-        val mb: Double = kb * 1024
-        val gb: Double = mb * 1024
-
-        val decimalFormat = DecimalFormat("#.##")
-
-        return when {
-            totalSize < kb -> "$totalSize Bytes"
-            totalSize < mb -> "${decimalFormat.format(totalSize / kb)} KB"
-            totalSize < gb -> "${decimalFormat.format(totalSize / mb)} MB"
-            else -> "${decimalFormat.format(totalSize / gb)} GB"
-        }
-    }
 
     val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
