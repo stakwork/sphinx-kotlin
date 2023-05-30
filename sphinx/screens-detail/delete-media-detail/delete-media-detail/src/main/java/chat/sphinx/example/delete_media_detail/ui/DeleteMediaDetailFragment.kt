@@ -11,11 +11,12 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
+import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.delete.media.detail.R
 import chat.sphinx.delete.media.detail.databinding.FragmentDeleteMediaDetailsBinding
-import chat.sphinx.example.delete_media_detail.adapter.DeleteMediaAdapter
+import chat.sphinx.example.delete_media_detail.adapter.DeleteMediaDetailAdapter
 import chat.sphinx.example.delete_media_detail.adapter.DeleteMediaFooterAdapter
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteNotificationViewState
@@ -104,7 +105,17 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: DeleteMediaDetailViewState) {}
+    override suspend fun onViewStateFlowCollect(viewState: DeleteMediaDetailViewState) {
+        @Exhaustive
+        when (viewState) {
+            is DeleteMediaDetailViewState.Idle -> {}
+            is DeleteMediaDetailViewState.EpisodeList -> {
+                binding.apply {
+                    binding.includeManageMediaElementHeader.textViewHeader.text = viewState.feedName
+                }
+            }
+        }
+    }
 
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -125,7 +136,7 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
     private fun setupDeleteMediaDetailsAdapter() {
         val deleteMediaFooterAdapter = DeleteMediaFooterAdapter(requireActivity() as InsetterActivity)
         binding.recyclerViewStorageElementList.apply {
-            val deleteMediaAdapter = DeleteMediaAdapter(
+            val deleteMediaAdapter = DeleteMediaDetailAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,

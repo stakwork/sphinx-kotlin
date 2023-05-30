@@ -12,23 +12,26 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.delete.media.detail.R
 import chat.sphinx.delete.media.detail.databinding.MediaStorageListItemHolderBinding
+import chat.sphinx.example.delete_media_detail.model.EpisodeToDelete
 import chat.sphinx.example.delete_media_detail.ui.DeleteMediaDetailViewModel
-import chat.sphinx.example.delete_media_detail.viewstate.MediaItemHolderViewState
+import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
+import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-internal class DeleteMediaAdapter(
+internal class DeleteMediaDetailAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DeleteMediaDetailViewModel,
-): RecyclerView.Adapter<DeleteMediaAdapter.DiscoverTribeViewHolder>(), DefaultLifecycleObserver {
+): RecyclerView.Adapter<DeleteMediaDetailAdapter.DeleteEpisodeViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<MediaItemHolderViewState>,
-        private val newList: List<MediaItemHolderViewState>,
+        private val oldList: List<EpisodeToDelete>,
+        private val newList: List<EpisodeToDelete>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -48,7 +51,7 @@ internal class DeleteMediaAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.mediaItem?.name == new.mediaItem?.name
+                    old.feedItem.id == new.feedItem.id
 
                 if (sameList) {
                     sameList = same
@@ -67,7 +70,7 @@ internal class DeleteMediaAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.mediaItem?.name  == new.mediaItem?.name
+                    old.feedItem.id  == new.feedItem.id
 
                 if (sameList) {
                     sameList = same
@@ -82,7 +85,7 @@ internal class DeleteMediaAdapter(
 
     }
 
-    private val sectionItems = ArrayList<MediaItemHolderViewState>(listOf())
+    private val episodeItems = ArrayList<EpisodeToDelete>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -90,36 +93,50 @@ internal class DeleteMediaAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.viewStateContainer.collect { viewState ->
 
-                sectionItems.clear()
+                var list: List<EpisodeToDelete> = if (viewState is DeleteMediaDetailViewState.EpisodeList) {
+                    viewState.episodes
+                } else {
+                    listOf()
+                }
 
-                // Load all sections
+                if (episodeItems.isEmpty()) {
+                    episodeItems.addAll(list)
+                    this@DeleteMediaDetailAdapter.notifyDataSetChanged()
+                } else {
 
-//                (viewState as? SectionHolderViewState.Section)?.tribes?.let { list ->
-//                    sectionItems.addAll(list)
-//                } ?: run {
-//                    sectionItems.clear()
-//                }
+                    val diff = Diff(episodeItems, list)
 
-                this@DeleteMediaAdapter.notifyDataSetChanged()
+                    withContext(viewModel.default) {
+                        DiffUtil.calculateDiff(diff)
+                    }.let { result ->
+
+                        if (!diff.sameList) {
+                            episodeItems.clear()
+                            episodeItems.addAll(list)
+                            result.dispatchUpdatesTo(this@DeleteMediaDetailAdapter)
+                        }
+                    }
+                }
+
             }
         }
     }
 
     override fun getItemCount(): Int {
-        return 5
+        return episodeItems.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeleteMediaAdapter.DiscoverTribeViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeleteMediaDetailAdapter.DeleteEpisodeViewHolder {
         val binding = MediaStorageListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
 
-        return DiscoverTribeViewHolder(binding)
+        return DeleteEpisodeViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: DeleteMediaAdapter.DiscoverTribeViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: DeleteMediaDetailAdapter.DeleteEpisodeViewHolder, position: Int) {
         holder.bind(position)
     }
 
@@ -129,14 +146,14 @@ internal class DeleteMediaAdapter(
             .build()
     }
 
-    inner class DiscoverTribeViewHolder(
+    inner class DeleteEpisodeViewHolder(
         private val binding: MediaStorageListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private val holderJobs: ArrayList<Job> = ArrayList(2)
         private val disposables: ArrayList<Disposable> = ArrayList(2)
 
-        private var section: MediaItemHolderViewState? = null
+        private var episode: EpisodeToDelete? = null
 
         init {
             binding.root.setOnClickListener {
@@ -146,20 +163,27 @@ internal class DeleteMediaAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-
-                for (job in holderJobs) {
-                    job.cancel()
-                }
-
-                for (disposable in disposables) {
-                    disposable.dispose()
-                }
-
-                val tribeItem: MediaItemHolderViewState = sectionItems.getOrNull(position) ?: let {
-                    section = null
+                val episodeItem: EpisodeToDelete = episodeItems.getOrNull(position) ?: let {
+                    episode = null
                     return
                 }
-                section = tribeItem
+                episode = episodeItem
+
+                episodeItem.feedItem.imageUrlToShow?.value?.let { imageUrl ->
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        imageLoader.load(
+                            imageViewElementPicture,
+                            imageUrl,
+                            imageLoaderOptions
+                        ).also {
+                            disposables.add(it)
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+                }
+                textViewManageStorageElementText.text = episodeItem.feedItem.titleToShow
+                textViewManageStorageElementNumber.text = episodeItem.size
             }
         }
 
