@@ -3,6 +3,7 @@ package chat.sphinx.example.delete_media.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -13,12 +14,14 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.delete.media.R
 import chat.sphinx.delete.media.databinding.StorageElementListItemHolderBinding
+import chat.sphinx.example.delete_media.model.MediaSection
 import chat.sphinx.example.delete_media.ui.DeleteMediaViewModel
-import chat.sphinx.example.delete_media.viewstate.SectionHolderViewState
+import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class MediaSectionAdapter(
     private val imageLoader: ImageLoader<ImageView>,
@@ -28,8 +31,8 @@ internal class MediaSectionAdapter(
 ): RecyclerView.Adapter<MediaSectionAdapter.DiscoverTribeViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<SectionHolderViewState>,
-        private val newList: List<SectionHolderViewState>,
+        private val oldList: List<MediaSection>,
+        private val newList: List<MediaSection>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -49,7 +52,7 @@ internal class MediaSectionAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.mediaSection?.name == new.mediaSection?.name
+                    old.name == new.name
 
                 if (sameList) {
                     sameList = same
@@ -68,7 +71,7 @@ internal class MediaSectionAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.mediaSection?.name  == new.mediaSection?.name
+                    old.name  == new.name
 
                 if (sameList) {
                     sameList = same
@@ -83,7 +86,7 @@ internal class MediaSectionAdapter(
 
     }
 
-    private val sectionItems = ArrayList<SectionHolderViewState>(listOf())
+    private val sectionItems = ArrayList<MediaSection>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -91,23 +94,36 @@ internal class MediaSectionAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.viewStateContainer.collect { viewState ->
 
-                sectionItems.clear()
+                var list: List<MediaSection> = if (viewState is DeleteMediaViewState.SectionList) {
+                    viewState.section
+                } else {
+                    listOf()
+                }
 
-                // Load all sections
+                if (sectionItems.isEmpty()) {
+                    sectionItems.addAll(list)
+                    this@MediaSectionAdapter.notifyDataSetChanged()
+                } else {
 
-//                (viewState as? SectionHolderViewState.Section)?.tribes?.let { list ->
-//                    sectionItems.addAll(list)
-//                } ?: run {
-//                    sectionItems.clear()
-//                }
+                    val diff = Diff(sectionItems, list)
 
-                this@MediaSectionAdapter.notifyDataSetChanged()
+                    withContext(viewModel.default) {
+                        DiffUtil.calculateDiff(diff)
+                    }.let { result ->
+
+                        if (!diff.sameList) {
+                            sectionItems.clear()
+                            sectionItems.addAll(list)
+                            result.dispatchUpdatesTo(this@MediaSectionAdapter)
+                        }
+                    }
+                }
             }
         }
     }
 
     override fun getItemCount(): Int {
-        return 5
+        return sectionItems.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaSectionAdapter.DiscoverTribeViewHolder {
@@ -137,7 +153,7 @@ internal class MediaSectionAdapter(
         private val holderJobs: ArrayList<Job> = ArrayList(2)
         private val disposables: ArrayList<Disposable> = ArrayList(2)
 
-        private var section: SectionHolderViewState? = null
+        private var section: MediaSection? = null
 
         init {
             binding.root.setOnClickListener {
@@ -149,20 +165,27 @@ internal class MediaSectionAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-
-                for (job in holderJobs) {
-                    job.cancel()
+                val section: MediaSection? = sectionItems.getOrNull(position)
+                section?.image?.let { imageUrl ->
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        imageLoader.load(
+                            imageViewElementPicture,
+                            imageUrl,
+                            imageLoaderOptions
+                        ).also {
+                            disposables.add(it)
+                        }
+                    }.let { job ->
+                        holderJobs.add(job)
+                    }
+                } ?: run {
+                    imageViewElementPicture.setImageDrawable(
+                        ContextCompat.getDrawable(root.context, R.drawable.ic_tribe)
+                    )
                 }
+                textViewManageStorageElementText.text = section?.name
+                textViewManageStorageElementNumber.text = section?.size
 
-                for (disposable in disposables) {
-                    disposable.dispose()
-                }
-
-                val tribeItem: SectionHolderViewState = sectionItems.getOrNull(position) ?: let {
-                    section = null
-                    return
-                }
-                section = tribeItem
             }
         }
 
