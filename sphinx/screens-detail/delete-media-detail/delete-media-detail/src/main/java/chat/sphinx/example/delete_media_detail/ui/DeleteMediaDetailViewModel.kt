@@ -5,12 +5,14 @@ import android.content.*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.example.delete_media_detail.model.EpisodeToDelete
 import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteNotificationViewState
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.toFeedId
+import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -29,6 +31,7 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteMediaDetailNavigator,
     private val feedRepository: FeedRepository,
+    private val repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -56,6 +59,21 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         }
     }
 
+    fun deleteDownloadedMedia(feedItem: FeedItem) {
+            viewModelScope.launch(mainImmediate) {
+                repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)
+            }
+        }
+
+
+    fun openDeleteItemPopUp() {
+        deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
+    }
+    fun closeDeleteItemPopUp() {
+        deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
+    }
+
+
     private fun calculateFileSize(file: File?): String {
         if (file == null) return ""
 
@@ -77,13 +95,6 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
 
     val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
-    }
-
-    fun openDeleteItemPopUp() {
-        deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
-    }
-    fun closeDeleteItemPopUp() {
-        deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
     }
 
 }

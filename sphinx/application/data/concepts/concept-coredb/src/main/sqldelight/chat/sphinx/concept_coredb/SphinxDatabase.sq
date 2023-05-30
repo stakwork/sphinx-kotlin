@@ -1292,6 +1292,7 @@ SELECT *
 FROM feedItemDbo
 WHERE feed_id = ? AND local_file IS NOT NULL;
 
+
 feedItemDeleteById:
 DELETE
 FROM feedItemDbo
@@ -1312,6 +1313,11 @@ feedItemUpdateLocalFile:
 UPDATE feedItemDbo
 SET local_file = :local_file
 WHERE id = ?;
+
+feedItemDeleteAllDownloadedByFeedId:
+UPDATE feedItemDbo
+SET local_file = NULL
+WHERE feed_id = ?;
 
 
 CREATE TABLE feedModelDbo(

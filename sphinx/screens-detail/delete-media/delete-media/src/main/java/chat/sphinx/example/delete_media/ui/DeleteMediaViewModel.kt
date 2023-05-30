@@ -5,6 +5,7 @@ import android.content.*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.example.delete_media.model.MediaSection
 import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
 import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
@@ -28,6 +29,7 @@ internal class DeleteMediaViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteMediaNavigator,
     private val feedRepository: FeedRepository,
+    private val repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -62,6 +64,16 @@ internal class DeleteMediaViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun deleteAllFeedItems(feedId: FeedId) {
+        viewModelScope.launch(mainImmediate) {
+            val feed = feedRepository.getFeedById(feedId).firstOrNull()
+            feed?.let { nnFeed ->
+                repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
+            }
+        }
+    
     }
 
     private fun getLocalFilesGroupedByFeed(feedItems: List<FeedItem>): Map<FeedId?, List<File>> {
