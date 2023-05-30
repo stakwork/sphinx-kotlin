@@ -215,6 +215,7 @@
 
     <string name="youtube" translatable="false">Youtube</string>
     <string name="podcast" translatable="false">Podcast</string>
+    <string name="podcasts" translatable="false">Podcasts</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

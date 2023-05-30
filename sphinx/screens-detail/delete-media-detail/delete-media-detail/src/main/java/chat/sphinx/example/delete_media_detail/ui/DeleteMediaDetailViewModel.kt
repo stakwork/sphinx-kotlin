@@ -7,6 +7,7 @@ import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavig
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteNotificationViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -17,13 +18,16 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteMediaDetailNavigator,
     dispatchers: CoroutineDispatchers,
-    handle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
         DeleteDetailNotifySideEffect,
         DeleteMediaDetailViewState
         >(dispatchers, DeleteMediaDetailViewState.Idle)
 {
+
+    private val args: DeleteMediaDetailFragmentArgs by savedStateHandle.navArgs()
+
     val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
     }

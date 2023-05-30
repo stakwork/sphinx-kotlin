@@ -89,7 +89,9 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
     }
 
     private fun setUpHeader() {
-        binding.apply {}
+        binding.apply {
+            includeManageMediaElementHeader.textViewHeader.text = getString(R.string.podcasts)
+        }
     }
 
     private fun setClickListeners() {

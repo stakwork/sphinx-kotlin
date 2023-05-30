@@ -1,7 +1,10 @@
 package chat.sphinx.example.delete_media.model
 
+import chat.sphinx.wrapper_common.feed.FeedId
+
 data class MediaSection(
-    val name: String,
+    val title: String,
     val image: String,
-    val size: String
+    val size: String,
+    val feedId: FeedId
 )

@@ -9,6 +9,8 @@
         android:id="@+id/navigation_delete_media_details_fragment"
         android:name="chat.sphinx.example.delete_media_detail.ui.DeleteMediaDetailFragment"
         tools:layout="@layout/fragment_delete_media_details" >
+        <argument
+            android:name="argFeedId"
+            app:argType="string"/>
     </fragment>
-
 </navigation>

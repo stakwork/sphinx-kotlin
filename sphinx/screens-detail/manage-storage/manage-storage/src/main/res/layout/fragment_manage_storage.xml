@@ -189,7 +189,7 @@
                 android:layout_height="@dimen/default_header_margin_horizontal"
                 android:indeterminate="true"
                 android:indeterminateTint="@color/primaryText"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/button_profile_trash_images"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -199,7 +199,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_marginStart="@dimen/default_layout_margin"
-                android:background="@color/black"
+                android:background="@color/darkDivider"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/storage_progress_point_images" />
@@ -268,7 +268,7 @@
                 android:layout_height="@dimen/default_header_margin_horizontal"
                 android:indeterminate="true"
                 android:indeterminateTint="@color/primaryText"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/button_profile_trash_video"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -278,7 +278,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_marginStart="@dimen/default_layout_margin"
-                android:background="@color/black"
+                android:background="@color/darkDivider"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/storage_progress_point_video" />
@@ -347,7 +347,7 @@
                 android:layout_height="@dimen/default_header_margin_horizontal"
                 android:indeterminate="true"
                 android:indeterminateTint="@color/primaryText"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/button_profile_trash_audio"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -357,7 +357,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_marginStart="@dimen/default_layout_margin"
-                android:background="@color/black"
+                android:background="@color/darkDivider"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/storage_progress_point_audio" />
@@ -390,12 +390,12 @@
                 android:layout_marginStart="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
+                android:text="@string/podcasts"
                 android:textColor="@color/primaryText"
                 android:textSize="@dimen/pin_help_text_view_size"
                 app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_custom_type"
                 app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type"
-                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_custom_type"
-                tools:text="Podcasts"/>
+                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_custom_type" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_custom_type_number"
@@ -426,7 +426,7 @@
                 android:layout_height="@dimen/default_header_margin_horizontal"
                 android:indeterminate="true"
                 android:indeterminateTint="@color/primaryText"
-                android:visibility="visible"
+                android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/button_profile_right_arrow_custom_type"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -436,7 +436,7 @@
                 android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_marginStart="@dimen/default_layout_margin"
-                android:background="@color/black"
+                android:background="@color/darkDivider"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type" />

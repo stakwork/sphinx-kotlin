@@ -143,7 +143,7 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.buttonCancel.setOnClickListener {
                 viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
             }
-            constraintLayoutStorageImageContainer.setOnClickListener {
+            constraintLayoutStorageCustomTypeContainer.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.toDeleteMediaDetail()
                 }

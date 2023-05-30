@@ -43,28 +43,23 @@ internal class DeleteMediaViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             feedRepository.getAllDownloadedFeedItems().collect { feedItems ->
-                val feedItemDownloadedList = feedItems
-                val feedList = getLocalFilesGroupedByFeed(feedItemDownloadedList)
-                val sectionList = mutableListOf<MediaSection>()
+                val feedList = getLocalFilesGroupedByFeed(feedItems)
 
-                feedList.keys.forEach { feedId ->
-                    feedId?.let { nnFeedId ->
-                        val podcast = feedRepository.getPodcastById(nnFeedId).firstOrNull()
-                        val listOfFiles = feedList[nnFeedId]
-                        listOfFiles?.let { nnListOfFiles ->
-                            podcast?.let { podcast ->
-                                sectionList.add(
-                                MediaSection(
-                                    podcast.title.value,
-                                    podcast.imageToShow?.value ?: "",
-                                    calculateTotalSize(nnListOfFiles)
-                                )
-                                )
-                            }
-                        }
-                    }
+                feedList.keys.mapNotNull { feedId ->
+                    val podcast = feedId?.let { feedRepository.getPodcastById(it).firstOrNull() }
+                    val listOfFiles = feedList[feedId]
+
+                    if (podcast != null && listOfFiles != null) {
+                        MediaSection(
+                            podcast.title.value,
+                            podcast.imageToShow?.value.orEmpty(),
+                            calculateTotalSize(listOfFiles),
+                            podcast.id
+                        )
+                    } else null
+                }.also { sectionList ->
+                    viewStateContainer.updateViewState(DeleteMediaViewState.SectionList(sectionList))
                 }
-                viewStateContainer.updateViewState(DeleteMediaViewState.SectionList(sectionList))
             }
         }
     }

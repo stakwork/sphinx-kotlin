@@ -16,6 +16,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/image_view_storage_cardview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/episode_image_radius"
+            android:background="@color/body"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_member_initials"
             android:layout_width="@dimen/default_tap_target_min_height"
@@ -27,8 +37,6 @@
             android:singleLine="true"
             android:textColor="@android:color/white"
             android:textSize="17sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="TT"
             tools:visibility="visible" />
@@ -39,10 +47,9 @@
             android:layout_height="@dimen/default_tap_target_min_height"
             android:layout_centerInParent="true"
             android:src="@drawable/ic_profile_avatar_circle"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
+
+        </androidx.cardview.widget.CardView>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_element_text"
@@ -55,7 +62,7 @@
             android:textColor="@color/primaryText"
             android:textSize="@dimen/pin_help_text_view_size"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/image_view_element_picture"
+            app:layout_constraintStart_toEndOf="@+id/image_view_storage_cardview"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -89,7 +96,7 @@
         android:layout_height="1dp"
         android:layout_marginStart="@dimen/default_extra_big_layout_margin"
         android:layout_marginEnd="@dimen/default_layout_margin"
-        android:background="@color/black"
+        android:background="@color/darkDivider"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
