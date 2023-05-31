@@ -15,7 +15,6 @@ import chat.sphinx.delete.media.detail.databinding.MediaStorageListItemHolderBin
 import chat.sphinx.example.delete_media_detail.model.EpisodeToDelete
 import chat.sphinx.example.delete_media_detail.ui.DeleteMediaDetailViewModel
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
-import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
@@ -157,7 +156,9 @@ internal class DeleteMediaDetailAdapter(
 
         init {
             binding.root.setOnClickListener {
-                viewModel.openDeleteItemPopUp()
+                episode?.let { nnEpisode ->
+                viewModel.openDeleteItemPopup(nnEpisode.feedItem)
+                }
             }
         }
 

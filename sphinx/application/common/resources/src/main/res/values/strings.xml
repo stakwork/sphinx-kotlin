@@ -214,6 +214,7 @@
     <string name="manage_storage_deleted_all_podcast">All podcast episode</string>
     <string name="manage_storage_deleted_successfully">successfully deleted</string>
     <string name="manage_storage_deleted_free_space">You have freed up %s of storage space</string>
+    <string name="manage_storage_delete_item">Delete %s?</string>
 
 
     <string name="video_sats_per_minute">Sats per minute</string>

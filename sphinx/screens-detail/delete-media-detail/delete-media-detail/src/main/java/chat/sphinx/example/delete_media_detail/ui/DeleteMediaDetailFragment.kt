@@ -110,7 +110,7 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                 }
             }
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
-                viewModel.closeDeleteItemPopUp()
+                viewModel.closeDeleteItemPopup()
             }
             includeManageMediaElementHeader.buttonProfileDelete.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
@@ -119,7 +119,7 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             }
 
             includeLayoutDeleteAllNotificationScreen.buttonDelete.setOnClickListener {
-                viewModel.deleteAllFeedItems()
+                viewModel.deleteAllDownloadedFeedItems()
             }
             includeLayoutDeleteAllNotificationScreen.buttonGotIt.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
@@ -129,6 +129,13 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             includeLayoutDeleteAllNotificationScreen.buttonCancel.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Closed)
             }
+
+            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonDelete.setOnClickListener {
+                (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteItemNotificationViewState.Open)?.let { viewState ->
+                    viewModel.deleteDownloadedFeedItem(viewState.feedItem)
+                }
+            }
+            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel
         }
     }
 
@@ -163,7 +170,9 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                 binding.includeLayoutManageStorageDeleteNotification.apply {
                     when (viewState) {
                         is DeleteItemNotificationViewState.Closed -> {}
-                        is DeleteItemNotificationViewState.Open -> {}
+                        is DeleteItemNotificationViewState.Open -> {
+                            includeLayoutManageStorageDeleteDetails.textViewStorageDeleteHeader.text = String.format(getString(R.string.manage_storage_delete_item), viewState.feedItem.titleToShow)
+                        }
                     }
                     root.setTransitionDuration(300)
                     viewState.transitionToEndSet(root)

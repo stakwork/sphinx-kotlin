@@ -70,13 +70,19 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         }
     }
 
-    fun deleteDownloadedMedia(feedItem: FeedItem) {
+    fun deleteDownloadedFeedItem(feedItem: FeedItem) {
             viewModelScope.launch(mainImmediate) {
-                repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)
+                if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
+                    deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
+                }
+                else {
+                    deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
+                    // handle toast
+                }
             }
         }
 
-    fun deleteAllFeedItems() {
+    fun deleteAllDownloadedFeedItems() {
         deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleting)
         viewModelScope.launch(mainImmediate) {
             currentFeed?.let { nnFeed ->
@@ -90,10 +96,10 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         }
     }
 
-    fun openDeleteItemPopUp() {
-        deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Open)
+    fun openDeleteItemPopup(feedItem: FeedItem) {
+        deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Open(feedItem))
     }
-    fun closeDeleteItemPopUp() {
+    fun closeDeleteItemPopup() {
         deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
     }
 
