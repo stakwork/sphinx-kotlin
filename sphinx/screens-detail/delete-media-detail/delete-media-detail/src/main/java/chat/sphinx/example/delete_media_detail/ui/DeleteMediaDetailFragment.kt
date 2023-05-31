@@ -112,24 +112,27 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
                 viewModel.closeDeleteItemPopup()
             }
-            includeManageMediaElementHeader.buttonProfileDelete.setOnClickListener {
+            includeManageMediaElementHeader.constraintLayoutDeleteElementContainer.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Open
                 )
             }
 
-            includeLayoutDeleteAllNotificationScreen.buttonDelete.setOnClickListener {
-                viewModel.deleteAllDownloadedFeedItems()
-            }
-            includeLayoutDeleteAllNotificationScreen.buttonGotIt.setOnClickListener {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.popBackStack()
+            includeLayoutDeleteAllNotificationScreen.apply {
+
+                buttonDelete.setOnClickListener { viewModel.deleteAllDownloadedFeedItems() }
+
+                buttonGotIt.setOnClickListener {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.popBackStack()
+                    }
+                }
+                buttonCancel.setOnClickListener {
+                    viewModel.deleteAllNotificationViewStateContainer.updateViewState(
+                        DeleteAllNotificationViewStateContainer.Closed
+                    )
                 }
             }
-            includeLayoutDeleteAllNotificationScreen.buttonCancel.setOnClickListener {
-                viewModel.deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Closed)
-            }
-
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonDelete.setOnClickListener {
                 (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteItemNotificationViewState.Open)?.let { viewState ->
                     viewModel.deleteDownloadedFeedItem(viewState.feedItem)

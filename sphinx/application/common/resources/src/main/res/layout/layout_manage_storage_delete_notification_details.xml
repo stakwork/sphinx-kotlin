@@ -23,11 +23,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
+        android:ellipsize="end"
         android:fontFamily="@font/roboto_medium"
         android:maxLines="1"
         android:textColor="@color/primaryText"
         android:textSize="@dimen/pin_help_text_view_size"
         app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow_total_delete"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/button_profile_right_arrow_total_delete"
         app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_total_delete"
         tools:text="Delete 2 Images?" />
