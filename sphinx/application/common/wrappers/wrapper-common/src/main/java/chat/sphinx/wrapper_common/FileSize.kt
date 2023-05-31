@@ -8,6 +8,11 @@ import java.util.*
 
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun Long.toFileSize(): FileSize? {
+    return if (this > 0) FileSize(this) else null
+}
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun FileSize.asFormattedString(): String{
 
     var bytes = value

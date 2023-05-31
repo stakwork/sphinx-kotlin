@@ -110,7 +110,7 @@
     <string name="manage_storage_deleted_free_space">You have freed up %s of storage space</string>
     <string name="video_sats_per_minute">Sats per minute</string>
     <string name="manage_storage_delete_item">Delete %s?</string>
-
+    <string name="manage_storage_error_delete">There was an error in the delete process</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

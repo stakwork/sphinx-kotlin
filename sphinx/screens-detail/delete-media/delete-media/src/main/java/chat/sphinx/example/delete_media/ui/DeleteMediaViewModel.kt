@@ -11,8 +11,10 @@ import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
 import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
 import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.calculateTotalSize
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -46,8 +48,9 @@ internal class DeleteMediaViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             feedRepository.getAllDownloadedFeedItems().collect { feedItems ->
                 val feedList = getLocalFilesGroupedByFeed(feedItems)
+                val totalSizeAllSections = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()?.calculateSize() ?: ""
 
-                feedList.keys.mapNotNull { feedId ->
+                    feedList.keys.mapNotNull { feedId ->
                     val podcast = feedId?.let { feedRepository.getPodcastById(it).firstOrNull() }
                     val listOfFiles = feedList[feedId]
 
@@ -61,7 +64,7 @@ internal class DeleteMediaViewModel @Inject constructor(
                         )
                     } else null
                 }.also { sectionList ->
-                    viewStateContainer.updateViewState(DeleteMediaViewState.SectionList(sectionList))
+                    viewStateContainer.updateViewState(DeleteMediaViewState.SectionList(sectionList, totalSizeAllSections))
                 }
             }
         }

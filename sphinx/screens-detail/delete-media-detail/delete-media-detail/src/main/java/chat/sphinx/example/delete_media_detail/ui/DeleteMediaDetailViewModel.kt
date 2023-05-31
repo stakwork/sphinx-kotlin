@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.delete.media.detail.R
 import chat.sphinx.example.delete_media_detail.model.EpisodeToDelete
 import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteAllNotificationViewStateContainer
@@ -20,6 +21,7 @@ import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -77,7 +79,9 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
                 }
                 else {
                     deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
-                    // handle toast
+                        submitSideEffect(
+                            DeleteDetailNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
+                        )
                 }
             }
         }
@@ -90,7 +94,10 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
                     deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleted)
                 }
                 else {
-                    // handle toast
+                    deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Closed)
+                    submitSideEffect(
+                        DeleteDetailNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
+                    )
                 }
             }
         }

@@ -7,7 +7,8 @@ internal sealed class DeleteMediaViewState: ViewState<DeleteMediaViewState>() {
     object Loading : DeleteMediaViewState()
 
     class SectionList(
-        val section: List<MediaSection>
+        val section: List<MediaSection>,
+        val totalSizeAllSections: String
     ) : DeleteMediaViewState()
 
 
