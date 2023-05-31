@@ -9,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/change_storage_header_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -20,7 +20,7 @@
             android:layout_height="@dimen/default_header_height"
             android:fontFamily="@font/material_icons_regular"
             android:gravity="center"
-            android:text="@string/material_icon_name_close"
+            android:text="@string/material_icon_name_nav_back"
             android:textColor="@color/placeholderText"
             android:textSize="@dimen/default_text_size_back_arrow"
             app:layout_constraintStart_toStartOf="parent"
@@ -31,16 +31,55 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_elevation"
+            android:ellipsize="end"
             android:fontFamily="@font/roboto_medium"
             android:maxLines="1"
-            android:ellipsize="end"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/pin_text_view_size"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_detail_screen_close"
+            app:layout_constraintEnd_toStartOf="@+id/constraint_layout_delete_element_container_trash"
             app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_close"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Manage Storage"/>
+            tools:text="Manage Storage" />
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_delete_element_container_trash"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_element_number"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_half_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_list_row_headline_variation"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/button_profile_delete"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_delete"
+                app:layout_constraintTop_toTopOf="@+id/button_profile_delete"
+                tools:text="12.37 GB" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_profile_delete"
+                android:layout_width="@dimen/badges_icon_radius"
+                android:layout_height="@dimen/badges_icon_radius"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:background="@drawable/ic_delete"
+                android:backgroundTint="@color/secondaryText"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <View
             android:id="@+id/view_storage_separator_divider_one"
@@ -53,42 +92,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint_layout_delete_element_container"
-        android:layout_width="@dimen/manage_storage_image_grid_size"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_manage_storage_element_number"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/default_layout_margin"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="1"
-            android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_text_size_list_row_headline_variation"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@+id/button_profile_delete"
-            app:layout_constraintEnd_toStartOf="@+id/button_profile_delete"
-            app:layout_constraintTop_toTopOf="@+id/button_profile_delete"
-            tools:text="12.37 GB" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/button_profile_delete"
-            android:layout_width="@dimen/badges_icon_radius"
-            android:layout_height="@dimen/badges_icon_radius"
-            android:layout_marginEnd="@dimen/default_layout_margin"
-            android:background="@drawable/ic_delete"
-            android:backgroundTint="@color/secondaryText"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

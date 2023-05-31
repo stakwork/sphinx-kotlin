@@ -112,7 +112,7 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
                 viewModel.closeDeleteItemPopup()
             }
-            includeManageMediaElementHeader.constraintLayoutDeleteElementContainer.setOnClickListener {
+            includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Open
                 )
@@ -150,7 +150,7 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                 binding.apply {
                     includeManageMediaElementHeader.textViewHeader.text = viewState.feedName
                     includeManageMediaElementHeader.textViewManageStorageElementNumber.visible
-                    includeManageMediaElementHeader.buttonProfileDelete.visible
+                    includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.visible
                     includeManageMediaElementHeader.textViewManageStorageElementNumber.text = viewState.totalSize
 
                     includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)

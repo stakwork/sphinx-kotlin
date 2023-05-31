@@ -364,86 +364,97 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_storage_custom_type_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/background_detail_screen"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_manage_bar_container">
+
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constraint_layout_storage_custom_type_container"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
-            android:layout_width="0dp"
+            android:id="@+id/constraint_layout_storage_podcast_type_container"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/default_header_navigation_xy"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/storage_progress_point_custom_type"
+            android:layout_width="@dimen/badges_icon_size"
+            android:layout_height="@dimen/badges_icon_size"
+            android:backgroundTint="@color/storageBarYellow"
+            android:src="@drawable/ic_podcast_type"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_audio_container">
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/storage_progress_point_custom_type"
-                android:layout_width="@dimen/badges_icon_size"
-                android:layout_height="@dimen/badges_icon_size"
-                android:src="@drawable/ic_podcast_type"
-                android:backgroundTint="@color/storageBarYellow"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_custom_type_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:text="@string/podcasts"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/pin_help_text_view_size"
+            app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_custom_type"
+            app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type"
+            app:layout_constraintTop_toTopOf="@+id/storage_progress_point_custom_type" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_manage_storage_custom_type_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/default_layout_margin"
-                android:fontFamily="@font/roboto_regular"
-                android:maxLines="1"
-                android:text="@string/podcasts"
-                android:textColor="@color/primaryText"
-                android:textSize="@dimen/pin_help_text_view_size"
-                app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_custom_type"
-                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type"
-                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_custom_type" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_custom_type_number"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_tab"
+            app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow_custom_type"
+            app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow_custom_type"
+            app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_custom_type"
+            tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_manage_storage_custom_type_number"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_regular"
-                android:layout_marginEnd="@dimen/default_layout_margin"
-                android:maxLines="1"
-                android:textColor="@color/secondaryText"
-                android:textSize="@dimen/default_text_size_tab"
-                app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow_custom_type"
-                app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow_custom_type"
-                app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_custom_type"
-                tools:text="12.37 GB" />
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_profile_right_arrow_custom_type"
+            android:layout_width="@dimen/default_form_scan_icon_width"
+            android:layout_height="@dimen/default_form_scan_icon_width"
+            android:background="@drawable/ic_arrow_right"
+            android:backgroundTint="@color/secondaryText"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_custom_type_text"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_profile_right_arrow_custom_type"
-                android:layout_width="@dimen/default_form_scan_icon_width"
-                android:layout_height="@dimen/default_form_scan_icon_width"
-                android:background="@drawable/ic_arrow_right"
-                android:backgroundTint="@color/secondaryText"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_custom_type_text"
-                app:layout_constraintEnd_toEndOf="parent" />
+        <ProgressBar
+            android:id="@+id/progress_bar_custom_type"
+            android:layout_width="@dimen/default_header_margin_horizontal"
+            android:layout_height="@dimen/default_header_margin_horizontal"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/primaryText"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/button_profile_right_arrow_custom_type"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <ProgressBar
-                android:id="@+id/progress_bar_custom_type"
-                android:layout_width="@dimen/default_header_margin_horizontal"
-                android:layout_height="@dimen/default_header_margin_horizontal"
-                android:indeterminate="true"
-                android:indeterminateTint="@color/primaryText"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/button_profile_right_arrow_custom_type"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <View
-                android:id="@+id/view_storage_separator_divider_four"
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_marginStart="@dimen/default_layout_margin"
-                android:background="@color/darkDivider"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type" />
-
+        <View
+            android:id="@+id/view_storage_separator_divider_four"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:background="@color/darkDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <include
         android:id="@+id/include_layout_change_limit"

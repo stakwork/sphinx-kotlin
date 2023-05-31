@@ -6,7 +6,7 @@
     android:id="@+id/delete_media_screen"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/headerBG">
+    android:background="@drawable/background_detail_screen">
 
     <include
         android:id="@+id/include_manage_media_element_header"
