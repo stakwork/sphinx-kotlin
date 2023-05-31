@@ -18,6 +18,7 @@ import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.collect
@@ -40,19 +41,22 @@ internal class DeleteMediaViewModel @Inject constructor(
         DeleteMediaViewState
         >(dispatchers, DeleteMediaViewState.Loading)
 {
-     val deleteNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
+     val deleteAllFeedsNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
     }
+    private var feedIdsList: List<FeedId?>? = null
+
 
     init {
         viewModelScope.launch(mainImmediate) {
             feedRepository.getAllDownloadedFeedItems().collect { feedItems ->
-                val feedList = getLocalFilesGroupedByFeed(feedItems)
-                val totalSizeAllSections = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()?.calculateSize() ?: ""
+                val feedIdAndFileList = getLocalFilesGroupedByFeed(feedItems)
+                val totalSizeAllSections: String? = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()?.calculateSize()
+                feedIdsList = feedIdAndFileList.map { it.key }
 
-                    feedList.keys.mapNotNull { feedId ->
+                    feedIdAndFileList.keys.mapNotNull { feedId ->
                     val podcast = feedId?.let { feedRepository.getPodcastById(it).firstOrNull() }
-                    val listOfFiles = feedList[feedId]
+                    val listOfFiles = feedIdAndFileList[feedId]
 
                     if (podcast != null && listOfFiles != null) {
                         val totalSize = listOfFiles.map { FileSize(it.length()) }.calculateTotalSize()
@@ -70,9 +74,25 @@ internal class DeleteMediaViewModel @Inject constructor(
         }
     }
 
+    fun deleteAllDownloadedFeeds() {
+        deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
+        viewModelScope.launch(mainImmediate) {
+            feedIdsList?.forEach { feedId ->
+                feedId?.let { nnFeedId ->
+                    feedRepository.getFeedById(nnFeedId).firstOrNull()?.let {nnFeed ->
+                        repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
+                    }
+                }
+            }
+            deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.SuccessfullyDeleted)
+        }
+    }
+
+
     private fun getLocalFilesGroupedByFeed(feedItems: List<FeedItem>): Map<FeedId?, List<File>> {
         return feedItems.groupBy({ it.feedId }, { it.localFile as File })
     }
+
 
 
 }

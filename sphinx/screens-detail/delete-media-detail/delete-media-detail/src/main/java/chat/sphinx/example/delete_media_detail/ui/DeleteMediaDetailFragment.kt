@@ -64,7 +64,6 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
 
         BackPressHandler(viewLifecycleOwner, requireActivity())
         setupDeleteMediaDetailsAdapter()
-        setUpHeader()
         setClickListeners()
 
         (requireActivity() as InsetterActivity)
@@ -98,13 +97,9 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
         }
     }
 
-    private fun setUpHeader() {
-        binding.apply {}
-    }
-
     private fun setClickListeners() {
         binding.apply {
-            includeManageMediaElementHeader.textViewDetailScreenClose.setOnClickListener {
+            includeManageMediaElementHeaderDetails.textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }
@@ -112,16 +107,14 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
                 viewModel.closeDeleteItemPopup()
             }
-            includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.setOnClickListener {
+            includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Open
                 )
             }
 
             includeLayoutDeleteAllNotificationScreen.apply {
-
                 buttonDelete.setOnClickListener { viewModel.deleteAllDownloadedFeedItems() }
-
                 buttonGotIt.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         viewModel.navigator.popBackStack()
@@ -148,10 +141,10 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
             is DeleteMediaDetailViewState.Idle -> {}
             is DeleteMediaDetailViewState.EpisodeList -> {
                 binding.apply {
-                    includeManageMediaElementHeader.textViewHeader.text = viewState.feedName
-                    includeManageMediaElementHeader.textViewManageStorageElementNumber.visible
-                    includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.visible
-                    includeManageMediaElementHeader.textViewManageStorageElementNumber.text = viewState.totalSize
+                    includeManageMediaElementHeaderDetails.textViewHeader.text = viewState.feedName
+                    includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.visible
+                    includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.visible
+                    includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.text = viewState.totalSize
 
                     includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
 
@@ -161,6 +154,9 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                                 getString(R.string.manage_storage_deleted_free_space),
                                 viewState.totalSize
                             )
+                    }
+                    if (viewState.episodes.isEmpty()) {
+                        binding.includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.gone
                     }
                 }
             }

@@ -9,7 +9,7 @@
     android:background="@drawable/background_detail_screen">
 
     <include
-        android:id="@+id/include_manage_media_element_header"
+        android:id="@+id/include_manage_media_element_header_details"
         layout="@layout/layout_detail_screen_alternative_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header"
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header_details"
         tools:listitem="@layout/media_storage_list_item_holder" />
 
     <include
@@ -34,7 +34,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header" />
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header_details" />
 
     <include
         android:id="@+id/include_layout_manage_storage_delete_notification"

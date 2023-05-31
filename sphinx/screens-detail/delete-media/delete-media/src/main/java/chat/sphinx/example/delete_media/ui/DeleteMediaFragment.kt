@@ -80,7 +80,6 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
                 )
             }
         }
-
         override fun handleOnBackPressed() {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
@@ -103,14 +102,17 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
             }
             includeLayoutDeleteNotificationScreen.apply {
                 buttonDelete.setOnClickListener {
-                    viewModel.deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
+                    viewModel.deleteAllDownloadedFeeds()
                 }
                 buttonGotIt.setOnClickListener {
-                    viewModel.deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
+                    viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
                 }
                 buttonCancel.setOnClickListener {
-                    viewModel.deleteNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
+                    viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
                 }
+            }
+            includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.setOnClickListener {
+                    viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
             }
         }
     }
@@ -119,13 +121,32 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
         @Exhaustive
         when (viewState) {
             is DeleteMediaViewState.Loading -> {}
-            is DeleteMediaViewState.SectionList -> {}
+            is DeleteMediaViewState.SectionList -> {
+                binding.includeManageMediaElementHeader.apply {
+                    constraintLayoutDeleteElementContainerTrash.visible
+                    textViewManageStorageElementNumber.text = viewState.totalSizeAllSections
+
+                }
+                binding.includeLayoutDeleteNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
+                viewState.totalSizeAllSections?.let { totalSize ->
+                    if (totalSize.split(" ")[0].toDouble().toInt() > 0) {
+                        binding.includeLayoutDeleteNotificationScreen.textViewManageStorageFreeSpaceText.text =
+                            String.format(
+                                getString(R.string.manage_storage_deleted_free_space),
+                                viewState.totalSizeAllSections
+                            )
+                    }
+                }
+                if (viewState.section.isEmpty()) {
+                    binding.includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.gone
+                }
+            }
         }
     }
 
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.deleteNotificationViewStateContainer.collect { viewState ->
+            viewModel.deleteAllFeedsNotificationViewStateContainer.collect { viewState ->
                 binding.includeLayoutDeleteNotificationScreen.apply {
                     when (viewState) {
                         is DeleteNotificationViewState.Closed -> {
