@@ -46,7 +46,6 @@ internal class DeleteMediaViewModel @Inject constructor(
     }
     private var feedIdsList: List<FeedId?>? = null
 
-
     init {
         viewModelScope.launch(mainImmediate) {
             feedRepository.getAllDownloadedFeedItems().collect { feedItems ->

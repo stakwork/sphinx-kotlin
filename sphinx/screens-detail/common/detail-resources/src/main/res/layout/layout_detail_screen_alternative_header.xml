@@ -31,7 +31,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_elevation"
-            android:ellipsize="end"
+            android:ellipsize="none"
             android:fontFamily="@font/roboto_medium"
             android:maxLines="1"
             android:textColor="@color/primaryText"

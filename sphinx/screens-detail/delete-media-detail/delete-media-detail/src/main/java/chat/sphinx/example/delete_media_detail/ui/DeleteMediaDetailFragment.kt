@@ -89,7 +89,13 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Closed
                 )
-            } else {
+            }
+            if (viewModel.deleteItemNotificationViewStateContainer.value is DeleteItemNotificationViewState.Open) {
+                viewModel.deleteItemNotificationViewStateContainer.updateViewState(
+                    DeleteItemNotificationViewState.Closed
+                )
+            }
+            else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }

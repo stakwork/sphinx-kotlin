@@ -25,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -81,8 +82,15 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
             }
         }
         override fun handleOnBackPressed() {
+            if (viewModel.deleteAllFeedsNotificationViewStateContainer.value is DeleteNotificationViewState.Open) {
+                viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(
+                    DeleteNotificationViewState.Closed
+                )
+            }
+            else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
+                }
             }
         }
     }
