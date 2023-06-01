@@ -14,25 +14,25 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.delete.media.R
 import chat.sphinx.delete.media.databinding.StorageElementListItemHolderBinding
-import chat.sphinx.example.delete_media.model.MediaSection
-import chat.sphinx.example.delete_media.ui.DeleteMediaViewModel
-import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
+import chat.sphinx.example.delete_media.model.PodcastToDelete
+import chat.sphinx.example.delete_media.ui.DeletePodcastViewModel
+import chat.sphinx.example.delete_media.viewstate.DeletePodcastViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-internal class MediaSectionAdapter(
+internal class PodcastDeleteAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
-    private val viewModel: DeleteMediaViewModel,
-): RecyclerView.Adapter<MediaSectionAdapter.MediaSectionViewHolder>(), DefaultLifecycleObserver {
+    private val viewModel: DeletePodcastViewModel,
+): RecyclerView.Adapter<PodcastDeleteAdapter.MediaSectionViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
-        private val oldList: List<MediaSection>,
-        private val newList: List<MediaSection>,
+        private val oldList: List<PodcastToDelete>,
+        private val newList: List<PodcastToDelete>,
     ): DiffUtil.Callback() {
 
         override fun getOldListSize(): Int {
@@ -86,7 +86,7 @@ internal class MediaSectionAdapter(
 
     }
 
-    private val sectionItems = ArrayList<MediaSection>(listOf())
+    private val sectionItems = ArrayList<PodcastToDelete>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -94,7 +94,7 @@ internal class MediaSectionAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.viewStateContainer.collect { viewState ->
 
-                var list: List<MediaSection> = if (viewState is DeleteMediaViewState.SectionList) {
+                var list: List<PodcastToDelete> = if (viewState is DeletePodcastViewState.SectionList) {
                     viewState.section
                 } else {
                     listOf()
@@ -102,7 +102,7 @@ internal class MediaSectionAdapter(
 
                 if (sectionItems.isEmpty()) {
                     sectionItems.addAll(list)
-                    this@MediaSectionAdapter.notifyDataSetChanged()
+                    this@PodcastDeleteAdapter.notifyDataSetChanged()
                 } else {
 
                     val diff = Diff(sectionItems, list)
@@ -114,7 +114,7 @@ internal class MediaSectionAdapter(
                         if (!diff.sameList) {
                             sectionItems.clear()
                             sectionItems.addAll(list)
-                            result.dispatchUpdatesTo(this@MediaSectionAdapter)
+                            result.dispatchUpdatesTo(this@PodcastDeleteAdapter)
                         }
                     }
                 }
@@ -126,7 +126,7 @@ internal class MediaSectionAdapter(
         return sectionItems.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaSectionAdapter.MediaSectionViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PodcastDeleteAdapter.MediaSectionViewHolder {
         val binding = StorageElementListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
@@ -136,7 +136,7 @@ internal class MediaSectionAdapter(
         return MediaSectionViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: MediaSectionAdapter.MediaSectionViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: PodcastDeleteAdapter.MediaSectionViewHolder, position: Int) {
         holder.bind(position)
     }
 
@@ -153,7 +153,7 @@ internal class MediaSectionAdapter(
         private val holderJobs: ArrayList<Job> = ArrayList(2)
         private val disposables: ArrayList<Disposable> = ArrayList(2)
 
-        private var section: MediaSection? = null
+        private var section: PodcastToDelete? = null
 
         init {
             binding.root.setOnClickListener {
@@ -167,7 +167,7 @@ internal class MediaSectionAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-                val sectionItem: MediaSection = sectionItems.getOrNull(position) ?: let {
+                val sectionItem: PodcastToDelete = sectionItems.getOrNull(position) ?: let {
                     section = null
                     return
                 }

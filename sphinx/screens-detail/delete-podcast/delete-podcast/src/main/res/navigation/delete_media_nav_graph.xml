@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/navigation_delete_media_fragment"
-        android:name="chat.sphinx.example.delete_media.ui.DeleteMediaFragment"
+        android:name="chat.sphinx.example.delete_media.ui.DeletePodcastFragment"
         tools:layout="@layout/fragment_delete_media" >
     </fragment>
 

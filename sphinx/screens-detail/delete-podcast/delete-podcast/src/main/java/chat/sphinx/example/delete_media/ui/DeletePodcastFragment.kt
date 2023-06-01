@@ -15,8 +15,8 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.delete.media.R
 import chat.sphinx.delete.media.databinding.FragmentDeleteMediaBinding
-import chat.sphinx.example.delete_media.adapter.MediaSectionAdapter
-import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
+import chat.sphinx.example.delete_media.adapter.PodcastDeleteAdapter
+import chat.sphinx.example.delete_media.viewstate.DeletePodcastViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -30,11 +30,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class DeleteMediaFragment: SideEffectDetailFragment<
+internal class DeletePodcastFragment: SideEffectDetailFragment<
         Context,
         DeleteNotifySideEffect,
-        DeleteMediaViewState,
-        DeleteMediaViewModel,
+        DeletePodcastViewState,
+        DeletePodcastViewModel,
         FragmentDeleteMediaBinding
         >(R.layout.fragment_delete_media)
 {
@@ -43,7 +43,9 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
     override val binding: FragmentDeleteMediaBinding by viewBinding(FragmentDeleteMediaBinding::bind)
-    override val viewModel: DeleteMediaViewModel by viewModels()
+    override val viewModel: DeletePodcastViewModel by viewModels()
+
+    private var maxTotalSize: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,19 +127,21 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
         }
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: DeleteMediaViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: DeletePodcastViewState) {
         @Exhaustive
         when (viewState) {
-            is DeleteMediaViewState.Loading -> {}
-            is DeleteMediaViewState.SectionList -> {
+            is DeletePodcastViewState.Loading -> {}
+            is DeletePodcastViewState.SectionList -> {
                 binding.includeManageMediaElementHeader.apply {
                     constraintLayoutDeleteElementContainerTrash.visible
                     textViewManageStorageElementNumber.text = viewState.totalSizeAllSections
 
                 }
                 binding.includeLayoutDeleteNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
-                viewState.totalSizeAllSections?.let { totalSize ->
-                    if (totalSize.split(" ")[0].toDouble().toInt() > 0) {
+                viewState.totalSizeAllSections?.let { allSectionsTotalSize ->
+                    val totalSize = allSectionsTotalSize.split(" ")[0].toDouble().toInt()
+                    if (totalSize > 0 && totalSize >= maxTotalSize) {
+                        maxTotalSize = totalSize
                         binding.includeLayoutDeleteNotificationScreen.textViewManageStorageFreeSpaceText.text =
                             String.format(
                                 getString(R.string.manage_storage_deleted_free_space),
@@ -145,6 +149,7 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
                             )
                     }
                 }
+
                 if (viewState.section.isEmpty()) {
                     binding.includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.gone
                 }
@@ -185,7 +190,7 @@ internal class DeleteMediaFragment: SideEffectDetailFragment<
 
     private fun setupMediaSectionAdapter() {
         binding.recyclerViewStorageElementList.apply {
-            val mediaSectionAdapter = MediaSectionAdapter(
+            val mediaSectionAdapter = PodcastDeleteAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,

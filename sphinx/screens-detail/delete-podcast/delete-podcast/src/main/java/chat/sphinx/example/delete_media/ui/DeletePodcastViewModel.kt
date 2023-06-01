@@ -6,9 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
-import chat.sphinx.example.delete_media.model.MediaSection
+import chat.sphinx.example.delete_media.model.PodcastToDelete
 import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
-import chat.sphinx.example.delete_media.viewstate.DeleteMediaViewState
+import chat.sphinx.example.delete_media.viewstate.DeletePodcastViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.calculateSize
@@ -18,7 +18,6 @@ import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.collect
@@ -28,7 +27,7 @@ import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
-internal class DeleteMediaViewModel @Inject constructor(
+internal class DeletePodcastViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteMediaNavigator,
     private val feedRepository: FeedRepository,
@@ -38,8 +37,8 @@ internal class DeleteMediaViewModel @Inject constructor(
 ): SideEffectViewModel<
         Context,
         DeleteNotifySideEffect,
-        DeleteMediaViewState
-        >(dispatchers, DeleteMediaViewState.Loading)
+        DeletePodcastViewState
+        >(dispatchers, DeletePodcastViewState.Loading)
 {
      val deleteAllFeedsNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
@@ -59,7 +58,7 @@ internal class DeleteMediaViewModel @Inject constructor(
 
                     if (podcast != null && listOfFiles != null) {
                         val totalSize = listOfFiles.map { FileSize(it.length()) }.calculateTotalSize()
-                        MediaSection(
+                        PodcastToDelete(
                             podcast.title.value,
                             podcast.imageToShow?.value.orEmpty(),
                             totalSize,
@@ -67,7 +66,7 @@ internal class DeleteMediaViewModel @Inject constructor(
                         )
                     } else null
                 }.also { sectionList ->
-                    viewStateContainer.updateViewState(DeleteMediaViewState.SectionList(sectionList, totalSizeAllSections))
+                    viewStateContainer.updateViewState(DeletePodcastViewState.SectionList(sectionList, totalSizeAllSections))
                 }
             }
         }
