@@ -148,6 +148,11 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                     viewModel.navigator.toDeleteMediaDetail()
                 }
             }
+            constraintLayoutStorageChatTypeContainer.setOnClickListener {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.toDeleteChatMedia()
+                }
+            }
         }
     }
 
