@@ -26,6 +26,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
@@ -151,6 +152,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                     includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.visible
                     includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.visible
                     includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.text = viewState.totalSize
+                    textViewPodcastNoFound.goneIfFalse(viewState.episodes.isEmpty())
 
                     includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
 

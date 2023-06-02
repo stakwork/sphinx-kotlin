@@ -36,13 +36,26 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header_details" />
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_podcast_no_found"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_light"
+        android:text="@string/manage_storage_no_podcast_found"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/default_text_size_large_title"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <include
         android:id="@+id/include_layout_manage_storage_delete_notification"
         layout="@layout/layout_manage_storage_delete_notification"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:visibility="gone"/>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
