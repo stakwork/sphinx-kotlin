@@ -46,8 +46,7 @@
             android:id="@+id/constraint_layout_delete_element_container_trash"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:clickable="true"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -62,13 +61,13 @@
                 android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_list_row_headline_variation"
                 android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="@+id/button_profile_delete"
-                app:layout_constraintEnd_toStartOf="@+id/button_profile_delete"
-                app:layout_constraintTop_toTopOf="@+id/button_profile_delete"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_delete_icon"
+                app:layout_constraintEnd_toStartOf="@+id/image_view_delete_icon"
+                app:layout_constraintTop_toTopOf="@+id/image_view_delete_icon"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/button_profile_delete"
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_delete_icon"
                 android:layout_width="@dimen/badges_icon_radius"
                 android:layout_height="@dimen/badges_icon_radius"
                 android:layout_marginEnd="@dimen/default_layout_margin"
@@ -78,6 +77,16 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_header_delete"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:background="@android:color/transparent">
+
+            </androidx.appcompat.widget.AppCompatButton>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -91,8 +100,5 @@
             app:layout_constraintTop_toBottomOf="@+id/text_view_detail_screen_close" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

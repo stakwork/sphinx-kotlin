@@ -283,10 +283,9 @@ internal class ProfileFragment: SideEffectFragment<
 
                 includeProfileBasicContainerHolder.layoutConstraintProfileBasicContainerManageStorage.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
-                    profileNavigator.toManageStorageDetail()
+                        profileNavigator.toManageStorageDetail()
                     }
                 }
-
             }
         }
     }

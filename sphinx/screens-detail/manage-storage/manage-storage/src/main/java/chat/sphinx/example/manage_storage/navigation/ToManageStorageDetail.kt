@@ -14,10 +14,7 @@ class ToManageStorageDetail(
         controller.navigate(
             R.id.manage_storage_nav_graph,
             null,
-            DetailNavOptions.default
-                .setEnterAnim(nav_R.anim.slide_in_left)
-                .setPopExitAnim(nav_R.anim.slide_out_right)
-                .build()
+            options
         )
     }
 

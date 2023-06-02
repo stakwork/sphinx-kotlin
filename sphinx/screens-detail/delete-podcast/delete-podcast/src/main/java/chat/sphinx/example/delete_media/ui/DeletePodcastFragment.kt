@@ -14,7 +14,7 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.delete.media.R
-import chat.sphinx.delete.media.databinding.FragmentDeleteMediaBinding
+import chat.sphinx.delete.media.databinding.FragmentDeletePodcastBinding
 import chat.sphinx.example.delete_media.adapter.PodcastDeleteAdapter
 import chat.sphinx.example.delete_media.viewstate.DeletePodcastViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
@@ -36,14 +36,14 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
         DeleteNotifySideEffect,
         DeletePodcastViewState,
         DeletePodcastViewModel,
-        FragmentDeleteMediaBinding
-        >(R.layout.fragment_delete_media)
+        FragmentDeletePodcastBinding
+        >(R.layout.fragment_delete_podcast)
 {
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
-    override val binding: FragmentDeleteMediaBinding by viewBinding(FragmentDeleteMediaBinding::bind)
+    override val binding: FragmentDeletePodcastBinding by viewBinding(FragmentDeletePodcastBinding::bind)
     override val viewModel: DeletePodcastViewModel by viewModels()
 
     private var maxTotalSize: Int = 0
@@ -111,7 +111,8 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
-            includeLayoutDeleteNotificationScreen.apply {
+
+            includeDeleteNotification.apply {
                 buttonDelete.setOnClickListener {
                     viewModel.deleteAllDownloadedFeeds()
                 }
@@ -122,8 +123,9 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
                     viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Closed)
                 }
             }
-            includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.setOnClickListener {
-                    viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
+
+            includeManageMediaElementHeader.buttonHeaderDelete.setOnClickListener {
+                viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Open)
             }
         }
     }
@@ -136,17 +138,15 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
                 binding.includeManageMediaElementHeader.apply {
                     constraintLayoutDeleteElementContainerTrash.visible
                     textViewManageStorageElementNumber.text = viewState.totalSizeAllSections
-
                 }
-                binding.includeLayoutDeleteNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
                 binding.textViewPodcastNoFound.goneIfFalse(viewState.section.isEmpty())
-
+                binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
 
                 viewState.totalSizeAllSections?.let { allSectionsTotalSize ->
                     val totalSize = allSectionsTotalSize.split(" ")[0].toDouble().toInt()
                     if (totalSize > 0 && totalSize >= maxTotalSize) {
                         maxTotalSize = totalSize
-                        binding.includeLayoutDeleteNotificationScreen.textViewManageStorageFreeSpaceText.text =
+                        binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
                             String.format(
                                 getString(R.string.manage_storage_deleted_free_space),
                                 viewState.totalSizeAllSections
@@ -164,7 +164,7 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deleteAllFeedsNotificationViewStateContainer.collect { viewState ->
-                binding.includeLayoutDeleteNotificationScreen.apply {
+                binding.includeDeleteNotification.apply {
                     when (viewState) {
                         is DeleteNotificationViewState.Closed -> {
                             root.gone
@@ -176,11 +176,13 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
                             constraintDeleteSuccessfullyContainer.gone
                         }
                         is DeleteNotificationViewState.Deleting -> {
+                            root.visible
                             constraintChooseDeleteContainer.gone
                             constraintDeleteProgressContainer.visible
                             constraintDeleteSuccessfullyContainer.gone
                         }
                         is DeleteNotificationViewState.SuccessfullyDeleted -> {
+                            root.visible
                             constraintChooseDeleteContainer.gone
                             constraintDeleteProgressContainer.gone
                             constraintDeleteSuccessfullyContainer.visible

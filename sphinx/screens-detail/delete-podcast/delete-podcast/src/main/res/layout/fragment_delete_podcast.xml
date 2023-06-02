@@ -40,11 +40,10 @@
         app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header" />
 
     <include
-        android:id="@+id/include_layout_delete_notification_screen"
-        layout="@layout/layout_delete_notification_screen"
+        android:id="@+id/include_delete_notification"
+        layout="@layout/layout_delete_notification"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
