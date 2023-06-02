@@ -23,7 +23,7 @@
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header_details"
-        tools:listitem="@layout/media_storage_list_item_holder" />
+        tools:listitem="@layout/podcast_storage_list_item_holder" />
 
     <include
         android:id="@+id/include_layout_delete_all_notification_screen"

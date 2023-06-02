@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.delete.media.detail.R
-import chat.sphinx.example.delete_media_detail.model.EpisodeToDelete
+import chat.sphinx.example.delete_media_detail.model.PodcastDetailToDelete
 import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteAllNotificationViewStateContainer
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-internal class DeleteMediaDetailViewModel @Inject constructor(
+internal class DeletePodcastDetailViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteMediaDetailNavigator,
     private val feedRepository: FeedRepository,
@@ -44,7 +44,7 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
         DeleteMediaDetailViewState
         >(dispatchers, DeleteMediaDetailViewState.Idle)
 {
-    private val args: DeleteMediaDetailFragmentArgs by savedStateHandle.navArgs()
+    private val args: DeletePodcastDetailFragmentArgs by savedStateHandle.navArgs()
     private var currentFeed: Feed? = null
 
     val deleteAllNotificationViewStateContainer: ViewStateContainer<DeleteAllNotificationViewStateContainer> by lazy {
@@ -61,13 +61,13 @@ internal class DeleteMediaDetailViewModel @Inject constructor(
                 val feed = feedRepository.getFeedById(FeedId(args.argFeedId)).firstOrNull()
                 currentFeed = feed
                 val totalSize = feedItemList.map { FileSize(it.localFile?.length() ?: 0L) }.calculateTotalSize()
-                val episodeToDeleteList: List<EpisodeToDelete> = feedItemList.map { feedItem ->
-                    EpisodeToDelete(
+                val podcastDetailToDeleteLists: List<PodcastDetailToDelete> = feedItemList.map { feedItem ->
+                    PodcastDetailToDelete(
                         feedItem,
                         FileSize(feedItem.localFile?.length() ?: 0L).calculateSize()
                     )
                 }
-                updateViewState(DeleteMediaDetailViewState.EpisodeList(feed?.titleToShow ?: "", totalSize, episodeToDeleteList))
+                updateViewState(DeleteMediaDetailViewState.EpisodeList(feed?.titleToShow ?: "", totalSize, podcastDetailToDeleteLists))
             }
         }
     }

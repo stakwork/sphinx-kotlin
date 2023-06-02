@@ -15,9 +15,9 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.delete.media.detail.R
-import chat.sphinx.delete.media.detail.databinding.FragmentDeleteMediaDetailsBinding
-import chat.sphinx.example.delete_media_detail.adapter.DeleteMediaDetailAdapter
-import chat.sphinx.example.delete_media_detail.adapter.DeleteMediaFooterAdapter
+import chat.sphinx.delete.media.detail.databinding.FragmentDeletePodcastDetailsBinding
+import chat.sphinx.example.delete_media_detail.adapter.DeletePodcastDetailAdapter
+import chat.sphinx.example.delete_media_detail.adapter.DeletePodcastFooterAdapter
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteAllNotificationViewStateContainer
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteItemNotificationViewState
 import chat.sphinx.example.delete_media_detail.viewstate.DeleteMediaDetailViewState
@@ -33,20 +33,20 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
+internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
         Context,
         DeleteDetailNotifySideEffect,
         DeleteMediaDetailViewState,
-        DeleteMediaDetailViewModel,
-        FragmentDeleteMediaDetailsBinding
-        >(R.layout.fragment_delete_media_details)
+        DeletePodcastDetailViewModel,
+        FragmentDeletePodcastDetailsBinding
+        >(R.layout.fragment_delete_podcast_details)
 {
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
-    override val binding: FragmentDeleteMediaDetailsBinding by viewBinding(FragmentDeleteMediaDetailsBinding::bind)
-    override val viewModel: DeleteMediaDetailViewModel by viewModels()
+    override val binding: FragmentDeletePodcastDetailsBinding by viewBinding(FragmentDeletePodcastDetailsBinding::bind)
+    override val viewModel: DeletePodcastDetailViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -213,16 +213,16 @@ internal class DeleteMediaDetailFragment: SideEffectDetailFragment<
     }
 
     private fun setupDeleteMediaDetailsAdapter() {
-        val deleteMediaFooterAdapter = DeleteMediaFooterAdapter(requireActivity() as InsetterActivity)
+        val deletePodcastFooterAdapter = DeletePodcastFooterAdapter(requireActivity() as InsetterActivity)
         binding.recyclerViewStorageElementList.apply {
-            val deleteMediaAdapter = DeleteMediaDetailAdapter(
+            val deleteMediaAdapter = DeletePodcastDetailAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
                 viewModel
             )
             layoutManager = LinearLayoutManager(binding.root.context)
-            adapter = ConcatAdapter(deleteMediaAdapter, deleteMediaFooterAdapter)
+            adapter = ConcatAdapter(deleteMediaAdapter, deletePodcastFooterAdapter)
         }
     }
 
