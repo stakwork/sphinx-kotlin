@@ -1,5 +1,6 @@
 package chat.sphinx.wrapper_message_media
 
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_message_media.token.*
@@ -11,6 +12,7 @@ abstract class MessageMedia {
     abstract val mediaToken: MediaToken
     abstract val localFile: File?
     abstract val fileName: FileName?
+    abstract val chatId: ChatId
 
     abstract val mediaKeyDecrypted: MediaKeyDecrypted?
     abstract val mediaKeyDecryptionError: Boolean
@@ -24,7 +26,8 @@ abstract class MessageMedia {
                 other.localFile                     == localFile                    &&
                 other.fileName                      == fileName                     &&
                 other.mediaKeyDecrypted             == mediaKeyDecrypted            &&
-                other.mediaKeyDecryptionError       == mediaKeyDecryptionError
+                other.mediaKeyDecryptionError       == mediaKeyDecryptionError      &&
+                other.chatId                        == chatId
     }
 
     companion object {
@@ -43,6 +46,7 @@ abstract class MessageMedia {
         result = _31 * result + fileName.hashCode()
         result = _31 * result + mediaKeyDecrypted.hashCode()
         result = _31 * result + mediaKeyDecryptionError.hashCode()
+        result = _31 * result + chatId.hashCode()
         return result
     }
 
@@ -50,7 +54,8 @@ abstract class MessageMedia {
         return  "MessageMedia(mediaKey=$mediaKey,mediaType=$mediaType,mediaToken=$mediaToken," +
                 "localFile=$localFile,fileName=$fileName,mediaKeyDecrypted=$mediaKeyDecrypted," +
                 "mediaKeyDecryptionError=$mediaKeyDecryptionError," +
-                "mediaKeyDecryptionException=$mediaKeyDecryptionException)"
+                "mediaKeyDecryptionException=$mediaKeyDecryptionException," +
+                "chatId=$chatId)"
     }
 
     val price: Sat by lazy {

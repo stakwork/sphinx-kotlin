@@ -9,8 +9,7 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.delete_chat_media.navigation.DeleteChatMediaNavigator
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatMediaViewState
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatNotificationViewState
-import chat.sphinx.wrapper_common.feed.FeedId
-import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_message_media.MessageMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -42,57 +41,14 @@ internal class DeleteChatMediaViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getAllDownloadedMedia().collect { chatItems ->
-                val pim = chatItems
+                val chatIdAndFileList =  getLocalFilesGroupedByChatId(chatItems)
 
-//                val feedIdAndFileList = getLocalFilesGroupedByFeed(feedItems)
-//                val totalSizeAllSections = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
-//                setItemTotalFile(totalSizeAllSections?.value ?: 0L )
-//                feedIdsList = feedIdAndFileList.map { it.key }
-//
-//                    feedIdAndFileList.keys.mapNotNull { feedId ->
-//                    val podcast = feedId?.let { feedRepository.getPodcastById(it).firstOrNull() }
-//                    val listOfFiles = feedIdAndFileList[feedId]
-//
-//                    if (podcast != null && listOfFiles != null) {
-//                        val totalSize = listOfFiles.map { FileSize(it.length()) }.calculateTotalSize()
-//                        PodcastToDelete(
-//                            podcast.title.value,
-//                            podcast.imageToShow?.value.orEmpty(),
-//                            totalSize,
-//                            podcast.id
-//                        )
-//                    } else null
-//                }.also { sectionList ->
-//                    viewStateContainer.updateViewState(DeletePodcastViewState.SectionList(sectionList, totalSizeAllSections?.calculateSize()))
-//                }
             }
         }
     }
 
-//    fun deleteAllDownloadedFeeds() {
-//        deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
-//        viewModelScope.launch(mainImmediate) {
-//            feedIdsList?.forEach { feedId ->
-//                feedId?.let { nnFeedId ->
-//                    feedRepository.getFeedById(nnFeedId).firstOrNull()?.let {nnFeed ->
-//                        repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
-//                    }
-//                }
-//            }
-//            deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize()))
-//        }
-//    }
-
-//    private fun setItemTotalFile(totalSize: Long) {
-//        if (totalSize > 0L && totalSize >= itemsTotalSize.value) {
-//            itemsTotalSize = FileSize(totalSize)
-//        }
-//    }
-
-    private fun getLocalFilesGroupedByChatId(feedItems: List<MessageMedia>): Map<FeedId?, List<File>> {
-        return feedItems.groupBy({ it.localFile }, { it.localFile as File })
+    private fun getLocalFilesGroupedByChatId(chatItems: List<MessageMedia>): Map<ChatId?, List<File>> {
+        return chatItems.groupBy({ it.chatId }, { it.localFile as File })
     }
-
-
 
 }
