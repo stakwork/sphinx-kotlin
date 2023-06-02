@@ -114,7 +114,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
                 viewModel.closeDeleteItemPopup()
             }
-            includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.setOnClickListener {
+            includeManageMediaElementHeaderDetails.buttonHeaderDelete.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Open
                 )
@@ -153,16 +153,10 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                     includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.visible
                     includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.text = viewState.totalSize
                     textViewPodcastNoFound.goneIfFalse(viewState.episodes.isEmpty())
+                    binding.includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.episodes.isNotEmpty())
 
                     includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
 
-                    if (viewState.totalSize.split(" ")[0].toDouble().toInt() > 0) {
-                        includeLayoutDeleteAllNotificationScreen.textViewManageStorageFreeSpaceText.text =
-                            String.format(
-                                getString(R.string.manage_storage_deleted_free_space),
-                                viewState.totalSize
-                            )
-                    }
                     if (viewState.episodes.isEmpty()) {
                         binding.includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.gone
                     }
@@ -206,6 +200,11 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                             constraintChooseDeleteContainer.gone
                             constraintDeleteProgressContainer.gone
                             constraintDeleteSuccessfullyContainer.visible
+                            textViewManageStorageFreeSpaceText.text =
+                                String.format(
+                                    getString(R.string.manage_storage_deleted_free_space),
+                                    viewState.deletedSize
+                                )
                         }
                     }
                 }

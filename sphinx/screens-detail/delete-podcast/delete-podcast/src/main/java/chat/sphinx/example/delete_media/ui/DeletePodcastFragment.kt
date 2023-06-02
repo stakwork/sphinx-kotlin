@@ -144,14 +144,6 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
 
                 viewState.totalSizeAllSections?.let { allSectionsTotalSize ->
                     val totalSize = allSectionsTotalSize.split(" ")[0].toDouble().toInt()
-                    if (totalSize > 0 && totalSize >= maxTotalSize) {
-                        maxTotalSize = totalSize
-                        binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
-                            String.format(
-                                getString(R.string.manage_storage_deleted_free_space),
-                                viewState.totalSizeAllSections
-                            )
-                    }
                 }
 
                 if (viewState.section.isEmpty()) {
@@ -186,6 +178,13 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
                             constraintChooseDeleteContainer.gone
                             constraintDeleteProgressContainer.gone
                             constraintDeleteSuccessfullyContainer.visible
+
+                            binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
+                                String.format(
+                                    getString(R.string.manage_storage_deleted_free_space),
+                                    viewState.deletedSize
+                                )
+
                         }
                     }
                 }

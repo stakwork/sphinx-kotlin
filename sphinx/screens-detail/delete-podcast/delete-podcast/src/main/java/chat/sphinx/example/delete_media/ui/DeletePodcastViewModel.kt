@@ -44,12 +44,14 @@ internal class DeletePodcastViewModel @Inject constructor(
         ViewStateContainer(DeleteNotificationViewState.Closed)
     }
     private var feedIdsList: List<FeedId?>? = null
+    private var itemsTotalSize: FileSize = FileSize(0)
 
     init {
         viewModelScope.launch(mainImmediate) {
             feedRepository.getAllDownloadedFeedItems().collect { feedItems ->
                 val feedIdAndFileList = getLocalFilesGroupedByFeed(feedItems)
-                val totalSizeAllSections: String? = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()?.calculateSize()
+                val totalSizeAllSections = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
+                setItemTotalFile(totalSizeAllSections?.value ?: 0L )
                 feedIdsList = feedIdAndFileList.map { it.key }
 
                     feedIdAndFileList.keys.mapNotNull { feedId ->
@@ -66,7 +68,7 @@ internal class DeletePodcastViewModel @Inject constructor(
                         )
                     } else null
                 }.also { sectionList ->
-                    viewStateContainer.updateViewState(DeletePodcastViewState.SectionList(sectionList, totalSizeAllSections))
+                    viewStateContainer.updateViewState(DeletePodcastViewState.SectionList(sectionList, totalSizeAllSections?.calculateSize()))
                 }
             }
         }
@@ -82,10 +84,15 @@ internal class DeletePodcastViewModel @Inject constructor(
                     }
                 }
             }
-            deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.SuccessfullyDeleted)
+            deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize()))
         }
     }
 
+    private fun setItemTotalFile(totalSize: Long) {
+        if (totalSize > 0L && totalSize >= itemsTotalSize.value) {
+            itemsTotalSize = FileSize(totalSize)
+        }
+    }
 
     private fun getLocalFilesGroupedByFeed(feedItems: List<FeedItem>): Map<FeedId?, List<File>> {
         return feedItems.groupBy({ it.feedId }, { it.localFile as File })

@@ -46,6 +46,7 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
 {
     private val args: DeletePodcastDetailFragmentArgs by savedStateHandle.navArgs()
     private var currentFeed: Feed? = null
+    private var itemsTotalSize: String = ""
 
     val deleteAllNotificationViewStateContainer: ViewStateContainer<DeleteAllNotificationViewStateContainer> by lazy {
         ViewStateContainer(DeleteAllNotificationViewStateContainer.Closed)
@@ -59,15 +60,16 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             feedRepository.getDownloadedFeedItemsByFeedId(FeedId(args.argFeedId)).collect { feedItemList ->
                 val feed = feedRepository.getFeedById(FeedId(args.argFeedId)).firstOrNull()
+                val totalSize = feedItemList.map { FileSize(it.localFile?.length() ?: 0L) }
                 currentFeed = feed
-                val totalSize = feedItemList.map { FileSize(it.localFile?.length() ?: 0L) }.calculateTotalSize()
+                setItemTotalFile(totalSize)
                 val podcastDetailToDeleteLists: List<PodcastDetailToDelete> = feedItemList.map { feedItem ->
                     PodcastDetailToDelete(
                         feedItem,
                         FileSize(feedItem.localFile?.length() ?: 0L).calculateSize()
                     )
                 }
-                updateViewState(DeleteMediaDetailViewState.EpisodeList(feed?.titleToShow ?: "", totalSize, podcastDetailToDeleteLists))
+                updateViewState(DeleteMediaDetailViewState.EpisodeList(feed?.titleToShow ?: "", totalSize.calculateTotalSize(), podcastDetailToDeleteLists))
             }
         }
     }
@@ -91,7 +93,7 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             currentFeed?.let { nnFeed ->
                 if (repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)) {
-                    deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleted)
+                    deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleted(itemsTotalSize))
                 }
                 else {
                     deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Closed)
@@ -100,6 +102,13 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun setItemTotalFile(files: List<FileSize>) {
+        val totalSize = files.sumOf { it.value }
+        if (totalSize > 0L) {
+            itemsTotalSize = files.calculateTotalSize()
         }
     }
 

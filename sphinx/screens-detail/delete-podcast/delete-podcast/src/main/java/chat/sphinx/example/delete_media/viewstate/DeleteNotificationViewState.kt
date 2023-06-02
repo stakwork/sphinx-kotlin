@@ -7,5 +7,5 @@ internal sealed class DeleteNotificationViewState: ViewState<DeleteNotificationV
     object Closed : DeleteNotificationViewState()
     object Open : DeleteNotificationViewState()
     object Deleting : DeleteNotificationViewState()
-    object SuccessfullyDeleted : DeleteNotificationViewState()
+    data class SuccessfullyDeleted(val deletedSize: String) : DeleteNotificationViewState()
 }
