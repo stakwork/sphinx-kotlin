@@ -877,6 +877,16 @@ SELECT *
 FROM messageMediaDbo
 WHERE chat_id = ?;
 
+messageMediaGetAllDownloaded:
+SELECT *
+FROM messageMediaDbo
+WHERE local_file IS NOT NULL;
+
+messageMediaGetAllDownloadedByChatId:
+SELECT *
+FROM messageMediaDbo
+WHERE chat_id = ? AND local_file IS NOT NULL;
+
 messageMediaUpsert {
     UPDATE messageMediaDbo
     SET media_key = :media_key,
@@ -912,6 +922,11 @@ WHERE id = ?;
 
 messageMediaDeleteByChatId:
 DELETE FROM messageMediaDbo
+WHERE chat_id = ?;
+
+messageMediaDeleteAllMediaByChatId:
+UPDATE messageMediaDbo
+SET local_file = NULL
 WHERE chat_id = ?;
 
 CREATE TABLE subscriptionDbo(

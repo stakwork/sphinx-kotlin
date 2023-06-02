@@ -11,6 +11,7 @@ import chat.sphinx.delete_chat_media.viewstate.DeleteChatMediaViewState
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatNotificationViewState
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_message_media.MessageMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -40,7 +41,9 @@ internal class DeleteChatMediaViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            feedRepository.getAllDownloadedFeedItems().collect { feedItems ->
+            repositoryMedia.getAllDownloadedMedia().collect { chatItems ->
+                val pim = chatItems
+
 //                val feedIdAndFileList = getLocalFilesGroupedByFeed(feedItems)
 //                val totalSizeAllSections = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
 //                setItemTotalFile(totalSizeAllSections?.value ?: 0L )
@@ -86,8 +89,8 @@ internal class DeleteChatMediaViewModel @Inject constructor(
 //        }
 //    }
 
-    private fun getLocalFilesGroupedByFeed(feedItems: List<FeedItem>): Map<FeedId?, List<File>> {
-        return feedItems.groupBy({ it.feedId }, { it.localFile as File })
+    private fun getLocalFilesGroupedByChatId(feedItems: List<MessageMedia>): Map<FeedId?, List<File>> {
+        return feedItems.groupBy({ it.localFile }, { it.localFile as File })
     }
 
 

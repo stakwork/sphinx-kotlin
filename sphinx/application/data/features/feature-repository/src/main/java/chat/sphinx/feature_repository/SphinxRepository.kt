@@ -6361,6 +6361,58 @@ abstract class SphinxRepository(
             emit(messageMedia)
         }
 
+    override fun getAllDownloadedMedia(): Flow<List<MessageMedia>> =
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().messageMediaGetAllDownloaded(::MessageMediaDbo)
+                    .asFlow()
+                    .mapToList(io)
+                    .map { listMessageMediaDbo ->
+                        listMessageMediaDbo.map { messageMediaDbo ->
+                            MessageMediaDboWrapper(messageMediaDbo)
+                        }
+                    }
+                    .distinctUntilChanged()
+            )
+        }
+
+    override fun getAllDownloadedMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().messageMediaGetAllDownloadedByChatId(chatId, ::MessageMediaDbo)
+                .asFlow()
+                .mapToList(io)
+                .map {  listMessageMediaDbo ->
+                    listMessageMediaDbo.map { messageMediaDbo ->
+                        MessageMediaDboWrapper(messageMediaDbo)
+                    }
+                }
+                .distinctUntilChanged()
+            )
+        }
+
+
+    override fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>) {
+        applicationScope.launch(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            files.forEach { localFile ->
+                try {
+                    if (localFile.exists()) {
+                        localFile.delete()
+                    }
+                } catch (e: Exception) { }
+            }
+            feedItemLock.withLock {
+                withContext(io) {
+                    queries.transaction {
+                        queries.messageMediaDeleteAllMediaByChatId(chatId)
+                    }
+                }
+            }
+            delay(200L)
+        }
+
+    }
 
     override suspend fun deleteDownloadedMediaIfApplicable(
         feedItem: DownloadableFeedItem

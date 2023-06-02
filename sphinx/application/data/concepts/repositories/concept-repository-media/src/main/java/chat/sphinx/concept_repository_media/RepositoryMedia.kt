@@ -23,6 +23,10 @@ interface RepositoryMedia {
 
     fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
 
+    fun getAllDownloadedMedia(): Flow<List<MessageMedia>>
+    fun getAllDownloadedMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
+    fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>)
+
     fun inProgressDownloadIds(): List<FeedId>
 
     suspend fun deleteDownloadedMediaIfApplicable(
