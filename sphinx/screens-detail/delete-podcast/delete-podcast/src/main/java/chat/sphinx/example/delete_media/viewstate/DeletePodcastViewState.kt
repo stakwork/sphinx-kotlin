@@ -11,6 +11,4 @@ internal sealed class DeletePodcastViewState: ViewState<DeletePodcastViewState>(
         val totalSizeAllSections: String?
     ) : DeletePodcastViewState()
 
-
-
 }
