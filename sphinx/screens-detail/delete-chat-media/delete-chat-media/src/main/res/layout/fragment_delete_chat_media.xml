@@ -17,6 +17,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_storage_element_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header"
+        tools:listitem="@layout/chat_delete_list_item_holder" />
+
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_podcast_no_found"
         android:layout_width="wrap_content"

@@ -46,8 +46,6 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
     override val binding: FragmentDeletePodcastBinding by viewBinding(FragmentDeletePodcastBinding::bind)
     override val viewModel: DeletePodcastViewModel by viewModels()
 
-    private var maxTotalSize: Int = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel

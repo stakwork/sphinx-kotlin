@@ -9,12 +9,16 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.delete.chat.media.R
 import chat.sphinx.delete.chat.media.databinding.FragmentDeleteChatMediaBinding
+import chat.sphinx.delete_chat_media.adapter.DeleteChatAdapter
+import chat.sphinx.delete_chat_media.adapter.DeleteChatFooterAdapter
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatMediaViewState
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatNotificationViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -22,7 +26,6 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
@@ -45,6 +48,10 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
     override val binding: FragmentDeleteChatMediaBinding by viewBinding(FragmentDeleteChatMediaBinding::bind)
     override val viewModel: DeleteChatMediaViewModel by viewModels()
 
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var userColorsHelper: UserColorsHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel
@@ -62,6 +69,7 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
         BackPressHandler(viewLifecycleOwner, requireActivity())
         setUpHeader()
         setClickListeners()
+        setupChatDeleteAdapter()
 
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.deleteMediaScreen)
@@ -155,6 +163,21 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
             }
         }
         super.subscribeToViewStateFlow()
+    }
+
+    private fun setupChatDeleteAdapter() {
+        val deleteChatFooterAdapter = DeleteChatFooterAdapter(requireActivity() as InsetterActivity)
+        binding.recyclerViewStorageElementList.apply {
+            val deleteChatAdapter = DeleteChatAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+                userColorsHelper
+            )
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = ConcatAdapter(deleteChatAdapter, deleteChatFooterAdapter)
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: DeleteNotifySideEffect) {

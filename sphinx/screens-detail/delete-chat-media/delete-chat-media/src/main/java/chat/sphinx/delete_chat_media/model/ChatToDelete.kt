@@ -7,8 +7,14 @@ import chat.sphinx.wrapper_contact.ContactAlias
 
 data class ChatToDelete(
     val contactAlias: String,
-    val photoUrl: String,
+    val photoUrl: PhotoUrl?,
     val size: String,
     val chatId: ChatId,
-    val contactId: ContactId
+    val contactId: ContactId,
+    val initials: Initials
+)
+
+data class Initials(
+    val initials: String?,
+    val colorKey: String
 )

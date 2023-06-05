@@ -9,15 +9,18 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.delete_chat_media.model.ChatToDelete
+import chat.sphinx.delete_chat_media.model.Initials
 import chat.sphinx.delete_chat_media.navigation.DeleteChatMediaNavigator
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatMediaViewState
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatNotificationViewState
+import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.calculateTotalSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.toFileSize
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message_media.MessageMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -33,7 +36,6 @@ import javax.inject.Inject
 internal class DeleteChatMediaViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteChatMediaNavigator,
-    private val feedRepository: FeedRepository,
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
     private val repositoryMedia: RepositoryMedia,
@@ -68,10 +70,14 @@ internal class DeleteChatMediaViewModel @Inject constructor(
                         val totalSize = listOfFiles.map { FileSize(it.length()) }.calculateTotalSize()
                         ChatToDelete(
                             contact.alias?.value ?: "",
-                            contact.photoUrl?.value ?: "",
+                            contact.photoUrl,
                             totalSize,
                             chat.id,
-                            contact.id
+                            contact.id,
+                            Initials(
+                                contact.alias?.value?.getInitials(),
+                                chat.getColorKey()
+                            )
                         )
                     } else null
                 }.also { chatToDeletes ->

@@ -112,6 +112,7 @@
     <string name="manage_storage_delete_item">Delete %s?</string>
     <string name="manage_storage_error_delete">There was an error in the delete process</string>
     <string name="manage_storage_no_podcast_found">No downloaded podcast found</string>
+    <string name="manage_storage_no_files_found">No files found</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>
