@@ -24,6 +24,7 @@ import chat.sphinx.tribes_discover.navigation.TribesDiscoverNavigator
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
 import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
+import chat.sphinx.example.delete_chat_media_detail.navigation.DeleteChatMediaDetailNavigator
 import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
 import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
 import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
@@ -313,8 +314,14 @@ internal object NavigationModule {
 
     @Provides
     fun provideDeleteChatMediaNavigator(
-        deleteChatMediaDetailNavigatorImpl: DeleteChatMediaNavigatorImpl
+        deleteChatMediaNavigatorImpl: DeleteChatMediaNavigatorImpl
     ): DeleteChatMediaNavigator =
+        deleteChatMediaNavigatorImpl
+
+    @Provides
+    fun provideDeleteChatMediaDetailNavigator(
+        deleteChatMediaDetailNavigatorImpl: DeleteChatMediaDetailNavigatorImpl
+    ): DeleteChatMediaDetailNavigator =
         deleteChatMediaDetailNavigatorImpl
 
     @Provides

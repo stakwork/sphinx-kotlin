@@ -20,6 +20,7 @@
     <include app:graph="@navigation/manage_storage_nav_graph" />
     <include app:graph="@navigation/delete_media_nav_graph" />
     <include app:graph="@navigation/delete_chat_media_nav_graph" />
+    <include app:graph="@navigation/delete_chat_media_detail_nav_graph" />
     <include app:graph="@navigation/delete_media_detail_nav_graph" />
     <include app:graph="@navigation/scanner_nav_graph" />
     <include app:graph="@navigation/subscription_nav_graph" />

@@ -164,8 +164,8 @@ internal class DeleteChatAdapter(
         init {
             binding.root.setOnClickListener {
                 lifecycleOwner.lifecycleScope.launch {
-                    chat?.let { section ->
-//                        viewModel.navigator.toDeleteMediaDetail(section.feedId)
+                    chat?.chatId?.let { chatId ->
+                        viewModel.navigator.toDeleteChatDetail(chatId)
                     }
                 }
             }
