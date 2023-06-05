@@ -428,8 +428,9 @@
                 android:layout_height="@dimen/default_form_scan_icon_width"
                 android:background="@drawable/ic_arrow_right"
                 android:backgroundTint="@color/secondaryText"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_custom_chat_text"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progress_bar_custom_chat"
@@ -439,7 +440,7 @@
                 android:indeterminateTint="@color/primaryText"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/button_profile_right_arrow_custom_type"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <View

@@ -188,5 +188,6 @@
     <string name="manage_storage_error_delete">There was an error in the delete process</string>
     <string name="manage_storage_no_podcast_found">No downloaded podcast found</string>
     <string name="manage_storage_no_files_found">No files found</string>
+    <string name="manage_storage_delete_chats">delete all chat media files</string>
 
 </resources>

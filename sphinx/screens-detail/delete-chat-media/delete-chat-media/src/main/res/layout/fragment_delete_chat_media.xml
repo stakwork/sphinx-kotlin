@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_light"
-        android:text="@string/manage_storage_no_podcast_found"
+        android:text="@string/manage_storage_no_files_found"
         android:textColor="@color/secondaryText"
         android:textSize="@dimen/default_text_size_large_title"
         android:visibility="gone"

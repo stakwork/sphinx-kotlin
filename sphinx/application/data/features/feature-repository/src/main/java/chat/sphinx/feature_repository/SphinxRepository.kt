@@ -6392,26 +6392,28 @@ abstract class SphinxRepository(
         }
 
 
-    override fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>) {
-        applicationScope.launch(mainImmediate) {
+    override suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>): Boolean {
+        return withContext(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
-            files.forEach { localFile ->
-                try {
+            try {
+                files.forEach { localFile ->
                     if (localFile.exists()) {
                         localFile.delete()
                     }
-                } catch (e: Exception) { }
-            }
-            feedItemLock.withLock {
-                withContext(io) {
-                    queries.transaction {
-                        queries.messageMediaDeleteAllMediaByChatId(chatId)
+                }
+                feedItemLock.withLock {
+                    withContext(io) {
+                        queries.transaction {
+                            queries.messageMediaDeleteAllMediaByChatId(chatId)
+                        }
                     }
                 }
+                delay(200L)
+                true
+            } catch (e: Exception) {
+                false
             }
-            delay(200L)
         }
-
     }
 
     override suspend fun deleteDownloadedMediaIfApplicable(

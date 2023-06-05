@@ -140,10 +140,6 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
                 binding.textViewPodcastNoFound.goneIfFalse(viewState.section.isEmpty())
                 binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
 
-                viewState.totalSizeAllSections?.let { allSectionsTotalSize ->
-                    val totalSize = allSectionsTotalSize.split(" ")[0].toDouble().toInt()
-                }
-
                 if (viewState.section.isEmpty()) {
                     binding.includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.gone
                 }

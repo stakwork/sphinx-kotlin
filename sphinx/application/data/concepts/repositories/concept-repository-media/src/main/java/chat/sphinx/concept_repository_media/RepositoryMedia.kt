@@ -25,7 +25,7 @@ interface RepositoryMedia {
 
     fun getAllDownloadedMedia(): Flow<List<MessageMedia>>
     fun getAllDownloadedMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
-    fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>)
+    suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>): Boolean
 
     fun inProgressDownloadIds(): List<FeedId>
 

@@ -26,6 +26,7 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
@@ -107,18 +108,19 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
 
             includeDeleteNotification.apply {
                 buttonDelete.setOnClickListener {
+                    viewModel.deleteAllChatFiles()
                 }
                 buttonGotIt.setOnClickListener {
-                    viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(
+                    viewModel.deleteChatNotificationViewStateContainer.updateViewState(
                         DeleteChatNotificationViewState.Closed)
                 }
                 buttonCancel.setOnClickListener {
-                    viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Closed)
+                    viewModel.deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Closed)
                 }
             }
 
             includeManageMediaElementHeader.buttonHeaderDelete.setOnClickListener {
-                viewModel.deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Open)
+                viewModel.deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Open)
             }
         }
     }
@@ -127,13 +129,20 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
         @Exhaustive
         when (viewState) {
             is DeleteChatMediaViewState.Loading -> {}
-            is DeleteChatMediaViewState.ChatList -> {}
+            is DeleteChatMediaViewState.ChatList -> {
+                binding.includeManageMediaElementHeader.apply {
+                    constraintLayoutDeleteElementContainerTrash.visible
+                    textViewManageStorageElementNumber.text = viewState.totalSizeChats
+                }
+                binding.textViewPodcastNoFound.goneIfFalse(viewState.chats.isEmpty())
+                binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_chats)
+            }
         }
     }
 
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.deleteAllFeedsNotificationViewStateContainer.collect { viewState ->
+            viewModel.deleteChatNotificationViewStateContainer.collect { viewState ->
                 binding.includeDeleteNotification.apply {
                     when (viewState) {
                         is DeleteChatNotificationViewState.Closed -> {
@@ -157,6 +166,11 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
                             constraintDeleteProgressContainer.gone
                             constraintDeleteSuccessfullyContainer.visible
 
+                            binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
+                                String.format(
+                                    getString(R.string.manage_storage_deleted_free_space),
+                                    viewState.deletedSize
+                                )
                         }
                     }
                 }
