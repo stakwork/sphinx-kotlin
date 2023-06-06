@@ -9,12 +9,16 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.GridLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.delete.chat.media.detail.R
 import chat.sphinx.delete.chat.media.detail.databinding.FragmentDeleteChatMediaDetailBinding
+import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailFooterAdapter
+import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailsGridAdapter
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatDetailNotificationViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -66,6 +70,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
         BackPressHandler(viewLifecycleOwner, requireActivity())
         setUpHeader()
         setClickListeners()
+        setupChatDeleteAdapter()
 
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.deleteChatMediaDetail)
@@ -175,20 +180,20 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
         super.subscribeToViewStateFlow()
     }
 
-//    private fun setupChatDeleteAdapter() {
-//        val deleteChatFooterAdapter = DeleteChatFooterAdapter(requireActivity() as InsetterActivity)
-//        binding.recyclerViewStorageElementList.apply {
-//            val deleteChatAdapter = DeleteChatAdapter(
-//                imageLoader,
-//                viewLifecycleOwner,
-//                onStopSupervisor,
-//                viewModel,
-//                userColorsHelper
-//            )
-//            layoutManager = LinearLayoutManager(binding.root.context)
-//            adapter = ConcatAdapter(deleteChatAdapter, deleteChatFooterAdapter)
-//        }
-//    }
+    private fun setupChatDeleteAdapter() {
+        val deleteChatFooterAdapter = DeleteChatDetailFooterAdapter(requireActivity() as InsetterActivity)
+        binding.recyclerViewStorageElementList.apply {
+            val deleteChatAdapter = DeleteChatDetailsGridAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+                userColorsHelper
+            )
+            layoutManager = GridLayoutManager(binding.root.context, 3)
+            adapter = ConcatAdapter(deleteChatAdapter, deleteChatFooterAdapter)
+        }
+    }
 
     override suspend fun onSideEffectCollect(sideEffect: DeleteNotifySideEffect) {
         sideEffect.execute(binding.root.context)
