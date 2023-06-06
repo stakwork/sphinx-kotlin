@@ -138,8 +138,9 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
             else chatFile
 
         }
-        updatedFiles?.let {
-            updateViewState(DeleteChatMediaDetailViewState.FileList(it, itemsTotalSize.calculateSize()))
+        updatedFiles?.let { fileList ->
+            val selectionMode = fileList.any{ it.isSelected }
+            updateViewState(DeleteChatMediaDetailViewState.FileList(fileList, itemsTotalSize.calculateSize()))
         }
     }
 

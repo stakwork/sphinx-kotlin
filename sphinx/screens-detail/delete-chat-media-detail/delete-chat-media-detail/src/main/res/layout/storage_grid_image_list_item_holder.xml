@@ -61,8 +61,8 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_place_holder"
-            android:layout_width="@dimen/default_big_layout_margin"
-            android:layout_height="@dimen/default_big_layout_margin"
+            android:layout_width="@dimen/default_form_scan_icon_container_width"
+            android:layout_height="@dimen/default_form_scan_icon_container_width"
             android:layout_centerInParent="true"
             android:src="@drawable/ic_chat_delete_video"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -82,7 +82,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
