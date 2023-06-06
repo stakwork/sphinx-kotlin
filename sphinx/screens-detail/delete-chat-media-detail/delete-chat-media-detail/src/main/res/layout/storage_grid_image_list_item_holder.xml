@@ -40,9 +40,9 @@
             android:layout_marginEnd="@dimen/episode_image_radius"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
-            android:visibility="gone"
+            android:visibility="visible"
             android:textColor="@color/primaryText"
-            android:textSize="@dimen/pin_help_text_view_size"
+            android:textSize="@dimen/default_text_size_list_row_headline"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="9.5 MB"
@@ -60,21 +60,9 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_check_mark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:src="@drawable/ic_blue_checkmark"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/image_view_element_picture"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_place_holder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/default_big_layout_margin"
+            android:layout_height="@dimen/default_big_layout_margin"
             android:layout_centerInParent="true"
             android:src="@drawable/ic_chat_delete_video"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -82,6 +70,19 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_check_mark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_blue_checkmark"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

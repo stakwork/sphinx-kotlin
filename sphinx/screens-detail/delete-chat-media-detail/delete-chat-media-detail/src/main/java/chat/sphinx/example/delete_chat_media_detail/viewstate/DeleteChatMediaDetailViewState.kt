@@ -6,7 +6,7 @@ import io.matthewnelson.concept_views.viewstate.ViewState
 internal sealed class DeleteChatMediaDetailViewState: ViewState<DeleteChatMediaDetailViewState>() {
     object Loading : DeleteChatMediaDetailViewState()
 
-    class FileList(
+    data class FileList(
         val files: List<ChatFile>,
         val totalSizeFiles: String?
     ) : DeleteChatMediaDetailViewState()

@@ -19,6 +19,8 @@ import chat.sphinx.example.delete_chat_media_detail.model.ChatFile
 import chat.sphinx.example.delete_chat_media_detail.ui.DeleteChatMediaDetailViewModel
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
 import chat.sphinx.wrapper_message_media.MediaType
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
@@ -62,7 +64,7 @@ internal class DeleteChatDetailsGridAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.contactAlias  == new.contactAlias && old.mediaType == old.mediaType
+                    old.messageId  == new.messageId && old.isSelected == new.isSelected
 
                 if (sameList) {
                     sameList = same
@@ -81,7 +83,7 @@ internal class DeleteChatDetailsGridAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.contactAlias  == new.contactAlias && old.mediaType == old.mediaType
+                    old.messageId  == new.messageId && old.isSelected == new.isSelected
                 if (sameList) {
                     sameList = same
                 }
@@ -194,8 +196,7 @@ internal class DeleteChatDetailsGridAdapter(
 
         init {
             binding.root.setOnClickListener {
-                lifecycleOwner.lifecycleScope.launch {
-                }
+                file?.messageId?.let { messageId -> viewModel.changeItemSelection(messageId) }
             }
             setUpPlaceHolder()
         }
@@ -215,6 +216,19 @@ internal class DeleteChatDetailsGridAdapter(
                     return
                 }
                 file = chatItem
+
+                textViewFileSize.text = chatItem.size
+
+                if (chatItem.isSelected) {
+                    imageViewAlpha.visible
+                    imageViewCheckMark.visible
+                    textViewFileSize.gone
+                } else
+                {
+                    imageViewAlpha.gone
+                    imageViewCheckMark.gone
+                    textViewFileSize.visible
+                }
             }
         }
 
@@ -232,10 +246,10 @@ internal class DeleteChatDetailsGridAdapter(
 
         private var file: ChatFile? = null
 
+
         init {
             binding.root.setOnClickListener {
-                lifecycleOwner.lifecycleScope.launch {
-                }
+                file?.messageId?.let { messageId -> viewModel.changeItemSelection(messageId) }
             }
             setUpPlaceHolder()
         }
@@ -255,6 +269,19 @@ internal class DeleteChatDetailsGridAdapter(
                     return
                 }
                 file = chatItem
+
+                textViewFileSize.text = chatItem.size
+
+                if (chatItem.isSelected) {
+                    imageViewAlpha.visible
+                    imageViewCheckMark.visible
+                    textViewFileSize.gone
+                } else
+                {
+                    imageViewAlpha.gone
+                    imageViewCheckMark.gone
+                    textViewFileSize.visible
+                }
             }
         }
 
@@ -274,8 +301,7 @@ internal class DeleteChatDetailsGridAdapter(
 
         init {
             binding.root.setOnClickListener {
-                lifecycleOwner.lifecycleScope.launch {
-                }
+                file?.messageId?.let { messageId -> viewModel.changeItemSelection(messageId) }
             }
             setUpPlaceHolder()
         }
@@ -295,6 +321,19 @@ internal class DeleteChatDetailsGridAdapter(
                     return
                 }
                 file = chatItem
+
+                textViewFileSize.text = chatItem.size
+
+                if (chatItem.isSelected) {
+                    imageViewAlpha.visible
+                    imageViewCheckMark.visible
+                    textViewFileSize.gone
+                } else
+                {
+                    imageViewAlpha.gone
+                    imageViewCheckMark.gone
+                    textViewFileSize.visible
+                }
             }
         }
 
@@ -314,8 +353,7 @@ internal class DeleteChatDetailsGridAdapter(
 
         init {
             binding.root.setOnClickListener {
-                lifecycleOwner.lifecycleScope.launch {
-                }
+                file?.messageId?.let { messageId -> viewModel.changeItemSelection(messageId) }
             }
             setUpPlaceHolder()
         }
@@ -335,6 +373,20 @@ internal class DeleteChatDetailsGridAdapter(
                     return
                 }
                 file = chatItem
+
+                textViewFileSize.text = chatItem.size
+
+                if (chatItem.isSelected) {
+                    imageViewAlpha.visible
+                    imageViewCheckMark.visible
+                    textViewFileSize.gone
+                } else
+                {
+                    imageViewAlpha.gone
+                    imageViewCheckMark.gone
+                    textViewFileSize.visible
+                }
+
             }
         }
 
