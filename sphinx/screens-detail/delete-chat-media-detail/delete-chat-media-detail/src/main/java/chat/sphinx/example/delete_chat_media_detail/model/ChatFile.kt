@@ -4,5 +4,6 @@ import chat.sphinx.wrapper_message_media.MediaType
 
 data class ChatFile(
     val contactAlias: String,
-    val mediaType: String
+    val mediaType: String,
+    val isSelected: Boolean = false
     )

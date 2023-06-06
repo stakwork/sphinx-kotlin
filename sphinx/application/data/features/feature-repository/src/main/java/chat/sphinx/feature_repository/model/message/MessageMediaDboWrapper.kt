@@ -2,6 +2,7 @@ package chat.sphinx.feature_repository.model.message
 
 import chat.sphinx.conceptcoredb.MessageMediaDbo
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_message_media.*
 import java.io.File
 
@@ -16,6 +17,8 @@ class MessageMediaDboWrapper(val messageMediaDbo: MessageMediaDbo): MessageMedia
         get() = messageMediaDbo.file_name
     override val chatId: ChatId
         get() = messageMediaDbo.chat_id
+    override val messageId: MessageId
+        get() = messageMediaDbo.id
 
     @Volatile
     @Suppress("PropertyName")

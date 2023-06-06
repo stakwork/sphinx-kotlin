@@ -14,11 +14,13 @@ import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDet
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.MessageMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -35,14 +37,16 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
-    handle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
         Context,
         DeleteNotifySideEffect,
         DeleteChatMediaDetailViewState
         >(dispatchers, DeleteChatMediaDetailViewState.Loading)
 {
-     val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatDetailNotificationViewState> by lazy {
+    private val args: DeleteChatMediaDetailFragmentArgs by savedStateHandle.navArgs()
+
+    val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatDetailNotificationViewState> by lazy {
         ViewStateContainer(DeleteChatDetailNotificationViewState.Closed)
     }
     private var currentChatIdAndFiles: Map<ChatId?, List<File>>? = null
@@ -50,7 +54,7 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(mainImmediate) {
-            repositoryMedia.getAllDownloadedMedia().collect { chatItems ->
+            repositoryMedia.getAllDownloadedMediaByChatId(ChatId(args.argChatId)).collect { chatItems ->
                 val chatIdAndFileList = getLocalFilesGroupedByChatId(chatItems)
                 val totalSizeChats = chatItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
                 setItemTotalFile(totalSizeChats?.value ?: 0L )
