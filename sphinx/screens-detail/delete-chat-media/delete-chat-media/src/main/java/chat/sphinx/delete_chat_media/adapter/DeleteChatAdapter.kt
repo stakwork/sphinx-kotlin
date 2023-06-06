@@ -34,7 +34,7 @@ internal class DeleteChatAdapter(
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DeleteChatMediaViewModel,
     private val userColorsHelper: UserColorsHelper,
-    ): RecyclerView.Adapter<DeleteChatAdapter.MediaSectionViewHolder>(), DefaultLifecycleObserver {
+    ): RecyclerView.Adapter<DeleteChatAdapter.ChatToDeleteViewHolder>(), DefaultLifecycleObserver {
 
     private inner class Diff(
         private val oldList: List<ChatToDelete>,
@@ -92,7 +92,7 @@ internal class DeleteChatAdapter(
 
     }
 
-    private val sectionItems = ArrayList<ChatToDelete>(listOf())
+    private val chatItems = ArrayList<ChatToDelete>(listOf())
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -106,20 +106,20 @@ internal class DeleteChatAdapter(
                     listOf()
                 }
 
-                if (sectionItems.isEmpty()) {
-                    sectionItems.addAll(list)
+                if (chatItems.isEmpty()) {
+                    chatItems.addAll(list)
                     this@DeleteChatAdapter.notifyDataSetChanged()
                 } else {
 
-                    val diff = Diff(sectionItems, list)
+                    val diff = Diff(chatItems, list)
 
                     withContext(viewModel.default) {
                         DiffUtil.calculateDiff(diff)
                     }.let { result ->
 
                         if (!diff.sameList) {
-                            sectionItems.clear()
-                            sectionItems.addAll(list)
+                            chatItems.clear()
+                            chatItems.addAll(list)
                             result.dispatchUpdatesTo(this@DeleteChatAdapter)
                         }
                     }
@@ -129,20 +129,20 @@ internal class DeleteChatAdapter(
     }
 
     override fun getItemCount(): Int {
-        return sectionItems.size
+        return chatItems.size
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeleteChatAdapter.MediaSectionViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeleteChatAdapter.ChatToDeleteViewHolder {
         val binding = ChatDeleteListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
         )
 
-        return MediaSectionViewHolder(binding)
+        return ChatToDeleteViewHolder(binding)
     }
 
-    override fun onBindViewHolder(holder: DeleteChatAdapter.MediaSectionViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: DeleteChatAdapter.ChatToDeleteViewHolder, position: Int) {
         holder.bind(position)
     }
 
@@ -152,7 +152,7 @@ internal class DeleteChatAdapter(
             .build()
     }
 
-    inner class MediaSectionViewHolder(
+    inner class ChatToDeleteViewHolder(
         private val binding: ChatDeleteListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
@@ -173,7 +173,7 @@ internal class DeleteChatAdapter(
 
         fun bind(position: Int) {
             binding.apply {
-                val chatItem: ChatToDelete = sectionItems.getOrNull(position) ?: let {
+                val chatItem: ChatToDelete = chatItems.getOrNull(position) ?: let {
                     chat = null
                     return
                 }
