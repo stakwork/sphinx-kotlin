@@ -21,6 +21,7 @@ import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailFoot
 import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailsGridAdapter
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatDetailNotificationViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
+import chat.sphinx.example.delete_chat_media_detail.viewstate.HeaderSelectionModeViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
@@ -122,6 +123,9 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
             includeManageMediaElementHeader.buttonHeaderDelete.setOnClickListener {
                 viewModel.deleteChatNotificationViewStateContainer.updateViewState(DeleteChatDetailNotificationViewState.Open)
             }
+            includeManageMediaElementHeader.textViewDetailScreenSelectionClose.setOnClickListener {
+                viewModel.deselectAllItems()
+            }
         }
     }
 
@@ -172,6 +176,26 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                                     getString(R.string.manage_storage_deleted_free_space),
                                     viewState.deletedSize
                                 )
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.headerSelectionModeViewStateContainer.collect { viewState ->
+                binding.includeManageMediaElementHeader.apply {
+                    when(viewState) {
+                        is HeaderSelectionModeViewState.Off -> {
+                            changeStorageHeaderContainer.visible
+                            changeStorageHeaderSelectionContainer.gone
+                        }
+                        is HeaderSelectionModeViewState.On -> {
+                            changeStorageHeaderSelectionContainer.visible
+                            changeStorageHeaderContainer.gone
+                            textViewSelectionHeader.text = viewState.itemsNumber
+                            textViewManageStorageElementSelectionNumber.text = viewState.sizeToDelete
+                            imageViewDeleteSelectionIcon.visible
                         }
                     }
                 }
