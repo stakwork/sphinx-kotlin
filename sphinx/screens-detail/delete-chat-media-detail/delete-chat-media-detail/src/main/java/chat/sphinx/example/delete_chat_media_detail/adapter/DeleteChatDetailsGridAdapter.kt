@@ -1,9 +1,9 @@
 package chat.sphinx.example.delete_chat_media_detail.adapter
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -62,7 +62,7 @@ internal class DeleteChatDetailsGridAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.contactAlias == new.contactAlias
+                    old.contactAlias  == new.contactAlias && old.mediaType == old.mediaType
 
                 if (sameList) {
                     sameList = same
@@ -81,7 +81,7 @@ internal class DeleteChatDetailsGridAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.contactAlias  == new.contactAlias
+                    old.contactAlias  == new.contactAlias && old.mediaType == old.mediaType
                 if (sameList) {
                     sameList = same
                 }
@@ -97,7 +97,7 @@ internal class DeleteChatDetailsGridAdapter(
 
     override fun getItemViewType(position: Int): Int {
         val chatFilesList = chatFiles.getOrNull(position)
-        return when (chatFilesList?.type?.value) {
+        return when (chatFilesList?.mediaType) {
             MediaType.IMAGE -> VIEW_TYPE_IMAGE
             MediaType.AUDIO -> VIEW_TYPE_AUDIO
             MediaType.VIDEO -> VIEW_TYPE_VIDEO
@@ -142,7 +142,7 @@ internal class DeleteChatDetailsGridAdapter(
     }
 
     override fun getItemCount(): Int {
-        return 128
+        return chatFiles.size
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -197,6 +197,15 @@ internal class DeleteChatDetailsGridAdapter(
                 lifecycleOwner.lifecycleScope.launch {
                 }
             }
+            setUpPlaceHolder()
+        }
+
+        private fun setUpPlaceHolder() {
+            binding.imageViewPlaceHolder.setImageDrawable(
+                ContextCompat.getDrawable(
+                    binding.root.context,
+                    R.drawable.ic_chat_delete_image
+                ))
         }
 
         fun bind(position: Int) {
@@ -228,6 +237,15 @@ internal class DeleteChatDetailsGridAdapter(
                 lifecycleOwner.lifecycleScope.launch {
                 }
             }
+            setUpPlaceHolder()
+        }
+
+        private fun setUpPlaceHolder() {
+            binding.imageViewPlaceHolder.setImageDrawable(
+                ContextCompat.getDrawable(
+                    binding.root.context,
+                    R.drawable.ic_chat_delete_audio
+                ))
         }
 
         fun bind(position: Int) {
@@ -259,6 +277,15 @@ internal class DeleteChatDetailsGridAdapter(
                 lifecycleOwner.lifecycleScope.launch {
                 }
             }
+            setUpPlaceHolder()
+        }
+
+        private fun setUpPlaceHolder() {
+            binding.imageViewPlaceHolder.setImageDrawable(
+                ContextCompat.getDrawable(
+                    binding.root.context,
+                    R.drawable.ic_chat_delete_video
+                ))
         }
 
         fun bind(position: Int) {
@@ -290,6 +317,15 @@ internal class DeleteChatDetailsGridAdapter(
                 lifecycleOwner.lifecycleScope.launch {
                 }
             }
+            setUpPlaceHolder()
+        }
+
+        private fun setUpPlaceHolder() {
+            binding.imageViewPlaceHolder.setImageDrawable(
+                ContextCompat.getDrawable(
+                    binding.root.context,
+                    R.drawable.ic_chat_delete_attachment
+                ))
         }
 
         fun bind(position: Int) {

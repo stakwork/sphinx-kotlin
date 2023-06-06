@@ -7,12 +7,16 @@ import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.example.delete_chat_media_detail.model.ChatFile
 import chat.sphinx.example.delete_chat_media_detail.navigation.DeleteChatMediaDetailNavigator
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatDetailNotificationViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
 import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.toFileSize
+import chat.sphinx.wrapper_contact.ContactAlias
+import chat.sphinx.wrapper_message_media.MediaType
 import chat.sphinx.wrapper_message_media.MessageMedia
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -96,6 +100,8 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
                 }
             }
         }
+
+
 
     private fun getLocalFilesGroupedByChatId(chatItems: List<MessageMedia>): Map<ChatId?, List<File>> {
         return chatItems.groupBy({ it.chatId }, { it.localFile as File })
