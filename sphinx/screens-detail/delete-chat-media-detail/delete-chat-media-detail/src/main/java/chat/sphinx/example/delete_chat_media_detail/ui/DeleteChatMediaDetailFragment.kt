@@ -90,7 +90,21 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                 )
             }
         }
-        override fun handleOnBackPressed() {}
+
+        override fun handleOnBackPressed() {
+            if (viewModel.deleteChatNotificationViewStateContainer.value is DeleteChatDetailNotificationViewState.Open) {
+                viewModel.deleteChatNotificationViewStateContainer.updateViewState(
+                    DeleteChatDetailNotificationViewState.Closed
+                )
+            }
+            if (viewModel.headerSelectionModeViewStateContainer.value is HeaderSelectionModeViewState.On) {
+                viewModel.deselectAllItems()
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
+            }
+        }
     }
 
     private fun setUpHeader() {
@@ -128,7 +142,6 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
             }
         }
     }
-
 
     override suspend fun onViewStateFlowCollect(viewState: DeleteChatMediaDetailViewState) {
         @Exhaustive

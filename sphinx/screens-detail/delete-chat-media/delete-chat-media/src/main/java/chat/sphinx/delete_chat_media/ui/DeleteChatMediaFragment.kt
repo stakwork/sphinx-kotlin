@@ -89,7 +89,15 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
                 )
             }
         }
-        override fun handleOnBackPressed() {}
+        override fun handleOnBackPressed() {
+            if (viewModel.deleteChatNotificationViewStateContainer.value is DeleteChatNotificationViewState.Open) {
+                viewModel.deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.popBackStack()
+                }
+            }
+        }
     }
 
     private fun setUpHeader() {
