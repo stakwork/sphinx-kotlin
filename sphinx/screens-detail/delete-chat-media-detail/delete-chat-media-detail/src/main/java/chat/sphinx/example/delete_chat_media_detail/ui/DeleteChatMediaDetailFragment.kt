@@ -126,8 +126,8 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                     viewModel.deleteAllChatFiles()
                 }
                 buttonGotIt.setOnClickListener {
-//                    viewModel.deleteChatNotificationViewStateContainer.updateViewState(
-//                        DeleteChatNotificationViewState.Closed)
+                    viewModel.deleteChatNotificationViewStateContainer.updateViewState(
+                        DeleteChatDetailNotificationViewState.Closed)
                 }
                 buttonCancel.setOnClickListener {
                     viewModel.deleteChatNotificationViewStateContainer.updateViewState(DeleteChatDetailNotificationViewState.Closed)
