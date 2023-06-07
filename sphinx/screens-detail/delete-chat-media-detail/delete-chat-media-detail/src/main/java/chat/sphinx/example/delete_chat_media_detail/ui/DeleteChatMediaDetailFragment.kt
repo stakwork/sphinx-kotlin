@@ -134,7 +134,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                 textViewDetailScreenSelectionClose.setOnClickListener {
                     viewModel.deselectAllItems()
                 }
-                buttonSave.setOnClickListener {
+                buttonDeleteContainer.setOnClickListener {
                     viewModel.deleteChatItemsNotificationViewState.updateViewState(
                         DeleteChatItemsNotificationViewState.Open
                     )
@@ -232,11 +232,11 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                             changeStorageHeaderSelectionContainer.gone
                         }
                         is HeaderSelectionModeViewState.On -> {
+                            imageViewDeleteSelectionIcon.visible
                             changeStorageHeaderSelectionContainer.visible
                             changeStorageHeaderContainer.gone
                             textViewSelectionHeader.text = viewState.itemsNumber
                             textViewManageStorageElementSelectionNumber.text = viewState.sizeToDelete
-                            imageViewDeleteSelectionIcon.visible
                         }
                     }
                 }
