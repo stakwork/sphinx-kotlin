@@ -92,7 +92,7 @@ internal class DeleteChatMediaViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             currentChatIdsAndFiles?.forEach { chatIdsAndFiles ->
                 chatIdsAndFiles.key?.let { chatId ->
-                    if (repositoryMedia.deleteDownloadedMediaByChatId(chatId, chatIdsAndFiles.value)) {
+                    if (repositoryMedia.deleteDownloadedMediaByChatId(chatId, chatIdsAndFiles.value, null)) {
                         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize()))
                     }
                     else {

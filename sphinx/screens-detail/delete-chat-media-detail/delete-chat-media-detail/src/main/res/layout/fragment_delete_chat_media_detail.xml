@@ -26,7 +26,7 @@
         tools:listitem="@layout/storage_grid_image_list_item_holder" />
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_podcast_no_found"
+        android:id="@+id/text_view_files_no_found"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/roboto_light"
@@ -48,6 +48,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header" />
+
+    <include
+        android:id="@+id/include_layout_manage_storage_delete_notification"
+        layout="@layout/layout_manage_storage_delete_notification"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

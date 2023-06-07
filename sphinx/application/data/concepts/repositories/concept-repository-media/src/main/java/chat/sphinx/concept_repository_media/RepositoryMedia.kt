@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_media
 
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_feed.DownloadableFeedItem
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_message.Message
@@ -25,7 +26,7 @@ interface RepositoryMedia {
 
     fun getAllDownloadedMedia(): Flow<List<MessageMedia>>
     fun getAllDownloadedMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
-    suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>): Boolean
+    suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?): Boolean
 
     fun inProgressDownloadIds(): List<FeedId>
 

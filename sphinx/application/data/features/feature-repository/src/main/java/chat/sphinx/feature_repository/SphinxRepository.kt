@@ -6391,8 +6391,7 @@ abstract class SphinxRepository(
             )
         }
 
-
-    override suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>): Boolean {
+    override suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?): Boolean {
         return withContext(mainImmediate) {
             val queries = coreDB.getSphinxDatabaseQueries()
             try {
@@ -6401,15 +6400,28 @@ abstract class SphinxRepository(
                         localFile.delete()
                     }
                 }
-                feedItemLock.withLock {
-                    withContext(io) {
-                        queries.transaction {
-                            queries.messageMediaDeleteAllMediaByChatId(chatId)
+                if (messageIds != null) {
+                    feedItemLock.withLock {
+                        withContext(io) {
+                            queries.transaction {
+                                queries.messageMediaDeleteMediaById(chatId, messageIds)
+                            }
                         }
                     }
+                    delay(200L)
+                    true
                 }
-                delay(200L)
-                true
+                else {
+                    feedItemLock.withLock {
+                        withContext(io) {
+                            queries.transaction {
+                                queries.messageMediaDeleteAllMediaByChatId(chatId)
+                            }
+                        }
+                    }
+                    delay(200L)
+                    true
+                }
             } catch (e: Exception) {
                 false
             }

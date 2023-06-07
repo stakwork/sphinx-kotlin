@@ -114,6 +114,8 @@
     <string name="manage_storage_no_podcast_found">No downloaded podcast found</string>
     <string name="manage_storage_no_files_found">No files found</string>
     <string name="manage_storage_delete_chats">delete all chat media files</string>
+    <string name="manage_storage_delete_items_successfully">Items deleted successfully</string>
+    <string name="manage_storage_delete_selected_items">Delete selected items?</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

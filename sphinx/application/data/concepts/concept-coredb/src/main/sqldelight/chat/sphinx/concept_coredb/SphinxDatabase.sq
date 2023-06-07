@@ -929,6 +929,11 @@ UPDATE messageMediaDbo
 SET local_file = NULL
 WHERE chat_id = ?;
 
+messageMediaDeleteMediaById:
+UPDATE messageMediaDbo
+SET local_file = NULL
+WHERE chat_id = ? AND id IN ?;
+
 CREATE TABLE subscriptionDbo(
     id                          INTEGER         AS SubscriptionId NOT NULL PRIMARY KEY,
     cron                        TEXT            AS Cron NOT NULL,

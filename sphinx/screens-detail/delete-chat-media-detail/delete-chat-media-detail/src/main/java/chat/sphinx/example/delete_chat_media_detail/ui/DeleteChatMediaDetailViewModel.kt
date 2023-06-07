@@ -11,18 +11,15 @@ import chat.sphinx.delete.chat.media.detail.R
 import chat.sphinx.example.delete_chat_media_detail.model.ChatFile
 import chat.sphinx.example.delete_chat_media_detail.navigation.DeleteChatMediaDetailNavigator
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatDetailNotificationViewState
+import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatItemsNotificationViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.HeaderSelectionModeViewState
 import chat.sphinx.wrapper_common.FileSize
-import chat.sphinx.wrapper_common.calculateLongSize
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
-import chat.sphinx.wrapper_common.dashboard.toChatId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.toFileSize
-import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message_media.MediaType
-import chat.sphinx.wrapper_message_media.MessageMedia
 import chat.sphinx.wrapper_message_media.isAudio
 import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isPdf
@@ -35,6 +32,7 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
@@ -44,8 +42,6 @@ import javax.inject.Inject
 internal class DeleteChatMediaDetailViewModel @Inject constructor(
     private val app: Application,
     val navigator: DeleteChatMediaDetailNavigator,
-    private val contactRepository: ContactRepository,
-    private val chatRepository: ChatRepository,
     private val repositoryMedia: RepositoryMedia,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
@@ -59,9 +55,12 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
     private var itemsTotalSize: FileSize = FileSize(0)
     private var currentChatIdAndFiles: Pair<ChatId, List<File>>? = null
 
-
     val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatDetailNotificationViewState> by lazy {
         ViewStateContainer(DeleteChatDetailNotificationViewState.Closed)
+    }
+
+    val deleteChatItemsNotificationViewState: ViewStateContainer<DeleteChatItemsNotificationViewState> by lazy {
+        ViewStateContainer(DeleteChatItemsNotificationViewState.Closed)
     }
 
     val headerSelectionModeViewStateContainer: ViewStateContainer<HeaderSelectionModeViewState> by lazy {
@@ -80,7 +79,9 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
                     getMediaType(it.mediaType),
                     it.messageId,
                     it.chatId,
-                    FileSize(it.localFile?.length() ?: 0L).calculateSize()
+                    FileSize(it.localFile?.length() ?: 0L).calculateSize(),
+                    false,
+                    it.localFile
                 )}
 
                 viewStateContainer.updateViewState(DeleteChatMediaDetailViewState.FileList(fileList, totalSizeChats?.calculateSize()))
@@ -92,7 +93,7 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatDetailNotificationViewState.Deleting)
         viewModelScope.launch(mainImmediate) {
             currentChatIdAndFiles?.let { chatIdAndFiles ->
-                if (repositoryMedia.deleteDownloadedMediaByChatId(chatIdAndFiles.first, chatIdAndFiles.second)) {
+                if (repositoryMedia.deleteDownloadedMediaByChatId(chatIdAndFiles.first, chatIdAndFiles.second, null)) {
                     deleteChatNotificationViewStateContainer.updateViewState(
                         DeleteChatDetailNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize())
                     )
@@ -108,6 +109,36 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
         }
     }
 
+    private var deleteSelectedJob: Job? = null
+
+    fun deleteSelectedFiles() {
+        if (deleteSelectedJob?.isActive == true) {
+            return
+        }
+        deleteSelectedJob = viewModelScope.launch(mainImmediate) {
+            val selectedFiles = (currentViewState as? DeleteChatMediaDetailViewState.FileList)?.files?.filter { it.isSelected }
+            val localFileList = selectedFiles?.mapNotNull { it.localFile } ?: listOf()
+            val messageIdList = selectedFiles?.map { it.messageId } ?: listOf()
+            val deleteResponse = repositoryMedia.deleteDownloadedMediaByChatId(
+                ChatId(args.argChatId),
+                localFileList,
+                messageIdList
+                )
+
+            if (deleteResponse) {
+                submitSideEffect(
+                    DeleteNotifySideEffect(app.getString(R.string.manage_storage_delete_items_successfully))
+                )
+            } else {
+                submitSideEffect(
+                    DeleteNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
+                )
+            }
+            deselectAllItems()
+            deleteChatItemsNotificationViewState.updateViewState(DeleteChatItemsNotificationViewState.Closed)
+        }
+    }
+
     private fun getMediaType(mediaType: MediaType): String {
          return when {
              mediaType.isImage -> MediaType.IMAGE
@@ -119,17 +150,17 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
     }
 
     fun changeItemSelection(messageId: MessageId) {
-        val updatedFiles = (currentViewState as? DeleteChatMediaDetailViewState.FileList)?.files?.map { chatFile ->
+        val currentFiles = (currentViewState as? DeleteChatMediaDetailViewState.FileList)?.files?.map { chatFile ->
             if (chatFile.messageId.value == messageId.value) {
                 chatFile.copy(isSelected = !chatFile.isSelected)
             }
             else chatFile
         }
 
-        updatedFiles?.let { fileList ->
+        currentFiles?.let { fileList ->
             if (fileList.any { it.isSelected }) {
                 val itemNumber = fileList.count { it.isSelected }.toString()
-                val selectedSize = fileList.filter { it.isSelected }.sumOf{ it.size.calculateLongSize()}.toFileSize()?.calculateSize() ?: ""
+                val selectedSize = fileList.filter { it.isSelected }.sumOf{ it.localFile?.length() ?: 0L}.toFileSize()?.calculateSize() ?: ""
                 headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.On(itemNumber, selectedSize))
             } else {
                 headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.Off)
@@ -139,12 +170,12 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
     }
 
     fun deselectAllItems(){
-        val updatedFiles = (currentViewState as? DeleteChatMediaDetailViewState.FileList)?.files?.map { chatFile ->
+        val currentFiles = (currentViewState as? DeleteChatMediaDetailViewState.FileList)?.files?.map { chatFile ->
             chatFile.copy(isSelected = false)
         }
-        updatedFiles?.let { fileList ->
+        currentFiles?.let { fileList ->
             headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.Off)
-            updateViewState(DeleteChatMediaDetailViewState.FileList(updatedFiles, itemsTotalSize.calculateSize()))
+            updateViewState(DeleteChatMediaDetailViewState.FileList(currentFiles, itemsTotalSize.calculateSize()))
         }
     }
 

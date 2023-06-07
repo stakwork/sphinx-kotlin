@@ -20,6 +20,7 @@ import chat.sphinx.delete.chat.media.detail.databinding.FragmentDeleteChatMediaD
 import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailFooterAdapter
 import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailsGridAdapter
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatDetailNotificationViewState
+import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatItemsNotificationViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.HeaderSelectionModeViewState
 import chat.sphinx.insetter_activity.InsetterActivity
@@ -99,7 +100,11 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
             }
             if (viewModel.headerSelectionModeViewStateContainer.value is HeaderSelectionModeViewState.On) {
                 viewModel.deselectAllItems()
-            } else {
+            }
+            if (viewModel.deleteChatItemsNotificationViewState.value is DeleteChatItemsNotificationViewState.Open) {
+                viewModel.deleteChatItemsNotificationViewState.updateViewState(DeleteChatItemsNotificationViewState.Closed)
+            }
+            else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }
@@ -115,9 +120,24 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
 
     private fun setClickListeners() {
         binding.apply {
-            includeManageMediaElementHeader.textViewDetailScreenClose.setOnClickListener {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.popBackStack()
+            includeManageMediaElementHeader.apply {
+                textViewDetailScreenClose.setOnClickListener {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.popBackStack()
+                    }
+                }
+                buttonHeaderDelete.setOnClickListener {
+                    viewModel.deleteChatNotificationViewStateContainer.updateViewState(
+                        DeleteChatDetailNotificationViewState.Open
+                    )
+                }
+                textViewDetailScreenSelectionClose.setOnClickListener {
+                    viewModel.deselectAllItems()
+                }
+                buttonSave.setOnClickListener {
+                    viewModel.deleteChatItemsNotificationViewState.updateViewState(
+                        DeleteChatItemsNotificationViewState.Open
+                    )
                 }
             }
 
@@ -134,11 +154,15 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                 }
             }
 
-            includeManageMediaElementHeader.buttonHeaderDelete.setOnClickListener {
-                viewModel.deleteChatNotificationViewStateContainer.updateViewState(DeleteChatDetailNotificationViewState.Open)
-            }
-            includeManageMediaElementHeader.textViewDetailScreenSelectionClose.setOnClickListener {
-                viewModel.deselectAllItems()
+            includeLayoutManageStorageDeleteNotification.apply {
+                includeLayoutManageStorageDeleteDetails.buttonDelete.setOnClickListener {
+                    viewModel.deleteSelectedFiles()
+                }
+                includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
+                    viewModel.deleteChatItemsNotificationViewState.updateViewState(
+                        DeleteChatItemsNotificationViewState.Closed
+                    )
+                }
             }
         }
     }
@@ -152,8 +176,12 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                     constraintLayoutDeleteElementContainerTrash.visible
                     textViewManageStorageElementNumber.text = viewState.totalSizeFiles
                 }
-                binding.textViewPodcastNoFound.goneIfFalse(viewState.files.isEmpty())
+                binding.textViewFilesNoFound.goneIfFalse(viewState.files.isEmpty())
                 binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_chats)
+
+                if (viewState.files.isEmpty()) {
+                    binding.includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.gone
+                }
             }
         }
     }
@@ -211,6 +239,21 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                             imageViewDeleteSelectionIcon.visible
                         }
                     }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.deleteChatItemsNotificationViewState.collect { viewState ->
+                binding.includeLayoutManageStorageDeleteNotification.apply {
+                    when (viewState) {
+                        is DeleteChatItemsNotificationViewState.Closed -> {}
+                        is DeleteChatItemsNotificationViewState.Open -> {
+                            includeLayoutManageStorageDeleteDetails.textViewStorageDeleteHeader.text = getString(R.string.manage_storage_delete_selected_items)
+                        }
+                    }
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
                 }
             }
         }

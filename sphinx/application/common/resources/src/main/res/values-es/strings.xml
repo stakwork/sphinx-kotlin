@@ -115,6 +115,8 @@
     <string name="manage_storage_no_podcast_found">No se encontraron podcast descargados</string>
     <string name="manage_storage_no_files_found">No se encontraron archivos</string>
     <string name="manage_storage_delete_chats">Todos los archivos de chats</string>
+    <string name="manage_storage_delete_items_successfully">Archivos eliminados exitosamente</string>
+    <string name="manage_storage_delete_selected_items">Borrar archivos seleccionados?</string>
 
     <string name="video_sats_per_minute">Sats por minuto</string>
 
