@@ -67,6 +67,20 @@ inline fun List<FileSize>.calculateTotalSize(): String {
     }
 }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.calculateLongSize(): Long {
+    val parts = this.split(" ")
+    val size = parts[0].toDouble()
+    val unit = parts[1].uppercase()
+
+    return when (unit) {
+        "B" -> size.toLong()
+        "KB" -> (size * 1024).toLong()
+        "MB" -> (size * 1024 * 1024).toLong()
+        "GB" -> (size * 1024 * 1024 * 1024).toLong()
+        else -> throw IllegalArgumentException("Invalid file size unit: $unit")
+    }
+}
 
 @JvmInline
 value class FileSize(val value: Long)

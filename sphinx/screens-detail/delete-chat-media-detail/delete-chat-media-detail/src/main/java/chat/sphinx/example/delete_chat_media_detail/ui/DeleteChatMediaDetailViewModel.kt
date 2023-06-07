@@ -13,6 +13,7 @@ import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatDetailNo
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.HeaderSelectionModeViewState
 import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.calculateLongSize
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.toChatId
@@ -107,7 +108,7 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
         updatedFiles?.let { fileList ->
             if (fileList.any { it.isSelected }) {
                 val itemNumber = fileList.count { it.isSelected }.toString()
-                val selectedSize = fileList.filter { it.isSelected }.sumOf{ extractNumber(it.size)}.toFileSize()?.calculateSize() ?: ""
+                val selectedSize = fileList.filter { it.isSelected }.sumOf{ it.size.calculateLongSize()}.toFileSize()?.calculateSize() ?: ""
                 headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.On(itemNumber, selectedSize))
             } else {
                 headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.Off)
@@ -124,13 +125,6 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
             headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.Off)
             updateViewState(DeleteChatMediaDetailViewState.FileList(updatedFiles, itemsTotalSize.calculateSize()))
         }
-    }
-
-    private fun extractNumber(input: String): Long {
-        val regex = "\\d+".toRegex()
-        val match = regex.find(input)
-
-        return match?.value?.toLongOrNull() ?: 0L
     }
 
     private fun setItemTotalFile(totalSize: Long) {
