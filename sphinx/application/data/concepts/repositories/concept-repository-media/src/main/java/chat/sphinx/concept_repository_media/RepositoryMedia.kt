@@ -1,5 +1,6 @@
 package chat.sphinx.concept_repository_media
 
+import chat.sphinx.wrapper_common.StorageData
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
@@ -22,6 +23,7 @@ interface RepositoryMedia {
         downloadCompleteCallback: (downloadedFile: File) -> Unit
     )
 
+    suspend fun getStorageDataInfo(): Flow<StorageData>
     fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
 
     fun getAllDownloadedMedia(): Flow<List<MessageMedia>>

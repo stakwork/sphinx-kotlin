@@ -6350,6 +6350,38 @@ abstract class SphinxRepository(
         }
     }
 
+    override suspend fun getStorageDataInfo(): Flow<StorageData> =
+        flow {
+            var images: Long = 0L
+            var video: Long = 0L
+            var audio: Long = 0L
+            var files: Long = 0L
+
+            val chatFiles = getAllDownloadedMedia().firstOrNull() ?: listOf()
+            val feedFiles = getAllDownloadedFeedItems().firstOrNull() ?: listOf()
+
+            chatFiles.forEach { messageMedia ->
+                when {
+                    messageMedia.mediaType.isImage -> images += messageMedia.localFile?.length() ?: 0L
+                    messageMedia.mediaType.isVideo -> video += messageMedia.localFile?.length() ?: 0L
+                    messageMedia.mediaType.isAudio -> audio += messageMedia.localFile?.length() ?: 0L
+                    else -> files += messageMedia.localFile?.length() ?: 0L
+                }
+            }
+            feedFiles.forEach { feedItem ->
+                audio += feedItem.localFile?.length() ?: 0L
+            }
+
+            val storageData = StorageData(
+                FileSize(0),
+                FileSize(images),
+                FileSize(video),
+                FileSize(audio),
+                FileSize(files)
+            )
+            emit(storageData)
+        }
+
     override fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
         flow {
         val queries = coreDB.getSphinxDatabaseQueries()
