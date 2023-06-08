@@ -130,7 +130,7 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 loadingStorage()
             }
             is ManageStorageViewState.StorageInfo -> {
-//                bindStorageInfo(viewState)
+                bindStorageInfo(viewState)
             }
         }
     }
@@ -157,13 +157,56 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
     private fun bindStorageInfo(viewState: ManageStorageViewState.StorageInfo) {
         binding.apply {
             textViewManageStorageOccupiedNumber.text = viewState.usedStorage
-            textViewManageStorageFreeNumber.text = viewState.freeStorage
+            textViewManageStorageFreeNumber.text = String.format(getString(R.string.manage_storage_free_space), viewState.freeStorage)
             textViewManageStorageImagesNumber.text = viewState.image
             textViewManageStorageVideoNumber.text = viewState.video
             textViewManageStorageAudioNumber.text = viewState.audio
             textViewManageStorageFilesNumber.text = viewState.files
             textViewManageStorageCustomChatNumber.text = viewState.chats
             textViewManageStorageCustomPodcastNumber.text = viewState.podcasts
+
+            textViewManageStorageOccupiedNumber.visible
+            textViewManageStorageFreeNumber.visible
+            progressBarLoading.gone
+            textViewLoading.gone
+            buttonChangeStorageLimit.visible
+
+            storageProgressPointImages.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.storageBarBlue)
+
+            storageProgressPointVideo.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.storageBarPurple)
+
+            storageProgressPointAudio.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.storageBarYellow)
+
+            storageProgressPointFiles.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.primaryGreen)
+
+            textViewManageStorageImagesText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.primaryText)
+            )
+            textViewManageStorageVideoText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.primaryText)
+            )
+            textViewManageStorageAudioText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.primaryText)
+            )
+            textViewManageStorageFilesText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.primaryText)
+            )
+
+            progressBarImages.gone
+            progressBarAudio.gone
+            progressBarVideo.gone
+            progressBarFiles.gone
+
+            buttonProfileTrashImages.visible
+            buttonProfileTrashVideo.visible
+            buttonProfileTrashAudio.visible
+            buttonProfileTrashFiles.visible
+
+            constraintLayoutStorageCustomTypeContainer.visible
         }
     }
 
@@ -210,7 +253,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             )
 
             constraintLayoutStorageCustomTypeContainer.gone
-            textViewManageStorageImagesNumber.gone
             progressBarImages.visible
             progressBarAudio.visible
             progressBarVideo.visible

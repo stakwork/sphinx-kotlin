@@ -58,7 +58,7 @@
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
             android:textColor="@color/mainBottomIcons"
-            android:textSize="@dimen/default_text_size_tab"
+            android:textSize="@dimen/default_text_size_large_title"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_occupied_number"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="120 GB Free" />
