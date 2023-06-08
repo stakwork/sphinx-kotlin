@@ -147,7 +147,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/text_view_header"
+                android:id="@+id/text_view_manage_storage_images_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/default_layout_margin"
@@ -180,7 +180,7 @@
                 android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_header"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_images_text"
                 app:layout_constraintEnd_toEndOf="parent" />
 
             <ProgressBar

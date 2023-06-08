@@ -130,7 +130,7 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 loadingStorage()
             }
             is ManageStorageViewState.StorageInfo -> {
-                bindStorageInfo(viewState)
+//                bindStorageInfo(viewState)
             }
         }
     }
@@ -175,6 +175,15 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             progressBarLoading.visible
             textViewLoading.visible
             buttonChangeStorageLimit.gone
+            includeManageStorageHeader.constraintLayoutDeleteElementContainerTrash.gone
+
+            includeProfileManageStorageBar.apply {
+                storageProgressImages.gone
+                storageProgressVideo.gone
+                storageProgressAudio.gone
+                storageProgressFiles.gone
+            }
+
             storageProgressPointImages.backgroundTintList =
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)
 
@@ -184,18 +193,33 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             storageProgressPointAudio.backgroundTintList =
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)
 
+            storageProgressPointFiles.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+
+            textViewManageStorageImagesText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+            )
             textViewManageStorageVideoText.setTextColor(
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)
             )
             textViewManageStorageAudioText.setTextColor(
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)
             )
+            textViewManageStorageFilesText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+            )
+
             constraintLayoutStorageCustomTypeContainer.gone
             textViewManageStorageImagesNumber.gone
             progressBarImages.visible
+            progressBarAudio.visible
+            progressBarVideo.visible
+            progressBarFiles.visible
+
             buttonProfileTrashImages.gone
             buttonProfileTrashAudio.gone
             buttonProfileTrashVideo.gone
+            buttonProfileTrashFiles.gone
         }
     }
 
