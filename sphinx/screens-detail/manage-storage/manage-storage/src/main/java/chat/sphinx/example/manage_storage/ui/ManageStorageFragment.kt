@@ -16,8 +16,6 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.manage.storage.R
 import chat.sphinx.manage.storage.databinding.FragmentManageStorageBinding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
-import chat.sphinx.share_qr_code.BottomMenuShareQRCode
-import chat.sphinx.wrapper_feed.FeedDestination
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -59,38 +57,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.layoutConstraintManageStorage)
 
-    }
-
-    private fun loadingStorage() {
-        binding.apply {
-            textViewManageStorageOccupiedNumber.gone
-            textViewManageStorageFreeNumber.gone
-            buttonChangeStorageLimit.gone
-            progressBarLoading.visible
-            textViewLoading.visible
-            buttonChangeStorageLimit.gone
-            storageProgressPointImages.backgroundTintList =
-                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
-
-            storageProgressPointVideo.backgroundTintList =
-                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
-
-            storageProgressPointAudio.backgroundTintList =
-                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
-
-            textViewManageStorageVideoText.setTextColor(
-                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
-            )
-            textViewManageStorageAudioText.setTextColor(
-                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
-            )
-            constraintLayoutStorageCustomTypeContainer.gone
-            textViewManageStorageImagesNumber.gone
-            progressBarImages.visible
-            buttonProfileTrashImages.gone
-            buttonProfileTrashAudio.gone
-            buttonProfileTrashVideo.gone
-        }
     }
 
     private inner class BackPressHandler(
@@ -163,6 +129,9 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             is ManageStorageViewState.Loading -> {
                 loadingStorage()
             }
+            is ManageStorageViewState.StorageInfo -> {
+                bindStorageInfo(viewState)
+            }
         }
     }
 
@@ -184,6 +153,52 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
 
         super.subscribeToViewStateFlow()
     }
+
+    private fun bindStorageInfo(viewState: ManageStorageViewState.StorageInfo) {
+        binding.apply {
+            textViewManageStorageOccupiedNumber.text = viewState.usedStorage
+            textViewManageStorageFreeNumber.text = viewState.freeStorage
+            textViewManageStorageImagesNumber.text = viewState.image
+            textViewManageStorageVideoNumber.text = viewState.video
+            textViewManageStorageAudioNumber.text = viewState.audio
+            textViewManageStorageFilesNumber.text = viewState.files
+            textViewManageStorageCustomChatNumber.text = viewState.chats
+            textViewManageStorageCustomPodcastNumber.text = viewState.podcasts
+        }
+    }
+
+    private fun loadingStorage() {
+        binding.apply {
+            textViewManageStorageOccupiedNumber.gone
+            textViewManageStorageFreeNumber.gone
+            buttonChangeStorageLimit.gone
+            progressBarLoading.visible
+            textViewLoading.visible
+            buttonChangeStorageLimit.gone
+            storageProgressPointImages.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+
+            storageProgressPointVideo.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+
+            storageProgressPointAudio.backgroundTintList =
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+
+            textViewManageStorageVideoText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+            )
+            textViewManageStorageAudioText.setTextColor(
+                ContextCompat.getColorStateList(root.context, R.color.placeholderText)
+            )
+            constraintLayoutStorageCustomTypeContainer.gone
+            textViewManageStorageImagesNumber.gone
+            progressBarImages.visible
+            buttonProfileTrashImages.gone
+            buttonProfileTrashAudio.gone
+            buttonProfileTrashVideo.gone
+        }
+    }
+
 
     override suspend fun onSideEffectCollect(sideEffect: StorageNotifySideEffect) {
         sideEffect.execute(binding.root.context)

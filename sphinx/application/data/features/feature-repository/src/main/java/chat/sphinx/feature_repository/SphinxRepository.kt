@@ -6352,13 +6352,15 @@ abstract class SphinxRepository(
 
     override suspend fun getStorageDataInfo(): Flow<StorageData> =
         flow {
+            val chatFiles = getAllDownloadedMedia().firstOrNull() ?: listOf()
+            val feedFiles = getAllDownloadedFeedItems().firstOrNull() ?: listOf()
+
             var images: Long = 0L
             var video: Long = 0L
             var audio: Long = 0L
             var files: Long = 0L
-
-            val chatFiles = getAllDownloadedMedia().firstOrNull() ?: listOf()
-            val feedFiles = getAllDownloadedFeedItems().firstOrNull() ?: listOf()
+            val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
+            val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
 
             chatFiles.forEach { messageMedia ->
                 when {
@@ -6373,11 +6375,14 @@ abstract class SphinxRepository(
             }
 
             val storageData = StorageData(
+                FileSize(chat + podcast),
                 FileSize(0),
                 FileSize(images),
                 FileSize(video),
                 FileSize(audio),
-                FileSize(files)
+                FileSize(files),
+                FileSize(chat),
+                FileSize(podcast)
             )
             emit(storageData)
         }

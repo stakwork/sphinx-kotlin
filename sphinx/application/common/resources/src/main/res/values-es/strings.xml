@@ -98,6 +98,7 @@
     <string name="manage_storage_images">Imágenes</string>
     <string name="manage_storage_video">Video</string>
     <string name="manage_storage_audio">Audio</string>
+    <string name="manage_storage_files">Archivos</string>
     <string name="manage_storage_total_storage">de %s</string>
     <string name="manage_storage_save">Guardar</string>
     <string name="manage_storage_delete">Borrar</string>

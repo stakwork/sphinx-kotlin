@@ -40,6 +40,17 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.2" />
 
+        <View
+            android:id="@+id/storage_progress_files"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_super_tiny_layout_margin"
+            android:background="@color/primaryGreen"
+            app:layout_constraintStart_toEndOf="@+id/storage_progress_audio"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.2" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

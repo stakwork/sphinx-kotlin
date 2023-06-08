@@ -85,6 +85,7 @@
     <string name="material_icon_name_group_action_accept_join_request">done</string>
     <string name="material_icon_name_group_action_reject_join_request">close</string>
     <string name="media_type_label_audio">Audio</string>
+    <string name="manage_storage_files">Files</string>
     <string name="media_type_label_video">Video</string>
     <string name="group_pin_label">Setting ng Privacy</string>
     <string name="new_contact_pin_standard_private_label">Karaniwang PIN / PribadongPIN</string>
