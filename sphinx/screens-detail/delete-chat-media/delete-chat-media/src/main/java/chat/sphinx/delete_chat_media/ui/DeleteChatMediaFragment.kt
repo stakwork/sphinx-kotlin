@@ -141,6 +141,7 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
                 binding.includeManageMediaElementHeader.apply {
                     constraintLayoutDeleteElementContainerTrash.visible
                     textViewManageStorageElementNumber.text = viewState.totalSizeChats
+                    constraintLayoutDeleteElementContainerTrash.goneIfFalse(!viewState.chats.isEmpty())
                 }
                 binding.textViewPodcastNoFound.goneIfFalse(viewState.chats.isEmpty())
                 binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_chats)

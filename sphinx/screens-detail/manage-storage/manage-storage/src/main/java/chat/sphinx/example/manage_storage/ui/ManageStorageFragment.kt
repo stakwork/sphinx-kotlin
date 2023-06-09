@@ -126,16 +126,16 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             }
 
             constraintLayoutStorageImageContainer.setOnClickListener {
-                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_images))
+//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_images))
             }
             constraintLayoutStorageVideoContainer.setOnClickListener {
-                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_video))
+//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_video))
             }
             constraintLayoutStorageAudioContainer.setOnClickListener {
-                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_audio))
+//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_audio))
             }
             constraintLayoutStorageFilesContainer.setOnClickListener {
-                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_files))
+//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_files))
             }
         }
     }
@@ -259,10 +259,10 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             progressBarVideo.gone
             progressBarFiles.gone
 
-            buttonProfileTrashImages.visible
-            buttonProfileTrashVideo.visible
-            buttonProfileTrashAudio.visible
-            buttonProfileTrashFiles.visible
+            buttonProfileTrashImages.gone
+            buttonProfileTrashVideo.gone
+            buttonProfileTrashAudio.gone
+            buttonProfileTrashFiles.gone
 
             constraintLayoutStorageCustomTypeContainer.visible
         }

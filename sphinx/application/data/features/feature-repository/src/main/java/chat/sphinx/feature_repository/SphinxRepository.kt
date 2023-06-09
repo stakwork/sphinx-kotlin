@@ -6375,7 +6375,7 @@ abstract class SphinxRepository(
                 audio += feedItem.localFile?.length() ?: 0L
             }
 
-            val totalStorage: Long = 1L * 1024L * 1024L * 1024L
+            val totalStorage: Long = 100L * 1024L * 1024L * 1024L
             val usedStorage = chat + podcast
             val freeStorage = totalStorage - usedStorage
 

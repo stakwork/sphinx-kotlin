@@ -181,8 +181,9 @@
                 android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_images_text"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progress_bar_images"
@@ -260,8 +261,9 @@
                 android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_video_text"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progress_bar_video"
@@ -339,8 +341,9 @@
                 android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_audio_text"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progress_bar_audio"
@@ -418,8 +421,9 @@
                 android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_files_text"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progress_bar_files"
