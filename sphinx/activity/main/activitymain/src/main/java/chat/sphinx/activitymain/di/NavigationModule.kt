@@ -19,10 +19,15 @@ import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.delete_chat_media.navigation.DeleteChatMediaNavigator
 import chat.sphinx.tribes_discover.navigation.TribesDiscoverNavigator
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
 import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
 import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
+import chat.sphinx.example.delete_chat_media_detail.navigation.DeleteChatMediaDetailNavigator
+import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
+import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
+import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
@@ -288,6 +293,36 @@ internal object NavigationModule {
         qrCodeNavigatorImpl: QRCodeNavigatorImpl
     ): QRCodeNavigator =
         qrCodeNavigatorImpl
+
+    @Provides
+    fun provideManageStorageNavigator(
+        manageStorageNavigatorImpl: ManageStorageNavigatorImpl
+    ): ManageStorageNavigator =
+        manageStorageNavigatorImpl
+
+    @Provides
+    fun provideDeleteMediaNavigator(
+        deleteMediaNavigatorImpl: DeleteMediaNavigatorImpl
+    ): DeleteMediaNavigator =
+        deleteMediaNavigatorImpl
+
+    @Provides
+    fun provideDeleteDetailMediaNavigator(
+        deleteMediaDetailNavigatorImpl: DeleteMediaDetailNavigatorImpl
+    ): DeleteMediaDetailNavigator =
+        deleteMediaDetailNavigatorImpl
+
+    @Provides
+    fun provideDeleteChatMediaNavigator(
+        deleteChatMediaNavigatorImpl: DeleteChatMediaNavigatorImpl
+    ): DeleteChatMediaNavigator =
+        deleteChatMediaNavigatorImpl
+
+    @Provides
+    fun provideDeleteChatMediaDetailNavigator(
+        deleteChatMediaDetailNavigatorImpl: DeleteChatMediaDetailNavigatorImpl
+    ): DeleteChatMediaDetailNavigator =
+        deleteChatMediaDetailNavigatorImpl
 
     @Provides
     fun provideProfileNavigator(

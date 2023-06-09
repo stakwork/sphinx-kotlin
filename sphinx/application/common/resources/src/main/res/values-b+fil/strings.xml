@@ -85,6 +85,7 @@
     <string name="material_icon_name_group_action_accept_join_request">done</string>
     <string name="material_icon_name_group_action_reject_join_request">close</string>
     <string name="media_type_label_audio">Audio</string>
+    <string name="manage_storage_files">Files</string>
     <string name="media_type_label_video">Video</string>
     <string name="group_pin_label">Setting ng Privacy</string>
     <string name="new_contact_pin_standard_private_label">Karaniwang PIN / PribadongPIN</string>
@@ -165,5 +166,34 @@
     <string name="podcast">Podcast</string>
     <string name="alias_allowed_characters">Mga titik, numero at underscore lamang ang pinapayagan sa mga alias ng tribo</string>
     <string name="video_sats_per_minute">Sats per minute</string>
+    <string name="manage_storage_total_storage">of %s</string>
+    <string name="manage_storage_free_space">%s Free</string>
+    <string name="loading_dots">Loading ...</string>
+    <string name="manage_storage">Manage Storage</string>
+    <string name="manage_storage_used">Used</string>
+    <string name="manage_storage_limit">Change Storage Limit</string>
+    <string name="manage_storage_images">Images</string>
+    <string name="manage_storage_video">Video</string>
+    <string name="manage_storage_audio">Audio</string>
+    <string name="manage_storage_save">Save</string>
+    <string name="manage_storage_cancel">Cancel</string>
+    <string name="manage_storage_delete">Delete</string>
+    <string name="manage_storage_got_it">Got it</string>
+    <string name="manage_storage_you_have_chosen">You\'ve chosen to</string>
+    <string name="manage_storage_delete_description">delete all podcast episodes</string>
+    <string name="manage_storage_notification_description">This action deletes all of the selected files permanently and cannot be undone.</string>
+    <string name="manage_storage_deleting">Deleting</string>
+    <string name="manage_storage_deleted_all_podcast">All podcast episode</string>
+    <string name="manage_storage_deleted_successfully">successfully deleted</string>
+    <string name="manage_storage_deleted_free_space">You have freed up %s of storage space</string>
+    <string name="manage_storage_delete_item">Delete %s?</string>
+    <string name="manage_storage_error_delete">There was an error in the delete process</string>
+    <string name="manage_storage_no_podcast_found">No downloaded podcast found</string>
+    <string name="manage_storage_no_files_found">No files found</string>
+    <string name="manage_storage_delete_chats">delete all chat media files</string>
+    <string name="manage_storage_delete_items_successfully">Items deleted successfully</string>
+    <string name="manage_storage_delete_selected_items">Delete selected items?</string>
+    <string name="manage_storage_delete_feature_not_implemented">Feature not implemented yet</string>
+
 
 </resources>

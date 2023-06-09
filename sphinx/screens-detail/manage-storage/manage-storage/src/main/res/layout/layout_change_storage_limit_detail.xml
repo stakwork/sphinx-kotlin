@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/headerBG">
+
+    <include
+        android:id="@+id/include_manage_change_limit_header"
+        layout="@layout/layout_detail_screen_alternative_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_manage_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_change_limit_header">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_used"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:text="@string/manage_storage_used"
+            android:textColor="@color/mainBottomIcons"
+            android:textSize="@dimen/pin_help_text_view_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_occupied_number"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_bold"
+            android:maxLines="1"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_used2"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="128 GB" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_used2"
+            android:layout_width="0dp"
+            android:layout_marginTop="@dimen/default_medium_layout_margin"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="1"
+            android:textColor="@color/mainBottomIcons"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_used"
+            tools:text="50.12 GB" />
+
+        <include
+            android:id="@+id/include_profile_manage_storage_bar"
+            layout="@layout/layout_manage_storage_progress_bar"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_occupied_number" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_seekbar_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_small_layout_margin"
+            app:layout_constraintTop_toBottomOf="@+id/include_profile_manage_storage_bar">
+
+            <View
+                android:id="@+id/view_seekbar_bg_line"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_small_layout_margin"
+                android:background="@drawable/background_manage_storage_seek_bar_progress"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatSeekBar
+                android:id="@+id/mySeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="50"
+                android:progressDrawable="@drawable/background_manage_storage_seek_bar_progress_invisible"
+                android:thumb="@drawable/ic_storage_seekbar_thumb"
+                android:thumbTint="@color/primaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_min"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_tab"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_seekbar_container"
+            tools:text="30 GB" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_max"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_tab"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_seekbar_container"
+            tools:text="200 GB" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/button_cancel_container"
+            android:layout_width="@dimen/manage_storage_button_cancel_width"
+            android:layout_height="@dimen/default_large_layout_margin"
+            android:layout_marginTop="@dimen/default_form_scan_icon_container_width"
+            android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_min">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_background_send_sats"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:text="@string/manage_storage_cancel"
+                android:textAllCaps="false"
+                android:textColor="@color/text"
+                android:textSize="@dimen/chat_footer_episode_title_text_size" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/button_save_container"
+            android:layout_width="@dimen/manage_storage_button_cancel_width"
+            android:layout_height="@dimen/default_large_layout_margin"
+            android:layout_marginTop="@dimen/default_form_scan_icon_container_width"
+            android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_max">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_save"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/background_button_join"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:text="@string/manage_storage_save"
+                android:textAllCaps="false"
+                android:textColor="@color/text"
+                android:textSize="@dimen/chat_footer_episode_title_text_size" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

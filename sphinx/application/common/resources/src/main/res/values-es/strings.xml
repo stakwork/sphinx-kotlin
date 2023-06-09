@@ -15,6 +15,7 @@
     <string name="decryption_error">ERROR DE DECRIPTACIÓN...</string>
     <string name="null_name_error">ERROR: NOMBRE VACÍO</string>
     <string name="public_key">Clave Pública</string>
+    <string name="loading_dots">Cargando ...</string>
 
     <!--  Media Type Labels -->
     <string name="media_type_label_audio">Audio</string>
@@ -90,6 +91,35 @@
     <string name="web_view_withdraw">retirar hasta</string>
     <string name="web_view_reauthorizing">sats antes de reautorizar</string>
     <string name="web_view_remaining_budget">Presupuesto Restante: %s</string>
+
+    <string name="manage_storage">Administrar Almaceniamiento</string>
+    <string name="manage_storage_used">Usado</string>
+    <string name="manage_storage_limit">Cambiar Límite de almacenamiento</string>
+    <string name="manage_storage_images">Imágenes</string>
+    <string name="manage_storage_video">Video</string>
+    <string name="manage_storage_audio">Audio</string>
+    <string name="manage_storage_files">Archivos</string>
+    <string name="manage_storage_total_storage">de %s</string>
+    <string name="manage_storage_free_space">%s Libres</string>
+    <string name="manage_storage_save">Guardar</string>
+    <string name="manage_storage_delete">Borrar</string>
+    <string name="manage_storage_cancel">Cancelar</string>
+    <string name="manage_storage_got_it">Aceptar</string>
+    <string name="manage_storage_you_have_chosen">Has elegido</string>
+    <string name="manage_storage_delete_description">Eliminar todos los episodios de podcast.</string>
+    <string name="manage_storage_notification_description">Esta acción elimina todos los archivos seleccionados de forma permanente y no se puede deshacer.</string>
+    <string name="manage_storage_deleting">Borrando</string>
+    <string name="manage_storage_deleted_all_podcast">Todos los episodios del podcast</string>
+    <string name="manage_storage_deleted_successfully">Han sido eliminados exitosamente</string>
+    <string name="manage_storage_deleted_free_space">Has liberado %s de espacio de almacenamiento.</string>
+    <string name="manage_storage_delete_item">Borrar %s?</string>
+    <string name="manage_storage_error_delete">Hubo un error para borrar el archivo</string>
+    <string name="manage_storage_no_podcast_found">No se encontraron podcast descargados</string>
+    <string name="manage_storage_no_files_found">No se encontraron archivos</string>
+    <string name="manage_storage_delete_chats">Todos los archivos de chats</string>
+    <string name="manage_storage_delete_items_successfully">Archivos eliminados exitosamente</string>
+    <string name="manage_storage_delete_selected_items">Borrar archivos seleccionados?</string>
+    <string name="manage_storage_delete_feature_not_implemented">"Esta funcionalidad se encuentra actualmente en desarrollo."</string>
 
     <string name="video_sats_per_minute">Sats por minuto</string>
 

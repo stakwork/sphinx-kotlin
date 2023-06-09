@@ -20,6 +20,7 @@ import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
@@ -33,6 +34,8 @@ import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
 import chat.sphinx.wrapper_common.FeedRecommendationsToggle
 import chat.sphinx.wrapper_common.PreviewsEnabled
+import chat.sphinx.wrapper_common.calculateSize
+import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
@@ -81,6 +84,7 @@ internal class ProfileViewModel @Inject constructor(
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
     private val feedRepository: FeedRepository,
+    private val repositoryMedia: RepositoryMedia,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val networkQueryCrypter: NetworkQueryCrypter,
     private val relayDataHandler: RelayDataHandler,
@@ -93,13 +97,20 @@ internal class ProfileViewModel @Inject constructor(
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
     PictureMenuViewModel
 {
-
     companion object {
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
         const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
 
         const val BITCOIN_NETWORK_REG_TEST = "regtest"
         const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
+    }
+
+    val storageBarViewStateContainer: ViewStateContainer<StorageBarViewState> by lazy {
+        ViewStateContainer(StorageBarViewState.Loading)
+    }
+
+    val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
+        ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
@@ -144,8 +155,22 @@ internal class ProfileViewModel @Inject constructor(
         )
     }
 
-    val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
-        ViewStateContainer(UpdatingImageViewState.Idle)
+    fun setUpManageStorage(){
+        viewModelScope.launch(mainImmediate) {
+            repositoryMedia.getStorageDataInfo().collect { storageData ->
+                val storagePercentage = calculateStoragePercentage(storageData)
+                val used = storageData.usedStorage.calculateSize()
+                val total = storageData.totalStorage.calculateSize()
+
+                storageBarViewStateContainer.updateViewState(
+                    StorageBarViewState.StorageData(
+                        storagePercentage,
+                        used,
+                        total
+                    )
+                )
+            }
+        }
     }
 
     private var resetPINJob: Job? = null
@@ -504,6 +529,7 @@ internal class ProfileViewModel @Inject constructor(
             setServerUrls()
             setLinkPreviewsEnabled()
             setFeedRecommendationsToggle()
+            setUpManageStorage()
         }
     }
 

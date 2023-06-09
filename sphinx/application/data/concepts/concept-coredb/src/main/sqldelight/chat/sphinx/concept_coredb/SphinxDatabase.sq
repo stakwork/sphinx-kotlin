@@ -873,6 +873,21 @@ SET local_file = :local_file,
     file_name = ?
 WHERE id = ?;
 
+messageMediaGetByChatId:
+SELECT *
+FROM messageMediaDbo
+WHERE chat_id = ?;
+
+messageMediaGetAllDownloaded:
+SELECT *
+FROM messageMediaDbo
+WHERE local_file IS NOT NULL;
+
+messageMediaGetAllDownloadedByChatId:
+SELECT *
+FROM messageMediaDbo
+WHERE chat_id = ? AND local_file IS NOT NULL;
+
 messageMediaUpsert {
     UPDATE messageMediaDbo
     SET media_key = :media_key,
@@ -909,6 +924,16 @@ WHERE id = ?;
 messageMediaDeleteByChatId:
 DELETE FROM messageMediaDbo
 WHERE chat_id = ?;
+
+messageMediaDeleteAllMediaByChatId:
+UPDATE messageMediaDbo
+SET local_file = NULL
+WHERE chat_id = ?;
+
+messageMediaDeleteMediaById:
+UPDATE messageMediaDbo
+SET local_file = NULL
+WHERE chat_id = ? AND id IN ?;
 
 CREATE TABLE subscriptionDbo(
     id                          INTEGER         AS SubscriptionId NOT NULL PRIMARY KEY,
@@ -1278,6 +1303,17 @@ FROM feedItemDbo
 WHERE feed_id IN ?
 ORDER BY date_published DESC;
 
+feedItemGetAllDownloaded:
+SELECT *
+FROM feedItemDbo
+WHERE local_file IS NOT NULL;
+
+feedItemGetDownloadedByFeedId:
+SELECT *
+FROM feedItemDbo
+WHERE feed_id = ? AND local_file IS NOT NULL;
+
+
 feedItemDeleteById:
 DELETE
 FROM feedItemDbo
@@ -1298,6 +1334,12 @@ feedItemUpdateLocalFile:
 UPDATE feedItemDbo
 SET local_file = :local_file
 WHERE id = ?;
+
+feedItemDeleteAllDownloadedByFeedId:
+UPDATE feedItemDbo
+SET local_file = NULL
+WHERE feed_id = ?;
+
 
 CREATE TABLE feedModelDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,

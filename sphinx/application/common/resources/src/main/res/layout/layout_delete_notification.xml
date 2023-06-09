@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:visibility="visible"
+    android:background="@color/blackSemiTransparent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_notification_container"
+        android:layout_width="317dp"
+        android:layout_height="410dp"
+        android:background="@drawable/background_storage_delete_box"
+        android:padding="@dimen/badges_icon_row_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <!-- Choose screen Box -->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_choose_delete_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tash_choose"
+                android:layout_width="35dp"
+                android:layout_height="31dp"
+                android:layout_marginTop="6dp"
+                android:src="@drawable/ic_delete"
+                android:tint="@color/primaryRed"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_red_circule_bg"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <View
+                android:id="@+id/image_view_red_circule_bg"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/background_red_circular_trash"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_you_choose"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:fontFamily="@font/roboto_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/manage_storage_you_have_chosen"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_text_view_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_red_circule_bg"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_delete_description"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/roboto_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/primaryRed"
+                android:textSize="@dimen/pin_text_view_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_you_choose"
+                tools:text="delete all podcast episodes" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_warning_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:maxLines="3"
+                android:textColor="@color/secondaryText"
+                android:text="@string/manage_storage_notification_description"
+                android:textSize="@dimen/chat_footer_episode_title_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_delete_description"
+                tools:text="This action deletes all of the selected files permanently and cannot be undone." />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/button_cancel_container"
+                android:layout_width="@dimen/manage_storage_button_cancel_width"
+                android:layout_height="@dimen/default_large_layout_margin"
+                android:layout_marginTop="@dimen/default_form_scan_icon_container_width"
+                android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_warning_text">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_cancel"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/button_background_send_sats"
+                    android:fontFamily="@font/roboto_medium"
+                    android:gravity="center"
+                    android:text="@string/manage_storage_cancel"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text"
+                    android:textSize="@dimen/chat_footer_episode_title_text_size" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/button_delete_chose_container"
+                android:layout_width="@dimen/manage_storage_button_cancel_width"
+                android:layout_height="@dimen/default_large_layout_margin"
+                android:layout_marginTop="@dimen/default_form_scan_icon_container_width"
+                android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_warning_text">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_delete"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/background_button_circular_red"
+                    android:fontFamily="@font/roboto_medium"
+                    android:gravity="center"
+                    android:text="@string/manage_storage_delete"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text"
+                    android:textSize="@dimen/chat_footer_episode_title_text_size" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Deleting in process-->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_delete_progress_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tash_progress"
+                android:layout_width="@dimen/default_form_horizontal_margin"
+                android:layout_height="@dimen/default_message_action_image_xy"
+                android:src="@drawable/ic_delete"
+                android:tint="@color/primaryText"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_red_progress_bar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/image_view_red_progress_bar"
+                android:layout_width="@dimen/feed_fragment_bottom_padding"
+                android:layout_height="@dimen/feed_fragment_bottom_padding"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryRed"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_deleting_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:fontFamily="@font/roboto_bold"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/primaryText"
+                android:text="@string/manage_storage_deleting"
+                android:textSize="@dimen/default_text_size_large_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_red_progress_bar" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_waiting_message_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_small_headline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_deleting_text"
+                tools:text="It may take up to a minute..." />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Successfully Deleted Box -->
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_delete_successfully_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:visibility="gone">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_successfully_checkmark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_successful_checkmark"
+                android:tint="@color/primaryText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_all_type_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_double_layout_margin"
+                android:fontFamily="@font/roboto_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/manage_storage_deleted_all_podcast"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_text_view_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/image_view_successfully_checkmark" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_successfully_deleted_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/roboto_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/manage_storage_deleted_successfully"
+                android:textColor="@color/primaryRed"
+                android:textSize="@dimen/pin_text_view_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_all_type_text" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_free_space_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:maxLines="2"
+                android:minLines="2"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/chat_footer_episode_title_text_size"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_successfully_deleted_text"
+                tools:text="You have freed up 12.5 GB of storage space" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/button_got_it_container"
+                android:layout_width="@dimen/tribe_member_send_sats_button_width"
+                android:layout_height="@dimen/default_large_layout_margin"
+                android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/button_got_it"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/button_background_send_sats"
+                    android:fontFamily="@font/roboto_medium"
+                    android:gravity="center"
+                    android:text="@string/manage_storage_got_it"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text"
+                    android:textSize="@dimen/chat_footer_episode_title_text_size" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
