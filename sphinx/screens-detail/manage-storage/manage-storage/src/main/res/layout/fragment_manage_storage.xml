@@ -131,8 +131,9 @@
             android:id="@+id/constraint_layout_storage_image_container"
             android:layout_width="0dp"
             android:layout_height="@dimen/default_header_navigation_xy"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+            android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constraint_change_limit_container">
 
@@ -164,8 +165,8 @@
                 android:id="@+id/text_view_manage_storage_images_number"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_regular"
                 android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_tab"
@@ -621,5 +622,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_manage_storage_delete_notification"
+        layout="@layout/layout_manage_storage_delete_notification"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

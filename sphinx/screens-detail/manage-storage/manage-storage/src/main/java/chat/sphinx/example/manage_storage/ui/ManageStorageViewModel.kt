@@ -8,6 +8,8 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.example.manage_storage.model.StorageSize
 import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
+import chat.sphinx.example.manage_storage.viewstate.DeleteTypeNotificationViewState
+import chat.sphinx.example.manage_storage.viewstate.ManageStorageViewState
 import chat.sphinx.manage.storage.R
 import chat.sphinx.wrapper_common.calculateSize
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +39,10 @@ internal class ManageStorageViewModel @Inject constructor(
         ViewStateContainer(ChangeStorageLimitViewState.Closed)
     }
 
+    val deleteItemNotificationViewStateContainer: ViewStateContainer<DeleteTypeNotificationViewState> by lazy {
+        ViewStateContainer(DeleteTypeNotificationViewState.Closed)
+    }
+
     init {
         getStorageData()
     }
@@ -59,7 +65,10 @@ internal class ManageStorageViewModel @Inject constructor(
                 updateViewState(ManageStorageViewState.StorageInfo(storageSize, storagePercentage))
             }
         }
+    }
 
+    fun openDeleteTypePopUp(type: String) {
+        deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Open(type))
     }
 
     fun featureNotImplementedToast(){

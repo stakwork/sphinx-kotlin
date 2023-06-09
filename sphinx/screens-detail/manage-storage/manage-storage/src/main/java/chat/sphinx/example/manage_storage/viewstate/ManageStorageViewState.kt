@@ -1,4 +1,4 @@
-package chat.sphinx.example.manage_storage.ui
+package chat.sphinx.example.manage_storage.viewstate
 
 import chat.sphinx.wrapper_common.StoragePercentage
 import chat.sphinx.example.manage_storage.model.StorageSize

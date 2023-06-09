@@ -12,6 +12,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.example.manage_storage.viewstate.DeleteTypeNotificationViewState
+import chat.sphinx.example.manage_storage.viewstate.ManageStorageViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.manage.storage.R
@@ -20,7 +22,6 @@ import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
-import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
@@ -123,6 +124,19 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                     viewModel.navigator.toDeleteChatMedia()
                 }
             }
+
+            constraintLayoutStorageImageContainer.setOnClickListener {
+                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_images))
+            }
+            constraintLayoutStorageVideoContainer.setOnClickListener {
+                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_video))
+            }
+            constraintLayoutStorageAudioContainer.setOnClickListener {
+                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_audio))
+            }
+            constraintLayoutStorageFilesContainer.setOnClickListener {
+                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_files))
+            }
         }
     }
 
@@ -153,6 +167,21 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                             // bind al the data
                         }
                         else -> {}
+                    }
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.deleteItemNotificationViewStateContainer.collect { viewState ->
+                binding.includeLayoutManageStorageDeleteNotification.apply {
+                    when (viewState) {
+                        is DeleteTypeNotificationViewState.Closed -> {}
+                        is DeleteTypeNotificationViewState.Open -> {
+                            includeLayoutManageStorageDeleteDetails.
+                            textViewStorageDeleteHeader.text = String.format(getString(R.string.manage_storage_delete_item), viewState.type)
+                        }
                     }
                     root.setTransitionDuration(300)
                     viewState.transitionToEndSet(root)
