@@ -40,7 +40,7 @@ internal class ManageStorageViewModel @Inject constructor(
             repositoryMedia.getStorageDataInfo().collect { storageData ->
                 val storageSize = StorageSize(
                     storageData.usedStorage.calculateSize(),
-                    "100 GB",
+                    storageData.freeStorage.calculateSize(),
                     storageData.images.calculateSize(),
                     storageData.video.calculateSize(),
                     storageData.audio.calculateSize(),

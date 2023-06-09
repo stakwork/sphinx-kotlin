@@ -223,7 +223,7 @@
                         android:id="@+id/constraint_layout_storage_number_container"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
+                        android:visibility="visible"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
@@ -231,11 +231,11 @@
                             android:id="@+id/text_view_profile_storage_number"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="@dimen/default_tiny_layout_margin"
+                            android:layout_marginEnd="@dimen/default_small_layout_margin"
                             android:fontFamily="@font/roboto_regular"
                             android:maxLines="1"
                             android:textColor="@color/text"
-                            android:textSize="@dimen/pin_text_view_size"
+                            android:textSize="@dimen/pin_help_text_view_size"
                             app:layout_constraintBottom_toBottomOf="@+id/text_view_profile_total_storage_number"
                             app:layout_constraintEnd_toStartOf="@+id/text_view_profile_total_storage_number"
                             app:layout_constraintTop_toTopOf="parent"
@@ -250,7 +250,7 @@
                             android:maxLines="1"
                             android:text="@string/manage_storage_total_storage"
                             android:textColor="@color/secondaryText"
-                            android:textSize="@dimen/pin_text_view_size"
+                            android:textSize="@dimen/pin_help_text_view_size"
                             app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow"
                             app:layout_constraintTop_toTopOf="parent"
                             tools:text="of 64GB" />
@@ -264,12 +264,14 @@
                             app:layout_constraintBottom_toBottomOf="@+id/text_view_profile_total_storage_number"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
+
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/constraint_layout_storage_loading_container"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent">
 
