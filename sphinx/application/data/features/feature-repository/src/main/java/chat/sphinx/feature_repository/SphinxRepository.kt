@@ -4109,6 +4109,34 @@ abstract class SphinxRepository(
         }
     }
 
+    override fun getAllDownloadedFeedItems(): Flow<List<FeedItem>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().feedItemGetAllDownloaded(::FeedItemDbo)
+                .asFlow()
+                .mapToList(io)
+                .map { listFeedItemDbo ->
+                    listFeedItemDbo.map {
+                        feedItemDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
+
+    override fun getDownloadedFeedItemsByFeedId(feedId: FeedId): Flow<List<FeedItem>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries().feedItemGetDownloadedByFeedId(feedId, ::FeedItemDbo)
+                .asFlow()
+                .mapToList(io)
+                .map { listFeedItemDbo ->
+                    listFeedItemDbo.map {
+                        feedItemDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
+
     private val feedDboPresenterMapper: FeedDboPresenterMapper by lazy {
         FeedDboPresenterMapper(dispatchers)
     }
@@ -6354,6 +6382,126 @@ abstract class SphinxRepository(
         }
     }
 
+    override suspend fun getStorageDataInfo(): Flow<StorageData> =
+        flow {
+            val chatFiles = getAllDownloadedMedia().firstOrNull() ?: listOf()
+            val feedFiles = getAllDownloadedFeedItems().firstOrNull() ?: listOf()
+
+            var images: Long = 0L
+            var video: Long = 0L
+            var audio: Long = 0L
+            var files: Long = 0L
+
+            val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
+            val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
+
+            chatFiles.forEach { messageMedia ->
+                when {
+                    messageMedia.mediaType.isImage -> images += messageMedia.localFile?.length() ?: 0L
+                    messageMedia.mediaType.isVideo -> video += messageMedia.localFile?.length() ?: 0L
+                    messageMedia.mediaType.isAudio -> audio += messageMedia.localFile?.length() ?: 0L
+                    else -> files += messageMedia.localFile?.length() ?: 0L
+                }
+            }
+            feedFiles.forEach { feedItem ->
+                audio += feedItem.localFile?.length() ?: 0L
+            }
+
+            val totalStorage: Long = 100L * 1024L * 1024L * 1024L
+            val usedStorage = chat + podcast
+            val freeStorage = totalStorage - usedStorage
+
+            val storageData = StorageData(
+                usedStorage = FileSize(usedStorage),
+                totalStorage = FileSize(totalStorage),
+                freeStorage = FileSize(freeStorage),
+                images = FileSize(images),
+                video = FileSize(video),
+                audio = FileSize(audio),
+                files = FileSize(files),
+                chats = FileSize(chat),
+                podcasts =FileSize(podcast)
+            )
+            emit(storageData)
+        }
+
+    override fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
+        flow {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+            val messageMediaList = queries.messageMediaGetByChatId(chatId).executeAsList()
+            val messageMedia = messageMediaList.map { messageMediaDbo ->
+                MessageMediaDboWrapper(messageMediaDbo)
+            }
+            emit(messageMedia)
+        }
+
+    override fun getAllDownloadedMedia(): Flow<List<MessageMedia>> =
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().messageMediaGetAllDownloaded(::MessageMediaDbo)
+                    .asFlow()
+                    .mapToList(io)
+                    .map { listMessageMediaDbo ->
+                        listMessageMediaDbo.map { messageMediaDbo ->
+                            MessageMediaDboWrapper(messageMediaDbo)
+                        }
+                    }
+                    .distinctUntilChanged()
+            )
+        }
+
+    override fun getAllDownloadedMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
+        flow {
+            emitAll(
+                coreDB.getSphinxDatabaseQueries().messageMediaGetAllDownloadedByChatId(chatId, ::MessageMediaDbo)
+                .asFlow()
+                .mapToList(io)
+                .map {  listMessageMediaDbo ->
+                    listMessageMediaDbo.map { messageMediaDbo ->
+                        MessageMediaDboWrapper(messageMediaDbo)
+                    }
+                }
+                .distinctUntilChanged()
+            )
+        }
+
+    override suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?): Boolean {
+        return withContext(mainImmediate) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+            try {
+                files.forEach { localFile ->
+                    if (localFile.exists()) {
+                        localFile.delete()
+                    }
+                }
+                if (messageIds != null) {
+                    feedItemLock.withLock {
+                        withContext(io) {
+                            queries.transaction {
+                                queries.messageMediaDeleteMediaById(chatId, messageIds)
+                            }
+                        }
+                    }
+                    delay(200L)
+                    true
+                }
+                else {
+                    feedItemLock.withLock {
+                        withContext(io) {
+                            queries.transaction {
+                                queries.messageMediaDeleteAllMediaByChatId(chatId)
+                            }
+                        }
+                    }
+                    delay(200L)
+                    true
+                }
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
 
     override suspend fun deleteDownloadedMediaIfApplicable(
         feedItem: DownloadableFeedItem
@@ -6387,6 +6535,36 @@ abstract class SphinxRepository(
             }
         }
         return false
+    }
+
+    override suspend fun deleteAllFeedDownloadedMedia(feed: Feed): Boolean {
+        val feedId: FeedId = feed.id
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val localFileList = feed.items.filter { it.downloaded }
+
+        localFileList.forEach { feedItem ->
+            val localFile = feedItem.localFile
+            localFile?.let {
+                try {
+                    if (it.exists()) {
+                        it.delete()
+                    }
+                } catch (e: Exception) {
+                    return false
+                }
+            }
+        }
+        feedItemLock.withLock {
+            withContext(io) {
+                queries.transaction {
+                    queries.feedItemDeleteAllDownloadedByFeedId(feedId)
+                }
+            }
+        }
+        delay(200L)
+
+        return true
     }
 
     override suspend fun getPaymentTemplates(): Response<List<PaymentTemplate>, ResponseError> {

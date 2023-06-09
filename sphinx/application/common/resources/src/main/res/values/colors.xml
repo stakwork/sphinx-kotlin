@@ -45,6 +45,7 @@
     <color name="divider">#151E27</color>
     <color name="lightDivider">#3B4755</color>
     <color name="lightEpisodeDivider">#47515E</color>
+    <color name="darkDivider">#101317</color>
     <color name="expiredInvoice">#FFFFFF</color>
     <color name="addressBookHeader">#222E3A</color>
     <color name="messageOptionDivider">#CCFFFFFF</color>
@@ -57,6 +58,7 @@
     <color name="oldSentMsgBG">#3E6189</color>
     <color name="imagePreviewBackground">#B3000000</color>
     <color name="sendAttachmentPreviewBackground">#D9000000</color>
+
 
     <color name="primaryGreen">#49C998</color>
     <color name="primaryPurple">#A76CF3</color>
@@ -95,6 +97,11 @@
 
     <color name="lightPopupBackground">#33ffffff</color>
     <color name="popupBackground">#80000000</color>
+
+    <color name="storageBarBlue">#618AFF</color>
+    <color name="storageBarPurple">#A76CF3</color>
+    <color name="storageBarYellow">#FAE676</color>
+    <color name="storageBarBackground">#222E3A</color>
 
     <!-- Random users colors-->
     <color name="randomColor1">#7077FF</color>

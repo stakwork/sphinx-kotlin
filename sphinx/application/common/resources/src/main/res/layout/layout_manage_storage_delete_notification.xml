@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layoutDescription="@xml/motion_manage_storage_delete">
+
+    <View
+        android:id="@+id/view_manage_storage_notification_lock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:background="@android:color/black" />
+
+    <include
+        android:id="@+id/include_layout_manage_storage_delete_details"
+        layout="@layout/layout_manage_storage_delete_notification_details"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="parent" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

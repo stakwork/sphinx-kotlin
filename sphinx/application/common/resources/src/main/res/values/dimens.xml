@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="default_super_tiny_layout_margin">1dp</dimen>
     <dimen name="default_tiny_layout_margin">2dp</dimen>
     <dimen name="default_small_layout_margin">4dp</dimen>
     <dimen name="default_half_layout_margin">8dp</dimen>
@@ -8,6 +9,7 @@
     <dimen name="default_double_layout_margin">32dp</dimen>
     <dimen name="default_large_layout_margin">48dp</dimen>
     <dimen name="default_big_layout_margin">64dp</dimen>
+    <dimen name="default_extra_big_layout_margin">76dp</dimen>
     <dimen name="default_list_row_padding_vertical">10dp</dimen>
     <dimen name="default_header_height">65dp</dimen>
     <dimen name="default_pin_header_height">50dp</dimen>
@@ -122,6 +124,8 @@
     <dimen name="web_view_auth_popup_width">350dp</dimen>
     <dimen name="web_view_auth_popup_height">550dp</dimen>
 
+    <dimen name="manage_storage_button_cancel_width">100dp</dimen>
+
     <dimen name="default_feed_watch_image_width">260dp</dimen>
     <dimen name="default_feed_watch_image_height">160dp</dimen>
     <dimen name="default_feed_watch_channel_image_xy">30dp</dimen>
@@ -170,6 +174,9 @@
     <dimen name="tribe_member_image_corner_radius">56dp</dimen>
     <dimen name="tribe_member_send_sats_button_width">147dp</dimen>
     <dimen name="tribe_member_send_sats_button_height">40dp</dimen>
+
+    <!-- Manage Storage  -->
+    <dimen name="manage_storage_image_grid_size">120dp</dimen>
 
     <!-- Feed Item Detail -->
     <dimen name="feed_item_detail_row_height">65dp</dimen>

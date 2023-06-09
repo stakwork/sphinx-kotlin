@@ -8,9 +8,6 @@
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view_content"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:background="@color/headerBG">
@@ -48,12 +45,14 @@
                 android:id="@+id/recycler_view_listen_now"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginTop="@dimen/default_layout_margin"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
                 android:paddingStart="@dimen/default_half_layout_margin"
                 android:paddingEnd="@dimen/default_half_layout_margin"
-                android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_listen_now_header"
                 tools:listitem="@layout/layout_feed_squared_row_holder" />
 

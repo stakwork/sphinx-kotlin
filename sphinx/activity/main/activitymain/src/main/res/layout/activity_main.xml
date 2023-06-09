@@ -64,7 +64,7 @@
     <Space
         android:id="@+id/space_detail_swipe_target"
         android:layout_width="0dp"
-        android:layout_height="@dimen/detail_header_height"
+        android:layout_height="20dp"
         android:layout_marginStart="@dimen/detail_header_nav_button_width"
         android:layout_marginEnd="@dimen/detail_header_exit_button_width"
         app:layout_constraintEnd_toEndOf="parent"

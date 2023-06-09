@@ -6,7 +6,7 @@
     app:layoutDescription="@xml/motion_scene_tribe_app">
 
     <View
-        android:id="@+id/view_tribe_app_lock"
+        android:id="@+id/view_auth_black_lock"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true"

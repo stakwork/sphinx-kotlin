@@ -9,7 +9,7 @@
 
     <ConstraintSet android:id="@+id/motion_scene_tribe_app_closed">
 
-        <Constraint android:id="@+id/view_tribe_app_lock">
+        <Constraint android:id="@+id/view_auth_black_lock">
             <Layout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
@@ -34,7 +34,7 @@
         android:id="@+id/motion_scene_tribe_app_open"
         app:deriveConstraintsFrom="@+id/motion_scene_tribe_app_closed">
 
-        <Constraint android:id="@+id/view_tribe_app_lock">
+        <Constraint android:id="@+id/view_auth_black_lock">
             <PropertySet
                 android:alpha="@dimen/options_menu_input_lock_alpha"
                 android:visibility="visible" />

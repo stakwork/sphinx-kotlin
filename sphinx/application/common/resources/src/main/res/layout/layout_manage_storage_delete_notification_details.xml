@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_manage_storage_delete_details"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/default_large_layout_margin"
+    android:background="@drawable/background_top_rounded_corners">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_profile_right_arrow_total_delete"
+        android:layout_width="@dimen/default_layout_margin"
+        android:layout_height="@dimen/default_layout_margin"
+        android:background="@drawable/ic_delete"
+        android:backgroundTint="@color/primaryText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_storage_delete_header"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/roboto_medium"
+        android:maxLines="1"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/pin_help_text_view_size"
+        app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow_total_delete"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button_profile_right_arrow_total_delete"
+        app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_total_delete"
+        tools:text="Delete 2 Images?" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/button_cancel_container"
+        android:layout_width="@dimen/manage_storage_button_cancel_width"
+        android:layout_height="@dimen/default_large_layout_margin"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
+        android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_profile_right_arrow_total_delete">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_cancel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/button_background_send_sats"
+            android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:text="@string/manage_storage_cancel"
+            android:textAllCaps="false"
+            android:textColor="@color/text"
+            android:textSize="@dimen/chat_footer_episode_title_text_size" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/button_delete_chose_container"
+        android:layout_width="@dimen/manage_storage_button_cancel_width"
+        android:layout_height="@dimen/default_large_layout_margin"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
+        android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_profile_right_arrow_total_delete">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_delete"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/background_button_circular_red"
+            android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:text="@string/manage_storage_delete"
+            android:textAllCaps="false"
+            android:textColor="@color/text"
+            android:textSize="@dimen/chat_footer_episode_title_text_size" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -40,7 +41,6 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.flow.collect
@@ -281,8 +281,33 @@ internal class ProfileFragment: SideEffectFragment<
                     viewModel.resetPIN()
                 }
 
+                includeProfileBasicContainerHolder.layoutConstraintProfileBasicContainerManageStorage.setOnClickListener {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        profileNavigator.toManageStorageDetail()
+                    }
+                }
             }
         }
+    }
+
+    private fun setProgressStorageBar(viewState: StorageBarViewState.StorageData) {
+        binding.includeProfileBasicContainerHolder.includeProfileManageStorageBar.apply {
+            viewState.storagePercentage.apply {
+                setViewSectionPercentage(storageProgressImages, image)
+                setViewSectionPercentage(storageProgressAudio, audio)
+                setViewSectionPercentage(storageProgressVideo, video)
+                setViewSectionPercentage(storageProgressFiles, files)
+                setViewSectionPercentage(storageProgressFree, freeStorage)
+            }
+        }
+    }
+
+    private fun setViewSectionPercentage(view: View, percentage: Float) {
+        val constraintLayout = binding.includeProfileBasicContainerHolder.includeProfileManageStorageBar.progressContainer
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(constraintLayout)
+        constraintSet.constrainPercentWidth(view.id, percentage)
+        constraintSet.applyTo(constraintLayout)
     }
 
     private fun removeFocusOnEnter(editText: EditText?) {
@@ -492,6 +517,26 @@ internal class ProfileFragment: SideEffectFragment<
                             viewModel.submitSideEffect(
                                 ProfileSideEffect.ImageUpdatedSuccessfully
                             )
+                        }
+                    }
+                }
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            binding.includeProfileBasicContainerHolder.apply {
+                viewModel.storageBarViewStateContainer.collect { viewState ->
+                    when (viewState) {
+                        is StorageBarViewState.Loading -> {
+                            constraintLayoutStorageLoadingContainer.visible
+                            constraintLayoutStorageNumberContainer.gone
+                        }
+                        is StorageBarViewState.StorageData -> {
+                            constraintLayoutStorageLoadingContainer.gone
+                            constraintLayoutStorageNumberContainer.visible
+                            textViewProfileStorageNumber.text = viewState.used
+                            textViewProfileTotalStorageNumber.text = String.format(getString(R.string.manage_storage_total_storage), viewState.total)
+
+                            setProgressStorageBar(viewState)
                         }
                     }
                 }
