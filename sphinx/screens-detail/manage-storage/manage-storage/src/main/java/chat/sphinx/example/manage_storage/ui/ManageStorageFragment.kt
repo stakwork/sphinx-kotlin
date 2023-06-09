@@ -227,13 +227,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             buttonProfileTrashAudio.visible
             buttonProfileTrashFiles.visible
 
-            includeLayoutManageStorageProgressBar.apply {
-                storageProgressImages.visible
-                storageProgressVideo.visible
-                storageProgressAudio.visible
-                storageProgressFiles.visible
-            }
-
             constraintLayoutStorageCustomTypeContainer.visible
         }
     }
@@ -247,13 +240,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             textViewLoading.visible
             buttonChangeStorageLimit.gone
             includeManageStorageHeader.constraintLayoutDeleteElementContainerTrash.gone
-
-            includeLayoutManageStorageProgressBar.apply {
-                storageProgressImages.gone
-                storageProgressVideo.gone
-                storageProgressAudio.gone
-                storageProgressFiles.gone
-            }
 
             storageProgressPointImages.backgroundTintList =
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)

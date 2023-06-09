@@ -219,43 +219,85 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/text_view_profile_storage_number"
-                        android:layout_width="0dp"
-                        android:layout_marginEnd="@dimen/default_tiny_layout_margin"
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraint_layout_storage_number_container"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/roboto_regular"
-                        android:maxLines="1"
-                        android:textColor="@color/text"
-                        android:textSize="@dimen/pin_text_view_size"
-                        app:layout_constraintBottom_toBottomOf="@+id/text_view_profile_total_storage_number"
-                        app:layout_constraintEnd_toStartOf="@+id/text_view_profile_total_storage_number"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="37"/>
-
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:id="@+id/text_view_profile_total_storage_number"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/episode_image_radius"
-                        android:fontFamily="@font/roboto_regular"
-                        android:maxLines="1"
-                        android:text="@string/manage_storage_total_storage"
-                        android:textColor="@color/secondaryText"
-                        android:textSize="@dimen/pin_text_view_size"
-                        app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow"
-                        app:layout_constraintTop_toTopOf="parent"
-                        tools:text="of 64GB"/>
-
-                    <androidx.appcompat.widget.AppCompatButton
-                        android:id="@+id/button_profile_right_arrow"
-                        android:layout_width="@dimen/default_form_scan_icon_width"
-                        android:layout_height="@dimen/default_form_scan_icon_width"
-                        android:background="@drawable/ic_arrow_right"
-                        android:backgroundTint="@color/secondaryText"
-                        app:layout_constraintBottom_toBottomOf="@+id/text_view_profile_total_storage_number"
+                        android:visibility="gone"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/text_view_profile_storage_number"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/default_tiny_layout_margin"
+                            android:fontFamily="@font/roboto_regular"
+                            android:maxLines="1"
+                            android:textColor="@color/text"
+                            android:textSize="@dimen/pin_text_view_size"
+                            app:layout_constraintBottom_toBottomOf="@+id/text_view_profile_total_storage_number"
+                            app:layout_constraintEnd_toStartOf="@+id/text_view_profile_total_storage_number"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="37" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/text_view_profile_total_storage_number"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/episode_image_radius"
+                            android:fontFamily="@font/roboto_regular"
+                            android:maxLines="1"
+                            android:text="@string/manage_storage_total_storage"
+                            android:textColor="@color/secondaryText"
+                            android:textSize="@dimen/pin_text_view_size"
+                            app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="of 64GB" />
+
+                        <androidx.appcompat.widget.AppCompatButton
+                            android:id="@+id/button_profile_right_arrow"
+                            android:layout_width="@dimen/default_form_scan_icon_width"
+                            android:layout_height="@dimen/default_form_scan_icon_width"
+                            android:background="@drawable/ic_arrow_right"
+                            android:backgroundTint="@color/secondaryText"
+                            app:layout_constraintBottom_toBottomOf="@+id/text_view_profile_total_storage_number"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/constraint_layout_storage_loading_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/text_view_mange_loading_profile"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/roboto_medium"
+                            android:gravity="center"
+                            android:text="@string/loading_dots"
+                            android:textAllCaps="false"
+                            android:textColor="@color/secondaryText"
+                            android:textSize="@dimen/default_text_size_list_row_headline"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <ProgressBar
+                            android:id="@+id/progress_bar_loading_storage_profile"
+                            android:layout_width="@dimen/default_form_scan_icon_width"
+                            android:layout_height="@dimen/default_form_scan_icon_width"
+                            android:layout_marginEnd="@dimen/default_medium_layout_margin"
+                            android:indeterminate="true"
+                            android:indeterminateTint="@color/primaryText"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintEnd_toStartOf="@+id/text_view_mange_loading_profile"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <include
                         android:id="@+id/include_profile_manage_storage_bar"
