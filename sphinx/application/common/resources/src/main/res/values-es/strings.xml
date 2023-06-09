@@ -119,6 +119,7 @@
     <string name="manage_storage_delete_chats">Todos los archivos de chats</string>
     <string name="manage_storage_delete_items_successfully">Archivos eliminados exitosamente</string>
     <string name="manage_storage_delete_selected_items">Borrar archivos seleccionados?</string>
+    <string name="manage_storage_delete_feature_not_implemented">"Esta funcionalidad se encuentra actualmente en desarrollo."</string>
 
     <string name="video_sats_per_minute">Sats por minuto</string>
 

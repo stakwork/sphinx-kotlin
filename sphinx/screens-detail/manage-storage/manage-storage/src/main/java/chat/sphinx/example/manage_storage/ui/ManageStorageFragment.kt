@@ -20,6 +20,7 @@ import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
@@ -89,15 +90,17 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         binding.apply {
             includeManageStorageHeader.textViewHeader.text = getString(R.string.manage_storage)
             includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.textViewHeader.text = getString(R.string.manage_storage_limit)
+            includeManageStorageHeader.constraintLayoutDeleteElementContainerTrash.gone
         }
     }
 
     private fun setClickListeners() {
         binding.apply {
-            buttonChangeStorageLimit.setOnClickListener {
-                viewModel.changeStorageLimitViewStateContainer.updateViewState(
-                    ChangeStorageLimitViewState.Open
-                )
+            buttonChangeStorageLimit.setOnClickListener{
+                viewModel.featureNotImplementedToast()
+//                viewModel.changeStorageLimitViewStateContainer.updateViewState(
+//                    ChangeStorageLimitViewState.Open
+//                )
             }
             includeManageStorageHeader.textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
@@ -121,6 +124,11 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        viewModel.getStorageData()
+        super.onResume()
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ManageStorageViewState) {

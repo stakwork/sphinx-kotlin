@@ -155,17 +155,21 @@ internal class ProfileViewModel @Inject constructor(
         )
     }
 
-    private suspend fun setUpManageStorage(){
-        repositoryMedia.getStorageDataInfo().collect { storageData ->
-            val storagePercentage = calculateStoragePercentage(storageData)
-            val used = storageData.usedStorage.calculateSize()
-            val total = storageData.totalStorage.calculateSize()
+    fun setUpManageStorage(){
+        viewModelScope.launch(mainImmediate) {
+            repositoryMedia.getStorageDataInfo().collect { storageData ->
+                val storagePercentage = calculateStoragePercentage(storageData)
+                val used = storageData.usedStorage.calculateSize()
+                val total = storageData.totalStorage.calculateSize()
 
-            storageBarViewStateContainer.updateViewState(StorageBarViewState.StorageData(
-                storagePercentage,
-                used,
-                total
-            ))
+                storageBarViewStateContainer.updateViewState(
+                    StorageBarViewState.StorageData(
+                        storagePercentage,
+                        used,
+                        total
+                    )
+                )
+            }
         }
     }
 

@@ -193,5 +193,7 @@
     <string name="manage_storage_delete_chats">delete all chat media files</string>
     <string name="manage_storage_delete_items_successfully">Items deleted successfully</string>
     <string name="manage_storage_delete_selected_items">Delete selected items?</string>
+    <string name="manage_storage_delete_feature_not_implemented">Feature not implemented yet</string>
+
 
 </resources>

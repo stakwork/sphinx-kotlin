@@ -8,9 +8,11 @@ import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.example.manage_storage.model.StorageSize
 import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
+import chat.sphinx.manage.storage.R
 import chat.sphinx.wrapper_common.calculateSize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -36,6 +38,10 @@ internal class ManageStorageViewModel @Inject constructor(
     }
 
     init {
+        getStorageData()
+    }
+
+    fun getStorageData(){
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getStorageDataInfo().collect { storageData ->
                 val storageSize = StorageSize(
@@ -52,6 +58,15 @@ internal class ManageStorageViewModel @Inject constructor(
 
                 updateViewState(ManageStorageViewState.StorageInfo(storageSize, storagePercentage))
             }
+        }
+
+    }
+
+    fun featureNotImplementedToast(){
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                StorageNotifySideEffect(app.getString(R.string.manage_storage_delete_feature_not_implemented))
+            )
         }
     }
 }
