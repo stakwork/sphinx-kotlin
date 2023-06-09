@@ -6359,6 +6359,7 @@ abstract class SphinxRepository(
             var video: Long = 0L
             var audio: Long = 0L
             var files: Long = 0L
+
             val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
             val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
 
@@ -6374,15 +6375,20 @@ abstract class SphinxRepository(
                 audio += feedItem.localFile?.length() ?: 0L
             }
 
+            val totalStorage: Long = 1L * 1024L * 1024L * 1024L
+            val usedStorage = chat + podcast
+            val freeStorage = totalStorage - usedStorage
+
             val storageData = StorageData(
-                FileSize(chat + podcast),
-                FileSize(0),
-                FileSize(images),
-                FileSize(video),
-                FileSize(audio),
-                FileSize(files),
-                FileSize(chat),
-                FileSize(podcast)
+                usedStorage = FileSize(usedStorage),
+                totalStorage = FileSize(totalStorage),
+                freeStorage = FileSize(freeStorage),
+                images = FileSize(images),
+                video = FileSize(video),
+                audio = FileSize(audio),
+                files = FileSize(files),
+                chats = FileSize(chat),
+                podcasts =FileSize(podcast)
             )
             emit(storageData)
         }

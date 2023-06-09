@@ -5,6 +5,8 @@ import android.content.*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.example.manage_storage.model.StorageSize
+import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
 import chat.sphinx.wrapper_common.calculateSize
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,18 +38,19 @@ internal class ManageStorageViewModel @Inject constructor(
     init {
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getStorageDataInfo().collect { storageData ->
-                updateViewState(
-                    ManageStorageViewState.StorageInfo(
-                        storageData.usedStorage.calculateSize(),
-                        "100 GB",
-                        storageData.images.calculateSize(),
-                        storageData.video.calculateSize(),
-                        storageData.audio.calculateSize(),
-                        storageData.files.calculateSize(),
-                        storageData.chats.calculateSize(),
-                        storageData.podcasts.calculateSize()
-                    )
+                val storageSize = StorageSize(
+                    storageData.usedStorage.calculateSize(),
+                    "100 GB",
+                    storageData.images.calculateSize(),
+                    storageData.video.calculateSize(),
+                    storageData.audio.calculateSize(),
+                    storageData.files.calculateSize(),
+                    storageData.chats.calculateSize(),
+                    storageData.podcasts.calculateSize()
                 )
+                val storagePercentage = calculateStoragePercentage(storageData)
+
+                updateViewState(ManageStorageViewState.StorageInfo(storageSize, storagePercentage))
             }
         }
     }

@@ -126,12 +126,12 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
     override suspend fun onViewStateFlowCollect(viewState: ManageStorageViewState) {
         @Exhaustive
         when (viewState) {
-            is ManageStorageViewState.Idle -> {}
             is ManageStorageViewState.Loading -> {
                 loadingStorage()
             }
             is ManageStorageViewState.StorageInfo -> {
                 bindStorageInfo(viewState)
+                setProgressStorageBar(viewState)
             }
         }
     }
@@ -155,12 +155,15 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         super.subscribeToViewStateFlow()
     }
 
-    private fun setProgressStorageBar() {
+    private fun setProgressStorageBar(viewState: ManageStorageViewState.StorageInfo) {
         binding.includeLayoutManageStorageProgressBar.apply {
-            setViewSectionPercentage(storageProgressImages, 0.174f)
-            setViewSectionPercentage(storageProgressAudio, 0.226f)
-            setViewSectionPercentage(storageProgressVideo, 0.100f)
-            setViewSectionPercentage(storageProgressFiles, 0.600f)
+            viewState.storagePercentage.apply {
+                setViewSectionPercentage(storageProgressImages, image)
+                setViewSectionPercentage(storageProgressAudio, audio)
+                setViewSectionPercentage(storageProgressVideo, video)
+                setViewSectionPercentage(storageProgressFiles, files)
+                setViewSectionPercentage(storageProgressFree, freeStorage)
+            }
         }
     }
 
@@ -174,14 +177,14 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
 
     private fun bindStorageInfo(viewState: ManageStorageViewState.StorageInfo) {
         binding.apply {
-            textViewManageStorageOccupiedNumber.text = viewState.usedStorage
-            textViewManageStorageFreeNumber.text = String.format(getString(R.string.manage_storage_free_space), viewState.freeStorage)
-            textViewManageStorageImagesNumber.text = viewState.image
-            textViewManageStorageVideoNumber.text = viewState.video
-            textViewManageStorageAudioNumber.text = viewState.audio
-            textViewManageStorageFilesNumber.text = viewState.files
-            textViewManageStorageCustomChatNumber.text = viewState.chats
-            textViewManageStorageCustomPodcastNumber.text = viewState.podcasts
+            textViewManageStorageOccupiedNumber.text = viewState.storageSize.usedStorage
+            textViewManageStorageFreeNumber.text = String.format(getString(R.string.manage_storage_free_space), viewState.storageSize.freeStorage)
+            textViewManageStorageImagesNumber.text = viewState.storageSize.image
+            textViewManageStorageVideoNumber.text = viewState.storageSize.video
+            textViewManageStorageAudioNumber.text = viewState.storageSize.audio
+            textViewManageStorageFilesNumber.text = viewState.storageSize.files
+            textViewManageStorageCustomChatNumber.text = viewState.storageSize.chats
+            textViewManageStorageCustomPodcastNumber.text = viewState.storageSize.podcasts
 
             textViewManageStorageOccupiedNumber.visible
             textViewManageStorageFreeNumber.visible
@@ -213,8 +216,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             textViewManageStorageFilesText.setTextColor(
                 ContextCompat.getColorStateList(root.context, R.color.primaryText)
             )
-
-            setProgressStorageBar()
 
             progressBarImages.gone
             progressBarAudio.gone

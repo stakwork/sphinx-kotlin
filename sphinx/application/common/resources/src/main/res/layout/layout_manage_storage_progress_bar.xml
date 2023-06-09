@@ -18,7 +18,7 @@
             android:background="@color/storageBarBlue"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.2" />
+            app:layout_constraintWidth_percent="0.0" />
 
         <View
             android:id="@+id/storage_progress_video"
@@ -28,7 +28,7 @@
             android:background="@color/storageBarPurple"
             app:layout_constraintStart_toEndOf="@+id/storage_progress_images"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.2" />
+            app:layout_constraintWidth_percent="0.0" />
 
         <View
             android:id="@+id/storage_progress_audio"
@@ -38,7 +38,7 @@
             android:background="@color/storageBarYellow"
             app:layout_constraintStart_toEndOf="@+id/storage_progress_video"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.2" />
+            app:layout_constraintWidth_percent="0.0" />
 
         <View
             android:id="@+id/storage_progress_files"
@@ -48,7 +48,18 @@
             android:background="@color/primaryGreen"
             app:layout_constraintStart_toEndOf="@+id/storage_progress_audio"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent="0.2" />
+            app:layout_constraintWidth_percent="0.0" />
+
+        <View
+            android:id="@+id/storage_progress_free"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_super_tiny_layout_margin"
+            android:background="@color/transactionBG"
+            app:layout_constraintStart_toEndOf="@+id/storage_progress_files"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.0" />
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
