@@ -95,7 +95,7 @@ internal class PinMessageAdapter: ColumnAdapter<MessageUUID, String> {
             }
     }
     override fun decode(databaseValue: String): MessageUUID {
-        return databaseValue.toPinnedMessageUUID()
+        return databaseValue.toPinnedHANGEMessageUUID()
     }
 
     override fun encode(value: MessageUUID): String {

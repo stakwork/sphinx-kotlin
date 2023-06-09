@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha97 (2023-06-09)
+- Adds storage management
+
 # Version 1.0.0-alpha96 (2023-05-26)
 - Improves pin message feature
 
