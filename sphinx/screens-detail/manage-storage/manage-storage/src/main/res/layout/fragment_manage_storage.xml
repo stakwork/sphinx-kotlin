@@ -64,7 +64,7 @@
             tools:text="120 GB Free" />
 
         <include
-            android:id="@+id/include_profile_manage_storage_bar"
+            android:id="@+id/include_layout_manage_storage_progress_bar"
             layout="@layout/layout_manage_storage_progress_bar"
             android:layout_marginTop="@dimen/default_layout_margin"
             android:layout_width="match_parent"
@@ -80,7 +80,7 @@
             android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/include_profile_manage_storage_bar">
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_manage_storage_progress_bar">
 
             <ProgressBar
                 android:id="@+id/progress_bar_loading"

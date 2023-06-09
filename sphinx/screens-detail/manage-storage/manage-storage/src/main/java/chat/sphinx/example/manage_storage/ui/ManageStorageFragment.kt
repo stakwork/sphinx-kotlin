@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -154,6 +155,23 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         super.subscribeToViewStateFlow()
     }
 
+    private fun setProgressStorageBar() {
+        binding.includeLayoutManageStorageProgressBar.apply {
+            setViewSectionPercentage(storageProgressImages, 0.174f)
+            setViewSectionPercentage(storageProgressAudio, 0.226f)
+            setViewSectionPercentage(storageProgressVideo, 0.100f)
+            setViewSectionPercentage(storageProgressFiles, 0.600f)
+        }
+    }
+
+    private fun setViewSectionPercentage(view: View, percentage: Float) {
+        val constraintLayout = binding.includeLayoutManageStorageProgressBar.progressContainer
+        val constraintSet = ConstraintSet()
+        constraintSet.clone(constraintLayout)
+        constraintSet.constrainPercentWidth(view.id, percentage)
+        constraintSet.applyTo(constraintLayout)
+    }
+
     private fun bindStorageInfo(viewState: ManageStorageViewState.StorageInfo) {
         binding.apply {
             textViewManageStorageOccupiedNumber.text = viewState.usedStorage
@@ -196,6 +214,8 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 ContextCompat.getColorStateList(root.context, R.color.primaryText)
             )
 
+            setProgressStorageBar()
+
             progressBarImages.gone
             progressBarAudio.gone
             progressBarVideo.gone
@@ -205,6 +225,13 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             buttonProfileTrashVideo.visible
             buttonProfileTrashAudio.visible
             buttonProfileTrashFiles.visible
+
+            includeLayoutManageStorageProgressBar.apply {
+                storageProgressImages.visible
+                storageProgressVideo.visible
+                storageProgressAudio.visible
+                storageProgressFiles.visible
+            }
 
             constraintLayoutStorageCustomTypeContainer.visible
         }
@@ -220,7 +247,7 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             buttonChangeStorageLimit.gone
             includeManageStorageHeader.constraintLayoutDeleteElementContainerTrash.gone
 
-            includeProfileManageStorageBar.apply {
+            includeLayoutManageStorageProgressBar.apply {
                 storageProgressImages.gone
                 storageProgressVideo.gone
                 storageProgressAudio.gone
