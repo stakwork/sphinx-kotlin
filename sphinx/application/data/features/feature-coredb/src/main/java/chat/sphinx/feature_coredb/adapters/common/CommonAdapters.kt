@@ -10,6 +10,8 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.message.toMessageUUID
+import chat.sphinx.wrapper_common.message.toPinnedMessageUUID
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import com.squareup.sqldelight.ColumnAdapter
 import java.io.File
@@ -93,7 +95,7 @@ internal class PinMessageAdapter: ColumnAdapter<MessageUUID, String> {
             }
     }
     override fun decode(databaseValue: String): MessageUUID {
-        return MessageUUID(databaseValue)
+        return databaseValue.toPinnedMessageUUID()
     }
 
     override fun encode(value: MessageUUID): String {
