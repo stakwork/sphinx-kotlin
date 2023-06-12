@@ -1335,6 +1335,11 @@ UPDATE feedItemDbo
 SET local_file = :local_file
 WHERE id = ?;
 
+feedItemUpdateLocalFileByIds:
+UPDATE feedItemDbo
+SET local_file = :local_file
+WHERE id IN ?;
+
 feedItemDeleteAllDownloadedByFeedId:
 UPDATE feedItemDbo
 SET local_file = NULL

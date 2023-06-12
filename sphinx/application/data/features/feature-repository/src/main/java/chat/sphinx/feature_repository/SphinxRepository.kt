@@ -6541,6 +6541,34 @@ abstract class SphinxRepository(
         return false
     }
 
+    override suspend fun deleteListOfDownloadedMediaIfApplicable(feedItems: List<DownloadableFeedItem>
+    ): Boolean {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val feedItemsId = feedItems.map { it.id }
+        val localFileList = feedItems.mapNotNull { it.localFile }
+
+        localFileList.forEach {
+            try {
+                if (it.exists()) {
+                    it.delete()
+                }
+            } catch (e: Exception) {
+                return false
+            }
+        }
+        feedItemLock.withLock {
+            withContext(io) {
+                queries.transaction {
+                    queries.feedItemUpdateLocalFileByIds(null, feedItemsId)
+                }
+            }
+        }
+        delay(200L)
+
+        return true
+    }
+
     override suspend fun deleteAllFeedDownloadedMedia(feed: Feed): Boolean {
         val feedId: FeedId = feed.id
         val queries = coreDB.getSphinxDatabaseQueries()

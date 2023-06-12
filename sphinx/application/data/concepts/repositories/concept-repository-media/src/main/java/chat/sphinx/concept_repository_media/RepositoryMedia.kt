@@ -25,17 +25,17 @@ interface RepositoryMedia {
 
     suspend fun getStorageDataInfo(): Flow<StorageData>
     fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
-
     fun getAllDownloadedMedia(): Flow<List<MessageMedia>>
     fun getAllDownloadedMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
-    suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?): Boolean
-
     fun inProgressDownloadIds(): List<FeedId>
 
+    suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?): Boolean
     suspend fun deleteDownloadedMediaIfApplicable(
         feedItem: DownloadableFeedItem
     ): Boolean
-
+    suspend fun deleteListOfDownloadedMediaIfApplicable(
+        feedItems: List<DownloadableFeedItem>
+    ): Boolean
     suspend fun deleteAllFeedDownloadedMedia(
         feed: Feed
     ): Boolean
