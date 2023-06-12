@@ -53,12 +53,12 @@ internal class ManageStorageViewModel @Inject constructor(
                 val storageSize = StorageSize(
                     storageData.usedStorage.calculateSize(),
                     storageData.freeStorage.calculateSize(),
-                    storageData.images.calculateSize(),
-                    storageData.video.calculateSize(),
-                    storageData.audio.calculateSize(),
-                    storageData.files.calculateSize(),
-                    storageData.chats.calculateSize(),
-                    storageData.podcasts.calculateSize()
+                    storageData.images.totalSize.calculateSize(),
+                    storageData.video.totalSize.calculateSize(),
+                    storageData.audio.totalSize.calculateSize(),
+                    storageData.files.totalSize.calculateSize(),
+                    storageData.chatsStorage.calculateSize(),
+                    storageData.podcastsStorage.calculateSize()
                 )
                 val storagePercentage = calculateStoragePercentage(storageData)
 

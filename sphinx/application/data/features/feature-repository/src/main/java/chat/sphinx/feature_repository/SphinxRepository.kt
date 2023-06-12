@@ -6389,24 +6389,56 @@ abstract class SphinxRepository(
             getAllDownloadedMedia().collect { chatFiles ->
                 getAllDownloadedFeedItems().collect { feedFiles ->
 
-                    var images: Long = 0L
-                    var video: Long = 0L
-                    var audio: Long = 0L
-                    var files: Long = 0L
+                    var imagesSize: Long = 0L
+                    var videoSize: Long = 0L
+                    var audioSize: Long = 0L
+                    var filesSize: Long = 0L
 
                     val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
                     val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
 
+                    val imageFiles = mutableListOf<File>()
+                    val videoFiles = mutableListOf<File>()
+                    val audioFiles = mutableListOf<File>()
+                    val otherFiles = mutableListOf<File>()
+
+                    val imageItems = mutableMapOf<ChatId, List<MessageId>>()
+                    val videoItems = mutableMapOf<ChatId, List<MessageId>>()
+                    val audioItems = mutableMapOf<ChatId, List<MessageId>>()
+                    val otherItems = mutableMapOf<ChatId, List<MessageId>>()
+
                     chatFiles.forEach { messageMedia ->
-                        when {
-                            messageMedia.mediaType.isImage -> images += messageMedia.localFile?.length() ?: 0L
-                            messageMedia.mediaType.isVideo -> video += messageMedia.localFile?.length() ?: 0L
-                            messageMedia.mediaType.isAudio -> audio += messageMedia.localFile?.length() ?: 0L
-                            else -> files += messageMedia.localFile?.length() ?: 0L
+                        messageMedia.localFile?.let { file ->
+                            when {
+                                messageMedia.mediaType.isImage -> {
+                                    imagesSize += file.length()
+                                    imageFiles.add(file)
+                                    imageItems[messageMedia.chatId] = imageItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                                }
+                                messageMedia.mediaType.isVideo -> {
+                                    videoSize += file.length()
+                                    videoFiles.add(file)
+                                    videoItems[messageMedia.chatId] = videoItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                                }
+                                messageMedia.mediaType.isAudio -> {
+                                    audioSize += file.length()
+                                    audioFiles.add(file)
+                                    audioItems[messageMedia.chatId] = audioItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                                }
+                                else -> {
+                                    filesSize += file.length()
+                                    otherFiles.add(file)
+                                    otherItems[messageMedia.chatId] = otherItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                                }
+                            }
                         }
                     }
+
                     feedFiles.forEach { feedItem ->
-                        audio += feedItem.localFile?.length() ?: 0L
+                        feedItem.localFile?.let { file ->
+                            audioSize += file.length()
+                            audioFiles.add(file)
+                        }
                     }
 
                     val usedStorage = chat + podcast
@@ -6416,12 +6448,12 @@ abstract class SphinxRepository(
                         usedStorage = FileSize(usedStorage),
                         totalStorage = FileSize(totalStorage),
                         freeStorage = FileSize(freeStorage),
-                        images = FileSize(images),
-                        video = FileSize(video),
-                        audio = FileSize(audio),
-                        files = FileSize(files),
-                        chats = FileSize(chat),
-                        podcasts = FileSize(podcast)
+                        chatsStorage = FileSize(chat),
+                        podcastsStorage = FileSize(podcast),
+                        images = ImageStorage(FileSize(imagesSize), imageFiles, imageItems),
+                        video = VideoStorage(FileSize(videoSize), videoFiles, videoItems),
+                        audio = AudioStorage(FileSize(audioSize), audioFiles, audioItems, feedFiles.map { it.id }),
+                        files = FilesStorage(FileSize(filesSize), otherFiles, otherItems)
                     )
 
                     emit(storageData)
