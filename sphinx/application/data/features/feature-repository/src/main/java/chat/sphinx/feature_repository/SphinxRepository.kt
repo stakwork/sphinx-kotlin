@@ -6384,45 +6384,49 @@ abstract class SphinxRepository(
 
     override suspend fun getStorageDataInfo(): Flow<StorageData> =
         flow {
-            val chatFiles = getAllDownloadedMedia().firstOrNull() ?: listOf()
-            val feedFiles = getAllDownloadedFeedItems().firstOrNull() ?: listOf()
+            val totalStorage: Long = 100L * 1024L * 1024L * 1024L
 
-            var images: Long = 0L
-            var video: Long = 0L
-            var audio: Long = 0L
-            var files: Long = 0L
+            getAllDownloadedMedia().collect { chatFiles ->
+                getAllDownloadedFeedItems().collect { feedFiles ->
 
-            val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
-            val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
+                    var images: Long = 0L
+                    var video: Long = 0L
+                    var audio: Long = 0L
+                    var files: Long = 0L
 
-            chatFiles.forEach { messageMedia ->
-                when {
-                    messageMedia.mediaType.isImage -> images += messageMedia.localFile?.length() ?: 0L
-                    messageMedia.mediaType.isVideo -> video += messageMedia.localFile?.length() ?: 0L
-                    messageMedia.mediaType.isAudio -> audio += messageMedia.localFile?.length() ?: 0L
-                    else -> files += messageMedia.localFile?.length() ?: 0L
+                    val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
+                    val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
+
+                    chatFiles.forEach { messageMedia ->
+                        when {
+                            messageMedia.mediaType.isImage -> images += messageMedia.localFile?.length() ?: 0L
+                            messageMedia.mediaType.isVideo -> video += messageMedia.localFile?.length() ?: 0L
+                            messageMedia.mediaType.isAudio -> audio += messageMedia.localFile?.length() ?: 0L
+                            else -> files += messageMedia.localFile?.length() ?: 0L
+                        }
+                    }
+                    feedFiles.forEach { feedItem ->
+                        audio += feedItem.localFile?.length() ?: 0L
+                    }
+
+                    val usedStorage = chat + podcast
+                    val freeStorage = totalStorage - usedStorage
+
+                    val storageData = StorageData(
+                        usedStorage = FileSize(usedStorage),
+                        totalStorage = FileSize(totalStorage),
+                        freeStorage = FileSize(freeStorage),
+                        images = FileSize(images),
+                        video = FileSize(video),
+                        audio = FileSize(audio),
+                        files = FileSize(files),
+                        chats = FileSize(chat),
+                        podcasts = FileSize(podcast)
+                    )
+
+                    emit(storageData)
                 }
             }
-            feedFiles.forEach { feedItem ->
-                audio += feedItem.localFile?.length() ?: 0L
-            }
-
-            val totalStorage: Long = 100L * 1024L * 1024L * 1024L
-            val usedStorage = chat + podcast
-            val freeStorage = totalStorage - usedStorage
-
-            val storageData = StorageData(
-                usedStorage = FileSize(usedStorage),
-                totalStorage = FileSize(totalStorage),
-                freeStorage = FileSize(freeStorage),
-                images = FileSize(images),
-                video = FileSize(video),
-                audio = FileSize(audio),
-                files = FileSize(files),
-                chats = FileSize(chat),
-                podcasts =FileSize(podcast)
-            )
-            emit(storageData)
         }
 
     override fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
