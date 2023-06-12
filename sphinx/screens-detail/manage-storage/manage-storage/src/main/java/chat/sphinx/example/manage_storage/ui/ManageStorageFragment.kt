@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -38,6 +39,12 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
     override val binding: FragmentManageStorageBinding by viewBinding(FragmentManageStorageBinding::bind)
     override val viewModel: ManageStorageViewModel by viewModels()
 
+    companion object {
+        const val IMAGE_TYPE = "Images"
+        const val VIDEO_TYPE = "Videos"
+        const val AUDIO_TYPE = "Audios"
+        const val FILE_TYPE = "Files"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +86,11 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         override fun handleOnBackPressed() {
             if (viewModel.changeStorageLimitViewStateContainer.value is ChangeStorageLimitViewState.Open) {
                 viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
-            } else {
+            }
+            if (viewModel.deleteItemNotificationViewStateContainer.value is DeleteTypeNotificationViewState.Open) {
+                viewModel.deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
+            }
+            else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
@@ -126,16 +137,27 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             }
 
             constraintLayoutStorageImageContainer.setOnClickListener {
-//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_images))
+                viewModel.openDeleteTypePopUp(IMAGE_TYPE)
             }
             constraintLayoutStorageVideoContainer.setOnClickListener {
-//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_video))
+                viewModel.openDeleteTypePopUp(VIDEO_TYPE)
             }
             constraintLayoutStorageAudioContainer.setOnClickListener {
-//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_audio))
+                viewModel.openDeleteTypePopUp(AUDIO_TYPE)
             }
             constraintLayoutStorageFilesContainer.setOnClickListener {
-//                viewModel.openDeleteTypePopUp(getString(R.string.manage_storage_files))
+                viewModel.openDeleteTypePopUp(FILE_TYPE)
+            }
+
+            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.apply {
+                buttonDelete.setOnClickListener {
+                    (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteTypeNotificationViewState.Open)?.type?.let { type ->
+                        viewModel.deleteAllFilesByType(type)
+                    }
+                }
+                buttonCancel.setOnClickListener {
+                    viewModel.deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
+                }
             }
         }
     }
@@ -259,10 +281,10 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             progressBarVideo.gone
             progressBarFiles.gone
 
-            buttonProfileTrashImages.gone
-            buttonProfileTrashVideo.gone
-            buttonProfileTrashAudio.gone
-            buttonProfileTrashFiles.gone
+            buttonProfileTrashImages.visible
+            buttonProfileTrashVideo.visible
+            buttonProfileTrashAudio.visible
+            buttonProfileTrashFiles.visible
 
             constraintLayoutStorageCustomTypeContainer.visible
         }

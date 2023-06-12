@@ -175,7 +175,7 @@
                 app:layout_constraintTop_toTopOf="@+id/button_profile_trash_images"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_images"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -255,7 +255,7 @@
                 app:layout_constraintTop_toTopOf="@+id/button_profile_trash_video"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_video"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -335,7 +335,7 @@
                 app:layout_constraintTop_toTopOf="@+id/button_profile_trash_audio"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_audio"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -415,7 +415,7 @@
                 app:layout_constraintTop_toTopOf="@+id/button_profile_trash_files"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_files"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -507,7 +507,7 @@
                 app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_custom_chat"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_right_arrow_custom_chat"
                 android:layout_width="@dimen/default_form_scan_icon_width"
                 android:layout_height="@dimen/default_form_scan_icon_width"
@@ -586,7 +586,7 @@
             app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_custom_type"
             tools:text="12.37 GB" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/button_profile_right_arrow_custom_type"
             android:layout_width="@dimen/default_form_scan_icon_width"
             android:layout_height="@dimen/default_form_scan_icon_width"
