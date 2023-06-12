@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.example.manage_storage.model.StorageSize
 import chat.sphinx.wrapper_common.calculateStoragePercentage
@@ -14,7 +15,9 @@ import chat.sphinx.manage.storage.R
 import chat.sphinx.wrapper_common.StorageData
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -22,6 +25,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -31,6 +35,7 @@ internal class ManageStorageViewModel @Inject constructor(
     private val app: Application,
     val navigator: ManageStorageNavigator,
     private val repositoryMedia: RepositoryMedia,
+    private val feedRepository: FeedRepository,
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -88,29 +93,30 @@ internal class ManageStorageViewModel @Inject constructor(
     fun deleteAllFilesByType(type: String) {
         when (type) {
             IMAGE_TYPE -> {
-                storageData?.images.let { imageStorage ->
-                    imageStorage?.items?.keys?.forEach { chatId ->
+                storageData?.images?.let { imageStorage ->
+                    imageStorage.items.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, imageStorage.fileList, imageStorage.items[chatId])
                     }
                 }
             }
             VIDEO_TYPE -> {
-                storageData?.video.let { videoStorage ->
-                    videoStorage?.items?.keys?.forEach { chatId ->
+                storageData?.video?.let { videoStorage ->
+                    videoStorage.items.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, videoStorage.fileList, videoStorage.items[chatId])
                     }
                 }
             }
             AUDIO_TYPE -> {
-                storageData?.audio.let { audioStorage ->
-                    audioStorage?.chatItems?.keys?.forEach { chatId ->
+                storageData?.audio?.let { audioStorage ->
+                    deleteAllDownloadedFeeds(audioStorage.feedList)
+                    audioStorage.chatItems.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, audioStorage.fileList, audioStorage.chatItems[chatId])
                     }
                 }
             }
             FILE_TYPE -> {
-                storageData?.files.let { filesStorage ->
-                    filesStorage?.items?.keys?.forEach { chatId ->
+                storageData?.files?.let { filesStorage ->
+                    filesStorage.items.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, filesStorage.fileList, filesStorage.items[chatId])
                     }
                 }
@@ -119,19 +125,30 @@ internal class ManageStorageViewModel @Inject constructor(
     }
 
     private fun deleteDownloadedMedia(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?) {
+        deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
         viewModelScope.launch(mainImmediate) {
             val deleteResponse = repositoryMedia.deleteDownloadedMediaByChatId(
                 chatId,
                 files,
                 messageIds
             )
-            if (deleteResponse) {
-                deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
-            } else {
+            if (!deleteResponse) {
                 submitSideEffect(
                     StorageNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
                 )
                 deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
+            }
+        }
+    }
+
+    private fun deleteAllDownloadedFeeds(feedsIds: List<FeedId>) {
+        viewModelScope.launch(mainImmediate) {
+            feedsIds.forEach { feedId ->
+                feedId.let { nnFeedId ->
+                    feedRepository.getFeedById(nnFeedId).firstOrNull()?.let {nnFeed ->
+                        repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
+                    }
+                }
             }
         }
     }

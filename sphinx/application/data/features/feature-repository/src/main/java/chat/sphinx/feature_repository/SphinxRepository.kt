@@ -6452,7 +6452,7 @@ abstract class SphinxRepository(
                         podcastsStorage = FileSize(podcast),
                         images = ImageStorage(FileSize(imagesSize), imageFiles, imageItems),
                         video = VideoStorage(FileSize(videoSize), videoFiles, videoItems),
-                        audio = AudioStorage(FileSize(audioSize), audioFiles, audioItems, feedFiles.map { it.id }),
+                        audio = AudioStorage(FileSize(audioSize), audioFiles, audioItems, feedFiles.distinctBy { it.feedId }.map { it.feedId }),
                         files = FilesStorage(FileSize(filesSize), otherFiles, otherItems)
                     )
 

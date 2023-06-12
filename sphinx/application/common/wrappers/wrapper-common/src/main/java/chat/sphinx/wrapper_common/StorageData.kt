@@ -31,7 +31,7 @@ data class AudioStorage(
     val totalSize: FileSize,
     val fileList: List<File>,
     val chatItems: Map<ChatId, List<MessageId>>,
-    val feedItems: List<FeedId>
+    val feedList: List<FeedId>
 )
 
 data class FilesStorage(
