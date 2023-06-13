@@ -5,6 +5,10 @@ import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
 import java.io.File
 
+fun calculateUserStorageLimit(seekBarValue: Int, freeStorage: Long): Long {
+    return freeStorage * seekBarValue / 100
+}
+
 data class StorageData(
     val usedStorage: FileSize,
     val freeStorage: FileSize?,

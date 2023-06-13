@@ -26,7 +26,7 @@
         app:layout_constraintTop_toBottomOf="@+id/include_manage_change_limit_header">
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_manage_storage_used"
+            android:id="@+id/text_view_manage_storage_used_plain"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
@@ -45,12 +45,12 @@
             android:maxLines="1"
             android:textColor="@color/text"
             android:textSize="@dimen/default_text_size_large_title_chevron_icon"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_used2"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_used_number"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="128 GB" />
 
         <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_manage_storage_used2"
+            android:id="@+id/text_view_manage_storage_used_number"
             android:layout_width="0dp"
             android:layout_marginTop="@dimen/default_medium_layout_margin"
             android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
             android:textColor="@color/mainBottomIcons"
             android:textSize="@dimen/default_text_size_tap_target_material_icon"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_used"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_used_plain"
             tools:text="50.12 GB" />
 
         <include
@@ -109,11 +109,11 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
+            android:text="@string/manage_storage_one_gb"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_tab"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraint_seekbar_container"
-            tools:text="30 GB" />
+            app:layout_constraintTop_toBottomOf="@+id/constraint_seekbar_container" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_max"

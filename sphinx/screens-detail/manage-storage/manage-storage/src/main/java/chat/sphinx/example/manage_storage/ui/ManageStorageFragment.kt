@@ -21,6 +21,10 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.manage.storage.R
 import chat.sphinx.manage.storage.databinding.FragmentManageStorageBinding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
+import chat.sphinx.wrapper_common.calculateSize
+import chat.sphinx.wrapper_common.calculateStoragePercentage
+import chat.sphinx.wrapper_common.calculateUserStorageLimit
+import chat.sphinx.wrapper_common.toFileSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -102,13 +106,15 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
     private fun setUpHeader() {
         binding.apply {
             includeManageStorageHeader.textViewHeader.text = getString(R.string.manage_storage)
-            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.textViewHeader.text = getString(R.string.manage_storage_limit)
             includeManageStorageHeader.constraintLayoutDeleteElementContainerTrash.gone
+            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.textViewHeader.text = getString(R.string.manage_storage_limit)
+            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.constraintLayoutDeleteElementContainerTrash.gone
         }
     }
 
     private fun setClickListeners() {
         binding.apply {
+
             buttonChangeStorageLimit.setOnClickListener{
                 viewModel.retrieveStorageLimitFromPreferences()
             }
@@ -172,7 +178,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             binding.includeLayoutChangeLimit
                 .includeLayoutChangeStorageLimitDetail.apply {}
 
-
         }
     }
 
@@ -195,11 +200,13 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 binding.includeLayoutChangeLimit.apply {
                     when (viewState) {
                         is ChangeStorageLimitViewState.Open -> {
-                            binding.includeLayoutChangeLimit
-                                .includeLayoutChangeStorageLimitDetail.apply {
-                                    storageLimitSeekBar.progress = viewState.storageLimit
+                            includeLayoutChangeStorageLimitDetail.apply {
+                                setupStorageSeekBar()
+                                storageLimitSeekBar.progress = viewState.storageLimit
+                                textViewManageStorageUsedNumber.text = viewState.storageData.usedStorage.calculateSize()
+                                textViewManageStorageMax.text = viewState.storageData.freeStorage?.calculateSize()
                             }
-                        }
+                            }
                         else -> {}
                     }
                     root.setTransitionDuration(300)
@@ -310,7 +317,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             progressBarLoading.visible
             textViewLoading.visible
             buttonChangeStorageLimit.gone
-            includeManageStorageHeader.constraintLayoutDeleteElementContainerTrash.gone
 
             storageProgressPointImages.backgroundTintList =
                 ContextCompat.getColorStateList(root.context, R.color.placeholderText)
@@ -347,6 +353,31 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             buttonProfileTrashAudio.gone
             buttonProfileTrashVideo.gone
             buttonProfileTrashFiles.gone
+        }
+    }
+
+    private fun setupStorageSeekBar(){
+        binding.includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.apply {
+            storageLimitSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                val freeStorage = (viewModel.changeStorageLimitViewStateContainer.value as ChangeStorageLimitViewState.Open)
+                        .storageData.freeStorage?.value ?: 0L
+
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    val sizeValue: Long = calculateUserStorageLimit(progress, freeStorage)
+                    val storageLimit: String = sizeValue.toFileSize()?.calculateSize() ?: getString(R.string.manage_storage_zero_gb)
+                    textViewManageStorageOccupiedNumber.text = storageLimit
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                }
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                }
+            })
         }
     }
 

@@ -203,6 +203,8 @@
     <string name="manage_storage_video">Video</string>
     <string name="manage_storage_audio">Audio</string>
     <string name="manage_storage_files">Files</string>
+    <string name="manage_storage_one_gb" translatable="false">1 GB</string>
+    <string name="manage_storage_zero_gb" translatable="false">0 GB</string>
     <string name="manage_storage_total_storage">of %s</string>
     <string name="manage_storage_free_space">%s Free</string>
     <string name="manage_storage_save">Save</string>

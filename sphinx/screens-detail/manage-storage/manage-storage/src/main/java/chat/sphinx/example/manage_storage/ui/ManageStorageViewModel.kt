@@ -70,8 +70,6 @@ internal class ManageStorageViewModel @Inject constructor(
 
     init {
         getStorageData()
-        val pim = getTotalStorage().toFileSize()?.calculateSize()
-        println(pim)
     }
 
     private fun getStorageData(){
@@ -169,7 +167,14 @@ internal class ManageStorageViewModel @Inject constructor(
 
     fun retrieveStorageLimitFromPreferences() {
         val storageLimitProgress = storageLimitSharedPreferences.getInt(STORAGE_LIMIT_KEY, DEFAULT_STORAGE_LIMIT)
-        changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Open(storageLimitProgress))
+        storageData?.let { nnStorageData ->
+            changeStorageLimitViewStateContainer.updateViewState(
+                ChangeStorageLimitViewState.Open(
+                    nnStorageData,
+                    storageLimitProgress
+                )
+            )
+        }
     }
 
     fun setStorageLimit(progress: Int) {
