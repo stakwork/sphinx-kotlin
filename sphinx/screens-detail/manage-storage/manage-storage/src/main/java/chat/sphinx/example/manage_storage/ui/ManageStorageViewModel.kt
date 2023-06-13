@@ -17,7 +17,6 @@ import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
-import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -49,6 +48,8 @@ internal class ManageStorageViewModel @Inject constructor(
         const val VIDEO_TYPE = "Videos"
         const val AUDIO_TYPE = "Audios"
         const val FILE_TYPE = "Files"
+        const val STORAGE_LIMIT_KEY = "storage_limit"
+        const val DEFAULT_STORAGE_LIMIT = 50
     }
 
     private var storageData: StorageData? = null
@@ -61,11 +62,14 @@ internal class ManageStorageViewModel @Inject constructor(
         ViewStateContainer(DeleteTypeNotificationViewState.Closed)
     }
 
+    private val storageLimitSharedPreferences: SharedPreferences =
+        app.applicationContext.getSharedPreferences(STORAGE_LIMIT_KEY, Context.MODE_PRIVATE)
+
     init {
         getStorageData()
     }
 
-    fun getStorageData(){
+    private fun getStorageData(){
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getStorageDataInfo().collect { storageDataInfo ->
                 storageData = storageDataInfo
@@ -153,11 +157,17 @@ internal class ManageStorageViewModel @Inject constructor(
         }
     }
 
-    fun featureNotImplementedToast(){
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(
-                StorageNotifySideEffect(app.getString(R.string.manage_storage_delete_feature_not_implemented))
-            )
-        }
+    fun retrieveStorageLimitFromPreferences() {
+        val storageLimitProgress = storageLimitSharedPreferences.getInt(STORAGE_LIMIT_KEY, DEFAULT_STORAGE_LIMIT)
+        changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Open(storageLimitProgress))
     }
+
+    fun setStorageLimit(progress: Int) {
+        val editor = storageLimitSharedPreferences.edit()
+        editor.putInt(STORAGE_LIMIT_KEY, progress)
+        editor.apply()
+
+        changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
+    }
+
 }

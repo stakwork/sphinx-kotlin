@@ -3,6 +3,7 @@ package chat.sphinx.example.manage_storage.ui
 import android.content.Context
 import android.os.Bundle
 import android.view.View
+import android.widget.SeekBar
 import androidx.activity.OnBackPressedCallback
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
@@ -109,22 +110,15 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
     private fun setClickListeners() {
         binding.apply {
             buttonChangeStorageLimit.setOnClickListener{
-                viewModel.featureNotImplementedToast()
-//                viewModel.changeStorageLimitViewStateContainer.updateViewState(
-//                    ChangeStorageLimitViewState.Open
-//                )
+                viewModel.retrieveStorageLimitFromPreferences()
             }
+
             includeManageStorageHeader.textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.closeDetailScreen()
                 }
             }
-            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.textViewDetailScreenClose.setOnClickListener {
-                viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
-            }
-            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.buttonCancel.setOnClickListener {
-                viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
-            }
+
             constraintLayoutStorageCustomTypeContainer.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.toDeleteMediaDetail()
@@ -149,6 +143,22 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 viewModel.openDeleteTypePopUp(FILE_TYPE)
             }
 
+            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.apply {
+                includeManageChangeLimitHeader.textViewDetailScreenClose.setOnClickListener {
+                    viewModel.changeStorageLimitViewStateContainer.updateViewState(
+                        ChangeStorageLimitViewState.Closed
+                    )
+                }
+                buttonCancel.setOnClickListener {
+                    viewModel.changeStorageLimitViewStateContainer.updateViewState(
+                        ChangeStorageLimitViewState.Closed
+                    )
+                }
+                buttonSave.setOnClickListener {
+                    viewModel.setStorageLimit(storageLimitSeekBar.progress)
+                }
+            }
+
             includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.apply {
                 buttonDelete.setOnClickListener {
                     (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteTypeNotificationViewState.Open)?.type?.let { type ->
@@ -159,6 +169,10 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                     viewModel.deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
                 }
             }
+            binding.includeLayoutChangeLimit
+                .includeLayoutChangeStorageLimitDetail.apply {}
+
+
         }
     }
 
@@ -181,7 +195,10 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 binding.includeLayoutChangeLimit.apply {
                     when (viewState) {
                         is ChangeStorageLimitViewState.Open -> {
-                            // bind al the data
+                            binding.includeLayoutChangeLimit
+                                .includeLayoutChangeStorageLimitDetail.apply {
+                                    storageLimitSeekBar.progress = viewState.storageLimit
+                            }
                         }
                         else -> {}
                     }
@@ -332,7 +349,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
             buttonProfileTrashFiles.gone
         }
     }
-
 
     override suspend fun onSideEffectCollect(sideEffect: StorageNotifySideEffect) {
         sideEffect.execute(binding.root.context)

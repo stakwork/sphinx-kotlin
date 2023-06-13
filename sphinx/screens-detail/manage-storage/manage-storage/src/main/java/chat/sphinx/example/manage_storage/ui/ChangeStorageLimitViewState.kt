@@ -16,7 +16,9 @@ sealed class ChangeStorageLimitViewState: MotionLayoutViewState<ChangeStorageLim
         override fun restoreMotionScene(motionLayout: MotionLayout) {}
     }
 
-    object Open : ChangeStorageLimitViewState() {
+    data class Open(
+        val storageLimit: Int
+    ) : ChangeStorageLimitViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_storage_limit_closed
         override val endSetId: Int?

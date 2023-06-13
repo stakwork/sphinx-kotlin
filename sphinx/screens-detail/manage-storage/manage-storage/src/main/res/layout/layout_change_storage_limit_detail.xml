@@ -88,7 +88,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatSeekBar
-                android:id="@+id/mySeekBar"
+                android:id="@+id/storage_limit_seek_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="100"
