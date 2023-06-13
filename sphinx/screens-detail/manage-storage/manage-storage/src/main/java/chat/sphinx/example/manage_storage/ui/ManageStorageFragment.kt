@@ -162,11 +162,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         }
     }
 
-    override fun onResume() {
-        viewModel.getStorageData()
-        super.onResume()
-    }
-
     override suspend fun onViewStateFlowCollect(viewState: ManageStorageViewState) {
         @Exhaustive
         when (viewState) {

@@ -6383,82 +6383,77 @@ abstract class SphinxRepository(
     }
 
     override suspend fun getStorageDataInfo(): Flow<StorageData> =
-        flow {
+        combine(getAllDownloadedMedia(), getAllDownloadedFeedItems()) { chatFiles, feedFiles ->
             val totalStorage: Long = 100L * 1024L * 1024L * 1024L
 
-            getAllDownloadedMedia().collect { chatFiles ->
-                getAllDownloadedFeedItems().collect { feedFiles ->
+            var imagesSize: Long = 0L
+            var videoSize: Long = 0L
+            var audioSize: Long = 0L
+            var filesSize: Long = 0L
 
-                    var imagesSize: Long = 0L
-                    var videoSize: Long = 0L
-                    var audioSize: Long = 0L
-                    var filesSize: Long = 0L
+            val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
+            val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
 
-                    val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
-                    val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
+            val imageFiles = mutableListOf<File>()
+            val videoFiles = mutableListOf<File>()
+            val audioFiles = mutableListOf<File>()
+            val otherFiles = mutableListOf<File>()
 
-                    val imageFiles = mutableListOf<File>()
-                    val videoFiles = mutableListOf<File>()
-                    val audioFiles = mutableListOf<File>()
-                    val otherFiles = mutableListOf<File>()
+            val imageItems = mutableMapOf<ChatId, List<MessageId>>()
+            val videoItems = mutableMapOf<ChatId, List<MessageId>>()
+            val audioItems = mutableMapOf<ChatId, List<MessageId>>()
+            val otherItems = mutableMapOf<ChatId, List<MessageId>>()
 
-                    val imageItems = mutableMapOf<ChatId, List<MessageId>>()
-                    val videoItems = mutableMapOf<ChatId, List<MessageId>>()
-                    val audioItems = mutableMapOf<ChatId, List<MessageId>>()
-                    val otherItems = mutableMapOf<ChatId, List<MessageId>>()
-
-                    chatFiles.forEach { messageMedia ->
-                        messageMedia.localFile?.let { file ->
-                            when {
-                                messageMedia.mediaType.isImage -> {
-                                    imagesSize += file.length()
-                                    imageFiles.add(file)
-                                    imageItems[messageMedia.chatId] = imageItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
-                                }
-                                messageMedia.mediaType.isVideo -> {
-                                    videoSize += file.length()
-                                    videoFiles.add(file)
-                                    videoItems[messageMedia.chatId] = videoItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
-                                }
-                                messageMedia.mediaType.isAudio -> {
-                                    audioSize += file.length()
-                                    audioFiles.add(file)
-                                    audioItems[messageMedia.chatId] = audioItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
-                                }
-                                else -> {
-                                    filesSize += file.length()
-                                    otherFiles.add(file)
-                                    otherItems[messageMedia.chatId] = otherItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
-                                }
-                            }
+            chatFiles.forEach { messageMedia ->
+                messageMedia.localFile?.let { file ->
+                    when {
+                        messageMedia.mediaType.isImage -> {
+                            imagesSize += file.length()
+                            imageFiles.add(file)
+                            imageItems[messageMedia.chatId] = imageItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
                         }
-                    }
-
-                    feedFiles.forEach { feedItem ->
-                        feedItem.localFile?.let { file ->
+                        messageMedia.mediaType.isVideo -> {
+                            videoSize += file.length()
+                            videoFiles.add(file)
+                            videoItems[messageMedia.chatId] = videoItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                        }
+                        messageMedia.mediaType.isAudio -> {
                             audioSize += file.length()
                             audioFiles.add(file)
+                            audioItems[messageMedia.chatId] = audioItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                        }
+                        else -> {
+                            filesSize += file.length()
+                            otherFiles.add(file)
+                            otherItems[messageMedia.chatId] = otherItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
                         }
                     }
-
-                    val usedStorage = chat + podcast
-                    val freeStorage = totalStorage - usedStorage
-
-                    val storageData = StorageData(
-                        usedStorage = FileSize(usedStorage),
-                        totalStorage = FileSize(totalStorage),
-                        freeStorage = FileSize(freeStorage),
-                        chatsStorage = FileSize(chat),
-                        podcastsStorage = FileSize(podcast),
-                        images = ImageStorage(FileSize(imagesSize), imageFiles, imageItems),
-                        video = VideoStorage(FileSize(videoSize), videoFiles, videoItems),
-                        audio = AudioStorage(FileSize(audioSize), audioFiles, audioItems, feedFiles.distinctBy { it.feedId }.map { it.feedId }),
-                        files = FilesStorage(FileSize(filesSize), otherFiles, otherItems)
-                    )
-
-                    emit(storageData)
                 }
             }
+
+            feedFiles.forEach { feedItem ->
+                feedItem.localFile?.let { file ->
+                    audioSize += file.length()
+                    audioFiles.add(file)
+                }
+            }
+
+            val usedStorage = chat + podcast
+            val freeStorage = totalStorage - usedStorage
+
+            val storageData = StorageData(
+                usedStorage = FileSize(usedStorage),
+                totalStorage = FileSize(totalStorage),
+                freeStorage = FileSize(freeStorage),
+                chatsStorage = FileSize(chat),
+                podcastsStorage = FileSize(podcast),
+                images = ImageStorage(FileSize(imagesSize), imageFiles, imageItems),
+                video = VideoStorage(FileSize(videoSize), videoFiles, videoItems),
+                audio = AudioStorage(FileSize(audioSize), audioFiles, audioItems, feedFiles.distinctBy { it.feedId }.map { it.feedId }),
+                files = FilesStorage(FileSize(filesSize), otherFiles, otherItems)
+            )
+
+            storageData
         }
 
     override fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
