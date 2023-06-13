@@ -7,8 +7,7 @@ import java.io.File
 
 data class StorageData(
     val usedStorage: FileSize,
-    val totalStorage: FileSize,
-    val freeStorage: FileSize,
+    val freeStorage: FileSize?,
     val chatsStorage: FileSize,
     val podcastsStorage: FileSize,
     val images: ImageStorage,

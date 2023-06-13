@@ -2,6 +2,8 @@ package chat.sphinx.example.manage_storage.ui
 
 import android.app.Application
 import android.content.*
+import android.os.Environment
+import android.os.StatFs
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
@@ -17,6 +19,7 @@ import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.toFileSize
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -67,15 +70,22 @@ internal class ManageStorageViewModel @Inject constructor(
 
     init {
         getStorageData()
+        val pim = getTotalStorage().toFileSize()?.calculateSize()
+        println(pim)
     }
 
     private fun getStorageData(){
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getStorageDataInfo().collect { storageDataInfo ->
-                storageData = storageDataInfo
+                val totalStorage = getTotalStorage()
+                val usedStorage = storageDataInfo.usedStorage
+                val freeStorage = (totalStorage - usedStorage.value).toFileSize()
+                val modifiedStorageDataInfo = storageDataInfo.copy(freeStorage = freeStorage)
+                storageData = modifiedStorageDataInfo
+
                 val storageSize = StorageSize(
                     storageDataInfo.usedStorage.calculateSize(),
-                    storageDataInfo.freeStorage.calculateSize(),
+                    freeStorage?.calculateSize(),
                     storageDataInfo.images.totalSize.calculateSize(),
                     storageDataInfo.video.totalSize.calculateSize(),
                     storageDataInfo.audio.totalSize.calculateSize(),
@@ -83,7 +93,7 @@ internal class ManageStorageViewModel @Inject constructor(
                     storageDataInfo.chatsStorage.calculateSize(),
                     storageDataInfo.podcastsStorage.calculateSize()
                 )
-                val storagePercentage = calculateStoragePercentage(storageDataInfo)
+                val storagePercentage = calculateStoragePercentage(modifiedStorageDataInfo)
 
                 updateViewState(ManageStorageViewState.StorageInfo(storageSize, storagePercentage))
             }
@@ -168,6 +178,11 @@ internal class ManageStorageViewModel @Inject constructor(
         editor.apply()
 
         changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
+    }
+
+    private fun getTotalStorage(): Long {
+        val stat = StatFs(Environment.getDataDirectory().path)
+        return stat.blockSizeLong * stat.availableBlocksLong
     }
 
 }

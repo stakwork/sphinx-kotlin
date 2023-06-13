@@ -6384,7 +6384,6 @@ abstract class SphinxRepository(
 
     override suspend fun getStorageDataInfo(): Flow<StorageData> =
         combine(getAllDownloadedMedia(), getAllDownloadedFeedItems()) { chatFiles, feedFiles ->
-            val totalStorage: Long = 100L * 1024L * 1024L * 1024L
 
             var imagesSize: Long = 0L
             var videoSize: Long = 0L
@@ -6439,12 +6438,10 @@ abstract class SphinxRepository(
             }
 
             val usedStorage = chat + podcast
-            val freeStorage = totalStorage - usedStorage
 
             val storageData = StorageData(
                 usedStorage = FileSize(usedStorage),
-                totalStorage = FileSize(totalStorage),
-                freeStorage = FileSize(freeStorage),
+                null,
                 chatsStorage = FileSize(chat),
                 podcastsStorage = FileSize(podcast),
                 images = ImageStorage(FileSize(imagesSize), imageFiles, imageItems),

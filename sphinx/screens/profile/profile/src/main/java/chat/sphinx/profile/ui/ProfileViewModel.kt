@@ -2,6 +2,8 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
+import android.os.Environment
+import android.os.StatFs
 import android.text.InputType
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
@@ -39,6 +41,7 @@ import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -155,22 +158,29 @@ internal class ProfileViewModel @Inject constructor(
         )
     }
 
-    fun setUpManageStorage(){
+    private fun setUpManageStorage(){
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getStorageDataInfo().collect { storageData ->
-                val storagePercentage = calculateStoragePercentage(storageData)
-                val used = storageData.usedStorage.calculateSize()
-                val total = storageData.totalStorage.calculateSize()
+                val totalStorage = getTotalStorage()
+                val usedStorage = storageData.usedStorage
+                val freeStorage = (totalStorage - usedStorage.value).toFileSize()
+                val modifiedStorageDataInfo = storageData.copy(freeStorage = freeStorage)
+                val storagePercentage = calculateStoragePercentage(modifiedStorageDataInfo)
 
                 storageBarViewStateContainer.updateViewState(
                     StorageBarViewState.StorageData(
                         storagePercentage,
-                        used,
-                        total
+                        usedStorage.calculateSize(),
+                        totalStorage.toFileSize()?.calculateSize() ?: "0 Bytes"
                     )
                 )
             }
         }
+    }
+
+    private fun getTotalStorage(): Long {
+        val stat = StatFs(Environment.getDataDirectory().path)
+        return stat.blockSizeLong * stat.availableBlocksLong
     }
 
     private var resetPINJob: Job? = null
