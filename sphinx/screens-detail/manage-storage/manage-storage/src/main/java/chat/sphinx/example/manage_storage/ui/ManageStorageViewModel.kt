@@ -15,6 +15,8 @@ import chat.sphinx.example.manage_storage.viewstate.DeleteTypeNotificationViewSt
 import chat.sphinx.example.manage_storage.viewstate.ManageStorageViewState
 import chat.sphinx.manage.storage.R
 import chat.sphinx.wrapper_common.StorageData
+import chat.sphinx.wrapper_common.StorageLimit.DEFAULT_STORAGE_LIMIT
+import chat.sphinx.wrapper_common.StorageLimit.STORAGE_LIMIT_KEY
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.calculateUserStorageLimit
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -52,8 +54,6 @@ internal class ManageStorageViewModel @Inject constructor(
         const val VIDEO_TYPE = "Videos"
         const val AUDIO_TYPE = "Audios"
         const val FILE_TYPE = "Files"
-        const val STORAGE_LIMIT_KEY = "storage_limit"
-        const val DEFAULT_STORAGE_LIMIT = 50
     }
 
     private var storageData: StorageData? = null
@@ -71,7 +71,6 @@ internal class ManageStorageViewModel @Inject constructor(
 
     init {
         getStorageData()
-
     }
 
     private fun getStorageData(){
@@ -113,8 +112,6 @@ internal class ManageStorageViewModel @Inject constructor(
     }
 
     fun openDeleteTypePopUp(type: String) {
-
-
         deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Open(type))
     }
 

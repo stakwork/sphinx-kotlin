@@ -42,6 +42,8 @@ import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerR
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.ItemId
 import chat.sphinx.wrapper_common.StorageData
+import chat.sphinx.wrapper_common.StorageLimit.DEFAULT_STORAGE_LIMIT
+import chat.sphinx.wrapper_common.StorageLimit.STORAGE_LIMIT_KEY
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.wrapper_common.calculateUserStorageLimit
@@ -693,11 +695,6 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 forceListReload()
             }
         }
-    }
-
-    companion object {
-        const val STORAGE_LIMIT_KEY = "storage_limit"
-        const val DEFAULT_STORAGE_LIMIT = 50
     }
 
     private val storageLimitSharedPreferences: SharedPreferences = app.applicationContext.getSharedPreferences(STORAGE_LIMIT_KEY, Context.MODE_PRIVATE)
