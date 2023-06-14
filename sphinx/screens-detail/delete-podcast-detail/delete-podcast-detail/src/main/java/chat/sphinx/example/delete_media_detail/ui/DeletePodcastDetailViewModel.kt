@@ -63,7 +63,7 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
                 val totalSize = feedItemList.map { FileSize(it.localFile?.length() ?: 0L) }
                 currentFeed = feed
                 setItemTotalFile(totalSize)
-                val podcastDetailToDeleteLists: List<PodcastDetailToDelete> = feedItemList.map { feedItem ->
+                val podcastDetailToDeleteLists: List<PodcastDetailToDelete> = feedItemList.sortedByDescending { it.datePublishedTime }.map { feedItem ->
                     PodcastDetailToDelete(
                         feedItem,
                         FileSize(feedItem.localFile?.length() ?: 0L).calculateSize()

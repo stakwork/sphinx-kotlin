@@ -5,9 +5,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.os.StatFs
 import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.SavedStateHandle
@@ -38,9 +41,14 @@ import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.podcast_player_view_model_coordinator.response.PodcastPlayerResponse
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.ItemId
+import chat.sphinx.wrapper_common.StorageData
+import chat.sphinx.wrapper_common.calculateSize
+import chat.sphinx.wrapper_common.calculateStoragePercentage
+import chat.sphinx.wrapper_common.calculateUserStorageLimit
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItemDetail
@@ -103,6 +111,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
 , MediaPlayerServiceController.MediaServiceListener {
 
     private val args: PodcastPlayerFragmentArgs by savedStateHandle.navArgs()
+    private var storageData: StorageData? = null
 
     private suspend fun getAccountBalance(): StateFlow<NodeBalance?> =
         lightningRepository.getAccountBalance()
@@ -261,6 +270,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
         }
 
         updateFeedContentInBackground()
+        getStorageData()
     }
 
     private val requestCatcher = RequestCatcher(
@@ -617,6 +627,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
             podcastEpisode,
             downloadCompleteCallback
         )
+        getDeleteExcessFileIfApplicable()
     }
 
     fun downloadMediaByItemId(feedId: FeedId) {
@@ -657,6 +668,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
             )
 
             forceListReload()
+            getDeleteExcessFileIfApplicable()
         }
     }
 
@@ -681,6 +693,42 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 forceListReload()
             }
         }
+    }
+
+    companion object {
+        const val STORAGE_LIMIT_KEY = "storage_limit"
+        const val DEFAULT_STORAGE_LIMIT = 50
+    }
+
+    private val storageLimitSharedPreferences: SharedPreferences = app.applicationContext.getSharedPreferences(STORAGE_LIMIT_KEY, Context.MODE_PRIVATE)
+
+    private fun getDeleteExcessFileIfApplicable(){
+        viewModelScope.launch(mainImmediate) {
+            storageData?.let { nnStorageData ->
+                val storageLimitProgress = storageLimitSharedPreferences.getInt(STORAGE_LIMIT_KEY, DEFAULT_STORAGE_LIMIT)
+                val userLimit = nnStorageData.freeStorage?.value?.let { calculateUserStorageLimit(freeStorage = it, seekBarValue = storageLimitProgress ) } ?: 0L
+                val usageStorage = nnStorageData.usedStorage.value
+                val excessSize = (usageStorage - userLimit)
+                repositoryMedia.deleteExcessFilesOnBackground(excessSize)
+            }
+        }
+    }
+
+    private fun getStorageData(){
+        viewModelScope.launch(mainImmediate) {
+            repositoryMedia.getStorageDataInfo().collect { storageDataInfo ->
+                val totalStorage = getTotalStorage()
+                val usedStorage = storageDataInfo.usedStorage
+                val freeStorage = (totalStorage - usedStorage.value).toFileSize()
+                val modifiedStorageDataInfo = storageDataInfo.copy(freeStorage = freeStorage)
+                storageData = modifiedStorageDataInfo
+            }
+        }
+    }
+
+    private fun getTotalStorage(): Long {
+        val stat = StatFs(Environment.getDataDirectory().path)
+        return stat.blockSizeLong * stat.availableBlocksLong
     }
 
 
