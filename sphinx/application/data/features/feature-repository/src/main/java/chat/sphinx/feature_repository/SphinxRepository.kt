@@ -6288,7 +6288,7 @@ abstract class SphinxRepository(
 
     private var deleteExcess: Job? = null
     override suspend fun deleteExcessFilesOnBackground(excessSize: Long) {
-        if (deleteExcess?.isActive == true || excessSize == 0L) {
+        if (deleteExcess?.isActive == true || excessSize <= 0L) {
             return
         }
 

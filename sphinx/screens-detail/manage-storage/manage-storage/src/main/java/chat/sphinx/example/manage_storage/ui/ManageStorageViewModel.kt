@@ -16,6 +16,7 @@ import chat.sphinx.example.manage_storage.viewstate.ManageStorageViewState
 import chat.sphinx.manage.storage.R
 import chat.sphinx.wrapper_common.StorageData
 import chat.sphinx.wrapper_common.calculateSize
+import chat.sphinx.wrapper_common.calculateUserStorageLimit
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
@@ -70,10 +71,7 @@ internal class ManageStorageViewModel @Inject constructor(
 
     init {
         getStorageData()
-        viewModelScope.launch(mainImmediate) {
-            val tenMb: Long = 10 * 1024L * 1024L
-            repositoryMedia.deleteExcessFilesOnBackground(tenMb)
-        }
+
     }
 
     private fun getStorageData(){
@@ -102,7 +100,21 @@ internal class ManageStorageViewModel @Inject constructor(
         }
     }
 
+    private fun getDeleteExcessFileIfApplicable(){
+        viewModelScope.launch(mainImmediate) {
+            storageData?.let { nnStorageData ->
+                val storageLimitProgress = storageLimitSharedPreferences.getInt(STORAGE_LIMIT_KEY, DEFAULT_STORAGE_LIMIT)
+                val userLimit = nnStorageData.freeStorage?.value?.let { calculateUserStorageLimit(freeStorage = it, seekBarValue = storageLimitProgress ) } ?: 0L
+                val usageStorage = nnStorageData.usedStorage.value
+                val excessSize = (usageStorage - userLimit)
+                repositoryMedia.deleteExcessFilesOnBackground(excessSize)
+            }
+        }
+    }
+
     fun openDeleteTypePopUp(type: String) {
+
+
         deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Open(type))
     }
 
@@ -185,8 +197,8 @@ internal class ManageStorageViewModel @Inject constructor(
         val editor = storageLimitSharedPreferences.edit()
         editor.putInt(STORAGE_LIMIT_KEY, progress)
         editor.apply()
-
         changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
+        getDeleteExcessFileIfApplicable()
     }
 
     private fun getTotalStorage(): Long {
