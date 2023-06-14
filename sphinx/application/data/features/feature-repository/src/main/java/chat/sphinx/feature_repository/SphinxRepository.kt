@@ -2175,6 +2175,22 @@ abstract class SphinxRepository(
         emitAll(getMessageByIdImpl(messageId, queries))
     }
 
+    override fun getMessagesByIds(messagesIds: List<MessageId>): Flow<List<Message?>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetMessagesByIds(messagesIds)
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        messageDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
+
+
     private fun getMessageByIdImpl(
         messageId: MessageId,
         queries: SphinxDatabaseQueries
@@ -6268,6 +6284,77 @@ abstract class SphinxRepository(
         return downloadFeedItemLockMap.withLock { map ->
             map.keys.toList()
         }
+    }
+
+    private var deleteExcess: Job? = null
+    override suspend fun deleteExcessFilesOnBackground(excessSize: Long) {
+        if (deleteExcess?.isActive == true || excessSize == 0L) {
+            return
+        }
+
+        combine(getAllDownloadedMedia(), getAllDownloadedFeedItems()) { chatFiles, feedFiles ->
+            val messages: List<Message?>? = getMessagesByIds(chatFiles.map { it.messageId }).firstOrNull()
+            val combinedList = mutableListOf<Triple<Any, File, DateTime>>()
+
+            messages?.forEach { nnMessages ->
+                nnMessages?.let { message ->
+                    val messageMedia = chatFiles.firstOrNull() { it.messageId == message.id  }
+                    val localFile: File? = messageMedia?.localFile
+                    val date = message.date
+                    if (localFile != null) {
+                        combinedList.add(Triple(messageMedia, localFile, date))
+                    }
+                }
+            }
+
+            feedFiles.forEach { feedItem ->
+                feedItem.let {
+                    val localFile = it.localFile
+                    val datePublished = it.datePublished
+                    if (localFile != null && datePublished != null) {
+                        combinedList.add(Triple(feedItem, localFile, datePublished))
+                    }
+                }
+            }
+            combinedList.sortBy { it.third.value }
+
+            val accumulatedFiles = mutableListOf<Triple<Any, File, DateTime>>()
+            var totalSize = 0L
+
+            for (item in combinedList) {
+                val fileSize = item.second.length()
+
+                if (totalSize < excessSize) {
+                    totalSize += fileSize
+                    accumulatedFiles.add(item)
+                }
+            }
+
+            val (messageMedias, feedItems) = accumulatedFiles.partition { it.first is MessageMedia }
+
+            val messageMediaTriples: List<Triple<ChatId, List<File>, List<MessageId>>> =
+                messageMedias.map {
+                    val messageMedia = it.first as MessageMedia
+                    val file = it.second
+                    Pair(messageMedia, file)
+                }.let { messageMediaFiles ->
+                    messageMediaFiles.groupBy { it.first.chatId }.map { (chatId, list) ->
+                        Triple(chatId, list.map { it.second }, list.map { it.first.messageId })
+                    }
+                }
+
+            val feedItemFiles: List<FeedItem> = feedItems.map { it.first as FeedItem }
+
+            deleteExcess = CoroutineScope(dispatchers.io).launch {
+                feedItemFiles.forEach { feedItem ->
+                    deleteDownloadedMediaIfApplicable(feedItem)
+                }
+                messageMediaTriples.forEach { tripe ->
+                    deleteDownloadedMediaByChatId(tripe.first, tripe.second, tripe.third )
+                }
+            }
+
+        }.first()
     }
 
     override fun downloadMediaIfApplicable(

@@ -29,6 +29,8 @@ interface RepositoryMedia {
     fun getAllDownloadedMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>>
     fun inProgressDownloadIds(): List<FeedId>
 
+    suspend fun deleteExcessFilesOnBackground(excessSize: Long)
+
     suspend fun deleteDownloadedMediaByChatId(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?): Boolean
     suspend fun deleteDownloadedMediaIfApplicable(
         feedItem: DownloadableFeedItem

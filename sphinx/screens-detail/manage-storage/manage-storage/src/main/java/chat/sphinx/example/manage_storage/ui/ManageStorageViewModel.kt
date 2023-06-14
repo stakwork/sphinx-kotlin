@@ -70,6 +70,10 @@ internal class ManageStorageViewModel @Inject constructor(
 
     init {
         getStorageData()
+        viewModelScope.launch(mainImmediate) {
+            val tenMb: Long = 10 * 1024L * 1024L
+            repositoryMedia.deleteExcessFilesOnBackground(tenMb)
+        }
     }
 
     private fun getStorageData(){

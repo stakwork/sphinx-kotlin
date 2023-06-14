@@ -171,7 +171,7 @@ internal class ProfileViewModel @Inject constructor(
                     StorageBarViewState.StorageData(
                         storagePercentage,
                         usedStorage.calculateSize(),
-                        totalStorage.toFileSize()?.calculateSize() ?: "0 Bytes"
+                        totalStorage.toFileSize()?.calculateSize() ?: "0 Bytes".trim()
                     )
                 )
             }
