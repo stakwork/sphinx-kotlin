@@ -4,10 +4,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!--
-          Set 1: Member Profile Closed
+          Set 1: Storage Limit Closed
     -->
 
     <ConstraintSet android:id="@+id/motion_scene_storage_limit_closed">
+
+        <Constraint android:id="@+id/view_storage_limit_details_lock">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
         <Constraint android:id="@+id/include_layout_change_storage_limit_detail">
             <Layout
                 android:layout_width="match_parent"
@@ -18,12 +26,19 @@
     </ConstraintSet>
 
     <!--
-           Set 2: Member Profile Open
+           Set 2: Storage Limit Open
     -->
 
     <ConstraintSet
         android:id="@+id/motion_scene_storage_limit_open"
         app:deriveConstraintsFrom="@+id/motion_scene_storage_limit_closed">
+
+        <Constraint android:id="@+id/view_storage_limit_details_lock">
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
         <Constraint android:id="@+id/include_layout_change_storage_limit_detail"
             android:layout_height="match_parent"
             motion:layout_constraintTop_toTopOf="parent"
@@ -45,3 +60,5 @@
         app:duration="300"/>
 
 </MotionScene>
+
+
