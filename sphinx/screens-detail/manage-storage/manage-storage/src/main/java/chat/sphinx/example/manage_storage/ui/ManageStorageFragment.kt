@@ -10,7 +10,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
@@ -21,10 +20,6 @@ import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.manage.storage.R
 import chat.sphinx.manage.storage.databinding.FragmentManageStorageBinding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
-import chat.sphinx.wrapper_common.calculateSize
-import chat.sphinx.wrapper_common.calculateStoragePercentage
-import chat.sphinx.wrapper_common.calculateUserStorageLimit
-import chat.sphinx.wrapper_common.toFileSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -202,9 +197,11 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                         is ChangeStorageLimitViewState.Open -> {
                             includeLayoutChangeStorageLimitDetail.apply {
                                 setupStorageSeekBar()
-                                storageLimitSeekBar.progress = viewState.storageLimit
-                                textViewManageStorageUsedNumber.text = viewState.storageData.usedStorage.calculateSize()
-                                textViewManageStorageMax.text = viewState.storageData.freeStorage?.calculateSize()
+                                storageLimitSeekBar.progress = viewState.storageLimit.seekBarProgress
+                                textViewManageStorageUsedNumber.text = viewState.storageLimit.usedStorage
+                                textViewManageStorageMax.text = viewState.storageLimit.freeStorage
+                                textViewManageStorageOccupiedNumber.text = viewState.storageLimit.userStorageLimit ?: getString(R.string.manage_storage_zero_gb)
+                                handleUndersizedLimit(viewState.storageLimit.undersized)
                             }
                             }
                         else -> {}
@@ -359,17 +356,13 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
     private fun setupStorageSeekBar(){
         binding.includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.apply {
             storageLimitSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                val freeStorage = (viewModel.changeStorageLimitViewStateContainer.value as ChangeStorageLimitViewState.Open)
-                        .storageData.freeStorage?.value ?: 0L
 
                 override fun onProgressChanged(
                     seekBar: SeekBar?,
                     progress: Int,
                     fromUser: Boolean
                 ) {
-                    val sizeValue: Long = calculateUserStorageLimit(progress, freeStorage)
-                    val storageLimit: String = sizeValue.toFileSize()?.calculateSize() ?: getString(R.string.manage_storage_zero_gb)
-                    textViewManageStorageOccupiedNumber.text = storageLimit
+                    viewModel.updateStorageLimitViewState(progress)
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -378,6 +371,21 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
                 }
             })
+        }
+    }
+
+    private fun handleUndersizedLimit(undersized: String?) {
+        binding.includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.apply {
+            if (undersized != null) {
+                changeStorageHeaderContainer.gone
+                changeStorageHeaderSaveLimitContainer.visible
+                textViewWarningUndersized.text = String.format(getString(R.string.manage_storage_limit_warning), undersized)
+            }
+            else {
+                changeStorageHeaderContainer.visible
+                changeStorageHeaderSaveLimitContainer.gone
+            }
+
         }
     }
 

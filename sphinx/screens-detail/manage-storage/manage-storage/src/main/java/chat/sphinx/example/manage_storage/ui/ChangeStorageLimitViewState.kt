@@ -1,6 +1,7 @@
 package chat.sphinx.example.manage_storage.ui
 
 import androidx.constraintlayout.motion.widget.MotionLayout
+import chat.sphinx.example.manage_storage.model.StorageLimit
 import chat.sphinx.manage.storage.R
 import chat.sphinx.wrapper_common.StorageData
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
@@ -18,8 +19,7 @@ sealed class ChangeStorageLimitViewState: MotionLayoutViewState<ChangeStorageLim
     }
 
     data class Open(
-        val storageData: StorageData,
-        val storageLimit: Int
+        val storageLimit: StorageLimit
     ) : ChangeStorageLimitViewState() {
         override val startSetId: Int
             get() = R.id.motion_scene_storage_limit_closed

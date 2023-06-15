@@ -196,7 +196,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
         <View
             android:id="@+id/view_storage_separator_divider_selection"
             android:layout_width="0dp"
@@ -207,6 +206,59 @@
             app:layout_constraintTop_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--  Save Limit header screen-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/change_storage_header_save_limit_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        android:background="@color/primaryRed"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/text_view_detail_screen_save_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_warning"
+            android:text="@string/material_icon_name_close"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_warning_undersized"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="none"
+            android:fontFamily="@font/roboto_medium"
+            android:layout_marginStart="@dimen/default_text_size_tab"
+            android:maxLines="2"
+            android:text="@string/manage_storage_limit_warning"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_save_close"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view_storage_separator_divider_save"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

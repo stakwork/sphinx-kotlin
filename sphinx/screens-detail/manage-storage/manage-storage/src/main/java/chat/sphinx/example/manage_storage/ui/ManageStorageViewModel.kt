@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
+import chat.sphinx.example.manage_storage.model.StorageLimit
 import chat.sphinx.example.manage_storage.model.StorageSize
 import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
@@ -180,11 +181,28 @@ internal class ManageStorageViewModel @Inject constructor(
 
     fun retrieveStorageLimitFromPreferences() {
         val storageLimitProgress = storageLimitSharedPreferences.getInt(STORAGE_LIMIT_KEY, DEFAULT_STORAGE_LIMIT)
+        updateStorageLimitViewState(storageLimitProgress)
+    }
+
+    fun updateStorageLimitViewState(progress: Int) {
         storageData?.let { nnStorageData ->
+            val usedStorage: Long = nnStorageData.usedStorage.value
+            val freeStorage = nnStorageData.freeStorage?.value ?: 0L
+            val userStorageLimit: Long = calculateUserStorageLimit(progress, freeStorage)
+            val undersized: String? =
+                if (userStorageLimit < usedStorage) {
+                    (usedStorage - userStorageLimit).toFileSize()?.calculateSize()
+                } else null
+
             changeStorageLimitViewStateContainer.updateViewState(
                 ChangeStorageLimitViewState.Open(
-                    nnStorageData,
-                    storageLimitProgress
+                    StorageLimit(
+                        progress,
+                        usedStorage.toFileSize()?.calculateSize(),
+                        userStorageLimit.toFileSize()?.calculateSize(),
+                        freeStorage.toFileSize()?.calculateSize(),
+                        undersized,
+                    )
                 )
             )
         }
