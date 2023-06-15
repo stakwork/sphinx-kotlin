@@ -170,9 +170,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                     viewModel.deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
                 }
             }
-            binding.includeLayoutChangeLimit
-                .includeLayoutChangeStorageLimitDetail.apply {}
-
         }
     }
 
@@ -201,9 +198,10 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                                 textViewManageStorageUsedNumber.text = viewState.storageLimit.usedStorage
                                 textViewManageStorageMax.text = viewState.storageLimit.freeStorage
                                 textViewManageStorageOccupiedNumber.text = viewState.storageLimit.userStorageLimit ?: getString(R.string.manage_storage_zero_gb)
+                                setChangeStorageLimitPercentage(includeProfileManageStorageBar.storageProgressUsed, viewState.storageLimit.progressBarPercentage)
                                 handleUndersizedLimit(viewState.storageLimit.undersized)
                             }
-                            }
+                        }
                         else -> {}
                     }
                     root.setTransitionDuration(300)
@@ -248,6 +246,23 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         constraintSet.clone(constraintLayout)
         constraintSet.constrainPercentWidth(view.id, percentage)
         constraintSet.applyTo(constraintLayout)
+    }
+
+    private fun setChangeStorageLimitPercentage(view: View, percentage: Float) {
+        binding.includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeProfileManageStorageBar.apply {
+
+            val constraintLayout = progressContainer
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(constraintLayout)
+            constraintSet.constrainPercentWidth(view.id, percentage)
+            constraintSet.applyTo(constraintLayout)
+
+            storageProgressFree.gone
+            storageProgressImages.gone
+            storageProgressAudio.gone
+            storageProgressFiles.gone
+            storageProgressVideo.gone
+        }
     }
 
     private fun bindStorageInfo(viewState: ManageStorageViewState.StorageInfo) {
@@ -385,7 +400,6 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 changeStorageHeaderContainer.visible
                 changeStorageHeaderSaveLimitContainer.gone
             }
-
         }
     }
 

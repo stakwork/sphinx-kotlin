@@ -19,6 +19,7 @@ import chat.sphinx.wrapper_common.StorageData
 import chat.sphinx.wrapper_common.StorageLimit.DEFAULT_STORAGE_LIMIT
 import chat.sphinx.wrapper_common.StorageLimit.STORAGE_LIMIT_KEY
 import chat.sphinx.wrapper_common.calculateSize
+import chat.sphinx.wrapper_common.calculateUsedStoragePercentage
 import chat.sphinx.wrapper_common.calculateUserStorageLimit
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -189,6 +190,7 @@ internal class ManageStorageViewModel @Inject constructor(
             val usedStorage: Long = nnStorageData.usedStorage.value
             val freeStorage = nnStorageData.freeStorage?.value ?: 0L
             val userStorageLimit: Long = calculateUserStorageLimit(progress, freeStorage)
+            val progressBarPercentage = calculateUsedStoragePercentage(nnStorageData)
             val undersized: String? =
                 if (userStorageLimit < usedStorage) {
                     (usedStorage - userStorageLimit).toFileSize()?.calculateSize()
@@ -202,6 +204,7 @@ internal class ManageStorageViewModel @Inject constructor(
                         userStorageLimit.toFileSize()?.calculateSize(),
                         freeStorage.toFileSize()?.calculateSize(),
                         undersized,
+                        progressBarPercentage
                     )
                 )
             )

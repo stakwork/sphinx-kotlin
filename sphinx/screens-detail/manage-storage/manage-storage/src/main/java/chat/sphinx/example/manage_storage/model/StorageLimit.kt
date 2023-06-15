@@ -5,5 +5,6 @@ data class StorageLimit(
     val usedStorage: String?,
     val userStorageLimit: String?,
     val freeStorage: String?,
-    val undersized: String?
+    val undersized: String?,
+    val progressBarPercentage: Float
 )

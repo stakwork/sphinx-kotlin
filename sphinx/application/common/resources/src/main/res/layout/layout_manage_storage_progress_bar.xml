@@ -60,6 +60,17 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.0" />
 
+        <View
+            android:id="@+id/storage_progress_used"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_super_tiny_layout_margin"
+            android:background="@color/primaryText"
+            app:layout_constraintStart_toEndOf="@+id/storage_progress_free"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.0" />
+
+
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

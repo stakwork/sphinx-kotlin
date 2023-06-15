@@ -16,6 +16,13 @@ fun calculateStoragePercentage(storageData: StorageData): StoragePercentage {
     )
 }
 
+fun calculateUsedStoragePercentage(storageData: StorageData): Float {
+    val usedStorage = storageData.usedStorage.value
+    val freeStorage = storageData.freeStorage?.value ?: 0L
+    val totalStorage = usedStorage + freeStorage
+    return String.format("%.3f", usedStorage.toFloat() / totalStorage).toFloat()
+}
+
 data class StoragePercentage(
     val freeStorage: Float,
     val image: Float,
