@@ -533,7 +533,7 @@ internal class ProfileFragment: SideEffectFragment<
                         is StorageBarViewState.StorageData -> {
                             constraintLayoutStorageLoadingContainer.gone
                             constraintLayoutStorageNumberContainer.visible
-                            textViewProfileStorageNumber.text = viewState.used
+                            textViewProfileStorageNumber.text = viewState.used.trim()
                             textViewProfileTotalStorageNumber.text = String.format(getString(R.string.manage_storage_total_storage), viewState.total)
 
                             setProgressStorageBar(viewState)

@@ -84,15 +84,21 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         }
 
         override fun handleOnBackPressed() {
-            if (viewModel.changeStorageLimitViewStateContainer.value is ChangeStorageLimitViewState.Open) {
-                viewModel.changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
-            }
-            if (viewModel.deleteItemNotificationViewStateContainer.value is DeleteTypeNotificationViewState.Open) {
-                viewModel.deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
-            }
-            else {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    viewModel.navigator.closeDetailScreen()
+            when {
+                (viewModel.changeStorageLimitViewStateContainer.value is ChangeStorageLimitViewState.Open) -> {
+                    viewModel.changeStorageLimitViewStateContainer.updateViewState(
+                        ChangeStorageLimitViewState.Closed
+                    )
+                }
+                (viewModel.deleteItemNotificationViewStateContainer.value is DeleteTypeNotificationViewState.Open) -> {
+                    viewModel.deleteItemNotificationViewStateContainer.updateViewState(
+                        DeleteTypeNotificationViewState.Closed
+                    )
+                }
+                else -> {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.closeDetailScreen()
+                    }
                 }
             }
         }

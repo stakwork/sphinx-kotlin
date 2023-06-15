@@ -229,7 +229,7 @@
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_profile_storage_number"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/default_small_layout_margin"
                             android:fontFamily="@font/roboto_regular"
@@ -243,7 +243,7 @@
 
                         <androidx.appcompat.widget.AppCompatTextView
                             android:id="@+id/text_view_profile_total_storage_number"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/episode_image_radius"
                             android:fontFamily="@font/roboto_regular"

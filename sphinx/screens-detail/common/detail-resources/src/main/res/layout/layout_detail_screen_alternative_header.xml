@@ -56,7 +56,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_element_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/default_half_layout_margin"
                 android:fontFamily="@font/roboto_regular"

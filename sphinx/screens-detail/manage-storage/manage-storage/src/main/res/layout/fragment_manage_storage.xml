@@ -40,7 +40,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_occupied_number"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/default_medium_layout_margin"
             android:fontFamily="@font/roboto_bold"
@@ -53,7 +53,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_free_number"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
@@ -163,7 +163,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_images_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_regular"
@@ -243,7 +243,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_video_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto_regular"
                 android:layout_marginEnd="@dimen/default_layout_margin"
@@ -323,7 +323,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_audio_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto_regular"
                 android:layout_marginEnd="@dimen/default_layout_margin"
@@ -403,7 +403,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_files_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/roboto_regular"
                 android:layout_marginEnd="@dimen/default_layout_margin"
@@ -495,7 +495,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_custom_chat_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_regular"
@@ -574,7 +574,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_custom_podcast_number"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/default_layout_margin"
             android:fontFamily="@font/roboto_regular"
