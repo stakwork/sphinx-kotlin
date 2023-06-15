@@ -17,6 +17,7 @@ import chat.sphinx.delete.chat.media.detail.R
 import chat.sphinx.delete.chat.media.detail.databinding.StorageGridImageListItemHolderBinding
 import chat.sphinx.example.delete_chat_media_detail.model.ChatFile
 import chat.sphinx.example.delete_chat_media_detail.ui.DeleteChatMediaDetailViewModel
+import chat.sphinx.example.delete_chat_media_detail.uitl.VideoThumbnailDeleteUtil
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
 import chat.sphinx.wrapper_message_media.MediaType
 import io.matthewnelson.android_feature_screens.util.gone
@@ -26,6 +27,7 @@ import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 internal class DeleteChatDetailsGridAdapter(
     private val imageLoader: ImageLoader<ImageView>,
@@ -313,6 +315,13 @@ internal class DeleteChatDetailsGridAdapter(
                     R.drawable.ic_chat_delete_video
                 ))
         }
+        private fun setUpImageFromFile(videoAttachment: File){
+            val thumbnail = VideoThumbnailDeleteUtil.loadThumbnail(videoAttachment)
+            if (thumbnail != null) {
+                binding.imageViewFile.visible
+                binding.imageViewFile.setImageBitmap(thumbnail)
+            }
+        }
 
         fun bind(position: Int) {
             binding.apply {
@@ -323,16 +332,22 @@ internal class DeleteChatDetailsGridAdapter(
                 file = chatItem
 
                 textViewFileSize.text = chatItem.size
+                file?.localFile?.let {
+                    setUpImageFromFile(it)
+                }
+                imageViewVideoAlpha.visible
 
                 if (chatItem.isSelected) {
                     imageViewAlpha.visible
                     imageViewCheckMark.visible
                     textViewFileSize.gone
+                    imageViewPlaceHolder.gone
                 } else
                 {
                     imageViewAlpha.gone
                     imageViewCheckMark.gone
                     textViewFileSize.visible
+                    imageViewPlaceHolder.visible
                 }
             }
         }
