@@ -303,11 +303,16 @@ internal class ProfileFragment: SideEffectFragment<
     }
 
     private fun setViewSectionPercentage(view: View, percentage: Float) {
-        val constraintLayout = binding.includeProfileBasicContainerHolder.includeProfileManageStorageBar.progressContainer
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(constraintLayout)
-        constraintSet.constrainPercentWidth(view.id, percentage)
-        constraintSet.applyTo(constraintLayout)
+        if (percentage == 0F) {
+            view.gone
+        }
+        else {
+            val constraintLayout = binding.includeProfileBasicContainerHolder.includeProfileManageStorageBar.progressContainer
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(constraintLayout)
+            constraintSet.constrainPercentWidth(view.id, percentage)
+            constraintSet.applyTo(constraintLayout)
+        }
     }
 
     private fun removeFocusOnEnter(editText: EditText?) {
