@@ -242,16 +242,23 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 setViewSectionPercentage(storageProgressVideo, video)
                 setViewSectionPercentage(storageProgressFiles, files)
                 setViewSectionPercentage(storageProgressFree, freeStorage)
+
+
             }
         }
     }
 
     private fun setViewSectionPercentage(view: View, percentage: Float) {
-        val constraintLayout = binding.includeLayoutManageStorageProgressBar.progressContainer
-        val constraintSet = ConstraintSet()
-        constraintSet.clone(constraintLayout)
-        constraintSet.constrainPercentWidth(view.id, percentage)
-        constraintSet.applyTo(constraintLayout)
+        if(percentage == 0F) {
+            view.gone
+        }
+        else {
+            val constraintLayout = binding.includeLayoutManageStorageProgressBar.progressContainer
+            val constraintSet = ConstraintSet()
+            constraintSet.clone(constraintLayout)
+            constraintSet.constrainPercentWidth(view.id, percentage)
+            constraintSet.applyTo(constraintLayout)
+        }
     }
 
     private fun setChangeStorageLimitPercentage(view: View, percentage: Float) {

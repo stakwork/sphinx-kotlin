@@ -57,6 +57,10 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
     }
 
     init {
+        getDownloadedFeedItems()
+    }
+
+    private fun getDownloadedFeedItems(){
         viewModelScope.launch(mainImmediate) {
             feedRepository.getDownloadedFeedItemsByFeedId(FeedId(args.argFeedId)).collect { feedItemList ->
                 val feed = feedRepository.getFeedById(FeedId(args.argFeedId)).firstOrNull()
@@ -86,7 +90,8 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
                         )
                 }
             }
-        }
+        getDownloadedFeedItems()
+    }
 
     fun deleteAllDownloadedFeedItems() {
         deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleting)

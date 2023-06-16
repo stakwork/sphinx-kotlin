@@ -47,6 +47,10 @@ internal class DeletePodcastViewModel @Inject constructor(
     private var itemsTotalSize: FileSize = FileSize(0)
 
     init {
+        getDownloadedFeedItems()
+    }
+
+    private fun getDownloadedFeedItems(){
         viewModelScope.launch(mainImmediate) {
             feedRepository.getAllDownloadedFeedItems().collect { feedItems ->
                 val feedIdAndFileList = getLocalFilesGroupedByFeed(feedItems)
@@ -54,7 +58,7 @@ internal class DeletePodcastViewModel @Inject constructor(
                 setItemTotalFile(totalSizeAllSections?.value ?: 0L )
                 feedIdsList = feedIdAndFileList.map { it.key }
 
-                    feedIdAndFileList.keys.mapNotNull { feedId ->
+                feedIdAndFileList.keys.mapNotNull { feedId ->
                     val podcast = feedId?.let { feedRepository.getPodcastById(it).firstOrNull() }
                     val listOfFiles = feedIdAndFileList[feedId]
 
@@ -72,8 +76,8 @@ internal class DeletePodcastViewModel @Inject constructor(
                 }
             }
         }
-    }
 
+    }
     fun deleteAllDownloadedFeeds() {
         deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
         viewModelScope.launch(mainImmediate) {
@@ -97,7 +101,5 @@ internal class DeletePodcastViewModel @Inject constructor(
     private fun getLocalFilesGroupedByFeed(feedItems: List<FeedItem>): Map<FeedId?, List<File>> {
         return feedItems.groupBy({ it.feedId }, { it.localFile as File })
     }
-
-
 
 }

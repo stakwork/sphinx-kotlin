@@ -68,6 +68,10 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
     }
 
     init {
+        getAllDownloadedMedia()
+    }
+
+    private fun getAllDownloadedMedia() {
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getAllDownloadedMediaByChatId(ChatId(args.argChatId)).collect { chatItems ->
                 val totalSizeChats = chatItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
@@ -87,6 +91,7 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
                 viewStateContainer.updateViewState(DeleteChatMediaDetailViewState.FileList(fileList, totalSizeChats?.calculateSize()))
             }
         }
+
     }
 
     fun deleteAllChatFiles() {
@@ -136,6 +141,7 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
             }
             deselectAllItems()
             deleteChatItemsNotificationViewState.updateViewState(DeleteChatItemsNotificationViewState.Closed)
+            getAllDownloadedMedia()
         }
     }
 
