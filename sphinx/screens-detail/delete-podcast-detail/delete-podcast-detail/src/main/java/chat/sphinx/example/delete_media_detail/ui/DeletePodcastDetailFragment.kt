@@ -111,9 +111,6 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                     viewModel.navigator.popBackStack()
                 }
             }
-            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
-                viewModel.closeDeleteItemPopup()
-            }
             includeManageMediaElementHeaderDetails.buttonHeaderDelete.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Open
@@ -133,12 +130,18 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                     )
                 }
             }
-            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonDelete.setOnClickListener {
-                (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteItemNotificationViewState.Open)?.let { viewState ->
-                    viewModel.deleteDownloadedFeedItem(viewState.feedItem)
-                }
+            includeLayoutManageStorageDeleteNotification.apply {
+                includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
+                viewModel.closeDeleteItemPopup()
             }
-            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel
+
+                includeLayoutManageStorageDeleteDetails.buttonDelete.setOnClickListener {
+                    (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteItemNotificationViewState.Open)?.let { viewState ->
+                        viewModel.deleteDownloadedFeedItem(viewState.feedItem)
+                    }
+                }
+                includeLayoutManageStorageDeleteDetails.buttonCancel
+            }
         }
     }
 
@@ -148,17 +151,20 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
             is DeleteMediaDetailViewState.Idle -> {}
             is DeleteMediaDetailViewState.EpisodeList -> {
                 binding.apply {
-                    includeManageMediaElementHeaderDetails.textViewHeader.text = viewState.feedName
-                    includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.visible
-                    includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.visible
-                    includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.text = viewState.totalSize
-                    textViewPodcastNoFound.goneIfFalse(viewState.episodes.isEmpty())
-                    binding.includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.episodes.isNotEmpty())
+                    includeManageMediaElementHeaderDetails.apply {
+                        textViewHeader.text = viewState.feedName
+                        textViewManageStorageElementNumber.visible
+                        constraintLayoutDeleteElementContainerTrash.visible
+                        textViewManageStorageElementNumber.text = viewState.totalSize
+                        textViewPodcastNoFound.goneIfFalse(viewState.episodes.isEmpty())
+                        constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.episodes.isNotEmpty())
 
-                    includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
+                        includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text =
+                            getString(R.string.manage_storage_delete_description)
 
-                    if (viewState.episodes.isEmpty()) {
-                        binding.includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.gone
+                        if (viewState.episodes.isEmpty()) {
+                            constraintLayoutDeleteElementContainerTrash.gone
+                        }
                     }
                 }
             }

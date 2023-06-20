@@ -89,8 +89,8 @@ internal class DeleteChatMediaViewModel @Inject constructor(
                 }
             }
         }
-
     }
+
     fun deleteAllChatFiles() {
         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Deleting)
         viewModelScope.launch(mainImmediate) {
@@ -106,9 +106,9 @@ internal class DeleteChatMediaViewModel @Inject constructor(
                         )
                     }
                 }
-                }
             }
         }
+    }
 
     private fun getLocalFilesGroupedByChatId(chatItems: List<MessageMedia>): Map<ChatId?, List<File>> {
         return chatItems.groupBy({ it.chatId }, { it.localFile as File })
@@ -119,6 +119,5 @@ internal class DeleteChatMediaViewModel @Inject constructor(
             itemsTotalSize = FileSize(totalSize)
         }
     }
-
 
 }

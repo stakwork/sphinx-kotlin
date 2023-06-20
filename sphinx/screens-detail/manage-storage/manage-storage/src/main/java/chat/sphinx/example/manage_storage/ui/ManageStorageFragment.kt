@@ -108,8 +108,10 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
         binding.apply {
             includeManageStorageHeader.textViewHeader.text = getString(R.string.manage_storage)
             includeManageStorageHeader.constraintLayoutDeleteElementContainerTrash.gone
-            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.textViewHeader.text = getString(R.string.manage_storage_limit)
-            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.constraintLayoutDeleteElementContainerTrash.gone
+            includeLayoutChangeLimit.includeLayoutChangeStorageLimitDetail.includeManageChangeLimitHeader.apply {
+                textViewHeader.text = getString(R.string.manage_storage_limit)
+                constraintLayoutDeleteElementContainerTrash.gone
+            }
         }
     }
 
@@ -242,14 +244,12 @@ internal class ManageStorageFragment: SideEffectDetailFragment<
                 setViewSectionPercentage(storageProgressVideo, video)
                 setViewSectionPercentage(storageProgressFiles, files)
                 setViewSectionPercentage(storageProgressFree, freeStorage)
-
-
             }
         }
     }
 
     private fun setViewSectionPercentage(view: View, percentage: Float) {
-        if(percentage == 0F) {
+        if (percentage == 0F) {
             view.gone
         }
         else {
