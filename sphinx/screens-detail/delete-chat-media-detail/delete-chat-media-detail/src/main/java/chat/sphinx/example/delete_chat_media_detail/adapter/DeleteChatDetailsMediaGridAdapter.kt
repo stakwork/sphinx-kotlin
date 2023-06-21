@@ -6,7 +6,6 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
@@ -29,7 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-internal class DeleteChatDetailsGridAdapter(
+internal class DeleteChatDetailsMediaGridAdapter(
     private val imageLoader: ImageLoader<ImageView>,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
@@ -125,7 +124,7 @@ internal class DeleteChatDetailsGridAdapter(
 
                 if (chatFiles.isEmpty()) {
                     chatFiles.addAll(list)
-                    this@DeleteChatDetailsGridAdapter.notifyDataSetChanged()
+                    this@DeleteChatDetailsMediaGridAdapter.notifyDataSetChanged()
                 } else {
 
                     val diff = Diff(chatFiles, list)
@@ -137,7 +136,7 @@ internal class DeleteChatDetailsGridAdapter(
                         if (!diff.sameList) {
                             chatFiles.clear()
                             chatFiles.addAll(list)
-                            result.dispatchUpdatesTo(this@DeleteChatDetailsGridAdapter)
+                            result.dispatchUpdatesTo(this@DeleteChatDetailsMediaGridAdapter)
                         }
                     }
                 }

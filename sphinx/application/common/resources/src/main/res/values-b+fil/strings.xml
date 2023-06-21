@@ -195,6 +195,8 @@
     <string name="manage_storage_delete_selected_items">Delete selected items?</string>
     <string name="manage_storage_delete_feature_not_implemented">Feature not implemented yet</string>
     <string name="manage_storage_limit_warning" >Saving this limit\nwill delete %s of your oldest content</string>
+    <string name="delete_chat_media">Media</string>
+    <string name="delete_chat_files">Files</string>
 
 
 </resources>

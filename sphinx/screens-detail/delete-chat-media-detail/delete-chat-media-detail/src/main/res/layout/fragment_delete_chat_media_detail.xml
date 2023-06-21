@@ -17,13 +17,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_storage_element_list"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_layout_delete_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        android:layout_gravity="top"
+        android:background="@color/headerBG"
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header"
+        app:tabBackground="@color/headerBG"
+        app:tabIndicatorColor="@color/primaryBlue"
+        app:tabRippleColor="@null"
+        app:tabSelectedTextColor="@color/text"
+        app:tabTextAppearance="@style/DeleteMediaFilesTab"
+        app:tabTextColor="@color/secondaryText"
+        tools:layout_editor_absoluteX="0dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_storage_media_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/include_manage_media_element_header"
+        app:layout_constraintTop_toBottomOf="@+id/tab_layout_delete_tabs"
         tools:listitem="@layout/storage_grid_image_list_item_holder" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_storage_files_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tab_layout_delete_tabs"
+        tools:listitem="@layout/chat_delete_file_list_item_holder" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_files_no_found"

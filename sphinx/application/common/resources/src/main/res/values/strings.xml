@@ -238,5 +238,8 @@
     <string name="chats" translatable="false">Chats</string>
     <string name="podcasts" translatable="false">Podcasts</string>
 
+    <string name="delete_chat_media">Media</string>
+    <string name="delete_chat_files">Files</string>
+
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
 </resources>

@@ -11,14 +11,16 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.delete.chat.media.detail.R
 import chat.sphinx.delete.chat.media.detail.databinding.FragmentDeleteChatMediaDetailBinding
+import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailFilesAdapter
 import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailFooterAdapter
-import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailsGridAdapter
+import chat.sphinx.example.delete_chat_media_detail.adapter.DeleteChatDetailsMediaGridAdapter
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatDetailNotificationViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatItemsNotificationViewState
 import chat.sphinx.example.delete_chat_media_detail.viewstate.DeleteChatMediaDetailViewState
@@ -26,6 +28,7 @@ import chat.sphinx.example.delete_chat_media_detail.viewstate.HeaderSelectionMod
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
+import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -72,7 +75,9 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
         BackPressHandler(viewLifecycleOwner, requireActivity())
         setUpHeader()
         setClickListeners()
-        setupChatDeleteAdapter()
+        setupChatDeleteMediaAdapter()
+        setUpTabs()
+        setupChatDeleteFilesAdapter()
 
         (requireActivity() as InsetterActivity)
             .addNavigationBarPadding(binding.deleteChatMediaDetail)
@@ -164,6 +169,34 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                     )
                 }
             }
+        }
+    }
+
+    private fun setUpTabs(){
+        binding.apply {
+            tabLayoutDeleteTabs.addTab(tabLayoutDeleteTabs.newTab().setText(getString(R.string.delete_chat_media)))
+            tabLayoutDeleteTabs.addTab(tabLayoutDeleteTabs.newTab().setText(getString(R.string.delete_chat_files)))
+            tabLayoutDeleteTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab) {
+                    when (tab.position) {
+                        0 -> {
+                            recyclerViewStorageMediaList.visible
+                            recyclerViewStorageFilesList.gone
+                        }
+
+                        1 -> {
+                            recyclerViewStorageMediaList.gone
+                            recyclerViewStorageFilesList.visible
+                        }
+                    }
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab) {}
+
+                override fun onTabReselected(tab: TabLayout.Tab) {}
+            })
+            recyclerViewStorageMediaList.visible
+            recyclerViewStorageFilesList.gone
         }
     }
 
@@ -260,10 +293,10 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
         super.subscribeToViewStateFlow()
     }
 
-    private fun setupChatDeleteAdapter() {
+    private fun setupChatDeleteMediaAdapter() {
         val deleteChatFooterAdapter = DeleteChatDetailFooterAdapter(requireActivity() as InsetterActivity)
-        binding.recyclerViewStorageElementList.apply {
-            val deleteChatAdapter = DeleteChatDetailsGridAdapter(
+        binding.recyclerViewStorageMediaList.apply {
+            val deleteChatMediaAdapter = DeleteChatDetailsMediaGridAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
@@ -271,7 +304,21 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                 userColorsHelper
             )
             layoutManager = GridLayoutManager(binding.root.context, 3)
-            adapter = ConcatAdapter(deleteChatAdapter, deleteChatFooterAdapter)
+            adapter = ConcatAdapter(deleteChatMediaAdapter, deleteChatFooterAdapter)
+        }
+    }
+
+    private fun setupChatDeleteFilesAdapter() {
+        val deleteChatFooterAdapter = DeleteChatDetailFooterAdapter(requireActivity() as InsetterActivity)
+        binding.recyclerViewStorageFilesList.apply {
+            val deleteChatFilesAdapter = DeleteChatDetailFilesAdapter(
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+                userColorsHelper
+            )
+            layoutManager = LinearLayoutManager(binding.root.context)
+            adapter = ConcatAdapter(deleteChatFilesAdapter, deleteChatFooterAdapter )
         }
     }
 

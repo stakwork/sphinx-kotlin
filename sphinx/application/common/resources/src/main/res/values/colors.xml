@@ -46,6 +46,7 @@
     <color name="lightDivider">#3B4755</color>
     <color name="lightEpisodeDivider">#47515E</color>
     <color name="darkDivider">#101317</color>
+    <color name="blueDivider">#2B3C64</color>
     <color name="expiredInvoice">#FFFFFF</color>
     <color name="addressBookHeader">#222E3A</color>
     <color name="messageOptionDivider">#CCFFFFFF</color>
@@ -87,6 +88,7 @@
 
     <color name="sphinxOrange">#FFBC58</color>
     <color name="badgeRed">#FF5252</color>
+    <color name="pdfRed">#D84535</color>
     <color name="authorizeModalBack">#FFFFFF</color>
     <color name="semitransparentText">#ffffff</color>
 

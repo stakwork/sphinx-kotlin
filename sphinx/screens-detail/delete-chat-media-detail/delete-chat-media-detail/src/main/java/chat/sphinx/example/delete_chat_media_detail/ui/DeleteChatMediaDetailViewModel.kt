@@ -85,13 +85,13 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
                     it.chatId,
                     FileSize(it.localFile?.length() ?: 0L).calculateSize(),
                     false,
-                    it.localFile
+                    it.localFile,
+                    it.localFile?.extension
                 )}
 
                 viewStateContainer.updateViewState(DeleteChatMediaDetailViewState.FileList(fileList, totalSizeChats?.calculateSize()))
             }
         }
-
     }
 
     fun deleteAllChatFiles() {
