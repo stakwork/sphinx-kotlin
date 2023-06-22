@@ -41,6 +41,10 @@ internal class DeleteChatDetailsMediaGridAdapter(
         const val VIEW_TYPE_AUDIO = 1
         const val VIEW_TYPE_VIDEO = 2
         const val VIEW_TYPE_ATTACHMENT = 3
+
+        const val IMAGE = "image"
+        const val PDF = "pdf"
+        const val VIDEO = "video"
     }
 
     private inner class Diff(
@@ -117,7 +121,7 @@ internal class DeleteChatDetailsMediaGridAdapter(
             viewModel.viewStateContainer.collect { viewState ->
 
                 var list: List<ChatFile> = if (viewState is DeleteChatMediaDetailViewState.FileList) {
-                    viewState.files
+                    viewState.files.filter { it.mediaType == IMAGE || it.mediaType == VIDEO }
                 } else {
                     listOf()
                 }
@@ -400,7 +404,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
                     imageViewCheckMark.gone
                     textViewFileSize.visible
                 }
-
             }
         }
 
@@ -408,8 +411,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
             lifecycleOwner.lifecycle.addObserver(this)
         }
     }
-
-
 
     init {
         lifecycleOwner.lifecycle.addObserver(this)

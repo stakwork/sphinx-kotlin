@@ -30,6 +30,13 @@ internal class DeleteChatDetailFilesAdapter(
     private val userColorsHelper: UserColorsHelper,
     ): RecyclerView.Adapter<DeleteChatDetailFilesAdapter.ChatFileToDeleteViewHolder>(), DefaultLifecycleObserver {
 
+
+    companion object {
+        const val IMAGE = "image"
+        const val VIDEO = "video"
+        const val PDF = "pdf"
+    }
+
     private inner class Diff(
         private val oldList: List<ChatFile>,
         private val newList: List<ChatFile>,
@@ -94,7 +101,7 @@ internal class DeleteChatDetailFilesAdapter(
             viewModel.viewStateContainer.collect { viewState ->
 
                 var list: List<ChatFile> = if (viewState is DeleteChatMediaDetailViewState.FileList) {
-                    viewState.files
+                    viewState.files.filter { it.mediaType != IMAGE && it.mediaType != VIDEO }
                 } else {
                     listOf()
                 }
@@ -187,7 +194,7 @@ internal class DeleteChatDetailFilesAdapter(
                     root.setBackgroundResource(R.drawable.background_detail_screen)
                 }
                 includeLayoutFileExtension.root.backgroundTintList = when (chatItem.ext) {
-                    "pdf" -> ContextCompat.getColorStateList(root.context, R.color.pdfRed)
+                    PDF -> ContextCompat.getColorStateList(root.context, R.color.pdfRed)
                     else -> ContextCompat.getColorStateList(root.context, R.color.primaryBlue)
                 }
             }

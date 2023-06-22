@@ -28,11 +28,13 @@ import chat.sphinx.example.delete_chat_media_detail.viewstate.HeaderSelectionMod
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
+import chat.sphinx.wrapper_message_media.MediaType
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
@@ -172,21 +174,26 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
         }
     }
 
-    private fun setUpTabs(){
+    private fun setUpTabs() {
         binding.apply {
             tabLayoutDeleteTabs.addTab(tabLayoutDeleteTabs.newTab().setText(getString(R.string.delete_chat_media)))
             tabLayoutDeleteTabs.addTab(tabLayoutDeleteTabs.newTab().setText(getString(R.string.delete_chat_files)))
+
             tabLayoutDeleteTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
                 override fun onTabSelected(tab: TabLayout.Tab) {
                     when (tab.position) {
                         0 -> {
                             recyclerViewStorageMediaList.visible
                             recyclerViewStorageFilesList.gone
+
+                            viewModel.deselectAllItems()
                         }
 
                         1 -> {
                             recyclerViewStorageMediaList.gone
                             recyclerViewStorageFilesList.visible
+
+                            viewModel.deselectAllItems()
                         }
                     }
                 }
@@ -195,6 +202,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
 
                 override fun onTabReselected(tab: TabLayout.Tab) {}
             })
+
             recyclerViewStorageMediaList.visible
             recyclerViewStorageFilesList.gone
         }
@@ -209,12 +217,9 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                     constraintLayoutDeleteElementContainerTrash.visible
                     textViewManageStorageElementNumber.text = viewState.totalSizeFiles
                 }
-                binding.textViewFilesNoFound.goneIfFalse(viewState.files.isEmpty())
-                binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_chats)
 
-                if (viewState.files.isEmpty()) {
-                    binding.includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.gone
-                }
+                binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_chats)
+                binding.includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.files.isNotEmpty())
             }
         }
     }
