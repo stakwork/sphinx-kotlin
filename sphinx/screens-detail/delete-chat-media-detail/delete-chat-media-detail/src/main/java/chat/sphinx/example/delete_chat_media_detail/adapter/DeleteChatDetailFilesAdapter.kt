@@ -176,7 +176,7 @@ internal class DeleteChatDetailFilesAdapter(
                 }
                 file = chatItem
 
-                textViewFileText.text = chatItem.fileName
+                textViewFileText.text = chatItem.fileName ?: chatItem.localFile?.name ?: "unnamed"
                 textViewManageStorageFileSize.text = chatItem.size
                 includeLayoutFileExtension.textViewExt.text = chatItem.ext ?: "DOC"
 

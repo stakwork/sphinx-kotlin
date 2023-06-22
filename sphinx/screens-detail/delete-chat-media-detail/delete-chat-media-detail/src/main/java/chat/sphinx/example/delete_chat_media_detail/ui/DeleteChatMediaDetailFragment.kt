@@ -220,6 +220,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
 
                 binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_chats)
                 binding.includeManageMediaElementHeader.constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.files.isNotEmpty())
+                binding.textViewFilesNoFound.goneIfFalse(viewState.files.isEmpty())
             }
         }
     }
