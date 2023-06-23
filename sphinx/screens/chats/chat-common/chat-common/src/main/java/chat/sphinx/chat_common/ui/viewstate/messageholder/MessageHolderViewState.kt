@@ -383,11 +383,15 @@ internal sealed class MessageHolderViewState(
         if (message == null) {
             null
         } else {
+            val pendingPayment = this is Received && message.isPaidPendingMessage
+            if (!pendingPayment) {
+                onBindDownloadMedia.invoke()
+            }
             message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                 LayoutState.Bubble.ContainerSecond.ImageAttachment(
                     mediaData.first,
                     mediaData.second,
-                    (this is Received && message.isPaidPendingMessage)
+                    pendingPayment
                 )
             }
         }
