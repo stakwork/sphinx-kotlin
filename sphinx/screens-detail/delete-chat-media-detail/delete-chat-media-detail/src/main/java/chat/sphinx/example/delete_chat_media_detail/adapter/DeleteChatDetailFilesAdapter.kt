@@ -27,7 +27,6 @@ internal class DeleteChatDetailFilesAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DeleteChatMediaDetailViewModel,
-    private val userColorsHelper: UserColorsHelper,
     ): RecyclerView.Adapter<DeleteChatDetailFilesAdapter.ChatFileToDeleteViewHolder>(), DefaultLifecycleObserver {
 
 

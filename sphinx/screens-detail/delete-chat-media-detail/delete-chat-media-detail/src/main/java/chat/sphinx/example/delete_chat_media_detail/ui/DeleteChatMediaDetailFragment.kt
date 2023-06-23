@@ -306,8 +306,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
-                viewModel,
-                userColorsHelper
+                viewModel
             )
             layoutManager = GridLayoutManager(binding.root.context, 3)
             adapter = ConcatAdapter(deleteChatMediaAdapter, deleteChatFooterAdapter)
@@ -320,8 +319,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
             val deleteChatFilesAdapter = DeleteChatDetailFilesAdapter(
                 viewLifecycleOwner,
                 onStopSupervisor,
-                viewModel,
-                userColorsHelper
+                viewModel
             )
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(deleteChatFilesAdapter, deleteChatFooterAdapter )

@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.delete.chat.media.detail.R
 import chat.sphinx.delete.chat.media.detail.databinding.StorageGridImageListItemHolderBinding
 import chat.sphinx.example.delete_chat_media_detail.model.ChatFile
@@ -33,7 +32,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: DeleteChatMediaDetailViewModel,
-    private val userColorsHelper: UserColorsHelper,
     ): RecyclerView.Adapter<RecyclerView.ViewHolder>(), DefaultLifecycleObserver {
 
     companion object {
@@ -43,7 +41,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
         const val VIEW_TYPE_ATTACHMENT = 3
 
         const val IMAGE = "image"
-        const val PDF = "pdf"
         const val VIDEO = "video"
     }
 
@@ -99,7 +96,12 @@ internal class DeleteChatDetailsMediaGridAdapter(
                 false
             }
         }
+    }
 
+    private val imageLoaderOptions: ImageLoaderOptions by lazy {
+        ImageLoaderOptions.Builder()
+            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .build()
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -160,9 +162,8 @@ internal class DeleteChatDetailsMediaGridAdapter(
         )
         return when (viewType) {
             VIEW_TYPE_IMAGE -> ImageViewHolder(binding)
-                VIEW_TYPE_AUDIO -> AudioViewHolder(binding)
                 VIEW_TYPE_VIDEO -> VideoViewHolder(binding)
-            else -> AttachmentViewHolder(binding)
+            else -> ImageViewHolder(binding)
         }
     }
 
@@ -172,30 +173,18 @@ internal class DeleteChatDetailsMediaGridAdapter(
             VIEW_TYPE_IMAGE == getItemViewType(position) -> {
                 (holder as ImageViewHolder).bind(position)
             }
-            VIEW_TYPE_AUDIO == getItemViewType(position) -> {
-                (holder as AudioViewHolder).bind(position)
-            }
             VIEW_TYPE_VIDEO == getItemViewType(position) -> {
                 (holder as VideoViewHolder).bind(position)
             }
-            VIEW_TYPE_ATTACHMENT == getItemViewType(position) -> {
-                (holder as AttachmentViewHolder).bind(position)
-            }
         }
-    }
-
-    private val imageLoaderOptions: ImageLoaderOptions by lazy {
-        ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_profile_avatar_circle)
-            .build()
     }
 
     inner class ImageViewHolder(
         private val binding: StorageGridImageListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(2)
-        private val disposables: ArrayList<Disposable> = ArrayList(2)
+        private var holderJob: Job? = null
+        private var disposable: Disposable? = null
 
         private var file: ChatFile? = null
 
@@ -203,15 +192,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
             binding.root.setOnClickListener {
                 file?.messageId?.let { messageId -> viewModel.changeItemSelection(messageId) }
             }
-            setUpPlaceHolder()
-        }
-
-        private fun setUpPlaceHolder() {
-            binding.imageViewPlaceHolder.setImageDrawable(
-                ContextCompat.getDrawable(
-                    binding.root.context,
-                    R.drawable.ic_chat_delete_image
-                ))
         }
 
         fun bind(position: Int) {
@@ -223,6 +203,8 @@ internal class DeleteChatDetailsMediaGridAdapter(
                 file = chatItem
 
                 textViewFileSize.text = chatItem.size
+                imageViewPlaceHolder.gone
+                imageViewFile.visible
 
                 if (chatItem.isSelected) {
                     imageViewAlpha.visible
@@ -234,62 +216,21 @@ internal class DeleteChatDetailsMediaGridAdapter(
                     imageViewCheckMark.gone
                     textViewFileSize.visible
                 }
-            }
-        }
-
-        init {
-            lifecycleOwner.lifecycle.addObserver(this)
-        }
-    }
-
-    inner class AudioViewHolder(
-        private val binding: StorageGridImageListItemHolderBinding
-    ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
-
-        private val holderJobs: ArrayList<Job> = ArrayList(2)
-        private val disposables: ArrayList<Disposable> = ArrayList(2)
-
-        private var file: ChatFile? = null
-
-
-        init {
-            binding.root.setOnClickListener {
-                file?.messageId?.let { messageId -> viewModel.changeItemSelection(messageId) }
-            }
-            setUpPlaceHolder()
-        }
-
-        private fun setUpPlaceHolder() {
-            binding.imageViewPlaceHolder.setImageDrawable(
-                ContextCompat.getDrawable(
-                    binding.root.context,
-                    R.drawable.ic_chat_delete_audio
-                ))
-        }
-
-        fun bind(position: Int) {
-            binding.apply {
-                val chatItem: ChatFile = chatFiles.getOrNull(position) ?: let {
-                    file = null
-                    return
-                }
-                file = chatItem
-
-                textViewFileSize.text = chatItem.size
-
-                if (chatItem.isSelected) {
-                    imageViewAlpha.visible
-                    imageViewCheckMark.visible
-                    textViewFileSize.gone
-                } else
-                {
-                    imageViewAlpha.gone
-                    imageViewCheckMark.gone
-                    textViewFileSize.visible
+                chatItem.localFile?.let { file ->
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        imageLoader.load(
+                            imageViewFile,
+                            file,
+                            imageLoaderOptions
+                        ).also {
+                            disposable = it
+                        }
+                    }.let { job ->
+                        holderJob = job
+                    }
                 }
             }
         }
-
         init {
             lifecycleOwner.lifecycle.addObserver(this)
         }
@@ -298,9 +239,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
     inner class VideoViewHolder(
         private val binding: StorageGridImageListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
-
-        private val holderJobs: ArrayList<Job> = ArrayList(2)
-        private val disposables: ArrayList<Disposable> = ArrayList(2)
 
         private var file: ChatFile? = null
 
@@ -338,7 +276,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
                 file?.localFile?.let {
                     setUpImageFromFile(it)
                 }
-                imageViewVideoAlpha.visible
 
                 if (chatItem.isSelected) {
                     imageViewAlpha.visible
@@ -351,58 +288,6 @@ internal class DeleteChatDetailsMediaGridAdapter(
                     imageViewCheckMark.gone
                     textViewFileSize.visible
                     imageViewPlaceHolder.visible
-                }
-            }
-        }
-
-        init {
-            lifecycleOwner.lifecycle.addObserver(this)
-        }
-    }
-
-    inner class AttachmentViewHolder(
-        private val binding: StorageGridImageListItemHolderBinding
-    ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
-
-        private val holderJobs: ArrayList<Job> = ArrayList(2)
-        private val disposables: ArrayList<Disposable> = ArrayList(2)
-
-        private var file: ChatFile? = null
-
-        init {
-            binding.root.setOnClickListener {
-                file?.messageId?.let { messageId -> viewModel.changeItemSelection(messageId) }
-            }
-            setUpPlaceHolder()
-        }
-
-        private fun setUpPlaceHolder() {
-            binding.imageViewPlaceHolder.setImageDrawable(
-                ContextCompat.getDrawable(
-                    binding.root.context,
-                    R.drawable.ic_chat_delete_attachment
-                ))
-        }
-
-        fun bind(position: Int) {
-            binding.apply {
-                val chatItem: ChatFile = chatFiles.getOrNull(position) ?: let {
-                    file = null
-                    return
-                }
-                file = chatItem
-
-                textViewFileSize.text = chatItem.size
-
-                if (chatItem.isSelected) {
-                    imageViewAlpha.visible
-                    imageViewCheckMark.visible
-                    textViewFileSize.gone
-                } else
-                {
-                    imageViewAlpha.gone
-                    imageViewCheckMark.gone
-                    textViewFileSize.visible
                 }
             }
         }

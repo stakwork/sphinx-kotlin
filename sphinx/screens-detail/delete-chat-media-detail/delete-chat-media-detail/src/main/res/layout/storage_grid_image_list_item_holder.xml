@@ -22,7 +22,7 @@
             android:id="@+id/image_view_file"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
+            android:scaleType="centerCrop"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -31,11 +31,11 @@
             tools:visibility="visible" />
 
         <View
-            android:id="@+id/image_view_video_alpha"
+            android:id="@+id/image_view_default_alpha"
             android:layout_width="@dimen/manage_storage_image_grid_size"
             android:layout_height="@dimen/manage_storage_image_grid_size"
-            android:background="@color/blackSemiTransparent70"
-            android:visibility="gone"
+            android:background="#1A000000"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
