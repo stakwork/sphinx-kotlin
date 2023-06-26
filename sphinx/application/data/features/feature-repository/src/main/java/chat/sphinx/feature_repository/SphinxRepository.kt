@@ -6292,17 +6292,22 @@ abstract class SphinxRepository(
             return
         }
 
-        combine(getAllDownloadedMedia(), getAllDownloadedFeedItems()) { chatFiles, feedFiles ->
+        combine(
+            getAllDownloadedMedia(),
+            getAllDownloadedFeedItems())
+        { chatFiles, feedFiles ->
+
             val messages: List<Message?>? = getMessagesByIds(chatFiles.map { it.messageId }).firstOrNull()
-            val combinedList = mutableListOf<Triple<Any, File, DateTime>>()
+            val combinedFileList = mutableListOf<Triple<Any, File, DateTime>>()
 
             messages?.forEach { nnMessages ->
                 nnMessages?.let { message ->
                     val messageMedia = chatFiles.firstOrNull() { it.messageId == message.id  }
                     val localFile: File? = messageMedia?.localFile
                     val date = message.date
+
                     if (localFile != null) {
-                        combinedList.add(Triple(messageMedia, localFile, date))
+                        combinedFileList.add(Triple(messageMedia, localFile, date))
                     }
                 }
             }
@@ -6311,33 +6316,38 @@ abstract class SphinxRepository(
                 feedItem.let {
                     val localFile = it.localFile
                     val datePublished = it.datePublished
+
                     if (localFile != null && datePublished != null) {
-                        combinedList.add(Triple(feedItem, localFile, datePublished))
+                        combinedFileList.add(Triple(feedItem, localFile, datePublished))
                     }
                 }
             }
-            combinedList.sortBy { it.third.value }
 
-            val accumulatedFiles = mutableListOf<Triple<Any, File, DateTime>>()
+            combinedFileList.sortBy { it.third.value }
+
+            val filesToDelete = mutableListOf<Triple<Any, File, DateTime>>()
             var totalSize = 0L
 
-            for (item in combinedList) {
+            for (item in combinedFileList) {
                 val fileSize = item.second.length()
 
                 if (totalSize < excessSize) {
                     totalSize += fileSize
-                    accumulatedFiles.add(item)
+
+                    filesToDelete.add(item)
                 }
             }
 
-            val (messageMedias, feedItems) = accumulatedFiles.partition { it.first is MessageMedia }
+            val (messageMedias, feedItems) = filesToDelete.partition { it.first is MessageMedia }
 
             val messageMediaTriples: List<Triple<ChatId, List<File>, List<MessageId>>> =
+
                 messageMedias.map {
                     val messageMedia = it.first as MessageMedia
                     val file = it.second
                     Pair(messageMedia, file)
-                }.let { messageMediaFiles ->
+                }.let{ messageMediaFiles ->
+
                     messageMediaFiles.groupBy { it.first.chatId }.map { (chatId, list) ->
                         Triple(chatId, list.map { it.second }, list.map { it.first.messageId })
                     }
@@ -6346,9 +6356,11 @@ abstract class SphinxRepository(
             val feedItemFiles: List<FeedItem> = feedItems.map { it.first as FeedItem }
 
             deleteExcess = CoroutineScope(dispatchers.io).launch {
+
                 feedItemFiles.forEach { feedItem ->
                     deleteDownloadedMediaIfApplicable(feedItem)
                 }
+
                 messageMediaTriples.forEach { tripe ->
                     deleteDownloadedMediaByChatId(tripe.first, tripe.second, tripe.third )
                 }
@@ -6470,7 +6482,10 @@ abstract class SphinxRepository(
     }
 
     override suspend fun getStorageDataInfo(): Flow<StorageData> =
-        combine(getAllDownloadedMedia(), getAllDownloadedFeedItems()) { chatFiles, feedFiles ->
+        combine(
+            getAllDownloadedMedia(),
+            getAllDownloadedFeedItems())
+        { chatFiles, feedFiles ->
 
             var imagesSize: Long = 0L
             var videoSize: Long = 0L

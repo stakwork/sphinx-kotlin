@@ -78,7 +78,8 @@ internal class ManageStorageViewModel @Inject constructor(
     private fun getStorageData(){
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getStorageDataInfo().collect { storageDataInfo ->
-                val totalStorage = getTotalStorage()
+
+                val totalStorage = getUserFreeStorage()
                 val usedStorage = storageDataInfo.usedStorage
                 val freeStorage = (totalStorage - usedStorage.value).toFileSize()
                 val modifiedStorageDataInfo = storageDataInfo.copy(freeStorage = freeStorage)
@@ -94,6 +95,7 @@ internal class ManageStorageViewModel @Inject constructor(
                     storageDataInfo.chatsStorage.calculateSize(),
                     storageDataInfo.podcastsStorage.calculateSize()
                 )
+
                 val storagePercentage = calculateStoragePercentage(modifiedStorageDataInfo)
 
                 updateViewState(ManageStorageViewState.StorageInfo(storageSize, storagePercentage))
@@ -104,10 +106,12 @@ internal class ManageStorageViewModel @Inject constructor(
     private fun getDeleteExcessFileIfApplicable(){
         viewModelScope.launch(mainImmediate) {
             storageData?.let { nnStorageData ->
+
                 val storageLimitProgress = storageLimitSharedPreferences.getInt(STORAGE_LIMIT_KEY, DEFAULT_STORAGE_LIMIT)
                 val userLimit = nnStorageData.freeStorage?.value?.let { calculateUserStorageLimit(freeStorage = it, seekBarValue = storageLimitProgress ) } ?: 0L
                 val usageStorage = nnStorageData.usedStorage.value
                 val excessSize = (usageStorage - userLimit)
+
                 repositoryMedia.deleteExcessFilesOnBackground(excessSize)
             }
         }
@@ -153,12 +157,14 @@ internal class ManageStorageViewModel @Inject constructor(
 
     private fun deleteDownloadedMedia(chatId: ChatId, files: List<File>, messageIds: List<MessageId>?) {
         deleteItemNotificationViewStateContainer.updateViewState(DeleteTypeNotificationViewState.Closed)
+
         viewModelScope.launch(mainImmediate) {
             val deleteResponse = repositoryMedia.deleteDownloadedMediaByChatId(
                 chatId,
                 files,
                 messageIds
             )
+
             if (!deleteResponse) {
                 submitSideEffect(
                     StorageNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
@@ -173,6 +179,7 @@ internal class ManageStorageViewModel @Inject constructor(
             feedsIds.forEach { feedId ->
                 feedId.let { nnFeedId ->
                     feedRepository.getFeedById(nnFeedId).firstOrNull()?.let {nnFeed ->
+
                         repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
                     }
                 }
@@ -187,10 +194,12 @@ internal class ManageStorageViewModel @Inject constructor(
 
     fun updateStorageLimitViewState(progress: Int) {
         storageData?.let { nnStorageData ->
+
             val usedStorage: Long = nnStorageData.usedStorage.value
             val freeStorage = nnStorageData.freeStorage?.value ?: 0L
             val userStorageLimit: Long = calculateUserStorageLimit(progress, freeStorage)
             val progressBarPercentage = calculateUsedStoragePercentage(nnStorageData)
+
             val undersized: String? =
                 if (userStorageLimit < usedStorage) {
                     (usedStorage - userStorageLimit).toFileSize()?.calculateSize()
@@ -215,11 +224,13 @@ internal class ManageStorageViewModel @Inject constructor(
         val editor = storageLimitSharedPreferences.edit()
         editor.putInt(STORAGE_LIMIT_KEY, progress)
         editor.apply()
+
         changeStorageLimitViewStateContainer.updateViewState(ChangeStorageLimitViewState.Closed)
+
         getDeleteExcessFileIfApplicable()
     }
 
-    private fun getTotalStorage(): Long {
+    private fun getUserFreeStorage(): Long {
         val stat = StatFs(Environment.getDataDirectory().path)
         return stat.blockSizeLong * stat.availableBlocksLong
     }
