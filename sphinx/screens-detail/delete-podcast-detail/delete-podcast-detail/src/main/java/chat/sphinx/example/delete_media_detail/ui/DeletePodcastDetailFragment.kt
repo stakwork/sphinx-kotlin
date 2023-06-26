@@ -106,11 +106,13 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
 
     private fun setClickListeners() {
         binding.apply {
+
             includeManageMediaElementHeaderDetails.textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }
             }
+
             includeManageMediaElementHeaderDetails.buttonHeaderDelete.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Open
@@ -118,19 +120,24 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
             }
 
             includeLayoutDeleteAllNotificationScreen.apply {
+
                 buttonDelete.setOnClickListener { viewModel.deleteAllDownloadedFeedItems() }
+
                 buttonGotIt.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         viewModel.navigator.popBackStack()
                     }
                 }
+
                 buttonCancel.setOnClickListener {
                     viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                         DeleteAllNotificationViewStateContainer.Closed
                     )
                 }
             }
+
             includeLayoutManageStorageDeleteNotification.apply {
+
                 includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
                 viewModel.closeDeleteItemPopup()
             }
@@ -140,6 +147,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                         viewModel.deleteDownloadedFeedItem(viewState.feedItem)
                     }
                 }
+
                 includeLayoutManageStorageDeleteDetails.buttonCancel
             }
         }
@@ -152,6 +160,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
             is DeleteMediaDetailViewState.EpisodeList -> {
                 binding.apply {
                     includeManageMediaElementHeaderDetails.apply {
+
                         textViewHeader.text = viewState.feedName
                         textViewManageStorageElementNumber.visible
                         constraintLayoutDeleteElementContainerTrash.visible
@@ -174,6 +183,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deleteItemNotificationViewStateContainer.collect { viewState ->
+
                 binding.includeLayoutManageStorageDeleteNotification.apply {
                     when (viewState) {
                         is DeleteItemNotificationViewState.Closed -> {}
@@ -186,8 +196,10 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                 }
             }
         }
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deleteAllNotificationViewStateContainer.collect { viewState ->
+
                 binding.includeLayoutDeleteAllNotificationScreen.apply {
                     when (viewState) {
                         is DeleteAllNotificationViewStateContainer.Closed -> {
@@ -221,6 +233,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
 
     private fun setupDeleteMediaDetailsAdapter() {
         val deletePodcastFooterAdapter = DeletePodcastFooterAdapter(requireActivity() as InsetterActivity)
+
         binding.recyclerViewStorageElementList.apply {
             val deleteMediaAdapter = DeletePodcastDetailAdapter(
                 imageLoader,

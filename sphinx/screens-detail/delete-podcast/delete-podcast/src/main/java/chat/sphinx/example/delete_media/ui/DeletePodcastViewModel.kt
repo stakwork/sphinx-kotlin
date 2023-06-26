@@ -53,8 +53,10 @@ internal class DeletePodcastViewModel @Inject constructor(
     private fun getDownloadedFeedItems(){
         viewModelScope.launch(mainImmediate) {
             feedRepository.getAllDownloadedFeedItems().collect { feedItems ->
+
                 val feedIdAndFileList = getLocalFilesGroupedByFeed(feedItems)
                 val totalSizeAllSections = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
+
                 setItemTotalFile(totalSizeAllSections?.value ?: 0L )
                 feedIdsList = feedIdAndFileList.map { it.key }
 
@@ -64,12 +66,14 @@ internal class DeletePodcastViewModel @Inject constructor(
 
                     if (podcast != null && listOfFiles != null) {
                         val totalSize = listOfFiles.map { FileSize(it.length()) }.calculateTotalSize()
+
                         PodcastToDelete(
                             podcast.title.value,
                             podcast.imageToShow?.value.orEmpty(),
                             totalSize,
                             podcast.id
                         )
+
                     } else null
                 }.also { sectionList ->
                     viewStateContainer.updateViewState(DeletePodcastViewState.SectionList(sectionList, totalSizeAllSections?.calculateSize()))
@@ -80,6 +84,7 @@ internal class DeletePodcastViewModel @Inject constructor(
 
     fun deleteAllDownloadedFeeds() {
         deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
+
         viewModelScope.launch(mainImmediate) {
             feedIdsList?.forEach { feedId ->
                 feedId?.let { nnFeedId ->
@@ -88,6 +93,7 @@ internal class DeletePodcastViewModel @Inject constructor(
                     }
                 }
             }
+
             deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize()))
         }
     }
