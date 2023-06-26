@@ -174,6 +174,12 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
                             constraintDeleteProgressContainer.gone
                             constraintDeleteSuccessfullyContainer.visible
 
+                            binding.includeDeleteNotification.textViewManageStorageAllTypeText.text =
+                                String.format(
+                                    getString(R.string.manage_storage_deleted_all_files),
+                                    viewState.deletedSize
+                                )
+
                             binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
                                 String.format(
                                     getString(R.string.manage_storage_deleted_free_space),

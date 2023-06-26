@@ -123,6 +123,7 @@
     <string name="manage_storage_limit_warning" >Al guardar este límite\nse eliminarán 20 GB de tu contenido más antiguo</string>
     <string name="delete_chat_media">Media</string>
     <string name="delete_chat_files">Archivos</string>
+    <string name="manage_storage_deleted_all_files">Todos los archivos</string>
 
 
     <string name="video_sats_per_minute">Sats por minuto</string>
