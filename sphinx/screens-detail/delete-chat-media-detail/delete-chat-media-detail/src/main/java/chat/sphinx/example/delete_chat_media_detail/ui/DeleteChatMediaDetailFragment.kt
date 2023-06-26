@@ -127,6 +127,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
 
     private fun setClickListeners() {
         binding.apply {
+
             includeManageMediaElementHeader.apply {
                 textViewDetailScreenClose.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
@@ -175,6 +176,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
     }
 
     private fun setUpTabs() {
+
         binding.apply {
             tabLayoutDeleteTabs.addTab(tabLayoutDeleteTabs.newTab().setText(getString(R.string.delete_chat_media)))
             tabLayoutDeleteTabs.addTab(tabLayoutDeleteTabs.newTab().setText(getString(R.string.delete_chat_files)))
@@ -307,6 +309,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
 
     private fun setupChatDeleteMediaAdapter() {
         val deleteChatFooterAdapter = DeleteChatDetailFooterAdapter(requireActivity() as InsetterActivity)
+
         binding.recyclerViewStorageMediaList.apply {
             val deleteChatMediaAdapter = DeleteChatDetailsMediaGridAdapter(
                 imageLoader,
@@ -321,6 +324,7 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
 
     private fun setupChatDeleteFilesAdapter() {
         val deleteChatFooterAdapter = DeleteChatDetailFooterAdapter(requireActivity() as InsetterActivity)
+
         binding.recyclerViewStorageFilesList.apply {
             val deleteChatFilesAdapter = DeleteChatDetailFilesAdapter(
                 viewLifecycleOwner,

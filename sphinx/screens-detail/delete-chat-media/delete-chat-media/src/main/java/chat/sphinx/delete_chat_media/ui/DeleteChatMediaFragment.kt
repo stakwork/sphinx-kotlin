@@ -92,7 +92,8 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
         override fun handleOnBackPressed() {
             if (viewModel.deleteChatNotificationViewStateContainer.value is DeleteChatNotificationViewState.Open) {
                 viewModel.deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Closed)
-            } else {
+            }
+            else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }
@@ -136,12 +137,15 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
         @Exhaustive
         when (viewState) {
             is DeleteChatMediaViewState.Loading -> {}
+
             is DeleteChatMediaViewState.ChatList -> {
+
                 binding.includeManageMediaElementHeader.apply {
                     constraintLayoutDeleteElementContainerTrash.visible
                     textViewManageStorageElementNumber.text = viewState.totalSizeChats
                     constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.chats.isNotEmpty())
                 }
+
                 binding.textViewPodcastNoFound.goneIfFalse(viewState.chats.isEmpty())
                 binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_chats)
             }
@@ -151,6 +155,7 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deleteChatNotificationViewStateContainer.collect { viewState ->
+
                 binding.includeDeleteNotification.apply {
                     when (viewState) {
                         is DeleteChatNotificationViewState.Closed -> {
@@ -195,6 +200,7 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
 
     private fun setupChatDeleteAdapter() {
         val deleteChatFooterAdapter = DeleteChatFooterAdapter(requireActivity() as InsetterActivity)
+
         binding.recyclerViewStorageElementList.apply {
             val deleteChatAdapter = DeleteChatAdapter(
                 imageLoader,

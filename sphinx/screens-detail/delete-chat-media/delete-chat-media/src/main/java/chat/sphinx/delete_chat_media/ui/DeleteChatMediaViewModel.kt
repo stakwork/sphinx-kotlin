@@ -51,6 +51,7 @@ internal class DeleteChatMediaViewModel @Inject constructor(
      val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatNotificationViewState> by lazy {
         ViewStateContainer(DeleteChatNotificationViewState.Closed)
     }
+
     private var currentChatIdsAndFiles: Map<ChatId, List<File>>? = null
     private var itemsTotalSize: FileSize = FileSize(0)
 
@@ -64,6 +65,7 @@ internal class DeleteChatMediaViewModel @Inject constructor(
 
                 val chatIdAndFileList = getLocalFilesGroupedByChatId(chatItems)
                 val totalSizeChats = chatItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
+
                 setItemTotalFile(totalSizeChats?.value ?: 0L)
                 currentChatIdsAndFiles = chatIdAndFileList
 
@@ -107,20 +109,30 @@ internal class DeleteChatMediaViewModel @Inject constructor(
                     }
                 }
 
-                viewStateContainer.updateViewState(DeleteChatMediaViewState.ChatList(allChatToDelete, totalSizeChats?.calculateSize()))
+                viewStateContainer.updateViewState(
+                    DeleteChatMediaViewState.ChatList(
+                        allChatToDelete, totalSizeChats?.calculateSize()
+                    )
+                )
             }
         }
     }
 
     fun deleteAllChatFiles() {
         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Deleting)
+
         viewModelScope.launch(mainImmediate) {
             currentChatIdsAndFiles?.forEach { chatIdsAndFiles ->
                 chatIdsAndFiles.key.let { chatId ->
+
                     if (repositoryMedia.deleteDownloadedMediaByChatId(chatId, chatIdsAndFiles.value, null)) {
-                        deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize()))
-                    } else {
+                        deleteChatNotificationViewStateContainer.updateViewState(
+                            DeleteChatNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize())
+                        )
+                    }
+                    else {
                         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Closed)
+
                         submitSideEffect(
                             DeleteNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
                         )
