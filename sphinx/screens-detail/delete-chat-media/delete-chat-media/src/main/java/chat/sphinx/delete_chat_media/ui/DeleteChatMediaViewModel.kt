@@ -14,6 +14,7 @@ import chat.sphinx.delete_chat_media.navigation.DeleteChatMediaNavigator
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatMediaViewState
 import chat.sphinx.delete_chat_media.viewstate.DeleteChatNotificationViewState
 import chat.sphinx.wrapper_chat.getColorKey
+import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.calculateTotalSize
@@ -67,22 +68,40 @@ internal class DeleteChatMediaViewModel @Inject constructor(
 
                 chatIdAndFileList.keys.mapNotNull { chatId ->
                     val chat = chatId?.let { chatRepository.getChatById(it).firstOrNull() }
-                    val contact = chat?.contactIds?.lastOrNull()?.let { contactRepository.getContactById(it).firstOrNull() }
-                    val listOfFiles = chatIdAndFileList[chatId]
 
-                    if (contact != null && listOfFiles != null) {
-                        val totalSize = listOfFiles.map { FileSize(it.length()) }.calculateTotalSize()
-                        ChatToDelete(
-                            contact.alias?.value ?: "",
-                            contact.photoUrl,
-                            totalSize,
-                            chat.id,
-                            contact.id,
-                            Initials(
-                                contact.alias?.value?.getInitials(),
-                                chat.getColorKey()
+                    if (chat != null) {
+                        val listOfFiles = chatIdAndFileList[chatId]
+                        val totalSize = listOfFiles?.map { FileSize(it.length()) }?.calculateTotalSize()
+
+                        if (chat.isTribe()) {
+                            ChatToDelete(
+                                chat.name?.value ?: "",
+                                chat.photoUrl,
+                                totalSize ?: "",
+                                chat.id,
+                                null,
+                                Initials(
+                                    chat.name?.value?.getInitials(),
+                                    chat.getColorKey()
+                                )
                             )
-                        )
+                        } else {
+                            val contact = chat.contactIds.lastOrNull()?.let { contactRepository.getContactById(it).firstOrNull() }
+
+                            if (contact != null && listOfFiles != null) {
+                                ChatToDelete(
+                                    contact.alias?.value ?: "",
+                                    contact.photoUrl,
+                                    totalSize ?: "",
+                                    chat.id,
+                                    contact.id,
+                                    Initials(
+                                        contact.alias?.value?.getInitials(),
+                                        chat.getColorKey()
+                                    )
+                                )
+                            } else null
+                        }
                     } else null
                 }.also { chatToDeletes ->
                     viewStateContainer.updateViewState(DeleteChatMediaViewState.ChatList(chatToDeletes, totalSizeChats?.calculateSize()))

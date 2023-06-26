@@ -10,7 +10,7 @@ data class ChatToDelete(
     val photoUrl: PhotoUrl?,
     val size: String,
     val chatId: ChatId,
-    val contactId: ContactId,
+    val contactId: ContactId?,
     val initials: Initials
 )
 
