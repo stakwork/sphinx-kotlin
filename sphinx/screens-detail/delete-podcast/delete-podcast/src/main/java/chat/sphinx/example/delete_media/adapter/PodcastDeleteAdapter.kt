@@ -142,7 +142,7 @@ internal class PodcastDeleteAdapter(
 
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_tribe)
+            .placeholderResId(R.drawable.ic_podcast_type)
             .build()
     }
 

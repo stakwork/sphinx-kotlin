@@ -16,29 +16,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_member_initials"
-            android:layout_width="@dimen/default_tap_target_min_height"
-            android:layout_height="@dimen/default_tap_target_min_height"
-            android:layout_centerInParent="true"
-            android:background="@drawable/chat_initials_circle"
-            android:fontFamily="@font/montserrat_regular"
-            android:gravity="center"
-            android:singleLine="true"
-            android:textColor="@android:color/white"
-            android:textSize="17sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="TT"
-            tools:visibility="visible" />
-
         <androidx.cardview.widget.CardView
             android:id="@+id/image_view_storage_cardview_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="@dimen/episode_image_radius"
             android:background="@color/body"
+            app:cardCornerRadius="@dimen/episode_image_radius"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -48,7 +31,7 @@
                 android:layout_width="@dimen/default_tap_target_min_height"
                 android:layout_height="@dimen/default_tap_target_min_height"
                 android:layout_centerInParent="true"
-                android:src="@drawable/ic_profile_avatar_circle"
+                android:src="@drawable/ic_podcast_placeholder"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
