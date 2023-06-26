@@ -51,61 +51,63 @@ internal class DeleteChatMediaViewModel @Inject constructor(
      val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatNotificationViewState> by lazy {
         ViewStateContainer(DeleteChatNotificationViewState.Closed)
     }
-    private var currentChatIdsAndFiles: Map<ChatId?, List<File>>? = null
+    private var currentChatIdsAndFiles: Map<ChatId, List<File>>? = null
     private var itemsTotalSize: FileSize = FileSize(0)
 
     init {
         getDownloadedMedia()
     }
 
-    private fun getDownloadedMedia(){
+    private fun getDownloadedMedia() {
         viewModelScope.launch(mainImmediate) {
             repositoryMedia.getAllDownloadedMedia().collect { chatItems ->
+
                 val chatIdAndFileList = getLocalFilesGroupedByChatId(chatItems)
                 val totalSizeChats = chatItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
-                setItemTotalFile(totalSizeChats?.value ?: 0L )
+                setItemTotalFile(totalSizeChats?.value ?: 0L)
                 currentChatIdsAndFiles = chatIdAndFileList
 
-                chatIdAndFileList.keys.mapNotNull { chatId ->
-                    val chat = chatId?.let { chatRepository.getChatById(it).firstOrNull() }
+                val allChats = chatRepository.getAllChatsByIds(chatIdAndFileList.keys.toList())
 
-                    if (chat != null) {
-                        val listOfFiles = chatIdAndFileList[chatId]
-                        val totalSize = listOfFiles?.map { FileSize(it.length()) }?.calculateTotalSize()
+                val allContactIds = allChats.flatMap { it.contactIds }.distinct()
+                val allContacts = contactRepository.getAllContactsByIds(allContactIds).associateBy { it.id }
 
-                        if (chat.isTribe()) {
+                val allChatToDelete = allChats.mapNotNull { chat ->
+                    val listOfFiles = chatIdAndFileList[chat.id]
+                    val totalSize = listOfFiles?.map { FileSize(it.length()) }?.calculateTotalSize()
+
+                    if (chat.isTribe()) {
+                        ChatToDelete(
+                            chat.name?.value ?: "",
+                            chat.photoUrl,
+                            totalSize ?: "",
+                            chat.id,
+                            Initials(
+                                chat.name?.value?.getInitials(),
+                                chat.getColorKey()
+                            )
+                        )
+                    } else {
+                        val contact = chat.contactIds.lastOrNull()?.let { contactId ->
+                            allContacts[contactId]
+                        }
+
+                        if (contact != null && listOfFiles != null) {
                             ChatToDelete(
-                                chat.name?.value ?: "",
-                                chat.photoUrl,
+                                contact.alias?.value ?: "",
+                                contact.photoUrl,
                                 totalSize ?: "",
                                 chat.id,
-                                null,
                                 Initials(
-                                    chat.name?.value?.getInitials(),
+                                    contact.alias?.value?.getInitials(),
                                     chat.getColorKey()
                                 )
                             )
-                        } else {
-                            val contact = chat.contactIds.lastOrNull()?.let { contactRepository.getContactById(it).firstOrNull() }
-
-                            if (contact != null && listOfFiles != null) {
-                                ChatToDelete(
-                                    contact.alias?.value ?: "",
-                                    contact.photoUrl,
-                                    totalSize ?: "",
-                                    chat.id,
-                                    contact.id,
-                                    Initials(
-                                        contact.alias?.value?.getInitials(),
-                                        chat.getColorKey()
-                                    )
-                                )
-                            } else null
-                        }
-                    } else null
-                }.also { chatToDeletes ->
-                    viewStateContainer.updateViewState(DeleteChatMediaViewState.ChatList(chatToDeletes, totalSizeChats?.calculateSize()))
+                        } else null
+                    }
                 }
+
+                viewStateContainer.updateViewState(DeleteChatMediaViewState.ChatList(allChatToDelete, totalSizeChats?.calculateSize()))
             }
         }
     }
@@ -114,11 +116,10 @@ internal class DeleteChatMediaViewModel @Inject constructor(
         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Deleting)
         viewModelScope.launch(mainImmediate) {
             currentChatIdsAndFiles?.forEach { chatIdsAndFiles ->
-                chatIdsAndFiles.key?.let { chatId ->
+                chatIdsAndFiles.key.let { chatId ->
                     if (repositoryMedia.deleteDownloadedMediaByChatId(chatId, chatIdsAndFiles.value, null)) {
                         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize()))
-                    }
-                    else {
+                    } else {
                         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Closed)
                         submitSideEffect(
                             DeleteNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
@@ -129,7 +130,7 @@ internal class DeleteChatMediaViewModel @Inject constructor(
         }
     }
 
-    private fun getLocalFilesGroupedByChatId(chatItems: List<MessageMedia>): Map<ChatId?, List<File>> {
+    private fun getLocalFilesGroupedByChatId(chatItems: List<MessageMedia>): Map<ChatId, List<File>> {
         return chatItems.groupBy({ it.chatId }, { it.localFile as File })
     }
 

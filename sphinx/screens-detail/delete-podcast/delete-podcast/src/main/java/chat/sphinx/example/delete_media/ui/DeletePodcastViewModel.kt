@@ -76,8 +76,8 @@ internal class DeletePodcastViewModel @Inject constructor(
                 }
             }
         }
-
     }
+
     fun deleteAllDownloadedFeeds() {
         deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
         viewModelScope.launch(mainImmediate) {
