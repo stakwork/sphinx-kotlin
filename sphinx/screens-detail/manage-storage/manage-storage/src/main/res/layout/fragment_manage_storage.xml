@@ -178,7 +178,7 @@
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_images"
                 android:layout_width="@dimen/default_layout_margin"
-                android:layout_height="14dp"
+                android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -257,7 +257,7 @@
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_video"
                 android:layout_width="@dimen/default_layout_margin"
-                android:layout_height="14dp"
+                android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -336,7 +336,7 @@
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_audio"
                 android:layout_width="@dimen/default_layout_margin"
-                android:layout_height="14dp"
+                android:layout_height="@dimen/default_layout_margin"
                 android:background="@drawable/ic_delete"
                 android:backgroundTint="@color/secondaryText"
                 app:layout_constraintBottom_toBottomOf="parent"
