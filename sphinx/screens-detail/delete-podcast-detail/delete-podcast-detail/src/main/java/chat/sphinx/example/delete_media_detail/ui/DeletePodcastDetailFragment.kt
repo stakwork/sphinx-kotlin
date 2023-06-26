@@ -106,14 +106,13 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
 
     private fun setClickListeners() {
         binding.apply {
+
             includeManageMediaElementHeaderDetails.textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
                 }
             }
-            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
-                viewModel.closeDeleteItemPopup()
-            }
+
             includeManageMediaElementHeaderDetails.buttonHeaderDelete.setOnClickListener {
                 viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                     DeleteAllNotificationViewStateContainer.Open
@@ -121,24 +120,36 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
             }
 
             includeLayoutDeleteAllNotificationScreen.apply {
+
                 buttonDelete.setOnClickListener { viewModel.deleteAllDownloadedFeedItems() }
+
                 buttonGotIt.setOnClickListener {
                     lifecycleScope.launch(viewModel.mainImmediate) {
                         viewModel.navigator.popBackStack()
                     }
                 }
+
                 buttonCancel.setOnClickListener {
                     viewModel.deleteAllNotificationViewStateContainer.updateViewState(
                         DeleteAllNotificationViewStateContainer.Closed
                     )
                 }
             }
-            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonDelete.setOnClickListener {
-                (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteItemNotificationViewState.Open)?.let { viewState ->
-                    viewModel.deleteDownloadedFeedItem(viewState.feedItem)
-                }
+
+            includeLayoutManageStorageDeleteNotification.apply {
+
+                includeLayoutManageStorageDeleteDetails.buttonCancel.setOnClickListener {
+                viewModel.closeDeleteItemPopup()
             }
-            includeLayoutManageStorageDeleteNotification.includeLayoutManageStorageDeleteDetails.buttonCancel
+
+                includeLayoutManageStorageDeleteDetails.buttonDelete.setOnClickListener {
+                    (viewModel.deleteItemNotificationViewStateContainer.value as? DeleteItemNotificationViewState.Open)?.let { viewState ->
+                        viewModel.deleteDownloadedFeedItem(viewState.feedItem)
+                    }
+                }
+
+                includeLayoutManageStorageDeleteDetails.buttonCancel
+            }
         }
     }
 
@@ -148,17 +159,21 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
             is DeleteMediaDetailViewState.Idle -> {}
             is DeleteMediaDetailViewState.EpisodeList -> {
                 binding.apply {
-                    includeManageMediaElementHeaderDetails.textViewHeader.text = viewState.feedName
-                    includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.visible
-                    includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.visible
-                    includeManageMediaElementHeaderDetails.textViewManageStorageElementNumber.text = viewState.totalSize
-                    textViewPodcastNoFound.goneIfFalse(viewState.episodes.isEmpty())
-                    binding.includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.episodes.isNotEmpty())
+                    includeManageMediaElementHeaderDetails.apply {
 
-                    includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
+                        textViewHeader.text = viewState.feedName
+                        textViewManageStorageElementNumber.visible
+                        constraintLayoutDeleteElementContainerTrash.visible
+                        textViewManageStorageElementNumber.text = viewState.totalSize
+                        textViewPodcastNoFound.goneIfFalse(viewState.episodes.isEmpty())
+                        constraintLayoutDeleteElementContainerTrash.goneIfFalse(viewState.episodes.isNotEmpty())
 
-                    if (viewState.episodes.isEmpty()) {
-                        binding.includeManageMediaElementHeaderDetails.constraintLayoutDeleteElementContainerTrash.gone
+                        includeLayoutDeleteAllNotificationScreen.textViewDeleteDescription.text =
+                            getString(R.string.manage_storage_delete_description)
+
+                        if (viewState.episodes.isEmpty()) {
+                            constraintLayoutDeleteElementContainerTrash.gone
+                        }
                     }
                 }
             }
@@ -168,6 +183,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deleteItemNotificationViewStateContainer.collect { viewState ->
+
                 binding.includeLayoutManageStorageDeleteNotification.apply {
                     when (viewState) {
                         is DeleteItemNotificationViewState.Closed -> {}
@@ -180,8 +196,10 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                 }
             }
         }
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deleteAllNotificationViewStateContainer.collect { viewState ->
+
                 binding.includeLayoutDeleteAllNotificationScreen.apply {
                     when (viewState) {
                         is DeleteAllNotificationViewStateContainer.Closed -> {
@@ -215,6 +233,7 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
 
     private fun setupDeleteMediaDetailsAdapter() {
         val deletePodcastFooterAdapter = DeletePodcastFooterAdapter(requireActivity() as InsetterActivity)
+
         binding.recyclerViewStorageElementList.apply {
             val deleteMediaAdapter = DeletePodcastDetailAdapter(
                 imageLoader,

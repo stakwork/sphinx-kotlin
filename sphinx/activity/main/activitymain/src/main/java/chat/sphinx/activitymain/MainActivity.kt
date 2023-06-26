@@ -258,6 +258,7 @@ internal class MainActivity: MotionLayoutNavigationActivity<
         super.onPause()
 
         viewModel.syncActions()
+        viewModel.getDeleteExcessFileIfApplicable()
     }
 
     override var isKeyboardVisible: Boolean = false

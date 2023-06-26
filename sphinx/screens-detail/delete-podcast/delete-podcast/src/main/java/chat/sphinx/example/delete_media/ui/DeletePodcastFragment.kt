@@ -104,6 +104,7 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
 
     private fun setClickListeners() {
         binding.apply {
+
             includeManageMediaElementHeader.textViewDetailScreenClose.setOnClickListener {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     viewModel.navigator.popBackStack()
@@ -133,10 +134,12 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
         when (viewState) {
             is DeletePodcastViewState.Loading -> {}
             is DeletePodcastViewState.SectionList -> {
+
                 binding.includeManageMediaElementHeader.apply {
                     constraintLayoutDeleteElementContainerTrash.visible
                     textViewManageStorageElementNumber.text = viewState.totalSizeAllSections
                 }
+
                 binding.textViewPodcastNoFound.goneIfFalse(viewState.section.isEmpty())
                 binding.includeDeleteNotification.textViewDeleteDescription.text = getString(R.string.manage_storage_delete_description)
 
@@ -150,6 +153,7 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
     override fun subscribeToViewStateFlow() {
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.deleteAllFeedsNotificationViewStateContainer.collect { viewState ->
+
                 binding.includeDeleteNotification.apply {
                     when (viewState) {
                         is DeleteNotificationViewState.Closed -> {
@@ -189,6 +193,7 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
 
     private fun setupMediaSectionAdapter() {
         binding.recyclerViewStorageElementList.apply {
+
             val mediaSectionAdapter = PodcastDeleteAdapter(
                 imageLoader,
                 viewLifecycleOwner,

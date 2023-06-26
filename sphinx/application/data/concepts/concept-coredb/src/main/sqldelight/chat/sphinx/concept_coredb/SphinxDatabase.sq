@@ -734,6 +734,11 @@ FROM messageDbo
 WHERE (chat_id IS NULL OR chat_id = 0)
 AND (message_content LIKE :message_content1 OR message_content LIKE :message_content2);
 
+messageGetMessagesByIds:
+SELECT *
+FROM messageDbo
+WHERE id IN ?;
+
 messagesSearchByTerm:
 SELECT *
 FROM messageDbo
@@ -1334,6 +1339,11 @@ feedItemUpdateLocalFile:
 UPDATE feedItemDbo
 SET local_file = :local_file
 WHERE id = ?;
+
+feedItemUpdateLocalFileByIds:
+UPDATE feedItemDbo
+SET local_file = :local_file
+WHERE id IN ?;
 
 feedItemDeleteAllDownloadedByFeedId:
 UPDATE feedItemDbo

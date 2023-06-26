@@ -7,6 +7,13 @@
     android:layout_height="match_parent"
     app:layoutDescription="@xml/motion_manage_storage_limit">
 
+    <View
+        android:id="@+id/view_storage_limit_details_lock"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:background="@android:color/black" />
+
     <include
         android:id="@+id/include_layout_change_storage_limit_detail"
         layout="@layout/layout_change_storage_limit_detail"

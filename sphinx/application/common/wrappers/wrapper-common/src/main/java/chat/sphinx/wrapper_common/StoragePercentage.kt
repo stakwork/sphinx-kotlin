@@ -2,17 +2,25 @@ package chat.sphinx.wrapper_common
 
 
 fun calculateStoragePercentage(storageData: StorageData): StoragePercentage {
-    val totalStorage = storageData.freeStorage.value + storageData.images.value +
-            storageData.video.value + storageData.audio.value +
-            storageData.files.value
+    val freeStorage = storageData.freeStorage?.value ?: 0L
+    val totalStorage = freeStorage + storageData.images.totalSize.value +
+            storageData.video.totalSize.value + storageData.audio.totalSize.value +
+            storageData.files.totalSize.value
 
     return StoragePercentage(
-        freeStorage = String.format("%.3f", storageData.freeStorage.value.toFloat() / totalStorage).toFloat(),
-        image = String.format("%.3f", storageData.images.value.toFloat() / totalStorage).toFloat(),
-        video = String.format("%.3f", storageData.video.value.toFloat() / totalStorage).toFloat(),
-        audio = String.format("%.3f", storageData.audio.value.toFloat() / totalStorage).toFloat(),
-        files = String.format("%.3f", storageData.files.value.toFloat() / totalStorage).toFloat()
+        freeStorage = String.format("%.3f", freeStorage.toFloat() / totalStorage).toFloat(),
+        image = String.format("%.3f", storageData.images.totalSize.value.toFloat() / totalStorage).toFloat(),
+        video = String.format("%.3f", storageData.video.totalSize.value.toFloat() / totalStorage).toFloat(),
+        audio = String.format("%.3f", storageData.audio.totalSize.value.toFloat() / totalStorage).toFloat(),
+        files = String.format("%.3f", storageData.files.totalSize.value.toFloat() / totalStorage).toFloat()
     )
+}
+
+fun calculateUsedStoragePercentage(storageData: StorageData): Float {
+    val usedStorage = storageData.usedStorage.value
+    val freeStorage = storageData.freeStorage?.value ?: 0L
+    val totalStorage = usedStorage + freeStorage
+    return String.format("%.3f", usedStorage.toFloat() / totalStorage).toFloat()
 }
 
 data class StoragePercentage(

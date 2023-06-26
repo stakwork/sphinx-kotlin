@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="nav_drawer_width">240dp</dimen>
+    <item name="nav_drawer_input_lock_alpha" format="float" type="dimen">.5</item>
+
+    <!-- Text size -->
+    <dimen name="nav_drawer_default_text_size">16sp</dimen>
+    <dimen name="nav_drawer_version_text_size">10sp</dimen>
+    <dimen name="dashboard_search_text_size">14sp</dimen>
+
+    <dimen name="nav_drawer_header_margin">32dp</dimen>
+    <dimen name="nav_drawer_header_profile_picture_xy">46dp</dimen>
+    <dimen name="nav_drawer_header_profile_picture_radius">23dp</dimen>
+    <dimen name="nav_drawer_header_profile_text_margin">8dp</dimen>
+
+    <dimen name="nav_drawer_button_image_xy">29dp</dimen>
+
+    <!-- This is the profile_picture_xy + profile_text_margin -->
+    <dimen name="nav_drawer_button_text_margin_start">53dp</dimen>
+
+    <!-- This is the profile_picture_xy - nav_drawer_button_image_xy / 2-->
+    <dimen name="nav_drawer_button_image_margin_start">8dp</dimen>
+
+    <dimen name="nav_drawer_button_margin_top">32dp</dimen>
+
+    <dimen name="nav_bar_button_padding">20dp</dimen>
+
+    <dimen name="dashboard_search_bar_height">58sp</dimen>
+    <dimen name="dashboard_header_network_xy">24dp</dimen>
+
+    <dimen name="dashboard_chips_view_height">60dp</dimen>
+    <dimen name="dashboard_chip_height">38dp</dimen>
+    <dimen name="dashboard_chip_vertical_spacing">22dp</dimen>
+    <dimen name="dashboard_chip_spacing">5dp</dimen>
+
+    <dimen name="recycler_view_holder_height">90dp</dimen>
+
+    <!-- Restore popup -->
+    <dimen name="dashboard_restore_popup_width">240dp</dimen>
+    <dimen name="dashboard_restore_popup_height">100dp</dimen>
+    <dimen name="dashboard_restore_progress_bar_height">7dp</dimen>
+
+    <!-- Podcast search -->
+    <dimen name="feed_podcast_search_progress_bar_xy">32dp</dimen>
+    <dimen name="feed_podcast_search_results_row_height">92dp</dimen>
+    <dimen name="feed_podcast_search_results_image_radius">8dp</dimen>
+    <dimen name="feed_podcast_search_results_image_xy">72dp</dimen>
+    <dimen name="feed_podcast_search_subscribe_text_view_width">50dp</dimen>
+    <dimen name="feed_podcast_search_result_progress_bar_xy">30dp</dimen>
+    <dimen name="feed_podcast_search_results_header_height">48dp</dimen>
+
+    <!-- Deep link authorize popup -->
+    <dimen name="dashboard_authorize_popup_width">240dp</dimen>
+    <dimen name="dashboard_authorize_popup_height">300dp</dimen>
+    <dimen name="dashboard_authorize_popup_verified_icon_margin_top">40sp</dimen>
+    <dimen name="dashboard_authorize_popup_verified_icon_text_size">40sp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_title_text_size">13sp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_name_text_size">14sp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_button_height">52dp</dimen>
+    <dimen name="dashboard_authorize_popup_authorize_button_text_size">12sp</dimen>
+    <dimen name="dashboard_authorize_popup_progress_bar_zy">32dp</dimen>
+
+    <!-- Deep link redeem badge token popup -->
+    <dimen name="dashboard_redeem_badge_token_popup_width">240dp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_height">300dp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_verified_icon_margin_top">40sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_verified_icon_text_size">40sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_title_text_size">13sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_name_text_size">14sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_button_height">52dp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_redeem_badge_token_button_text_size">12sp</dimen>
+    <dimen name="dashboard_redeem_badge_token_popup_progress_bar_zy">32dp</dimen>
+
+    <!-- Deep save profile authorize popup -->
+    <dimen name="dashboard_save_profile_popup_width">240dp</dimen>
+    <dimen name="dashboard_save_profile_popup_height">300dp</dimen>
+    <dimen name="dashboard_save_profile_popup_verified_icon_margin_top">40sp</dimen>
+    <dimen name="dashboard_save_profile_popup_verified_icon_text_size">40sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_title_text_size">13sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_name_text_size">14sp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_button_height">52dp</dimen>
+    <dimen name="dashboard_save_profile_popup_save_profile_button_text_size">12sp</dimen>
+    <dimen name="dashboard_save_profile_popup_progress_bar_zy">32dp</dimen>
+
+    <dimen name="dashboard_connect_popup_width">260dp</dimen>
+    <dimen name="dashboard_connect_popup_height">420dp</dimen>
+    <dimen name="dashboard_connect_popup_profile_pic_xy">100dp</dimen>
+    <dimen name="dashboard_connect_popup_profile_pic_margin_top">30dp</dimen>
+    <dimen name="dashboard_connect_popup_name_text_size">17sp</dimen>
+    <dimen name="dashboard_connect_popup_price_text_size">12sp</dimen>
+    <dimen name="dashboard_connect_popup_description_text_size">14sp</dimen>
+    <dimen name="dashboard_connect_popup_form_edit_view_text_size">14sp</dimen>
+    <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="dashboard_badge_count_xy">26dp</dimen>
+    <dimen name="dashboard_badge_count_padding_horizontal">6dp</dimen>
+    <dimen name="dashboard_feed_placeholder_text_size">20sp</dimen>
+    <dimen name="feed_row_text_point_divider">4sp</dimen>
+
+    <dimen name="feed_all_loading_height">285dp</dimen>
+</resources>

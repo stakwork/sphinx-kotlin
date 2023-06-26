@@ -2175,6 +2175,22 @@ abstract class SphinxRepository(
         emitAll(getMessageByIdImpl(messageId, queries))
     }
 
+    override fun getMessagesByIds(messagesIds: List<MessageId>): Flow<List<Message?>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messageGetMessagesByIds(messagesIds)
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        messageDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
+
+
     private fun getMessageByIdImpl(
         messageId: MessageId,
         queries: SphinxDatabaseQueries
@@ -6270,6 +6286,89 @@ abstract class SphinxRepository(
         }
     }
 
+    private var deleteExcess: Job? = null
+    override suspend fun deleteExcessFilesOnBackground(excessSize: Long) {
+        if (deleteExcess?.isActive == true || excessSize <= 0L) {
+            return
+        }
+
+        combine(
+            getAllDownloadedMedia(),
+            getAllDownloadedFeedItems())
+        { chatFiles, feedFiles ->
+
+            val messages: List<Message?>? = getMessagesByIds(chatFiles.map { it.messageId }).firstOrNull()
+            val combinedFileList = mutableListOf<Triple<Any, File, DateTime>>()
+
+            messages?.forEach { nnMessages ->
+                nnMessages?.let { message ->
+                    val messageMedia = chatFiles.firstOrNull() { it.messageId == message.id  }
+                    val localFile: File? = messageMedia?.localFile
+                    val date = message.date
+
+                    if (localFile != null) {
+                        combinedFileList.add(Triple(messageMedia, localFile, date))
+                    }
+                }
+            }
+
+            feedFiles.forEach { feedItem ->
+                feedItem.let {
+                    val localFile = it.localFile
+                    val datePublished = it.datePublished
+
+                    if (localFile != null && datePublished != null) {
+                        combinedFileList.add(Triple(feedItem, localFile, datePublished))
+                    }
+                }
+            }
+
+            combinedFileList.sortBy { it.third.value }
+
+            val filesToDelete = mutableListOf<Triple<Any, File, DateTime>>()
+            var totalSize = 0L
+
+            for (item in combinedFileList) {
+                val fileSize = item.second.length()
+
+                if (totalSize < excessSize) {
+                    totalSize += fileSize
+
+                    filesToDelete.add(item)
+                }
+            }
+
+            val (messageMedias, feedItems) = filesToDelete.partition { it.first is MessageMedia }
+
+            val messageMediaTriples: List<Triple<ChatId, List<File>, List<MessageId>>> =
+
+                messageMedias.map {
+                    val messageMedia = it.first as MessageMedia
+                    val file = it.second
+                    Pair(messageMedia, file)
+                }.let{ messageMediaFiles ->
+
+                    messageMediaFiles.groupBy { it.first.chatId }.map { (chatId, list) ->
+                        Triple(chatId, list.map { it.second }, list.map { it.first.messageId })
+                    }
+                }
+
+            val feedItemFiles: List<FeedItem> = feedItems.map { it.first as FeedItem }
+
+            deleteExcess = CoroutineScope(dispatchers.io).launch {
+
+                feedItemFiles.forEach { feedItem ->
+                    deleteDownloadedMediaIfApplicable(feedItem)
+                }
+
+                messageMediaTriples.forEach { tripe ->
+                    deleteDownloadedMediaByChatId(tripe.first, tripe.second, tripe.third )
+                }
+            }
+
+        }.first()
+    }
+
     override fun downloadMediaIfApplicable(
         feedItem: DownloadableFeedItem,
         downloadCompleteCallback: (downloadedFile: File) -> Unit
@@ -6383,46 +6482,77 @@ abstract class SphinxRepository(
     }
 
     override suspend fun getStorageDataInfo(): Flow<StorageData> =
-        flow {
-            val chatFiles = getAllDownloadedMedia().firstOrNull() ?: listOf()
-            val feedFiles = getAllDownloadedFeedItems().firstOrNull() ?: listOf()
+        combine(
+            getAllDownloadedMedia(),
+            getAllDownloadedFeedItems())
+        { chatFiles, feedFiles ->
 
-            var images: Long = 0L
-            var video: Long = 0L
-            var audio: Long = 0L
-            var files: Long = 0L
+            var imagesSize: Long = 0L
+            var videoSize: Long = 0L
+            var audioSize: Long = 0L
+            var filesSize: Long = 0L
 
             val chat: Long = chatFiles.sumOf { it.localFile?.length() ?: 0L }
             val podcast: Long = feedFiles.sumOf { it.localFile?.length() ?: 0L }
 
+            val imageFiles = mutableListOf<File>()
+            val videoFiles = mutableListOf<File>()
+            val audioFiles = mutableListOf<File>()
+            val otherFiles = mutableListOf<File>()
+
+            val imageItems = mutableMapOf<ChatId, List<MessageId>>()
+            val videoItems = mutableMapOf<ChatId, List<MessageId>>()
+            val audioItems = mutableMapOf<ChatId, List<MessageId>>()
+            val otherItems = mutableMapOf<ChatId, List<MessageId>>()
+
             chatFiles.forEach { messageMedia ->
-                when {
-                    messageMedia.mediaType.isImage -> images += messageMedia.localFile?.length() ?: 0L
-                    messageMedia.mediaType.isVideo -> video += messageMedia.localFile?.length() ?: 0L
-                    messageMedia.mediaType.isAudio -> audio += messageMedia.localFile?.length() ?: 0L
-                    else -> files += messageMedia.localFile?.length() ?: 0L
+                messageMedia.localFile?.let { file ->
+                    when {
+                        messageMedia.mediaType.isImage -> {
+                            imagesSize += file.length()
+                            imageFiles.add(file)
+                            imageItems[messageMedia.chatId] = imageItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                        }
+                        messageMedia.mediaType.isVideo -> {
+                            videoSize += file.length()
+                            videoFiles.add(file)
+                            videoItems[messageMedia.chatId] = videoItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                        }
+                        messageMedia.mediaType.isAudio -> {
+                            audioSize += file.length()
+                            audioFiles.add(file)
+                            audioItems[messageMedia.chatId] = audioItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                        }
+                        else -> {
+                            filesSize += file.length()
+                            otherFiles.add(file)
+                            otherItems[messageMedia.chatId] = otherItems[messageMedia.chatId]?.plus(messageMedia.messageId) ?: listOf(messageMedia.messageId)
+                        }
+                    }
                 }
             }
+
             feedFiles.forEach { feedItem ->
-                audio += feedItem.localFile?.length() ?: 0L
+                feedItem.localFile?.let { file ->
+                    audioSize += file.length()
+                    audioFiles.add(file)
+                }
             }
 
-            val totalStorage: Long = 100L * 1024L * 1024L * 1024L
             val usedStorage = chat + podcast
-            val freeStorage = totalStorage - usedStorage
 
             val storageData = StorageData(
                 usedStorage = FileSize(usedStorage),
-                totalStorage = FileSize(totalStorage),
-                freeStorage = FileSize(freeStorage),
-                images = FileSize(images),
-                video = FileSize(video),
-                audio = FileSize(audio),
-                files = FileSize(files),
-                chats = FileSize(chat),
-                podcasts =FileSize(podcast)
+                null,
+                chatsStorage = FileSize(chat),
+                podcastsStorage = FileSize(podcast),
+                images = ImageStorage(FileSize(imagesSize), imageFiles, imageItems),
+                video = VideoStorage(FileSize(videoSize), videoFiles, videoItems),
+                audio = AudioStorage(FileSize(audioSize), audioFiles, audioItems, feedFiles.distinctBy { it.feedId }.map { it.feedId }),
+                files = FilesStorage(FileSize(filesSize), otherFiles, otherItems)
             )
-            emit(storageData)
+
+            storageData
         }
 
     override fun getAllMessageMediaByChatId(chatId: ChatId): Flow<List<MessageMedia>> =
@@ -6535,6 +6665,34 @@ abstract class SphinxRepository(
             }
         }
         return false
+    }
+
+    override suspend fun deleteListOfDownloadedMediaIfApplicable(feedItems: List<DownloadableFeedItem>
+    ): Boolean {
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        val feedItemsId = feedItems.map { it.id }
+        val localFileList = feedItems.mapNotNull { it.localFile }
+
+        localFileList.forEach {
+            try {
+                if (it.exists()) {
+                    it.delete()
+                }
+            } catch (e: Exception) {
+                return false
+            }
+        }
+        feedItemLock.withLock {
+            withContext(io) {
+                queries.transaction {
+                    queries.feedItemUpdateLocalFileByIds(null, feedItemsId)
+                }
+            }
+        }
+        delay(200L)
+
+        return true
     }
 
     override suspend fun deleteAllFeedDownloadedMedia(feed: Feed): Boolean {

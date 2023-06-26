@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/default_extra_big_layout_margin"
     android:background="@drawable/background_detail_screen">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,31 +14,15 @@
         android:padding="@dimen/default_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_member_initials"
-            android:layout_width="@dimen/default_tap_target_min_height"
-            android:layout_height="@dimen/default_tap_target_min_height"
-            android:layout_centerInParent="true"
-            android:background="@drawable/chat_initials_circle"
-            android:fontFamily="@font/montserrat_regular"
-            android:gravity="center"
-            android:singleLine="true"
-            android:textColor="@android:color/white"
-            android:textSize="17sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="TT"
-            tools:visibility="visible" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/image_view_storage_cardview_item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="@dimen/episode_image_radius"
             android:background="@color/body"
+            app:cardCornerRadius="@dimen/episode_image_radius"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -48,7 +32,7 @@
                 android:layout_width="@dimen/default_tap_target_min_height"
                 android:layout_height="@dimen/default_tap_target_min_height"
                 android:layout_centerInParent="true"
-                android:src="@drawable/ic_profile_avatar_circle"
+                android:src="@drawable/ic_podcast_placeholder"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -62,9 +46,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="1"
             android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="2"
             android:text="@string/manage_storage_images"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/pin_help_text_view_size"
@@ -82,19 +66,20 @@
             android:maxLines="1"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_tab"
-            app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow"
-            app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="12.37 GB" />
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_profile_right_arrow"
-            android:layout_width="@dimen/default_form_scan_icon_height"
-            android:layout_height="@dimen/default_form_scan_icon_height"
+            android:layout_width="@dimen/default_layout_margin"
+            android:layout_height="@dimen/default_layout_margin"
             android:background="@drawable/ic_delete"
             android:backgroundTint="@color/secondaryText"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_element_text"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

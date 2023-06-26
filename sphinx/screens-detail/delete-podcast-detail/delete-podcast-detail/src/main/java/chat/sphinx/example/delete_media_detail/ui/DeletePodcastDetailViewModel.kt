@@ -57,46 +57,66 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
     }
 
     init {
+        getDownloadedFeedItems()
+    }
+
+    private fun getDownloadedFeedItems(){
         viewModelScope.launch(mainImmediate) {
             feedRepository.getDownloadedFeedItemsByFeedId(FeedId(args.argFeedId)).collect { feedItemList ->
+
                 val feed = feedRepository.getFeedById(FeedId(args.argFeedId)).firstOrNull()
                 val totalSize = feedItemList.map { FileSize(it.localFile?.length() ?: 0L) }
+
                 currentFeed = feed
                 setItemTotalFile(totalSize)
-                val podcastDetailToDeleteLists: List<PodcastDetailToDelete> = feedItemList.map { feedItem ->
+
+                val podcastDetailToDeleteLists: List<PodcastDetailToDelete> = feedItemList.sortedByDescending { it.datePublishedTime }.map { feedItem ->
                     PodcastDetailToDelete(
                         feedItem,
                         FileSize(feedItem.localFile?.length() ?: 0L).calculateSize()
                     )
                 }
+
                 updateViewState(DeleteMediaDetailViewState.EpisodeList(feed?.titleToShow ?: "", totalSize.calculateTotalSize(), podcastDetailToDeleteLists))
             }
         }
     }
 
     fun deleteDownloadedFeedItem(feedItem: FeedItem) {
-            viewModelScope.launch(mainImmediate) {
-                if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
-                    deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
-                }
-                else {
-                    deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
-                        submitSideEffect(
-                            DeleteDetailNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
-                        )
-                }
+        viewModelScope.launch(mainImmediate) {
+
+            if (repositoryMedia.deleteDownloadedMediaIfApplicable(feedItem)) {
+                deleteItemNotificationViewStateContainer.updateViewState(
+                    DeleteItemNotificationViewState.Closed
+                )
+            } else {
+                deleteItemNotificationViewStateContainer.updateViewState(
+                    DeleteItemNotificationViewState.Closed
+                )
+
+                submitSideEffect(
+                    DeleteDetailNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
+                )
             }
         }
+        getDownloadedFeedItems()
+    }
 
     fun deleteAllDownloadedFeedItems() {
         deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleting)
+
         viewModelScope.launch(mainImmediate) {
             currentFeed?.let { nnFeed ->
+
                 if (repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)) {
-                    deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleted(itemsTotalSize))
-                }
-                else {
-                    deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Closed)
+                    deleteAllNotificationViewStateContainer.updateViewState(
+                        DeleteAllNotificationViewStateContainer.Deleted(itemsTotalSize)
+                    )
+                } else {
+                    deleteAllNotificationViewStateContainer.updateViewState(
+                        DeleteAllNotificationViewStateContainer.Closed
+                    )
+
                     submitSideEffect(
                         DeleteDetailNotifySideEffect(app.getString(R.string.manage_storage_error_delete))
                     )
@@ -118,6 +138,5 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
     fun closeDeleteItemPopup() {
         deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
     }
-
 
 }

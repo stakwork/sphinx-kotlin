@@ -11,5 +11,6 @@ data class ChatFile(
     val chatId: ChatId,
     val size: String,
     val isSelected: Boolean = false,
-    val localFile: File?
+    val localFile: File?,
+    val ext: String?
     )
