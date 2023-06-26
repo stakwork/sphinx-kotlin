@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/default_extra_big_layout_margin"
     android:background="@drawable/background_detail_screen">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -14,7 +14,8 @@
         android:padding="@dimen/default_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_extension_mark"
@@ -52,9 +53,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/default_layout_margin"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="1"
             android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="2"
             android:text="@string/manage_storage_images"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/pin_help_text_view_size"
@@ -72,9 +73,9 @@
             android:maxLines="1"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_tab"
-            app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow"
-            app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow"
+            app:layout_constraintTop_toTopOf="parent"
             tools:text="12.37 GB" />
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -83,8 +84,9 @@
             android:layout_height="@dimen/default_layout_margin"
             android:background="@drawable/ic_delete"
             android:backgroundTint="@color/secondaryText"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_file_text"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

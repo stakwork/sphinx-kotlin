@@ -100,7 +100,7 @@ internal class DeleteChatDetailsMediaGridAdapter(
 
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .placeholderResId(R.drawable.ic_podcast_placeholder)
             .build()
     }
 

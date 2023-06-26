@@ -417,7 +417,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         imageViewProfilePicture,
                         photoUrl.value,
                         ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
                             .transformation(Transformation.CircleCrop)
                             .build()
                     )
