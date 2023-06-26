@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-alpha98 (2023-06-26)
+- Adds storage management for audio and generic files
+
 # Version 1.0.0-alpha97 (2023-06-09)
 - Adds storage management
 

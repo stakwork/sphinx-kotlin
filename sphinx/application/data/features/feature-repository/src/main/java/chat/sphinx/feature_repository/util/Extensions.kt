@@ -551,12 +551,14 @@ fun TransactionCallbacks.upsertFeed(
     queries.feedItemsDeleteOldByFeedId(feedId, itemIds)
 
     for (destination in feedDto.value?.destinations ?: listOf()) {
-        queries.feedDestinationUpsert(
-            address = FeedDestinationAddress(destination.address),
-            split = FeedDestinationSplit(destination.split.toDouble()),
-            type = FeedDestinationType(destination.type),
-            feed_id = feedId
-        )
+        if (destination.address.toFeedDestinationAddress() != null) {
+            queries.feedDestinationUpsert(
+                address = FeedDestinationAddress(destination.address),
+                split = FeedDestinationSplit(destination.split.toDouble()),
+                type = FeedDestinationType(destination.type),
+                feed_id = feedId
+            )
+        }
     }
 
     val description = searchResultDescription

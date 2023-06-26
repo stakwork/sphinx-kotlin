@@ -40,7 +40,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_occupied_number"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/default_medium_layout_margin"
             android:fontFamily="@font/roboto_bold"
@@ -53,7 +53,7 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_manage_storage_free_number"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto_regular"
             android:maxLines="1"
@@ -130,7 +130,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_storage_image_container"
             android:layout_width="0dp"
-            android:layout_height="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/player_bar_height"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -163,19 +163,19 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_images_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_tab"
-                app:layout_constraintBottom_toBottomOf="@+id/button_profile_trash_images"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_images"
-                app:layout_constraintTop_toTopOf="@+id/button_profile_trash_images"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_images"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -210,9 +210,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_storage_video_container"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
             android:layout_width="0dp"
-            android:layout_height="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/player_bar_height"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_image_container">
@@ -243,19 +242,19 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_video_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_regular"
                 android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_tab"
-                app:layout_constraintBottom_toBottomOf="@+id/button_profile_trash_video"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_video"
-                app:layout_constraintTop_toTopOf="@+id/button_profile_trash_video"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_video"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -290,9 +289,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_storage_audio_container"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
             android:layout_width="0dp"
-            android:layout_height="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/player_bar_height"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_video_container">
@@ -323,19 +321,19 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_audio_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_regular"
                 android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_tab"
-                app:layout_constraintBottom_toBottomOf="@+id/button_profile_trash_audio"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_audio"
-                app:layout_constraintTop_toTopOf="@+id/button_profile_trash_audio"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_audio"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -370,9 +368,8 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/constraint_layout_storage_files_container"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
             android:layout_width="0dp"
-            android:layout_height="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/player_bar_height"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_audio_container">
@@ -403,19 +400,19 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_files_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/roboto_regular"
                 android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_tab"
-                app:layout_constraintBottom_toBottomOf="@+id/button_profile_trash_files"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_files"
-                app:layout_constraintTop_toTopOf="@+id/button_profile_trash_files"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_trash_files"
                 android:layout_width="@dimen/default_layout_margin"
                 android:layout_height="@dimen/default_layout_margin"
@@ -465,8 +462,7 @@
             android:id="@+id/constraint_layout_storage_chat_type_container"
             android:layout_marginHorizontal="@dimen/default_layout_margin"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/default_header_navigation_xy"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+            android:layout_height="@dimen/player_bar_height"
             app:layout_constraintTop_toTopOf="parent">
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -495,19 +491,19 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_manage_storage_custom_chat_number"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_regular"
                 android:maxLines="1"
                 android:textColor="@color/secondaryText"
                 android:textSize="@dimen/default_text_size_tab"
-                app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow_custom_chat"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow_custom_chat"
-                app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_custom_chat"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="12.37 GB" />
 
-            <androidx.appcompat.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/button_profile_right_arrow_custom_chat"
                 android:layout_width="@dimen/default_form_scan_icon_width"
                 android:layout_height="@dimen/default_form_scan_icon_width"
@@ -544,8 +540,7 @@
             android:id="@+id/constraint_layout_storage_podcast_type_container"
             android:layout_marginHorizontal="@dimen/default_layout_margin"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/default_header_navigation_xy"
-            android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+            android:layout_height="@dimen/player_bar_height"
             app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_chat_type_container">
 
         <androidx.appcompat.widget.AppCompatImageView
@@ -572,21 +567,21 @@
             app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type"
             app:layout_constraintTop_toTopOf="@+id/storage_progress_point_custom_type" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_manage_storage_custom_podcast_number"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/default_layout_margin"
-            android:fontFamily="@font/roboto_regular"
-            android:maxLines="1"
-            android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_text_size_tab"
-            app:layout_constraintBottom_toBottomOf="@+id/button_profile_right_arrow_custom_type"
-            app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow_custom_type"
-            app:layout_constraintTop_toTopOf="@+id/button_profile_right_arrow_custom_type"
-            tools:text="12.37 GB" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_custom_podcast_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow_custom_type"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12.37 GB" />
 
-        <androidx.appcompat.widget.AppCompatButton
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/button_profile_right_arrow_custom_type"
             android:layout_width="@dimen/default_form_scan_icon_width"
             android:layout_height="@dimen/default_form_scan_icon_width"

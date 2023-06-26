@@ -75,7 +75,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .placeholderResId(R.drawable.ic_video_placeholder)
             .build()
     }
 
@@ -332,7 +332,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                         imageViewProfilePicture,
                         photoUrl.value,
                         ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .placeholderResId(R.drawable.ic_video_placeholder)
                             .transformation(Transformation.CircleCrop)
                             .build()
                     )
