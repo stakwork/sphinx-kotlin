@@ -1,0 +1,3 @@
+import chat.sphinx.wrapper_invite.ConnectionString;
+
+ALTER TABLE inviteDbo ADD COLUMN connection_string TEXT AS ConnectionString;
