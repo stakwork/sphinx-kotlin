@@ -15,7 +15,8 @@ internal class InviteDboPresenterMapper(dispatchers: CoroutineDispatchers): Clas
             value.status,
             value.price,
             value.created_at,
-        )
+            value.connection_string,
+            )
     }
 
     override suspend fun mapTo(value: Invite): InviteDbo {
@@ -27,6 +28,7 @@ internal class InviteDboPresenterMapper(dispatchers: CoroutineDispatchers): Clas
             value.status,
             value.price,
             value.createdAt,
-        )
+            value.connectionString,
+            )
     }
 }

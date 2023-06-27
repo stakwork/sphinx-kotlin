@@ -31,6 +31,7 @@ import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_invite.InviteString
+import chat.sphinx.wrapper_invite.toValidConnectionStringOrNull
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
@@ -315,6 +316,7 @@ inline fun TransactionCallbacks.upsertInvite(dto: InviteDto, queries: SphinxData
         dto.invoice?.toLightningPaymentRequestOrNull(),
         inviteStatus,
         dto.price?.toSat(),
+        dto.connection_string?.toValidConnectionStringOrNull(),
         InviteId(dto.id),
         ContactId(dto.contact_id),
         dto.created_at.toDateTime(),

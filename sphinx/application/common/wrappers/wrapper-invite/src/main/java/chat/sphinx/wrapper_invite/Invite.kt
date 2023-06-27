@@ -15,4 +15,5 @@ data class Invite(
     val status: InviteStatus,
     val price: Sat?,
     val createdAt: DateTime,
-)
+    val connectionString: ConnectionString?
+    )

@@ -62,6 +62,7 @@ import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
 import chat.sphinx.wrapper_feed.FeedTitle;
+import chat.sphinx.wrapper_invite.ConnectionString;
 import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.Flagged;
 import chat.sphinx.wrapper_message.MessageContent;
@@ -421,7 +422,8 @@ CREATE TABLE inviteDbo(
     contact_id                  INTEGER         AS ContactId NOT NULL,
     status                      INTEGER         AS InviteStatus NOT NULL,
     price                       INTEGER         AS Sat,
-    created_at                  INTEGER         AS DateTime NOT NULL
+    created_at                  INTEGER         AS DateTime NOT NULL,
+    connection_string           TEXT            AS ConnectionString
 );
 
 inviteGetAll:
@@ -448,7 +450,8 @@ inviteUpsert {
     SET invite_string = :invite_string,
         invoice = :invoice,
         status = :status,
-        price = :price
+        price = :price,
+        connection_string = :connection_string
     WHERE id = :id;
 
     INSERT OR IGNORE INTO inviteDbo(
@@ -458,7 +461,8 @@ inviteUpsert {
         contact_id,
         status,
         price,
-        created_at
+        created_at,
+        connection_string
     )
     VALUES (
         :id,
@@ -467,7 +471,8 @@ inviteUpsert {
         :contact_id,
         :status,
         :price,
-        :created_at
+        :created_at,
+        :connection_string
     );
 }
 

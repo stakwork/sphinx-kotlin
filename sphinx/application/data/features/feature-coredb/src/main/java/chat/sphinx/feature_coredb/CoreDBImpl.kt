@@ -11,6 +11,7 @@ import chat.sphinx.feature_coredb.adapters.chat.*
 import chat.sphinx.feature_coredb.adapters.common.*
 import chat.sphinx.feature_coredb.adapters.contact.*
 import chat.sphinx.feature_coredb.adapters.feed.*
+import chat.sphinx.feature_coredb.adapters.invite.ConnectionStringAdapter
 import chat.sphinx.feature_coredb.adapters.invite.InviteStringAdapter
 import chat.sphinx.feature_coredb.adapters.media.*
 import chat.sphinx.feature_coredb.adapters.media.FileNameAdapter
@@ -118,6 +119,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     statusAdapter = InviteStatusAdapter.getInstance(),
                     priceAdapter = SatAdapter.getInstance(),
                     created_atAdapter = DateTimeAdapter.getInstance(),
+                    connection_stringAdapter = ConnectionStringAdapter(),
                 ),
                 dashboardDboAdapter = DashboardDbo.Adapter(
                     idAdapter = DashboardIdAdapter(),
