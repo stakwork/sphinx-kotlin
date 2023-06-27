@@ -627,9 +627,12 @@ abstract class ChatFragment<
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
                 override fun afterTextChanged(s: Editable?) {
+
                     lifecycleScope.launch(viewModel.mainImmediate) {
-                        viewModel.searchMessages(s.toString())
+                        viewModel.searchMessages(s.toString().trim())
                     }
+
+                    buttonChatSearchClear.goneIfFalse(s.toString().isNotEmpty())
                 }
             })
 
@@ -640,7 +643,13 @@ abstract class ChatFragment<
                     MessagesSearchViewState.Idle
                 )
 
+                hideKeyboardFrom(textViewChatSearchDone.context, textViewChatSearchDone )
+
 //                forceScrollToBottom()?
+            }
+
+            buttonChatSearchClear.setOnClickListener {
+                editTextChatSearch.setText("")
             }
         }
     }
@@ -1724,6 +1733,11 @@ abstract class ChatFragment<
                 }
             }
         }
+    }
+
+    fun hideKeyboardFrom(context: Context, view: View) {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     override fun onPause() {
