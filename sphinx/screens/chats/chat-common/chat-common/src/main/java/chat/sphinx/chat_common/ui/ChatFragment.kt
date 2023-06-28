@@ -127,6 +127,7 @@ abstract class ChatFragment<
     protected abstract val moreMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
     protected abstract val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+    protected abstract val scrollDownButtonBinding: LayoutScrollDownButtonBinding
 
     protected abstract val menuEnablePayments: Boolean
 
@@ -201,6 +202,7 @@ abstract class ChatFragment<
         setupHeader(insetterActivity)
         setupAttachmentSendPreview(insetterActivity)
         setupAttachmentFullscreen(insetterActivity)
+        setupScrollDown()
         setupRecyclerView()
 
         viewModel.screenInit()
@@ -821,6 +823,13 @@ abstract class ChatFragment<
 
                 viewModel.updateSelectedMessageViewState(SelectedMessageViewState.None)
             }
+        }
+    }
+
+    private fun setupScrollDown(){
+        scrollDownButtonBinding.root.setOnClickListener {
+            forceScrollToBottom()
+            viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.Off)
         }
     }
 
@@ -1705,8 +1714,12 @@ abstract class ChatFragment<
             viewModel.scrollDownViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
-                    is ScrollDownViewState.On -> {}
-                    is ScrollDownViewState.Off -> {}
+                    is ScrollDownViewState.On -> {
+                        scrollDownButtonBinding.root.visible
+                    }
+                    is ScrollDownViewState.Off -> {
+                        scrollDownButtonBinding.root.gone
+                    }
                 }
             }
         }
