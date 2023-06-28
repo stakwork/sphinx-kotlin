@@ -5,7 +5,6 @@ import chat.sphinx.delete.media.detail.R
 import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.android_concept_views.MotionLayoutViewState
 
-
 sealed class DeleteItemNotificationViewState: MotionLayoutViewState<DeleteItemNotificationViewState>() {
 
     object Closed: DeleteItemNotificationViewState() {

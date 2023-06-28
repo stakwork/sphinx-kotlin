@@ -24,12 +24,14 @@ import chat.sphinx.delete_chat_media.viewstate.DeleteChatNotificationViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
+import chat.sphinx.wrapper_common.calculateSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -180,19 +182,20 @@ internal class DeleteChatMediaFragment: SideEffectDetailFragment<
                             constraintDeleteSuccessfullyContainer.visible
 
                             binding.includeDeleteNotification.textViewManageStorageAllTypeText.text =
-                                String.format(
-                                    getString(R.string.manage_storage_deleted_all_files),
-                                    viewState.deletedSize
-                                )
-
-                            binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
-                                String.format(
-                                    getString(R.string.manage_storage_deleted_free_space),
-                                    viewState.deletedSize
-                                )
+                                getString(R.string.manage_storage_deleted_all_files)
                         }
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.itemsTotalSizeStateFlow.collect { deletedSize ->
+                binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
+                    String.format(
+                        getString(R.string.manage_storage_deleted_free_space),
+                        deletedSize.calculateSize()
+                    )
             }
         }
         super.subscribeToViewStateFlow()

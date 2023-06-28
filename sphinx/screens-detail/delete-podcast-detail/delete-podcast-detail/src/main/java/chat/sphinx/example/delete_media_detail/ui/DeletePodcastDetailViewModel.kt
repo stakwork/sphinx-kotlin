@@ -147,8 +147,13 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
     }
 
     fun openDeleteItemPopup(feedItem: FeedItem) {
-        deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Open(feedItem))
+        deleteItemNotificationViewStateContainer.updateViewState(
+            DeleteItemNotificationViewState.Open(
+                feedItem
+            )
+        )
     }
+
     fun closeDeleteItemPopup() {
         deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
     }
