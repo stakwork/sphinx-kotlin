@@ -44,6 +44,7 @@ import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -851,6 +852,13 @@ abstract class ChatFragment<
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.readMessages()
                         }
+                    }
+
+                    if (recyclerView.canScrollVertically(1)) {
+                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.On)
+                    }
+                    else {
+                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.Off)
                     }
                 }
             })
@@ -1690,6 +1698,15 @@ abstract class ChatFragment<
                             if (viewState.navigatingForward) viewState.index - 1 else viewState.index + 1
                         )
                     }
+                }
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.scrollDownViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is ScrollDownViewState.On -> {}
+                    is ScrollDownViewState.Off -> {}
                 }
             }
         }

@@ -37,6 +37,7 @@ import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
@@ -167,6 +168,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     val messageMentionsViewStateContainer: ViewStateContainer<MessageMentionsViewState> by lazy {
         ViewStateContainer(MessageMentionsViewState.MessageMentions(listOf()))
+    }
+
+    val scrollDownViewStateContainer: ViewStateContainer<ScrollDownViewState> by lazy {
+        ViewStateContainer(ScrollDownViewState.Off)
     }
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
