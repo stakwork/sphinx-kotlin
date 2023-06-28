@@ -30,6 +30,7 @@ import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -218,14 +219,20 @@ internal class DeletePodcastDetailFragment: SideEffectDetailFragment<
                             constraintChooseDeleteContainer.gone
                             constraintDeleteProgressContainer.gone
                             constraintDeleteSuccessfullyContainer.visible
-                            textViewManageStorageFreeSpaceText.text =
-                                String.format(
-                                    getString(R.string.manage_storage_deleted_free_space),
-                                    viewState.deletedSize
-                                )
                         }
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.itemsTotalSizeStateFlow.collect { deleteSize ->
+
+                binding.includeLayoutDeleteAllNotificationScreen.textViewManageStorageFreeSpaceText.text =
+                    String.format(
+                        getString(R.string.manage_storage_deleted_free_space),
+                        deleteSize
+                    )
             }
         }
         super.subscribeToViewStateFlow()
