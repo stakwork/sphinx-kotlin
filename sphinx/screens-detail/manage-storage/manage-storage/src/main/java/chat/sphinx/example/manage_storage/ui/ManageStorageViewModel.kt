@@ -25,12 +25,16 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.toFileSize
+import chat.sphinx.wrapper_feed.FeedItem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -58,7 +62,11 @@ internal class ManageStorageViewModel @Inject constructor(
         const val FILE_TYPE = "Files"
     }
 
-    private var storageData: StorageData? = null
+    private val _storageDataStateFlow: MutableStateFlow<StorageData?> by lazy {
+        MutableStateFlow(null)
+    }
+    private val storageDataStateFlow: StateFlow<StorageData?>
+        get() = _storageDataStateFlow.asStateFlow()
 
     val changeStorageLimitViewStateContainer: ViewStateContainer<ChangeStorageLimitViewState> by lazy {
         ViewStateContainer(ChangeStorageLimitViewState.Closed)
@@ -83,7 +91,7 @@ internal class ManageStorageViewModel @Inject constructor(
                 val usedStorage = storageDataInfo.usedStorage
                 val freeStorage = (totalStorage - usedStorage.value).toFileSize()
                 val modifiedStorageDataInfo = storageDataInfo.copy(freeStorage = freeStorage)
-                storageData = modifiedStorageDataInfo
+                _storageDataStateFlow.value = modifiedStorageDataInfo
 
                 val storageSize = StorageSize(
                     storageDataInfo.usedStorage.calculateSize(),
@@ -105,7 +113,7 @@ internal class ManageStorageViewModel @Inject constructor(
 
     private fun getDeleteExcessFileIfApplicable(){
         viewModelScope.launch(mainImmediate) {
-            storageData?.let { nnStorageData ->
+            storageDataStateFlow.value?.let { nnStorageData ->
 
                 val storageLimitProgress = storageLimitSharedPreferences.getInt(STORAGE_LIMIT_KEY, DEFAULT_STORAGE_LIMIT)
                 val userLimit = nnStorageData.freeStorage?.value?.let { calculateUserStorageLimit(freeStorage = it, seekBarValue = storageLimitProgress ) } ?: 0L
@@ -124,21 +132,21 @@ internal class ManageStorageViewModel @Inject constructor(
     fun deleteAllFilesByType(type: String) {
         when (type) {
             IMAGE_TYPE -> {
-                storageData?.images?.let { imageStorage ->
+                storageDataStateFlow.value?.images?.let { imageStorage ->
                     imageStorage.items.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, imageStorage.fileList, imageStorage.items[chatId])
                     }
                 }
             }
             VIDEO_TYPE -> {
-                storageData?.video?.let { videoStorage ->
+                storageDataStateFlow.value?.video?.let { videoStorage ->
                     videoStorage.items.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, videoStorage.fileList, videoStorage.items[chatId])
                     }
                 }
             }
             AUDIO_TYPE -> {
-                storageData?.audio?.let { audioStorage ->
+                storageDataStateFlow.value?.audio?.let { audioStorage ->
                     deleteAllDownloadedFeeds(audioStorage.feedList)
                     audioStorage.chatItems.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, audioStorage.fileList, audioStorage.chatItems[chatId])
@@ -146,7 +154,7 @@ internal class ManageStorageViewModel @Inject constructor(
                 }
             }
             FILE_TYPE -> {
-                storageData?.files?.let { filesStorage ->
+                storageDataStateFlow.value?.files?.let { filesStorage ->
                     filesStorage.items.keys.forEach { chatId ->
                         deleteDownloadedMedia(chatId, filesStorage.fileList, filesStorage.items[chatId])
                     }
@@ -193,7 +201,7 @@ internal class ManageStorageViewModel @Inject constructor(
     }
 
     fun updateStorageLimitViewState(progress: Int) {
-        storageData?.let { nnStorageData ->
+        storageDataStateFlow.value?.let { nnStorageData ->
 
             val usedStorage: Long = nnStorageData.usedStorage.value
             val freeStorage = nnStorageData.freeStorage?.value ?: 0L

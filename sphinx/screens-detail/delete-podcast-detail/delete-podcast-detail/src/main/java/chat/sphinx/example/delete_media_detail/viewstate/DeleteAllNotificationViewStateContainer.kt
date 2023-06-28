@@ -7,6 +7,6 @@ sealed class DeleteAllNotificationViewStateContainer : ViewState<DeleteAllNotifi
     object Closed: DeleteAllNotificationViewStateContainer()
     object Open: DeleteAllNotificationViewStateContainer()
     object Deleting: DeleteAllNotificationViewStateContainer()
-    data class Deleted(val deletedSize: String): DeleteAllNotificationViewStateContainer()
+    object Deleted: DeleteAllNotificationViewStateContainer()
 
 }
