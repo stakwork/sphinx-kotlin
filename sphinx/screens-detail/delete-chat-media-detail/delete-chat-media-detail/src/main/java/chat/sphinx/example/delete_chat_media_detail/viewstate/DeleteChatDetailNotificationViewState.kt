@@ -7,5 +7,5 @@ internal sealed class DeleteChatDetailNotificationViewState: ViewState<DeleteCha
     object Closed : DeleteChatDetailNotificationViewState()
     object Open : DeleteChatDetailNotificationViewState()
     object Deleting : DeleteChatDetailNotificationViewState()
-    data class SuccessfullyDeleted(val deletedSize: String) : DeleteChatDetailNotificationViewState()
+    object SuccessfullyDeleted : DeleteChatDetailNotificationViewState()
 }
