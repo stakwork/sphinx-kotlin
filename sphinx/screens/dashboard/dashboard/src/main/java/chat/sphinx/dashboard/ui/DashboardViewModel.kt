@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -165,6 +166,8 @@ internal class DashboardViewModel @Inject constructor(
                 handleRedeemSatsLink(redeemSatsLink)
             } ?: deepLink?.toFeedItemLink()?.let { feedItemLink ->
                 handleFeedItemLink(feedItemLink)
+            }  ?: deepLink?.toLightningNodeLink()?.let { lightningNodeLink ->
+                handleLightningNodeLink(lightningNodeLink)
             }
         }
     }
@@ -451,6 +454,75 @@ internal class DashboardViewModel @Inject constructor(
         feedRepository.getFeedForLink(link).firstOrNull()?.let { feed ->
             goToFeedDetailView(feed)
         }
+    }
+
+    private var setupSigningDeviceJob: Job? = null
+    private fun handleLightningNodeLink(link: LightningNodeLink) {
+        if (setupSigningDeviceJob?.isActive == true) return
+        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ChatListSideEffect.CheckNetwork {
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(ChatListSideEffect.SigningDeviceInfo(
+                        app.getString(R.string.network_name_title),
+                        app.getString(R.string.network_name_message)
+                    ) { networkName ->
+                        viewModelScope.launch(mainImmediate) {
+                            if (networkName == null) {
+                                submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
+                                return@launch
+                            }
+
+                            seedDto.ssid = networkName
+
+                            submitSideEffect(ChatListSideEffect.SigningDeviceInfo(
+                                app.getString(R.string.network_password_title),
+                                app.getString(
+                                    R.string.network_password_message,
+                                    networkName ?: "-"
+                                ),
+                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                            ) { networkPass ->
+                                viewModelScope.launch(mainImmediate) {
+                                    if (networkPass == null) {
+                                        submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
+                                        return@launch
+                                    }
+
+                                    seedDto.pass = networkPass
+
+                                    submitSideEffect(ChatListSideEffect.SigningDeviceInfo(
+                                        app.getString(R.string.lightning_node_url_title),
+                                        app.getString(R.string.lightning_node_url_message),
+                                    ) { lightningNodeUrl ->
+                                        viewModelScope.launch(mainImmediate) {
+                                            if (lightningNodeUrl == null) {
+                                                submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
+                                                return@launch
+                                            }
+
+                                            seedDto.lightningNodeUrl = lightningNodeUrl
+
+                                            submitSideEffect(ChatListSideEffect.CheckBitcoinNetwork(
+                                                regTestCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                                }, mainNetCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                                }, callback = {
+                                                    viewModelScope.launch(mainImmediate) {
+                                                        linkSigningDevice()
+                                                    }
+                                                }
+                                            ))
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
+
     }
 
     private suspend fun goToFeedDetailView(feed: Feed) {
