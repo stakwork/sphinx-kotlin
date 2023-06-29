@@ -51,7 +51,9 @@
     <string name="network_password_title">WiFi password</string>
     <string name="network_password_message">Enter the WiFi password for %s</string>
     <string name="lightning_node_ip_title">Lightning node IP</string>
+    <string name="lightning_node_url_title">Lightning Node URL</string>
     <string name="lightning_node_ip_message">Enter the IP of your lightning node</string>
+    <string name="lightning_node_url_message">Enter the URL of your lightning node</string>
     <string name="lightning_node_port_title">Lightning node Port</string>
     <string name="lightning_node_port_message">Enter the Port number of your lightning node</string>
     <string name="store_mnemonic">Store your Mnemonic securely</string>
