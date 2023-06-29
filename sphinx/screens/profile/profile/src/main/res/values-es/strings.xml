@@ -51,7 +51,9 @@
     <string name="network_password_title">Contraseña de WiFi</string>
     <string name="network_password_message">Ingresa la contraseña de WiFi para %s</string>
     <string name="lightning_node_ip_title">IP del nodo de lightning</string>
+    <string name="lightning_node_url_title">URL del nodo de lightning</string>
     <string name="lightning_node_ip_message">Ingresa la IP del nodo de lightning</string>
+    <string name="lightning_node_url_message">Ingresa la URL del nodo de lightning</string>
     <string name="lightning_node_port_title">Puerto del nodo de lightning</string>
     <string name="lightning_node_port_message">Ingresa el número de puerto del nodo de lightning</string>
     <string name="store_mnemonic">Guarda tus palabras de seguridad cuidadosamente</string>
