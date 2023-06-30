@@ -70,7 +70,7 @@ dependencies {
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
     implementation project(path: ':sphinx:application:common:logger')
 
-    
+
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
 
     implementation deps.androidx.swipeRefreshLayout
@@ -78,6 +78,7 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.bip39.sdk
+    implementation deps.jna.sdk
     implementation deps.lottie.sdk
     implementation deps.square.moshi
     kapt kaptDeps.google.hilt
