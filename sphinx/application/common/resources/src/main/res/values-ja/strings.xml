@@ -125,4 +125,27 @@
     <string name="manage_storage_deleted_all_files">All files</string>
 
     <string name="alias_allowed_characters">Only letters, numbers and underscore\nare allowed in tribe aliases</string>
+
+    <string name="network_check_title">Check your network</string>
+    <string name="network_check_message">Before starting you need to connect to \"sphinxkey\" WiFi network. Otherwise you won’t be able to setup your device. Are you connected to this network?</string>
+    <string name="network_name_title">WiFi network</string>
+    <string name="network_name_message">Please specify your WiFi network</string>
+    <string name="network_password_title">WiFi password</string>
+    <string name="network_password_message">Enter the WiFi password for %s</string>
+    <string name="lightning_node_ip_title">Lightning node IP</string>
+    <string name="lightning_node_url_title">Lightning Node URL</string>
+    <string name="lightning_node_ip_message">Enter the IP of your lightning node</string>
+    <string name="lightning_node_url_message">Enter the URL of your lightning node</string>
+    <string name="lightning_node_port_title">Lightning node Port</string>
+    <string name="lightning_node_port_message">Enter the Port number of your lightning node</string>
+    <string name="store_mnemonic">Store your Mnemonic securely</string>
+    <string name="sending_seed">Sending seed to hardware</string>
+    <string name="error_setting_up_signing_device">There was an error setting up signing device: %s</string>
+    <string name="signing_device_successfully_set">Seed sent to hardware successfully</string>
+    <string name="setup_signing_device">Setup Signing Device</string>
+    <string name="configure_signing_device">Configure Signing Device</string>
+    <string name="mnemonic_copied_to_clipboard">Mnemonic words copied to clipboard</string>
+    <string name="bitcoin_network">Bitcoin Network</string>
+    <string name="select_bitcoin_network">Select Bitcoin Network</string>
+
 </resources>
