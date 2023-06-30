@@ -753,7 +753,7 @@ internal class ProfileViewModel @Inject constructor(
         val nonce = ByteArray(12)
         SecureRandom().nextBytes(nonce)
 
-        encrypt(seed, sec1, nonce.toHex())?.let { cipher ->
+        encrypt(seed, sec1, nonce.toHex()).let { cipher ->
             if (cipher.isNotEmpty()) {
                 seedDto.seed = cipher
 
@@ -766,6 +766,7 @@ internal class ProfileViewModel @Inject constructor(
                             resetSeedDto()
                             submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("error sending seed to hardware"))
                         }
+
                         is Response.Success -> {
                             submitSideEffect(ProfileSideEffect.SigningDeviceSuccessfullySet)
 

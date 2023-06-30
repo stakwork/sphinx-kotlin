@@ -1,15 +1,21 @@
 package chat.sphinx.dashboard.ui
 
 import android.app.AlertDialog
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import chat.sphinx.dashboard.R
+import chat.sphinx.dashboard.ui.DashboardViewModel.Companion.BITCOIN_NETWORK_MAIN_NET
+import chat.sphinx.dashboard.ui.DashboardViewModel.Companion.BITCOIN_NETWORK_REG_TEST
 import chat.sphinx.resources.SphinxToastUtils
+import chat.sphinx.wrapper_chat.Chat
 import io.matthewnelson.android_feature_toast_utils.show
 import io.matthewnelson.concept_views.sideeffect.SideEffect
+import java.util.Locale
 
 sealed class ChatListSideEffect: SideEffect<Context>() {
 
@@ -161,7 +167,7 @@ sealed class ChatListSideEffect: SideEffect<Context>() {
         private val regTestCallback: () -> Unit,
         private val mainNetCallback: () -> Unit,
         private val callback: () -> Unit,
-    ): ProfileSideEffect() {
+    ): ChatListSideEffect() {
         override suspend fun execute(value: Context) {
             val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
             builder.setTitle(value.getString(R.string.select_bitcoin_network))
@@ -186,6 +192,52 @@ sealed class ChatListSideEffect: SideEffect<Context>() {
                 callback.invoke()
             }
             builder.show()
+        }
+    }
+
+    class ShowMnemonicToUser(
+        private val mnemonic: String,
+        private val callback: () -> Unit,
+    ): ChatListSideEffect() {
+        override suspend fun execute(value: Context) {
+            val builder = AlertDialog.Builder(value, R.style.AlertDialogTheme)
+            builder.setTitle(value.getString(R.string.store_mnemonic))
+            builder.setMessage(mnemonic)
+            builder.setNeutralButton(android.R.string.copy) { _, _ ->
+                (value.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager)?.let { manager ->
+                    val clipData = ClipData.newPlainText("mnemonic", mnemonic)
+                    manager.setPrimaryClip(clipData)
+
+                    SphinxToastUtils().show(value, R.string.mnemonic_copied_to_clipboard)
+                }
+                callback.invoke()
+            }
+            builder.setPositiveButton(android.R.string.ok) { _, _ ->
+                callback.invoke()
+            }
+            builder.show()
+        }
+    }
+
+    object SendingSeedToHardware: ChatListSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.sending_seed)
+        }
+    }
+
+    object SigningDeviceSuccessfullySet: ChatListSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils(true).show(value, R.string.signing_device_successfully_set)
+        }
+    }
+
+
+    @Suppress("NOTHING_TO_INLINE")
+    inline fun String.toCapitalized(): String {
+        return this.replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(
+                Locale.ROOT
+            ) else it.toString()
         }
     }
 
