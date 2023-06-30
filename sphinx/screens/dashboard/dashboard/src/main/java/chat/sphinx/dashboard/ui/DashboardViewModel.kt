@@ -70,12 +70,16 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import uniffi.sphinxrs.deriveSharedSecret
+import uniffi.sphinxrs.encrypt
+import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 
@@ -530,16 +534,16 @@ internal class DashboardViewModel @Inject constructor(
                                                 return@launch
                                             }
 
-//                                            seedDto.lightningNodeUrl = lightningNodeUrl
+                                            seedDto.lightningNodeUrl = lightningNodeUrl
 
                                             submitSideEffect(ChatListSideEffect.CheckBitcoinNetwork(
                                                 regTestCallback = {
-//                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
                                                 }, mainNetCallback = {
-//                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
                                                 }, callback = {
                                                     viewModelScope.launch(mainImmediate) {
-//                                                        linkSigningDevice()
+                                                        linkSigningDevice()
                                                     }
                                                 }
                                             ))
@@ -552,65 +556,64 @@ internal class DashboardViewModel @Inject constructor(
                 }
             })
         }
-
     }
 
-//    private suspend fun linkSigningDevice() {
-//        val secKey = ByteArray(32)
-//        SecureRandom().nextBytes(secKey)
-//
-//        val sk1 = secKey.toHex()
-//        val pk1 = pubkeyFromSecretKey(sk1)
-//
-//        var pk2 : String? = null
-//
-//        if (pk1 == null) {
-//            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error generating secret key"))
-//            resetSeedDto()
-//            return
-//        }
-//
-//        seedDto.pubkey = pk1
-//
-//        if (
-//            seedDto.lightningNodeUrl == null ||
-//            seedDto.lightningNodeUrl?.isEmpty() == true
-//        ) {
-//            resetSeedDto()
-//            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("lightning node URL can't be empty"))
-//            return
-//        }
-//
-//        networkQueryCrypter.getCrypterPubKey().collect { loadResponse ->
-//            when (loadResponse) {
-//                is LoadResponse.Loading -> {}
-//                is Response.Error -> {
-//                    resetSeedDto()
-//                    submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error getting public key from hardware"))
-//                }
-//                is Response.Success -> {
-//                    pk2 = loadResponse.value.pubkey
-//                }
-//            }
-//        }
-//
-//        pk2?.let { nnPk2 ->
-//            val sec1 = deriveSharedSecret(nnPk2, sk1)
-//            val seedAndMnemonic = generateAndPersistMnemonic()
-//
-//            seedAndMnemonic.second?.let { mnemonic ->
-//                submitSideEffect(ChatListSideEffect.ShowMnemonicToUser(
-//                    mnemonic.value
-//                ) {
-//                    seedAndMnemonic.first?.let { seed ->
-//                        viewModelScope.launch(mainImmediate) {
-//                            encryptAndSendSeed(seed, sec1)
-//                        }
-//                    }
-//                })
-//            }
-//        }
-//    }
+    private suspend fun linkSigningDevice() {
+        val secKey = ByteArray(32)
+        SecureRandom().nextBytes(secKey)
+
+        val sk1 = secKey.toHex()
+        val pk1 = pubkeyFromSecretKey(sk1)
+
+        var pk2 : String? = null
+
+        if (pk1 == null) {
+            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error generating secret key"))
+            resetSeedDto()
+            return
+        }
+
+        seedDto.pubkey = pk1
+
+        if (
+            seedDto.lightningNodeUrl == null ||
+            seedDto.lightningNodeUrl?.isEmpty() == true
+        ) {
+            resetSeedDto()
+            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("lightning node URL can't be empty"))
+            return
+        }
+
+        networkQueryCrypter.getCrypterPubKey().collect { loadResponse ->
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    resetSeedDto()
+                    submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error getting public key from hardware"))
+                }
+                is Response.Success -> {
+                    pk2 = loadResponse.value.pubkey
+                }
+            }
+        }
+
+        pk2?.let { nnPk2 ->
+            val sec1 = deriveSharedSecret(nnPk2, sk1)
+            val seedAndMnemonic = generateAndPersistMnemonic()
+
+            seedAndMnemonic.second?.let { mnemonic ->
+                submitSideEffect(ChatListSideEffect.ShowMnemonicToUser(
+                    mnemonic.value
+                ) {
+                    seedAndMnemonic.first?.let { seed ->
+                        viewModelScope.launch(mainImmediate) {
+                            encryptAndSendSeed(seed, sec1)
+                        }
+                    }
+                })
+            }
+        }
+    }
 
     private suspend fun generateAndPersistMnemonic() : Pair<String?, WalletMnemonic?> {
         var walletMnemonic: WalletMnemonic? = null
@@ -648,38 +651,49 @@ internal class DashboardViewModel @Inject constructor(
         return Pair(seed, walletMnemonic)
     }
 
-//    private suspend fun encryptAndSendSeed(
-//        seed: String,
-//        sec1: String
-//    ) {
-//        val nonce = ByteArray(12)
-//        SecureRandom().nextBytes(nonce)
-//
-//        encrypt(seed, sec1, nonce.toHex())?.let { cipher ->
-//            if (cipher.isNotEmpty()) {
-//                seedDto.seed = cipher
-//
-//                submitSideEffect(ChatListSideEffect.SendingSeedToHardware)
-//
-//                networkQueryCrypter.sendEncryptedSeed(seedDto).collect { loadResponse ->
-//                    when (loadResponse) {
-//                        is LoadResponse.Loading -> {}
-//                        is Response.Error -> {
-//                            resetSeedDto()
-//                            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error sending seed to hardware"))
-//                        }
-//                        is Response.Success -> {
-//                            submitSideEffect(ChatListSideEffect.SigningDeviceSuccessfullySet)
-//
-//                            setSigningDeviceSetupDone {
-//                                switchTabTo(false)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+    private suspend fun encryptAndSendSeed(
+        seed: String,
+        sec1: String
+    ) {
+        val nonce = ByteArray(12)
+        SecureRandom().nextBytes(nonce)
+
+        encrypt(seed, sec1, nonce.toHex()).let { cipher ->
+            if (cipher.isNotEmpty()) {
+                seedDto.seed = cipher
+
+                submitSideEffect(ChatListSideEffect.SendingSeedToHardware)
+
+                networkQueryCrypter.sendEncryptedSeed(seedDto).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            resetSeedDto()
+                            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error sending seed to hardware"))
+                        }
+
+                        is Response.Success -> {
+                            submitSideEffect(ChatListSideEffect.SigningDeviceSuccessfullySet)
+
+                            setSigningDeviceSetupDone {
+                                // Device Successfully Set
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun isSigningDeviceSetupDone(): Boolean {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        return sharedPreferences.getBoolean(
+            SIGNING_DEVICE_SETUP_KEY,
+            false
+        )
+    }
 
     private suspend fun setSigningDeviceSetupDone(
         callback: () -> Unit
