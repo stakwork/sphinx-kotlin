@@ -11,6 +11,11 @@ inline fun String.toLightningNodeLink(): LightningNodeLink? =
 inline val String.isValidLightningNodeLink: Boolean
     get() = isNotEmpty() && matches("^${LightningNodeLink.REGEX}\$".toRegex())
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.isBitcoinNetwork(): Boolean =
+    this == "bitcoin"
+
+
 @JvmInline
 value class LightningNodeLink(val value: String) {
 
@@ -43,5 +48,4 @@ value class LightningNodeLink(val value: String) {
         }
         return null
     }
-
 }

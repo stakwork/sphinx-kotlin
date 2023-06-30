@@ -194,7 +194,7 @@ internal class DashboardViewModel @Inject constructor(
                 handleRedeemSatsLink(redeemSatsLink)
             } ?: deepLink?.toFeedItemLink()?.let { feedItemLink ->
                 handleFeedItemLink(feedItemLink)
-            }  ?: deepLink?.toLightningNodeLink()?.let { lightningNodeLink ->
+            } ?: deepLink?.toLightningNodeLink()?.let { lightningNodeLink ->
                 handleLightningNodeLink(lightningNodeLink)
             }
         }
@@ -223,6 +223,7 @@ internal class DashboardViewModel @Inject constructor(
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ||
+                                data.isValidLightningNodeLink ||
                                 data.isValidExternalRequestLink ->
                                 {
                                     Response.Success(Any())
@@ -296,6 +297,8 @@ internal class DashboardViewModel @Inject constructor(
                             )
                         }
                     } catch (e: Exception) {}
+                } ?: code.toLightningNodeLink()?.let { lightningNodeLink ->
+                    handleLightningNodeLink(lightningNodeLink)
                 }
             }
         }
@@ -493,6 +496,7 @@ internal class DashboardViewModel @Inject constructor(
     private var setupSigningDeviceJob: Job? = null
     private fun handleLightningNodeLink(link: LightningNodeLink) {
         if (setupSigningDeviceJob?.isActive == true) return
+
         setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
             submitSideEffect(ChatListSideEffect.CheckNetwork {
                 viewModelScope.launch(mainImmediate) {
@@ -523,32 +527,25 @@ internal class DashboardViewModel @Inject constructor(
                                     }
 
                                     seedDto.pass = networkPass
+                                    seedDto.lightningNodeUrl = link.lightningMqtt
 
-                                    submitSideEffect(ChatListSideEffect.SigningDeviceInfo(
-                                        app.getString(R.string.payment_request),
-                                        app.getString(R.string.lightning_node_url_message),
-                                    ) { lightningNodeUrl ->
-                                        viewModelScope.launch(mainImmediate) {
-                                            if (lightningNodeUrl == null) {
-                                                submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
-                                                return@launch
-                                            }
-
-                                            seedDto.lightningNodeUrl = lightningNodeUrl
-
-                                            submitSideEffect(ChatListSideEffect.CheckBitcoinNetwork(
-                                                regTestCallback = {
-                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
-                                                }, mainNetCallback = {
-                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
-                                                }, callback = {
-                                                    viewModelScope.launch(mainImmediate) {
-                                                        linkSigningDevice()
-                                                    }
+                                    if (link.lightningNetwork.isBitcoinNetwork()) {
+                                        seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                        linkSigningDevice()
+                                    }
+                                    else {
+                                        submitSideEffect(ChatListSideEffect.CheckBitcoinNetwork(
+                                            regTestCallback = {
+                                                seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                            }, mainNetCallback = {
+                                                seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                            }, callback = {
+                                                viewModelScope.launch(mainImmediate) {
+                                                    linkSigningDevice()
                                                 }
-                                            ))
-                                        }
-                                    })
+                                            }
+                                        ))
+                                    }
                                 }
                             })
                         }
