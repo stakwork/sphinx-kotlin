@@ -671,10 +671,7 @@ internal class DashboardViewModel @Inject constructor(
 
                         is Response.Success -> {
                             submitSideEffect(ChatListSideEffect.SigningDeviceSuccessfullySet)
-
-                            setSigningDeviceSetupDone {
-                                // Device Successfully Set
-                            }
+                            setSigningDeviceSetupDone()
                         }
                     }
                 }
@@ -682,19 +679,7 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private fun isSigningDeviceSetupDone(): Boolean {
-        val appContext: Context = app.applicationContext
-        val sharedPreferences = appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
-
-        return sharedPreferences.getBoolean(
-            SIGNING_DEVICE_SETUP_KEY,
-            false
-        )
-    }
-
-    private suspend fun setSigningDeviceSetupDone(
-        callback: () -> Unit
-    ) {
+    private suspend fun setSigningDeviceSetupDone() {
         val appContext: Context = app.applicationContext
         val sharedPreferences = appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
@@ -704,7 +689,6 @@ internal class DashboardViewModel @Inject constructor(
                     if (!editor.commit()) {
                         editor.apply()
                     }
-                    callback.invoke()
                 }
         }
     }
