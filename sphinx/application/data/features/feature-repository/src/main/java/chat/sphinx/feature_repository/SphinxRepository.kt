@@ -4131,9 +4131,10 @@ abstract class SphinxRepository(
                 .asFlow()
                 .mapToList(io)
                 .map { listFeedItemDbo ->
-                    listFeedItemDbo.map {
+                    val feedItems = listFeedItemDbo.map {
                         feedItemDboPresenterMapper.mapFrom(it)
                     }
+                    assignFeedToFeedItemList(feedItems, coreDB.getSphinxDatabaseQueries())
                 }
                 .distinctUntilChanged()
         )
@@ -4510,6 +4511,31 @@ abstract class SphinxRepository(
     private val podcastEpisodeDboPresenterMapper: FeedItemDboPodcastEpisodePresenterMapper by lazy {
         FeedItemDboPodcastEpisodePresenterMapper(dispatchers)
     }
+
+    private suspend fun assignFeedToFeedItemList(
+        feedItems: List<FeedItem>,
+        queries: SphinxDatabaseQueries
+    ): List<FeedItem> {
+        val feedsMap: MutableMap<FeedId, Feed> = mutableMapOf()
+
+        val feedIds = feedItems.map { it.feedId }.distinct()
+
+        queries.feedGetByIds(feedIds)
+            .executeAsList()
+            .let { response ->
+                response.forEach { dbo ->
+                    val feed = feedDboPresenterMapper.mapFrom(dbo)
+                    feedsMap[dbo.id] = feed
+                }
+            }
+
+        feedItems.forEach { item ->
+            item.feed = feedsMap[item.feedId]
+        }
+
+        return feedItems
+    }
+
 
     override fun getPodcastByChatId(chatId: ChatId): Flow<Podcast?> = flow {
         val queries = coreDB.getSphinxDatabaseQueries()
