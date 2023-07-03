@@ -191,6 +191,16 @@ internal class FeedAllFragment : SideEffectFragment<
                 )
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.feedDownloadedHolderViewStateFlow.collect { list ->
+                if (list.isEmpty()) {
+                    binding.layoutConstraintDownloadedSection.gone
+                } else {
+                    binding.layoutConstraintDownloadedSection.visible
+                }
+            }
+        }
     }
 
     private fun toggleElements(contentAvailable: Boolean) {
