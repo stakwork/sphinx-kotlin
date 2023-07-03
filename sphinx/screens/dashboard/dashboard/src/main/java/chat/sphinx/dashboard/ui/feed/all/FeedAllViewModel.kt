@@ -1,5 +1,6 @@
 package chat.sphinx.dashboard.ui.feed.all
 
+import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
@@ -11,6 +12,7 @@ import chat.sphinx.dashboard.ui.feed.FeedDownloadedViewModel
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecentlyPlayedViewModel
 import chat.sphinx.dashboard.ui.feed.FeedRecommendationsViewModel
+import chat.sphinx.dashboard.ui.getMediaDuration
 import chat.sphinx.dashboard.ui.viewstates.FeedAllViewState
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -20,8 +22,10 @@ import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.time
 import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_feed.FeedItem
+import chat.sphinx.wrapper_feed.FeedItemDuration
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.Podcast
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -161,7 +165,55 @@ internal class FeedAllViewModel @Inject constructor(
     override val feedDownloadedHolderViewStateFlow: StateFlow<List<FeedItem>>
         get() = _feedDownloadedHolderViewStateFlow
 
-    override fun feedDownloadedSelected(feedItem: FeedItem) {}
+    override fun feedDownloadedSelected(feedItem: FeedItem) {
+        viewModelScope.launch(mainImmediate) {
+            feedRepository.getPodcastById(feedItem.feedId).firstOrNull()?.let { podcast ->
+                podcast.getEpisodeWithId(feedItem.id.value)?.let { episode ->
+
+                    podcast.willStartPlayingEpisode(
+                        episode,
+                        episode.currentTimeMilliseconds ?: 0,
+                        ::retrieveEpisodeDuration
+                    )
+
+                    dashboardNavigator.toPodcastPlayerScreen(
+                        feedItem.feed?.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                        episode.podcastId,
+                        podcast.feedUrl
+                    )
+
+                    mediaPlayerServiceController.submitAction(
+                        UserAction.ServiceAction.Play(
+                            feedItem.feed?.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                            episode.episodeUrl,
+                            podcast.getUpdatedContentFeedStatus(),
+                            podcast.getUpdatedContentEpisodeStatus()
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
+        }
+
+        return duration
+    }
+
 
     private fun goToPodcastPlayer(
         chatId: ChatId,
