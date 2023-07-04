@@ -1,6 +1,6 @@
 package chat.sphinx.concept_network_query_feed_search.model
 
-import chat.sphinx.wrapper_podcast.FeedItemSearchResult
+import chat.sphinx.wrapper_podcast.FeedSearchResult
 import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
@@ -22,22 +22,23 @@ data class FeedItemSearchResultDto(
     val url: String
 )
 
-inline fun FeedItemSearchResultDto.toFeedItemSearchResult() : FeedItemSearchResult {
-    return FeedItemSearchResult(
-        id,
-        title,
-        description,
-        datePublished,
-        dateUpdated,
-        author,
-        enclosureUrl,
-        enclosureType,
-        duration,
-        imageUrl,
-        thumbnailUrl,
-        link,
-        feedId,
-        feedType,
-        url,
+inline fun FeedItemSearchResultDto.toFeedItemSearchResult() : FeedSearchResult {
+    return FeedSearchResult(
+        id = feedId,
+        title = title,
+        description = description,
+        datePublished = datePublished,
+        dateUpdated = dateUpdated,
+        author = author,
+        url = url,
+        contentType = enclosureType,
+        link = link,
+        imageUrl = imageUrl,
+        feedType = feedType,
+        generator = "",
+        ownerUrl = "",
+        language = null,
+        chatId = null,
+        feedItemId = id
     )
 }

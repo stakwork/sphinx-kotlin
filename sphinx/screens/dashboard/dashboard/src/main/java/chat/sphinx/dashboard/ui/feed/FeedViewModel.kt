@@ -1,12 +1,15 @@
 package chat.sphinx.dashboard.ui.feed
 
-import android.util.Log
+import android.net.Uri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
+import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.dashboard.ui.getMediaDuration
 import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.kotlin_response.Response
@@ -15,9 +18,9 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_feed.*
-import chat.sphinx.wrapper_podcast.FeedItemSearchResultRow
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
+import chat.sphinx.wrapper_podcast.PodcastEpisode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -38,6 +41,7 @@ class FeedViewModel @Inject constructor(
     val dashboardNavigator: DashboardNavigator,
     private val feedRepository: FeedRepository,
     private val actionsRepository: ActionsRepository,
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
     dispatchers: CoroutineDispatchers,
 ): SideEffectViewModel<
         FragmentActivity,
@@ -94,15 +98,14 @@ class FeedViewModel @Inject constructor(
                     searchTerm,
                     feedType
                 ).collect { searchResults ->
-                    processSearchResults(searchTerm, searchResults, isItemSearch = true)
-                    Log.d("searchResult", searchResults.toString())
+                    processSearchResults(searchTerm, searchResults)
                 }
             } else {
                 feedRepository.searchFeedsBy(
                     searchTerm,
                     feedType
                 ).collect { searchResults ->
-                    processSearchResults(searchTerm, searchResults, isItemSearch = false)
+                    processSearchResults(searchTerm, searchResults)
                 }
             }
         }.also {
@@ -110,7 +113,7 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    private fun processSearchResults(searchTerm: String, searchResults: List<Any>, isItemSearch: Boolean) {
+    private fun processSearchResults(searchTerm: String, searchResults: List<FeedSearchResultRow>) {
         addSearchTerm(
             searchTerm.lowercase().trim()
         )
@@ -131,15 +134,9 @@ class FeedViewModel @Inject constructor(
             )
         } else {
             updateViewState(
-                if (isItemSearch) {
-                    FeedViewState.SearchItemResults(
-                        searchResults as List<FeedItemSearchResultRow>
-                    )
-                } else {
-                    FeedViewState.SearchFeedResults(
-                        searchResults as List<FeedSearchResultRow>
-                    )
-                }
+                FeedViewState.SearchFeedResults(
+                    searchResults
+                )
             )
         }
     }
@@ -210,23 +207,27 @@ class FeedViewModel @Inject constructor(
                     chatId = ChatId(ChatId.NULL_CHAT_ID.toLong()),
                     host = ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL),
                     feedUrl = feedUrl,
-                    searchResultDescription = searchResult.description?.toFeedDescription(),
+                    searchResultDescription = if (searchResult.feedItemId == null) searchResult.description?.toFeedDescription() else null,
                     searchResultImageUrl = searchResult.imageUrl?.toPhotoUrl(),
                     chatUUID = null,
                     subscribed = false.toSubscribed(),
                     currentItemId = null
                 )
 
-                @Exhaustive
-                when (response) {
+                @Exhaustive when (response) {
                     is Response.Success -> {
-                        feedRepository.getFeedById(response.value).firstOrNull()?.let { feed ->
-                            feed?.let { nnFeed ->
-                                goToFeedDetailView(nnFeed)
-                                callback()
+                        if (searchResult.feedItemId.isNullOrEmpty()) {
+                            feedRepository.getFeedById(response.value).firstOrNull()?.let { feed ->
+                                feed.let { nnFeed ->
+                                    goToFeedDetailView(nnFeed)
+                                    callback()
+                                }
                             }
+                        } else {
+                            goToPodcastPlayer(FeedId(searchResult.feedItemId.toString()))
                         }
                     }
+
                     is Response.Error -> {
                         submitSideEffect(FeedSideEffect.FailedToLoadFeed)
                         callback()
@@ -238,6 +239,58 @@ class FeedViewModel @Inject constructor(
             }
         }
     }
+
+    private fun goToPodcastPlayer(feedItemId: FeedId){
+        viewModelScope.launch(mainImmediate) {
+            feedRepository.getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+                feedRepository.getPodcastById(feedItem.feedId).firstOrNull()?.let { podcast ->
+                    podcast.getEpisodeWithId(feedItem.id.value)?.let { episode ->
+
+                        podcast.willStartPlayingEpisode(
+                            episode,
+                            episode.currentTimeMilliseconds ?: 0,
+                            ::retrieveEpisodeDuration
+                        )
+
+                        dashboardNavigator.toPodcastPlayerScreen(
+                            feedItem.feed?.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                            episode.podcastId,
+                            podcast.feedUrl
+                        )
+
+                        mediaPlayerServiceController.submitAction(
+                            UserAction.ServiceAction.Play(
+                                feedItem.feed?.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                                episode.episodeUrl,
+                                podcast.getUpdatedContentFeedStatus(),
+                                podcast.getUpdatedContentEpisodeStatus()
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun retrieveEpisodeDuration(
+        episode: PodcastEpisode
+    ): Long {
+        val duration = episode.localFile?.let {
+            Uri.fromFile(it).getMediaDuration(true)
+        } ?: Uri.parse(episode.episodeUrl).getMediaDuration(false)
+
+        viewModelScope.launch(io) {
+            feedRepository.updateContentEpisodeStatus(
+                feedId = episode.podcastId,
+                itemId = episode.id,
+                FeedItemDuration(duration / 1000),
+                FeedItemDuration(episode.currentTimeSeconds)
+            )
+        }
+
+        return duration
+    }
+
 
     private suspend fun goToFeedDetailView(feed: Feed) {
         when {

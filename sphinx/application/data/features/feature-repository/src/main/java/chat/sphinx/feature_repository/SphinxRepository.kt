@@ -119,7 +119,6 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
-import chat.sphinx.wrapper_podcast.FeedItemSearchResultRow
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
@@ -4718,12 +4717,12 @@ abstract class SphinxRepository(
     override fun searchFeedItemsBy(
         searchTerm: String,
         feedType: FeedType?
-    ): Flow<List<FeedItemSearchResultRow>> = flow {
+    ): Flow<List<FeedSearchResultRow>> = flow {
         if (feedType == null) {
             return@flow
         }
 
-        var results: MutableList<FeedItemSearchResultRow> = mutableListOf()
+        var results: MutableList<FeedSearchResultRow> = mutableListOf()
 
         networkQueryFeedSearch.searchFeedItems(
             searchTerm,
@@ -4738,7 +4737,7 @@ abstract class SphinxRepository(
 
                     if (response.value.isNotEmpty()) {
                         results.add(
-                            FeedItemSearchResultRow(
+                            FeedSearchResultRow(
                                 feedSearchResult = null,
                                 isSectionHeader = true,
                                 isFollowingSection = false,
@@ -4748,7 +4747,7 @@ abstract class SphinxRepository(
 
                         response.value.forEachIndexed { index, item ->
                             results.add(
-                                FeedItemSearchResultRow(
+                                FeedSearchResultRow(
                                     item.toFeedItemSearchResult(),
                                     isSectionHeader = false,
                                     isFollowingSection = false,
