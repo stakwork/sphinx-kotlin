@@ -10,6 +10,7 @@ import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_podcast.FeedItemSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import kotlinx.coroutines.flow.Flow
@@ -23,6 +24,11 @@ interface FeedRepository {
         searchTerm: String,
         feedType: FeedType?,
     ): Flow<List<FeedSearchResultRow>>
+
+    fun searchFeedItemsBy(
+        searchTerm: String,
+        feedType: FeedType?,
+    ): Flow<List<FeedItemSearchResultRow>>
 
     suspend fun updateFeedContent(
         chatId: ChatId,

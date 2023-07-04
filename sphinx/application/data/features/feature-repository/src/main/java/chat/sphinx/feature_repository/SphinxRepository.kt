@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_search.model.toFeedItemSearchResult
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
@@ -118,6 +119,7 @@ import chat.sphinx.wrapper_meme_server.PublicAttachmentInfo
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import chat.sphinx.wrapper_message_media.token.MediaHost
+import chat.sphinx.wrapper_podcast.FeedItemSearchResultRow
 import chat.sphinx.wrapper_podcast.FeedRecommendation
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import chat.sphinx.wrapper_podcast.Podcast
@@ -4699,6 +4701,55 @@ abstract class SphinxRepository(
                             results.add(
                                 FeedSearchResultRow(
                                     item.toFeedSearchResult(),
+                                    isSectionHeader = false,
+                                    isFollowingSection = false,
+                                    (index == response.value.count() - 1)
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        emit(results)
+    }
+
+    override fun searchFeedItemsBy(
+        searchTerm: String,
+        feedType: FeedType?
+    ): Flow<List<FeedItemSearchResultRow>> = flow {
+        if (feedType == null) {
+            return@flow
+        }
+
+        var results: MutableList<FeedItemSearchResultRow> = mutableListOf()
+
+        networkQueryFeedSearch.searchFeedItems(
+            searchTerm,
+            feedType
+        ).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {}
+                is Response.Success -> {
+
+                    if (response.value.isNotEmpty()) {
+                        results.add(
+                            FeedItemSearchResultRow(
+                                feedSearchResult = null,
+                                isSectionHeader = true,
+                                isFollowingSection = false,
+                                isLastOnSection = false
+                            )
+                        )
+
+                        response.value.forEachIndexed { index, item ->
+                            results.add(
+                                FeedItemSearchResultRow(
+                                    item.toFeedItemSearchResult(),
                                     isSectionHeader = false,
                                     isFollowingSection = false,
                                     (index == response.value.count() - 1)

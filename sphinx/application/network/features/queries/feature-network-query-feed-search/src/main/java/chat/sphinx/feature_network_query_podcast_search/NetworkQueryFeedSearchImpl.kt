@@ -1,6 +1,7 @@
 package chat.sphinx.feature_network_query_podcast_search
 
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_search.model.FeedItemSearchResultDto
 import chat.sphinx.concept_network_query_feed_search.model.FeedRecommendationDto
 import chat.sphinx.concept_network_query_feed_search.model.FeedSearchResultDto
 import chat.sphinx.concept_network_relay_call.NetworkRelayCall
@@ -24,6 +25,10 @@ class NetworkQueryFeedSearchImpl(
 
         private const val ENDPOINT_PODCAST_SEARCH = "$TRIBES_DEFAULT_SERVER_URL/search_podcasts?q=%s"
         private const val ENDPOINT_YOUTUBE_SEARCH = "$TRIBES_DEFAULT_SERVER_URL/search_youtube?q=%s"
+
+        private const val ENDPOINT_PODCAST_ITEM_SEARCH = "$TRIBES_DEFAULT_SERVER_URL/search_podcast_episodes?q=%s"
+        private const val ENDPOINT_YOUTUBE_VIDEO_SEARCH = "$TRIBES_DEFAULT_SERVER_URL/search_youtube_videos?q=%s"
+
         private const val ENDPOINT_FEED_RECOMMENDATIONS = "/feeds"
     }
 
@@ -40,6 +45,21 @@ class NetworkQueryFeedSearchImpl(
             ),
             responseJsonClass = FeedSearchResultDto::class.java,
         )
+
+    override fun searchFeedItems(
+        searchTerm: String,
+        feedType: FeedType
+    ): Flow<LoadResponse<List<FeedItemSearchResultDto>, ResponseError>> =
+        networkRelayCall.getList(
+            url = String.format(
+                if (feedType.isPodcast())
+                    ENDPOINT_PODCAST_ITEM_SEARCH
+                else
+                    ENDPOINT_YOUTUBE_VIDEO_SEARCH, searchTerm
+            ),
+            responseJsonClass = FeedItemSearchResultDto::class.java,
+        )
+
 
     override fun getFeedRecommendations(
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
