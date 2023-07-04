@@ -1,5 +1,6 @@
 package chat.sphinx.dashboard.ui.feed
 
+import android.util.Log
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -14,7 +15,9 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.toPhotoUrl
 import chat.sphinx.wrapper_feed.*
+import chat.sphinx.wrapper_podcast.FeedItemSearchResultRow
 import chat.sphinx.wrapper_podcast.FeedSearchResult
+import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.currentViewState
@@ -53,7 +56,8 @@ class FeedViewModel @Inject constructor(
     suspend fun searchFeedsBy(
         searchTerm: String,
         feedType: FeedType?,
-        searchFieldActive: Boolean
+        searchFieldActive: Boolean,
+        searchItems: Boolean = true
     ) {
         searchFeedsJob?.cancel()
 
@@ -81,43 +85,62 @@ class FeedViewModel @Inject constructor(
         updateViewState(
             FeedViewState.LoadingSearchResults
         )
-        
+
         viewModelScope.launch(mainImmediate) {
             delay(500L)
 
-            feedRepository.searchFeedsBy(
-                searchTerm,
-                feedType
-            ).collect { searchResults ->
-
-                addSearchTerm(
-                    searchTerm.lowercase().trim()
-                )
-
-                if (searchResults.isEmpty()) {
-                    updateViewState(
-                        when (feedChipsViewStateContainer.value) {
-                            is FeedChipsViewState.Listen -> {
-                                FeedViewState.SearchPodcastPlaceHolder
-                            }
-                            is FeedChipsViewState.Watch -> {
-                                FeedViewState.SearchVideoPlaceHolder
-                            }
-                            else -> {
-                                FeedViewState.SearchPlaceHolder
-                            }
-                        }
-                    )
-                } else {
-                    updateViewState(
-                        FeedViewState.SearchResults(
-                            searchResults
-                        )
-                    )
+            if (searchItems) {
+                feedRepository.searchFeedItemsBy(
+                    searchTerm,
+                    feedType
+                ).collect { searchResults ->
+                    processSearchResults(searchTerm, searchResults, isItemSearch = true)
+                    Log.d("searchResult", searchResults.toString())
+                }
+            } else {
+                feedRepository.searchFeedsBy(
+                    searchTerm,
+                    feedType
+                ).collect { searchResults ->
+                    processSearchResults(searchTerm, searchResults, isItemSearch = false)
                 }
             }
         }.also {
             searchFeedsJob = it
+        }
+    }
+
+    private fun processSearchResults(searchTerm: String, searchResults: List<Any>, isItemSearch: Boolean) {
+        addSearchTerm(
+            searchTerm.lowercase().trim()
+        )
+
+        if (searchResults.isEmpty()) {
+            updateViewState(
+                when (feedChipsViewStateContainer.value) {
+                    is FeedChipsViewState.Listen -> {
+                        FeedViewState.SearchPodcastPlaceHolder
+                    }
+                    is FeedChipsViewState.Watch -> {
+                        FeedViewState.SearchVideoPlaceHolder
+                    }
+                    else -> {
+                        FeedViewState.SearchPlaceHolder
+                    }
+                }
+            )
+        } else {
+            updateViewState(
+                if (isItemSearch) {
+                    FeedViewState.SearchItemResults(
+                        searchResults as List<FeedItemSearchResultRow>
+                    )
+                } else {
+                    FeedViewState.SearchFeedResults(
+                        searchResults as List<FeedSearchResultRow>
+                    )
+                }
+            )
         }
     }
 

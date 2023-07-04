@@ -1,5 +1,6 @@
 package chat.sphinx.dashboard.ui.viewstates
 
+import chat.sphinx.wrapper_podcast.FeedItemSearchResultRow
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import io.matthewnelson.concept_views.viewstate.ViewState
 
@@ -13,7 +14,11 @@ sealed class FeedViewState: ViewState<FeedViewState>() {
 
     object LoadingSearchResults: FeedViewState()
 
-    data class SearchResults(
+    data class SearchFeedResults(
         val searchResults: List<FeedSearchResultRow>
+    ): FeedViewState()
+
+    data class SearchItemResults(
+        val searchResults: List<FeedItemSearchResultRow>
     ): FeedViewState()
 }

@@ -31,5 +31,4 @@ abstract class NetworkQueryFeedSearch {
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<List<FeedRecommendationDto>, ResponseError>>
 
-
 }
