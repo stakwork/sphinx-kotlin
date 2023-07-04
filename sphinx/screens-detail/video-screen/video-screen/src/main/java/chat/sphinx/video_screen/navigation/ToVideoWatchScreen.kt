@@ -8,23 +8,28 @@ import chat.sphinx.video_screen.ui.watch.VideoFeedWatchScreenFragmentArgs
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.feed.FeedUrl
+import chat.sphinx.wrapper_feed.FeedItem
 import io.matthewnelson.concept_navigation.NavigationRequest
 
 class ToVideoWatchScreen(
     private val chatId: ChatId,
     private val feedId: FeedId,
     private val feedUrl: FeedUrl,
+    private val feedItem: FeedId? = null,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
-
     override fun navigate(controller: NavController) {
+
+        val args = VideoFeedWatchScreenFragmentArgs.Builder(
+            chatId.value,
+            feedId.value,
+            feedUrl.value,
+        )
+        args.argFeedItemId = feedItem?.value
+
         controller.navigate(
             R.id.video_watch_nav_graph,
-            VideoFeedWatchScreenFragmentArgs.Builder(
-                chatId.value,
-                feedId.value,
-                feedUrl.value,
-            ).build().toBundle(),
+            args.build().toBundle(),
             options
         )
     }

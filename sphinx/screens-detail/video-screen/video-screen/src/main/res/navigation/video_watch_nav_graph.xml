@@ -18,6 +18,11 @@
         <argument
             android:name="argFeedUrl"
             app:argType="string" />
+        <argument
+            android:name="argFeedItemId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
     </fragment>
 
 </navigation>

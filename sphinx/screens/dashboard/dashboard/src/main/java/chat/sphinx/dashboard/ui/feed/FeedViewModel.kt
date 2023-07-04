@@ -216,18 +216,27 @@ class FeedViewModel @Inject constructor(
 
                 @Exhaustive when (response) {
                     is Response.Success -> {
-                        if (searchResult.feedItemId.isNullOrEmpty()) {
-                            feedRepository.getFeedById(response.value).firstOrNull()?.let { feed ->
-                                feed.let { nnFeed ->
+                        feedRepository.getFeedById(response.value).firstOrNull()?.let { feed ->
+                            feed.let { nnFeed ->
+                                if (searchResult.feedItemId.isNullOrEmpty()) {
                                     goToFeedDetailView(nnFeed)
                                     callback()
+                                } else {
+                                    feedRepository.getFeedItemById(FeedId(searchResult.feedItemId.toString()))
+                                        .firstOrNull()?.let { feedItem ->
+                                        if (feed.isPodcast) {
+                                            goToPodcastPlayer(feedItem)
+                                            callback()
+                                        }
+                                        else {
+                                            goToWatchScreen(feed, feedItem.id)
+                                            callback()
+                                        }
+                                    }
                                 }
                             }
-                        } else {
-                            goToPodcastPlayer(FeedId(searchResult.feedItemId.toString()))
                         }
                     }
-
                     is Response.Error -> {
                         submitSideEffect(FeedSideEffect.FailedToLoadFeed)
                         callback()
@@ -240,9 +249,9 @@ class FeedViewModel @Inject constructor(
         }
     }
 
-    private fun goToPodcastPlayer(feedItemId: FeedId){
+    private fun goToPodcastPlayer(feedItem: FeedItem){
         viewModelScope.launch(mainImmediate) {
-            feedRepository.getFeedItemById(feedItemId).firstOrNull()?.let { feedItem ->
+            feedRepository.getFeedItemById(feedItem.id).firstOrNull()?.let { feedItem ->
                 feedRepository.getPodcastById(feedItem.feedId).firstOrNull()?.let { podcast ->
                     podcast.getEpisodeWithId(feedItem.id.value)?.let { episode ->
 
@@ -269,6 +278,17 @@ class FeedViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun goToWatchScreen(feed: Feed, feedItemId: FeedId) {
+        viewModelScope.launch(mainImmediate) {
+            dashboardNavigator.toVideoWatchScreen(
+                feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                feed.id,
+                feed.feedUrl,
+                feedItemId
+            )
         }
     }
 

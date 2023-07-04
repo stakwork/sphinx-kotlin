@@ -14,7 +14,6 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
-import chat.sphinx.concept_service_media.UserAction
 import chat.sphinx.video_screen.R
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
@@ -28,13 +27,10 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
-import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_message.FeedBoost
-import chat.sphinx.wrapper_podcast.PodcastEpisode
-import chat.sphinx.wrapper_podcast.toHrAndMin
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
@@ -176,19 +172,37 @@ internal open class VideoFeedScreenViewModel(
                     )
 
                     if (selectedVideoStateContainer.value is SelectedVideoViewState.Idle) {
-                        nnFeed.items.firstOrNull()?.let { video ->
+                        val currentFeedItem =  nnFeed.items.firstOrNull{ it.id == getArgFeedItemId() }
+
+                        if (currentFeedItem != null) {
                             selectedVideoStateContainer.updateViewState(
                                 SelectedVideoViewState.VideoSelected(
-                                    video.id,
+                                    currentFeedItem.id,
                                     nnFeed.id,
-                                    video.title,
-                                    video.description,
-                                    video.enclosureUrl,
-                                    video.localFile,
-                                    video.dateUpdated,
-                                    video.duration
+                                    currentFeedItem.title,
+                                    currentFeedItem.description,
+                                    currentFeedItem.enclosureUrl,
+                                    currentFeedItem.localFile,
+                                    currentFeedItem.dateUpdated,
+                                    currentFeedItem.duration
                                 )
+
                             )
+                        } else {
+                            nnFeed.items.firstOrNull()?.let { video ->
+                                selectedVideoStateContainer.updateViewState(
+                                    SelectedVideoViewState.VideoSelected(
+                                        video.id,
+                                        nnFeed.id,
+                                        video.title,
+                                        video.description,
+                                        video.enclosureUrl,
+                                        video.localFile,
+                                        video.dateUpdated,
+                                        video.duration
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -411,6 +425,10 @@ internal open class VideoFeedScreenViewModel(
     }
 
     open fun getArgFeedId(): FeedId? {
+        return null
+    }
+
+    open fun getArgFeedItemId(): FeedId? {
         return null
     }
 
