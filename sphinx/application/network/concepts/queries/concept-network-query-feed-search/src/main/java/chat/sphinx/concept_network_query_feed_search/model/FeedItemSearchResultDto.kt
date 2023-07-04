@@ -1,5 +1,6 @@
 package chat.sphinx.concept_network_query_feed_search.model
 
+import chat.sphinx.wrapper_feed.htmlToPlainText
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import com.squareup.moshi.JsonClass
 
@@ -26,7 +27,7 @@ inline fun FeedItemSearchResultDto.toFeedItemSearchResult() : FeedSearchResult {
     return FeedSearchResult(
         id = feedId,
         title = title,
-        description = description,
+        description = description.htmlToPlainText().trim(),
         datePublished = datePublished,
         dateUpdated = dateUpdated,
         author = author,
