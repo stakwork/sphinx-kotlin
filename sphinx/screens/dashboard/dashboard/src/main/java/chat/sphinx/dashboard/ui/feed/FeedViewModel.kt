@@ -214,25 +214,26 @@ class FeedViewModel @Inject constructor(
                     currentItemId = null
                 )
 
-                @Exhaustive when (response) {
+                @Exhaustive
+                when (response) {
                     is Response.Success -> {
-                        feedRepository.getFeedById(response.value).firstOrNull()?.let { feed ->
-                            feed.let { nnFeed ->
-                                if (searchResult.feedItemId.isNullOrEmpty()) {
-                                    goToFeedDetailView(nnFeed)
-                                    callback()
-                                } else {
-                                    feedRepository.getFeedItemById(FeedId(searchResult.feedItemId.toString()))
-                                        .firstOrNull()?.let { feedItem ->
-                                        if (feed.isPodcast) {
-                                            goToPodcastPlayer(feedItem)
-                                            callback()
-                                        }
-                                        else {
-                                            goToWatchScreen(feed, feedItem.id)
-                                            callback()
-                                        }
+                        val feedId = response.value
+                        val feed = feedRepository.getFeedById(feedId).firstOrNull()
+
+                        feed?.let { nnFeed ->
+                            if (searchResult.feedItemId.isNullOrEmpty()) {
+                                goToFeedDetailView(nnFeed)
+                                callback()
+                            } else {
+                                val feedItemId = searchResult.feedItemId!!
+
+                                nnFeed.items.find { item -> item.id.youtubeVideoId() == feedItemId }?.let { feedItem ->
+                                    if (feedItem.isPodcast) {
+                                        goToPodcastPlayer(feedItem)
+                                    } else {
+                                        goToWatchScreen(nnFeed, feedItem.id)
                                     }
+                                    callback()
                                 }
                             }
                         }
