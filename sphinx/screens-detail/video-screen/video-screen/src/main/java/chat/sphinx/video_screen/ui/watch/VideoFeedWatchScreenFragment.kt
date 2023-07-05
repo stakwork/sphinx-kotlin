@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import android.webkit.WebChromeClient
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.activity.OnBackPressedCallback
@@ -259,6 +260,135 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         }
     }
 
+    private fun setupYoutubePlayerIframe(videoId: String) {
+        binding.includeLayoutVideoPlayer.apply {
+            webViewYoutubePlayer.settings.javaScriptEnabled = true
+            webViewYoutubePlayer.webChromeClient = WebChromeClient()
+            val videoStateListener = object : VideoStateListener {
+                override fun onVideoReady() {
+                }
+
+                override fun onVideoUnstarted() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVideoEnded() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVideoPlaying() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVideoPaused() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVideoBuffering() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVideoCued() {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onVideoError(error: String) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onPlaybackQualityChange(quality: String) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onPlaybackRateChange(rate: String) {
+                    TODO("Not yet implemented")
+                }
+
+            }
+
+            fun setupVideoPlayer(videoId: String) {
+                val html = """
+        <!DOCTYPE html>
+        <html>
+        <body>
+        <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+        <div id="player"></div>
+        
+        <script>
+        // 2. This code loads the IFrame Player API code asynchronously.
+        var tag = document.createElement('script');
+        
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        
+        // 3. This function creates an <iframe> (and YouTube player)
+        //    after the API code downloads.
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%',
+                width: '100%',
+                videoId: '$videoId',
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
+            });
+        }
+        
+        // 4. The API will call this function when the video player is ready.
+        function onPlayerReady(event) {
+            Android.notifyVideoReady();
+        }
+        
+        // 5. The API calls this function when the player's state changes.
+        function onPlayerStateChange(event) {
+    switch(event.data) {
+        case YT.PlayerState.UNSTARTED:
+            Android.onVideoStateChange('UNSTARTED');
+            break;
+        case YT.PlayerState.ENDED:
+            Android.onVideoStateChange('ENDED');
+            break;
+        case YT.PlayerState.PLAYING:
+            Android.onVideoStateChange('PLAYING');
+            break;
+        case YT.PlayerState.PAUSED:
+            Android.onVideoStateChange('PAUSED');
+            break;
+        case YT.PlayerState.BUFFERING:
+            Android.onVideoStateChange('BUFFERING');
+            break;
+        case YT.PlayerState.CUED:
+            Android.onVideoStateChange('CUED');
+            break;
+    }
+}
+
+function onPlayerError(event) {
+    Android.onError(event.data);
+}
+
+        
+        // Other functions for handling player events here
+
+        </script>
+        </body>
+        </html>
+    """
+                webViewYoutubePlayer.loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null)
+            }
+            setupVideoPlayer(videoId)
+
+            webViewYoutubePlayer.addJavascriptInterface(
+                JavaScriptInterface(videoStateListener),
+                "Android"
+            )
+        }
+    }
+
     private fun setupYoutubePlayer(videoId: String) {
         var isSeeking = false
         val youtubePlayerFragment = YouTubeVideoPlayerSupportFragmentXKt()
@@ -475,13 +605,14 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                         viewModel.trackVideoConsumed()
                                         viewModel.createVideoRecordConsumed(viewState.id)
                                     } else {
-                                        setupYoutubePlayer(viewState.id.youtubeVideoId())
-                                        viewModel.createVideoRecordConsumed(viewState.id)
+//                                        setupYoutubePlayer(viewState.id.youtubeVideoId())
+//                                        viewModel.createVideoRecordConsumed(viewState.id)
+                                        setupYoutubePlayerIframe(viewState.id.youtubeVideoId())
                                     }
                                 } else {
                                     layoutConstraintLoadingVideo.visible
                                     layoutConstraintVideoViewContainer.visible
-                                    frameLayoutYoutubePlayer.gone
+                                    .gone
 
                                     val videoUri = if (viewState.localFile != null) {
                                         viewState.localFile.toUri()

@@ -60,7 +60,7 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     messageRepository,
     lightningRepository,
     navigator
-)
+), VideoStateListener
 {
     private val args: VideoFeedWatchScreenFragmentArgs by savedStateHandle.navArgs()
 
@@ -132,5 +132,45 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
 
     override fun getArgFeedId(): FeedId? {
         return args.feedId
+    }
+
+    override fun onVideoReady() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onVideoUnstarted() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onVideoEnded() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onVideoPlaying() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onVideoPaused() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onVideoBuffering() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onVideoCued() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onVideoError(error: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onPlaybackQualityChange(quality: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onPlaybackRateChange(rate: String) {
+        TODO("Not yet implemented")
     }
 }
