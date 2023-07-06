@@ -2,7 +2,7 @@ package chat.sphinx.video_screen.ui.watch
 
 import android.webkit.JavascriptInterface
 
-class JavaScriptInterface(private val listener: VideoStateListener) {
+class YoutubePlayerJavaScriptInterface(private val listener: VideoStateListener) {
 
     @JavascriptInterface
     fun onVideoReady() {
