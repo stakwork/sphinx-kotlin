@@ -47,12 +47,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <FrameLayout
-            android:id="@+id/frame_layout_youtube_player"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible"/>
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_loading_video"
             android:layout_width="match_parent"
