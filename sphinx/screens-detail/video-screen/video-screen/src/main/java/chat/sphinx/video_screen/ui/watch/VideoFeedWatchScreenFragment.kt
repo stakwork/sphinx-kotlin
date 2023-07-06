@@ -4,16 +4,21 @@ import android.animation.Animator
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.webkit.WebChromeClient
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.activity.OnBackPressedCallback
 import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
@@ -269,12 +274,54 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         binding.includeLayoutVideoPlayer.apply {
 
             webViewYoutubePlayer.settings.javaScriptEnabled = true
-            webViewYoutubePlayer.webChromeClient = WebChromeClient()
+
+            webViewYoutubePlayer.webChromeClient = object : WebChromeClient() {
+
+                private var customView: View? = null
+                private var customViewCallback: CustomViewCallback? = null
+                private var originalOrientation: Int = 0
+
+                override fun onShowCustomView(view: View?, callback: CustomViewCallback) {
+                    if (customView != null) {
+                        onHideCustomView()
+                        return
+                    }
+
+                    customView = view
+                    originalOrientation = activity?.requestedOrientation ?: Configuration.ORIENTATION_UNDEFINED
+
+                    customViewCallback = callback
+
+                    val decor = activity?.window?.decorView as FrameLayout
+                    decor.addView(customView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+
+                    ViewCompat.getWindowInsetsController(decor)?.let {
+                        it.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+                        it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
+                }
+
+                override fun onHideCustomView() {
+                    val decor = activity?.window?.decorView as FrameLayout
+                    decor.removeView(customView)
+                    customView = null
+
+                    ViewCompat.getWindowInsetsController(decor)?.show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+
+                    activity?.requestedOrientation = originalOrientation
+
+                    customViewCallback?.onCustomViewHidden()
+                    customViewCallback = null
+                }
+
+                override fun getDefaultVideoPoster(): Bitmap {
+                    return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+                }
+            }
 
             val videoStateListener = object : VideoStateListener {
 
-                override fun onVideoReady() {
-                }
+                override fun onVideoReady() {}
 
                 override fun onVideoUnstarted() {
                     TODO("Not yet implemented")
