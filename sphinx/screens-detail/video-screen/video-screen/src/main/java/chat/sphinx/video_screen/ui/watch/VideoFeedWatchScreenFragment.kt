@@ -88,6 +88,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     companion object {
         val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,15,20,20,40,40,80,80,100)
+
+        const val YOUTUBE_URL = "https://www.youtube.com"
+        const val MIME_TYPE_HTML = "text/html"
+        const val ENCODING_UTF = "UTF-8"
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -307,6 +311,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                 override fun onPlaybackRateChange(rate: String) {
                     TODO("Not yet implemented")
                 }
+
+                override fun onVideoSeek(time: Int) {
+                    // Call setNewHistoryItem
+                }
             }
 
             webViewYoutubePlayer.addJavascriptInterface(
@@ -324,10 +332,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
             val formattedHtml = htmlContent?.replace("%%VIDEO_ID%%", videoId)
             formattedHtml?.let { html ->
                 webViewYoutubePlayer.loadDataWithBaseURL(
-                    "https://www.youtube.com",
+                    YOUTUBE_URL,
                     html,
-                    "text/html",
-                    "UTF-8",
+                    MIME_TYPE_HTML,
+                    ENCODING_UTF,
                     null
                 )
             }

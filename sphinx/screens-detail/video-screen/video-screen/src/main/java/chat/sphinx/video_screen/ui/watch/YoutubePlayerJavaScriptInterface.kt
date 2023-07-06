@@ -35,6 +35,11 @@ class YoutubePlayerJavaScriptInterface(private val listener: VideoStateListener)
     fun onPlaybackRateChange(rate: String) {
         listener.onPlaybackRateChange(rate)
     }
+
+    @JavascriptInterface
+    fun onVideoSeek(time: Int) {
+        listener.onVideoSeek(time)
+    }
 }
 
 interface VideoStateListener {
@@ -48,4 +53,6 @@ interface VideoStateListener {
     fun onVideoError(error: String)
     fun onPlaybackQualityChange(quality: String)
     fun onPlaybackRateChange(rate: String)
+    fun onVideoSeek(time: Int)
+
 }

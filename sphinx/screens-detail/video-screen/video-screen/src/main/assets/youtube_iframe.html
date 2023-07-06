@@ -2,19 +2,18 @@
 <html>
 <body>
 <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+
 <div id="player"></div>
 
 <script>
 // 2. This code loads the IFrame Player API code asynchronously.
 
 var tag = document.createElement('script');
-
 tag.src = "https://www.youtube.com/iframe_api";
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-// 3. This function creates an <iframe> (and YouTube player)
-//    after the API code downloads.
+// 3. This function creates an <iframe> (and YouTube player) after the API code downloads.
 
 var player;
 function onYouTubeIframeAPIReady() {
@@ -38,7 +37,9 @@ function onPlayerReady(event) {
 
 // 5. The API calls this function when the player's state changes.
 
+var lastRecordedTime = 0;
 function onPlayerStateChange(event) {
+    var currentTime = player.getCurrentTime();
     switch(event.data) {
         case YT.PlayerState.UNSTARTED:
             Android.onVideoStateChange('UNSTARTED');
@@ -47,6 +48,10 @@ function onPlayerStateChange(event) {
             Android.onVideoStateChange('ENDED');
             break;
         case YT.PlayerState.PLAYING:
+            if (Math.abs(currentTime - lastRecordedTime) > 1) {
+                lastRecordedTime = currentTime;
+                Android.onVideoSeek(Math.floor(currentTime));
+            }
             Android.onVideoStateChange('PLAYING');
             break;
         case YT.PlayerState.PAUSED:
@@ -64,7 +69,6 @@ function onPlayerStateChange(event) {
 function onPlayerError(event) {
     Android.onError(event.data);
 }
-
 </script>
 </body>
 </html>
