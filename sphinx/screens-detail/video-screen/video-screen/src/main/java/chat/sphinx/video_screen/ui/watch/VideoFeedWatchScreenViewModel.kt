@@ -173,4 +173,8 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     override fun onPlaybackRateChange(rate: String) {
         TODO("Not yet implemented")
     }
+
+    override fun onVideoSeek(time: Int) {
+        TODO("Not yet implemented")
+    }
 }
