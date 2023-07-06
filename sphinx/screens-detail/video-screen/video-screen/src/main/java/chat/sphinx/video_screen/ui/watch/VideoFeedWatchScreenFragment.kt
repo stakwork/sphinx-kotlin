@@ -19,7 +19,6 @@ import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -52,9 +51,6 @@ import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.lightning.toSat
-import com.google.android.youtube.player.YouTubeInitializationResult
-import com.google.android.youtube.player.YouTubePlayer
-import com.google.android.youtube.player.YouTubeVideoPlayerSupportFragmentXKt
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -89,7 +85,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         FragmentVideoWatchScreenBinding::bind
     )
     override val viewModel: VideoFeedWatchScreenViewModel by viewModels()
-    private var youtubePlayer: YouTubePlayer? = null
 
     companion object {
         val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,15,20,20,40,40,80,80,100)
@@ -155,8 +150,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-        youtubePlayer?.release()
-        youtubePlayer = null
     }
 
     private var draggingSatsSlider: Boolean = false
@@ -378,61 +371,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupYoutubePlayer(videoId: String) {
-        var isSeeking = false
-        val youtubePlayerFragment = YouTubeVideoPlayerSupportFragmentXKt()
-
-        childFragmentManager.beginTransaction()
-            .replace(binding.includeLayoutVideoPlayer.frameLayoutYoutubePlayer.id, youtubePlayerFragment as Fragment)
-            .commit()
-
-        youtubePlayerFragment.initialize(
-            BuildConfig.YOUTUBE_API_KEY,
-            object : YouTubePlayer.OnInitializedListener {
-
-                override fun onInitializationSuccess(
-                    p0: YouTubePlayer.Provider?,
-                    p1: YouTubePlayer?,
-                    p2: Boolean
-                ) {
-                    p1?.let {
-                        youtubePlayer = it
-                    }
-                    p1?.cueVideo(videoId)
-                    p1?.setPlaybackEventListener(playbackEventListener)
-                }
-
-                override fun onInitializationFailure(
-                    p0: YouTubePlayer.Provider?,
-                    p1: YouTubeInitializationResult?
-                ) {}
-                   private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
-
-                    override fun onSeekTo(p0: Int) {
-                        isSeeking = true
-                        viewModel.setNewHistoryItem(p0.toLong())
-                        Log.d("YouTubePlayer", "Youtube has seek $p0")
-                    }
-                    override fun onBuffering(p0: Boolean) {}
-
-                    override fun onPlaying() {
-                        viewModel.startTimer(isSeeking)
-                        viewModel.updateVideoLastPlayed()
-                        isSeeking = false
-                        Log.d("YouTubePlayer", "Youtube is playing")
-                    }
-                    override fun onStopped() {
-                        viewModel.stopTimer()
-                        Log.d("YouTubePlayer", "Youtube has stopped")
-                    }
-                    override fun onPaused() {
-                        viewModel.stopTimer()
-                        Log.d("YouTubePlayer", "Youtube is on pause")
-                    }
-                }
-            })
-    }
-
     private suspend fun setupBoostAnimation(
         photoUrl: PhotoUrl?,
         amount: Sat?
@@ -585,7 +523,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 if (viewState.url.isYoutubeVideo()) {
 
                                     layoutConstraintVideoViewContainer.gone
-//                                    frameLayoutYoutubePlayer.visible
                                     layoutConstraintYoutubeIframeContainer.visible
 
                                     setupYoutubeIframeVideo(viewState.id.youtubeVideoId())
@@ -594,20 +531,10 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                         viewModel.trackVideoConsumed()
                                         viewModel.createVideoRecordConsumed(viewState.id)
 
-//                                    if (youtubePlayer != null) {
-//                                        youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
-//
-//                                        viewModel.createHistoryItem()
-//                                        viewModel.trackVideoConsumed()
-//                                        viewModel.createVideoRecordConsumed(viewState.id)
-//                                    } else {
-//                                        setupYoutubePlayer(viewState.id.youtubeVideoId())
-//                                        viewModel.createVideoRecordConsumed(viewState.id)
-//                                    }
                                 } else {
                                     layoutConstraintLoadingVideo.visible
                                     layoutConstraintVideoViewContainer.visible
-                                    .gone
+                                    layoutConstraintYoutubeIframeContainer.gone
 
                                     val videoUri = if (viewState.localFile != null) {
                                         viewState.localFile.toUri()
