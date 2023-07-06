@@ -108,7 +108,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         setupBoost()
         setupSeekBar()
         setupItems()
-        setupYoutubeIframePlayer()
+        setupYoutubeIframeVideo()
         setupFeedItemDetails()
         setupFragmentLayout()
         setupYoutubePlayerIframe()
@@ -254,7 +254,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupYoutubeIframePlayer() {
+    private fun setupYoutubeIframeVideo() {
         binding.includeLayoutVideoPlayer.apply {
 
             viewModel.setVideoView(videoViewVideoPlayer)
@@ -271,8 +271,9 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
     }
 
     private fun setupYoutubePlayerIframe() {
-        binding.includeLayoutVideoPlayer.apply {
+        var isSeeking = false
 
+        binding.includeLayoutVideoPlayer.apply {
             webViewYoutubePlayer.settings.javaScriptEnabled = true
 
             webViewYoutubePlayer.webChromeClient = object : WebChromeClient() {
@@ -321,47 +322,35 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
             val videoStateListener = object : VideoStateListener {
 
-                override fun onVideoReady() {}
-
-                override fun onVideoUnstarted() {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onVideoEnded() {
-                    TODO("Not yet implemented")
+                override fun onVideoSeek(time: Int) {
+                    isSeeking = true
+                    viewModel.setNewHistoryItem(time.toLong())
+                    Log.d("YouTubePlayer", "Youtube has seek $time")
                 }
 
                 override fun onVideoPlaying() {
-                    TODO("Not yet implemented")
+                    viewModel.startTimer(isSeeking)
+                    viewModel.updateVideoLastPlayed()
+                    isSeeking = false
+                    Log.d("YouTubePlayer", "Youtube is playing")
                 }
-
                 override fun onVideoPaused() {
-                    TODO("Not yet implemented")
+                    viewModel.stopTimer()
+                    Log.d("YouTubePlayer", "Youtube is on pause")
                 }
 
-                override fun onVideoBuffering() {
-                    TODO("Not yet implemented")
+                override fun onVideoEnded() {
+                    viewModel.stopTimer()
+                    Log.d("YouTubePlayer", "Youtube video ended")
                 }
 
-                override fun onVideoCued() {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onVideoError(error: String) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onPlaybackQualityChange(quality: String) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onPlaybackRateChange(rate: String) {
-                    TODO("Not yet implemented")
-                }
-
-                override fun onVideoSeek(time: Int) {
-                    // Call setNewHistoryItem
-                }
+                override fun onVideoReady() {}
+                override fun onVideoBuffering() {}
+                override fun onVideoUnstarted() {}
+                override fun onVideoCued() {}
+                override fun onVideoError(error: String) {}
+                override fun onPlaybackQualityChange(quality: String) {}
+                override fun onPlaybackRateChange(rate: String) {}
             }
 
             webViewYoutubePlayer.addJavascriptInterface(
@@ -371,7 +360,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupYoutubeIframePlayer(videoId: String) {
+    private fun setupYoutubeIframeVideo(videoId: String) {
         binding.includeLayoutVideoPlayer.apply {
 
             val htmlContent = context?.assets?.open("youtube_iframe.html")?.bufferedReader()
@@ -596,10 +585,14 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 if (viewState.url.isYoutubeVideo()) {
 
                                     layoutConstraintVideoViewContainer.gone
-                                    frameLayoutYoutubePlayer.visible
+//                                    frameLayoutYoutubePlayer.visible
                                     layoutConstraintYoutubeIframeContainer.visible
 
-                                    setupYoutubeIframePlayer(viewState.id.youtubeVideoId())
+                                    setupYoutubeIframeVideo(viewState.id.youtubeVideoId())
+
+                                        viewModel.createHistoryItem()
+                                        viewModel.trackVideoConsumed()
+                                        viewModel.createVideoRecordConsumed(viewState.id)
 
 //                                    if (youtubePlayer != null) {
 //                                        youtubePlayer?.cueVideo(viewState.id.youtubeVideoId())
