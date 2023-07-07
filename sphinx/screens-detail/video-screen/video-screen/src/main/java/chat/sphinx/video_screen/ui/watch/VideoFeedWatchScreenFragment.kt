@@ -37,7 +37,6 @@ import chat.sphinx.video_screen.adapter.VideoFeedItemsAdapter
 import chat.sphinx.video_screen.adapter.VideoFeedItemsFooterAdapter
 import chat.sphinx.video_screen.databinding.FragmentVideoWatchScreenBinding
 import chat.sphinx.video_screen.ui.VideoFeedScreenSideEffect
-import chat.sphinx.video_screen.BuildConfig
 import chat.sphinx.video_screen.ui.viewstate.*
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
@@ -103,7 +102,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         setupBoost()
         setupSeekBar()
         setupItems()
-        setupYoutubeIframeVideo()
+        cueYoutubeVideo()
         setupFeedItemDetails()
         setupFragmentLayout()
         setupYoutubePlayerIframe()
@@ -247,7 +246,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupYoutubeIframeVideo() {
+    private fun cueYoutubeVideo() {
         binding.includeLayoutVideoPlayer.apply {
 
             viewModel.setVideoView(videoViewVideoPlayer)
@@ -353,7 +352,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupYoutubeIframeVideo(videoId: String) {
+    private fun cueYoutubeVideo(videoId: String) {
         binding.includeLayoutVideoPlayer.apply {
 
             val htmlContent = context?.assets?.open("youtube_iframe.html")?.bufferedReader()
@@ -525,7 +524,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                     layoutConstraintVideoViewContainer.gone
                                     layoutConstraintYoutubeIframeContainer.visible
 
-                                    setupYoutubeIframeVideo(viewState.id.youtubeVideoId())
+                                    cueYoutubeVideo(viewState.id.youtubeVideoId())
 
                                         viewModel.createHistoryItem()
                                         viewModel.trackVideoConsumed()
