@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+    .youtube-player-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .youtube-player-container iframe {
+        width: 100%;
+        height: 100%;
+    }
+</style>
+
+<body>
+
+<!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
+<div id="player" class="youtube-player-container"></div>
+
+<script>
+// 2. This code loads the IFrame Player API code asynchronously.
+
+var tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+// 3. This function creates an <iframe> (and YouTube player) after the API code downloads.
+
+var player;
+function onYouTubeIframeAPIReady() {
+    player = new YT.Player('player', {
+        videoId: '%%VIDEO_ID%%',
+        events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange,
+            'onError': onPlayerError
+        }
+    });
+}
+
+// 4. The API will call this function when the video player is ready.
+
+function onPlayerReady(event) {
+    Android.notifyVideoReady();
+}
+
+// 5. The API calls this function when the player's state changes.
+
+var lastRecordedTime = 0;
+function onPlayerStateChange(event) {
+    var currentTime = player.getCurrentTime();
+    switch(event.data) {
+        case YT.PlayerState.UNSTARTED:
+            Android.onVideoStateChange('UNSTARTED');
+            break;
+        case YT.PlayerState.ENDED:
+            Android.onVideoStateChange('ENDED');
+            break;
+        case YT.PlayerState.PLAYING:
+            if (Math.abs(currentTime - lastRecordedTime) > 1) {
+                lastRecordedTime = currentTime;
+                Android.onVideoSeek(Math.floor(currentTime));
+            }
+            Android.onVideoStateChange('PLAYING');
+            break;
+        case YT.PlayerState.PAUSED:
+            Android.onVideoStateChange('PAUSED');
+            break;
+        case YT.PlayerState.BUFFERING:
+            Android.onVideoStateChange('BUFFERING');
+            break;
+        case YT.PlayerState.CUED:
+            Android.onVideoStateChange('CUED');
+            break;
+    }
+}
+
+function onPlayerError(event) {
+    Android.onError(event.data);
+}
+</script>
+</body>
+</html>
