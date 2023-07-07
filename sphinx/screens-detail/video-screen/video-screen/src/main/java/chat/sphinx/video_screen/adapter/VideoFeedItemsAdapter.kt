@@ -171,7 +171,7 @@ internal class VideoFeedItemsAdapter (
             binding.layoutConstraintEpisodeIconsContainer.setOnClickListener {
                 playEpisodeFromList()
             }
-            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+            binding.buttonPlayEpisode.setOnClickListener {
                 playEpisodeFromList()
             }
             binding.buttonAdditionalOptions.setOnClickListener {
@@ -220,7 +220,7 @@ internal class VideoFeedItemsAdapter (
                 seekBarCurrentTimeEpisodeProgress.gone
                 textViewItemEpisodeTime.gone
                 circleSplit.gone
-                buttonPlayEpisode.invisible
+                buttonPlayEpisode.visible
                 layoutConstraintAlpha.gone
 
 
