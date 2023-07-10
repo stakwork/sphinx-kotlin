@@ -62,7 +62,7 @@ class FeedViewModel @Inject constructor(
         searchTerm: String,
         feedType: FeedType?,
         searchFieldActive: Boolean,
-        searchItems: Boolean = true
+        searchItems: Boolean = false
     ) {
         searchFeedsJob?.cancel()
 
