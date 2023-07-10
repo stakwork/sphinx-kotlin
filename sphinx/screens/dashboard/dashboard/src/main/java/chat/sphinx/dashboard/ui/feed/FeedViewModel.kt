@@ -14,6 +14,7 @@ import chat.sphinx.dashboard.ui.viewstates.FeedChipsViewState
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_chat.ChatHost
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.toPhotoUrl
@@ -228,12 +229,29 @@ class FeedViewModel @Inject constructor(
                                 val feedItemId = searchResult.feedItemId!!
 
                                 nnFeed.items.find { item -> item.id.youtubeVideoId() == feedItemId }?.let { feedItem ->
-                                    if (feedItem.isPodcast) {
-                                        goToPodcastPlayer(feedItem)
-                                    } else {
-                                        goToWatchScreen(nnFeed, feedItem.id)
-                                    }
+                                    navigateToPlayerFromEpisode(feedItem, nnFeed)
                                     callback()
+                                } ?: run {
+
+                                    val newFeedItemId = if (searchResult.url.contains("www.youtube.com")) {
+                                        FeedId(feedItemId).toYoutubeVideoId()
+                                    } else FeedId(feedItemId)
+
+                                    feedRepository.updateFeedItemContent(
+                                        newFeedItemId,
+                                        feedId,
+                                        FeedTitle(searchResult.title),
+                                        FeedDescription(searchResult.description ?: "empty"),
+                                        PhotoUrl(searchResult.imageUrl ?: "empty"),
+                                        FeedUrl(searchResult.url)
+                                    )
+
+                                    val updatedFeed = feedRepository.getFeedById(feedId).firstOrNull()
+
+                                    updatedFeed?.items?.find { item -> item.id.youtubeVideoId() == feedItemId }?.let { newfeedItem ->
+                                        navigateToPlayerFromEpisode(newfeedItem, nnFeed)
+                                        callback()
+                                    }
                                 }
                             }
                         }
@@ -290,6 +308,14 @@ class FeedViewModel @Inject constructor(
                 feed.feedUrl,
                 feedItemId
             )
+        }
+    }
+
+    private fun navigateToPlayerFromEpisode(feedItem: FeedItem, feed: Feed) {
+        if (feedItem.isPodcast) {
+            goToPodcastPlayer(feedItem)
+        } else {
+            goToWatchScreen(feed, feedItem.id)
         }
     }
 

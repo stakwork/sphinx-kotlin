@@ -41,6 +41,15 @@ interface FeedRepository {
         delay: Long = 500L
     ): Response<FeedId, ResponseError>
 
+    fun updateFeedItemContent(
+        feedItemId: FeedId,
+        feedId: FeedId,
+        title: FeedTitle,
+        description: FeedDescription,
+        imageUrl: PhotoUrl,
+        enclosureUrl: FeedUrl
+    )
+
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
     fun getFeedById(feedId: FeedId): Flow<Feed?>
     fun getFeedItemById(feedItemId: FeedId): Flow<FeedItem?>

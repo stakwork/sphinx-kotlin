@@ -138,6 +138,7 @@ import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.*
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -3915,6 +3916,41 @@ abstract class SphinxRepository(
         }
 
         return updateResponse
+    }
+
+    private val updateFeedItemContentLock = Mutex()
+
+    override fun updateFeedItemContent(
+        feedItemId: FeedId,
+        feedId: FeedId,
+        title: FeedTitle,
+        description: FeedDescription,
+        imageUrl: PhotoUrl,
+        enclosureUrl: FeedUrl
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            updateFeedItemContentLock.withLock {
+                queries.feedItemUpsert(
+                    id = feedItemId,
+                    feed_id = feedId,
+                    title = title,
+                    description = description,
+                    image_url = imageUrl,
+                    enclosure_url = enclosureUrl,
+                    author = null,
+                    date_published = null,
+                    date_updated = null,
+                    content_type = null,
+                    enclosure_length = null,
+                    enclosure_type = null,
+                    thumbnail_url = null,
+                    link = null,
+                    duration = null
+                )
+            }
+        }
     }
 
     private suspend fun updateFeedContentItemsFor(
