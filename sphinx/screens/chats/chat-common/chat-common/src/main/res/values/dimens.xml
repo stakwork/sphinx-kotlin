@@ -177,4 +177,7 @@
     <dimen name="chat_tribe_pin_icon_width">94dp</dimen>
     <dimen name="chat_tribe_pin_icon_height">94dp</dimen>
     <dimen name="chat_tribe_pin_icon_margin_top">48dp</dimen>
+
+    <dimen name="scroll_down_button_width">50dp</dimen>
+    <dimen name="scroll_down_button_height">40dp</dimen>
 </resources>

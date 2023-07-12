@@ -63,6 +63,16 @@
         android:src="@drawable/bottom_bar_elevation_gradient"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container" />
 
+    <include
+        android:id="@+id/include_chat_contact_scroll_down"
+        layout="@layout/layout_scroll_down_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        android:layout_marginBottom="@dimen/default_double_layout_margin"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_chat_footer_container"
         android:layout_width="match_parent"

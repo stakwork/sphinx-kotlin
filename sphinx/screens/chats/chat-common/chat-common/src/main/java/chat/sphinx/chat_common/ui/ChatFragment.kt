@@ -45,6 +45,7 @@ import chat.sphinx.chat_common.ui.viewstate.header.ChatHeaderViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.ChatMenuViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.setView
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
@@ -127,6 +128,7 @@ abstract class ChatFragment<
     protected abstract val moreMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
     protected abstract val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+    protected abstract val scrollDownButtonBinding: LayoutScrollDownButtonBinding
 
     protected abstract val menuEnablePayments: Boolean
 
@@ -201,6 +203,7 @@ abstract class ChatFragment<
         setupHeader(insetterActivity)
         setupAttachmentSendPreview(insetterActivity)
         setupAttachmentFullscreen(insetterActivity)
+        setupScrollDown()
         setupRecyclerView()
 
         viewModel.screenInit()
@@ -809,6 +812,12 @@ abstract class ChatFragment<
         }
     }
 
+    private fun setupScrollDown(){
+        scrollDownButtonBinding.root.setOnClickListener {
+            forceScrollToBottom()
+        }
+    }
+
     private fun setupRecyclerView() {
         val linearLayoutManager = LinearLayoutManager(binding.root.context)
         val messageListAdapter = MessageListAdapter(
@@ -837,6 +846,13 @@ abstract class ChatFragment<
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.readMessages()
                         }
+                    }
+
+                    if (recyclerView.canScrollVertically(1)) {
+                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.On)
+                    }
+                    else {
+                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.Off)
                     }
                 }
             })
@@ -1701,6 +1717,19 @@ abstract class ChatFragment<
                             viewState.index,
                             if (viewState.navigatingForward) viewState.index - 1 else viewState.index + 1
                         )
+                    }
+                }
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.scrollDownViewStateContainer.collect { viewState ->
+                @Exhaustive
+                when (viewState) {
+                    is ScrollDownViewState.On -> {
+                        scrollDownButtonBinding.root.visible
+                    }
+                    is ScrollDownViewState.Off -> {
+                        scrollDownButtonBinding.root.gone
                     }
                 }
             }
