@@ -1007,7 +1007,9 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             MenuBottomViewState.Closed
         )
 
-        if (messagesSearchViewStateContainer.viewStateFlow.value is MessagesSearchViewState.Idle) {
+        if (
+            messagesSearchViewStateContainer.viewStateFlow.value is MessagesSearchViewState.Idle
+        ) {
             loadAllMessages()
         }
 
@@ -1015,7 +1017,9 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             text?.let { nnText ->
                 if (nnText.toCharArray().size > 2) {
                     messagesSearchViewStateContainer.updateViewState(
-                        MessagesSearchViewState.Loading
+                        MessagesSearchViewState.Loading(
+                            true
+                        )
                     )
 
                     messagesSearchJob?.cancel()
@@ -1025,7 +1029,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                         messageRepository.searchMessagesBy(nnChatId, nnText).firstOrNull()
                             ?.let { messages ->
                                 messagesSearchViewStateContainer.updateViewState(
-                                    MessagesSearchViewState.Searching(messages, 0, true)
+                                    MessagesSearchViewState.Searching(
+                                        true,
+                                        messages,
+                                        0,
+                                        true
+                                    )
                                 )
                             }
                     }
@@ -1035,7 +1044,24 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         }
 
         messagesSearchViewStateContainer.updateViewState(
-            MessagesSearchViewState.Searching(emptyList(), 0, true)
+            MessagesSearchViewState.Searching(
+                (text ?: "").isNotEmpty(),
+                emptyList(),
+                0,
+                true
+            )
+        )
+    }
+
+    fun cancelSearch() {
+        messagesSearchViewStateContainer.updateViewState(
+            MessagesSearchViewState.Cancel
+        )
+    }
+
+    fun clearSearch() {
+        messagesSearchViewStateContainer.updateViewState(
+            MessagesSearchViewState.Clear
         )
     }
 
@@ -1046,6 +1072,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         if (searchViewState is MessagesSearchViewState.Searching) {
             messagesSearchViewStateContainer.updateViewState(
                 MessagesSearchViewState.Searching(
+                    searchViewState.clearButtonVisible,
                     searchViewState.messages,
                     searchViewState.index + advanceBy,
                     advanceBy > 0

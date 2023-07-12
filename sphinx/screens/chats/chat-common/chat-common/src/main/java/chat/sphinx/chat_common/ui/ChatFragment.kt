@@ -11,7 +11,8 @@ import android.os.ParcelFileDescriptor
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.*
+import android.view.View
+import android.view.Window
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.activity.OnBackPressedCallback
@@ -61,7 +62,10 @@ import chat.sphinx.concept_network_client_crypto.CryptoScheme
 import chat.sphinx.concept_repository_message.model.AttachmentInfo
 import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
-import chat.sphinx.insetter_activity.*
+import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addKeyboardPadding
+import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.keyboard_inset_fragment.KeyboardInsetMotionLayoutFragment
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -70,7 +74,6 @@ import chat.sphinx.menu_bottom.model.MenuBottomOption
 import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.*
-import chat.sphinx.wrapper_chat.isTrue
 import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -78,7 +81,6 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_common.util.getHHMMString
-import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_meme_server.headerKey
 import chat.sphinx.wrapper_meme_server.headerValue
 import chat.sphinx.wrapper_message.*
@@ -91,7 +93,6 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_views.viewstate.collect
-import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
@@ -489,7 +490,6 @@ abstract class ChatFragment<
     }
 
     open fun setupMoreOptionsMenu() {
-
         bottomMenuMore.newBuilder(moreMenuBinding, viewLifecycleOwner)
             .setHeaderText(R.string.bottom_menu_more_header_text)
             .setOptions(
@@ -621,26 +621,12 @@ abstract class ChatFragment<
             root.layoutParams.height = root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
             root.requestLayout()
 
-            editTextChatSearch.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-
-                override fun afterTextChanged(s: Editable?) {
-                    lifecycleScope.launch(viewModel.mainImmediate) {
-                        viewModel.searchMessages(s.toString())
-                    }
-                }
-            })
-
             textViewChatSearchDone.setOnClickListener {
-                editTextChatSearch.setText("")
+                viewModel.cancelSearch()
+            }
 
-                viewModel.messagesSearchViewStateContainer.updateViewState(
-                    MessagesSearchViewState.Idle
-                )
-
-//                forceScrollToBottom()?
+            buttonChatSearchClear.setOnClickListener {
+                viewModel.clearSearch()
             }
         }
     }
@@ -1622,7 +1608,7 @@ abstract class ChatFragment<
             viewModel.messagesSearchViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
-                    is MessagesSearchViewState.Idle -> {
+                    is MessagesSearchViewState.Idle, is MessagesSearchViewState.Cancel -> {
                         headerBinding.root.visible
                         footerBinding.root.visible
 
@@ -1632,6 +1618,23 @@ abstract class ChatFragment<
                         (recyclerView.adapter as ConcatAdapter).adapters.firstOrNull()?.let { messagesListAdapter ->
                             (messagesListAdapter as MessageListAdapter<*>).resetHighlighted()
                         }
+
+                        searchHeaderBinding.apply {
+                            editTextChatSearch.removeTextChangedListener(searchTextListener)
+                            editTextChatSearch.setText("")
+                            buttonChatSearchClear.gone
+
+                            if (viewState is MessagesSearchViewState.Cancel) {
+                                hideKeyboardFrom(textViewChatSearchDone.context, textViewChatSearchDone )
+                                forceScrollToBottom()
+                            }
+                        }
+                    }
+                    is MessagesSearchViewState.Clear -> {
+                        searchHeaderBinding.apply {
+                            editTextChatSearch.setText("")
+                            buttonChatSearchClear.gone
+                        }
                     }
                     is MessagesSearchViewState.Loading -> {
                         headerBinding.root.gone
@@ -1639,6 +1642,8 @@ abstract class ChatFragment<
 
                         searchHeaderBinding.root.visible
                         searchFooterBinding.root.visible
+
+                        searchHeaderBinding.buttonChatSearchClear.goneIfFalse(viewState.clearButtonVisible)
 
                         searchFooterBinding.apply {
                             progressBarLoadingSearch.visible
@@ -1652,6 +1657,13 @@ abstract class ChatFragment<
 
                         searchHeaderBinding.root.visible
                         searchFooterBinding.root.visible
+
+                        searchHeaderBinding.apply {
+                            buttonChatSearchClear.goneIfFalse(viewState.clearButtonVisible)
+
+                            editTextChatSearch.removeTextChangedListener(searchTextListener)
+                            editTextChatSearch.addTextChangedListener(searchTextListener)
+                        }
 
                         searchFooterBinding.apply {
                             progressBarLoadingSearch.gone
@@ -1695,6 +1707,18 @@ abstract class ChatFragment<
         }
     }
 
+    var searchTextListener: TextWatcher = object : TextWatcher {
+        override fun beforeTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+        override fun onTextChanged(charSequence: CharSequence, i: Int, i1: Int, i2: Int) {}
+        override fun afterTextChanged(editable: Editable) {
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                viewModel.searchMessages(
+                    editable.toString().trim()
+                )
+            }
+        }
+    }
+
     private fun scrollToResult(
         messages: List<Message>,
         index: Int,
@@ -1724,6 +1748,11 @@ abstract class ChatFragment<
                 }
             }
         }
+    }
+
+    fun hideKeyboardFrom(context: Context, view: View) {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     override fun onPause() {

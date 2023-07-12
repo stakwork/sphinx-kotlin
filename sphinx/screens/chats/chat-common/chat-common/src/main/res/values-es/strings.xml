@@ -196,4 +196,6 @@
     <string name="message_pinned">Mensaje Fijado</string>
     <string name="message_unpinned">Mensaje removido</string>
     <string name="pin_message_error">Ocurrió un error. Por favor inténtalo luego</string>
+
+    <string name="cancel_search">CANCELAR</string>
 </resources>
