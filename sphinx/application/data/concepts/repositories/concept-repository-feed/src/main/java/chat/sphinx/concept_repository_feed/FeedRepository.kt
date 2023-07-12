@@ -24,6 +24,11 @@ interface FeedRepository {
         feedType: FeedType?,
     ): Flow<List<FeedSearchResultRow>>
 
+    fun searchFeedItemsBy(
+        searchTerm: String,
+        feedType: FeedType?,
+    ): Flow<List<FeedSearchResultRow>>
+
     suspend fun updateFeedContent(
         chatId: ChatId,
         host: ChatHost,
@@ -35,6 +40,15 @@ interface FeedRepository {
         currentItemId: FeedId? = null,
         delay: Long = 500L
     ): Response<FeedId, ResponseError>
+
+    fun updateFeedItemContent(
+        feedItemId: FeedId,
+        feedId: FeedId,
+        title: FeedTitle,
+        description: FeedDescription,
+        imageUrl: PhotoUrl,
+        enclosureUrl: FeedUrl
+    )
 
     fun getFeedByChatId(chatId: ChatId): Flow<Feed?>
     fun getFeedById(feedId: FeedId): Flow<Feed?>

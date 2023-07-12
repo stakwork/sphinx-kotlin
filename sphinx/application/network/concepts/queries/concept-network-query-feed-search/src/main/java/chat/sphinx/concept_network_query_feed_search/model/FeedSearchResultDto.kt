@@ -37,6 +37,7 @@ inline fun FeedSearchResultDto.toFeedSearchResult() : FeedSearchResult {
          dateUpdated,
          contentType,
          language,
+         null,
          null
      )
 }

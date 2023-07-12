@@ -26,7 +26,7 @@ abstract class DashboardNavigator(
         routeHint: LightningRouteHint? = null
     )
 
-    abstract suspend fun toVideoWatchScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl)
+    abstract suspend fun toVideoWatchScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, feedItemId: FeedId? = null)
 
     abstract suspend fun toWebViewDetail(
         chatId: ChatId?,

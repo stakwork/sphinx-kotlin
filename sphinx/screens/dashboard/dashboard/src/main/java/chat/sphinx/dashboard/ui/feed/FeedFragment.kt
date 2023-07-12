@@ -81,7 +81,7 @@ internal class FeedFragment : SideEffectFragment<
             ) {
                 return
             } else if (
-                viewModel.currentViewState is FeedViewState.SearchResults ||
+                viewModel.currentViewState is FeedViewState.SearchFeedResults ||
                 viewModel.currentViewState is FeedViewState.LoadingSearchResults
             ) {
                 binding.layoutSearchBar.editTextDashboardSearch.setText("")
@@ -265,7 +265,7 @@ internal class FeedFragment : SideEffectFragment<
                     layoutConstraintLoadingSearchResults.visible
                     recyclerViewFeedSearchResults.gone
                 }
-                is FeedViewState.SearchResults -> {
+                is FeedViewState.SearchFeedResults -> {
                     root.visible
                     layoutConstraintFeedSearchVideoPlaceholder.gone
                     layoutConstraintFeedSearchPodcastPlaceholder.gone

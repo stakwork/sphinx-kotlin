@@ -13,6 +13,10 @@ inline fun FeedId.youtubeVideoId(): String =
     value.replace("yt:video:","")
 
 @Suppress("NOTHING_TO_INLINE")
+inline fun FeedId.toYoutubeVideoId(): FeedId =
+    FeedId("yt:video:${this.value}")
+
+@Suppress("NOTHING_TO_INLINE")
 inline fun FeedId.youtubeFeedIds(): List<FeedId> =
     listOf(
         this,

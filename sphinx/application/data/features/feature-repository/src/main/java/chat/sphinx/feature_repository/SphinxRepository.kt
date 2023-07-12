@@ -18,6 +18,7 @@ import chat.sphinx.concept_network_query_contact.model.PostContactDto
 import chat.sphinx.concept_network_query_contact.model.PutContactDto
 import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_search.model.toFeedItemSearchResult
 import chat.sphinx.concept_network_query_feed_search.model.toFeedSearchResult
 import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
@@ -137,6 +138,7 @@ import io.matthewnelson.crypto_common.annotations.UnencryptedDataAccess
 import io.matthewnelson.crypto_common.clazzes.*
 import io.matthewnelson.feature_authentication_core.AuthenticationCoreManager
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -3916,6 +3918,41 @@ abstract class SphinxRepository(
         return updateResponse
     }
 
+    private val updateFeedItemContentLock = Mutex()
+
+    override fun updateFeedItemContent(
+        feedItemId: FeedId,
+        feedId: FeedId,
+        title: FeedTitle,
+        description: FeedDescription,
+        imageUrl: PhotoUrl,
+        enclosureUrl: FeedUrl
+    ) {
+        applicationScope.launch(io) {
+            val queries = coreDB.getSphinxDatabaseQueries()
+
+            updateFeedItemContentLock.withLock {
+                queries.feedItemUpsert(
+                    id = feedItemId,
+                    feed_id = feedId,
+                    title = title,
+                    description = description,
+                    image_url = imageUrl,
+                    enclosure_url = enclosureUrl,
+                    author = null,
+                    date_published = null,
+                    date_updated = null,
+                    content_type = null,
+                    enclosure_length = null,
+                    enclosure_type = null,
+                    thumbnail_url = null,
+                    link = null,
+                    duration = null
+                )
+            }
+        }
+    }
+
     private suspend fun updateFeedContentItemsFor(
         feed: Feed,
         host: ChatHost,
@@ -4730,6 +4767,55 @@ abstract class SphinxRepository(
                             results.add(
                                 FeedSearchResultRow(
                                     item.toFeedSearchResult(),
+                                    isSectionHeader = false,
+                                    isFollowingSection = false,
+                                    (index == response.value.count() - 1)
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        emit(results)
+    }
+
+    override fun searchFeedItemsBy(
+        searchTerm: String,
+        feedType: FeedType?
+    ): Flow<List<FeedSearchResultRow>> = flow {
+        if (feedType == null) {
+            return@flow
+        }
+
+        var results: MutableList<FeedSearchResultRow> = mutableListOf()
+
+        networkQueryFeedSearch.searchFeedItems(
+            searchTerm,
+            feedType
+        ).collect { response ->
+            @Exhaustive
+            when (response) {
+                is LoadResponse.Loading -> {}
+
+                is Response.Error -> {}
+                is Response.Success -> {
+
+                    if (response.value.isNotEmpty()) {
+                        results.add(
+                            FeedSearchResultRow(
+                                feedSearchResult = null,
+                                isSectionHeader = true,
+                                isFollowingSection = false,
+                                isLastOnSection = false
+                            )
+                        )
+
+                        response.value.forEachIndexed { index, item ->
+                            results.add(
+                                FeedSearchResultRow(
+                                    item.toFeedItemSearchResult(),
                                     isSectionHeader = false,
                                     isFollowingSection = false,
                                     (index == response.value.count() - 1)

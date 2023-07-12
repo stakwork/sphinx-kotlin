@@ -18,7 +18,6 @@ import chat.sphinx.dashboard.ui.feed.FeedViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedViewState
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.feed.toFeedType
-import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_podcast.FeedSearchResult
 import chat.sphinx.wrapper_podcast.FeedSearchResultRow
 import io.matthewnelson.android_feature_screens.util.gone
@@ -120,7 +119,7 @@ class FeedSearchAdapter(
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.collectViewState { viewState ->
 
-                var list: List<FeedSearchResultRow> = if (viewState is FeedViewState.SearchResults) {
+                var list: List<FeedSearchResultRow> = if (viewState is FeedViewState.SearchFeedResults) {
                     viewState.searchResults
                 } else {
                     listOf()

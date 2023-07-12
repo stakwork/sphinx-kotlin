@@ -32,6 +32,7 @@ internal class FeedDboFeedSearchResultPresenterMapper(
             value.content_type?.value,
             value.language?.value,
             value.chat_id.value,
+            null
         )
     }
 

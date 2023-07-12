@@ -13,7 +13,8 @@ sealed class FeedViewState: ViewState<FeedViewState>() {
 
     object LoadingSearchResults: FeedViewState()
 
-    data class SearchResults(
+    data class SearchFeedResults(
         val searchResults: List<FeedSearchResultRow>
     ): FeedViewState()
+
 }

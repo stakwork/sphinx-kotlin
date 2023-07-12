@@ -17,5 +17,6 @@ data class FeedSearchResult(
     val dateUpdated: Long?,
     val contentType: String?,
     val language: String?,
-    val chatId: Long?
+    val chatId: Long?,
+    val feedItemId: String?
 )

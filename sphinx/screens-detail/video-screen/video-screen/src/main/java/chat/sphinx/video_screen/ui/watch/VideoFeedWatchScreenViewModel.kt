@@ -36,6 +36,10 @@ internal inline val VideoFeedWatchScreenFragmentArgs.feedUrl: FeedUrl?
 internal inline val VideoFeedWatchScreenFragmentArgs.feedId: FeedId?
     get() = FeedId(argFeedId)
 
+internal inline val VideoFeedWatchScreenFragmentArgs.feedItemId: FeedId?
+    get() = argFeedItemId?.let { FeedId(it) }
+
+
 @HiltViewModel
 internal class VideoFeedWatchScreenViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
@@ -132,5 +136,9 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
 
     override fun getArgFeedId(): FeedId? {
         return args.feedId
+    }
+
+    override fun getArgFeedItemId(): FeedId? {
+        return args.feedItemId
     }
 }
