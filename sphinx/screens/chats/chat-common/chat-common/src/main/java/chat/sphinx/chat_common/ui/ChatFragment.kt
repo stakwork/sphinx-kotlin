@@ -970,8 +970,9 @@ abstract class ChatFragment<
 
                         val message = viewState.message
 
-                        message.uuid?.value?.toReplyUUID().let { uuid ->
-                            sendMessageBuilder.setReplyUUID(uuid)
+                        message.uuid?.value?.let { uuid ->
+                            sendMessageBuilder.setReplyUUID(uuid.toReplyUUID())
+                            sendMessageBuilder.setThreadUUID(message.threadUUID ?: uuid.toThreadUUID())
 
                             replyingMessageBinding.apply {
 
