@@ -5,16 +5,22 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.webkit.WebChromeClient
 import android.widget.*
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
@@ -23,7 +29,6 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
-import chat.sphinx.common_player.BuildConfig
 import chat.sphinx.common_player.R
 import chat.sphinx.common_player.adapter.RecommendedItemsAdapter
 import chat.sphinx.common_player.adapter.RecommendedItemsFooterAdapter
@@ -46,9 +51,6 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.util.getHHMMSSString
 import chat.sphinx.wrapper_podcast.Podcast
 import chat.sphinx.wrapper_podcast.PodcastEpisode
-import com.google.android.youtube.player.YouTubeCommonPlayerSupportFragmentXKt
-import com.google.android.youtube.player.YouTubeInitializationResult
-import com.google.android.youtube.player.YouTubePlayer
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -83,7 +85,11 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
     )
     override val viewModel: CommonPlayerScreenViewModel by viewModels()
 
-    private var youtubePlayer: YouTubePlayer? = null
+    companion object {
+        const val YOUTUBE_URL = "https://www.youtube.com"
+        const val MIME_TYPE_HTML = "text/html"
+        const val ENCODING_UTF = "UTF-8"
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -111,6 +117,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         setupItems()
         setupFeedItemDetails()
         setupFragmentLayout()
+        setupYoutubePlayerIframe()
     }
 
     private fun setupFragmentLayout() {
@@ -195,8 +202,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         val a: Activity? = activity
         a?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 
-        youtubePlayer?.release()
-        youtubePlayer = null
     }
 
     private fun setupItems() {
@@ -379,7 +384,6 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                                         this@fireworks.lottieAnimationView.playAnimation()
                                     }
                                 }
-
                             }
                         )
                     }
@@ -661,10 +665,9 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                         is PlayerViewState.Idle -> {}
 
                         is PlayerViewState.PodcastEpisodeSelected -> {
-                            youtubePlayer?.pause()
 
                             includeLayoutPlayersContainer.apply {
-                                frameLayoutYoutubePlayer.gone
+                                webViewYoutubePlayer.gone
                                 imageViewPodcastImage.visible
                                 layoutConstraintSliderContainer.visible
                             }
@@ -680,7 +683,7 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
 
                         is PlayerViewState.YouTubeVideoSelected -> {
                             includeLayoutPlayersContainer.apply {
-                                frameLayoutYoutubePlayer.visible
+                                webViewYoutubePlayer.visible
                                 imageViewPodcastImage.gone
                                 layoutConstraintSliderContainer.gone
                             }
@@ -693,20 +696,11 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
                                 imageViewPlayPauseButton.invisible
                             }
 
-                            didSeekToStartTime = false
+                            cueYoutubeVideo(viewState.episode.enclosureUrl.value.youTubeVideoId())
 
-                            if (youtubePlayer != null) {
-                                youtubePlayer?.cueVideo(viewState.episode.enclosureUrl.value.youTubeVideoId())
-
-                                viewModel.createHistoryItem()
-                                viewModel.trackVideoConsumed()
-                                viewModel.createVideoRecordConsumed(viewState.episode.id)
-                            } else {
-                                setupYoutubePlayer(
-                                    viewState.episode.enclosureUrl.value.youTubeVideoId(),
-                                )
-                                viewModel.createVideoRecordConsumed(viewState.episode.id)
-                            }
+                            viewModel.createHistoryItem()
+                            viewModel.trackVideoConsumed()
+                            viewModel.createVideoRecordConsumed(viewState.episode.id)
                         }
                     }
                 }
@@ -737,78 +731,122 @@ internal class CommonPlayerScreenFragment : SideEffectFragment<
         }
     }
 
-    private var didSeekToStartTime = false
-    private fun seekToStartTime() {
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            (viewModel.playerViewStateContainer.value as? PlayerViewState.YouTubeVideoSelected)?.let { viewState ->
-                viewState.episode.clipStartTime?.let {
-                    if (!didSeekToStartTime) {
-                        youtubePlayer?.seekToMillis(it)
+    private fun setupYoutubePlayerIframe() {
+        var isSeeking = false
+
+        binding.includeLayoutPlayersContainer.apply {
+            webViewYoutubePlayer.settings.javaScriptEnabled = true
+
+            webViewYoutubePlayer.webChromeClient = object : WebChromeClient() {
+
+                private var customView: View? = null
+                private var customViewCallback: CustomViewCallback? = null
+                private var originalOrientation: Int = 0
+
+                override fun onShowCustomView(view: View?, callback: CustomViewCallback) {
+                    if (customView != null) {
+                        onHideCustomView()
+                        return
                     }
-                    didSeekToStartTime = true
+
+                    customView = view
+                    originalOrientation = activity?.requestedOrientation ?: Configuration.ORIENTATION_UNDEFINED
+
+                    customViewCallback = callback
+
+                    val decor = activity?.window?.decorView as FrameLayout
+                    decor.addView(customView, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+
+                    ViewCompat.getWindowInsetsController(decor)?.let {
+                        it.hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+                        it.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
+                }
+
+                override fun onHideCustomView() {
+                    val decor = activity?.window?.decorView as FrameLayout
+                    decor.removeView(customView)
+                    customView = null
+
+                    ViewCompat.getWindowInsetsController(decor)?.show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+
+                    activity?.requestedOrientation = originalOrientation
+
+                    customViewCallback?.onCustomViewHidden()
+                    customViewCallback = null
+                }
+
+                override fun getDefaultVideoPoster(): Bitmap {
+                    return Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
                 }
             }
+
+            val videoStateListener = object : VideoStateListener {
+
+                override fun onVideoSeek(time: Int) {
+                    isSeeking = true
+                    viewModel.setNewHistoryItem(time.toLong())
+
+                    Log.d("YouTubePlayer", "Youtube has seek $time")
+                }
+
+                override fun onVideoPlaying() {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.playingVideoUpdate()
+                        binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
+                    }
+                    viewModel.startTimer()
+                    isSeeking = false
+
+                    Log.d("YouTubePlayer", "Youtube is playing")
+                }
+                override fun onVideoPaused() {
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.playingVideoDidPause()
+                        binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
+                    }
+                    viewModel.stopTimer()
+
+                    Log.d("YouTubePlayer", "Youtube is on pause")
+                }
+
+                override fun onVideoEnded() {
+                    viewModel.stopTimer()
+                    Log.d("YouTubePlayer", "Youtube video ended")
+                }
+
+                override fun onVideoReady() {}
+                override fun onVideoBuffering() {}
+                override fun onVideoUnstarted() {}
+                override fun onVideoCued() {}
+                override fun onVideoError(error: String) {}
+                override fun onPlaybackQualityChange(quality: String) {}
+                override fun onPlaybackRateChange(rate: String) {}
+            }
+
+            webViewYoutubePlayer.addJavascriptInterface(
+                YoutubePlayerJavaScriptInterface(videoStateListener),
+                "Android"
+            )
         }
     }
 
-    private fun setupYoutubePlayer(
-        videoId: String
-    ) {
-        val youtubePlayerFragment = YouTubeCommonPlayerSupportFragmentXKt()
+    private fun cueYoutubeVideo(videoId: String) {
+        binding.includeLayoutPlayersContainer.apply {
 
-        childFragmentManager.beginTransaction()
-            .replace(binding.includeLayoutPlayersContainer.frameLayoutYoutubePlayer.id, youtubePlayerFragment as Fragment)
-            .commit()
-
-        youtubePlayerFragment.initialize(
-            BuildConfig.YOUTUBE_API_KEY,
-            object : YouTubePlayer.OnInitializedListener {
-                override fun onInitializationSuccess(
-                    p0: YouTubePlayer.Provider?,
-                    p1: YouTubePlayer?,
-                    p2: Boolean
-                ) {
-                    p1?.let {
-                        youtubePlayer = it
-                    }
-                    p1?.cueVideo(videoId)
-                    p1?.setPlaybackEventListener(playbackEventListener)
-                }
-
-                override fun onInitializationFailure(
-                    p0: YouTubePlayer.Provider?,
-                    p1: YouTubeInitializationResult?
-                ) {}
-                private val playbackEventListener = object : YouTubePlayer.PlaybackEventListener {
-
-                    override fun onSeekTo(p0: Int) {
-                        viewModel.setNewHistoryItem(p0.toLong())
-                    }
-
-                    override fun onBuffering(p0: Boolean) {}
-
-                    override fun onPlaying() {
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            viewModel.playingVideoUpdate()
-                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
-                        }
-
-                        seekToStartTime()
-                        viewModel.startTimer()
-                    }
-                    override fun onStopped() {
-                        viewModel.stopTimer()
-                    }
-
-                    override fun onPaused() {
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            viewModel.playingVideoDidPause()
-                            binding.includeRecommendedItemsList.recyclerViewList.adapter?.notifyDataSetChanged()
-                        }
-                        viewModel.stopTimer()
-                    }
-                }
-            })
+            val htmlContent = context?.assets?.open("youtube_iframe.html")?.bufferedReader()
+                .use { it?.readText() }
+            val formattedHtml = htmlContent?.replace("%%VIDEO_ID%%", videoId)
+            formattedHtml?.let { html ->
+                webViewYoutubePlayer.loadDataWithBaseURL(
+                    YOUTUBE_URL,
+                    html,
+                    MIME_TYPE_HTML,
+                    ENCODING_UTF,
+                    null
+                )
+            }
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
