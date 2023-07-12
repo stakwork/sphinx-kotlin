@@ -1,5 +1,12 @@
 # ChangeLog
 
+# Version 1.0.0-alpha99 (2023-07-12)
+- Adds downloaded content section on feed
+- Improves chat messages search
+- Upgrades YouTube video player
+- Implements scroll to bottom on chat
+- Fixes bugs
+
 # Version 1.0.0-alpha98 (2023-06-26)
 - Adds storage management for audio and generic files
 
