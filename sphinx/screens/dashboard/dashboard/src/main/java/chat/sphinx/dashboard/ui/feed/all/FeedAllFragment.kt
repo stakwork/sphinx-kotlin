@@ -201,6 +201,16 @@ internal class FeedAllFragment : SideEffectFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.lastPlayedFeedsHolderViewStateFlow.collect { list ->
+                if (list.isEmpty()) {
+                    binding.layoutConstraintRecentlyPlayed.gone
+                } else {
+                    binding.layoutConstraintRecentlyPlayed.visible
+                }
+            }
+        }
     }
 
     private fun toggleElements(contentAvailable: Boolean) {
