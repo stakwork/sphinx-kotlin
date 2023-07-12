@@ -10,6 +10,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedAllBinding
+import chat.sphinx.dashboard.ui.adapter.FeedDownloadedAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedFollowingAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedRecentlyPlayedAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedRecommendationsAdapter
@@ -47,6 +48,7 @@ internal class FeedAllFragment : SideEffectFragment<
         setupRecommendationsAdapter()
         setupFollowingAdapter()
         setupRecentlyPlayedAdapter()
+        setupDownloadedAdapter()
         setupRefreshButton()
         setupNestedScrollView()
     }
@@ -119,6 +121,21 @@ internal class FeedAllFragment : SideEffectFragment<
         }
     }
 
+    private fun setupDownloadedAdapter() {
+        binding.recyclerViewDownloaded.apply {
+            val downloadedAdapter = FeedDownloadedAdapter(
+                imageLoader,
+                viewLifecycleOwner,
+                onStopSupervisor,
+                viewModel,
+                viewModel
+            )
+            this.setHasFixedSize(false)
+            adapter = downloadedAdapter
+            itemAnimator = null
+        }
+    }
+
     override suspend fun onSideEffectCollect(sideEffect: FeedAllSideEffect) {
         sideEffect.execute(requireActivity())
     }
@@ -174,6 +191,26 @@ internal class FeedAllFragment : SideEffectFragment<
                 )
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.feedDownloadedHolderViewStateFlow.collect { list ->
+                if (list.isEmpty()) {
+                    binding.layoutConstraintDownloadedSection.gone
+                } else {
+                    binding.layoutConstraintDownloadedSection.visible
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.lastPlayedFeedsHolderViewStateFlow.collect { list ->
+                if (list.isEmpty()) {
+                    binding.layoutConstraintRecentlyPlayed.gone
+                } else {
+                    binding.layoutConstraintRecentlyPlayed.visible
+                }
+            }
+        }
     }
 
     private fun toggleElements(contentAvailable: Boolean) {
@@ -189,4 +226,5 @@ internal class FeedAllFragment : SideEffectFragment<
             }
         }
     }
+
 }

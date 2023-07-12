@@ -4131,9 +4131,10 @@ abstract class SphinxRepository(
                 .asFlow()
                 .mapToList(io)
                 .map { listFeedItemDbo ->
-                    listFeedItemDbo.map {
-                        feedItemDboPresenterMapper.mapFrom(it)
-                    }
+                    mapFeedItemDboList(
+                        listFeedItemDbo,
+                        coreDB.getSphinxDatabaseQueries()
+                    )
                 }
                 .distinctUntilChanged()
         )
@@ -4503,6 +4504,36 @@ abstract class SphinxRepository(
         return feedItem
     }
 
+    private suspend fun mapFeedItemDboList(
+        listFeedItemDbo: List<FeedItemDbo>,
+        queries: SphinxDatabaseQueries
+    ): List<FeedItem> {
+
+        val feedsMap: MutableMap<FeedId, Feed> = mutableMapOf()
+        val feedIds = listFeedItemDbo.map { it.feed_id }.distinct()
+
+        queries.feedGetByIds(feedIds)
+            .executeAsList()
+            .let { response ->
+                response.forEach { dbo ->
+                    val feed = feedDboPresenterMapper.mapFrom(dbo)
+                    feedsMap[dbo.id] = feed
+                }
+            }
+
+        val feedItems = listFeedItemDbo.map {
+            feedItemDboPresenterMapper.mapFrom(it).apply {
+                it.feed_id
+            }
+        }
+
+        feedItems.forEach { item ->
+            item.feed = feedsMap[item.feedId]
+        }
+
+        return feedItems
+    }
+
     private val podcastDboPresenterMapper: FeedDboPodcastPresenterMapper by lazy {
         FeedDboPodcastPresenterMapper(dispatchers)
     }
@@ -4726,36 +4757,6 @@ abstract class SphinxRepository(
                 newValue,
                 feedId
             )
-        }
-    }
-
-    private suspend fun mapFeedItemDboList(
-        listFeedItemDbo: List<FeedItemDbo>,
-        queries: SphinxDatabaseQueries
-    ): List<FeedItem> {
-        val feedsMap: MutableMap<FeedId, ArrayList<Feed>> =
-            LinkedHashMap(listFeedItemDbo.size)
-
-        for (dbo in listFeedItemDbo) {
-            feedsMap[dbo.feed_id] = ArrayList(0)
-        }
-
-        feedsMap.keys.chunked(500).forEach { chunkedFeedIds ->
-            queries.feedGetAllByIds(chunkedFeedIds)
-                .executeAsList()
-                .let { response ->
-                    response.forEach { dbo ->
-                        feedsMap[dbo.id]?.add(
-                            feedDboPresenterMapper.mapFrom(dbo)
-                        )
-                    }
-                }
-        }
-
-        return listFeedItemDbo.map {
-            feedItemDboPresenterMapper.mapFrom(it).apply {
-                it.feed_id
-            }
         }
     }
 

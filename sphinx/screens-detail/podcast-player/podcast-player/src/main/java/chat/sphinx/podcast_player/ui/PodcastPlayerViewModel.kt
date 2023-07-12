@@ -89,6 +89,9 @@ internal inline val PodcastPlayerFragmentArgs.feedId: FeedId
 internal inline val PodcastPlayerFragmentArgs.fromFeed: Boolean
     get() = argFromFeed
 
+internal inline val PodcastPlayerFragmentArgs.fromDownloaded: Boolean
+    get() = argFromDownloaded
+
 @HiltViewModel
 internal class PodcastPlayerViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
@@ -205,6 +208,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.MediaStateUpdate(
                                 podcast,
+                                args.fromDownloaded,
                                 serviceState
                             )
                         )
@@ -215,6 +219,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.MediaStateUpdate(
                                 podcast,
+                                args.fromDownloaded,
                                 serviceState
                             )
                         )
@@ -227,6 +232,7 @@ internal class PodcastPlayerViewModel @Inject constructor(
                         viewStateContainer.updateViewState(
                             PodcastPlayerViewState.MediaStateUpdate(
                                 podcast,
+                                args.fromDownloaded,
                                 serviceState
                             )
                         )
@@ -357,7 +363,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
             podcast.applyPlayingContentState(playingContent)
 
             viewStateContainer.updateViewState(
-                PodcastPlayerViewState.PodcastLoaded(podcast)
+                PodcastPlayerViewState.PodcastLoaded(
+                    podcast,
+                    args.fromDownloaded
+                )
             )
 
             val contentFeedStatus = podcast.getUpdatedContentFeedStatus()
@@ -453,7 +462,8 @@ internal class PodcastPlayerViewModel @Inject constructor(
 
                 viewStateContainer.updateViewState(
                     PodcastPlayerViewState.EpisodePlayed(
-                        podcast
+                        podcast,
+                        args.fromDownloaded
                     )
                 )
 
@@ -861,7 +871,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
 
                 viewStateContainer.updateViewState(
-                    PodcastPlayerViewState.PodcastLoaded(viewState.podcast)
+                    PodcastPlayerViewState.PodcastLoaded(
+                        viewState.podcast,
+                        args.fromDownloaded
+                    )
                 )
                 Log.d("isAudioComingOut", "UpdateState! PodcastLoaded")
             }
@@ -869,7 +882,10 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
 
                 viewStateContainer.updateViewState(
-                    PodcastPlayerViewState.EpisodePlayed(viewState.podcast)
+                    PodcastPlayerViewState.EpisodePlayed(
+                        viewState.podcast,
+                        args.fromDownloaded
+                    )
                 )
                 Log.d("isAudioComingOut", "UpdateState! EpisodePlayed ")
             }
@@ -877,7 +893,11 @@ internal class PodcastPlayerViewModel @Inject constructor(
                 viewState.podcast.forceUpdate = !viewState.podcast.forceUpdate
 
                 viewStateContainer.updateViewState(
-                    PodcastPlayerViewState.MediaStateUpdate(viewState.podcast, viewState.state)
+                    PodcastPlayerViewState.MediaStateUpdate(
+                        viewState.podcast,
+                        args.fromDownloaded,
+                        viewState.state
+                    )
                 )
                 Log.d("isAudioComingOut", "UpdateState! MediaStateUpdate")
             }

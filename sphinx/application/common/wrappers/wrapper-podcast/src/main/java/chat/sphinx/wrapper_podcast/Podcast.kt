@@ -200,6 +200,22 @@ data class Podcast(
         return episodesList
     }
 
+    fun getDownloadedEpisodesListCopy(): ArrayList<PodcastEpisode> {
+        var episodesList = ArrayList<PodcastEpisode>()
+
+        for (episode in this.episodes) {
+            if (episode.downloaded) {
+                val episodeCopy = episode.copy()
+                episodeCopy.playing = episode.playing
+                episodeCopy.contentEpisodeStatus = episode.contentEpisodeStatus
+                episodeCopy.played = episode.played
+
+                episodesList.add(episodeCopy)
+            }
+        }
+        return episodesList
+    }
+
     fun setCurrentEpisodeWith(episodeId: String) {
         this.playingEpisode?.playing = false
 

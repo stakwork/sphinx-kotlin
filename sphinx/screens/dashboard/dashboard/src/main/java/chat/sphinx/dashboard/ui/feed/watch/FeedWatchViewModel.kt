@@ -57,6 +57,7 @@ class FeedWatchViewModel @Inject constructor(
                     .sortedByDescending { it.lastPublished?.datePublished?.time ?: 0 }
 
                 _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList()
+                    .filter { it.lastPlayed != null }
                     .sortedWith(compareByDescending<Feed> { it.lastPlayed?.time }.thenByDescending { it.lastPublished?.datePublished?.time ?: 0 })
             }
         }

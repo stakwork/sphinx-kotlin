@@ -21,6 +21,9 @@
         <argument
             android:name="argFromFeed"
             app:argType="boolean" />
+        <argument
+            android:name="argFromDownloaded"
+            app:argType="boolean" />
     </fragment>
 
 </navigation>
