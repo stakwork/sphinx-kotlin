@@ -194,4 +194,6 @@
     <string name="message_pinned">Message Pinned</string>
     <string name="message_unpinned">Message Unpinned</string>
     <string name="pin_message_error">Something went wrong. Please try again later</string>
+
+    <string name="cancel_search">CANCEL</string>
 </resources>
