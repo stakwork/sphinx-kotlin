@@ -112,11 +112,19 @@ internal class PodcastEpisodesListAdapter(
                 var episodes = ArrayList<PodcastEpisode>()
 
                 if (viewState is PodcastPlayerViewState.PodcastLoaded) {
-                    episodes = viewState.podcast.getEpisodesListCopy()
+                    episodes = if (viewState.downloadedOnly) {
+                        viewState.podcast.getDownloadedEpisodesListCopy()
+                    } else {
+                        viewState.podcast.getEpisodesListCopy()
+                    }
                 }
 
                 if (viewState is PodcastPlayerViewState.EpisodePlayed) {
-                    episodes = viewState.podcast.getEpisodesListCopy()
+                    episodes = if (viewState.downloadedOnly) {
+                        viewState.podcast.getDownloadedEpisodesListCopy()
+                    } else {
+                        viewState.podcast.getEpisodesListCopy()
+                    }
                 }
 
                 if (viewState is PodcastPlayerViewState.MediaStateUpdate) {
@@ -125,7 +133,11 @@ internal class PodcastEpisodesListAdapter(
                         viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended ||
                         viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Playing
                     ) {
-                        episodes = viewState.podcast.getEpisodesListCopy()
+                        episodes = if (viewState.downloadedOnly) {
+                            viewState.podcast.getDownloadedEpisodesListCopy()
+                        } else {
+                            viewState.podcast.getEpisodesListCopy()
+                        }
                     }
                 }
 

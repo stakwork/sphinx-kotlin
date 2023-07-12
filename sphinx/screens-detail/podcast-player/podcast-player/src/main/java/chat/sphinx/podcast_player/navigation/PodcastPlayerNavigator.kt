@@ -18,8 +18,9 @@ abstract class PodcastPlayerNavigator(
         chatId: ChatId,
         feedId: FeedId,
         feedUrl: FeedUrl,
+        fromDownloadedSection: Boolean = false
     ) {
-        navigationDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, false))
+        navigationDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, false, fromDownloadedSection))
     }
 
     @JvmSynthetic

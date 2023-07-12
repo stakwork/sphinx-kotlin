@@ -38,7 +38,12 @@ abstract class DashboardNavigator(
 
     abstract suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl)
 
-    abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl)
+    abstract suspend fun toPodcastPlayerScreen(
+        chatId: ChatId,
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        fromDownloadedSection: Boolean = false
+    )
 
     abstract suspend fun toCommonPlayerScreen(
         podcastId: FeedId,
