@@ -50,8 +50,13 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToPaymentReceiveDetail(contactId, chatId))
     }
 
-    override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
-        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, false))
+    override suspend fun toPodcastPlayerScreen(
+        chatId: ChatId,
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        fromDownloadedSection: Boolean
+    ) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, fromFeed = false, fromDownloaded = false))
     }
 
     override suspend fun toTribeDetailScreen(chatId: ChatId) {
@@ -139,6 +144,6 @@ internal class TribeChatNavigatorImpl @Inject constructor(
     }
 
     override suspend fun toPodcastPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
-        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, true))
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, fromFeed = false, fromDownloaded = false))
     }
 }

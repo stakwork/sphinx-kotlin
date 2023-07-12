@@ -32,7 +32,11 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -166,32 +170,68 @@ internal class FeedAllViewModel @Inject constructor(
         get() = _feedDownloadedHolderViewStateFlow
 
     override fun feedDownloadedSelected(feedItem: FeedItem) {
-        viewModelScope.launch(mainImmediate) {
-            feedRepository.getPodcastById(feedItem.feedId).firstOrNull()?.let { podcast ->
-                podcast.getEpisodeWithId(feedItem.id.value)?.let { episode ->
+        feedItem.feed?.let { feed ->
+            viewModelScope.launch(mainImmediate) {
 
-                    podcast.willStartPlayingEpisode(
-                        episode,
-                        episode.currentTimeMilliseconds ?: 0,
-                        ::retrieveEpisodeDuration
-                    )
+                //Pause if playing
+                pausePlayingIfNeeded(
+                    feed,
+                    feedItem
+                )
 
-                    dashboardNavigator.toPodcastPlayerScreen(
-                        feedItem.feed?.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                        episode.podcastId,
-                        podcast.feedUrl
-                    )
+                delay(50L)
 
+                //Set new episode
+                setEpisodeOnFeed(
+                    feed,
+                    feedItem
+                )
+
+                dashboardNavigator.toPodcastPlayerScreen(
+                    feed.chat?.id ?: feed.chatId,
+                    feed.id,
+                    feed.feedUrl,
+                    true
+                )
+            }
+        }
+    }
+
+    private suspend fun pausePlayingIfNeeded(
+        feed: Feed,
+        episode: FeedItem
+    ) {
+        mediaPlayerServiceController.getPlayingContent()?.let { playingContent ->
+            if (
+                playingContent.first == feed.id.value &&
+                playingContent.second != episode.id.value
+            ) {
+                viewModelScope.launch(mainImmediate) {
                     mediaPlayerServiceController.submitAction(
-                        UserAction.ServiceAction.Play(
-                            feedItem.feed?.chatId ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
-                            episode.episodeUrl,
-                            podcast.getUpdatedContentFeedStatus(),
-                            podcast.getUpdatedContentEpisodeStatus()
+                        UserAction.ServiceAction.Pause(
+                            feed.chatId,
+                            playingContent.second
                         )
                     )
                 }
             }
+        }
+    }
+
+    private fun setEpisodeOnFeed(
+        feed: Feed,
+        episode: FeedItem
+    ) {
+        feed?.getNNContentFeedStatus()?.let { contentFeedStatus ->
+            feedRepository.updateContentFeedStatus(
+                feed.id,
+                contentFeedStatus.feedUrl,
+                contentFeedStatus.subscriptionStatus,
+                contentFeedStatus.chatId,
+                episode.id,
+                contentFeedStatus.satsPerMinute,
+                contentFeedStatus.playerSpeed
+            )
         }
     }
 
