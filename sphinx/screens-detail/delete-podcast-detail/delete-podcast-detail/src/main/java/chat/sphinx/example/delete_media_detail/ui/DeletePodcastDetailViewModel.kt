@@ -25,6 +25,9 @@ import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -45,8 +48,19 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
         >(dispatchers, DeleteMediaDetailViewState.Idle)
 {
     private val args: DeletePodcastDetailFragmentArgs by savedStateHandle.navArgs()
-    private var currentFeed: Feed? = null
-    private var itemsTotalSize: String = ""
+
+    private val _currentFeedStateFlow: MutableStateFlow<Feed?> by lazy {
+        MutableStateFlow(null)
+    }
+    private val currentFeedStateFlow: StateFlow<Feed?>
+        get() = _currentFeedStateFlow.asStateFlow()
+
+    private val _itemsTotalSizeStateFlow: MutableStateFlow<String> by lazy {
+        MutableStateFlow("")
+    }
+
+    val itemsTotalSizeStateFlow: StateFlow<String>
+        get() = _itemsTotalSizeStateFlow.asStateFlow()
 
     val deleteAllNotificationViewStateContainer: ViewStateContainer<DeleteAllNotificationViewStateContainer> by lazy {
         ViewStateContainer(DeleteAllNotificationViewStateContainer.Closed)
@@ -67,7 +81,7 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
                 val feed = feedRepository.getFeedById(FeedId(args.argFeedId)).firstOrNull()
                 val totalSize = feedItemList.map { FileSize(it.localFile?.length() ?: 0L) }
 
-                currentFeed = feed
+                _currentFeedStateFlow.value = feed
                 setItemTotalFile(totalSize)
 
                 val podcastDetailToDeleteLists: List<PodcastDetailToDelete> = feedItemList.sortedByDescending { it.datePublishedTime }.map { feedItem ->
@@ -106,11 +120,11 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
         deleteAllNotificationViewStateContainer.updateViewState(DeleteAllNotificationViewStateContainer.Deleting)
 
         viewModelScope.launch(mainImmediate) {
-            currentFeed?.let { nnFeed ->
+            currentFeedStateFlow.value?.let { nnFeed ->
 
                 if (repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)) {
                     deleteAllNotificationViewStateContainer.updateViewState(
-                        DeleteAllNotificationViewStateContainer.Deleted(itemsTotalSize)
+                        DeleteAllNotificationViewStateContainer.Deleted
                     )
                 } else {
                     deleteAllNotificationViewStateContainer.updateViewState(
@@ -128,13 +142,18 @@ internal class DeletePodcastDetailViewModel @Inject constructor(
     private fun setItemTotalFile(files: List<FileSize>) {
         val totalSize = files.sumOf { it.value }
         if (totalSize > 0L) {
-            itemsTotalSize = files.calculateTotalSize()
+            _itemsTotalSizeStateFlow.value = files.calculateTotalSize()
         }
     }
 
     fun openDeleteItemPopup(feedItem: FeedItem) {
-        deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Open(feedItem))
+        deleteItemNotificationViewStateContainer.updateViewState(
+            DeleteItemNotificationViewState.Open(
+                feedItem
+            )
+        )
     }
+
     fun closeDeleteItemPopup() {
         deleteItemNotificationViewStateContainer.updateViewState(DeleteItemNotificationViewState.Closed)
     }
