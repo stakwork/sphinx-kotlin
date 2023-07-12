@@ -2719,7 +2719,8 @@ abstract class SphinxRepository(
                     sendMessage.paidMessagePrice?.value,
                     sendMessage.isBoost,
                     sendMessage.isCall,
-                    sendMessage.isTribePayment
+                    sendMessage.isTribePayment,
+                    sendMessage.threadUUID?.value
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
@@ -2961,18 +2962,19 @@ abstract class SphinxRepository(
 
             val postMessageDto: PostMessageDto = try {
                 PostMessageDto(
-                    message.chatId.value,
-                    contact?.id?.value,
-                    messagePrice.value,
-                    messagePrice.value,
-                    message.replyUUID?.value,
-                    message.messageContentDecrypted?.value,
-                    remoteTextMap,
-                    null,
-                    message.messageMedia?.mediaType?.value,
-                    message.messageMedia?.muid?.value,
-                    null,
-                    false
+                    chat_id = message.chatId.value,
+                    contact_id = contact?.id?.value,
+                    amount = messagePrice.value,
+                    message_price = messagePrice.value,
+                    reply_uuid = message.replyUUID?.value,
+                    text = message.messageContentDecrypted?.value,
+                    remote_text_map = remoteTextMap,
+                    media_key_map = null,
+                    media_type = message.messageMedia?.mediaType?.value,
+                    muid = message.messageMedia?.muid?.value,
+                    price = null,
+                    boost = false,
+                    thread_uuid = message.threadUUID?.value
                 )
             } catch (e: IllegalArgumentException) {
                 LOG.e(TAG, "Failed to create PostMessageDto", e)
