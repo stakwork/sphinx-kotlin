@@ -121,6 +121,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutMenuBottomCall
     override val moreMenuBinding: LayoutMenuBottomBinding
         get() = binding.includeLayoutMenuBottomMore
+    override val scrollDownButtonBinding: LayoutScrollDownButtonBinding
+        get() = binding.includeChatTribeScrollDown
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
@@ -819,23 +821,6 @@ internal class ChatTribeFragment: ChatFragment<
                         viewModel.submitSideEffect(
                             ChatSideEffect.Notify(viewState.error)
                         )
-                    }
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.messagesSearchViewStateContainer.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is MessagesSearchViewState.Idle -> {
-                        binding.layoutConstraintChatHeader.visible
-                    }
-                    is MessagesSearchViewState.Loading -> {
-                        binding.layoutConstraintChatHeader.gone
-                    }
-                    is MessagesSearchViewState.Searching -> {
-                        binding.layoutConstraintChatHeader.gone
                     }
                 }
             }

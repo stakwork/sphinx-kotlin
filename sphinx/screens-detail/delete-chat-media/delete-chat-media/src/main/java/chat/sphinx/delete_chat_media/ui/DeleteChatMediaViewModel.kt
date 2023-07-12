@@ -27,8 +27,10 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -48,12 +50,21 @@ internal class DeleteChatMediaViewModel @Inject constructor(
         DeleteChatMediaViewState
         >(dispatchers, DeleteChatMediaViewState.Loading)
 {
-     val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatNotificationViewState> by lazy {
+    val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatNotificationViewState> by lazy {
         ViewStateContainer(DeleteChatNotificationViewState.Closed)
     }
 
-    private var currentChatIdsAndFiles: Map<ChatId, List<File>>? = null
-    private var itemsTotalSize: FileSize = FileSize(0)
+    private val _currentChatIdsAndFilesStateFlow: MutableStateFlow<Map<ChatId, List<File>>?> by lazy {
+        MutableStateFlow(null)
+    }
+    private val currentChatIdsAndFilesStateFlow: StateFlow<Map<ChatId, List<File>>?>
+        get() = _currentChatIdsAndFilesStateFlow.asStateFlow()
+
+    private val _itemsTotalSizeStateFlow: MutableStateFlow<FileSize> by lazy {
+        MutableStateFlow(FileSize(0))
+    }
+    val itemsTotalSizeStateFlow: StateFlow<FileSize>
+        get() = _itemsTotalSizeStateFlow.asStateFlow()
 
     init {
         getDownloadedMedia()
@@ -67,7 +78,7 @@ internal class DeleteChatMediaViewModel @Inject constructor(
                 val totalSizeChats = chatItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
 
                 setItemTotalFile(totalSizeChats?.value ?: 0L)
-                currentChatIdsAndFiles = chatIdAndFileList
+                _currentChatIdsAndFilesStateFlow.value = chatIdAndFileList
 
                 val allChats = chatRepository.getAllChatsByIds(chatIdAndFileList.keys.toList())
 
@@ -122,12 +133,12 @@ internal class DeleteChatMediaViewModel @Inject constructor(
         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatNotificationViewState.Deleting)
 
         viewModelScope.launch(mainImmediate) {
-            currentChatIdsAndFiles?.forEach { chatIdsAndFiles ->
+            currentChatIdsAndFilesStateFlow.value?.forEach { chatIdsAndFiles ->
                 chatIdsAndFiles.key.let { chatId ->
 
                     if (repositoryMedia.deleteDownloadedMediaByChatId(chatId, chatIdsAndFiles.value, null)) {
                         deleteChatNotificationViewStateContainer.updateViewState(
-                            DeleteChatNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize())
+                            DeleteChatNotificationViewState.SuccessfullyDeleted
                         )
                     }
                     else {
@@ -147,8 +158,8 @@ internal class DeleteChatMediaViewModel @Inject constructor(
     }
 
     private fun setItemTotalFile(totalSize: Long) {
-        if (totalSize > 0L && totalSize >= itemsTotalSize.value) {
-            itemsTotalSize = FileSize(totalSize)
+        if (totalSize > 0L) {
+            _itemsTotalSizeStateFlow.value = FileSize(totalSize)
         }
     }
 

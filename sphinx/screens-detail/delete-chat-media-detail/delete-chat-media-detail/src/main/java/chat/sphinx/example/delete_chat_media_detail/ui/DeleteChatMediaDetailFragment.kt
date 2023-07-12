@@ -28,6 +28,7 @@ import chat.sphinx.example.delete_chat_media_detail.viewstate.HeaderSelectionMod
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
+import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_message_media.MediaType
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,6 +38,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -254,19 +256,20 @@ internal class DeleteChatMediaDetailFragment: SideEffectDetailFragment<
                             constraintDeleteSuccessfullyContainer.visible
 
                             binding.includeDeleteNotification.textViewManageStorageAllTypeText.text =
-                                String.format(
-                                    getString(R.string.manage_storage_deleted_all_files),
-                                    viewState.deletedSize
-                                )
-
-                            binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
-                                String.format(
-                                    getString(R.string.manage_storage_deleted_free_space),
-                                    viewState.deletedSize
-                                )
+                                getString(R.string.manage_storage_deleted_all_files)
                         }
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.itemsTotalSizeStateFlow.collect { deletedSize ->
+                binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
+                    String.format(
+                        getString(R.string.manage_storage_deleted_free_space),
+                        deletedSize.calculateSize()
+                    )
             }
         }
 

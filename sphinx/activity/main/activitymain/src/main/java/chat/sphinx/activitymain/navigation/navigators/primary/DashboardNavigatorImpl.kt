@@ -84,8 +84,13 @@ internal class DashboardNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
-        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, true))
+    override suspend fun toPodcastPlayerScreen(
+        chatId: ChatId,
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        fromDownloadedSection: Boolean
+    ) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, true, fromDownloadedSection))
     }
 
     override suspend fun toCommonPlayerScreen(podcastId: FeedId, episodeId: FeedId) {

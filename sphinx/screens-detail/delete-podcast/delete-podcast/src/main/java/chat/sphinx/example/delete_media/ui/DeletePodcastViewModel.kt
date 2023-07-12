@@ -11,6 +11,7 @@ import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
 import chat.sphinx.example.delete_media.viewstate.DeletePodcastViewState
 import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
 import chat.sphinx.wrapper_common.FileSize
+import chat.sphinx.wrapper_common.StorageData
 import chat.sphinx.wrapper_common.calculateSize
 import chat.sphinx.wrapper_common.calculateTotalSize
 import chat.sphinx.wrapper_common.feed.FeedId
@@ -20,6 +21,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
@@ -43,8 +47,18 @@ internal class DeletePodcastViewModel @Inject constructor(
      val deleteAllFeedsNotificationViewStateContainer: ViewStateContainer<DeleteNotificationViewState> by lazy {
         ViewStateContainer(DeleteNotificationViewState.Closed)
     }
-    private var feedIdsList: List<FeedId?>? = null
-    private var itemsTotalSize: FileSize = FileSize(0)
+
+    private val _feedIdsListStateFlow: MutableStateFlow<List<FeedId?>?> by lazy {
+        MutableStateFlow(null)
+    }
+    private val feedIdsListStateFlow: StateFlow<List<FeedId?>?>
+        get() = _feedIdsListStateFlow.asStateFlow()
+
+    private val _itemsTotalSizeStateFlow: MutableStateFlow<FileSize> by lazy {
+        MutableStateFlow(FileSize(0))
+    }
+    val itemsTotalSizeStateFlow: StateFlow<FileSize>
+        get() = _itemsTotalSizeStateFlow.asStateFlow()
 
     init {
         getDownloadedFeedItems()
@@ -58,7 +72,7 @@ internal class DeletePodcastViewModel @Inject constructor(
                 val totalSizeAllSections = feedItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
 
                 setItemTotalFile(totalSizeAllSections?.value ?: 0L )
-                feedIdsList = feedIdAndFileList.map { it.key }
+                _feedIdsListStateFlow.value = feedIdAndFileList.map { it.key }
 
                 feedIdAndFileList.keys.mapNotNull { feedId ->
                     val podcast = feedId?.let { feedRepository.getPodcastById(it).firstOrNull() }
@@ -86,7 +100,7 @@ internal class DeletePodcastViewModel @Inject constructor(
         deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.Deleting)
 
         viewModelScope.launch(mainImmediate) {
-            feedIdsList?.forEach { feedId ->
+            feedIdsListStateFlow.value?.forEach { feedId ->
                 feedId?.let { nnFeedId ->
                     feedRepository.getFeedById(nnFeedId).firstOrNull()?.let {nnFeed ->
                         repositoryMedia.deleteAllFeedDownloadedMedia(nnFeed)
@@ -94,13 +108,13 @@ internal class DeletePodcastViewModel @Inject constructor(
                 }
             }
 
-            deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize()))
+            deleteAllFeedsNotificationViewStateContainer.updateViewState(DeleteNotificationViewState.SuccessfullyDeleted)
         }
     }
 
     private fun setItemTotalFile(totalSize: Long) {
-        if (totalSize > 0L && totalSize >= itemsTotalSize.value) {
-            itemsTotalSize = FileSize(totalSize)
+        if (totalSize > 0L) {
+            _itemsTotalSizeStateFlow.value = FileSize(totalSize)
         }
     }
 

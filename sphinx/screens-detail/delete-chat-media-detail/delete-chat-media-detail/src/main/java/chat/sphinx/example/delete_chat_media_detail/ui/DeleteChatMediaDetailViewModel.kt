@@ -33,6 +33,9 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import java.io.File
@@ -52,8 +55,19 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
         >(dispatchers, DeleteChatMediaDetailViewState.Loading)
 {
     private val args: DeleteChatMediaDetailFragmentArgs by savedStateHandle.navArgs()
-    private var itemsTotalSize: FileSize = FileSize(0)
-    private var currentChatIdAndFiles: Pair<ChatId, List<File>>? = null
+
+    private val _currentChatIdAndFilesStateFlow: MutableStateFlow<Pair<ChatId, List<File>>?> by lazy {
+        MutableStateFlow(null)
+    }
+    private val currentChatIdAndFilesStateFlow: StateFlow<Pair<ChatId, List<File>>?>
+        get() = _currentChatIdAndFilesStateFlow.asStateFlow()
+
+    private val _itemsTotalSizeStateFlow: MutableStateFlow<FileSize> by lazy {
+        MutableStateFlow(FileSize(0))
+    }
+    val itemsTotalSizeStateFlow: StateFlow<FileSize>
+        get() = _itemsTotalSizeStateFlow.asStateFlow()
+
 
     val deleteChatNotificationViewStateContainer: ViewStateContainer<DeleteChatDetailNotificationViewState> by lazy {
         ViewStateContainer(DeleteChatDetailNotificationViewState.Closed)
@@ -78,7 +92,7 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
                 val totalSizeChats = chatItems.sumOf { it.localFile?.length() ?: 0 }.toFileSize()
 
                 setItemTotalFile(totalSizeChats?.value ?: 0L )
-                currentChatIdAndFiles = Pair(ChatId(args.argChatId), chatItems.mapNotNull { it.localFile })
+                _currentChatIdAndFilesStateFlow.value = Pair(ChatId(args.argChatId), chatItems.mapNotNull { it.localFile })
 
                 val fileList = chatItems.map {
                     ChatFile(
@@ -102,11 +116,11 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
         deleteChatNotificationViewStateContainer.updateViewState(DeleteChatDetailNotificationViewState.Deleting)
 
         viewModelScope.launch(mainImmediate) {
-            currentChatIdAndFiles?.let { chatIdAndFiles ->
+            currentChatIdAndFilesStateFlow.value?.let { chatIdAndFiles ->
                 if (repositoryMedia.deleteDownloadedMediaByChatId(chatIdAndFiles.first, chatIdAndFiles.second, null)) {
 
                     deleteChatNotificationViewStateContainer.updateViewState(
-                        DeleteChatDetailNotificationViewState.SuccessfullyDeleted(itemsTotalSize.calculateSize())
+                        DeleteChatDetailNotificationViewState.SuccessfullyDeleted
                     )
 
                 } else {
@@ -191,7 +205,7 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
                 headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.Off)
             }
 
-            updateViewState(DeleteChatMediaDetailViewState.FileList(fileList, itemsTotalSize.calculateSize()))
+            updateViewState(DeleteChatMediaDetailViewState.FileList(fileList, itemsTotalSizeStateFlow.value.calculateSize()))
         }
     }
 
@@ -203,13 +217,13 @@ internal class DeleteChatMediaDetailViewModel @Inject constructor(
         currentFiles?.let { fileList ->
             headerSelectionModeViewStateContainer.updateViewState(HeaderSelectionModeViewState.Off)
 
-            updateViewState(DeleteChatMediaDetailViewState.FileList(currentFiles, itemsTotalSize.calculateSize()))
+            updateViewState(DeleteChatMediaDetailViewState.FileList(currentFiles, itemsTotalSizeStateFlow.value.calculateSize()))
         }
     }
 
     private fun setItemTotalFile(totalSize: Long) {
-        if (totalSize > 0L && totalSize >= itemsTotalSize.value) {
-            itemsTotalSize = FileSize(totalSize)
+        if (totalSize > 0L) {
+            _itemsTotalSizeStateFlow.value = FileSize(totalSize)
         }
     }
 

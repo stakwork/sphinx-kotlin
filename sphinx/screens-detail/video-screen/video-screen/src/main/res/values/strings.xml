@@ -2,4 +2,5 @@
 <resources>
     <string name="label_text_videos_list_header">Videos</string>
     <string name="delete_download">Delete Download</string>
+
 </resources>

@@ -22,7 +22,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -63,6 +65,7 @@ class FeedListenViewModel @Inject constructor(
                     .sortedByDescending { it.lastPublished?.datePublished?.time ?: 0 }
 
                 _lastPlayedFeedsHolderViewStateFlow.value = feeds.toList()
+                    .filter { it.lastPlayed != null }
                     .sortedWith(compareByDescending<Feed> { it.lastPlayed?.time }.thenByDescending { it.lastPublished?.datePublished?.time ?: 0 })
             }
         }

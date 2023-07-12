@@ -620,45 +620,28 @@ internal class ProfileViewModel @Inject constructor(
                                     seedDto.pass = networkPass
 
                                     submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                        app.getString(R.string.lightning_node_ip_title),
-                                        app.getString(R.string.lightning_node_ip_message),
-                                    ) { lightningNodeIP ->
+                                        app.getString(R.string.lightning_node_url_title),
+                                        app.getString(R.string.lightning_node_url_message),
+                                    ) { lightningNodeUrl ->
                                         viewModelScope.launch(mainImmediate) {
-                                            if (lightningNodeIP == null) {
-                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node IP can not be empty"))
+                                            if (lightningNodeUrl == null) {
+                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
                                                 return@launch
                                             }
 
-                                            seedDto.lightningNodeIP = lightningNodeIP
+                                            seedDto.lightningNodeUrl = lightningNodeUrl
 
-                                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                                app.getString(R.string.lightning_node_port_title),
-                                                app.getString(R.string.lightning_node_port_message),
-                                                "1883"
-                                            ) { lightningNodePort ->
-
-                                                viewModelScope.launch(mainImmediate) {
-
-                                                    if (lightningNodePort == null) {
-                                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node port can not be empty"))
-                                                        return@launch
+                                            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
+                                                regTestCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                                }, mainNetCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                                }, callback = {
+                                                    viewModelScope.launch(mainImmediate) {
+                                                        linkSigningDevice()
                                                     }
-
-                                                    seedDto.lightningNodePort = lightningNodePort
-
-                                                    submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
-                                                        regTestCallback = {
-                                                            seedDto.network = BITCOIN_NETWORK_REG_TEST
-                                                        }, mainNetCallback = {
-                                                            seedDto.network = BITCOIN_NETWORK_MAIN_NET
-                                                        }, callback = {
-                                                            viewModelScope.launch(mainImmediate) {
-                                                                linkSigningDevice()
-                                                            }
-                                                        }
-                                                    ))
                                                 }
-                                            })
+                                            ))
                                         }
                                     })
                                 }
@@ -688,11 +671,11 @@ internal class ProfileViewModel @Inject constructor(
         seedDto.pubkey = pk1
 
         if (
-            seedDto.lightningNodeIP == null ||
-            seedDto.lightningNodeIP?.isEmpty() == true
+            seedDto.lightningNodeUrl == null ||
+            seedDto.lightningNodeUrl?.isEmpty() == true
         ) {
             resetSeedDto()
-            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("lightning node IP can't be empty"))
+            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("lightning node URL can't be empty"))
             return
         }
 
@@ -770,7 +753,7 @@ internal class ProfileViewModel @Inject constructor(
         val nonce = ByteArray(12)
         SecureRandom().nextBytes(nonce)
 
-        encrypt(seed, sec1, nonce.toHex())?.let { cipher ->
+        encrypt(seed, sec1, nonce.toHex()).let { cipher ->
             if (cipher.isNotEmpty()) {
                 seedDto.seed = cipher
 
@@ -783,6 +766,7 @@ internal class ProfileViewModel @Inject constructor(
                             resetSeedDto()
                             submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("error sending seed to hardware"))
                         }
+
                         is Response.Success -> {
                             submitSideEffect(ProfileSideEffect.SigningDeviceSuccessfullySet)
 

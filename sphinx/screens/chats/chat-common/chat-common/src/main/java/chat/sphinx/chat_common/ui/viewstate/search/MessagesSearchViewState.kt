@@ -8,9 +8,16 @@ sealed class MessagesSearchViewState: ViewState<MessagesSearchViewState>() {
 
     object Idle: MessagesSearchViewState()
 
-    object Loading: MessagesSearchViewState()
+    object Clear: MessagesSearchViewState()
+
+    object Cancel: MessagesSearchViewState()
+
+    data class Loading(
+        val clearButtonVisible: Boolean
+    ): MessagesSearchViewState()
 
     class Searching(
+        val clearButtonVisible: Boolean,
         val messages: List<Message>,
         val index: Int,
         val navigatingForward: Boolean

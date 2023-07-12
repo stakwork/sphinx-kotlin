@@ -21,12 +21,14 @@ import chat.sphinx.example.delete_media.viewstate.DeleteNotificationViewState
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
+import chat.sphinx.wrapper_common.calculateSize
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import io.matthewnelson.concept_views.viewstate.value
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -176,16 +178,20 @@ internal class DeletePodcastFragment: SideEffectDetailFragment<
                             constraintChooseDeleteContainer.gone
                             constraintDeleteProgressContainer.gone
                             constraintDeleteSuccessfullyContainer.visible
-
-                            binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
-                                String.format(
-                                    getString(R.string.manage_storage_deleted_free_space),
-                                    viewState.deletedSize
-                                )
-
                         }
                     }
                 }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.itemsTotalSizeStateFlow.collect { deleteSize ->
+
+                binding.includeDeleteNotification.textViewManageStorageFreeSpaceText.text =
+                    String.format(
+                        getString(R.string.manage_storage_deleted_free_space),
+                        deleteSize.calculateSize()
+                    )
             }
         }
         super.subscribeToViewStateFlow()

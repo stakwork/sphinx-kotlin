@@ -15,6 +15,7 @@ class ToPodcastPlayerScreen(
     private val feedId: FeedId,
     private val feedUrl: FeedUrl,
     private val fromFeed: Boolean,
+    private val fromDownloaded: Boolean,
     private val options: NavOptions = DetailNavOptions.defaultBuilt
 ) : NavigationRequest<NavController>() {
 
@@ -25,7 +26,8 @@ class ToPodcastPlayerScreen(
                 chatId.value,
                 feedId.value,
                 feedUrl.value,
-                fromFeed
+                fromFeed,
+                fromDownloaded
             ).build().toBundle(),
             options
         )
