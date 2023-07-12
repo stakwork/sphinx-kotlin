@@ -203,7 +203,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     fun forceScrollToBottom() {
-        recyclerView.scrollToPosition(messages.size)
+        recyclerView.layoutManager?.smoothScrollToPosition(recyclerView, null, messages.size);
     }
 
     fun highlightAndScrollToSearchResult(

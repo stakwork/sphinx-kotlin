@@ -815,7 +815,6 @@ abstract class ChatFragment<
     private fun setupScrollDown(){
         scrollDownButtonBinding.root.setOnClickListener {
             forceScrollToBottom()
-            viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.Off)
         }
     }
 
