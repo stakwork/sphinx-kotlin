@@ -825,23 +825,6 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.messagesSearchViewStateContainer.collect { viewState ->
-                @Exhaustive
-                when (viewState) {
-                    is MessagesSearchViewState.Idle -> {
-                        binding.layoutConstraintChatHeader.visible
-                    }
-                    is MessagesSearchViewState.Loading -> {
-                        binding.layoutConstraintChatHeader.gone
-                    }
-                    is MessagesSearchViewState.Searching -> {
-                        binding.layoutConstraintChatHeader.gone
-                    }
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.tribeMemberDataViewStateContainer.collect { viewState ->
                 @Exhaustive
                 when (viewState) {
