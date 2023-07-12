@@ -41,23 +41,5 @@
     <string name="github_pat_message">Bumuo ng Personal Access Token sa github gamit ang repo scope</string>
     <string name="github_pat_succeed">Matagumpay na naitakda ang Github Personal Access Token</string>
     <string name="github_pat_failed">Github Personal Access Token could not be set</string>
-    <string name="network_check_title">Suriin ang iyong network</string>
-    <string name="network_check_message">Bago magsimula kailangan mong kumonekta sa \"sphinxkey\" WiFi network. Kung hindi, hindi mo mase-set up ang iyong aparato. Nakakonekta ka ba sa network na ito??</string>
-    <string name="network_name_title">WiFi network</string>
-    <string name="network_name_message">Mangyaring tukuyin ang iyong WiFi network</string>
-    <string name="network_password_title">WiFi password</string>
-    <string name="network_password_message">Enter the WiFi password for %s</string>
-    <string name="lightning_node_ip_title">IP ng lightning node</string>
-    <string name="lightning_node_ip_message">Ilagay ang IP ng iyong lightning node</string>
-    <string name="lightning_node_port_title">Lightning node Port</string>
-    <string name="lightning_node_port_message">Ilagay ang numbero ng Port ng iyong lightning node</string>
-    <string name="store_mnemonic">I-imbak ng ligtas ang iyong Mnemonic</string>
-    <string name="sending_seed">Sending seed to hardware</string>
-    <string name="error_setting_up_signing_device">There was an error setting up signing device: %s</string>
-    <string name="signing_device_successfully_set">Matagumpay na naipadala ang binhi sa hardware</string>
-    <string name="setup_signing_device">I-setup ang Signing Device</string>
-    <string name="configure_signing_device">I-configure ang Signing Device</string>
-    <string name="mnemonic_copied_to_clipboard">Ang mga Mnemonic na salita  ay nakopya na sa clipboard</string>
-    <string name="bitcoin_network">Bitcoin Network</string>
-    <string name="select_bitcoin_network">Piliin ang Bitcoin Network</string>
+
 </resources>

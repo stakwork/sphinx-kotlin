@@ -30,7 +30,7 @@ class NetworkQueryCrypterImpl(
         seedDto: SendSeedDto,
     ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.post(
-            url = String.format(ENDPOINT_POST_ENCRYPTED_SEED, "{\"seed\":\"${seedDto.seed}\",\"ssid\":\"${seedDto.ssid}\",\"pass\":\"${seedDto.pass}\",\"broker\":\"${seedDto.lightningNodeIP}:${seedDto.lightningNodePort}\",\"pubkey\":\"${seedDto.pubkey}\",\"network\":\"${seedDto.network}\"}"),
+            url = String.format(ENDPOINT_POST_ENCRYPTED_SEED, "{\"seed\":\"${seedDto.seed}\",\"ssid\":\"${seedDto.ssid}\",\"pass\":\"${seedDto.pass}\",\"broker\":\"${seedDto.lightningNodeUrl}\",\"pubkey\":\"${seedDto.pubkey}\",\"network\":\"${seedDto.network}\"}"),
             responseJsonClass = Any::class.java,
             requestBodyJsonClass = Map::class.java,
             requestBody = mapOf(Pair("", "")),

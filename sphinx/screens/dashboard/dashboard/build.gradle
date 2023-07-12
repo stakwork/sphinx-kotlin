@@ -50,10 +50,12 @@ dependencies {
     implementation project(path: ':sphinx:application:common:resources')
     implementation project(path: ':sphinx:application:common:swipe-reveal-layout')
 
+
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-chat')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
+    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
     implementation project(path: ':sphinx:activity:concepts:concept-user-colors-helper')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-lightning')
@@ -61,10 +63,13 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-people')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-redeem-badge-token')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
     implementation project(path: ':sphinx:application:network:concepts:concept-socket-io')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     implementation project(path: ':sphinx:screens-detail:tribes-discover:tribes-discover-view-model-coordinator')
     implementation project(path: ':sphinx:service:concepts:concept-service-notification')
+    implementation project(path: ':sphinx:application:common:logger')
+
 
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
 
@@ -72,6 +77,8 @@ dependencies {
     implementation deps.androidx.recyclerView
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation deps.bip39.sdk
+    implementation deps.jna.sdk
     implementation deps.lottie.sdk
     implementation deps.square.moshi
     kapt kaptDeps.google.hilt
