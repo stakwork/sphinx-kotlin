@@ -2094,7 +2094,7 @@ abstract class SphinxRepository(
                             val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
                                 LinkedHashMap(listMessageDbo.size)
 
-                            val threadMap: MutableMap<ThreadUUID, ArrayList<Message>> =
+                            val threadMap: MutableMap<MessageUUID, ArrayList<Message>> =
                                 LinkedHashMap(listMessageDbo.size)
 
                             val purchaseItemsMap: MutableMap<MessageMUID, ArrayList<Message>> =
@@ -2107,8 +2107,8 @@ abstract class SphinxRepository(
                                 dbo.muid?.let { muid ->
                                     purchaseItemsMap[muid] = ArrayList(0)
                                 }
-                                dbo.thread_uuid?.let { threadUUID ->
-                                    threadMap[threadUUID] = ArrayList(0)
+                                dbo.uuid?.let { uuid ->
+                                    threadMap[uuid] = ArrayList(0)
                                 }
                             }
 
@@ -2146,7 +2146,7 @@ abstract class SphinxRepository(
                                     .let { response ->
                                         response.forEach { dbo ->
                                             dbo.thread_uuid?.let { uuid ->
-                                                threadMap[ThreadUUID(uuid.value)]?.add(
+                                                threadMap[MessageUUID(uuid.value)]?.add(
                                                     mapMessageDboAndDecryptContentIfNeeded(
                                                         queries,
                                                         dbo
