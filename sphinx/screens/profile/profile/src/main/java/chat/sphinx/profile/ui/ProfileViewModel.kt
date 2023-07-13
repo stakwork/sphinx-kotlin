@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.os.Environment
 import android.os.StatFs
-import android.text.InputType
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -34,21 +33,21 @@ import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
-import chat.sphinx.wrapper_common.FeedRecommendationsToggle
-import chat.sphinx.wrapper_common.PreviewsEnabled
-import chat.sphinx.wrapper_common.calculateSize
-import chat.sphinx.wrapper_common.calculateStoragePercentage
-import chat.sphinx.wrapper_common.isTrue
+import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
-import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
-import chat.sphinx.wrapper_relay.*
+import chat.sphinx.wrapper_relay.AuthorizationToken
+import chat.sphinx.wrapper_relay.RelayUrl
+import chat.sphinx.wrapper_relay.isOnionAddress
+import chat.sphinx.wrapper_relay.toRelayUrl
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
+import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -61,7 +60,8 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
-import io.matthewnelson.crypto_common.clazzes.*
+import io.matthewnelson.crypto_common.clazzes.Password
+import io.matthewnelson.crypto_common.clazzes.clear
 import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -76,6 +76,31 @@ import uniffi.sphinxrs.encrypt
 import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class SampleClass(
+    val elements: List<SampleClassElement>
+)
+
+@Serializable
+data class SampleClassElement(
+    val key: String,
+    val value: SampleClassSubElement
+)
+
+@Serializable
+data class SampleClassSubElement(
+    val key: Int,
+    val value: List<SampleClassSubSubElement>
+)
+
+@Serializable
+data class SampleClassSubSubElement(
+    val key1: UInt,
+    val key2: UInt,
+    val key3: UInt
+)
 
 @HiltViewModel
 internal class ProfileViewModel @Inject constructor(
@@ -586,71 +611,136 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     fun setupSigningDevice() {
-        if (setupSigningDeviceJob?.isActive == true) return
+        val byteArray = byteArrayOf(
+            147.toByte(),
+            146.toByte(),
+            164.toByte(),
+            97.toByte(),
+            97.toByte(),
+            97.toByte(),
+            97.toByte(),
+            146.toByte(),
+            15.toByte(),
+            147.toByte(),
+            204.toByte(),
+            255.toByte(),
+            204.toByte(),
+            255.toByte(),
+            204.toByte(),
+            255.toByte(),
+            146.toByte(),
+            164.toByte(),
+            98.toByte(),
+            98.toByte(),
+            98.toByte(),
+            98.toByte(),
+            146.toByte(),
+            15.toByte(),
+            147.toByte(),
+            204.toByte(),
+            255.toByte(),
+            204.toByte(),
+            255.toByte(),
+            204.toByte(),
+            255.toByte(),
+            146.toByte(),
+            164.toByte(),
+            99.toByte(),
+            99.toByte(),
+            99.toByte(),
+            99.toByte(),
+            146.toByte(),
+            15.toByte(),
+            147.toByte(),
+            204.toByte(),
+            255.toByte(),
+            204.toByte(),
+            255.toByte(),
+            204.toByte(),
+            255.toByte()
+        )
 
-        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.CheckNetwork {
-                viewModelScope.launch(mainImmediate) {
-                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                        app.getString(R.string.network_name_title),
-                        app.getString(R.string.network_name_message)
-                    ) { networkName ->
-                        viewModelScope.launch(mainImmediate) {
-                            if (networkName == null) {
-                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
-                                return@launch
-                            }
+        var decoded: Any? = null
 
-                            seedDto.ssid = networkName
-
-                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                app.getString(R.string.network_password_title),
-                                app.getString(
-                                    R.string.network_password_message,
-                                    networkName ?: "-"
-                                ),
-                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-                            ) { networkPass ->
-                                viewModelScope.launch(mainImmediate) {
-                                    if (networkPass == null) {
-                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
-                                        return@launch
-                                    }
-
-                                    seedDto.pass = networkPass
-
-                                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                        app.getString(R.string.lightning_node_url_title),
-                                        app.getString(R.string.lightning_node_url_message),
-                                    ) { lightningNodeUrl ->
-                                        viewModelScope.launch(mainImmediate) {
-                                            if (lightningNodeUrl == null) {
-                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
-                                                return@launch
-                                            }
-
-                                            seedDto.lightningNodeUrl = lightningNodeUrl
-
-                                            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
-                                                regTestCallback = {
-                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
-                                                }, mainNetCallback = {
-                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
-                                                }, callback = {
-                                                    viewModelScope.launch(mainImmediate) {
-                                                        linkSigningDevice()
-                                                    }
-                                                }
-                                            ))
-                                        }
-                                    })
-                                }
-                            })
-                        }
-                    })
+        try {
+            decoded = MsgPack.decodeFromByteArray(
+                MsgPackDynamicSerializer,
+                "9392a461616161920f93ccffccffccff92a462626262920f93ccffccffccff92a463636363920f93ccffccffccff".let { bytesString ->
+                    ByteArray(bytesString.length / 2) { bytesString.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
                 }
-            })
+            )
+        } catch (e: IllegalArgumentException) {
+            println("ERROR")
         }
+
+        println(decoded)
+        println(((((decoded as List<Any>)[0] as List<Any>)[1] as List<Any>)[1] as List<Int>)[2])
+
+//        if (setupSigningDeviceJob?.isActive == true) return
+//
+//        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
+//            submitSideEffect(ProfileSideEffect.CheckNetwork {
+//                viewModelScope.launch(mainImmediate) {
+//                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+//                        app.getString(R.string.network_name_title),
+//                        app.getString(R.string.network_name_message)
+//                    ) { networkName ->
+//                        viewModelScope.launch(mainImmediate) {
+//                            if (networkName == null) {
+//                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
+//                                return@launch
+//                            }
+//
+//                            seedDto.ssid = networkName
+//
+//                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+//                                app.getString(R.string.network_password_title),
+//                                app.getString(
+//                                    R.string.network_password_message,
+//                                    networkName ?: "-"
+//                                ),
+//                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+//                            ) { networkPass ->
+//                                viewModelScope.launch(mainImmediate) {
+//                                    if (networkPass == null) {
+//                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
+//                                        return@launch
+//                                    }
+//
+//                                    seedDto.pass = networkPass
+//
+//                                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+//                                        app.getString(R.string.lightning_node_url_title),
+//                                        app.getString(R.string.lightning_node_url_message),
+//                                    ) { lightningNodeUrl ->
+//                                        viewModelScope.launch(mainImmediate) {
+//                                            if (lightningNodeUrl == null) {
+//                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
+//                                                return@launch
+//                                            }
+//
+//                                            seedDto.lightningNodeUrl = lightningNodeUrl
+//
+//                                            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
+//                                                regTestCallback = {
+//                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
+//                                                }, mainNetCallback = {
+//                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
+//                                                }, callback = {
+//                                                    viewModelScope.launch(mainImmediate) {
+//                                                        linkSigningDevice()
+//                                                    }
+//                                                }
+//                                            ))
+//                                        }
+//                                    })
+//                                }
+//                            })
+//                        }
+//                    })
+//                }
+//            })
+//        }
     }
 
     private suspend fun linkSigningDevice() {
