@@ -13,7 +13,6 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
-import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip as PodcastClipObject
 import chat.sphinx.wrapper_message.PurchaseStatus
@@ -76,6 +75,11 @@ internal sealed class LayoutState private constructor() {
         val showReceived: Boolean
             get() = !showSent
     }
+
+    data class Replies(
+        val replyCount: Int,
+        val users: Set<ReplyUserHolder>
+        ): LayoutState()
 
     sealed class Bubble private constructor(): LayoutState() {
 
@@ -289,6 +293,12 @@ internal sealed class LayoutState private constructor() {
 }
 
 data class BoostSenderHolder(
+    val photoUrl: PhotoUrl?,
+    val alias: ContactAlias?,
+    val colorKey: String,
+)
+
+data class ReplyUserHolder(
     val photoUrl: PhotoUrl?,
     val alias: ContactAlias?,
     val colorKey: String,

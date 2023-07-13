@@ -2191,7 +2191,7 @@ abstract class SphinxRepository(
                                     queries,
                                     dbo,
                                     dbo.uuid?.let { reactionsMap[it] },
-                                    dbo.thread_uuid?.let { threadMap[it] },
+                                    dbo.uuid?.let { threadMap[it] },
                                     dbo.muid?.let { purchaseItemsMap[it] },
                                     dbo.reply_uuid,
                                     chat

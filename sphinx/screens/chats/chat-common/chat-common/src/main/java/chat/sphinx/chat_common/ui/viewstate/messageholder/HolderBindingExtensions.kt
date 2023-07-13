@@ -1,11 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.pdf.PdfRenderer
-import android.os.ParcelFileDescriptor
-import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.view.Gravity
 import android.view.View
 import android.webkit.WebView
@@ -275,6 +270,27 @@ internal fun  LayoutMessageHolderBinding.setView(
 
                     disposables.add(disposable)
                     disposable.await()
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
+            setRepliesLayout(
+                viewState.replies,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+            ){ imageView, url ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    imageLoader.load(
+                        imageView,
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                        .also { disposables.add(it) }
                 }.let { job ->
                     holderJobs.add(job)
                 }
@@ -942,6 +958,28 @@ internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
             textViewInvoicePaymentDate.gravity = gravity
         }
     }
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setRepliesLayout(
+    replies: LayoutState.Replies?,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    loadImage: (ImageView, String) -> Unit,
+) {
+    includeLayoutMessageReplies.apply {
+        if (replies == null) {
+            root.gone
+        } else {
+            root.visible
+
+            textViewRepliesNumber.text = replies.replyCount.toString()
+        }
+    }
+
 }
 
 @MainThread

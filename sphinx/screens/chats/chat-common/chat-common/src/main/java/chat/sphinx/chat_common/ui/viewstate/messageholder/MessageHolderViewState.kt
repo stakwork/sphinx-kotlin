@@ -180,6 +180,31 @@ internal sealed class MessageHolderViewState(
         }
     }
 
+    val replies: LayoutState.Replies? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message == null) {
+            null
+        } else {
+            message.thread?.let { replies ->
+                if (replies.isEmpty()){
+                    null
+                } else {
+                    val users: MutableSet<ReplyUserHolder> = LinkedHashSet(0)
+
+                    replies.forEach { replyMessage ->
+                        users.add(
+                            ReplyUserHolder(
+                                replyMessage.senderPic,
+                                replyMessage.senderAlias?.value?.toContactAlias(),
+                                replyMessage.getColorKey())
+                        )
+                    }
+
+                    LayoutState.Replies(replies.size, users)
+                }
+            }
+        }
+    }
+
     val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message == null) {
             null
