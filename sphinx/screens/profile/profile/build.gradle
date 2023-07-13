@@ -4,6 +4,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'kotlinx-serialization'
 }
 
 android {
@@ -66,5 +67,8 @@ dependencies {
     implementation deps.google.hilt
     implementation deps.bip39.sdk
     implementation deps.jna.sdk
+    implementation deps.kotlinx.serialization
+    implementation deps.msgpack.sdk
+
     kapt kaptDeps.google.hilt
 }
