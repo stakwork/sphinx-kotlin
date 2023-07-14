@@ -621,12 +621,10 @@ internal class ProfileViewModel @Inject constructor(
             97.toByte(),
             146.toByte(),
             15.toByte(),
-            147.toByte(),
-            204.toByte(),
+            196.toByte(),
+            3.toByte(),
             255.toByte(),
-            204.toByte(),
             255.toByte(),
-            204.toByte(),
             255.toByte(),
             146.toByte(),
             164.toByte(),
@@ -636,12 +634,10 @@ internal class ProfileViewModel @Inject constructor(
             98.toByte(),
             146.toByte(),
             15.toByte(),
-            147.toByte(),
-            204.toByte(),
+            196.toByte(),
+            3.toByte(),
             255.toByte(),
-            204.toByte(),
             255.toByte(),
-            204.toByte(),
             255.toByte(),
             146.toByte(),
             164.toByte(),
@@ -651,12 +647,10 @@ internal class ProfileViewModel @Inject constructor(
             99.toByte(),
             146.toByte(),
             15.toByte(),
-            147.toByte(),
-            204.toByte(),
+            196.toByte(),
+            3.toByte(),
             255.toByte(),
-            204.toByte(),
             255.toByte(),
-            204.toByte(),
             255.toByte()
         )
 
@@ -665,16 +659,17 @@ internal class ProfileViewModel @Inject constructor(
         try {
             decoded = MsgPack.decodeFromByteArray(
                 MsgPackDynamicSerializer,
-                "9392a461616161920f93ccffccffccff92a462626262920f93ccffccffccff92a463636363920f93ccffccffccff".let { bytesString ->
-                    ByteArray(bytesString.length / 2) { bytesString.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
-                }
+//                "9392a461616161920fc403ffffff92a462626262920fc403ffffff92a463636363920fc403ffffff".let { bytesString ->
+//                    ByteArray(bytesString.length / 2) { bytesString.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
+//                }
+                byteArray
             )
         } catch (e: IllegalArgumentException) {
             println("ERROR")
         }
 
         println(decoded)
-        println(((((decoded as List<Any>)[0] as List<Any>)[1] as List<Any>)[1] as List<Int>)[2])
+        println((((((decoded as List<Any>)[0] as List<Any>)[1] as List<Any>)[1] as ByteArray)[2]).toUByte().toInt())
 
 //        if (setupSigningDeviceJob?.isActive == true) return
 //
@@ -741,6 +736,14 @@ internal class ProfileViewModel @Inject constructor(
 //                }
 //            })
 //        }
+    }
+
+    fun littleEndianConversion(bytes: ByteArray): Int {
+        var result = 0
+        for (i in bytes.indices) {
+            result = result or (bytes[i].toInt() shl 8 * i)
+        }
+        return result
     }
 
     private suspend fun linkSigningDevice() {
