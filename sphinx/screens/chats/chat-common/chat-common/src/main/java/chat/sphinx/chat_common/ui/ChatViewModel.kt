@@ -384,17 +384,40 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
+        val threadMessageMap: MutableMap<String, Int> = mutableMapOf()
+
         withContext(io) {
 
             var groupingDate: DateTime? = null
             var openSentPaidInvoicesCount = 0
             var openReceivedPaidInvoicesCount = 0
 
-            for ((index, message) in messages.withIndex()) {
+            var filteredMessages: MutableList<Message> = mutableListOf()
 
-                val previousMessage: Message? = if (index > 0) messages[index - 1] else null
+            // Filter messages to do not show thread replies on chat
+            for (message in messages) {
+
+                if (message.thread?.isNotEmpty() == true) {
+                    message.uuid?.value?.let { uuid ->
+                        threadMessageMap[uuid] = message.thread?.count() ?: 0
+                    }
+                }
+
+                val shouldAddMessage = message.threadUUID?.let { threadUUID ->
+                    val count = threadMessageMap[threadUUID.value] ?: 0
+                    count <= 1
+                } ?: true
+
+                if (shouldAddMessage) {
+                    filteredMessages.add(message)
+                }
+            }
+
+            for ((index, message) in filteredMessages.withIndex()) {
+
+                val previousMessage: Message? = if (index > 0) filteredMessages[index - 1] else null
                 val nextMessage: Message? =
-                    if (index < messages.size - 1) messages[index + 1] else null
+                    if (index < filteredMessages.size - 1) filteredMessages[index + 1] else null
 
                 val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
                     message,
