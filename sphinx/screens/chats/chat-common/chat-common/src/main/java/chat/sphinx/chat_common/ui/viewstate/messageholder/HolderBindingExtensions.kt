@@ -976,7 +976,43 @@ internal inline fun LayoutMessageHolderBinding.setRepliesLayout(
         } else {
             root.visible
 
-            textViewRepliesNumber.text = replies.replyCount.toString()
+            val users = replies.users.distinct()
+
+            textViewRepliesNumber.text = String.format(getString(R.string.replies_amount), replies.replyCount)
+
+            includeLayoutMessageRepliesGroup.apply {
+
+                setReplySender(
+                    users.elementAtOrNull(0),
+                    layoutConstraintReplyImageHolder1,
+                    includeReplyImageHolder1,
+                    holderJobs,
+                    dispatchers,
+                    lifecycleScope,
+                    userColorsHelper,
+                    loadImage
+                )
+                setReplySender(
+                    users.elementAtOrNull(1),
+                    layoutConstraintReplyImageHolder2,
+                    includeReplyImageHolder2,
+                    holderJobs,
+                    dispatchers,
+                    lifecycleScope,
+                    userColorsHelper,
+                    loadImage
+                )
+                setReplySender(
+                    users.elementAtOrNull(2),
+                    layoutConstraintReplyImageHolder2,
+                    includeReplyImageHolder2,
+                    holderJobs,
+                    dispatchers,
+                    lifecycleScope,
+                    userColorsHelper,
+                    loadImage
+                )
+            }
         }
     }
 
@@ -1946,6 +1982,54 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
         }
     }
 }
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setReplySender(
+    replyUserHolder: ReplyUserHolder?,
+    container: ConstraintLayout,
+    imageHolderBinding: LayoutChatImageSmallInitialHolderBinding,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    loadImage: (ImageView, String) -> Unit,
+) {
+    container.let { imageHolderContainer ->
+        if (replyUserHolder == null) {
+            imageHolderContainer.gone
+        } else {
+            imageHolderContainer.visible
+
+            imageHolderBinding.apply {
+
+                textViewInitials.visible
+                textViewInitials.text = (replyUserHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
+                imageViewChatPicture.gone
+
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    textViewInitials.setBackgroundRandomColor(
+                        R.drawable.chat_initials_circle,
+                        Color.parseColor(
+                            userColorsHelper.getHexCodeForKey(
+                                replyUserHolder.colorKey,
+                                root.context.getRandomHexCode(),
+                            )
+                        ))
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+
+                replyUserHolder.photoUrl?.let { photoUrl ->
+                    textViewInitials.gone
+                    imageViewChatPicture.visible
+                    loadImage(imageViewChatPicture, photoUrl.value)
+                }
+            }
+        }
+    }
+}
+
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
