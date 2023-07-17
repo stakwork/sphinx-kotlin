@@ -5,8 +5,11 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -21,6 +24,7 @@ import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.SelectedVideoViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedItemDetailsViewState
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
+import chat.sphinx.video_screen.ui.viewstate.VideoPlayerViewState
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoRecordConsumed
 import chat.sphinx.wrapper_action_track.action_wrappers.VideoStreamSatsTimer
 import chat.sphinx.wrapper_chat.ChatHost
@@ -56,6 +60,7 @@ internal open class VideoFeedScreenViewModel(
     private val contactRepository: ContactRepository,
     private val messageRepository: MessageRepository,
     private val lightningRepository: LightningRepository,
+    private val networkQueryFeedStatus: NetworkQueryFeedStatus,
     val navigator: VideoScreenNavigator
 ): SideEffectViewModel<
     FragmentActivity,
@@ -129,6 +134,10 @@ internal open class VideoFeedScreenViewModel(
 
     open val selectedVideoStateContainer: ViewStateContainer<SelectedVideoViewState> by lazy {
         ViewStateContainer(SelectedVideoViewState.Idle)
+    }
+
+    open val videoPlayerStateContainer: ViewStateContainer<VideoPlayerViewState> by lazy {
+        ViewStateContainer(VideoPlayerViewState.Idle)
     }
 
     open val boostAnimationViewStateContainer: ViewStateContainer<BoostAnimationViewState> by lazy {
@@ -471,5 +480,17 @@ internal open class VideoFeedScreenViewModel(
     fun stopTimer(){
         videoRecordConsumed?.stopTimer()
         videoStreamSatsTimer?.stopTimer()
+    }
+
+    fun checkYoutubeVideoAvailable(videoId: FeedId){
+        viewModelScope.launch(mainImmediate) {
+            val url = networkQueryFeedStatus.checkYoutubeVideoAvailable(videoId.youtubeVideoId())
+
+            if (url != null) {
+                videoPlayerStateContainer.updateViewState(VideoPlayerViewState.WebViewPlayer(url.toUri(), null))
+            } else {
+                videoPlayerStateContainer.updateViewState(VideoPlayerViewState.YoutubeVideoIframe(videoId))
+            }
+        }
     }
 }
