@@ -1747,7 +1747,7 @@ abstract class ChatFragment<
                 )
             }
         }
-    }
+     }
 
     private fun scrollToResult(
         messages: List<Message>,
