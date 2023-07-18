@@ -58,7 +58,7 @@ import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
-import chat.sphinx.threads.navigation.ThreadNavigator
+import chat.sphinx.threads.navigation.ThreadsNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
 import chat.sphinx.tribe_badge.navigation.TribeBadgesNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
@@ -302,10 +302,10 @@ internal object NavigationModule {
         manageStorageNavigatorImpl
 
     @Provides
-    fun provideThreadNavigator(
-        threadNavigatorImpl: ThreadNavigatorImpl
-    ): ThreadNavigator =
-        threadNavigatorImpl
+    fun provideThreadsNavigator(
+        threadsNavigatorImpl: ThreadsNavigatorImpl
+    ): ThreadsNavigator =
+        threadsNavigatorImpl
 
     @Provides
     fun provideDeleteMediaNavigator(

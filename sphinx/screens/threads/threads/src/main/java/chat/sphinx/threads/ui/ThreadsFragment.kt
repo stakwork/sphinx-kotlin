@@ -14,22 +14,22 @@ import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.threads.R
-import chat.sphinx.threads.databinding.FragmentThreadBinding
-import chat.sphinx.threads.viewstate.ThreadViewState
+import chat.sphinx.threads.databinding.FragmentThreadsBinding
+import chat.sphinx.threads.viewstate.ThreadsViewState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-internal class ThreadFragment: SideEffectDetailFragment<
+internal class ThreadsFragment: SideEffectDetailFragment<
         Context,
-        ThreadSideEffect,
-        ThreadViewState,
-        ThreadViewModel,
-        FragmentThreadBinding
-        >(R.layout.fragment_thread)
+        ThreadsSideEffect,
+        ThreadsViewState,
+        ThreadsViewModel,
+        FragmentThreadsBinding
+        >(R.layout.fragment_threads)
 {
-    override val binding: FragmentThreadBinding by viewBinding(FragmentThreadBinding::bind)
-    override val viewModel: ThreadViewModel by viewModels()
+    override val binding: FragmentThreadsBinding by viewBinding(FragmentThreadsBinding::bind)
+    override val viewModel: ThreadsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,10 +80,10 @@ internal class ThreadFragment: SideEffectDetailFragment<
         binding.apply {}
     }
 
-    override suspend fun onViewStateFlowCollect(viewState: ThreadViewState) {
+    override suspend fun onViewStateFlowCollect(viewState: ThreadsViewState) {
         @Exhaustive
         when (viewState) {
-            is ThreadViewState.Idle -> {}
+            is ThreadsViewState.Idle -> {}
         }
     }
 
@@ -92,7 +92,7 @@ internal class ThreadFragment: SideEffectDetailFragment<
         super.subscribeToViewStateFlow()
     }
 
-    override suspend fun onSideEffectCollect(sideEffect: ThreadSideEffect) {
+    override suspend fun onSideEffectCollect(sideEffect: ThreadsSideEffect) {
         sideEffect.execute(binding.root.context)
     }
 }

@@ -36,7 +36,7 @@
             android:paddingVertical="8dp"
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_nav_back"
-            app:layout_constraintEnd_toStartOf="@+id/image_view_chat_web_view"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_threads_view"
             app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_nav_back"
             app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_nav_back">
 
@@ -132,6 +132,19 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_threads_view"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_threads"
+            android:tint="@color/placeholderText"
+            android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
+            android:clickable="true"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_chat_web_view"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_chat_web_view"

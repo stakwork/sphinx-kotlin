@@ -18,6 +18,7 @@
     <include app:graph="@navigation/common_player_nav_graph" />
     <include app:graph="@navigation/qr_code_nav_graph" />
     <include app:graph="@navigation/manage_storage_nav_graph" />
+    <include app:graph="@navigation/threads_nav_graph" />
     <include app:graph="@navigation/delete_media_nav_graph" />
     <include app:graph="@navigation/delete_chat_media_nav_graph" />
     <include app:graph="@navigation/delete_chat_media_detail_nav_graph" />
