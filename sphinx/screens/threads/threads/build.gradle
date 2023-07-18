@@ -43,6 +43,8 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
     implementation project(path: ':sphinx:application:common:resources')
+    implementation project(path: ':sphinx:screens:chats:chat-common:chat-common')
+
 
     api project(path: ':sphinx:application:network:concepts:concept-socket-io')
 

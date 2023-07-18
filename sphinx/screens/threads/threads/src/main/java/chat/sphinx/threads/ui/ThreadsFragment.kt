@@ -50,7 +50,7 @@ internal class ThreadsFragment: SideEffectDetailFragment<
         setClickListeners()
 
         (requireActivity() as InsetterActivity)
-            .addNavigationBarPadding(binding.layoutConstraintManageStorage)
+            .addNavigationBarPadding(binding.layoutConstraintThreads)
 
     }
 
