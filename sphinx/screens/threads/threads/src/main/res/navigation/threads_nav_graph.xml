@@ -9,6 +9,9 @@
         android:id="@+id/navigation_manage_storage_fragment"
         android:name="chat.sphinx.threads.ui.ThreadsFragment"
         tools:layout="@layout/fragment_threads" >
+        <argument
+            android:name="argChatId"
+            app:argType="long" />
     </fragment>
 
 </navigation>

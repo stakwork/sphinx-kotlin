@@ -555,6 +555,12 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    fun navigateToThreads(chatId: ChatId) {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toThreads(chatId)
+        }
+    }
+
     override fun reloadPinnedMessage() {
         viewModelScope.launch(mainImmediate) {
             getChat()?.let { nnChat ->

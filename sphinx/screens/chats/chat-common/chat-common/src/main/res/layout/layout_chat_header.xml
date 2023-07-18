@@ -141,7 +141,7 @@
             android:tint="@color/placeholderText"
             android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
             android:clickable="true"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/image_view_chat_web_view"
             app:layout_constraintTop_toTopOf="parent" />

@@ -61,6 +61,7 @@ import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_chat.protocolLessUrl
+import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
@@ -205,6 +206,11 @@ internal class ChatTribeFragment: ChatFragment<
 
         binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
             tribeAppViewModel.toggleWebAppView()
+        }
+
+        binding.includeChatTribeHeader.imageViewThreadsView.visible
+        binding.includeChatTribeHeader.imageViewThreadsView.setOnClickListener {
+            viewModel.navigateToThreads(ChatId(ChatId.NULL_CHAT_ID.toLong()))
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{

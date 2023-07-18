@@ -16,6 +16,7 @@ import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
+import chat.sphinx.threads.navigation.ToThreads
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
 import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -145,5 +146,9 @@ internal class TribeChatNavigatorImpl @Inject constructor(
 
     override suspend fun toPodcastPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, fromFeed = false, fromDownloaded = false))
+    }
+
+    override suspend fun toThreads(chatId: ChatId) {
+        detailDriver.submitNavigationRequest(ToThreads(chatId))
     }
 }
