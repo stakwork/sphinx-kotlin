@@ -59,6 +59,7 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-lightning')
     api project(path: ':sphinx:screens:onboard:onboard-desktop')
     api project(path: ':sphinx:screens:profile:profile')
+    api project(path: ':sphinx:screens:threads:threads')
     api project(path: ':sphinx:screens:splash:splash')
 
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
