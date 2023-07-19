@@ -12,7 +12,8 @@
         android:id="@+id/layout_constraint_chat_thread_header"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="@dimen/default_layout_margin"
+        android:paddingTop="@dimen/default_layout_margin"
+        android:paddingHorizontal="@dimen/default_layout_margin"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -21,8 +22,8 @@
         <include
             android:id="@+id/layout_layout_chat_image_small_initial_holder"
             layout="@layout/layout_chat_image_small_initial_holder"
-            android:layout_width="@dimen/feed_item_detail_rows_container_margin_top"
-            android:layout_height="@dimen/feed_item_detail_rows_container_margin_top"
+            android:layout_width="@dimen/player_bar_play_button_xy"
+            android:layout_height="@dimen/player_bar_play_button_xy"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -51,7 +52,7 @@
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/secondaryText"
             android:textSize="@dimen/default_text_size_body"
-            android:visibility="gone"
+            android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="@+id/text_view_contact_header_name"
             app:layout_constraintStart_toEndOf="@+id/text_view_contact_header_name"
             app:layout_constraintTop_toTopOf="@+id/text_view_contact_header_name"
@@ -65,7 +66,7 @@
             android:maxLines="2"
             android:ellipsize="end"
             android:layout_marginStart="@dimen/default_list_row_padding_vertical"
-            android:layout_marginTop="@dimen/default_medium_layout_margin"
+            android:layout_marginTop="@dimen/default_half_layout_margin"
             android:fontFamily="@font/roboto_regular"
             android:textColor="@color/textMessages"
             android:textSize="@dimen/default_form_edit_view_text_size"
@@ -114,7 +115,7 @@
                 android:textColor="@color/secondaryText"
                 android:layout_marginStart="@dimen/default_layout_margin"
                 android:textSize="@dimen/default_text_size_body"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/text_view_replies_quantity"
                 app:layout_constraintTop_toTopOf="parent"

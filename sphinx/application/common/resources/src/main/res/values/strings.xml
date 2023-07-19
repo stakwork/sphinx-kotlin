@@ -267,5 +267,6 @@
     <string name="select_bitcoin_network">Select Bitcoin Network</string>
     <string name="replies_amount">%s replies</string>
     <string name="threads_header" translatable="false">Threads</string>
+    <string name="threads_plus" translatable="false">+%s</string>
 
 </resources>

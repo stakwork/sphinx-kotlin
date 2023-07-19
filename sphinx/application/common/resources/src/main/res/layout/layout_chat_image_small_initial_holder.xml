@@ -35,4 +35,35 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone"/>
 
+    <View
+        android:id="@+id/image_view_default_alpha"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/chat_circle_black_alpha"
+        android:alpha="0.6"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_replies_number"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/default_text_size_caption2"
+        android:textAllCaps="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="+8" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

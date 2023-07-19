@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
@@ -42,6 +43,10 @@ internal class ThreadsFragment: SideEffectDetailFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var userColorsHelper: UserColorsHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +111,8 @@ internal class ThreadsFragment: SideEffectDetailFragment<
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
-                viewModel
+                viewModel,
+                userColorsHelper
             )
             layoutManager = LinearLayoutManager(binding.root.context)
             adapter = ConcatAdapter(threadsAdapter, threadsFooterAdapter)
@@ -121,6 +127,7 @@ internal class ThreadsFragment: SideEffectDetailFragment<
         @Exhaustive
         when (viewState) {
             is ThreadsViewState.Idle -> {}
+            is ThreadsViewState.ThreadList -> {}
         }
     }
 

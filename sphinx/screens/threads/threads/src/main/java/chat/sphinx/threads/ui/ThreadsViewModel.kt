@@ -2,11 +2,11 @@ package chat.sphinx.threads.ui
 
 import android.app.Application
 import android.content.*
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.viewstate.messageholder.ReplyUserHolder
 import chat.sphinx.concept_repository_message.MessageRepository
+import chat.sphinx.threads.R
 import chat.sphinx.threads.model.ThreadItem
 import chat.sphinx.threads.navigation.ThreadsNavigator
 import chat.sphinx.threads.viewstate.ThreadsViewState
@@ -64,23 +64,29 @@ internal class ThreadsViewModel @Inject constructor(
                     }
 
                     val threadItems = completeThreads.keys.map { uuid ->
+
+                        val repliesList = completeThreads[uuid]?.drop(1)
+                        val repliesExcess: Int? = if ((repliesList?.size ?: 0) > 6) repliesList?.size?.minus(6) else null
+
                         ThreadItem(
-                            userName = completeThreads[uuid]?.get(0)?.senderAlias?.value ?: "",
-                            userPic =  completeThreads[uuid]?.get(0)?.senderPic,
+                            aliasAndColorKey = Pair(completeThreads[uuid]?.get(0)?.senderAlias?.value?.toContactAlias(), completeThreads[uuid]?.get(0)?.getColorKey()),
+                            photoUrl =  completeThreads[uuid]?.get(0)?.senderPic,
                             date = completeThreads[uuid]?.get(0)?.date?.chatTimeFormat() ?: "",
                             message = completeThreads[uuid]?.get(0)?.messageContentDecrypted?.value ?: "",
-                            usersReplies = completeThreads[uuid]?.drop(1)?.map {
+                            usersReplies = repliesList?.take(6)?.map {
                                 ReplyUserHolder(
                                     it.senderPic,
                                     it.senderAlias?.value?.toContactAlias(),
                                     it.getColorKey()
                                 )
                             },
-                            repliesAmount = completeThreads[uuid]?.drop(1)?.count().toString(),
-                            repliesExcess = null,
-                            lastReplyDate = completeThreads[uuid]?.last()?.date?.timeAgo()
+                            repliesAmount = String.format(app.getString(R.string.replies_amount) ,repliesList?.size?.toString() ?: "0"),
+                            repliesExcess = String.format(app.getString(R.string.threads_plus), repliesExcess.toString()),
+                            lastReplyDate = completeThreads[uuid]?.last()?.date?.timeAgo(),
+                            uuid = uuid?.value ?: ""
                         )
                     }
+
                     updateViewState(ThreadsViewState.ThreadList(threadItems))
                 }
             }
