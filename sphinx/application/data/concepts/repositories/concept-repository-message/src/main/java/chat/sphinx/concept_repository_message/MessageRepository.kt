@@ -31,6 +31,8 @@ interface MessageRepository {
     fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
     fun getPaymentsTotalFor(feedId: FeedId): Flow<Sat?>
 
+    fun getThreadUUIDMessagesByChatId(chatId: ChatId): Flow<List<Message>>
+
     suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
 
     suspend fun fetchPinnedMessageByUUID(messageUUID: MessageUUID, chatId: ChatId)

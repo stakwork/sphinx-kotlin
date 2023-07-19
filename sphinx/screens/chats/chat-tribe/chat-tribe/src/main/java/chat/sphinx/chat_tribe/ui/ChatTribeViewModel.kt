@@ -555,7 +555,7 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
-    fun navigateToThreads(chatId: ChatId) {
+    fun navigateToThreads() {
         viewModelScope.launch(mainImmediate) {
             (chatNavigator as TribeChatNavigator).toThreads(chatId)
         }

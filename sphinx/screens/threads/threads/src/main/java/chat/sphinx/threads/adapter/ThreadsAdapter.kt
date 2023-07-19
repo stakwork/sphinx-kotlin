@@ -3,10 +3,8 @@ package chat.sphinx.threads.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
@@ -52,7 +50,7 @@ internal class ThreadsAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.name == new.name
+                    old.userName == new.userName
 
                 if (sameList) {
                     sameList = same
@@ -71,7 +69,7 @@ internal class ThreadsAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.name  == new.name
+                    old.userName  == new.userName
 
                 if (sameList) {
                     sameList = same

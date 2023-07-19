@@ -2222,6 +2222,21 @@ abstract class SphinxRepository(
         )
     }
 
+    override fun getThreadUUIDMessagesByChatId(chatId: ChatId): Flow<List<Message>> = flow {
+        emitAll(
+            coreDB.getSphinxDatabaseQueries()
+                .messagesGetAllThreadUUIDByChatId(chatId, ::MessageDbo)
+                .asFlow()
+                .mapToList(io)
+                .map { listMessageDbo ->
+                    listMessageDbo.map {
+                        messageDboPresenterMapper.mapFrom(it)
+                    }
+                }
+                .distinctUntilChanged()
+        )
+    }
+
 
     private fun getMessageByIdImpl(
         messageId: MessageId,

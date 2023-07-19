@@ -210,7 +210,7 @@ internal class ChatTribeFragment: ChatFragment<
 
         binding.includeChatTribeHeader.imageViewThreadsView.visible
         binding.includeChatTribeHeader.imageViewThreadsView.setOnClickListener {
-            viewModel.navigateToThreads(ChatId(ChatId.NULL_CHAT_ID.toLong()))
+            viewModel.navigateToThreads()
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{

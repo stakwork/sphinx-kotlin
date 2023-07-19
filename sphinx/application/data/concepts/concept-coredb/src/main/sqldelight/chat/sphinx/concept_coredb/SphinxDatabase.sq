@@ -620,6 +620,13 @@ WHERE chat_id = :chat_id
 AND type != 29
 AND thread_uuid IN :thread_uuid;
 
+messagesGetAllThreadUUIDByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND type != 29
+AND thread_uuid IS NOT NULL;
+
 messageGetAllPurchaseItemsByMUID:
 SELECT *
 FROM messageDbo
