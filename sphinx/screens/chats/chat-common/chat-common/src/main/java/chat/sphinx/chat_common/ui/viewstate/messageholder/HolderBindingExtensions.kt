@@ -228,6 +228,27 @@ internal fun  LayoutMessageHolderBinding.setView(
                 viewState.bubbleMessage,
                 onSphinxInteractionListener
             )
+            setBubbleThreadThreadLayout(
+                viewState.bubbleThread,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+            ){ imageView, url ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    imageLoader.load(
+                        imageView,
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                        .also { disposables.add(it) }
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
             setBubblePaidMessageLayout(
                 dispatchers,
                 holderJobs,
@@ -270,27 +291,6 @@ internal fun  LayoutMessageHolderBinding.setView(
 
                     disposables.add(disposable)
                     disposable.await()
-                }.let { job ->
-                    holderJobs.add(job)
-                }
-            }
-            setRepliesLayout(
-                viewState.replies,
-                holderJobs,
-                dispatchers,
-                lifecycleScope,
-                userColorsHelper,
-            ){ imageView, url ->
-                lifecycleScope.launch(dispatchers.mainImmediate) {
-                    imageLoader.load(
-                        imageView,
-                        url,
-                        ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                            .transformation(Transformation.CircleCrop)
-                            .build()
-                    )
-                        .also { disposables.add(it) }
                 }.let { job ->
                     holderJobs.add(job)
                 }
@@ -658,6 +658,7 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
         var bubbleWidth: Int = when {
             viewState.message?.shouldAdaptBubbleWidth == true -> {
+
                 val textWidth = viewState.bubbleMessage?.let { nnBubbleMessage ->
                     (includeMessageHolderBubble.textViewMessageText.paint.measureText(
                         nnBubbleMessage.text ?: getString(R.string.decryption_error)
@@ -962,57 +963,77 @@ internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setRepliesLayout(
-    replies: LayoutState.Replies?,
+internal inline fun LayoutMessageHolderBinding.setBubbleThreadThreadLayout(
+    thread: LayoutState.Bubble.ContainerThird.Thread?,
     holderJobs: ArrayList<Job>,
     dispatchers: CoroutineDispatchers,
     lifecycleScope: CoroutineScope,
     userColorsHelper: UserColorsHelper,
     loadImage: (ImageView, String) -> Unit,
 ) {
-    includeLayoutMessageReplies.apply {
-        if (replies == null) {
+    includeMessageHolderBubble.includeLayoutMessageThread.apply {
+        if (thread == null) {
             root.gone
         } else {
             root.visible
 
-            val users = replies.users.distinct()
+            val users = thread.users.distinct()
+            textViewOriginalThreadMessageText.text = thread.originalMessage
+            // Set original text just like in a message bubble and bind it on the xml
+            // in the same way than the setBubbleMessage does, also apply external changes to this
 
-            textViewRepliesNumber.text = String.format(getString(R.string.replies_amount), replies.replyCount)
+            // We need up to 4 setReplySenderImage
 
-            includeLayoutMessageRepliesGroup.apply {
-
-                setReplySender(
-                    users.elementAtOrNull(0),
-                    layoutConstraintReplyImageHolder1,
-                    includeReplyImageHolder1,
-                    holderJobs,
-                    dispatchers,
-                    lifecycleScope,
-                    userColorsHelper,
-                    loadImage
-                )
-                setReplySender(
-                    users.elementAtOrNull(1),
-                    layoutConstraintReplyImageHolder2,
-                    includeReplyImageHolder2,
-                    holderJobs,
-                    dispatchers,
-                    lifecycleScope,
-                    userColorsHelper,
-                    loadImage
-                )
-                setReplySender(
-                    users.elementAtOrNull(2),
-                    layoutConstraintReplyImageHolder2,
-                    includeReplyImageHolder2,
-                    holderJobs,
-                    dispatchers,
-                    lifecycleScope,
-                    userColorsHelper,
-                    loadImage
-                )
-            }
+//            includeLayoutMessageRepliesGroup.apply {
+//
+//                // Set first reply imageHolder
+//                setReplySenderImage(
+//                    users.elementAtOrNull(0),
+//                    layoutConstraintReplyImageHolder1,
+//                    includeReplyImageHolder1,
+//                    holderJobs,
+//                    dispatchers,
+//                    lifecycleScope,
+//                    userColorsHelper,
+//                    loadImage
+//                )
+//                // Set Last Reply Image Holder
+//                setReplySenderImage(
+//                    users.elementAtOrNull(2),
+//                    layoutConstraintReplyImageHolder2,
+//                    includeReplyImageHolder2,
+//                    holderJobs,
+//                    dispatchers,
+//                    lifecycleScope,
+//                    userColorsHelper,
+//                    loadImage
+//                )
+//
+//                // Set second reply imageHolder if exist
+//                setReplySenderImage(
+//                    users.elementAtOrNull(1),
+//                    layoutConstraintReplyImageHolder2,
+//                    includeReplyImageHolder2,
+//                    holderJobs,
+//                    dispatchers,
+//                    lifecycleScope,
+//                    userColorsHelper,
+//                    loadImage
+//                )
+//
+//                // set replies number on circule
+////            textViewMessageText.text = String.format(getString(R.string.replies_amount), replies.replyCount)
+//                setReplySenderImage(
+//                    users.elementAtOrNull(2),
+//                    layoutConstraintReplyImageHolder2,
+//                    includeReplyImageHolder2,
+//                    holderJobs,
+//                    dispatchers,
+//                    lifecycleScope,
+//                    userColorsHelper,
+//                    loadImage
+//                )
+//            }
         }
     }
 
@@ -1985,7 +2006,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setReplySender(
+internal inline fun LayoutMessageHolderBinding.setReplySenderImage(
     replyUserHolder: ReplyUserHolder?,
     container: ConstraintLayout,
     imageHolderBinding: LayoutChatImageSmallInitialHolderBinding,
@@ -2000,6 +2021,9 @@ internal inline fun LayoutMessageHolderBinding.setReplySender(
             imageHolderContainer.gone
         } else {
             imageHolderContainer.visible
+
+            // Add logic to bind the number of more replies
+            // setting background color of the circle and number
 
             imageHolderBinding.apply {
 

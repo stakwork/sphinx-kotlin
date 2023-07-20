@@ -37,6 +37,7 @@ inline val Message.shouldAdaptBubbleWidth: Boolean
             podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
+            thread?.isEmpty() == true &&
             !status.isDeleted() &&
             !flagged.isTrue()) ||
             type.isDirectPayment()
@@ -180,31 +181,6 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    val replies: LayoutState.Replies? by lazy(LazyThreadSafetyMode.NONE) {
-        if (message == null) {
-            null
-        } else {
-            message.thread?.let { replies ->
-                if (replies.isEmpty()){
-                    null
-                } else {
-                    val users: MutableSet<ReplyUserHolder> = LinkedHashSet(0)
-
-                    replies.forEach { replyMessage ->
-                        users.add(
-                            ReplyUserHolder(
-                                replyMessage.senderPic,
-                                replyMessage.senderAlias?.value?.toContactAlias(),
-                                replyMessage.getColorKey())
-                        )
-                    }
-
-                    LayoutState.Replies(replies.size, users)
-                }
-            }
-        }
-    }
-
     val bubbleDirectPayment: LayoutState.Bubble.ContainerSecond.DirectPayment? by lazy(LazyThreadSafetyMode.NONE) {
         if (message == null) {
             null
@@ -249,7 +225,7 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleMessage: LayoutState.Bubble.ContainerThird.Message? by  lazy(LazyThreadSafetyMode.NONE) {
-        if (message == null) {
+        if (message == null || message.thread?.isNotEmpty() == true) {
             null
         } else {
             message.retrieveTextToShow()?.let { text ->
@@ -273,6 +249,47 @@ internal sealed class MessageHolderViewState(
             }
         }
     }
+
+    val bubbleThread: LayoutState.Bubble.ContainerThird.Thread? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message == null) {
+            null
+        } else {
+            message.thread?.let { replies ->
+                if (replies.isEmpty()){
+                    null
+                } else {
+                    val users: MutableSet<ReplyUserHolder> = LinkedHashSet(0)
+
+                    replies.forEach { replyMessage ->
+                        users.add(
+                            ReplyUserHolder(
+                                replyMessage.senderPic,
+                                replyMessage.senderAlias?.value?.toContactAlias(),
+                                replyMessage.getColorKey())
+                        )
+                    }
+
+                    val lastReplyUser = replies.last().let {
+                        ReplyUserHolder(
+                            it.senderPic,
+                            it.senderAlias?.value?.toContactAlias(),
+                            it.getColorKey()
+                        )
+                    }
+
+                    LayoutState.Bubble.ContainerThird.Thread(
+                        originalMessage = message.retrieveTextToShow(),
+                        replyCount = replies.size,
+                        users = users,
+                        lastReplyMessage = replies.last().retrieveTextToShow(),
+                        lastReplyDate = replies.last().date.chatTimeFormat(),
+                        lastReplyUser = lastReplyUser
+                    )
+                }
+            }
+        }
+    }
+
 
     val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
         if (message == null || message.retrieveTextToShow() != null || !message.isPaidTextMessage) {

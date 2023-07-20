@@ -76,11 +76,6 @@ internal sealed class LayoutState private constructor() {
             get() = !showSent
     }
 
-    data class Replies(
-        val replyCount: Int,
-        val users: Set<ReplyUserHolder>
-        ): LayoutState()
-
     sealed class Bubble private constructor(): LayoutState() {
 
         sealed class ContainerFirst private constructor(): Bubble() {
@@ -213,6 +208,15 @@ internal sealed class LayoutState private constructor() {
                 val text: String?,
                 val decryptionError: Boolean,
             ): ContainerThird()
+
+            data class Thread(
+                val originalMessage: String?,
+                val replyCount: Int,
+                val users: Set<ReplyUserHolder>,
+                val lastReplyMessage: String?,
+                val lastReplyDate: String,
+                val lastReplyUser: ReplyUserHolder
+            )
 
             data class PaidMessage(
                 val showSent: Boolean,
