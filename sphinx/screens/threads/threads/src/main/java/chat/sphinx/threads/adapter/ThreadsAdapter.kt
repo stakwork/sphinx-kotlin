@@ -13,6 +13,7 @@ import chat.sphinx.chat_common.ui.viewstate.messageholder.ReplyUserHolder
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.resources.getRandomHexCode
@@ -151,6 +152,7 @@ internal class ThreadsAdapter(
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
             .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .transformation(Transformation.CircleCrop)
             .build()
     }
 
