@@ -144,15 +144,16 @@
             tools:visibility="gone" />
 
         <!-- Thread preview  -->
+
         <include
             android:id="@+id/include_layout_message_thread"
             layout="@layout/layout_message_thread"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:layout_editor_absoluteX="0dp"
             tools:visibility="visible" />
 
-        <!-- Contact link preview  -->
         <include
             android:id="@+id/include_message_link_preview_contact"
             layout="@layout/layout_message_link_preview_contact"

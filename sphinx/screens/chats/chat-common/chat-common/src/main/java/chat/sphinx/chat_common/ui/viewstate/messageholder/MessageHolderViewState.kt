@@ -277,13 +277,16 @@ internal sealed class MessageHolderViewState(
                         )
                     }
 
+                    val sent = message.sender == chat.contactIds.firstOrNull()
+
                     LayoutState.Bubble.ContainerThird.Thread(
                         originalMessage = message.retrieveTextToShow(),
                         replyCount = replies.size,
                         users = users,
                         lastReplyMessage = replies.last().retrieveTextToShow(),
                         lastReplyDate = replies.last().date.chatTimeFormat(),
-                        lastReplyUser = lastReplyUser
+                        lastReplyUser = lastReplyUser,
+                        isSentMessage = sent
                     )
                 }
             }

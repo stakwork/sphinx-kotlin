@@ -150,5 +150,6 @@
     <string name="bitcoin_network">Red de Bitcoin</string>
     <string name="select_bitcoin_network">Seleccioná la red de Bitcoin</string>
     <string name="replies_amount">%s respuestas</string>
+    <string name="threads_more_replies">respuestas más</string>
 
 </resources>

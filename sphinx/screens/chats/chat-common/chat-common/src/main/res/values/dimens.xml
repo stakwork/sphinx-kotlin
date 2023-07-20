@@ -180,4 +180,9 @@
 
     <dimen name="scroll_down_button_width">50dp</dimen>
     <dimen name="scroll_down_button_height">40dp</dimen>
+
+    <!-- Thread -->
+    <dimen name="thread_height">256dp</dimen>
+
+
 </resources>

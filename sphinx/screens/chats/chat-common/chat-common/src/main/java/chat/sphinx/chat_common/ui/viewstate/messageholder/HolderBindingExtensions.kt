@@ -228,7 +228,7 @@ internal fun  LayoutMessageHolderBinding.setView(
                 viewState.bubbleMessage,
                 onSphinxInteractionListener
             )
-            setBubbleThreadThreadLayout(
+            setBubbleThreadLayout(
                 viewState.bubbleThread,
                 holderJobs,
                 dispatchers,
@@ -963,7 +963,7 @@ internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setBubbleThreadThreadLayout(
+internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
     thread: LayoutState.Bubble.ContainerThird.Thread?,
     holderJobs: ArrayList<Job>,
     dispatchers: CoroutineDispatchers,

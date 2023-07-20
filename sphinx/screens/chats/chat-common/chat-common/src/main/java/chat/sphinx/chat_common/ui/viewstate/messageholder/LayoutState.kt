@@ -215,7 +215,8 @@ internal sealed class LayoutState private constructor() {
                 val users: Set<ReplyUserHolder>,
                 val lastReplyMessage: String?,
                 val lastReplyDate: String,
-                val lastReplyUser: ReplyUserHolder
+                val lastReplyUser: ReplyUserHolder,
+                val isSentMessage: Boolean
             )
 
             data class PaidMessage(
