@@ -1009,20 +1009,21 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                 loadImage
             )
 
-            // This binds the number
-            setReplyRow(
-                users.elementAtOrNull(0),
-                layoutConstraintReplyThree,
-                layoutLayoutChatImageSmallInitialHolderThree,
-                holderJobs,
-                dispatchers,
-                lifecycleScope,
-                userColorsHelper,
-                thread.replyCount.toString(),
-                thread.isSentMessage,
-                false,
-                loadImage
-            )
+            if (thread.replyCount >= 4) {
+                setReplyRow(
+                    users.elementAtOrNull(0),
+                    layoutConstraintReplyThree,
+                    layoutLayoutChatImageSmallInitialHolderThree,
+                    holderJobs,
+                    dispatchers,
+                    lifecycleScope,
+                    userColorsHelper,
+                    thread.replyCount.minus(3).toString(),
+                    thread.isSentMessage,
+                    false,
+                    loadImage
+                )
+            }
 
             setReplyRow(
                 thread.lastReplyUser,
@@ -1041,7 +1042,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
             layoutConstraintLastReply.apply {
                 textViewLastReplyMessageText.text = thread.lastReplyMessage
                 textViewLastReplyDate.text = thread.lastReplyDate
-                textViewLastReplyUserName.text = thread.lastReplyUser.alias?.value
+                textViewLastReplyUserName.text = thread.lastReplyUser.alias?.value ?: "unknown"
 
 
             }
@@ -2037,6 +2038,7 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
             imageHolderContainer.visible
 
             imageHolderBinding.apply {
+
                 val rowBackground = when {
                     isLastReply -> if (isSentMessage) {
                         R.drawable.background_thread_row_last_reply_holder_sent

@@ -2191,7 +2191,7 @@ abstract class SphinxRepository(
                                     queries,
                                     dbo,
                                     dbo.uuid?.let { reactionsMap[it] },
-                                    dbo.uuid?.let { threadMap[it] },
+                                    if (threadMap.size > 1) dbo.uuid?.let { threadMap[it] } else null,
                                     dbo.muid?.let { purchaseItemsMap[it] },
                                     dbo.reply_uuid,
                                     chat

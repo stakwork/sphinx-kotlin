@@ -255,7 +255,7 @@ internal sealed class MessageHolderViewState(
             null
         } else {
             message.thread?.let { replies ->
-                if (replies.isEmpty()){
+                if (replies.isEmpty() || chat.isConversation()){
                     null
                 } else {
                     val users: MutableSet<ReplyUserHolder> = LinkedHashSet(0)

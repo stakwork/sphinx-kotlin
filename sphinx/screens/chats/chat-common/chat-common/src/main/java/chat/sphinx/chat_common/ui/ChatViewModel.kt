@@ -392,25 +392,30 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             var openSentPaidInvoicesCount = 0
             var openReceivedPaidInvoicesCount = 0
 
-            var filteredMessages: MutableList<Message> = mutableListOf()
+            val filteredMessages: MutableList<Message> = mutableListOf()
 
-            // Filter messages to do not show thread replies on chat
-            for (message in messages) {
+            if (chat.isTribe()) {
 
-                if (message.thread?.isNotEmpty() == true) {
-                    message.uuid?.value?.let { uuid ->
-                        threadMessageMap[uuid] = message.thread?.count() ?: 0
+                // Filter messages to do not show thread replies on chat
+                for (message in messages) {
+
+                    if (message.thread?.isNotEmpty() == true) {
+                        message.uuid?.value?.let { uuid ->
+                            threadMessageMap[uuid] = message.thread?.count() ?: 0
+                        }
+                    }
+
+                    val shouldAddMessage = message.threadUUID?.let { threadUUID ->
+                        val count = threadMessageMap[threadUUID.value] ?: 0
+                        count <= 1
+                    } ?: true
+
+                    if (shouldAddMessage) {
+                        filteredMessages.add(message)
                     }
                 }
-
-                val shouldAddMessage = message.threadUUID?.let { threadUUID ->
-                    val count = threadMessageMap[threadUUID.value] ?: 0
-                    count <= 1
-                } ?: true
-
-                if (shouldAddMessage) {
-                    filteredMessages.add(message)
-                }
+            } else {
+                filteredMessages.addAll(messages)
             }
 
             for ((index, message) in filteredMessages.withIndex()) {
@@ -483,6 +488,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     newList.add(
                         MessageHolderViewState.Sent(
                             message,
+
                             chat,
                             tribeAdmin,
                             background = when {
