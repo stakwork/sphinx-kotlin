@@ -978,62 +978,73 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
             root.visible
 
             val users = thread.users.distinct()
+
             textViewOriginalThreadMessageText.text = thread.originalMessage
-            // Set original text just like in a message bubble and bind it on the xml
-            // in the same way than the setBubbleMessage does, also apply external changes to this
 
-            // We need up to 4 setReplySenderImage
+            setReplyRow(
+                users.elementAtOrNull(0),
+                layoutConstraintReplyOne,
+                layoutLayoutChatImageSmallInitialHolderOne,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+                null,
+                thread.isSentMessage,
+                false,
+                loadImage
+            )
 
-//            includeLayoutMessageRepliesGroup.apply {
-//
-//                // Set first reply imageHolder
-//                setReplySenderImage(
-//                    users.elementAtOrNull(0),
-//                    layoutConstraintReplyImageHolder1,
-//                    includeReplyImageHolder1,
-//                    holderJobs,
-//                    dispatchers,
-//                    lifecycleScope,
-//                    userColorsHelper,
-//                    loadImage
-//                )
-//                // Set Last Reply Image Holder
-//                setReplySenderImage(
-//                    users.elementAtOrNull(2),
-//                    layoutConstraintReplyImageHolder2,
-//                    includeReplyImageHolder2,
-//                    holderJobs,
-//                    dispatchers,
-//                    lifecycleScope,
-//                    userColorsHelper,
-//                    loadImage
-//                )
-//
-//                // Set second reply imageHolder if exist
-//                setReplySenderImage(
-//                    users.elementAtOrNull(1),
-//                    layoutConstraintReplyImageHolder2,
-//                    includeReplyImageHolder2,
-//                    holderJobs,
-//                    dispatchers,
-//                    lifecycleScope,
-//                    userColorsHelper,
-//                    loadImage
-//                )
-//
-//                // set replies number on circule
-////            textViewMessageText.text = String.format(getString(R.string.replies_amount), replies.replyCount)
-//                setReplySenderImage(
-//                    users.elementAtOrNull(2),
-//                    layoutConstraintReplyImageHolder2,
-//                    includeReplyImageHolder2,
-//                    holderJobs,
-//                    dispatchers,
-//                    lifecycleScope,
-//                    userColorsHelper,
-//                    loadImage
-//                )
-//            }
+            setReplyRow(
+                users.elementAtOrNull(1),
+                layoutConstraintReplyTwo,
+                layoutLayoutChatImageSmallInitialHolderTwo,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+                null,
+                thread.isSentMessage,
+                false,
+                loadImage
+            )
+
+            // This binds the number
+            setReplyRow(
+                users.elementAtOrNull(0),
+                layoutConstraintReplyThree,
+                layoutLayoutChatImageSmallInitialHolderThree,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+                thread.replyCount.toString(),
+                thread.isSentMessage,
+                false,
+                loadImage
+            )
+
+            setReplyRow(
+                thread.lastReplyUser,
+                layoutConstraintLastReply,
+                layoutLayoutChatImageSmallInitialHolderFour,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+                null,
+                thread.isSentMessage,
+                true,
+                loadImage
+            )
+
+            layoutConstraintLastReply.apply {
+                textViewLastReplyMessageText.text = thread.lastReplyMessage
+                textViewLastReplyDate.text = thread.lastReplyDate
+                textViewLastReplyUserName.text = thread.lastReplyUser.alias?.value
+
+
+            }
         }
     }
 
@@ -2006,7 +2017,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
-internal inline fun LayoutMessageHolderBinding.setReplySenderImage(
+internal inline fun LayoutMessageHolderBinding.setReplyRow(
     replyUserHolder: ReplyUserHolder?,
     container: ConstraintLayout,
     imageHolderBinding: LayoutChatImageSmallInitialHolderBinding,
@@ -2014,6 +2025,9 @@ internal inline fun LayoutMessageHolderBinding.setReplySenderImage(
     dispatchers: CoroutineDispatchers,
     lifecycleScope: CoroutineScope,
     userColorsHelper: UserColorsHelper,
+    repliesNumber: String? = null,
+    isSentMessage: Boolean,
+    isLastReply: Boolean = false,
     loadImage: (ImageView, String) -> Unit,
 ) {
     container.let { imageHolderContainer ->
@@ -2022,24 +2036,49 @@ internal inline fun LayoutMessageHolderBinding.setReplySenderImage(
         } else {
             imageHolderContainer.visible
 
-            // Add logic to bind the number of more replies
-            // setting background color of the circle and number
-
             imageHolderBinding.apply {
 
+                val rowBackground = when {
+                    isLastReply -> if (isSentMessage) {
+                        R.drawable.background_thread_row_last_reply_holder_sent
+                    } else {
+                        R.drawable.background_thread_row_last_reply_holder_received
+                    }
+                    else -> if (isSentMessage) {
+                        R.drawable.background_thread_row_reply_holder_sent
+                    } else {
+                        R.drawable.background_thread_row_reply_holder_received
+                    }
+                }
+
+                container.setBackgroundResource(rowBackground)
+
+                val text = repliesNumber ?: (replyUserHolder.alias?.value ?: root.context.getString(
+                    R.string.unknown
+                )).getInitials()
+
                 textViewInitials.visible
-                textViewInitials.text = (replyUserHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
+                textViewInitials.text = text
                 imageViewChatPicture.gone
 
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    textViewInitials.setBackgroundRandomColor(
-                        R.drawable.chat_initials_circle,
-                        Color.parseColor(
-                            userColorsHelper.getHexCodeForKey(
-                                replyUserHolder.colorKey,
-                                root.context.getRandomHexCode(),
+                    if (repliesNumber != null) {
+                        textViewInitials.setBackgroundRandomColor(
+                            R.drawable.chat_initials_circle,
+                            root.context.getColor(R.color.primaryText)
+                        )
+                        textViewInitials.setTextColor(root.context.getColor(R.color.body))
+                    } else {
+                        textViewInitials.setBackgroundRandomColor(
+                            R.drawable.chat_initials_circle,
+                            Color.parseColor(
+                                userColorsHelper.getHexCodeForKey(
+                                    replyUserHolder.colorKey,
+                                    root.context.getRandomHexCode(),
+                                )
                             )
-                        ))
+                        )
+                    }
                 }.let { job ->
                     holderJobs.add(job)
                 }

@@ -3,7 +3,9 @@
     android:shape="rectangle">
     <solid android:color="@color/lightDivider" />
     <corners
-        android:topRightRadius="@dimen/chat_message_big_inner_padding" />
+        android:topRightRadius="@dimen/chat_message_big_inner_padding"
+        android:bottomRightRadius="@dimen/chat_message_big_inner_padding"
+        android:bottomLeftRadius="@dimen/chat_message_big_inner_padding"/>
     <stroke
         android:color="@color/lightDivider"
         android:width="1dp" />
