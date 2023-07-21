@@ -9,7 +9,7 @@
     tools:visibility="visible"
     tools:background="@drawable/background_message_bubble_received_last">
 
-<!-- Original Thread Message    -->
+    <!-- Original Thread Message    -->
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_original_thread_message_text"
         style="@style/chat_message_body_text"
@@ -25,21 +25,14 @@
         tools:text="At vero eos et accusamus et iusto odio dignissimos ducius qui blanditiis praesentinum  ..."
         tools:visibility="visible" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/constraint_reply_row_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@color/body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_view_original_thread_message_text">
-
-<!-- First reply row-->
+    <!-- First reply row-->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_reply_one"
         android:layout_width="match_parent"
         android:layout_height="@dimen/badges_icon_size"
         android:background="@drawable/background_thread_row_reply_holder_received"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_original_thread_message_text">
 
         <include
             android:id="@+id/layout_layout_chat_image_small_initial_holder_one"
@@ -53,7 +46,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-<!-- Second reply row (optional)    -->
+    <!-- Second reply row (optional)    -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_reply_two"
         android:layout_width="match_parent"
@@ -76,7 +69,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-<!-- Third reply row with the total reply number minus three (optional)    -->
+    <!-- Third reply row with the total reply number minus three (optional)    -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_reply_three"
         android:layout_width="match_parent"
@@ -112,73 +105,105 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Last reply row    -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_last_reply"
+        android:id="@+id/last_row_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/background_thread_row_last_reply_holder_received"
+        android:background="@color/body"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/constraint_reply_row_container">
+        app:layout_constraintTop_toBottomOf="@id/layout_constraint_reply_three">
 
-        <include
-            android:id="@+id/layout_layout_chat_image_small_initial_holder_four"
-            layout="@layout/layout_chat_image_small_initial_holder"
-            android:layout_width="@dimen/image_holder_boost_reaction_xy"
-            android:layout_height="@dimen/image_holder_boost_reaction_xy"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="4dp"
+        <!-- Last reply row    -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_last_reply"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@drawable/background_thread_row_last_reply_holder_received"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_last_reply_user_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:fontFamily="@font/roboto_medium"
-            android:singleLine="true"
-            android:textColor="@color/textMessages"
-            android:textSize="@dimen/default_text_size_body"
-            app:layout_constraintBottom_toBottomOf="@+id/layout_layout_chat_image_small_initial_holder_four"
-            app:layout_constraintStart_toEndOf="@+id/layout_layout_chat_image_small_initial_holder_four"
-            app:layout_constraintTop_toTopOf="@+id/layout_layout_chat_image_small_initial_holder_four"
-            tools:text="Gladys" />
+            <include
+                android:id="@+id/layout_layout_chat_image_small_initial_holder_four"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_last_reply_date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:fontFamily="@font/roboto_regular"
-            android:textColor="@color/secondaryText"
-            android:textSize="@dimen/default_text_size_body"
-            android:visibility="visible"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_last_reply_user_name"
-            app:layout_constraintStart_toEndOf="@+id/text_view_last_reply_user_name"
-            app:layout_constraintTop_toTopOf="@+id/text_view_last_reply_user_name"
-            tools:text="6:05 PM"
-            tools:visibility="visible" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_last_reply_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/roboto_medium"
+                android:singleLine="true"
+                android:textColor="@color/textMessages"
+                android:textSize="@dimen/default_text_size_body"
+                app:layout_constraintBottom_toBottomOf="@+id/layout_layout_chat_image_small_initial_holder_four"
+                app:layout_constraintStart_toEndOf="@+id/layout_layout_chat_image_small_initial_holder_four"
+                app:layout_constraintTop_toTopOf="@+id/layout_layout_chat_image_small_initial_holder_four"
+                tools:text="Gladys" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_last_reply_message_text"
-            style="@style/chat_message_body_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="3"
-            android:padding="@dimen/default_layout_margin"
-            app:layout_constraintStart_toStartOf="@+id/layout_layout_chat_image_small_initial_holder_four"
-            app:layout_constraintTop_toBottomOf="@+id/layout_layout_chat_image_small_initial_holder_four"
-            tools:text="At vero eos et accusamus et iusto odio dignissimos ducius qui blanditiis praesentinum  ..."
-            tools:visibility="visible" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_last_reply_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/roboto_regular"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_body"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/text_view_last_reply_user_name"
+                app:layout_constraintStart_toEndOf="@+id/text_view_last_reply_user_name"
+                app:layout_constraintTop_toTopOf="@+id/text_view_last_reply_user_name"
+                tools:text="6:05 PM"
+                tools:visibility="visible" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_last_reply_message_text"
+                style="@style/chat_message_body_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:paddingTop="@dimen/default_layout_margin"
+                android:paddingEnd="@dimen/default_layout_margin"
+                android:paddingBottom="@dimen/default_layout_margin"
+                app:layout_constraintStart_toStartOf="@+id/layout_layout_chat_image_small_initial_holder_four"
+                app:layout_constraintTop_toBottomOf="@+id/layout_layout_chat_image_small_initial_holder_four"
+                tools:text="At vero eos et accusamus et iusto odio dignissimos ducius qui blanditiis praesentinum  ..."
+                tools:visibility="visible" />
+
+            <View
+                android:id="@+id/left_line"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:background="@color/lightDivider"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/right_line"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="16dp"
+                android:background="@color/lightDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

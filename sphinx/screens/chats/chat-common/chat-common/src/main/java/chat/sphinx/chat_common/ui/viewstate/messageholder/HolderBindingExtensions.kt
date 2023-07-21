@@ -2031,18 +2031,22 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
     loadImage: (ImageView, String) -> Unit,
 ) {
     container.let { imageHolderContainer ->
-        if (replyUserHolder == null) {
+        if (replyUserHolder == null && !isLastReply) {
             imageHolderContainer.gone
         } else {
             imageHolderContainer.visible
 
             imageHolderBinding.apply {
-
                 val rowBackground = when {
                     isLastReply -> if (isSentMessage) {
                         R.drawable.background_thread_row_last_reply_holder_sent
                     } else {
                         R.drawable.background_thread_row_last_reply_holder_received
+                    }
+                    repliesNumber != null -> if (isSentMessage) {
+                        R.drawable.background_thread_row_reply_number_holder_sent
+                    } else {
+                        R.drawable.background_thread_row_reply_number_holder_received
                     }
                     else -> if (isSentMessage) {
                         R.drawable.background_thread_row_reply_holder_sent
@@ -2053,7 +2057,7 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
 
                 container.setBackgroundResource(rowBackground)
 
-                val text = repliesNumber ?: (replyUserHolder.alias?.value ?: root.context.getString(
+                val text = repliesNumber ?: (replyUserHolder?.alias?.value ?: root.context.getString(
                     R.string.unknown
                 )).getInitials()
 
@@ -2073,7 +2077,7 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
                             R.drawable.chat_initials_circle,
                             Color.parseColor(
                                 userColorsHelper.getHexCodeForKey(
-                                    replyUserHolder.colorKey,
+                                    replyUserHolder!!.colorKey,
                                     root.context.getRandomHexCode(),
                                 )
                             )
@@ -2083,7 +2087,7 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
                     holderJobs.add(job)
                 }
 
-                replyUserHolder.photoUrl?.let { photoUrl ->
+                replyUserHolder!!.photoUrl?.let { photoUrl ->
                     textViewInitials.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)
