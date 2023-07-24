@@ -46,15 +46,15 @@ internal class ThreadsViewModel @Inject constructor(
 
                 val messagesGrouped = threadUUIDMessages.groupBy { it.threadUUID }
 
-                messagesGrouped.mapNotNull { it.key?.value?.toMessageUUID() }.let { messageUUIDs ->
-                    val headerMessages = messageRepository.getAllMessagesByUUID(messageUUIDs)
-                    val headerMessagesMappedByUUID = headerMessages.associateBy { it.uuid?.value }
+                messagesGrouped.mapNotNull { it.key?.value?.toMessageUUID() }.let { messageUUID ->
+                    val headerMessage = messageRepository.getAllMessagesByUUID(messageUUID)
+                    val headerMessageMappedByUUID = headerMessage.associateBy { it.uuid?.value }
 
                     val completeThreads = messagesGrouped.mapValues { groupEntry ->
                         val threadUUID = groupEntry.key
                         val threadMessages = groupEntry.value
 
-                        val threadHeaderMessage = headerMessagesMappedByUUID[threadUUID?.value]
+                        val threadHeaderMessage = headerMessageMappedByUUID[threadUUID?.value]
 
                         if (threadHeaderMessage != null) {
                             listOf(threadHeaderMessage) + threadMessages

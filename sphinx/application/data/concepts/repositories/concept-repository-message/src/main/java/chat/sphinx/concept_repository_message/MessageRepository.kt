@@ -18,6 +18,7 @@ import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
@@ -32,6 +33,7 @@ interface MessageRepository {
     fun getPaymentsTotalFor(feedId: FeedId): Flow<Sat?>
 
     fun getThreadUUIDMessagesByChatId(chatId: ChatId): Flow<List<Message>>
+    fun getThreadUUIDMessagesByUUID(chatId: ChatId, threadUUID: ThreadUUID): Flow<List<Message>>
 
     suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
 

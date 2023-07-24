@@ -34,7 +34,6 @@ import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
@@ -197,6 +196,9 @@ internal class ChatContactViewModel @Inject constructor(
             )
         }
     }
+
+    override val threadSharedFlow: SharedFlow<List<Message>>?
+        get() = null
 
     override fun forceKeyExchange() {
         viewModelScope.launch(io) {

@@ -33,13 +33,11 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
@@ -206,6 +204,21 @@ class ChatTribeViewModel @Inject constructor(
     override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
     }
+
+    override val threadSharedFlow: SharedFlow<List<Message>>? =
+        if (args.argThreadUUID.isNullOrEmpty()){
+            null
+        } else
+            flow {
+                messageRepository.getThreadUUIDMessagesByUUID(chatId, ThreadUUID(args.argThreadUUID!!)).collect {
+                emit(it)
+                }
+            }.distinctUntilChanged().shareIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(2_000),
+                replay = 1,
+            )
+
 
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
         getPodcast()?.let { podcast ->

@@ -176,6 +176,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
 
+    protected abstract val threadSharedFlow: SharedFlow<List<Message>>?
+
     abstract val headerInitialHolderSharedFlow: SharedFlow<InitialHolderViewState>
 
     protected abstract suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>?
@@ -236,6 +238,16 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             SharingStarted.WhileSubscribed(5_000),
             ChatHeaderViewState.Idle
         )
+    }
+
+    private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
+
+    private fun collectThread() {
+        viewModelScope.launch(mainImmediate) {
+            threadSharedFlow?.collect { messages ->
+                latestThreadMessagesFlow.value = messages
+            }
+        }
     }
 
     val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
@@ -396,22 +408,28 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
             if (chat.isTribe()) {
 
-                // Filter messages to do not show thread replies on chat
-                for (message in messages) {
+                // Shows only the thread messages
+                if (!latestThreadMessagesFlow.value.isNullOrEmpty()) {
+                    filteredMessages.addAll(latestThreadMessagesFlow.value!!)
+                }
+                else {
+                    // Filter messages to do not show thread replies on chat
+                    for (message in messages) {
 
-                    if (message.thread?.isNotEmpty() == true) {
-                        message.uuid?.value?.let { uuid ->
-                            threadMessageMap[uuid] = message.thread?.count() ?: 0
+                        if (message.thread?.isNotEmpty() == true) {
+                            message.uuid?.value?.let { uuid ->
+                                threadMessageMap[uuid] = message.thread?.count() ?: 0
+                            }
                         }
-                    }
 
-                    val shouldAddMessage = message.threadUUID?.let { threadUUID ->
-                        val count = threadMessageMap[threadUUID.value] ?: 0
-                        count <= 1
-                    } ?: true
+                        val shouldAddMessage = message.threadUUID?.let { threadUUID ->
+                            val count = threadMessageMap[threadUUID.value] ?: 0
+                            count <= 1
+                        } ?: true
 
-                    if (shouldAddMessage) {
-                        filteredMessages.add(message)
+                        if (shouldAddMessage) {
+                            filteredMessages.add(message)
+                        }
                     }
                 }
             } else {
@@ -868,6 +886,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 reloadPinnedMessage()
             }
         }
+        collectThread()
     }
 
     abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>
@@ -1865,9 +1884,15 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     private suspend fun handleTribeLink(tribeJoinLink: TribeJoinLink) {
         chatRepository.getChatByUUID(ChatUUID(tribeJoinLink.tribeUUID)).firstOrNull()?.let { chat ->
-            chatNavigator.toChat(chat, null)
+            chatNavigator.toChat(chat, null, null)
         } ?: chatNavigator.toJoinTribeDetail(tribeJoinLink).also {
             audioPlayerController.pauseMediaIfPlaying()
+        }
+    }
+
+    fun navigateToChatThread(uuid: MessageUUID) {
+        viewModelScope.launch(mainImmediate) {
+            chatNavigator.toChat(getChat(), null, ThreadUUID(uuid.value))
         }
     }
 
@@ -1878,7 +1903,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
 
             chatRepository.getConversationByContactId(contact.id).firstOrNull().let { chat ->
-                chatNavigator.toChat(chat, contact.id)
+                chatNavigator.toChat(chat, contact.id, null)
             }
 
         } ?: chatNavigator.toAddContactDetail(pubKey, routeHint).also {

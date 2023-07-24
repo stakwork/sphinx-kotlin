@@ -30,6 +30,7 @@ import chat.sphinx.wrapper_chat.isPrivateTribe
 import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
@@ -451,6 +452,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                     layoutConstraintAttachmentFileMainInfoGroup.setOnLongClickListener(selectedMessageLongClickListener)
+                }
+
+                includeLayoutMessageThread.apply {
+                    root.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            message.uuid?.let { nnUUID -> viewModel.navigateToChatThread(nnUUID) }
+                        }
+                    }
                 }
 
                 includePaidMessageReceivedDetailsHolder.apply {

@@ -31,7 +31,6 @@ import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
@@ -131,6 +130,9 @@ class ChatGroupViewModel @Inject constructor(
     override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
         return null
     }
+
+    override val threadSharedFlow: SharedFlow<List<Message>>?
+        get() = null
 
     override fun forceKeyExchange() { }
 

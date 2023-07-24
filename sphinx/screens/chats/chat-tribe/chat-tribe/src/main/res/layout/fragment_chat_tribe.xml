@@ -201,7 +201,9 @@
 
     <include
         android:id="@+id/include_layout_bottom_pinned"
-        layout="@layout/layout_bottom_pinned" />
+        layout="@layout/layout_bottom_pinned"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <include
         android:id="@+id/include_layout_tribe_member_profile"
