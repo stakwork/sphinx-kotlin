@@ -183,4 +183,8 @@
     <dimen name="feed_item_detail_row_height">65dp</dimen>
     <dimen name="feed_item_detail_rows_container_height">260dp</dimen>
     <dimen name="feed_item_detail_rows_container_margin_top">36dp</dimen>
+
+    <!-- Thread -->
+    <dimen name="thread_header_height">316dp</dimen>
+
 </resources>

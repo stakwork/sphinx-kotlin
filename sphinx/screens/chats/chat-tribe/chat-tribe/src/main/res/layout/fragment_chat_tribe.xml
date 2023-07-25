@@ -44,6 +44,13 @@
             android:layout_height="@dimen/default_header_height"
             android:visibility="gone"/>
 
+        <include
+            android:id="@+id/include_layout_thread_header"
+            layout="@layout/layout_thread_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView

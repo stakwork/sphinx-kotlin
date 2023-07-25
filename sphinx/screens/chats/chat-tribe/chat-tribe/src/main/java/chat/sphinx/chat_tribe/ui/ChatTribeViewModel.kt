@@ -36,6 +36,7 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -43,6 +44,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
@@ -150,6 +152,10 @@ class ChatTribeViewModel @Inject constructor(
         ViewStateContainer(PinedMessageDataViewState.Idle)
     }
 
+    val threadViewState: ViewStateContainer<ThreadViewState> by lazy {
+        ViewStateContainer(ThreadViewState.Idle)
+    }
+
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
             return podcast
@@ -197,21 +203,13 @@ class ChatTribeViewModel @Inject constructor(
         replay = 1,
     )
 
-    internal val moreOptionsMenuStateFlow: MutableStateFlow<MoreMenuOptionsViewState> by lazy {
-        MutableStateFlow(MoreMenuOptionsViewState.OwnTribe)
-    }
-
-    override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
-        return null
-    }
-
     override val threadSharedFlow: SharedFlow<List<Message>>? =
         if (args.argThreadUUID.isNullOrEmpty()){
             null
         } else
             flow {
                 messageRepository.getThreadUUIDMessagesByUUID(chatId, ThreadUUID(args.argThreadUUID!!)).collect {
-                emit(it)
+                    emit(it)
                 }
             }.distinctUntilChanged().shareIn(
                 viewModelScope,
@@ -219,6 +217,13 @@ class ChatTribeViewModel @Inject constructor(
                 replay = 1,
             )
 
+    internal val moreOptionsMenuStateFlow: MutableStateFlow<MoreMenuOptionsViewState> by lazy {
+        MutableStateFlow(MoreMenuOptionsViewState.OwnTribe)
+    }
+
+    override suspend fun getChatInfo(): Triple<ChatName?, PhotoUrl?, String>? {
+        return null
+    }
 
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
         getPodcast()?.let { podcast ->
@@ -316,6 +321,7 @@ class ChatTribeViewModel @Inject constructor(
         }
 
         getAllLeaderboards()
+        getThreadHeaderMessageIfApplicable()
     }
 
     override suspend fun processMemberRequest(
@@ -456,6 +462,25 @@ class ChatTribeViewModel @Inject constructor(
                     is Response.Error -> {}
                     is Response.Success -> {
                         leaderboardListStateFlow.value = loadResponse.value
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getThreadHeaderMessageIfApplicable() {
+        viewModelScope.launch(mainImmediate) {
+            args.argThreadUUID?.let { uuid ->
+                if (uuid.isNotEmpty()) {
+                    messageRepository.getMessageByUUID(MessageUUID(uuid)).firstOrNull()?.let { message ->
+                        threadViewState.updateViewState(
+                            ThreadViewState.ThreadHeader(
+                                Pair(message.senderAlias?.value?.toContactAlias(), message.getColorKey()),
+                                message.senderPic,
+                                message.date.chatTimeFormat(),
+                                message.messageContentDecrypted?.value ?: ""
+                            )
+                        )
                     }
                 }
             }

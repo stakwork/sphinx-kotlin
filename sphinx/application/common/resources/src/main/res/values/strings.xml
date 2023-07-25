@@ -269,5 +269,6 @@
     <string name="threads_header" translatable="false">Threads</string>
     <string name="threads_plus" translatable="false">+%s</string>
     <string name="threads_more_replies">more replies</string>
+    <string name="thread_header" translatable="false">Thread</string>
 
 </resources>

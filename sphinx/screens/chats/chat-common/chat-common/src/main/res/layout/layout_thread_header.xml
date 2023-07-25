@@ -4,9 +4,49 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_thread_header"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/tribe_member_send_sats_button_width"
+    android:layout_height="wrap_content"
     android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_header_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_chat_header_nav_back"
+            android:layout_width="@dimen/default_chat_initial_image_xy"
+            android:layout_height="@dimen/default_chat_initial_image_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:textColor="@color/washedOutReceivedText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            android:text="@string/material_icon_name_nav_back"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="none"
+            android:fontFamily="@font/roboto_medium"
+            android:layout_marginStart="@dimen/default_elevation"
+            android:maxLines="1"
+            android:text="@string/thread_header"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/pin_text_view_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_nav_back"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_chat_thread_header"
@@ -15,7 +55,7 @@
         android:layout_marginTop="@dimen/default_half_layout_margin"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/constraint_header_container">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_thread_contact_name"
@@ -84,14 +124,33 @@
             android:id="@+id/text_view_thread_message_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/roboto_regular"
-            android:paddingEnd="4dp"
             android:layout_marginTop="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="12"
+            android:paddingEnd="@dimen/default_small_layout_margin"
+            android:layout_marginBottom="@dimen/default_half_layout_margin"
             android:textColor="@color/textMessages"
             android:textSize="@dimen/option_title_text_size"
+            app:layout_constraintBottom_toTopOf="@+id/text_view_show_more"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/layout_constraint_thread_contact_name"
-            tools:text="Contrary to popular belief, Lorem Ipsum is not simply random text." />
+            tools:text="Are there any updates? At vero eos et accu amus et iusto odio digns ducimus qui blanditiis prae sentium volu ptatum deleniti. Character Counter is a 100% free online character count calculator that's simple to use. Sometimes users prefer simplicity over all of the detailed writing information Word Counter provides, and this is exactly what this tool offers. It displays character count and word count which is often the only information a person needs to know about their writing. Best of all, you rece ..." />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_show_more"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_half_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:letterSpacing="0.1"
+            android:maxLines="1"
+            android:text="@string/episode_description_show_more"
+            android:textColor="@color/receivedIcon"
+            android:textSize="@dimen/default_text_size_caption1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="SHOW MORE" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

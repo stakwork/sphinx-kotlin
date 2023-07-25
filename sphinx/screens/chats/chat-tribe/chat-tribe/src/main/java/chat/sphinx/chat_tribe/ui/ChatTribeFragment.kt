@@ -137,6 +137,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutBottomPinned
     private val webView: WebView
         get() = tribeAppBinding.includeLayoutTribeAppDetails.webView
+    private val threadHeader: LayoutThreadHeaderBinding
+        get() = binding.includeLayoutThreadHeader
 
     override val menuEnablePayments: Boolean
         get() = false
@@ -702,6 +704,54 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.threadViewState.collect { viewState ->
+                @Exhaustive
+                when(viewState) {
+                    is ThreadViewState.Idle -> {}
+                    is ThreadViewState.ThreadHeader -> {
+                        // Hide header elements
+                        binding.layoutConstraintChatHeader.gone
+                        threadHeader.apply {
+                            root.visible
+
+                            textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
+                            textViewThreadDate.text = viewState.date
+                            textViewThreadMessageContent.text = viewState.message
+
+                            layoutContactInitialHolder.apply {
+                                textViewInitials.apply {
+                                    text = viewState.aliasAndColorKey.first?.value?.getInitials()
+                                    setBackgroundRandomColor(
+                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
+                                        Color.parseColor(
+                                            viewState.aliasAndColorKey.second?.let {
+                                                userColorsHelper.getHexCodeForKey(
+                                                    it,
+                                                    root.context.getRandomHexCode(),
+                                                )
+                                            }
+                                        ),
+                                    )
+                                }
+                                viewState.photoUrl?.let { photoUrl ->
+                                    imageLoader.load(
+                                        imageViewChatPicture,
+                                        photoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
+                                }
+                            }
+                        }
+
                     }
                 }
             }
