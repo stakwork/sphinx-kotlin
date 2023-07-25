@@ -50,7 +50,6 @@ internal class ThreadsFragment: SideEffectDetailFragment<
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel
     }
 
     override fun closeDetailsScreen() {

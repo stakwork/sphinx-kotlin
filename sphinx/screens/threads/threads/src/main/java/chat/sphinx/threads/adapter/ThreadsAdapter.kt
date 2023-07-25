@@ -163,26 +163,24 @@ internal class ThreadsAdapter(
         private val holderJobs: ArrayList<Job> = ArrayList(2)
         private val disposables: ArrayList<Disposable> = ArrayList(2)
 
-        private var section: ThreadItem? = null
+        private var item: ThreadItem? = null
 
         init {
-//            binding.root.setOnClickListener {
-//                lifecycleOwner.lifecycleScope.launch {
-//                    section?.let { section ->
-//                        viewModel.navigator.toDeleteMediaDetail(section.feedId)
-//                    }
-//                }
-//            }
-        }
+            binding.root.setOnClickListener {
+                    item?.let { threadItem ->
+                        viewModel.navigateToThreadDetail(threadItem.uuid)
+                    }
+                }
+            }
 
         fun bind(position: Int) {
             binding.apply {
 
                 val threadItem: ThreadItem = threadsItems.getOrNull(position) ?: let {
-                    section = null
+                    item = null
                     return
                 }
-                section = threadItem
+                item = threadItem
 
                 // General Info
                 textViewContactHeaderName.text = threadItem.aliasAndColorKey.first?.value

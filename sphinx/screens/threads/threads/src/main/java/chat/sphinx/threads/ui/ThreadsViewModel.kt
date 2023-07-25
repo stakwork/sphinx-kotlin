@@ -15,6 +15,7 @@ import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.message.toMessageUUID
 import chat.sphinx.wrapper_common.timeAgo
 import chat.sphinx.wrapper_contact.toContactAlias
+import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message.getColorKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -24,6 +25,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.absoluteValue
 
 @HiltViewModel
 internal class ThreadsViewModel @Inject constructor(
@@ -90,6 +92,12 @@ internal class ThreadsViewModel @Inject constructor(
                     updateViewState(ThreadsViewState.ThreadList(threadItems))
                 }
             }
+        }
+    }
+
+    fun navigateToThreadDetail(uuid: String) {
+        viewModelScope.launch(mainImmediate) {
+            navigator.toChatTribeThread(ChatId(args.argChatId), ThreadUUID(uuid))
         }
     }
 

@@ -1,6 +1,9 @@
 package chat.sphinx.threads.navigation
 
 import androidx.navigation.NavController
+import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_message.ThreadUUID
 import io.matthewnelson.android_feature_navigation.requests.PopBackStack
 import io.matthewnelson.concept_navigation.BaseNavigationDriver
 import io.matthewnelson.concept_navigation.Navigator
@@ -11,6 +14,11 @@ abstract class ThreadsNavigator(
     @JvmSynthetic
     internal suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(PopBackStack())
+    }
+
+    @JvmSynthetic
+    internal suspend fun toChatTribeThread(chatId: ChatId, threadUUID: ThreadUUID) {
+        navigationDriver.submitNavigationRequest(ToChatTribeScreen(chatId, threadUUID))
     }
 
     abstract suspend fun closeDetailScreen()
