@@ -393,6 +393,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 includeMessageTypeBotResponse.webViewMessageTypeBotResponse.setOnLongClickListener(onSphinxInteractionListener)
 
+                includeLayoutMessageThread.apply {
+                    root.setOnLongClickListener(selectedMessageLongClickListener)
+                }
+
                 includeMessageLinkPreviewContact.apply contact@ {
                     root.setOnLongClickListener(selectedMessageLongClickListener)
                     root.setOnClickListener(linkPreviewClickListener)

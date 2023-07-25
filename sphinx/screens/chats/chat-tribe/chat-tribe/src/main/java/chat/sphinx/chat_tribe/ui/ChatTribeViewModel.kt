@@ -51,7 +51,9 @@ import chat.sphinx.wrapper_podcast.Podcast
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -658,5 +660,15 @@ class ChatTribeViewModel @Inject constructor(
         }.join()
 
         return pinnedMessageData
+    }
+
+    fun toggleThreadDescriptionExpanded() {
+        (threadViewState.viewStateFlow.value as? ThreadViewState.ThreadHeader)?.let {
+            it.copy(
+                isExpanded = !it.isExpanded,
+            ).let { updatedThreadHeader ->
+                threadViewState.updateViewState(updatedThreadHeader)
+            }
+        }
     }
 }

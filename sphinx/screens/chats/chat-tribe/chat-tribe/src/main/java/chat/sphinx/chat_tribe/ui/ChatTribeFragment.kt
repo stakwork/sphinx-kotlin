@@ -30,7 +30,6 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
-import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -59,9 +58,9 @@ import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_chat.protocolLessUrl
-import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
@@ -208,6 +207,10 @@ internal class ChatTribeFragment: ChatFragment<
 
         binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
             tribeAppViewModel.toggleWebAppView()
+        }
+
+        binding.includeLayoutThreadHeader.constraintShowMoreContainer.setOnClickListener {
+            viewModel.toggleThreadDescriptionExpanded()
         }
 
         binding.includeChatTribeHeader.imageViewThreadsView.visible
@@ -715,7 +718,6 @@ internal class ChatTribeFragment: ChatFragment<
                 when(viewState) {
                     is ThreadViewState.Idle -> {}
                     is ThreadViewState.ThreadHeader -> {
-                        // Hide header elements
                         binding.layoutConstraintChatHeader.gone
                         threadHeader.apply {
                             root.visible
@@ -723,6 +725,21 @@ internal class ChatTribeFragment: ChatFragment<
                             textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
                             textViewThreadDate.text = viewState.date
                             textViewThreadMessageContent.text = viewState.message
+
+                            if (viewState.message.length < 165) {
+                                textViewShowMore.gone
+                            } else {
+
+                                if (viewState.isExpanded) {
+                                    textViewThreadMessageContent.maxLines = Int.MAX_VALUE
+                                    textViewShowMore.text =
+                                        getString(R.string.episode_description_show_less)
+                                } else {
+                                    textViewThreadMessageContent.maxLines = 4
+                                    textViewShowMore.text =
+                                        getString(R.string.episode_description_show_more)
+                                }
+                            }
 
                             layoutContactInitialHolder.apply {
                                 textViewInitials.apply {
@@ -739,6 +756,7 @@ internal class ChatTribeFragment: ChatFragment<
                                         ),
                                     )
                                 }
+
                                 viewState.photoUrl?.let { photoUrl ->
                                     imageLoader.load(
                                         imageViewChatPicture,
@@ -751,7 +769,6 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
                             }
                         }
-
                     }
                 }
             }

@@ -234,6 +234,7 @@ internal fun  LayoutMessageHolderBinding.setView(
                 dispatchers,
                 lifecycleScope,
                 userColorsHelper,
+                onSphinxInteractionListener
             ){ imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(
@@ -969,6 +970,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
     dispatchers: CoroutineDispatchers,
     lifecycleScope: CoroutineScope,
     userColorsHelper: UserColorsHelper,
+    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?,
     loadImage: (ImageView, String) -> Unit,
 ) {
     includeMessageHolderBubble.includeLayoutMessageThread.apply {
@@ -1044,7 +1046,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                 textViewLastReplyDate.text = thread.lastReplyDate
                 textViewLastReplyUserName.text = thread.lastReplyUser.alias?.value ?: "unknown"
 
-
+                if (onSphinxInteractionListener != null) {
+                    SphinxLinkify.addLinks(textViewOriginalThreadMessageText, SphinxLinkify.ALL, includeMessageHolderBubble.root.context, onSphinxInteractionListener)
+                }
             }
         }
     }
