@@ -2059,8 +2059,11 @@ abstract class SphinxRepository(
             } // else do nothing
         }
 
+        if ((thread?.size ?: 0) > 1) {
+            message._thread = thread
+        }
+
         message._reactions = reactions
-        message._thread = thread
         message._purchaseItems = purchaseItems
         message._isPinned = chat?.pin_message?.value == messageDbo.uuid?.value
 
@@ -2191,7 +2194,7 @@ abstract class SphinxRepository(
                                     queries,
                                     dbo,
                                     dbo.uuid?.let { reactionsMap[it] },
-                                    if (threadMap.size > 1) dbo.uuid?.let { threadMap[it] } else null,
+                                    dbo.uuid?.let { threadMap[it] },
                                     dbo.muid?.let { purchaseItemsMap[it] },
                                     dbo.reply_uuid,
                                     chat
