@@ -1896,6 +1896,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         }
     }
 
+    fun navigateToTribeFromThread() {
+        viewModelScope.launch(mainImmediate) {
+            chatNavigator.toChat(getChat(), null, null)
+        }
+    }
+
     private suspend fun handleContactLink(
         pubKey: LightningNodePubKey,
         routeHint: LightningRouteHint?

@@ -190,6 +190,10 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
+        binding.includeLayoutThreadHeader.textViewChatHeaderNavBack.setOnClickListener {
+            viewModel.navigateToTribeFromThread()
+        }
+
         podcastPlayerBinding.apply {
             imageViewForward30Button.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickFastForward?.invoke()
@@ -452,7 +456,10 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                     } ?: (viewModel.pinedMessageBottomViewState.value as? PinMessageBottomViewState.Open)?.let {
                         viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
-                    } ?: run {
+                    } ?: (viewModel.threadViewState.value as? ThreadViewState.ThreadHeader)?.let {
+                        viewModel.navigateToTribeFromThread()
+                    } ?:
+                    run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
