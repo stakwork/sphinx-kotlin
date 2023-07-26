@@ -279,6 +279,9 @@ class ChatTribeViewModel @Inject constructor(
     }
 
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+        args.argThreadUUID?.let {
+            builder.setThreadUUID(ThreadUUID(it))
+        }
         builder.setChatId(chatId)
         return super.sendMessage(builder)
     }
