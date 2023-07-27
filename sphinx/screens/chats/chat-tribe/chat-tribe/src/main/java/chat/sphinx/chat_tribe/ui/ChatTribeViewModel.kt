@@ -45,6 +45,7 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.*
@@ -52,9 +53,7 @@ import chat.sphinx.wrapper_podcast.Podcast
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
-import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
-import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
@@ -481,10 +480,25 @@ class ChatTribeViewModel @Inject constructor(
             args.argThreadUUID?.let { uuid ->
                 if (uuid.isNotEmpty()) {
                     messageRepository.getMessageByUUID(MessageUUID(uuid)).firstOrNull()?.let { message ->
+
+                        val owner = getOwner()
+                        val isOwner: Boolean = message.sender == owner.id
+
+                        val aliasAndColor = if (isOwner) {
+                            Pair(owner.alias, owner.getColorKey())
+                        } else {
+                            Pair(
+                                message.senderAlias?.value?.toContactAlias(),
+                                message.getColorKey()
+                            )
+                        }
+
+                        val photoUrl = if (isOwner) owner.photoUrl else message.senderPic
+
                         threadViewState.updateViewState(
                             ThreadViewState.ThreadHeader(
-                                Pair(message.senderAlias?.value?.toContactAlias(), message.getColorKey()),
-                                message.senderPic,
+                                aliasAndColor,
+                                photoUrl,
                                 message.date.chatTimeFormat(),
                                 message.messageContentDecrypted?.value ?: ""
                             )

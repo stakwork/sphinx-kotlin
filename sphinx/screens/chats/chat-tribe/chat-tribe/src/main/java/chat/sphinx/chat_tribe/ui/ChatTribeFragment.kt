@@ -763,7 +763,6 @@ internal class ChatTribeFragment: ChatFragment<
                                         ),
                                     )
                                 }
-
                                 viewState.photoUrl?.let { photoUrl ->
                                     imageLoader.load(
                                         imageViewChatPicture,
