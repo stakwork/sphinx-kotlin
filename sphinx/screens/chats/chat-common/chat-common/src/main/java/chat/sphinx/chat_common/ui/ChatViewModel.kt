@@ -187,7 +187,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
-    private val unseenMessages: MutableStateFlow<Long?> = MutableStateFlow(null)
+    private val scrollDownButtonCount: MutableStateFlow<Long?> = MutableStateFlow(null)
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
 
@@ -267,7 +267,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         viewModelScope.launch(mainImmediate) {
             if (!isThreadChat()) {
                 repositoryDashboard.getUnseenMessagesByChatId(getChat().id).collect { unseenMessagesCount ->
-                    unseenMessages.value = unseenMessagesCount
+                    scrollDownButtonCount.value = unseenMessagesCount
                 }
             }
         }
@@ -275,7 +275,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     fun updateScrollDownButton(showButton: Boolean) {
         val newState = if (showButton) {
-            val count = unseenMessages.value?.takeIf { it > 0 }?.toString()
+            val count = scrollDownButtonCount.value?.takeIf { it > 0 }?.toString()
             ScrollDownViewState.On(count)
         } else {
             ScrollDownViewState.Off
@@ -895,15 +895,19 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     var messagesLoadJob: Job? = null
     fun screenInit() {
+        var isScrollDownButtonSetup = false
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
             if (isThreadChat()) {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 0, getThreadUUID()).distinctUntilChanged().collect { messages ->
-                    val list = getMessageHolderViewStateList(messages).toList()
+                    val list = getMessageHolderViewStateList(messages.reversed()).toList()
                     messageHolderViewStateFlow.value = list
 
-                    unseenMessages.value = list.size.toLong()
+                    scrollDownButtonCount.value = list.size.toLong()
 
-                    setupUnseenMessagesButton()
+                    if (!isScrollDownButtonSetup) {
+                        setupScrollDownButtonCount()
+                        isScrollDownButtonSetup = true
+                    }
                 }
             } else {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
@@ -916,7 +920,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
 
                     reloadPinnedMessage()
-                    setupUnseenMessagesButton()
+
+                    if (!isScrollDownButtonSetup) {
+                        setupScrollDownButtonCount()
+                        isScrollDownButtonSetup = true
+                    }
                 }
             }
         }
@@ -924,8 +932,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         collectUnseenMessagesNumber()
     }
 
-    private fun setupUnseenMessagesButton() {
-        val unseenMessagesCount = unseenMessages.value ?: 0
+        private fun setupScrollDownButtonCount() {
+        val unseenMessagesCount = scrollDownButtonCount.value ?: 0
         if (unseenMessagesCount > 0.toLong()) {
             scrollDownViewStateContainer.updateViewState(
                 ScrollDownViewState.On(unseenMessagesCount.toString())
