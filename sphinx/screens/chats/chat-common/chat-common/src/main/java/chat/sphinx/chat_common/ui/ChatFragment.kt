@@ -829,7 +829,8 @@ abstract class ChatFragment<
             onStopSupervisor,
             viewModel,
             imageLoader,
-            userColorsHelper
+            userColorsHelper,
+            isThreadChat = viewModel.isThreadChat()
         )
         val footerAdapter = MessageListFooterAdapter()
         recyclerView.apply {

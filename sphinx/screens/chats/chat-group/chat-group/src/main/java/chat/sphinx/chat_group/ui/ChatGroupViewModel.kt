@@ -37,6 +37,7 @@ import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.PodcastClip
+import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message.getColorKey
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -165,6 +166,14 @@ class ChatGroupViewModel @Inject constructor(
     }
 
     override fun reloadPinnedMessage() {}
+
+    override fun getThreadUUID(): ThreadUUID? {
+        return null
+    }
+
+    override fun isThreadChat(): Boolean {
+        return false
+    }
 
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)

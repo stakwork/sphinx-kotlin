@@ -43,6 +43,7 @@ import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_contact.isEncrypted
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.PodcastClip
+import chat.sphinx.wrapper_message.ThreadUUID
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
@@ -337,6 +338,14 @@ internal class ChatContactViewModel @Inject constructor(
     }
 
     override fun reloadPinnedMessage() {}
+
+    override fun getThreadUUID(): ThreadUUID? {
+        return null
+    }
+
+    override fun isThreadChat(): Boolean {
+        return false
+    }
 
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         getContact()?.let { nnContact ->

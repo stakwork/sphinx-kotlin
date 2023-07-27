@@ -23,7 +23,12 @@ import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
-    fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>>
+    fun getAllMessagesToShowByChatId(
+        chatId: ChatId,
+        limit: Long,
+        chatThreadUUID: ThreadUUID? = null
+    ): Flow<List<Message>>
+
     fun searchMessagesBy(chatId: ChatId, term: String): Flow<List<Message>>
 
     fun getMessageById(messageId: MessageId): Flow<Message?>

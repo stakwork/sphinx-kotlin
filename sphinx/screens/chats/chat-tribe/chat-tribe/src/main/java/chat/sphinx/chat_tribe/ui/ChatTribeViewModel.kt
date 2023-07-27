@@ -607,6 +607,14 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    override fun getThreadUUID(): ThreadUUID? {
+        return args.argThreadUUID?.toThreadUUID()
+    }
+
+    override fun isThreadChat(): Boolean {
+        return getThreadUUID() != null
+    }
+
     override fun reloadPinnedMessage() {
         viewModelScope.launch(mainImmediate) {
             getChat()?.let { nnChat ->

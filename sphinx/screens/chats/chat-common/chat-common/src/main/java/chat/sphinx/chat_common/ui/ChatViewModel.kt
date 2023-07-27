@@ -173,7 +173,13 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     val scrollDownViewStateContainer: ViewStateContainer<ScrollDownViewState> by lazy {
-        ViewStateContainer(ScrollDownViewState.Off)
+        ViewStateContainer(
+            if (isThreadChat()) {
+                ScrollDownViewState.On("0")
+            } else {
+                ScrollDownViewState.Off
+            }
+        )
     }
 
     val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
@@ -182,7 +188,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
     private val unseenMessages: MutableStateFlow<Long?> = MutableStateFlow(null)
-
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
 
@@ -260,8 +265,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     private fun collectUnseenMessagesNumber() {
         viewModelScope.launch(mainImmediate) {
-            repositoryDashboard.getUnseenMessagesByChatId(getChat().id).collect { unseenMessagesCount ->
-            unseenMessages.value = unseenMessagesCount
+            if (!isThreadChat()) {
+                repositoryDashboard.getUnseenMessagesByChatId(getChat().id).collect { unseenMessagesCount ->
+                    unseenMessages.value = unseenMessagesCount
+                }
             }
         }
     }
@@ -428,30 +435,23 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
             val filteredMessages: MutableList<Message> = mutableListOf()
 
-            if (chat.isTribe()) {
+            if (chat.isTribe() && !isThreadChat()) {
+                // Filter messages to do not show thread replies on chat
+                for (message in messages) {
 
-                // Shows only the thread messages
-                if (!latestThreadMessagesFlow.value.isNullOrEmpty()) {
-                    filteredMessages.addAll(latestThreadMessagesFlow.value!!)
-                }
-                else {
-                    // Filter messages to do not show thread replies on chat
-                    for (message in messages) {
-
-                        if (message.thread?.isNotEmpty() == true) {
-                            message.uuid?.value?.let { uuid ->
-                                threadMessageMap[uuid] = message.thread?.count() ?: 0
-                            }
+                    if (message.thread?.isNotEmpty() == true) {
+                        message.uuid?.value?.let { uuid ->
+                            threadMessageMap[uuid] = message.thread?.count() ?: 0
                         }
+                    }
 
-                        val shouldAddMessage = message.threadUUID?.let { threadUUID ->
-                            val count = threadMessageMap[threadUUID.value] ?: 0
-                            count <= 1
-                        } ?: true
+                    val shouldAddMessage = message.threadUUID?.let { threadUUID ->
+                        val count = threadMessageMap[threadUUID.value] ?: 0
+                        count <= 1
+                    } ?: true
 
-                        if (shouldAddMessage) {
-                            filteredMessages.add(message)
-                        }
+                    if (shouldAddMessage) {
+                        filteredMessages.add(message)
                     }
                 }
             } else {
@@ -896,20 +896,46 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     var messagesLoadJob: Job? = null
     fun screenInit() {
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
-                messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
-            }
+            if (isThreadChat()) {
+                messageRepository.getAllMessagesToShowByChatId(getChat().id, 0, getThreadUUID()).distinctUntilChanged().collect { messages ->
+                    val list = getMessageHolderViewStateList(messages).toList()
+                    messageHolderViewStateFlow.value = list
 
-            delay(1000L)
+                    unseenMessages.value = list.size.toLong()
 
-            messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
-                messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+                    setupUnseenMessagesButton()
+                }
+            } else {
+                messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
+                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+                }
 
-                reloadPinnedMessage()
+                delay(1000L)
+
+                messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+
+                    reloadPinnedMessage()
+                    setupUnseenMessagesButton()
+                }
             }
         }
         collectThread()
         collectUnseenMessagesNumber()
+    }
+
+    private fun setupUnseenMessagesButton() {
+        val unseenMessagesCount = unseenMessages.value ?: 0
+        if (unseenMessagesCount > 0.toLong()) {
+            scrollDownViewStateContainer.updateViewState(
+                ScrollDownViewState.On(unseenMessagesCount.toString())
+            )
+        } else {
+            scrollDownViewStateContainer.updateViewState(
+                ScrollDownViewState.Off
+            )
+        }
+
     }
 
     abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>
@@ -917,6 +943,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     abstract fun readMessages()
 
     abstract fun reloadPinnedMessage()
+
+    abstract fun getThreadUUID(): ThreadUUID?
+
+    abstract fun isThreadChat(): Boolean
 
     suspend fun createPaidMessageFile(text: String?): File? {
         if (text.isNullOrEmpty()) {

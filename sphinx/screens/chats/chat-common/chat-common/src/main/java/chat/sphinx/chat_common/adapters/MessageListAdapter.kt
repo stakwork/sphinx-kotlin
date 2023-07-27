@@ -52,6 +52,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
     private val userColorsHelper: UserColorsHelper,
+    private val isThreadChat: Boolean
 ) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
     DefaultLifecycleObserver,
     View.OnLayoutChangeListener
@@ -151,6 +152,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     private fun scrollToUnseenSeparatorOrBottom(messageHolders: List<MessageHolderViewState>) {
+        if (isThreadChat) {
+            return
+        }
         for ((index, message) in messageHolders.withIndex()) {
             (message as? MessageHolderViewState.Separator)?.let {
                 if (it.messageHolderType.isUnseenSeparatorHolder()) {
