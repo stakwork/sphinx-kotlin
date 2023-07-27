@@ -307,14 +307,19 @@ class ChatTribeViewModel @Inject constructor(
 
                 chatRepository.updateTribeInfo(chat)?.let { tribeData ->
 
-                    _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
-                        tribeData.host,
-                        tribeData.feedUrl,
-                        tribeData.chatUUID,
-                        tribeData.feedType,
-                        tribeData.appUrl,
-                        tribeData.badges
-                    )
+                    if (!args.argThreadUUID.isNullOrEmpty()) {
+                        _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
+                    }
+                    else {
+                        _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
+                            tribeData.host,
+                            tribeData.feedUrl,
+                            tribeData.chatUUID,
+                            tribeData.feedType,
+                            tribeData.appUrl,
+                            tribeData.badges
+                        )
+                    }
 
                     updatePinnedMessageState(tribeData.pin, chat.id)
 
