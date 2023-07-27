@@ -37,7 +37,7 @@ inline val Message.shouldAdaptBubbleWidth: Boolean
             podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
-            thread?.isEmpty() == true &&
+            (thread == null || thread!!.isEmpty()) &&
             !status.isDeleted() &&
             !flagged.isTrue()) ||
             type.isDirectPayment()
