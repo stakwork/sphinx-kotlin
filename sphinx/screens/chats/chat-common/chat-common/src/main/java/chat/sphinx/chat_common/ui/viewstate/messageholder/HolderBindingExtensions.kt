@@ -94,7 +94,7 @@ internal fun  LayoutMessageHolderBinding.setView(
             }
 
             viewState.initialHolder.setInitialHolder(
-                includeMessageHolderChatImageInitialHolder.textViewInitials,
+                includeMessageHolderChatImageInitialHolder.textViewInitialsName,
                 includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
                 includeMessageStatusHeader,
                 imageLoader,
@@ -1986,12 +1986,12 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
 
             imageHolderBinding.apply {
 
-                textViewInitials.visible
-                textViewInitials.text = (boostSenderHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
+                textViewInitialsName.visible
+                textViewInitialsName.text = (boostSenderHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
                 imageViewChatPicture.gone
 
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    textViewInitials.setBackgroundRandomColor(
+                    textViewInitialsName.setBackgroundRandomColor(
                         R.drawable.chat_initials_circle,
                         Color.parseColor(
                             userColorsHelper.getHexCodeForKey(
@@ -2004,7 +2004,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
                 }
 
                 boostSenderHolder.photoUrl?.let { photoUrl ->
-                    textViewInitials.gone
+                    textViewInitialsName.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)
                 }
@@ -2056,12 +2056,12 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
                     R.string.unknown
                 )).getInitials()
 
-                textViewInitials.visible
-                textViewInitials.text = text
+                textViewInitialsName.visible
+                textViewInitialsName.text = text
                 imageViewChatPicture.gone
 
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    textViewInitials.setBackgroundRandomColor(
+                    textViewInitialsName.setBackgroundRandomColor(
                         R.drawable.chat_initials_circle,
                         Color.parseColor(
                             userColorsHelper.getHexCodeForKey(
@@ -2075,7 +2075,7 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
                 }
 
                 replyUserHolder!!.photoUrl?.let { photoUrl ->
-                    textViewInitials.gone
+                    textViewInitialsName.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)
                 }

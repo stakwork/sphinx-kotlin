@@ -748,8 +748,11 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
                             }
 
-                            layoutContactInitialHolder.apply {
-                                textViewInitials.apply {
+                            binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
+                                textViewInitialsName.visible
+                                imageViewChatPicture.gone
+
+                                textViewInitialsName.apply {
                                     text = viewState.aliasAndColorKey.first?.value?.getInitials()
                                     setBackgroundRandomColor(
                                         chat.sphinx.chat_common.R.drawable.chat_initials_circle,
@@ -763,9 +766,13 @@ internal class ChatTribeFragment: ChatFragment<
                                         ),
                                     )
                                 }
+
                                 viewState.photoUrl?.let { photoUrl ->
+                                    textViewInitialsName.gone
+                                    imageViewChatPicture.visible
+
                                     imageLoader.load(
-                                        imageViewChatPicture,
+                                        layoutContactInitialHolder.imageViewChatPicture,
                                         photoUrl.value,
                                         ImageLoaderOptions.Builder()
                                             .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)

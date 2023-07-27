@@ -191,14 +191,14 @@ internal class ThreadsAdapter(
 
 //                 User Profile Picture
                 layoutLayoutChatImageSmallInitialHolder.apply {
-                    textViewInitials.visible
-                    textViewInitials.text =
+                    textViewInitialsName.visible
+                    textViewInitialsName.text =
                         threadItem.aliasAndColorKey.first?.value ?: root.context.getString(R.string.unknown)
                             .getInitials()
                     imageViewChatPicture.gone
 
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        textViewInitials.setBackgroundRandomColor(
+                        textViewInitialsName.setBackgroundRandomColor(
                             R.drawable.chat_initials_circle,
                             Color.parseColor(
                                 threadItem.aliasAndColorKey.second?.let {
@@ -213,7 +213,7 @@ internal class ThreadsAdapter(
                         holderJobs.add(job)
 
                         threadItem.photoUrl?.let { photoUrl ->
-                            textViewInitials.gone
+                            textViewInitialsName.gone
                             imageViewChatPicture.visible
 
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -249,14 +249,14 @@ internal class ThreadsAdapter(
                         includeReplyImageHolder.first.visible
 
                         includeReplyImageHolder.second.apply {
-                            textViewInitials.visible
-                            textViewInitials.text =
+                            textViewInitialsName.visible
+                            textViewInitialsName.text =
                                 user.alias?.value ?: root.context.getString(R.string.unknown)
                                     .getInitials()
                             imageViewChatPicture.gone
 
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                textViewInitials.setBackgroundRandomColor(
+                                textViewInitialsName.setBackgroundRandomColor(
                                     R.drawable.chat_initials_circle,
                                     Color.parseColor(
                                         userColorsHelper.getHexCodeForKey(
@@ -269,7 +269,7 @@ internal class ThreadsAdapter(
                                 holderJobs.add(job)
 
                                 user.photoUrl?.let { photoUrl ->
-                                    textViewInitials.gone
+                                    textViewInitialsName.gone
                                     imageViewChatPicture.visible
 
                                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {

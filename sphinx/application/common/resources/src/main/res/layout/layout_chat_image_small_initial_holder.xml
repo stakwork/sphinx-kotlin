@@ -6,7 +6,7 @@
     android:layout_height="@dimen/default_small_chat_initial_image_xy">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_initials"
+        android:id="@+id/text_view_initials_name"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_centerInParent="true"
