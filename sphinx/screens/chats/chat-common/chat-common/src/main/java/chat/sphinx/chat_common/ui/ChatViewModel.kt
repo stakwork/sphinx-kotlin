@@ -52,6 +52,7 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -120,6 +121,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     protected val contactRepository: ContactRepository,
     protected val messageRepository: MessageRepository,
     protected val actionsRepository: ActionsRepository,
+    protected val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     protected val networkQueryLightning: NetworkQueryLightning,
     protected val networkQueryPeople: NetworkQueryPeople,
     val mediaCacheHandler: MediaCacheHandler,
@@ -173,6 +175,14 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     val scrollDownViewStateContainer: ViewStateContainer<ScrollDownViewState> by lazy {
         ViewStateContainer(ScrollDownViewState.Off)
     }
+
+    val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
+        ChatHeaderViewStateContainer()
+    }
+
+    private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
+    private val unseenMessages: MutableStateFlow<Long?> = MutableStateFlow(null)
+
 
     protected abstract val chatSharedFlow: SharedFlow<Chat?>
 
@@ -240,8 +250,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         )
     }
 
-    private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
-
     private fun collectThread() {
         viewModelScope.launch(mainImmediate) {
             threadSharedFlow?.collect { messages ->
@@ -250,8 +258,22 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         }
     }
 
-    val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
-        ChatHeaderViewStateContainer()
+    private fun collectUnseenMessagesNumber() {
+        viewModelScope.launch(mainImmediate) {
+            repositoryDashboard.getUnseenMessagesByChatId(getChat().id).collect { unseenMessagesCount ->
+            unseenMessages.value = unseenMessagesCount
+            }
+        }
+    }
+
+    fun updateScrollDownButton(showButton: Boolean) {
+        val newState = if (showButton) {
+            val count = unseenMessages.value?.takeIf { it > 0 }?.toString()
+            ScrollDownViewState.On(count)
+        } else {
+            ScrollDownViewState.Off
+        }
+        scrollDownViewStateContainer.updateViewState(newState)
     }
 
     suspend fun getChat(): Chat {
@@ -887,6 +909,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             }
         }
         collectThread()
+        collectUnseenMessagesNumber()
     }
 
     abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>

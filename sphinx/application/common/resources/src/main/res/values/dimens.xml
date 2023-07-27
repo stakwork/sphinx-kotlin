@@ -127,6 +127,8 @@
 
     <dimen name="manage_storage_button_cancel_width">100dp</dimen>
 
+    <dimen name="chat_scroll_down_button_number_height">15dp</dimen>
+
     <dimen name="default_feed_watch_image_width">260dp</dimen>
     <dimen name="default_feed_watch_image_height">160dp</dimen>
     <dimen name="default_feed_watch_channel_image_xy">30dp</dimen>

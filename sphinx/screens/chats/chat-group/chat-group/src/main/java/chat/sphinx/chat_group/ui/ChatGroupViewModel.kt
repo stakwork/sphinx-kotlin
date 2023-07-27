@@ -16,6 +16,7 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -61,6 +62,7 @@ class ChatGroupViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
+    repositoryDashboard: RepositoryDashboardAndroid<Any>,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
@@ -81,6 +83,7 @@ class ChatGroupViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     actionsRepository,
+    repositoryDashboard,
     networkQueryLightning,
     networkQueryPeople,
     mediaCacheHandler,

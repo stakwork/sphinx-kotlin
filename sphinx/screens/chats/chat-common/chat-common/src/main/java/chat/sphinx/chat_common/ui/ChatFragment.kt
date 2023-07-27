@@ -849,10 +849,10 @@ abstract class ChatFragment<
                     }
 
                     if (recyclerView.canScrollVertically(1)) {
-                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.On)
+                        viewModel.updateScrollDownButton(true)
                     }
                     else {
-                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.Off)
+                        viewModel.updateScrollDownButton(false)
                     }
                 }
             })
@@ -1728,6 +1728,8 @@ abstract class ChatFragment<
                 when (viewState) {
                     is ScrollDownViewState.On -> {
                         scrollDownButtonBinding.root.visible
+                        scrollDownButtonBinding.textViewChatMessagesCount.goneIfFalse(!viewState.unseenMessagesCount.isNullOrEmpty())
+                        scrollDownButtonBinding.textViewChatMessagesCount.text = viewState.unseenMessagesCount
                     }
                     is ScrollDownViewState.Off -> {
                         scrollDownButtonBinding.root.gone
