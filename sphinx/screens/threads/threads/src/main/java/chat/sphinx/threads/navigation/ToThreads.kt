@@ -15,10 +15,16 @@ class ToThreads(
     override fun navigate(controller: NavController) {
         val args = ThreadsFragmentArgs.Builder(chatId.value)
 
+        val animation = NavOptions.Builder()
+            .setEnterAnim(R.anim.slide_in_left)
+            .setExitAnim(R.anim.slide_out_left)
+            .setPopEnterAnim(R.anim.slide_in_right)
+            .setPopExitAnim(R.anim.slide_out_right)
+
         controller.navigate(
             R.id.threads_nav_graph,
             args.build().toBundle(),
-            options
+            animation.build()
         )
     }
 
