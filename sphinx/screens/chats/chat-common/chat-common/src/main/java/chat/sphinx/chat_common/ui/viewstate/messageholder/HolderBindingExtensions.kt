@@ -234,7 +234,6 @@ internal fun  LayoutMessageHolderBinding.setView(
                 dispatchers,
                 lifecycleScope,
                 userColorsHelper,
-                onSphinxInteractionListener
             ){ imageView, url ->
                 lifecycleScope.launch(dispatchers.mainImmediate) {
                     imageLoader.load(
@@ -970,7 +969,6 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
     dispatchers: CoroutineDispatchers,
     lifecycleScope: CoroutineScope,
     userColorsHelper: UserColorsHelper,
-    onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?,
     loadImage: (ImageView, String) -> Unit,
 ) {
     includeMessageHolderBubble.includeLayoutMessageThread.apply {
@@ -979,13 +977,12 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
         } else {
             root.visible
 
-            val users = thread.users.distinct()
-
-            textViewOriginalThreadMessageText.text = thread.originalMessage
+            val users = thread.users
 
             setReplyRow(
                 users.elementAtOrNull(0),
                 layoutConstraintReplyOne,
+                layoutConstraintReplyOneBackground,
                 layoutLayoutChatImageSmallInitialHolderOne,
                 holderJobs,
                 dispatchers,
@@ -1000,6 +997,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
             setReplyRow(
                 users.elementAtOrNull(1),
                 layoutConstraintReplyTwo,
+                layoutConstraintReplyTwoBackground,
                 layoutLayoutChatImageSmallInitialHolderTwo,
                 holderJobs,
                 dispatchers,
@@ -1011,25 +1009,10 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                 loadImage
             )
 
-            if (thread.replyCount >= 4) {
-                setReplyRow(
-                    users.elementAtOrNull(0),
-                    layoutConstraintReplyThree,
-                    layoutLayoutChatImageSmallInitialHolderThree,
-                    holderJobs,
-                    dispatchers,
-                    lifecycleScope,
-                    userColorsHelper,
-                    thread.replyCount.minus(3).toString(),
-                    thread.isSentMessage,
-                    false,
-                    loadImage
-                )
-            }
-
             setReplyRow(
                 thread.lastReplyUser,
                 layoutConstraintLastReply,
+                layoutConstraintLastReplyBackground,
                 layoutLayoutChatImageSmallInitialHolderFour,
                 holderJobs,
                 dispatchers,
@@ -1041,14 +1024,23 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                 loadImage
             )
 
+            if (thread.replyCount > 3) {
+                layoutConstraintReplyThree.visible
+
+                layoutConstraintReplyThreeBackground.setBackgroundResource(
+                    if (thread.isSentMessage) {
+                        R.drawable.background_thread_row_reply_number_holder_sent
+                    } else {
+                        R.drawable.background_thread_row_reply_number_holder_received
+                    }
+                )
+                textViewRepliesCount.text = thread.replyCount.minus(3).toString()
+            }
+
             layoutConstraintLastReply.apply {
                 textViewLastReplyMessageText.text = thread.lastReplyMessage
                 textViewLastReplyDate.text = thread.lastReplyDate
                 textViewLastReplyUserName.text = thread.lastReplyUser.alias?.value ?: "unknown"
-
-                if (onSphinxInteractionListener != null) {
-                    SphinxLinkify.addLinks(textViewOriginalThreadMessageText, SphinxLinkify.ALL, includeMessageHolderBubble.root.context, onSphinxInteractionListener)
-                }
             }
         }
     }
@@ -1067,6 +1059,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             includeMessageHolderBubble.textViewPaidMessageText.gone
 
+            maxLines = if (message.isThread) 2 else Integer.MAX_VALUE
             visible
             text = message.text ?: getString(R.string.decryption_error)
 
@@ -2025,6 +2018,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
 internal inline fun LayoutMessageHolderBinding.setReplyRow(
     replyUserHolder: ReplyUserHolder?,
     container: ConstraintLayout,
+    backgroundContainer: ConstraintLayout,
     imageHolderBinding: LayoutChatImageSmallInitialHolderBinding,
     holderJobs: ArrayList<Job>,
     dispatchers: CoroutineDispatchers,
@@ -2035,11 +2029,11 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
     isLastReply: Boolean = false,
     loadImage: (ImageView, String) -> Unit,
 ) {
-    container.let { imageHolderContainer ->
-        if (replyUserHolder == null && !isLastReply) {
-            imageHolderContainer.gone
+    container.let { replyContainer ->
+        if (replyUserHolder == null) {
+            replyContainer.gone
         } else {
-            imageHolderContainer.visible
+            replyContainer.visible
 
             imageHolderBinding.apply {
 
@@ -2049,11 +2043,6 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
                     } else {
                         R.drawable.background_thread_row_last_reply_holder_received
                     }
-                    repliesNumber != null -> if (isSentMessage) {
-                        R.drawable.background_thread_row_reply_number_holder_sent
-                    } else {
-                        R.drawable.background_thread_row_reply_number_holder_received
-                    }
                     else -> if (isSentMessage) {
                         R.drawable.background_thread_row_reply_holder_sent
                     } else {
@@ -2061,9 +2050,9 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
                     }
                 }
 
-                container.setBackgroundResource(rowBackground)
+                backgroundContainer.setBackgroundResource(rowBackground)
 
-                val text = repliesNumber ?: (replyUserHolder?.alias?.value ?: root.context.getString(
+                val text = (replyUserHolder?.alias?.value ?: root.context.getString(
                     R.string.unknown
                 )).getInitials()
 
@@ -2072,23 +2061,15 @@ internal inline fun LayoutMessageHolderBinding.setReplyRow(
                 imageViewChatPicture.gone
 
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    if (repliesNumber != null) {
-                        textViewInitials.setBackgroundRandomColor(
-                            R.drawable.chat_initials_circle,
-                            root.context.getColor(R.color.primaryText)
-                        )
-                        textViewInitials.setTextColor(root.context.getColor(R.color.body))
-                    } else {
-                        textViewInitials.setBackgroundRandomColor(
-                            R.drawable.chat_initials_circle,
-                            Color.parseColor(
-                                userColorsHelper.getHexCodeForKey(
-                                    replyUserHolder!!.colorKey,
-                                    root.context.getRandomHexCode(),
-                                )
+                    textViewInitials.setBackgroundRandomColor(
+                        R.drawable.chat_initials_circle,
+                        Color.parseColor(
+                            userColorsHelper.getHexCodeForKey(
+                                replyUserHolder!!.colorKey,
+                                root.context.getRandomHexCode(),
                             )
                         )
-                    }
+                    )
                 }.let { job ->
                     holderJobs.add(job)
                 }

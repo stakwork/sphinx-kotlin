@@ -124,6 +124,7 @@
             android:paddingEnd="@dimen/message_holder_text_view_padding_end"
             android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
             android:visibility="gone"
+            android:ellipsize="end"
             app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="Contrary to popular belief"
@@ -144,7 +145,6 @@
             tools:visibility="gone" />
 
         <!-- Thread preview  -->
-
         <include
             android:id="@+id/include_layout_message_thread"
             layout="@layout/layout_message_thread"

@@ -207,12 +207,12 @@ internal sealed class LayoutState private constructor() {
             data class Message(
                 val text: String?,
                 val decryptionError: Boolean,
+                val isThread: Boolean
             ): ContainerThird()
 
             data class Thread(
-                val originalMessage: String?,
                 val replyCount: Int,
-                val users: Set<ReplyUserHolder>,
+                val users: List<ReplyUserHolder>,
                 val lastReplyMessage: String?,
                 val lastReplyDate: String,
                 val lastReplyUser: ReplyUserHolder,

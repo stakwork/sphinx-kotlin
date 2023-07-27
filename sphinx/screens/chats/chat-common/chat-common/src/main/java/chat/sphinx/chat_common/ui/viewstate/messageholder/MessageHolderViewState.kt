@@ -225,14 +225,17 @@ internal sealed class MessageHolderViewState(
     }
 
     val bubbleMessage: LayoutState.Bubble.ContainerThird.Message? by  lazy(LazyThreadSafetyMode.NONE) {
-        if (message == null || message.thread?.isNotEmpty() == true) {
+        if (message == null) {
             null
         } else {
+            val isThread = message.thread?.isNotEmpty() == true
+
             message.retrieveTextToShow()?.let { text ->
                 if (text.isNotEmpty()) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = text,
-                        decryptionError = false
+                        decryptionError = false,
+                        isThread = isThread
                     )
                 } else {
                     null
@@ -241,7 +244,8 @@ internal sealed class MessageHolderViewState(
                 if (decryptionError) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = null,
-                        decryptionError = true
+                        decryptionError = true,
+                        isThread = isThread
                     )
                 } else {
                     null
@@ -258,29 +262,44 @@ internal sealed class MessageHolderViewState(
                 if (replies.isEmpty() || chat.isConversation()){
                     null
                 } else {
-                    val users: MutableSet<ReplyUserHolder> = LinkedHashSet(0)
+                    val users: MutableList<ReplyUserHolder> = mutableListOf()
+
+                    val owner = accountOwner()
+                    val ownerUserHolder = ReplyUserHolder(
+                        owner.photoUrl,
+                        owner.alias,
+                        owner.getColorKey()
+                    )
 
                     replies.forEach { replyMessage ->
                         users.add(
-                            ReplyUserHolder(
-                                replyMessage.senderPic,
-                                replyMessage.senderAlias?.value?.toContactAlias(),
-                                replyMessage.getColorKey())
+                            if (replyMessage.sender == owner.id) {
+                                ownerUserHolder
+                            } else {
+                                ReplyUserHolder(
+                                    replyMessage.senderPic,
+                                    replyMessage.senderAlias?.value?.toContactAlias(),
+                                    replyMessage.getColorKey()
+                                )
+                            }
                         )
                     }
 
                     val lastReplyUser = replies.last().let {
-                        ReplyUserHolder(
-                            it.senderPic,
-                            it.senderAlias?.value?.toContactAlias(),
-                            it.getColorKey()
-                        )
+                        if (it.sender == owner.id) {
+                            ownerUserHolder
+                        } else {
+                            ReplyUserHolder(
+                                it.senderPic,
+                                it.senderAlias?.value?.toContactAlias(),
+                                it.getColorKey()
+                            )
+                        }
                     }
 
                     val sent = message.sender == chat.contactIds.firstOrNull()
 
                     LayoutState.Bubble.ContainerThird.Thread(
-                        originalMessage = message.retrieveTextToShow(),
                         replyCount = replies.size,
                         users = users,
                         lastReplyMessage = replies.last().retrieveTextToShow(),
