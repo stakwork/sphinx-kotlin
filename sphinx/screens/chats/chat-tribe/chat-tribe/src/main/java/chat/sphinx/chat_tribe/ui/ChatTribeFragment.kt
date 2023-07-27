@@ -284,6 +284,11 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
+        threadHeader.apply {
+            (requireActivity() as InsetterActivity).addNavigationBarPadding(root)
+
+        }
+
         layoutBottomPinned.apply {
             (requireActivity() as InsetterActivity).addNavigationBarPadding(root)
 

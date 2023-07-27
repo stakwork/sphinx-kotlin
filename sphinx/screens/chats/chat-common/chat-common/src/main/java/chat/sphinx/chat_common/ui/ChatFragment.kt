@@ -632,6 +632,8 @@ abstract class ChatFragment<
                 viewModel.clearSearch()
             }
         }
+
+
     }
 
     private fun setupSelectedMessage() {
