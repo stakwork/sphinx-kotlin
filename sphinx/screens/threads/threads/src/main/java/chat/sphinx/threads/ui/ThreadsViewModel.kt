@@ -53,11 +53,11 @@ internal class ThreadsViewModel @Inject constructor(
     private val _ownerStateFlow: MutableStateFlow<Contact?> by lazy {
         MutableStateFlow(null)
     }
-    val ownerStateFlow: StateFlow<Contact?>?
+    private val ownerStateFlow: StateFlow<Contact?>?
         get() = _ownerStateFlow.asStateFlow()
 
 
-    suspend fun getOwner(): Contact {
+    private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
             if (contact != null) {
                 contact

@@ -126,6 +126,17 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         )
     }
 
+    override suspend fun toChatThread(chatId: ChatId, threadUUID: ThreadUUID?) {
+        navigationDriver.submitNavigationRequest(
+            ToChatTribeScreen(
+                chatId = chatId,
+                threadUUID = threadUUID,
+                popUpToId = R.id.navigation_chat_tribe_fragment,
+                popUpToInclusive = false,
+            )
+        )
+    }
+
     override suspend fun toKnownBadges(badgeIds: Array<String>) {
         detailDriver.submitNavigationRequest(
             ToKnownBadges(badgeIds)
@@ -151,6 +162,12 @@ internal class TribeChatNavigatorImpl @Inject constructor(
     }
 
     override suspend fun toThreads(chatId: ChatId) {
-        detailDriver.submitNavigationRequest(ToThreads(chatId))
+        navigationDriver.submitNavigationRequest(
+            ToThreads(
+                chatId = chatId,
+                popUpToId = R.id.navigation_chat_tribe_fragment,
+                popUpToInclusive = false,
+            )
+        )
     }
 }

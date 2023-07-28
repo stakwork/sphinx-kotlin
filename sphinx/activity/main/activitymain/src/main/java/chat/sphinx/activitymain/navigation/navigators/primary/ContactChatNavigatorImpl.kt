@@ -113,4 +113,15 @@ internal class ContactChatNavigatorImpl @Inject constructor(
         )
     }
 
+    override suspend fun toChatThread(chatId: ChatId, threadUUID: ThreadUUID?) {
+        navigationDriver.submitNavigationRequest(
+            ToChatTribeScreen(
+                chatId = chatId,
+                threadUUID = threadUUID,
+                popUpToId = R.id.navigation_chat_tribe_fragment,
+                popUpToInclusive = false,
+            )
+        )
+    }
+
 }

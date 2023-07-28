@@ -50,6 +50,8 @@ abstract class ChatNavigator(
     protected abstract suspend fun toChatGroup(chatId: ChatId)
     protected abstract suspend fun toChatTribe(chatId: ChatId, threadUUID: ThreadUUID?)
 
+    abstract suspend fun toChatThread(chatId: ChatId, threadUUID: ThreadUUID?)
+
     @JvmSynthetic
     internal suspend fun toChat(chat: Chat?, contactId: ContactId?, threadUUID: ThreadUUID?, ) {
         if (chat == null) {

@@ -40,7 +40,10 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
-import chat.sphinx.chat_common.util.*
+import chat.sphinx.chat_common.util.AudioPlayerController
+import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
+import chat.sphinx.chat_common.util.AudioRecorderController
+import chat.sphinx.chat_common.util.SphinxLinkify
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_link_preview.LinkPreviewHandler
 import chat.sphinx.concept_link_preview.model.TribePreviewName
@@ -1954,7 +1957,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     fun navigateToChatThread(uuid: MessageUUID) {
         viewModelScope.launch(mainImmediate) {
-            chatNavigator.toChat(getChat(), null, ThreadUUID(uuid.value))
+            chatNavigator.toChatThread(getChat().id, ThreadUUID(uuid.value))
         }
     }
 

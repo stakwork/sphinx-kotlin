@@ -16,20 +16,20 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.insetter_activity.InsetterActivity
-import chat.sphinx.insetter_activity.addNavigationBarPadding
-import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
+import chat.sphinx.insetter_activity.addStatusBarPadding
 import chat.sphinx.threads.R
 import chat.sphinx.threads.adapter.ThreadsAdapter
 import chat.sphinx.threads.adapter.ThreadsFooterAdapter
 import chat.sphinx.threads.databinding.FragmentThreadsBinding
 import chat.sphinx.threads.viewstate.ThreadsViewState
 import dagger.hilt.android.AndroidEntryPoint
+import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class ThreadsFragment: SideEffectDetailFragment<
+internal class ThreadsFragment: SideEffectFragment<
         Context,
         ThreadsSideEffect,
         ThreadsViewState,
@@ -48,13 +48,9 @@ internal class ThreadsFragment: SideEffectDetailFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var userColorsHelper: UserColorsHelper
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-    override fun closeDetailsScreen() {
+    fun popBackStack() {
         lifecycleScope.launch(viewModel.mainImmediate) {
-            viewModel.navigator.closeDetailScreen()
+            viewModel.navigator.popBackStack()
         }
     }
 
@@ -67,7 +63,7 @@ internal class ThreadsFragment: SideEffectDetailFragment<
         setClickListeners()
 
         (requireActivity() as InsetterActivity)
-            .addNavigationBarPadding(binding.layoutConstraintThreads)
+            .addStatusBarPadding(binding.layoutConstraintThreads)
 
     }
 
@@ -86,7 +82,7 @@ internal class ThreadsFragment: SideEffectDetailFragment<
         }
 
         override fun handleOnBackPressed() {
-            closeDetailsScreen()
+            popBackStack()
         }
     }
 
@@ -96,7 +92,7 @@ internal class ThreadsFragment: SideEffectDetailFragment<
                 constraintLayoutDeleteElementContainerTrash.gone
                 textViewHeader.text = getString(R.string.threads_header)
                 textViewDetailScreenClose.setOnClickListener {
-                    closeDetailsScreen()
+                    popBackStack()
                 }
             }
         }

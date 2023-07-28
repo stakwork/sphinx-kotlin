@@ -5,8 +5,7 @@
     android:id="@+id/layout_threads_list_item_holder"
     android:layout_width="match_parent"
     android:layout_height="@dimen/tribe_member_send_sats_button_width"
-    android:background="@color/headerBG"
-    android:elevation="@dimen/default_elevation">
+    android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_chat_thread_header"

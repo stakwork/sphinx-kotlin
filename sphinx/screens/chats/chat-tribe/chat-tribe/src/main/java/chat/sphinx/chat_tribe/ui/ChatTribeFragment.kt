@@ -194,7 +194,9 @@ internal class ChatTribeFragment: ChatFragment<
             (requireActivity() as InsetterActivity).addStatusBarPadding(root)
 
             textViewChatHeaderNavBack.setOnClickListener {
-                viewModel.navigateToTribeFromThread()
+                lifecycleScope.launch {
+                    viewModel.chatNavigator.popBackStack()
+                }
             }
 
             constraintShowMoreContainer.setOnClickListener {

@@ -39,17 +39,18 @@
         android:id="@+id/text_view_chat_messages_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/default_small_layout_margin"
+        android:paddingVertical="@dimen/default_tiny_layout_margin"
         android:background="@drawable/chat_initials_circle"
         android:backgroundTint="@color/primaryBlue"
         android:fontFamily="@font/roboto_medium"
         android:gravity="center"
-        android:minWidth="@dimen/default_small_chat_initial_image_xy"
         android:textColor="@android:color/white"
         android:textSize="@dimen/default_text_size_sub_headline"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="92"
+        tools:text="2"
         tools:visibility="visible" />
 
 
