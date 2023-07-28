@@ -126,7 +126,7 @@ internal class ThreadsViewModel @Inject constructor(
                         }
 
                         val itemPhotoUrl = if (isOwner) owner?.photoUrl else threadItem?.get(0)?.senderPic
-
+                        val repliesCountMap = repliesList?.groupingBy { it.sender }?.eachCount()
 
                         ThreadItem(
                             aliasAndColorKey = aliasAndColor,
@@ -134,14 +134,19 @@ internal class ThreadsViewModel @Inject constructor(
                             date = threadItem?.get(0)?.date?.chatTimeFormat() ?: "",
                             message = threadItem?.get(0)?.messageContentDecrypted?.value ?: "",
                             usersReplies = repliesList?.take(6)?.map {
+                                val sender = if (isOwner) owner?.id else it.sender
+                                val repliesCount = repliesCountMap?.get(sender)?.minus(1)
+
                                 ReplyUserHolder(
                                     if (isOwner) owner?.photoUrl else it.senderPic,
                                     if (isOwner) owner?.alias else it.senderAlias?.value?.toContactAlias(),
-                                    if (isOwner) owner?.getColorKey() ?: "" else it.getColorKey()
+                                    if (isOwner) owner?.getColorKey() ?: "" else it.getColorKey(),
+                                    repliesCount?.takeIf { it > 1 }?.let {
+                                        String.format(app.getString(R.string.threads_plus), it.toString())
+                                    }
                                 )
                             }?.distinct(),
                             repliesAmount = String.format(app.getString(R.string.replies_amount) ,repliesList?.size?.toString() ?: "0"),
-                            repliesExcess = String.format(app.getString(R.string.threads_plus), repliesExcess.toString()),
                             lastReplyDate = threadItem?.last()?.date?.timeAgo(),
                             uuid = uuid?.value ?: ""
                         )

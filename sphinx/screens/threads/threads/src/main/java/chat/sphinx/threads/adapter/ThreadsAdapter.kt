@@ -257,6 +257,12 @@ internal class ThreadsAdapter(
                                     .getInitials()
                             imageViewChatPicture.gone
 
+                            if (user.repliesCount != null) {
+                                imageViewDefaultAlpha.visible
+                                textViewRepliesNumber.visible
+                                textViewRepliesNumber.text = user.repliesCount
+                            }
+
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                                 textViewInitialsName.setBackgroundRandomColor(
                                     R.drawable.chat_initials_circle,
@@ -292,12 +298,6 @@ internal class ThreadsAdapter(
                         val user = replyUsers[i]
                         val userImageView = replyImageHolders[i]
                         bindUserToImageHolder(user, userImageView)
-                    }
-
-                    if (threadItem.repliesExcess != null) {
-                        includeReplyImageHolder6.imageViewDefaultAlpha.visible
-                        includeReplyImageHolder6.textViewRepliesNumber.visible
-                        includeReplyImageHolder6.textViewRepliesNumber.text = threadItem.repliesExcess
                     }
                 }
             }

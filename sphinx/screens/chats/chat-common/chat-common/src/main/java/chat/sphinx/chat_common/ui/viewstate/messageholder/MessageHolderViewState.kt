@@ -268,7 +268,8 @@ internal sealed class MessageHolderViewState(
                     val ownerUserHolder = ReplyUserHolder(
                         owner.photoUrl,
                         owner.alias,
-                        owner.getColorKey()
+                        owner.getColorKey(),
+                        null
                     )
 
                     replies.forEach { replyMessage ->
@@ -279,7 +280,8 @@ internal sealed class MessageHolderViewState(
                                 ReplyUserHolder(
                                     replyMessage.senderPic,
                                     replyMessage.senderAlias?.value?.toContactAlias(),
-                                    replyMessage.getColorKey()
+                                    replyMessage.getColorKey(),
+                                    null
                                 )
                             }
                         )
@@ -292,7 +294,8 @@ internal sealed class MessageHolderViewState(
                             ReplyUserHolder(
                                 it.senderPic,
                                 it.senderAlias?.value?.toContactAlias(),
-                                it.getColorKey()
+                                it.getColorKey(),
+                                null
                             )
                         }
                     }

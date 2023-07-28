@@ -11,7 +11,6 @@ data class ThreadItem(
     val message: String,
     val usersReplies: List<ReplyUserHolder>?,
     val repliesAmount: String,
-    val repliesExcess: String?,
     val lastReplyDate: String?,
     val uuid: String
 )
