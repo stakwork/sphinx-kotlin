@@ -139,7 +139,7 @@ internal class ThreadsViewModel @Inject constructor(
                                     if (isOwner) owner?.alias else it.senderAlias?.value?.toContactAlias(),
                                     if (isOwner) owner?.getColorKey() ?: "" else it.getColorKey()
                                 )
-                            },
+                            }?.distinct(),
                             repliesAmount = String.format(app.getString(R.string.replies_amount) ,repliesList?.size?.toString() ?: "0"),
                             repliesExcess = String.format(app.getString(R.string.threads_plus), repliesExcess.toString()),
                             lastReplyDate = threadItem?.last()?.date?.timeAgo(),

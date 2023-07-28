@@ -248,7 +248,9 @@ internal class ThreadsAdapter(
                     ) {
                         includeReplyImageHolder.first.visible
 
+
                         includeReplyImageHolder.second.apply {
+                            circularBorder.visible
                             textViewInitialsName.visible
                             textViewInitialsName.text =
                                 user.alias?.value ?: root.context.getString(R.string.unknown)
