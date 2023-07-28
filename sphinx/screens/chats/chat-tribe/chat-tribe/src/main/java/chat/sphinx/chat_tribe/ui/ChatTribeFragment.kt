@@ -190,8 +190,16 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
-        binding.includeLayoutThreadHeader.textViewChatHeaderNavBack.setOnClickListener {
-            viewModel.navigateToTribeFromThread()
+        binding.includeLayoutThreadHeader.apply {
+            (requireActivity() as InsetterActivity).addStatusBarPadding(root)
+
+            textViewChatHeaderNavBack.setOnClickListener {
+                viewModel.navigateToTribeFromThread()
+            }
+
+            constraintShowMoreContainer.setOnClickListener {
+                viewModel.toggleThreadDescriptionExpanded()
+            }
         }
 
         podcastPlayerBinding.apply {
@@ -211,10 +219,6 @@ internal class ChatTribeFragment: ChatFragment<
 
         binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
             tribeAppViewModel.toggleWebAppView()
-        }
-
-        binding.includeLayoutThreadHeader.constraintShowMoreContainer.setOnClickListener {
-            viewModel.toggleThreadDescriptionExpanded()
         }
 
         binding.includeChatTribeHeader.imageViewThreadsView.visible
@@ -282,11 +286,6 @@ internal class ChatTribeFragment: ChatFragment<
                     }
                 }
             }
-        }
-
-        threadHeader.apply {
-            (requireActivity() as InsetterActivity).addNavigationBarPadding(root)
-
         }
 
         layoutBottomPinned.apply {
