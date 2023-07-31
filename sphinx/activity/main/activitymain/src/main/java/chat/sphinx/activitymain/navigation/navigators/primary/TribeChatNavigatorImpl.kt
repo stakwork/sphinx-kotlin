@@ -16,6 +16,7 @@ import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
 import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
 import chat.sphinx.qr_code.navigation.ToQRCodeDetail
+import chat.sphinx.threads.navigation.ToThreads
 import chat.sphinx.tribe_detail.navigation.ToTribeDetailScreen
 import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
@@ -26,6 +27,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_message.ThreadUUID
 import javax.inject.Inject
 
 internal class TribeChatNavigatorImpl @Inject constructor(
@@ -113,11 +115,23 @@ internal class TribeChatNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toChatTribe(chatId: ChatId) {
+    override suspend fun toChatTribe(chatId: ChatId, threadUUID: ThreadUUID?) {
         navigationDriver.submitNavigationRequest(
             ToChatTribeScreen(
                 chatId = chatId,
+                threadUUID = threadUUID,
                 popUpToId = R.id.navigation_dashboard_fragment,
+                popUpToInclusive = false,
+            )
+        )
+    }
+
+    override suspend fun toChatThread(chatId: ChatId, threadUUID: ThreadUUID?) {
+        navigationDriver.submitNavigationRequest(
+            ToChatTribeScreen(
+                chatId = chatId,
+                threadUUID = threadUUID,
+                popUpToId = R.id.navigation_chat_tribe_fragment,
                 popUpToInclusive = false,
             )
         )
@@ -145,5 +159,15 @@ internal class TribeChatNavigatorImpl @Inject constructor(
 
     override suspend fun toPodcastPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
         detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, fromFeed = false, fromDownloaded = false))
+    }
+
+    override suspend fun toThreads(chatId: ChatId) {
+        navigationDriver.submitNavigationRequest(
+            ToThreads(
+                chatId = chatId,
+                popUpToId = R.id.navigation_chat_tribe_fragment,
+                popUpToInclusive = false,
+            )
+        )
     }
 }

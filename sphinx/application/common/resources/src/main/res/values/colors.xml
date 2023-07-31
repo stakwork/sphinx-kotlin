@@ -59,7 +59,7 @@
     <color name="oldSentMsgBG">#3E6189</color>
     <color name="imagePreviewBackground">#B3000000</color>
     <color name="sendAttachmentPreviewBackground">#D9000000</color>
-
+    <color name="threadSent">#2C3B49</color>
 
     <color name="primaryGreen">#49C998</color>
     <color name="primaryPurple">#A76CF3</color>

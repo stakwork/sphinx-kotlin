@@ -44,6 +44,13 @@
             android:layout_height="@dimen/default_header_height"
             android:visibility="gone"/>
 
+        <include
+            android:id="@+id/include_layout_thread_header"
+            layout="@layout/layout_thread_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -76,8 +83,9 @@
         layout="@layout/layout_scroll_down_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/default_layout_margin"
         android:visibility="visible"
-        android:layout_marginBottom="@dimen/default_double_layout_margin"
+        android:layout_marginBottom="@dimen/default_layout_margin"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -201,7 +209,9 @@
 
     <include
         android:id="@+id/include_layout_bottom_pinned"
-        layout="@layout/layout_bottom_pinned" />
+        layout="@layout/layout_bottom_pinned"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <include
         android:id="@+id/include_layout_tribe_member_profile"

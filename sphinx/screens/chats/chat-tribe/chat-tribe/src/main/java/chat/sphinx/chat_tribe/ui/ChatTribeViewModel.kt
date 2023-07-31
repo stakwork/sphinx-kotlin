@@ -23,6 +23,7 @@ import chat.sphinx.concept_network_query_people.model.ChatLeaderboardDto
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -33,18 +34,19 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.kotlin_response.message
 import chat.sphinx.logger.SphinxLogger
-import chat.sphinx.logger.d
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
+import chat.sphinx.wrapper_contact.getColorKey
+import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_feed.FeedPlayerSpeed
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_podcast.Podcast
@@ -77,6 +79,7 @@ class ChatTribeViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
+    repositoryDashboard: RepositoryDashboardAndroid<Any>,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
@@ -97,6 +100,7 @@ class ChatTribeViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     actionsRepository,
+    repositoryDashboard,
     networkQueryLightning,
     networkQueryPeople,
     mediaCacheHandler,
@@ -152,6 +156,10 @@ class ChatTribeViewModel @Inject constructor(
         ViewStateContainer(PinedMessageDataViewState.Idle)
     }
 
+    val threadViewState: ViewStateContainer<ThreadViewState> by lazy {
+        ViewStateContainer(ThreadViewState.Idle)
+    }
+
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
             return podcast
@@ -198,6 +206,20 @@ class ChatTribeViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
+
+    override val threadSharedFlow: SharedFlow<List<Message>>? =
+        if (args.argThreadUUID.isNullOrEmpty()){
+            null
+        } else
+            flow {
+                messageRepository.getThreadUUIDMessagesByUUID(chatId, ThreadUUID(args.argThreadUUID!!)).collect {
+                    emit(it)
+                }
+            }.distinctUntilChanged().shareIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(2_000),
+                replay = 1,
+            )
 
     internal val moreOptionsMenuStateFlow: MutableStateFlow<MoreMenuOptionsViewState> by lazy {
         MutableStateFlow(MoreMenuOptionsViewState.OwnTribe)
@@ -259,6 +281,9 @@ class ChatTribeViewModel @Inject constructor(
     }
 
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+        args.argThreadUUID?.let {
+            builder.setThreadUUID(ThreadUUID(it))
+        }
         builder.setChatId(chatId)
         return super.sendMessage(builder)
     }
@@ -282,14 +307,19 @@ class ChatTribeViewModel @Inject constructor(
 
                 chatRepository.updateTribeInfo(chat)?.let { tribeData ->
 
-                    _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
-                        tribeData.host,
-                        tribeData.feedUrl,
-                        tribeData.chatUUID,
-                        tribeData.feedType,
-                        tribeData.appUrl,
-                        tribeData.badges
-                    )
+                    if (!args.argThreadUUID.isNullOrEmpty()) {
+                        _feedDataStateFlow.value = TribeFeedData.Result.NoFeed
+                    }
+                    else {
+                        _feedDataStateFlow.value = TribeFeedData.Result.FeedData(
+                            tribeData.host,
+                            tribeData.feedUrl,
+                            tribeData.chatUUID,
+                            tribeData.feedType,
+                            tribeData.appUrl,
+                            tribeData.badges
+                        )
+                    }
 
                     updatePinnedMessageState(tribeData.pin, chat.id)
 
@@ -303,6 +333,7 @@ class ChatTribeViewModel @Inject constructor(
         }
 
         getAllLeaderboards()
+        getThreadHeaderMessageIfApplicable()
     }
 
     override suspend fun processMemberRequest(
@@ -449,6 +480,40 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    private fun getThreadHeaderMessageIfApplicable() {
+        viewModelScope.launch(mainImmediate) {
+            args.argThreadUUID?.let { uuid ->
+                if (uuid.isNotEmpty()) {
+                    messageRepository.getMessageByUUID(MessageUUID(uuid)).firstOrNull()?.let { message ->
+
+                        val owner = getOwner()
+                        val isOwner: Boolean = message.sender == owner.id
+
+                        val aliasAndColor = if (isOwner) {
+                            Pair(owner.alias, owner.getColorKey())
+                        } else {
+                            Pair(
+                                message.senderAlias?.value?.toContactAlias(),
+                                message.getColorKey()
+                            )
+                        }
+
+                        val photoUrl = if (isOwner) owner.photoUrl else message.senderPic
+
+                        threadViewState.updateViewState(
+                            ThreadViewState.ThreadHeader(
+                                aliasAndColor,
+                                photoUrl,
+                                message.date.chatTimeFormat(),
+                                message.messageContentDecrypted?.value ?: ""
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private fun loadPersonData(message: Message) {
         viewModelScope.launch(mainImmediate) {
             message.person?.let { person ->
@@ -555,6 +620,20 @@ class ChatTribeViewModel @Inject constructor(
         }
     }
 
+    fun navigateToThreads() {
+        viewModelScope.launch(mainImmediate) {
+            (chatNavigator as TribeChatNavigator).toThreads(chatId)
+        }
+    }
+
+    override fun getThreadUUID(): ThreadUUID? {
+        return args.argThreadUUID?.toThreadUUID()
+    }
+
+    override fun isThreadChat(): Boolean {
+        return getThreadUUID() != null
+    }
+
     override fun reloadPinnedMessage() {
         viewModelScope.launch(mainImmediate) {
             getChat()?.let { nnChat ->
@@ -614,5 +693,15 @@ class ChatTribeViewModel @Inject constructor(
         }.join()
 
         return pinnedMessageData
+    }
+
+    fun toggleThreadDescriptionExpanded() {
+        (threadViewState.viewStateFlow.value as? ThreadViewState.ThreadHeader)?.let {
+            it.copy(
+                isExpanded = !it.isExpanded,
+            ).let { updatedThreadHeader ->
+                threadViewState.updateViewState(updatedThreadHeader)
+            }
+        }
     }
 }

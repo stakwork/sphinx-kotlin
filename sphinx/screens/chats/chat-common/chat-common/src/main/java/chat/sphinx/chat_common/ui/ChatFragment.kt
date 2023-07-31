@@ -632,6 +632,8 @@ abstract class ChatFragment<
                 viewModel.clearSearch()
             }
         }
+
+
     }
 
     private fun setupSelectedMessage() {
@@ -829,7 +831,8 @@ abstract class ChatFragment<
             onStopSupervisor,
             viewModel,
             imageLoader,
-            userColorsHelper
+            userColorsHelper,
+            isThreadChat = viewModel.isThreadChat()
         )
         val footerAdapter = MessageListFooterAdapter()
         recyclerView.apply {
@@ -849,10 +852,10 @@ abstract class ChatFragment<
                     }
 
                     if (recyclerView.canScrollVertically(1)) {
-                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.On)
+                        viewModel.updateScrollDownButton(true)
                     }
                     else {
-                        viewModel.scrollDownViewStateContainer.updateViewState(ScrollDownViewState.Off)
+                        viewModel.updateScrollDownButton(false)
                     }
                 }
             })
@@ -972,8 +975,9 @@ abstract class ChatFragment<
 
                         val message = viewState.message
 
-                        message.uuid?.value?.toReplyUUID().let { uuid ->
-                            sendMessageBuilder.setReplyUUID(uuid)
+                        message.uuid?.value?.let { uuid ->
+                            sendMessageBuilder.setReplyUUID(uuid.toReplyUUID())
+                            sendMessageBuilder.setThreadUUID(message.threadUUID ?: uuid.toThreadUUID())
 
                             replyingMessageBinding.apply {
 
@@ -1727,6 +1731,8 @@ abstract class ChatFragment<
                 when (viewState) {
                     is ScrollDownViewState.On -> {
                         scrollDownButtonBinding.root.visible
+                        scrollDownButtonBinding.textViewChatMessagesCount.goneIfFalse(!viewState.unseenMessagesCount.isNullOrEmpty())
+                        scrollDownButtonBinding.textViewChatMessagesCount.text = viewState.unseenMessagesCount
                     }
                     is ScrollDownViewState.Off -> {
                         scrollDownButtonBinding.root.gone
@@ -1746,7 +1752,7 @@ abstract class ChatFragment<
                 )
             }
         }
-    }
+     }
 
     private fun scrollToResult(
         messages: List<Message>,

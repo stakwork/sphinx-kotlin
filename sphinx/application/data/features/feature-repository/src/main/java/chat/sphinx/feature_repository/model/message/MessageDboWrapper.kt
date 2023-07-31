@@ -62,6 +62,8 @@ class MessageDboWrapper(
         get() = messageDbo.recipient_pic
     override val person: MessagePerson?
         get() = messageDbo.person
+    override val threadUUID: ThreadUUID?
+        get() = messageDbo.thread_uuid
 
 
     @Volatile
@@ -129,6 +131,12 @@ class MessageDboWrapper(
     var _replyMessage: Message? = null
     override val replyMessage: Message?
         get() = _replyMessage
+
+    @Volatile
+    @Suppress("PropertyName")
+    var _thread: List<Message>? = null
+    override val thread: List<Message>?
+        get() = _thread
 
     @Volatile
     @Suppress("PropertyName")
