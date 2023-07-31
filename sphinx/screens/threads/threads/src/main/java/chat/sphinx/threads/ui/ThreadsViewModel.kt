@@ -20,6 +20,7 @@ import chat.sphinx.wrapper_common.timeAgo
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_contact.toContactAlias
+import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message.getColorKey
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,7 +50,6 @@ internal class ThreadsViewModel @Inject constructor(
 {
     private val args: ThreadsFragmentArgs by savedStateHandle.navArgs()
 
-
     private val _ownerStateFlow: MutableStateFlow<Contact?> by lazy {
         MutableStateFlow(null)
     }
@@ -63,7 +63,6 @@ internal class ThreadsViewModel @Inject constructor(
         SharingStarted.WhileSubscribed(2_000),
         replay = 1,
     )
-
 
     private suspend fun getOwner(): Contact {
         return contactRepository.accountOwner.value.let { contact ->
@@ -112,83 +111,104 @@ internal class ThreadsViewModel @Inject constructor(
         return chat!!
     }
 
-
     init {
+        initializeOwner()
+        updateThreads()
+    }
+
+    private fun initializeOwner() {
         viewModelScope.launch(mainImmediate) {
             _ownerStateFlow.value = getOwner()
         }
+    }
 
+    private fun updateThreads() {
         viewModelScope.launch(mainImmediate) {
-            messageRepository.getThreadUUIDMessagesByChatId(ChatId(args.argChatId)).collect { threadUUIDMessages ->
+            messageRepository.getThreadUUIDMessagesByChatId(ChatId(args.argChatId)).collect { messages ->
 
-                val messagesGrouped = threadUUIDMessages.groupBy { it.threadUUID }
+                val threadItems = generateThreadItemsList(messages)
 
-                messagesGrouped.mapNotNull { it.key?.value?.toMessageUUID() }.let { messageUUID ->
-                    val headerMessage = messageRepository.getAllMessagesByUUID(messageUUID)
-                    val headerMessageMappedByUUID = headerMessage.associateBy { it.uuid?.value }
-
-                    val completeThreads = messagesGrouped.mapValues { groupEntry ->
-                        val threadUUID = groupEntry.key
-                        val threadMessages = groupEntry.value
-
-                        val threadHeaderMessage = headerMessageMappedByUUID[threadUUID?.value]
-
-                        if (threadHeaderMessage != null) {
-                            listOf(threadHeaderMessage) + threadMessages
-                        } else {
-                            threadMessages
-                        }
-                    }
-
-                    val threadItems = completeThreads.keys.map { uuid ->
-
-                        val owner = ownerStateFlow?.value
-                        val threadItemList = completeThreads[uuid]
-
-                        val originalMessage = threadItemList?.get(0)
-                        val chat = getChat()
-                        val isSenderOwner: Boolean = originalMessage?.sender == chat?.contactIds.firstOrNull()
-
-                        val aliasAndColor = if (isSenderOwner) {
-                            Pair(owner?.alias, owner?.getColorKey())
-                        } else {
-                            Pair(
-                                threadItemList?.get(0)?.senderAlias?.value?.toContactAlias(),
-                                threadItemList?.get(0)?.getColorKey()
-                            )
-                        }
-                        val itemPhotoUrl = if (isSenderOwner) owner?.photoUrl else threadItemList?.get(0)?.senderPic
-
-                        val repliesList = threadItemList?.drop(1)?.distinctBy { it.senderAlias }
-                        val repliesCountMap = threadItemList?.drop(1)?.groupingBy { (it.senderAlias?.value ?: "Unknown") }?.eachCount()
-
-                        ThreadItem(
-                            aliasAndColorKey = aliasAndColor,
-                            photoUrl = itemPhotoUrl,
-                            date = threadItemList?.get(0)?.date?.chatTimeFormat() ?: "",
-                            message = threadItemList?.get(0)?.messageContentDecrypted?.value ?: "",
-                            usersReplies = repliesList?.take(6)?.map {
-                                val isSenderOwner: Boolean = it?.sender == chat?.contactIds.firstOrNull()
-                                val repliesCount = repliesCountMap?.get((it.senderAlias?.value ?: "Unknown"))?.minus(1)
-
-                                ReplyUserHolder(
-                                    if (isSenderOwner) owner?.photoUrl else it.senderPic,
-                                    if (isSenderOwner) owner?.alias else it.senderAlias?.value?.toContactAlias(),
-                                    if (isSenderOwner) owner?.getColorKey() ?: "" else it.getColorKey(),
-                                    repliesCount?.takeIf { it > 0 }?.let {
-                                        String.format(app.getString(R.string.threads_plus), it.toString())
-                                    }
-                                )
-                            },
-                            repliesAmount = String.format(app.getString(R.string.replies_amount) , threadItemList?.drop(1)?.size?.toString() ?: "0"),
-                            lastReplyDate = threadItemList?.last()?.date?.timeAgo(),
-                            uuid = uuid?.value ?: ""
-                        )
-                    }
-
-                    updateViewState(ThreadsViewState.ThreadList(threadItems))
-                }
+                updateViewState(ThreadsViewState.ThreadList(threadItems))
             }
+        }
+    }
+
+    private suspend fun generateThreadItemsList(messages: List<Message>): List<ThreadItem> {
+        // Group messages by their ThreadUUID
+        val groupedMessagesByThread = messages.groupBy { it.threadUUID }
+
+        // Fetch the header messages based on the message UUIDs
+        val headerMessages = messageRepository.getAllMessagesByUUID(groupedMessagesByThread.keys.mapNotNull { it?.value?.toMessageUUID() })
+        val headerMessagesMappedByUUID = headerMessages.associateBy { it.uuid?.value }
+
+        // Generate a map of complete threads, where each thread includes its header message and its other messages
+        val completeThreads = groupedMessagesByThread.mapValues { entry ->
+            val threadUUID = entry.key
+            val threadMessages = entry.value
+
+            val threadHeaderMessage = headerMessagesMappedByUUID[threadUUID?.value]
+
+            if (threadHeaderMessage != null) {
+                listOf(threadHeaderMessage) + threadMessages
+            } else {
+                threadMessages
+            }
+        }
+
+        // Prepare thread items from the complete threads
+        return completeThreads.keys.map { uuid ->
+
+            val owner = ownerStateFlow?.value
+            val messagesForThread = completeThreads[uuid]
+
+            val originalMessage = messagesForThread?.get(0)
+            val chat = getChat()
+            val isSenderOwner: Boolean = originalMessage?.sender == chat.contactIds.firstOrNull()
+
+            createThreadItem(uuid?.value, owner, messagesForThread, originalMessage, chat, isSenderOwner)
+        }
+    }
+
+    private fun createThreadItem(uuid: String?, owner: Contact?, messagesForThread: List<Message>?, originalMessage: Message?, chat: Chat?, isSenderOwner: Boolean): ThreadItem {
+        val senderInfo = if (isSenderOwner) {
+            Pair(owner?.alias, owner?.getColorKey())
+        } else {
+            Pair(
+                originalMessage?.senderAlias?.value?.toContactAlias(),
+                originalMessage?.getColorKey()
+            )
+        }
+
+        val senderPhotoUrl = if (isSenderOwner) owner?.photoUrl else originalMessage?.senderPic
+
+        val repliesList = messagesForThread?.drop(1)?.distinctBy { it.senderAlias }
+        val repliesCountMap = messagesForThread?.drop(1)?.groupingBy { (it.senderAlias?.value ?: "Unknown") }?.eachCount()
+
+        return ThreadItem(
+            aliasAndColorKey = senderInfo,
+            photoUrl = senderPhotoUrl,
+            date = originalMessage?.date?.chatTimeFormat() ?: "",
+            message = originalMessage?.messageContentDecrypted?.value ?: "",
+            usersReplies = createReplyUserHolders(repliesList, chat, owner, repliesCountMap),
+            repliesAmount = String.format(app.getString(R.string.replies_amount), messagesForThread?.drop(1)?.size?.toString() ?: "0"),
+            lastReplyDate = messagesForThread?.last()?.date?.timeAgo(),
+            uuid = uuid ?: ""
+        )
+    }
+
+    private fun createReplyUserHolders(repliesList: List<Message>?, chat: Chat?, owner: Contact?, repliesCountMap: Map<String, Int>?): List<ReplyUserHolder>? {
+        return repliesList?.take(6)?.map {
+            val isSenderOwner: Boolean = it.sender == chat?.contactIds?.firstOrNull()
+            val repliesCount = repliesCountMap?.get((it.senderAlias?.value ?: "Unknown"))?.minus(1)
+
+            ReplyUserHolder(
+                photoUrl = if (isSenderOwner) owner?.photoUrl else it.senderPic,
+                alias = if (isSenderOwner) owner?.alias else it.senderAlias?.value?.toContactAlias(),
+                colorKey = if (isSenderOwner) owner?.getColorKey() ?: "" else it.getColorKey(),
+                repliesCount = repliesCount?.takeIf { it > 0 }?.let { count ->
+                    String.format(app.getString(R.string.threads_plus), count.toString())
+                }
+            )
         }
     }
 
