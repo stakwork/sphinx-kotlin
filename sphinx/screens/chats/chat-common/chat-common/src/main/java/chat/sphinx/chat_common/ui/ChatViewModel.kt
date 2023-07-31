@@ -1233,7 +1233,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     @JvmSynthetic
     internal fun getFooterViewStateFlow(): StateFlow<FooterViewState> =
-        footerViewStateContainer.viewStateFlow
+        if (isThreadChat()) {
+            MutableStateFlow(FooterViewState.ThreadChat)
+        } else {
+            footerViewStateContainer.viewStateFlow
+        }
 
     @JvmSynthetic
     internal fun updateFooterViewState(viewState: FooterViewState) {

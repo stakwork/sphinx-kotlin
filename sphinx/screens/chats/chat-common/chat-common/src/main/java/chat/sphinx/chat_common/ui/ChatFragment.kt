@@ -464,8 +464,8 @@ abstract class ChatFragment<
             editTextChatFooter.addTextChangedListener { editable ->
                 //Do not toggle microphone and send icon if on attachment mode
                 if (viewModel.getFooterViewStateFlow().value !is FooterViewState.Attachment) {
-                    textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
-                    imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+                    textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty() && !viewModel.isThreadChat())
+                    imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty() && !viewModel.isThreadChat())
                 }
             }
         }
@@ -1352,6 +1352,11 @@ abstract class ChatFragment<
                         textViewRecordingTimer.text = viewState.duration.getHHMMString()
                     } else {
                         layoutConstraintChatFooterActions.translationX = 0f
+                    }
+                    if (viewState is FooterViewState.ThreadChat) {
+                        textViewChatFooterAttachment.gone
+                        imageViewChatFooterMicrophone.gone
+                        textViewChatFooterSend.visible
                     }
                 }
 
