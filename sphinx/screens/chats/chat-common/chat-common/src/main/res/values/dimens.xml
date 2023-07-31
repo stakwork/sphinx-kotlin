@@ -183,6 +183,4 @@
 
     <!-- Thread -->
     <dimen name="thread_height">256dp</dimen>
-
-
 </resources>

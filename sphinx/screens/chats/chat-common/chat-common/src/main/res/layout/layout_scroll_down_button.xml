@@ -53,5 +53,4 @@
         tools:text="2"
         tools:visibility="visible" />
 
-
 </androidx.constraintlayout.widget.ConstraintLayout>
