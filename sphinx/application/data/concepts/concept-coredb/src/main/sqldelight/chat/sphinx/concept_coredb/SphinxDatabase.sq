@@ -625,7 +625,8 @@ SELECT *
 FROM messageDbo
 WHERE chat_id = :chat_id
 AND type != 29
-AND thread_uuid IS NOT NULL;
+AND thread_uuid IS NOT NULL
+ORDER BY date DESC;
 
 messageGetAllPurchaseItemsByMUID:
 SELECT *

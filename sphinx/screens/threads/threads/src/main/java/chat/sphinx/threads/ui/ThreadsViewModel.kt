@@ -5,12 +5,14 @@ import android.content.*
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.viewstate.messageholder.ReplyUserHolder
+import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.threads.R
 import chat.sphinx.threads.model.ThreadItem
 import chat.sphinx.threads.navigation.ThreadsNavigator
 import chat.sphinx.threads.viewstate.ThreadsViewState
+import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.message.toMessageUUID
@@ -26,10 +28,7 @@ import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +38,7 @@ internal class ThreadsViewModel @Inject constructor(
     val navigator: ThreadsNavigator,
     private val messageRepository: MessageRepository,
     private val contactRepository: ContactRepository,
+    private val chatRepository: ChatRepository,
     dispatchers: CoroutineDispatchers,
     savedStateHandle: SavedStateHandle,
 ): SideEffectViewModel<
@@ -55,6 +55,14 @@ internal class ThreadsViewModel @Inject constructor(
     }
     private val ownerStateFlow: StateFlow<Contact?>?
         get() = _ownerStateFlow.asStateFlow()
+
+    private val chatSharedFlow: SharedFlow<Chat?> = flow {
+        emitAll(chatRepository.getChatById(ChatId(args.argChatId)))
+    }.distinctUntilChanged().shareIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(2_000),
+        replay = 1,
+    )
 
 
     private suspend fun getOwner(): Contact {
@@ -77,6 +85,31 @@ internal class ThreadsViewModel @Inject constructor(
                 resolvedOwner!!
             }
         }
+    }
+
+    suspend fun getChat(): Chat {
+        chatSharedFlow.replayCache.firstOrNull()?.let { chat ->
+            return chat
+        }
+
+        chatSharedFlow.firstOrNull()?.let { chat ->
+            return chat
+        }
+
+        var chat: Chat? = null
+
+        try {
+            chatSharedFlow.collect {
+                if (it != null) {
+                    chat = it
+                    throw Exception()
+                }
+            }
+        } catch (e: Exception) {
+        }
+        delay(25L)
+
+        return chat!!
     }
 
 
@@ -110,44 +143,45 @@ internal class ThreadsViewModel @Inject constructor(
                     val threadItems = completeThreads.keys.map { uuid ->
 
                         val owner = ownerStateFlow?.value
-                        val threadItem = completeThreads[uuid]
-                        val isOwner: Boolean = threadItem?.get(0)?.sender == owner?.id
+                        val threadItemList = completeThreads[uuid]
 
-                        val repliesList = threadItem?.drop(1)
-                        val repliesExcess: Int? = if ((repliesList?.size ?: 0) > 6) repliesList?.size?.minus(6) else null
+                        val originalMessage = threadItemList?.get(0)
+                        val chat = getChat()
+                        val isSenderOwner: Boolean = originalMessage?.sender == chat?.contactIds.firstOrNull()
 
-                        val aliasAndColor = if (isOwner) {
+                        val aliasAndColor = if (isSenderOwner) {
                             Pair(owner?.alias, owner?.getColorKey())
                         } else {
                             Pair(
-                                threadItem?.get(0)?.senderAlias?.value?.toContactAlias(),
-                                threadItem?.get(0)?.getColorKey()
+                                threadItemList?.get(0)?.senderAlias?.value?.toContactAlias(),
+                                threadItemList?.get(0)?.getColorKey()
                             )
                         }
+                        val itemPhotoUrl = if (isSenderOwner) owner?.photoUrl else threadItemList?.get(0)?.senderPic
 
-                        val itemPhotoUrl = if (isOwner) owner?.photoUrl else threadItem?.get(0)?.senderPic
-                        val repliesCountMap = repliesList?.groupingBy { it.sender }?.eachCount()
+                        val repliesList = threadItemList?.drop(1)?.distinctBy { it.senderAlias }
+                        val repliesCountMap = threadItemList?.drop(1)?.groupingBy { (it.senderAlias?.value ?: "Unknown") }?.eachCount()
 
                         ThreadItem(
                             aliasAndColorKey = aliasAndColor,
                             photoUrl = itemPhotoUrl,
-                            date = threadItem?.get(0)?.date?.chatTimeFormat() ?: "",
-                            message = threadItem?.get(0)?.messageContentDecrypted?.value ?: "",
+                            date = threadItemList?.get(0)?.date?.chatTimeFormat() ?: "",
+                            message = threadItemList?.get(0)?.messageContentDecrypted?.value ?: "",
                             usersReplies = repliesList?.take(6)?.map {
-                                val sender = if (isOwner) owner?.id else it.sender
-                                val repliesCount = repliesCountMap?.get(sender)?.minus(1)
+                                val isSenderOwner: Boolean = it?.sender == chat?.contactIds.firstOrNull()
+                                val repliesCount = repliesCountMap?.get((it.senderAlias?.value ?: "Unknown"))?.minus(1)
 
                                 ReplyUserHolder(
-                                    if (isOwner) owner?.photoUrl else it.senderPic,
-                                    if (isOwner) owner?.alias else it.senderAlias?.value?.toContactAlias(),
-                                    if (isOwner) owner?.getColorKey() ?: "" else it.getColorKey(),
-                                    repliesCount?.takeIf { it > 1 }?.let {
+                                    if (isSenderOwner) owner?.photoUrl else it.senderPic,
+                                    if (isSenderOwner) owner?.alias else it.senderAlias?.value?.toContactAlias(),
+                                    if (isSenderOwner) owner?.getColorKey() ?: "" else it.getColorKey(),
+                                    repliesCount?.takeIf { it > 0 }?.let {
                                         String.format(app.getString(R.string.threads_plus), it.toString())
                                     }
                                 )
-                            }?.distinct(),
-                            repliesAmount = String.format(app.getString(R.string.replies_amount) ,repliesList?.size?.toString() ?: "0"),
-                            lastReplyDate = threadItem?.last()?.date?.timeAgo(),
+                            },
+                            repliesAmount = String.format(app.getString(R.string.replies_amount) , threadItemList?.drop(1)?.size?.toString() ?: "0"),
+                            lastReplyDate = threadItemList?.last()?.date?.timeAgo(),
                             uuid = uuid?.value ?: ""
                         )
                     }

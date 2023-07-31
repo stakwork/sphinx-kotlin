@@ -194,7 +194,7 @@ internal class ThreadsAdapter(
                     textViewInitialsName.visible
                     textViewInitialsName.text =
                         threadItem.aliasAndColorKey.first?.value ?: root.context.getString(R.string.unknown)
-                            .getInitials()
+                            .getInitials(1)
                     imageViewChatPicture.gone
 
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
@@ -248,13 +248,11 @@ internal class ThreadsAdapter(
                     ) {
                         includeReplyImageHolder.first.visible
 
-
                         includeReplyImageHolder.second.apply {
                             circularBorder.visible
                             textViewInitialsName.visible
                             textViewInitialsName.text =
-                                user.alias?.value ?: root.context.getString(R.string.unknown)
-                                    .getInitials()
+                                (user.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
                             imageViewChatPicture.gone
 
                             if (user.repliesCount != null) {
