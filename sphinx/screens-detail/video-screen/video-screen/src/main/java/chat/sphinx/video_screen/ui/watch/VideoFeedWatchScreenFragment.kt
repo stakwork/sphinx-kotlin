@@ -354,7 +354,6 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
 
     private fun cueYoutubeVideo(videoId: String) {
         binding.includeLayoutVideoPlayer.apply {
-
             val htmlContent = context?.assets?.open("youtube_iframe.html")?.bufferedReader()
                 .use { it?.readText() }
             val formattedHtml = htmlContent?.replace("%%VIDEO_ID%%", videoId)
@@ -520,31 +519,15 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
 
                                 if (viewState.url.isYoutubeVideo()) {
-
-                                    layoutConstraintVideoViewContainer.gone
-                                    layoutConstraintYoutubeIframeContainer.visible
-
-                                    cueYoutubeVideo(viewState.id.youtubeVideoId())
-
-                                        viewModel.createHistoryItem()
-                                        viewModel.trackVideoConsumed()
-                                        viewModel.createVideoRecordConsumed(viewState.id)
-
+                                    viewModel.checkYoutubeVideoAvailable(viewState.id)
                                 } else {
-                                    layoutConstraintLoadingVideo.visible
-                                    layoutConstraintVideoViewContainer.visible
-                                    layoutConstraintYoutubeIframeContainer.gone
-
                                     val videoUri = if (viewState.localFile != null) {
                                         viewState.localFile.toUri()
                                     } else {
                                         viewState.url.value.toUri()
                                     }
 
-                                    viewModel.initializeVideo(
-                                        videoUri,
-                                        viewState.duration?.value?.toInt()
-                                    )
+                                    viewModel.videoPlayerStateContainer.updateViewState(VideoPlayerViewState.WebViewPlayer(videoUri, viewState.duration))
                                 }
                             }
                         }
@@ -590,6 +573,41 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                     (viewState as? VideoFeedItemDetailsViewState.Closed)?.let {
                         delay(300L)
                         root.gone
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.videoPlayerStateContainer.collect { viewState ->
+                binding.includeLayoutVideoPlayer.apply {
+                @Exhaustive
+                when (viewState) {
+                    is VideoPlayerViewState.Idle -> {}
+                    is VideoPlayerViewState.YoutubeVideoIframe -> {
+
+                            layoutConstraintVideoViewContainer.gone
+                            layoutConstraintYoutubeIframeContainer.visible
+
+                            cueYoutubeVideo(viewState.videoId.youtubeVideoId())
+
+                            viewModel.createHistoryItem()
+                            viewModel.trackVideoConsumed()
+                            viewModel.createVideoRecordConsumed(viewState.videoId)
+
+                    }
+                    is VideoPlayerViewState.WebViewPlayer -> {
+
+                            layoutConstraintLoadingVideo.visible
+                            layoutConstraintVideoViewContainer.visible
+                            layoutConstraintYoutubeIframeContainer.gone
+
+                            viewModel.initializeVideo(
+                                viewState.videoUri,
+                                viewState.duration?.value?.toInt()
+                            )
+                        }
+
                     }
                 }
             }

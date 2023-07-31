@@ -37,6 +37,7 @@ inline val Message.shouldAdaptBubbleWidth: Boolean
             podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
+            (thread == null || thread!!.isEmpty()) &&
             !status.isDeleted() &&
             !flagged.isTrue()) ||
             type.isDirectPayment()
@@ -227,11 +228,14 @@ internal sealed class MessageHolderViewState(
         if (message == null) {
             null
         } else {
+            val isThread = message.thread?.isNotEmpty() == true
+
             message.retrieveTextToShow()?.let { text ->
                 if (text.isNotEmpty()) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = text,
-                        decryptionError = false
+                        decryptionError = false,
+                        isThread = isThread
                     )
                 } else {
                     null
@@ -240,7 +244,8 @@ internal sealed class MessageHolderViewState(
                 if (decryptionError) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = null,
-                        decryptionError = true
+                        decryptionError = true,
+                        isThread = isThread
                     )
                 } else {
                     null
@@ -248,6 +253,68 @@ internal sealed class MessageHolderViewState(
             }
         }
     }
+
+    val bubbleThread: LayoutState.Bubble.ContainerThird.Thread? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message == null) {
+            null
+        } else {
+            message.thread?.let { replies ->
+                if (replies.isEmpty() || chat.isConversation()){
+                    null
+                } else {
+                    val users: MutableList<ReplyUserHolder> = mutableListOf()
+
+                    val owner = accountOwner()
+                    val ownerUserHolder = ReplyUserHolder(
+                        owner.photoUrl,
+                        owner.alias,
+                        owner.getColorKey(),
+                        null
+                    )
+
+                    replies.forEach { replyMessage ->
+                        users.add(
+                            if (replyMessage.sender == owner.id) {
+                                ownerUserHolder
+                            } else {
+                                ReplyUserHolder(
+                                    replyMessage.senderPic,
+                                    replyMessage.senderAlias?.value?.toContactAlias(),
+                                    replyMessage.getColorKey(),
+                                    null
+                                )
+                            }
+                        )
+                    }
+
+                    val lastReplyUser = replies.last().let {
+                        if (it.sender == owner.id) {
+                            ownerUserHolder
+                        } else {
+                            ReplyUserHolder(
+                                it.senderPic,
+                                it.senderAlias?.value?.toContactAlias(),
+                                it.getColorKey(),
+                                null
+                            )
+                        }
+                    }
+
+                    val sent = message.sender == chat.contactIds.firstOrNull()
+
+                    LayoutState.Bubble.ContainerThird.Thread(
+                        replyCount = replies.size,
+                        users = users,
+                        lastReplyMessage = replies.last().retrieveTextToShow(),
+                        lastReplyDate = replies.last().date.chatTimeFormat(),
+                        lastReplyUser = lastReplyUser,
+                        isSentMessage = sent
+                    )
+                }
+            }
+        }
+    }
+
 
     val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
         if (message == null || message.retrieveTextToShow() != null || !message.isPaidTextMessage) {

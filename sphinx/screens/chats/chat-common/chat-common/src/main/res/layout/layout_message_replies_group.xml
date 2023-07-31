@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/message_boost_height">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_reply_images_holder"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_reply_image_holder_1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_reply_image_holder_1"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_reply_image_holder_2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/default_layout_margin"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_reply_image_holder_2"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_reply_image_holder_3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/default_double_layout_margin"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_reply_image_holder_3"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_reply_image_holder_4"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/default_large_layout_margin"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_reply_image_holder_4"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_reply_image_holder_5"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/default_big_layout_margin"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_reply_image_holder_5"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_reply_image_holder_6"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/feed_fragment_bottom_padding"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <include
+                android:id="@+id/include_reply_image_holder_6"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/image_holder_boost_reaction_xy"
+                android:layout_height="@dimen/image_holder_boost_reaction_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

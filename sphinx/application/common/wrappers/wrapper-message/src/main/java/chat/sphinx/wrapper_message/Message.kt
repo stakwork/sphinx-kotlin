@@ -356,6 +356,7 @@ abstract class Message {
     abstract val recipientAlias: RecipientAlias?
     abstract val recipientPic: PhotoUrl?
     abstract val person: MessagePerson?
+    abstract val threadUUID: ThreadUUID?
     abstract val isPinned: Boolean
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
@@ -369,6 +370,7 @@ abstract class Message {
     abstract val reactions: List<Message>?
     abstract val purchaseItems: List<Message>?
     abstract val replyMessage: Message?
+    abstract val thread: List<Message>?
 
     override fun equals(other: Any?): Boolean {
         return  other                               is Message                      &&
@@ -396,12 +398,13 @@ abstract class Message {
                 other.messageDecryptionException    == messageDecryptionException   &&
                 other.messageMedia                  == messageMedia                 &&
                 other.feedBoost                     == feedBoost                    &&
-                other.callLinkMessage                      == callLinkMessage                    &&
+                other.callLinkMessage               == callLinkMessage              &&
                 other.podcastClip                   == podcastClip                  &&
                 other.giphyData                     == giphyData                    &&
                 other.recipientAlias                == recipientAlias               &&
                 other.recipientPic                  == recipientPic                 &&
                 other.person                        == person                       &&
+                other.threadUUID                    == threadUUID                   &&
                 other.isPinned                      == isPinned                     &&
                 other.reactions.let { a ->
                     reactions.let { b ->
@@ -457,6 +460,7 @@ abstract class Message {
         result = _31 * result + recipientAlias.hashCode()
         result = _31 * result + recipientPic.hashCode()
         result = _31 * result + person.hashCode()
+        result = _31 * result + threadUUID.hashCode()
         result = _31 * result + isPinned.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
@@ -477,7 +481,8 @@ abstract class Message {
                 "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
                 "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
-                "recipientPic=$recipientPic,person=$person,callLink=$callLinkMessage"           +
+                "recipientPic=$recipientPic,person=$person,threadUUID=$threadUUID,"             +
+                "callLink=$callLinkMessage"                                                     +
                 "isPinned=$isPinned"
     }
 }

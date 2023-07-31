@@ -18,6 +18,7 @@ data class PostMessageDto(
     val boost: Boolean = false,
     val call: Boolean = false,
     val pay: Boolean = false,
+    val thread_uuid: String? = null
 ) {
     init {
         require(!(chat_id == null && contact_id == null)) {

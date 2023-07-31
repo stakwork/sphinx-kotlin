@@ -43,4 +43,8 @@ abstract class NetworkQueryFeedStatus {
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<ContentFeedStatusDto, ResponseError>>
 
+    abstract suspend fun checkYoutubeVideoAvailable(
+        videoId: String,
+    ): String?
+
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="@dimen/default_list_row_padding_vertical"
+    android:paddingStart="@dimen/default_list_row_padding_vertical"
+    android:paddingEnd="@dimen/default_layout_margin"
+    android:visibility="gone"
+    tools:visibility="visible">
+
+    <!-- Replies -->
+    <include
+        android:id="@+id/include_layout_message_replies_group"
+        layout="@layout/layout_message_replies_group"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_replies_number"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_medium"
+        android:layout_marginStart="@dimen/default_medium_layout_margin"
+        android:textColor="@color/textMessages"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/include_layout_message_replies_group"
+        app:layout_constraintStart_toEndOf="@+id/include_layout_message_replies_group"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="15 replies" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -30,7 +30,6 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
-import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -59,6 +58,7 @@ import chat.sphinx.resources.databinding.LayoutPodcastPlayerFooterBinding
 import chat.sphinx.resources.databinding.LayoutTribeAppBinding
 import chat.sphinx.resources.databinding.LayoutTribeMemberProfileBinding
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_chat.protocolLessUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
@@ -136,6 +136,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutBottomPinned
     private val webView: WebView
         get() = tribeAppBinding.includeLayoutTribeAppDetails.webView
+    private val threadHeader: LayoutThreadHeaderBinding
+        get() = binding.includeLayoutThreadHeader
 
     override val menuEnablePayments: Boolean
         get() = false
@@ -188,6 +190,20 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
+        binding.includeLayoutThreadHeader.apply {
+            (requireActivity() as InsetterActivity).addStatusBarPadding(root)
+
+            textViewChatHeaderNavBack.setOnClickListener {
+                lifecycleScope.launch {
+                    viewModel.chatNavigator.popBackStack()
+                }
+            }
+
+            constraintShowMoreContainer.setOnClickListener {
+                viewModel.toggleThreadDescriptionExpanded()
+            }
+        }
+
         podcastPlayerBinding.apply {
             imageViewForward30Button.setOnClickListener {
                 tribeFeedViewModel.podcastViewStateContainer.value.clickFastForward?.invoke()
@@ -205,6 +221,11 @@ internal class ChatTribeFragment: ChatFragment<
 
         binding.includeChatTribeHeader.imageViewChatWebView.setOnClickListener {
             tribeAppViewModel.toggleWebAppView()
+        }
+
+        binding.includeChatTribeHeader.imageViewThreadsView.visible
+        binding.includeChatTribeHeader.imageViewThreadsView.setOnClickListener {
+            viewModel.navigateToThreads()
         }
 
         boostAnimationBinding.lottieAnimationView.addAnimatorListener(object : Animator.AnimatorListener{
@@ -441,7 +462,10 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                     } ?: (viewModel.pinedMessageBottomViewState.value as? PinMessageBottomViewState.Open)?.let {
                         viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
-                    } ?: run {
+                    } ?: (viewModel.threadViewState.value as? ThreadViewState.ThreadHeader)?.let {
+                        viewModel.navigateToTribeFromThread()
+                    } ?:
+                    run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
@@ -693,6 +717,74 @@ internal class ChatTribeFragment: ChatFragment<
 
                                 includePinnedBottomMessageHolder.apply {
                                     textViewPinnedBottomHeaderText.text = viewState.messageContent
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.threadViewState.collect { viewState ->
+                @Exhaustive
+                when(viewState) {
+                    is ThreadViewState.Idle -> {}
+                    is ThreadViewState.ThreadHeader -> {
+                        binding.layoutConstraintChatHeader.gone
+                        threadHeader.apply {
+                            root.visible
+
+                            textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
+                            textViewThreadDate.text = viewState.date
+                            textViewThreadMessageContent.text = viewState.message
+
+                            if (viewState.message.length < 165) {
+                                textViewShowMore.gone
+                            } else {
+
+                                if (viewState.isExpanded) {
+                                    textViewThreadMessageContent.maxLines = Int.MAX_VALUE
+                                    textViewShowMore.text =
+                                        getString(R.string.episode_description_show_less)
+                                } else {
+                                    textViewThreadMessageContent.maxLines = 4
+                                    textViewShowMore.text =
+                                        getString(R.string.episode_description_show_more)
+                                }
+                            }
+
+                            binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
+                                textViewInitialsName.visible
+                                imageViewChatPicture.gone
+
+                                textViewInitialsName.apply {
+                                    text = viewState.aliasAndColorKey.first?.value?.getInitials()
+                                    setBackgroundRandomColor(
+                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
+                                        Color.parseColor(
+                                            viewState.aliasAndColorKey.second?.let {
+                                                userColorsHelper.getHexCodeForKey(
+                                                    it,
+                                                    root.context.getRandomHexCode(),
+                                                )
+                                            }
+                                        ),
+                                    )
+                                }
+
+                                viewState.photoUrl?.let { photoUrl ->
+                                    textViewInitialsName.gone
+                                    imageViewChatPicture.visible
+
+                                    imageLoader.load(
+                                        layoutContactInitialHolder.imageViewChatPicture,
+                                        photoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
                                 }
                             }
                         }
