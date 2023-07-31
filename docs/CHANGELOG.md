@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta00 (2023-07-30)
+- Adds support for threading
+
 # Version 1.0.0-alpha99 (2023-07-12)
 - Adds downloaded content section on feed
 - Improves chat messages search
