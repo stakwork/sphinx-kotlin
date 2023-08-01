@@ -463,10 +463,7 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                     } ?: (viewModel.pinedMessageBottomViewState.value as? PinMessageBottomViewState.Open)?.let {
                         viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
-                    } ?: (viewModel.threadViewState.value as? ThreadViewState.ThreadHeader)?.let {
-                        viewModel.navigateToTribeFromThread()
-                    } ?:
-                    run {
+                    } ?: run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
