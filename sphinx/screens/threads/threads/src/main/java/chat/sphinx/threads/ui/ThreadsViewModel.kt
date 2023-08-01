@@ -169,7 +169,15 @@ internal class ThreadsViewModel @Inject constructor(
         }
     }
 
-    private fun createThreadItem(uuid: String?, owner: Contact?, messagesForThread: List<Message>?, originalMessage: Message?, chat: Chat?, isSenderOwner: Boolean): ThreadItem {
+    private fun createThreadItem(
+        uuid: String?,
+        owner: Contact?,
+        messagesForThread: List<Message>?,
+        originalMessage: Message?,
+        chat: Chat?,
+        isSenderOwner: Boolean
+    ): ThreadItem {
+
         val senderInfo = if (isSenderOwner) {
             Pair(owner?.alias, owner?.getColorKey())
         } else {
@@ -182,32 +190,32 @@ internal class ThreadsViewModel @Inject constructor(
         val senderPhotoUrl = if (isSenderOwner) owner?.photoUrl else originalMessage?.senderPic
 
         val repliesList = messagesForThread?.drop(1)?.distinctBy { it.senderAlias }
-        val repliesCountMap = messagesForThread?.drop(1)?.groupingBy { (it.senderAlias?.value ?: "Unknown") }?.eachCount()
 
         return ThreadItem(
             aliasAndColorKey = senderInfo,
             photoUrl = senderPhotoUrl,
             date = originalMessage?.date?.chatTimeFormat() ?: "",
             message = originalMessage?.messageContentDecrypted?.value ?: "",
-            usersReplies = createReplyUserHolders(repliesList, chat, owner, repliesCountMap),
+            usersReplies = createReplyUserHolders(repliesList, chat, owner),
+            usersCount = repliesList?.size ?: 0,
             repliesAmount = String.format(app.getString(R.string.replies_amount), messagesForThread?.drop(1)?.size?.toString() ?: "0"),
             lastReplyDate = messagesForThread?.last()?.date?.timeAgo(),
             uuid = uuid ?: ""
         )
     }
 
-    private fun createReplyUserHolders(repliesList: List<Message>?, chat: Chat?, owner: Contact?, repliesCountMap: Map<String, Int>?): List<ReplyUserHolder>? {
+    private fun createReplyUserHolders(
+        repliesList: List<Message>?,
+        chat: Chat?,
+        owner: Contact?
+    ): List<ReplyUserHolder>? {
         return repliesList?.take(6)?.map {
             val isSenderOwner: Boolean = it.sender == chat?.contactIds?.firstOrNull()
-            val repliesCount = repliesCountMap?.get((it.senderAlias?.value ?: "Unknown"))?.minus(1)
 
             ReplyUserHolder(
                 photoUrl = if (isSenderOwner) owner?.photoUrl else it.senderPic,
                 alias = if (isSenderOwner) owner?.alias else it.senderAlias?.value?.toContactAlias(),
-                colorKey = if (isSenderOwner) owner?.getColorKey() ?: "" else it.getColorKey(),
-                repliesCount = repliesCount?.takeIf { it > 0 }?.let { count ->
-                    String.format(app.getString(R.string.threads_plus), count.toString())
-                }
+                colorKey = if (isSenderOwner) owner?.getColorKey() ?: "" else it.getColorKey()
             )
         }
     }

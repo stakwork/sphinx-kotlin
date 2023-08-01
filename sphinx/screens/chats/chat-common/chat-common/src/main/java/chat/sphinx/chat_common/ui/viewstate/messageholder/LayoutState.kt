@@ -306,6 +306,5 @@ data class BoostSenderHolder(
 data class ReplyUserHolder(
     val photoUrl: PhotoUrl?,
     val alias: ContactAlias?,
-    val colorKey: String,
-    val repliesCount: String?
+    val colorKey: String
 )
