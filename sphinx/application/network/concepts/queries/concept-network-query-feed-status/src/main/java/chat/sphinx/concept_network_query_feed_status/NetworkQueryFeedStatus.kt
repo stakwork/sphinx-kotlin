@@ -2,6 +2,7 @@ package chat.sphinx.concept_network_query_feed_status
 
 import chat.sphinx.concept_network_query_feed_status.model.ContentFeedStatusDto
 import chat.sphinx.concept_network_query_feed_status.model.PostFeedStatusDto
+import chat.sphinx.concept_network_query_feed_status.model.PostYoutubeUrlDto
 import chat.sphinx.concept_network_query_feed_status.model.PutFeedStatusDto
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.ResponseError
@@ -46,5 +47,9 @@ abstract class NetworkQueryFeedStatus {
     abstract suspend fun checkYoutubeVideoAvailable(
         videoId: String,
     ): String?
+
+    abstract suspend fun extractYoutubeVideoFromUrl(
+        youtubeUrl: PostYoutubeUrlDto
+    ): Flow<LoadResponse<Any, ResponseError>>
 
 }
