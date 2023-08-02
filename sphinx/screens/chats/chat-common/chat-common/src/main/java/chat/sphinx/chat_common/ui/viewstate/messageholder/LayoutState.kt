@@ -13,7 +13,6 @@ import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_contact.ContactAlias
-import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.PodcastClip as PodcastClipObject
 import chat.sphinx.wrapper_message.PurchaseStatus
@@ -208,7 +207,17 @@ internal sealed class LayoutState private constructor() {
             data class Message(
                 val text: String?,
                 val decryptionError: Boolean,
+                val isThread: Boolean
             ): ContainerThird()
+
+            data class Thread(
+                val replyCount: Int,
+                val users: List<ReplyUserHolder>,
+                val lastReplyMessage: String?,
+                val lastReplyDate: String,
+                val lastReplyUser: ReplyUserHolder,
+                val isSentMessage: Boolean
+            )
 
             data class PaidMessage(
                 val showSent: Boolean,
@@ -292,4 +301,11 @@ data class BoostSenderHolder(
     val photoUrl: PhotoUrl?,
     val alias: ContactAlias?,
     val colorKey: String,
+)
+
+data class ReplyUserHolder(
+    val photoUrl: PhotoUrl?,
+    val alias: ContactAlias?,
+    val colorKey: String,
+    val repliesCount: String?
 )

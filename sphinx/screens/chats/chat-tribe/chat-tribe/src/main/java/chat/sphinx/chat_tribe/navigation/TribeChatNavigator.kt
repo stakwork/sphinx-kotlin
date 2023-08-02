@@ -29,4 +29,6 @@ abstract class TribeChatNavigator(
     abstract suspend fun toNotificationsLevel(chatId: ChatId)
 
     abstract suspend fun toKnownBadges(badgeIds: Array<String>)
+
+    abstract suspend fun toThreads(chatId: ChatId)
 }

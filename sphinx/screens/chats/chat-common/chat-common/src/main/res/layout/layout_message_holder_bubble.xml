@@ -124,6 +124,7 @@
             android:paddingEnd="@dimen/message_holder_text_view_padding_end"
             android:paddingVertical="@dimen/default_inner_spacing_list_item_title"
             android:visibility="gone"
+            android:ellipsize="end"
             app:layout_constraintTop_toBottomOf="@+id/include_unsupported_message_type_placeholder"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="Contrary to popular belief"
@@ -143,13 +144,22 @@
             tools:text="@string/paid_message_pay_to_unlock"
             tools:visibility="gone" />
 
-        <!-- Contact link preview  -->
+        <!-- Thread preview  -->
+        <include
+            android:id="@+id/include_layout_message_thread"
+            layout="@layout/layout_message_thread"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            tools:layout_editor_absoluteX="0dp"
+            tools:visibility="visible" />
+
         <include
             android:id="@+id/include_message_link_preview_contact"
             layout="@layout/layout_message_link_preview_contact"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_message_text"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_message_thread"
             tools:visibility="visible" />
 
 

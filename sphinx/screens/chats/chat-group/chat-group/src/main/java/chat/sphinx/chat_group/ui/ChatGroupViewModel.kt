@@ -16,6 +16,7 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
@@ -31,12 +32,12 @@ import chat.sphinx.wrapper_chat.getColorKey
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.PodcastClip
+import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message.getColorKey
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,6 +63,7 @@ class ChatGroupViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
+    repositoryDashboard: RepositoryDashboardAndroid<Any>,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
@@ -82,6 +84,7 @@ class ChatGroupViewModel @Inject constructor(
     contactRepository,
     messageRepository,
     actionsRepository,
+    repositoryDashboard,
     networkQueryLightning,
     networkQueryPeople,
     mediaCacheHandler,
@@ -132,6 +135,9 @@ class ChatGroupViewModel @Inject constructor(
         return null
     }
 
+    override val threadSharedFlow: SharedFlow<List<Message>>?
+        get() = null
+
     override fun forceKeyExchange() { }
 
     override suspend fun shouldStreamSatsFor(podcastClip: PodcastClip, messageUUID: MessageUUID?) {
@@ -160,6 +166,14 @@ class ChatGroupViewModel @Inject constructor(
     }
 
     override fun reloadPinnedMessage() {}
+
+    override fun getThreadUUID(): ThreadUUID? {
+        return null
+    }
+
+    override fun isThreadChat(): Boolean {
+        return false
+    }
 
     override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
         builder.setChatId(args.chatId)

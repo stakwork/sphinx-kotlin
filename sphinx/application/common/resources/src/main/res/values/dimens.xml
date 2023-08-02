@@ -9,6 +9,7 @@
     <dimen name="default_double_layout_margin">32dp</dimen>
     <dimen name="default_large_layout_margin">48dp</dimen>
     <dimen name="default_big_layout_margin">64dp</dimen>
+    <dimen name="default_huge_layout_margin">96dp</dimen>
     <dimen name="default_extra_big_layout_margin">76dp</dimen>
     <dimen name="default_list_row_padding_vertical">10dp</dimen>
     <dimen name="default_header_height">65dp</dimen>
@@ -101,8 +102,6 @@
     <dimen name="badges_constraint_badge_quantity_width">180dp</dimen>
     <dimen name="badges_constraint_badge_quantity_height">40dp</dimen>
 
-
-
     <!-- Menu option input lock -->
     <item name="options_menu_input_lock_alpha" type="dimen" format="float">.5</item>
 
@@ -125,6 +124,8 @@
     <dimen name="web_view_auth_popup_height">550dp</dimen>
 
     <dimen name="manage_storage_button_cancel_width">100dp</dimen>
+
+    <dimen name="chat_scroll_down_button_number_height">15dp</dimen>
 
     <dimen name="default_feed_watch_image_width">260dp</dimen>
     <dimen name="default_feed_watch_image_height">160dp</dimen>
@@ -182,4 +183,11 @@
     <dimen name="feed_item_detail_row_height">65dp</dimen>
     <dimen name="feed_item_detail_rows_container_height">260dp</dimen>
     <dimen name="feed_item_detail_rows_container_margin_top">36dp</dimen>
+
+    <!-- Thread -->
+    <dimen name="thread_header_height">316dp</dimen>
+    <dimen name="thread_reply_height">36dp</dimen>
+    <dimen name="thread_reply_double_height">72dp</dimen>
+    <dimen name="thread_reply_half_height">18dp</dimen>
+
 </resources>

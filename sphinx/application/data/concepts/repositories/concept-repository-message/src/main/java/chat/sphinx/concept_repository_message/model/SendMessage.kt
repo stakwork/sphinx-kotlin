@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.ReplyUUID
+import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message_media.isSphinxText
 import java.io.File
 
@@ -22,7 +23,8 @@ class SendMessage private constructor(
     val isCall: Boolean,
     val isTribePayment: Boolean,
     val paidMessagePrice: Sat?,
-    val priceToMeet: Sat?
+    val priceToMeet: Sat?,
+    val threadUUID: ThreadUUID?
 ) {
 
     class Builder {
@@ -39,6 +41,7 @@ class SendMessage private constructor(
         private var isTribePayment: Boolean         = false
         private var paidMessagePrice: Sat?          = null
         private var priceToMeet: Sat?               = null
+        private var threadUUID: ThreadUUID?         = null
 
         enum class ValidationError {
             EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
@@ -58,6 +61,7 @@ class SendMessage private constructor(
             isTribePayment = false
             paidMessagePrice = null
             priceToMeet = null
+            threadUUID = null
         }
 
         @Synchronized
@@ -185,6 +189,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setThreadUUID(threadUUID: ThreadUUID?): Builder {
+            this.threadUUID = threadUUID
+            return this
+        }
+
+        @Synchronized
         fun build(): Pair<SendMessage?, ValidationError?> {
             val isValid = isValid()
 
@@ -205,7 +215,8 @@ class SendMessage private constructor(
                         isCall,
                         isTribePayment,
                         paidMessagePrice,
-                        priceToMeet
+                        priceToMeet,
+                        threadUUID
                     ), null
                 )
             }

@@ -218,6 +218,8 @@
     <string name="mnemonic_copied_to_clipboard">Ang mga Mnemonic na salita  ay nakopya na sa clipboard</string>
     <string name="bitcoin_network">Bitcoin Network</string>
     <string name="select_bitcoin_network">Piliin ang Bitcoin Network</string>
+    <string name="replies_amount">%s replies</string>
+    <string name="threads_more_replies">more replies</string>
 
 
 </resources>

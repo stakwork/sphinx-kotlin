@@ -519,9 +519,7 @@ internal class VideoFeedWatchScreenFragment : SideEffectFragment<
                                 textViewVideoPublishedDate.text = viewState.date?.hhmmElseDate()
 
                                 if (viewState.url.isYoutubeVideo()) {
-
                                     viewModel.checkYoutubeVideoAvailable(viewState.id)
-
                                 } else {
                                     val videoUri = if (viewState.localFile != null) {
                                         viewState.localFile.toUri()

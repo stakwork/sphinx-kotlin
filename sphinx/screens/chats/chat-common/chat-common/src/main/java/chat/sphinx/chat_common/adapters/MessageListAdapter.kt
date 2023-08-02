@@ -30,6 +30,7 @@ import chat.sphinx.wrapper_chat.isPrivateTribe
 import chat.sphinx.wrapper_chat.isTribe
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
@@ -51,6 +52,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
     private val userColorsHelper: UserColorsHelper,
+    private val isThreadChat: Boolean
 ) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
     DefaultLifecycleObserver,
     View.OnLayoutChangeListener
@@ -99,15 +101,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 when {
                     old is MessageHolderViewState.Received && new is MessageHolderViewState.Received -> {
-                        old.background                         == new.background        &&
-                        old.message                            == new.message           &&
-                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
+                        old.background                         == new.background                   &&
+                        old.message                            == new.message                      &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState  &&
+                        old.message?.thread                    == new.message?.thread
                     }
                     old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
                         old.background                         == new.background                    &&
                         old.message                            == new.message                       &&
                         old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState   &&
-                        old.isPinned                           == new.isPinned
+                        old.isPinned                           == new.isPinned                      &&
+                        old.message?.thread                    == new.message?.thread
                     }
                     else -> {
                         false
@@ -148,6 +152,9 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     private fun scrollToUnseenSeparatorOrBottom(messageHolders: List<MessageHolderViewState>) {
+        if (isThreadChat) {
+            return
+        }
         for ((index, message) in messageHolders.withIndex()) {
             (message as? MessageHolderViewState.Separator)?.let {
                 if (it.messageHolderType.isUnseenSeparatorHolder()) {
@@ -449,6 +456,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                     layoutConstraintAttachmentFileMainInfoGroup.setOnLongClickListener(selectedMessageLongClickListener)
+                }
+
+                includeLayoutMessageThread.apply {
+                    root.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            message.uuid?.let { nnUUID -> viewModel.navigateToChatThread(nnUUID) }
+                        }
+                    }
                 }
 
                 includePaidMessageReceivedDetailsHolder.apply {

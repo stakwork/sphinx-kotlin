@@ -22,6 +22,7 @@ import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_message.ThreadUUID
 import javax.inject.Inject
 
 internal class GroupChatNavigatorImpl @Inject constructor(
@@ -79,11 +80,22 @@ internal class GroupChatNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toChatTribe(chatId: ChatId) {
+    override suspend fun toChatTribe(chatId: ChatId, threadUUID: ThreadUUID?) {
         navigationDriver.submitNavigationRequest(
             ToChatTribeScreen(
                 chatId = chatId,
                 popUpToId = R.id.navigation_dashboard_fragment,
+                popUpToInclusive = false,
+            )
+        )
+    }
+
+    override suspend fun toChatThread(chatId: ChatId, threadUUID: ThreadUUID?) {
+        navigationDriver.submitNavigationRequest(
+            ToChatTribeScreen(
+                chatId = chatId,
+                threadUUID = threadUUID,
+                popUpToId = R.id.navigation_chat_tribe_fragment,
                 popUpToInclusive = false,
             )
         )
