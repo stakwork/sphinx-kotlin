@@ -30,6 +30,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -66,7 +67,6 @@ import chat.sphinx.wrapper_common.util.getInitials
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
 import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -718,6 +718,72 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.threadHeaderViewState.collect { viewState ->
+                threadHeader.apply {
+                @Exhaustive
+                when(viewState) {
+                    is ThreadHeaderViewState.Idle -> {}
+                    is ThreadHeaderViewState.BasicHeader -> {
+                        root.visible
+                        binding.layoutConstraintChatHeader.gone
+
+                        layoutConstraintOriginalMessage.gone
+                        layoutConstraintThreadContactName.gone
+                        textViewHeader.visible
+                    }
+                    is ThreadHeaderViewState.FullHeader -> {
+                        root.visible
+                        binding.layoutConstraintChatHeader.gone
+
+                        layoutConstraintOriginalMessage.visible
+                        layoutConstraintThreadContactName.visible
+                        textViewHeader.gone
+
+                        textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
+                            textViewThreadDate.text = viewState.date
+                            textViewThreadMessageContent.text = viewState.message
+
+                            binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
+                                textViewInitialsName.visible
+                                imageViewChatPicture.gone
+
+                                textViewInitialsName.apply {
+                                    text = viewState.aliasAndColorKey.first?.value?.getInitials()
+                                    setBackgroundRandomColor(
+                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
+                                        Color.parseColor(
+                                            viewState.aliasAndColorKey.second?.let {
+                                                userColorsHelper.getHexCodeForKey(
+                                                    it,
+                                                    root.context.getRandomHexCode(),
+                                                )
+                                            }
+                                        ),
+                                    )
+                                }
+
+                                viewState.photoUrl?.let { photoUrl ->
+                                    textViewInitialsName.gone
+                                    imageViewChatPicture.visible
+
+                                    imageLoader.load(
+                                        layoutContactInitialHolder.imageViewChatPicture,
+                                        photoUrl.value,
+                                        ImageLoaderOptions.Builder()
+                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                            .transformation(Transformation.CircleCrop)
+                                            .build()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->

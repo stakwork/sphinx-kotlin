@@ -40,6 +40,7 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
 import chat.sphinx.chat_common.util.AudioRecorderController
@@ -187,6 +188,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
         ChatHeaderViewStateContainer()
+    }
+
+    val threadHeaderViewState: ViewStateContainer<ThreadHeaderViewState> by lazy {
+        ViewStateContainer(ThreadHeaderViewState.Idle)
     }
 
     private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
@@ -1446,6 +1451,23 @@ abstract class ChatViewModel<ARGS : NavArgs>(
             }
         }
         messageHolderViewStateFlow.value = newList
+    }
+
+    fun changeThreadHeaderState(isFullHeader: Boolean){
+        if (isFullHeader) {
+            (messageHolderViewStateFlow.value.getOrNull(0) as? MessageHolderViewState.ThreadHeader)?.let { originalMessage ->
+                val threadHeader = ThreadHeaderViewState.FullHeader(
+                    originalMessage.aliasAndColorKey,
+                    originalMessage.photoUrl,
+                    originalMessage.date,
+                    originalMessage.messageText
+                )
+                threadHeaderViewState.updateViewState(threadHeader)
+            }
+        }
+        else {
+            threadHeaderViewState.updateViewState(ThreadHeaderViewState.BasicHeader)
+        }
     }
 
     fun copyMessageText(message: Message) {

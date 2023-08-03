@@ -835,6 +835,7 @@ abstract class ChatFragment<
             isThreadChat = viewModel.isThreadChat()
         )
         val footerAdapter = MessageListFooterAdapter()
+
         recyclerView.apply {
             setHasFixedSize(false)
             layoutManager = linearLayoutManager
@@ -842,6 +843,22 @@ abstract class ChatFragment<
             itemAnimator = null
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    if (viewModel.isThreadChat()) {
+                        val firstVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition()
+
+                        if (firstVisiblePosition > 0) {
+                            viewModel.changeThreadHeaderState(true)
+                        }
+
+                        if (firstVisiblePosition == 0) {
+                            viewModel.changeThreadHeaderState(false)
+                        }
+                    }
+                }
+
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
 
