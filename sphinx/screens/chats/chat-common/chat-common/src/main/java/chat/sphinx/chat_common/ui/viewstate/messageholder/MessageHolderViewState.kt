@@ -844,12 +844,12 @@ internal sealed class MessageHolderViewState(
 
     class ThreadHeader(
         messageHolderType: MessageHolderType,
-        chat: Chat,
-        tribeAdmin: Contact?,
+        val chat: Chat,
+        val tribeAdmin: Contact?,
         background: BubbleBackground,
         invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         initialHolder: InitialHolderViewState,
-        accountOwner: () -> Contact,
+        val accountOwner: () -> Contact,
         val aliasAndColorKey: Pair<ContactAlias?, String?>,
         val photoUrl: PhotoUrl?,
         val date: String,
@@ -871,6 +871,23 @@ internal sealed class MessageHolderViewState(
         { null },
         { null },
         {}
-    )
+    ) {
+        fun copy(isExpanded: Boolean = this.isExpanded): ThreadHeader {
+            return ThreadHeader(
+                messageHolderType,
+                chat,
+                tribeAdmin,
+                background,
+                invoiceLinesHolderViewState,
+                initialHolder,
+                accountOwner,
+                aliasAndColorKey,
+                photoUrl,
+                date,
+                messageText,
+                isExpanded
+            )
+        }
+    }
 
 }

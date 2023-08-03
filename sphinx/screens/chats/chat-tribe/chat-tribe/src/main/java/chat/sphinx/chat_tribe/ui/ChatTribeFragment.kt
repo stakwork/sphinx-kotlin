@@ -199,10 +199,6 @@ internal class ChatTribeFragment: ChatFragment<
                     viewModel.chatNavigator.popBackStack()
                 }
             }
-
-            constraintShowMoreContainer.setOnClickListener {
-                viewModel.toggleThreadDescriptionExpanded()
-            }
         }
 
         podcastPlayerBinding.apply {
@@ -718,74 +714,6 @@ internal class ChatTribeFragment: ChatFragment<
                                 }
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.threadViewState.collect { viewState ->
-                @Exhaustive
-                when(viewState) {
-                    is ThreadViewState.Idle -> {}
-                    is ThreadViewState.ThreadHeader -> {
-//                        binding.layoutConstraintChatHeader.gone
-//                        threadHeader.apply {
-//                            root.visible
-//
-//                            textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
-//                            textViewThreadDate.text = viewState.date
-//                            textViewThreadMessageContent.text = viewState.message
-//
-//                            if (viewState.message.length < 165) {
-//                                textViewShowMore.gone
-//                            } else {
-//
-//                                if (viewState.isExpanded) {
-//                                    textViewThreadMessageContent.maxLines = Int.MAX_VALUE
-//                                    textViewShowMore.text =
-//                                        getString(R.string.episode_description_show_less)
-//                                } else {
-//                                    textViewThreadMessageContent.maxLines = 4
-//                                    textViewShowMore.text =
-//                                        getString(R.string.episode_description_show_more)
-//                                }
-//                            }
-//
-//                            binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
-//                                textViewInitialsName.visible
-//                                imageViewChatPicture.gone
-//
-//                                textViewInitialsName.apply {
-//                                    text = viewState.aliasAndColorKey.first?.value?.getInitials()
-//                                    setBackgroundRandomColor(
-//                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
-//                                        Color.parseColor(
-//                                            viewState.aliasAndColorKey.second?.let {
-//                                                userColorsHelper.getHexCodeForKey(
-//                                                    it,
-//                                                    root.context.getRandomHexCode(),
-//                                                )
-//                                            }
-//                                        ),
-//                                    )
-//                                }
-//
-//                                viewState.photoUrl?.let { photoUrl ->
-//                                    textViewInitialsName.gone
-//                                    imageViewChatPicture.visible
-//
-//                                    imageLoader.load(
-//                                        layoutContactInitialHolder.imageViewChatPicture,
-//                                        photoUrl.value,
-//                                        ImageLoaderOptions.Builder()
-//                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
-//                                            .transformation(Transformation.CircleCrop)
-//                                            .build()
-//                                    )
-//                                }
-//                            }
-//                        }
                     }
                 }
             }

@@ -685,9 +685,11 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutThreadMessageHeaderBinding
     ) : RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
-        private val holderJobs: ArrayList<Job> = ArrayList(15)
-        private val disposables: ArrayList<Disposable> = ArrayList(4)
-        private var currentViewState: MessageHolderViewState? = null
+        init {
+            binding.constraintShowMoreContainer.setOnClickListener {
+                viewModel.toggleThreadDescriptionExpanded()
+            }
+        }
 
         fun bind(position: Int) {
             val threadHeader = messages.getOrNull(position) as MessageHolderViewState.ThreadHeader

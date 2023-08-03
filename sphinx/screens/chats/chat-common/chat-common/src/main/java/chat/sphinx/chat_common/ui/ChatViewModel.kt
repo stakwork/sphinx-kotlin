@@ -1435,6 +1435,19 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         }
     }
 
+    fun toggleThreadDescriptionExpanded() {
+        val currentList = messageHolderViewStateFlow.value
+
+        val newList = currentList.map { item ->
+            if (item is MessageHolderViewState.ThreadHeader) {
+                item.copy(isExpanded = !item.isExpanded)
+            } else {
+                item
+            }
+        }
+        messageHolderViewStateFlow.value = newList
+    }
+
     fun copyMessageText(message: Message) {
         viewModelScope.launch(mainImmediate) {
             message.retrieveTextToShow()?.let { text ->
