@@ -724,6 +724,8 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                 }
             }
             is MessageHolderViewState.Separator -> { }
+
+            is MessageHolderViewState.ThreadHeader -> { }
         }
     }
 }

@@ -52,6 +52,8 @@ internal inline fun LayoutSelectedMessageBinding.setMenuColor(viewState: Message
                     .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
             }
             is MessageHolderViewState.Separator -> { }
+
+            is MessageHolderViewState.ThreadHeader -> { }
         }
     }
 }

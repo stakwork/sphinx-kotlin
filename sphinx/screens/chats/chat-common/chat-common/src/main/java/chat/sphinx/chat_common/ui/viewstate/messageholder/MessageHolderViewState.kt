@@ -841,4 +841,36 @@ internal sealed class MessageHolderViewState(
         paidTextAttachmentContentProvider = { null },
         onBindDownloadMedia = {}
     )
+
+    class ThreadHeader(
+        messageHolderType: MessageHolderType,
+        chat: Chat,
+        tribeAdmin: Contact?,
+        background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
+        initialHolder: InitialHolderViewState,
+        accountOwner: () -> Contact,
+        val aliasAndColorKey: Pair<ContactAlias?, String?>,
+        val photoUrl: PhotoUrl?,
+        val date: String,
+        val messageText: String,
+        val isExpanded: Boolean = false
+    ) : MessageHolderViewState(
+        null,
+        chat,
+        tribeAdmin,
+        messageHolderType,
+        null,
+        background,
+        invoiceLinesHolderViewState,
+        initialHolder,
+        null,
+        { null },
+        accountOwner,
+        false,
+        { null },
+        { null },
+        {}
+    )
+
 }
