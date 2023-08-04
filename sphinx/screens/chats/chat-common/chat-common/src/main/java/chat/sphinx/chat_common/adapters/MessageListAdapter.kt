@@ -167,9 +167,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     private fun scrollToUnseenSeparatorOrBottom(messageHolders: List<MessageHolderViewState>) {
-        if (isThreadChat) {
-            return
-        }
         for ((index, message) in messageHolders.withIndex()) {
             (message as? MessageHolderViewState.Separator)?.let {
                 if (it.messageHolderType.isUnseenSeparatorHolder()) {

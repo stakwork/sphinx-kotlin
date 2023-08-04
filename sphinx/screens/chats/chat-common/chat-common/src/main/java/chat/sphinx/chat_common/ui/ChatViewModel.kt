@@ -177,13 +177,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     val scrollDownViewStateContainer: ViewStateContainer<ScrollDownViewState> by lazy {
-        ViewStateContainer(
-            if (isThreadChat()) {
-                ScrollDownViewState.On("0")
-            } else {
-                ScrollDownViewState.Off
-            }
-        )
+        ViewStateContainer(ScrollDownViewState.Off)
     }
 
     val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
@@ -509,7 +503,9 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                 val threadPhotoUrl = if (isOwner) owner.photoUrl else message.senderPic
 
-                if (message.uuid?.value == getThreadUUID()?.value) {
+                val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0)
+
+                if (isThreadHeaderMessage) {
                     newList.add(
                         MessageHolderViewState.ThreadHeader(
                             MessageHolderType.ThreadHeader,
@@ -525,6 +521,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                             message.messageContentDecrypted?.value ?: ""
                         )
                     )
+                    continue
                 }
 
 
@@ -563,8 +560,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                 if (
                     (sent && !message.isPaidInvoice) ||
-                    (!sent && message.isPaidInvoice) ||
-                    (message.uuid?.value != getThreadUUID()?.value)
+                    (!sent && message.isPaidInvoice)
                 ) {
                     newList.add(
                         MessageHolderViewState.Sent(
@@ -958,12 +954,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                     messageHolderViewStateFlow.value = list
 
-                    scrollDownButtonCount.value = list.drop(0).size.toLong()
+                    scrollDownButtonCount.value = messages.size.toLong()
 
-                    if (!isScrollDownButtonSetup) {
-                        setupScrollDownButtonCount()
-                        isScrollDownButtonSetup = true
-                    }
                 }
             } else {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
@@ -999,7 +991,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 ScrollDownViewState.Off
             )
         }
-
     }
 
     abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>
