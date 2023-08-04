@@ -427,44 +427,19 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
-        val threadMessageMap: MutableMap<String, Int> = mutableMapOf()
-
         withContext(io) {
 
             var groupingDate: DateTime? = null
             var openSentPaidInvoicesCount = 0
             var openReceivedPaidInvoicesCount = 0
 
-            val filteredMessages: MutableList<Message> = mutableListOf()
+            val messagesList = filterAndSortMessagesIfNecessary(chat, messages)
 
-            if (chat.isTribe() && !isThreadChat()) {
-                // Filter messages to do not show thread replies on chat
-                for (message in messages) {
+            for ((index, message) in messagesList.withIndex()) {
 
-                    if (message.thread?.isNotEmpty() == true) {
-                        message.uuid?.value?.let { uuid ->
-                            threadMessageMap[uuid] = message.thread?.count() ?: 0
-                        }
-                    }
-
-                    val shouldAddMessage = message.threadUUID?.let { threadUUID ->
-                        val count = threadMessageMap[threadUUID.value] ?: 0
-                        count <= 1
-                    } ?: true
-
-                    if (shouldAddMessage) {
-                        filteredMessages.add(message)
-                    }
-                }
-            } else {
-                filteredMessages.addAll(messages)
-            }
-
-            for ((index, message) in filteredMessages.withIndex()) {
-
-                val previousMessage: Message? = if (index > 0) filteredMessages[index - 1] else null
+                val previousMessage: Message? = if (index > 0) messagesList[index - 1] else null
                 val nextMessage: Message? =
-                    if (index < filteredMessages.size - 1) filteredMessages[index + 1] else null
+                    if (index < messagesList.size - 1) messagesList[index + 1] else null
 
                 val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
                     message,
@@ -540,8 +515,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     )
                     unseenSeparatorAdded = true
                 }
+                // Consider last reply or message and last reply of previous message if exists
+                val actualMessage = message.thread?.last() ?: message
+                val actualPreviousMessage = previousMessage?.thread?.last() ?: previousMessage
 
-                if (previousMessage == null || message.date.isDifferentDayThan(previousMessage.date)) {
+                if (actualPreviousMessage == null || actualMessage.date.isDifferentDayThan(actualPreviousMessage.date)) {
                     newList.add(
                         MessageHolderViewState.Separator(
                             MessageHolderType.DateSeparator,
@@ -715,6 +693,41 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         }
 
         return newList
+    }
+
+    private fun filterAndSortMessagesIfNecessary(
+        chat: Chat,
+        messages: List<Message>,
+    ): List<Message> {
+        val filteredMessages: MutableList<Message> = mutableListOf()
+        val threadMessageMap: MutableMap<String, Int> = mutableMapOf()
+
+        // Filter messages to do not show thread replies on chat
+        if (chat.isTribe() && !isThreadChat()) {
+            for (message in messages) {
+
+                if (message.thread?.isNotEmpty() == true) {
+                    message.uuid?.value?.let { uuid ->
+                        threadMessageMap[uuid] = message.thread?.count() ?: 0
+                    }
+                }
+
+                val shouldAddMessage = message.threadUUID?.let { threadUUID ->
+                    val count = threadMessageMap[threadUUID.value] ?: 0
+                    count <= 1
+                } ?: true
+
+                if (shouldAddMessage) {
+                    filteredMessages.add(message)
+                }
+            }
+        } else {
+            filteredMessages.addAll(messages)
+        }
+
+        // Sort messages list by the last thread message date if applicable
+
+        return filteredMessages.sortedBy { it.thread?.last()?.date?.value ?: it.date.value }
     }
 
     internal val messageHolderViewStateFlow: MutableStateFlow<List<MessageHolderViewState>> by lazy {
