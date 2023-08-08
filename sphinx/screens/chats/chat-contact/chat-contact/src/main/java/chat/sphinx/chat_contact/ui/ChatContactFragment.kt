@@ -76,6 +76,10 @@ internal class ChatContactFragment: ChatFragment<
         LayoutScrollDownButtonBinding::bind, R.id.include_chat_contact_scroll_down
     )
 
+    override val shimmerBinding: LayoutShimmerContainerBinding by viewBinding(
+        LayoutShimmerContainerBinding::bind, R.id.include_chat_contact_shimmer_container
+    )
+
     override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
         get() = null
 

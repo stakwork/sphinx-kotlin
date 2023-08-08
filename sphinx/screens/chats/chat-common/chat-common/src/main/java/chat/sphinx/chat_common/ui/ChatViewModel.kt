@@ -40,6 +40,7 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.ui.viewstate.shimmer.ShimmerViewState
 import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
@@ -186,6 +187,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     val threadHeaderViewState: ViewStateContainer<ThreadHeaderViewState> by lazy {
         ViewStateContainer(ThreadHeaderViewState.Idle)
+    }
+
+    val shimmerViewState: ViewStateContainer<ShimmerViewState> by lazy {
+        ViewStateContainer(ShimmerViewState.On)
     }
 
     private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
@@ -967,6 +972,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                     messageHolderViewStateFlow.value = list
 
+                    shimmerViewState.updateViewState(ShimmerViewState.Off)
+
                     scrollDownButtonCount.value = messages.size.toLong()
 
                 }
@@ -979,6 +986,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+
+                    shimmerViewState.updateViewState(ShimmerViewState.Off)
 
                     reloadPinnedMessage()
 

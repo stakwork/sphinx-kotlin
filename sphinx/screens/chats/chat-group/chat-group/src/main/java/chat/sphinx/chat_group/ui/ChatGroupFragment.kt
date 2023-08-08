@@ -75,6 +75,10 @@ internal class ChatGroupFragment: ChatFragment<
         LayoutScrollDownButtonBinding::bind, R.id.include_chat_group_scroll_down
     )
 
+    override val shimmerBinding: LayoutShimmerContainerBinding by viewBinding(
+        LayoutShimmerContainerBinding::bind, R.id.include_chat_group_shimmer_container
+    )
+
     override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
         get() = null
 

@@ -124,6 +124,8 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutMenuBottomMore
     override val scrollDownButtonBinding: LayoutScrollDownButtonBinding
         get() = binding.includeChatTribeScrollDown
+    override val shimmerBinding: LayoutShimmerContainerBinding
+        get() = binding.includeChatTribeShimmerContainer
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
