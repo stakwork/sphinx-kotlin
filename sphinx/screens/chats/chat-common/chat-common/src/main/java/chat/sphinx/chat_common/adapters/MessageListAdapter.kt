@@ -41,6 +41,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -132,12 +133,20 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     private val messages = ArrayList<MessageHolderViewState>(viewModel.messageHolderViewStateFlow.value)
+    private var isFirstCollection = true
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
 
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.main) {
             viewModel.messageHolderViewStateFlow.collect { list ->
+
+                // Delay added to ensure navigation animation is done
+                if (isFirstCollection) {
+                    delay(600)
+                    isFirstCollection = false
+                }
+
                 if (messages.isEmpty()) {
                     messages.addAll(list)
                     notifyDataSetChanged()
