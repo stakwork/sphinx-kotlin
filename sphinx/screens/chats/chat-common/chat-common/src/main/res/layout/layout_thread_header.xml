@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_constraint_thread_header"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/default_header_height"
     android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
 
@@ -12,6 +12,7 @@
         android:id="@+id/constraint_header_container"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_header_height"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -21,10 +22,10 @@
             android:layout_width="@dimen/default_chat_initial_image_xy"
             android:layout_height="@dimen/default_chat_initial_image_xy"
             android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_nav_back"
             android:textColor="@color/washedOutReceivedText"
             android:textSize="@dimen/default_text_size_back_arrow"
-            android:text="@string/material_icon_name_nav_back"
-            android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -33,14 +34,14 @@
             android:id="@+id/text_view_header"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_elevation"
             android:ellipsize="none"
             android:fontFamily="@font/roboto_medium"
-            android:layout_marginStart="@dimen/default_elevation"
             android:maxLines="1"
-            android:visibility="gone"
             android:text="@string/thread_header"
             android:textColor="@color/primaryText"
             android:textSize="@dimen/pin_text_view_size"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_nav_back"
             app:layout_constraintTop_toTopOf="parent" />
@@ -108,35 +109,6 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_original_message"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:layout_marginBottom="@dimen/default_layout_margin"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraint_header_container">
-
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_thread_message_content"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:fontFamily="@font/roboto_regular"
-            android:gravity="start"
-            android:maxLines="2"
-            android:paddingEnd="@dimen/default_small_layout_margin"
-            android:textColor="@color/textMessages"
-            android:textSize="@dimen/option_title_text_size"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="The bitcoin blockchain is a public ledger that records bitcoin transactions.[27] It is implemented as a chain of blocks, each block containing a cryptographic hash of then" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

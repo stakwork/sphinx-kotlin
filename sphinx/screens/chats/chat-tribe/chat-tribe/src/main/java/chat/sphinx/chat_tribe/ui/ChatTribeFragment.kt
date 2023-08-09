@@ -133,6 +133,9 @@ internal class ChatTribeFragment: ChatFragment<
     override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
         get() = binding.includeChatPinedMessageHeader
 
+    override val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
+        get() = binding.includeLayoutThreadOriginalMessage
+
     private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
         get() = binding.includePinMessagePopup
     private val layoutBottomPinned: LayoutBottomPinnedBinding
@@ -729,23 +732,29 @@ internal class ChatTribeFragment: ChatFragment<
                     is ThreadHeaderViewState.Idle -> {}
                     is ThreadHeaderViewState.BasicHeader -> {
                         root.visible
-                        binding.layoutConstraintChatHeader.gone
+                        binding.includeChatTribeHeader.root.gone
+                        binding.includeChatPinedMessageHeader.root.gone
+                        threadOriginalMessageBinding?.root?.gone
+//                        threadOriginalMessageBinding?.textViewThreadMessageContent?.gone
 
-                        layoutConstraintOriginalMessage.gone
                         layoutConstraintThreadContactName.gone
                         textViewHeader.visible
                     }
                     is ThreadHeaderViewState.FullHeader -> {
                         root.visible
-                        binding.layoutConstraintChatHeader.gone
+                        binding.includeChatTribeHeader.root.gone
+//                        threadOriginalMessageBinding?.root?.gone
+                        binding.includeChatPinedMessageHeader.root.gone
 
-                        layoutConstraintOriginalMessage.visible
+                        threadOriginalMessageBinding?.root?.visible
+                        threadOriginalMessageBinding?.textViewThreadMessageContent?.visible
+
                         layoutConstraintThreadContactName.visible
                         textViewHeader.gone
 
                         textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
                             textViewThreadDate.text = viewState.date
-                            textViewThreadMessageContent.text = viewState.message
+                        threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible

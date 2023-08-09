@@ -129,6 +129,7 @@ abstract class ChatFragment<
     protected abstract val moreMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
     protected abstract val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+    protected abstract val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
     protected abstract val scrollDownButtonBinding: LayoutScrollDownButtonBinding
     protected abstract val shimmerBinding: LayoutShimmerContainerBinding
 
@@ -823,6 +824,7 @@ abstract class ChatFragment<
     }
 
     private fun setupRecyclerView() {
+        var isFirstInitialization = true
         val linearLayoutManager = LinearLayoutManager(binding.root.context)
         val messageListAdapter = MessageListAdapter(
             recyclerView,
@@ -851,12 +853,17 @@ abstract class ChatFragment<
                     if (viewModel.isThreadChat()) {
                         val firstVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition()
 
-                        if (firstVisiblePosition > 0) {
+                        if (isFirstInitialization) {
                             viewModel.changeThreadHeaderState(true)
-                        }
+                            isFirstInitialization = false
+                        } else {
+                            if (firstVisiblePosition > 0) {
+                                viewModel.changeThreadHeaderState(true)
+                            }
 
-                        if (firstVisiblePosition == 0) {
-                            viewModel.changeThreadHeaderState(false)
+                            if (firstVisiblePosition == 0) {
+                                viewModel.changeThreadHeaderState(false)
+                            }
                         }
                     }
                 }

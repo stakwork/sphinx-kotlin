@@ -83,6 +83,8 @@ internal class ChatContactFragment: ChatFragment<
     override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
         get() = null
 
+    override val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
+        get() = null
 
     override val menuEnablePayments: Boolean
         get() = true
