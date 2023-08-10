@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="12dp"
+    android:paddingStart="@dimen/default_medium_layout_margin"
     android:background="@color/body">
 
     <View
