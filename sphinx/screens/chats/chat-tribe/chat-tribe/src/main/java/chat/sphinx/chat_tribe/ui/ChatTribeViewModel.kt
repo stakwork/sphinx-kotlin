@@ -614,6 +614,10 @@ class ChatTribeViewModel @Inject constructor(
         messageUUID: MessageUUID?,
         chatId: ChatId
     ) {
+        if (isThreadChat()) {
+            return
+        }
+
         messageUUID?.let { uuid ->
             if (uuid.value.isNotEmpty()) {
                 messageRepository.getMessageByUUID(uuid).firstOrNull()?.let { message ->

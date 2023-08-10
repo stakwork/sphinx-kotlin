@@ -133,7 +133,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     private val messages = ArrayList<MessageHolderViewState>(viewModel.messageHolderViewStateFlow.value)
-    private var isFirstCollection = true
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -142,11 +141,6 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             viewModel.messageHolderViewStateFlow.collect { list ->
 
                 // Delay added to ensure navigation animation is done
-                if (isFirstCollection) {
-                    delay(600)
-                    isFirstCollection = false
-                }
-
                 if (messages.isEmpty()) {
                     messages.addAll(list)
                     notifyDataSetChanged()

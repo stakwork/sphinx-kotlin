@@ -197,7 +197,11 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         binding.includeLayoutThreadHeader.apply {
-            (requireActivity() as InsetterActivity).addStatusBarPadding(root)
+            val insetterActivity = (requireActivity() as InsetterActivity)
+            insetterActivity.addStatusBarPadding(root)
+
+            root.layoutParams.height = root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
+            root.requestLayout()
 
             textViewChatHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch {
@@ -727,34 +731,34 @@ internal class ChatTribeFragment: ChatFragment<
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.threadHeaderViewState.collect { viewState ->
                 threadHeader.apply {
-                @Exhaustive
-                when(viewState) {
-                    is ThreadHeaderViewState.Idle -> {}
-                    is ThreadHeaderViewState.BasicHeader -> {
-                        root.visible
-                        binding.includeChatTribeHeader.root.gone
-                        binding.includeChatPinedMessageHeader.root.gone
-                        threadOriginalMessageBinding?.root?.gone
-//                        threadOriginalMessageBinding?.textViewThreadMessageContent?.gone
+                    @Exhaustive
+                    when(viewState) {
+                        is ThreadHeaderViewState.Idle -> {
+                            root.gone
+                        }
+                        is ThreadHeaderViewState.BasicHeader -> {
+                            root.visible
 
-                        layoutConstraintThreadContactName.gone
-                        textViewHeader.visible
-                    }
-                    is ThreadHeaderViewState.FullHeader -> {
-                        root.visible
-                        binding.includeChatTribeHeader.root.gone
-//                        threadOriginalMessageBinding?.root?.gone
-                        binding.includeChatPinedMessageHeader.root.gone
+                            binding.includeChatTribeHeader.root.gone
+                            binding.includeChatPinedMessageHeader.root.gone
+                            threadOriginalMessageBinding?.root?.gone
 
-                        threadOriginalMessageBinding?.root?.visible
-                        threadOriginalMessageBinding?.textViewThreadMessageContent?.visible
+                            layoutConstraintThreadContactName.gone
+                            textViewHeader.visible
+                        }
+                        is ThreadHeaderViewState.FullHeader -> {
+                            root.visible
+                            binding.includeChatTribeHeader.root.gone
+                            binding.includeChatPinedMessageHeader.root.gone
 
-                        layoutConstraintThreadContactName.visible
-                        textViewHeader.gone
+                            threadOriginalMessageBinding?.root?.visible
 
-                        textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
-                            textViewThreadDate.text = viewState.date
-                        threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
+                            layoutConstraintThreadContactName.visible
+                            textViewHeader.gone
+
+                            textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
+                                textViewThreadDate.text = viewState.date
+                            threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible

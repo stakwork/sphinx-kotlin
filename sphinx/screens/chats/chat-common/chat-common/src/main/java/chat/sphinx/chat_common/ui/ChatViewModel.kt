@@ -186,7 +186,13 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     val threadHeaderViewState: ViewStateContainer<ThreadHeaderViewState> by lazy {
-        ViewStateContainer(ThreadHeaderViewState.Idle)
+        ViewStateContainer(
+            if (isThreadChat()) {
+                ThreadHeaderViewState.BasicHeader
+            } else {
+                ThreadHeaderViewState.Idle
+            }
+        )
     }
 
     val shimmerViewState: ViewStateContainer<ShimmerViewState> by lazy {
@@ -970,23 +976,19 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                     val list = getMessageHolderViewStateList(completeThread.filterNotNull()).toList()
 
+                    delay(200)
+                    
                     messageHolderViewStateFlow.value = list
-
+                    changeThreadHeaderState(true)
                     shimmerViewState.updateViewState(ShimmerViewState.Off)
 
                     scrollDownButtonCount.value = messages.size.toLong()
-
                 }
             } else {
-                messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
-                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
-                }
-
-                delay(1000L)
-
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
-                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
 
+                    delay(200)
+                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
                     shimmerViewState.updateViewState(ShimmerViewState.Off)
 
                     reloadPinnedMessage()
