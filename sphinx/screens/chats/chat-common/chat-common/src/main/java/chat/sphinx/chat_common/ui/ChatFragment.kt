@@ -824,7 +824,6 @@ abstract class ChatFragment<
     }
 
     private fun setupRecyclerView() {
-        var isFirstInitialization = true
         val linearLayoutManager = LinearLayoutManager(binding.root.context)
         val messageListAdapter = MessageListAdapter(
             recyclerView,
@@ -853,17 +852,12 @@ abstract class ChatFragment<
                     if (viewModel.isThreadChat()) {
                         val firstVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition()
 
-                        if (isFirstInitialization) {
+                        if (firstVisiblePosition > 0) {
                             viewModel.changeThreadHeaderState(true)
-                            isFirstInitialization = false
-                        } else {
-                            if (firstVisiblePosition > 0) {
-                                viewModel.changeThreadHeaderState(true)
-                            }
+                        }
 
-                            if (firstVisiblePosition == 0) {
-                                viewModel.changeThreadHeaderState(false)
-                            }
+                        if (firstVisiblePosition == 0) {
+                            viewModel.changeThreadHeaderState(false)
                         }
                     }
                 }

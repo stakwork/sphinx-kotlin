@@ -970,14 +970,12 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
             if (isThreadChat()) {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 0, getThreadUUID()).distinctUntilChanged().collect { messages ->
+                    delay(200)
 
                     val originalMessage = messageRepository.getMessageByUUID(MessageUUID(getThreadUUID()?.value!!)).firstOrNull()
                     val completeThread = listOf(originalMessage) + messages.reversed()
-
                     val list = getMessageHolderViewStateList(completeThread.filterNotNull()).toList()
 
-                    delay(200)
-                    
                     messageHolderViewStateFlow.value = list
                     changeThreadHeaderState(true)
                     shimmerViewState.updateViewState(ShimmerViewState.Off)
@@ -986,8 +984,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
             } else {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
-
                     delay(200)
+
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
                     shimmerViewState.updateViewState(ShimmerViewState.Off)
 
