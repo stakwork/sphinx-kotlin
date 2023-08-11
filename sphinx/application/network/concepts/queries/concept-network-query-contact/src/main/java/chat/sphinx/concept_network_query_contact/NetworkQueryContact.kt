@@ -25,6 +25,8 @@ abstract class NetworkQueryContact {
 
     abstract fun getLatestContacts(
         date: DateTime?,
+        limit: Int,
+        offset: Int,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<GetLatestContactsResponse, ResponseError>>
 
