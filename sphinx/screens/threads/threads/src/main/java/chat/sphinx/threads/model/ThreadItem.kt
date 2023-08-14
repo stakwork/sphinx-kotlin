@@ -10,6 +10,7 @@ data class ThreadItem(
     val date: String,
     val message: String,
     val usersReplies: List<ReplyUserHolder>?,
+    val usersCount: Int,
     val repliesAmount: String,
     val lastReplyDate: String?,
     val uuid: String

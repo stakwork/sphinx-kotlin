@@ -255,11 +255,8 @@ internal class ThreadsAdapter(
                                 (user.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
                             imageViewChatPicture.gone
 
-                            if (user.repliesCount != null) {
-                                imageViewDefaultAlpha.visible
-                                textViewRepliesNumber.visible
-                                textViewRepliesNumber.text = user.repliesCount
-                            }
+                            imageViewDefaultAlpha.gone
+                            textViewRepliesNumber.gone
 
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                                 textViewInitialsName.setBackgroundRandomColor(
@@ -294,8 +291,16 @@ internal class ThreadsAdapter(
 
                     for (i in replyUsers.indices) {
                         val user = replyUsers[i]
-                        val userImageView = replyImageHolders[i]
-                        bindUserToImageHolder(user, userImageView)
+                        val replyImageHolder = replyImageHolders[i]
+                        bindUserToImageHolder(user, replyImageHolder)
+                    }
+
+                    if (threadItem.usersCount > 6) {
+                        includeReplyImageHolder6.apply {
+                            imageViewDefaultAlpha.visible
+                            textViewRepliesNumber.visible
+                            textViewRepliesNumber.text = "+${threadItem.usersCount - 6}"
+                        }
                     }
                 }
             }

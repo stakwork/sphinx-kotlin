@@ -30,6 +30,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -197,10 +198,6 @@ internal class ChatTribeFragment: ChatFragment<
                 lifecycleScope.launch {
                     viewModel.chatNavigator.popBackStack()
                 }
-            }
-
-            constraintShowMoreContainer.setOnClickListener {
-                viewModel.toggleThreadDescriptionExpanded()
             }
         }
 
@@ -462,10 +459,7 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                     } ?: (viewModel.pinedMessageBottomViewState.value as? PinMessageBottomViewState.Open)?.let {
                         viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
-                    } ?: (viewModel.threadViewState.value as? ThreadViewState.ThreadHeader)?.let {
-                        viewModel.navigateToTribeFromThread()
-                    } ?:
-                    run {
+                    } ?: run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
@@ -726,33 +720,30 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.threadViewState.collect { viewState ->
+            viewModel.threadHeaderViewState.collect { viewState ->
+                threadHeader.apply {
                 @Exhaustive
                 when(viewState) {
-                    is ThreadViewState.Idle -> {}
-                    is ThreadViewState.ThreadHeader -> {
+                    is ThreadHeaderViewState.Idle -> {}
+                    is ThreadHeaderViewState.BasicHeader -> {
+                        root.visible
                         binding.layoutConstraintChatHeader.gone
-                        threadHeader.apply {
-                            root.visible
 
-                            textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
+                        layoutConstraintOriginalMessage.gone
+                        layoutConstraintThreadContactName.gone
+                        textViewHeader.visible
+                    }
+                    is ThreadHeaderViewState.FullHeader -> {
+                        root.visible
+                        binding.layoutConstraintChatHeader.gone
+
+                        layoutConstraintOriginalMessage.visible
+                        layoutConstraintThreadContactName.visible
+                        textViewHeader.gone
+
+                        textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
                             textViewThreadDate.text = viewState.date
                             textViewThreadMessageContent.text = viewState.message
-
-                            if (viewState.message.length < 165) {
-                                textViewShowMore.gone
-                            } else {
-
-                                if (viewState.isExpanded) {
-                                    textViewThreadMessageContent.maxLines = Int.MAX_VALUE
-                                    textViewShowMore.text =
-                                        getString(R.string.episode_description_show_less)
-                                } else {
-                                    textViewThreadMessageContent.maxLines = 4
-                                    textViewShowMore.text =
-                                        getString(R.string.episode_description_show_more)
-                                }
-                            }
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible
@@ -792,6 +783,7 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
         }
+
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->

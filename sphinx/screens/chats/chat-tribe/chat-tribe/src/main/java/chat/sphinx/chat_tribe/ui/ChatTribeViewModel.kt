@@ -156,10 +156,6 @@ class ChatTribeViewModel @Inject constructor(
         ViewStateContainer(PinedMessageDataViewState.Idle)
     }
 
-    val threadViewState: ViewStateContainer<ThreadViewState> by lazy {
-        ViewStateContainer(ThreadViewState.Idle)
-    }
-
     private suspend fun getPodcast(): Podcast? {
         podcastSharedFlow.replayCache.firstOrNull()?.let { podcast ->
             return podcast
@@ -333,7 +329,6 @@ class ChatTribeViewModel @Inject constructor(
         }
 
         getAllLeaderboards()
-        getThreadHeaderMessageIfApplicable()
     }
 
     override suspend fun processMemberRequest(
@@ -474,40 +469,6 @@ class ChatTribeViewModel @Inject constructor(
                     is Response.Error -> {}
                     is Response.Success -> {
                         leaderboardListStateFlow.value = loadResponse.value
-                    }
-                }
-            }
-        }
-    }
-
-    private fun getThreadHeaderMessageIfApplicable() {
-        viewModelScope.launch(mainImmediate) {
-            args.argThreadUUID?.let { uuid ->
-                if (uuid.isNotEmpty()) {
-                    messageRepository.getMessageByUUID(MessageUUID(uuid)).firstOrNull()?.let { message ->
-
-                        val owner = getOwner()
-                        val isOwner: Boolean = message.sender == owner.id
-
-                        val aliasAndColor = if (isOwner) {
-                            Pair(owner.alias, owner.getColorKey())
-                        } else {
-                            Pair(
-                                message.senderAlias?.value?.toContactAlias(),
-                                message.getColorKey()
-                            )
-                        }
-
-                        val photoUrl = if (isOwner) owner.photoUrl else message.senderPic
-
-                        threadViewState.updateViewState(
-                            ThreadViewState.ThreadHeader(
-                                aliasAndColor,
-                                photoUrl,
-                                message.date.chatTimeFormat(),
-                                message.messageContentDecrypted?.value ?: ""
-                            )
-                        )
                     }
                 }
             }
@@ -695,13 +656,4 @@ class ChatTribeViewModel @Inject constructor(
         return pinnedMessageData
     }
 
-    fun toggleThreadDescriptionExpanded() {
-        (threadViewState.viewStateFlow.value as? ThreadViewState.ThreadHeader)?.let {
-            it.copy(
-                isExpanded = !it.isExpanded,
-            ).let { updatedThreadHeader ->
-                threadViewState.updateViewState(updatedThreadHeader)
-            }
-        }
-    }
 }
