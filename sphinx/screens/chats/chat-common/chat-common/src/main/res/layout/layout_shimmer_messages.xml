@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingStart="@dimen/default_medium_layout_margin"
+    android:background="@color/body">
+
+    <View
+        android:id="@+id/shimmer_message_one"
+        android:layout_width="132dp"
+        android:layout_height="56dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/shimmer_message_two"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_width="84dp"
+        android:layout_height="24dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_one" />
+
+    <View
+        android:id="@+id/shimmer_message_three"
+        android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+        android:layout_width="280dp"
+        android:layout_height="74dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_two" />
+
+    <View
+        android:id="@+id/shimmer_message_four"
+        android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+        android:layout_width="280dp"
+        android:layout_height="56dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_three" />
+
+    <View
+        android:id="@+id/shimmer_message_five"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_width="184dp"
+        android:layout_height="24dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_four" />
+
+    <View
+        android:id="@+id/shimmer_message_six"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_width="184dp"
+        android:layout_height="24dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_five" />
+
+    <View
+        android:id="@+id/shimmer_message_seven"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_width="280dp"
+        android:layout_height="64dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_six" />
+
+    <View
+        android:id="@+id/shimmer_message_eight"
+        android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+        android:layout_width="184dp"
+        android:layout_height="24dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_seven" />
+
+    <View
+        android:id="@+id/shimmer_message_nine"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_width="280dp"
+        android:layout_height="74dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_eight" />
+
+    <View
+        android:id="@+id/shimmer_message_ten"
+        android:layout_width="64dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_nine" />
+
+    <View
+        android:id="@+id/shimmer_message_eleven"
+        android:layout_width="184dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_ten" />
+
+    <View
+        android:id="@+id/shimmer_message_twelve"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_width="280dp"
+        android:layout_height="56dp"
+        android:background="@drawable/background_shimmer_message"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shimmer_message_eleven" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

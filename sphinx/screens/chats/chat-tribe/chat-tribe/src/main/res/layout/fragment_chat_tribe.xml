@@ -28,12 +28,27 @@
                 android:visibility="visible"/>
 
             <include
+                android:id="@+id/include_layout_thread_header"
+                layout="@layout/layout_thread_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_header_height"
+                android:visibility="gone"/>
+
+            <include
                 android:id="@+id/include_chat_pined_message_header"
                 layout="@layout/layout_chat_pined_message_header"
                 app:layout_constraintTop_toBottomOf="@id/include_chat_tribe_header"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/default_pin_header_height"
                 android:visibility="visible" />
+
+            <include
+                android:id="@+id/include_layout_thread_original_message"
+                layout="@layout/layout_thread_original_message"
+                app:layout_constraintTop_toBottomOf="@id/include_layout_thread_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_pin_header_height"
+                android:visibility="gone" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -42,13 +57,6 @@
             layout="@layout/layout_chat_search_header"
             android:layout_width="match_parent"
             android:layout_height="@dimen/default_header_height"
-            android:visibility="gone"/>
-
-        <include
-            android:id="@+id/include_layout_thread_header"
-            layout="@layout/layout_thread_header"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -228,6 +236,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
         tools:visibility="gone" />
+
+    <include
+        android:id="@+id/include_chat_tribe_shimmer_container"
+        layout="@layout/layout_shimmer_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

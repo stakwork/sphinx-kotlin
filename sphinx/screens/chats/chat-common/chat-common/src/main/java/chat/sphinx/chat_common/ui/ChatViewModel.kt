@@ -40,6 +40,8 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.ui.viewstate.shimmer.ShimmerViewState
+import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
 import chat.sphinx.chat_common.util.AudioRecorderController
@@ -176,17 +178,25 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     val scrollDownViewStateContainer: ViewStateContainer<ScrollDownViewState> by lazy {
-        ViewStateContainer(
-            if (isThreadChat()) {
-                ScrollDownViewState.On("0")
-            } else {
-                ScrollDownViewState.Off
-            }
-        )
+        ViewStateContainer(ScrollDownViewState.Off)
     }
 
     val chatHeaderViewStateContainer: ViewStateContainer<ChatHeaderViewState> by lazy {
         ChatHeaderViewStateContainer()
+    }
+
+    val threadHeaderViewState: ViewStateContainer<ThreadHeaderViewState> by lazy {
+        ViewStateContainer(
+            if (isThreadChat()) {
+                ThreadHeaderViewState.BasicHeader
+            } else {
+                ThreadHeaderViewState.Idle
+            }
+        )
+    }
+
+    val shimmerViewState: ViewStateContainer<ShimmerViewState> by lazy {
+        ViewStateContainer(ShimmerViewState.On)
     }
 
     private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
@@ -428,44 +438,19 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
         val newList = ArrayList<MessageHolderViewState>(messages.size)
 
-        val threadMessageMap: MutableMap<String, Int> = mutableMapOf()
-
         withContext(io) {
 
             var groupingDate: DateTime? = null
             var openSentPaidInvoicesCount = 0
             var openReceivedPaidInvoicesCount = 0
 
-            val filteredMessages: MutableList<Message> = mutableListOf()
+            val messagesList = filterAndSortMessagesIfNecessary(chat, messages)
 
-            if (chat.isTribe() && !isThreadChat()) {
-                // Filter messages to do not show thread replies on chat
-                for (message in messages) {
+            for ((index, message) in messagesList.withIndex()) {
 
-                    if (message.thread?.isNotEmpty() == true) {
-                        message.uuid?.value?.let { uuid ->
-                            threadMessageMap[uuid] = message.thread?.count() ?: 0
-                        }
-                    }
-
-                    val shouldAddMessage = message.threadUUID?.let { threadUUID ->
-                        val count = threadMessageMap[threadUUID.value] ?: 0
-                        count <= 1
-                    } ?: true
-
-                    if (shouldAddMessage) {
-                        filteredMessages.add(message)
-                    }
-                }
-            } else {
-                filteredMessages.addAll(messages)
-            }
-
-            for ((index, message) in filteredMessages.withIndex()) {
-
-                val previousMessage: Message? = if (index > 0) filteredMessages[index - 1] else null
+                val previousMessage: Message? = if (index > 0) messagesList[index - 1] else null
                 val nextMessage: Message? =
-                    if (index < filteredMessages.size - 1) filteredMessages[index + 1] else null
+                    if (index < messagesList.size - 1) messagesList[index + 1] else null
 
                 val groupingDateAndBubbleBackground = getBubbleBackgroundForMessage(
                     message,
@@ -491,6 +476,41 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     openReceivedPaidInvoicesCount > 0
                 )
 
+                val isOwner: Boolean = message.sender == owner.id
+
+                val threadAliasAndColor = if (isOwner) {
+                    Pair(owner.alias, owner.getColorKey())
+                } else {
+                    Pair(
+                        message.senderAlias?.value?.toContactAlias(),
+                        message.getColorKey()
+                    )
+                }
+
+                val threadPhotoUrl = if (isOwner) owner.photoUrl else message.senderPic
+
+                val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0)
+
+                if (isThreadHeaderMessage) {
+                    newList.add(
+                        MessageHolderViewState.ThreadHeader(
+                            MessageHolderType.ThreadHeader,
+                            chat,
+                            tribeAdmin,
+                            BubbleBackground.Gone(setSpacingEqual = true),
+                            invoiceLinesHolderViewState,
+                            InitialHolderViewState.None,
+                            accountOwner = { owner },
+                            threadAliasAndColor,
+                            threadPhotoUrl,
+                            message.date.chatTimeFormat(),
+                            message.messageContentDecrypted?.value ?: ""
+                        )
+                    )
+                    continue
+                }
+
+
                 if (!message.seen.isTrue() && !sent && !unseenSeparatorAdded) {
                     newList.add(
                         MessageHolderViewState.Separator(
@@ -506,8 +526,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     )
                     unseenSeparatorAdded = true
                 }
+                // Consider last reply or message and last reply of previous message if exists
+                val actualMessage = message.thread?.last() ?: message
+                val actualPreviousMessage = previousMessage?.thread?.last() ?: previousMessage
 
-                if (previousMessage == null || message.date.isDifferentDayThan(previousMessage.date)) {
+                if (actualPreviousMessage == null || actualMessage.date.isDifferentDayThan(actualPreviousMessage.date)) {
                     newList.add(
                         MessageHolderViewState.Separator(
                             MessageHolderType.DateSeparator,
@@ -589,76 +612,85 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                         )
                     )
                 } else {
-                    newList.add(
-                        MessageHolderViewState.Received(
-                            message,
-                            chat,
-                            tribeAdmin,
-                            background = when {
-                                isDeleted -> {
-                                    BubbleBackground.Gone(setSpacingEqual = false)
-                                }
-                                message.isFlagged -> {
-                                    BubbleBackground.Gone(setSpacingEqual = false)
-                                }
-                                message.type.isInvoicePayment() -> {
-                                    BubbleBackground.Gone(setSpacingEqual = false)
-                                }
-                                message.type.isGroupAction() -> {
-                                    BubbleBackground.Gone(setSpacingEqual = true)
-                                }
-                                else -> {
-                                    groupingDateAndBubbleBackground.second
-                                }
-                            },
-                            invoiceLinesHolderViewState = invoiceLinesHolderViewState,
-                            initialHolder = when {
-                                isDeleted || message.type.isGroupAction() -> {
-                                    InitialHolderViewState.None
-                                }
-                                else -> {
-                                    getInitialHolderViewStateForReceivedMessage(message, owner)
-                                }
-                            },
-                            highlightedText = null,
-                            messageSenderInfo = { messageCallback ->
-                                when {
-                                    messageCallback.sender == chat.contactIds.firstOrNull() -> {
-                                        val accountOwner = contactRepository.accountOwner.value
+                    if (message.uuid?.value != getThreadUUID()?.value) {
+                        newList.add(
+                            MessageHolderViewState.Received(
+                                message,
+                                chat,
+                                tribeAdmin,
+                                background = when {
+                                    isDeleted -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
+                                    }
 
-                                        Triple(
-                                            accountOwner?.photoUrl,
-                                            accountOwner?.alias,
-                                            accountOwner?.getColorKey() ?: ""
-                                        )
+                                    message.isFlagged -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
                                     }
-                                    chat.type.isConversation() -> {
-                                        Triple(
-                                            chatPhotoUrl,
-                                            chatName?.value?.toContactAlias(),
-                                            chatColorKey
-                                        )
+
+                                    message.type.isInvoicePayment() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = false)
                                     }
+
+                                    message.type.isGroupAction() -> {
+                                        BubbleBackground.Gone(setSpacingEqual = true)
+                                    }
+
                                     else -> {
-                                        Triple(
-                                            messageCallback.senderPic,
-                                            messageCallback.senderAlias?.value?.toContactAlias(),
-                                            messageCallback.getColorKey()
-                                        )
+                                        groupingDateAndBubbleBackground.second
                                     }
+                                },
+                                invoiceLinesHolderViewState = invoiceLinesHolderViewState,
+                                initialHolder = when {
+                                    isDeleted || message.type.isGroupAction() -> {
+                                        InitialHolderViewState.None
+                                    }
+
+                                    else -> {
+                                        getInitialHolderViewStateForReceivedMessage(message, owner)
+                                    }
+                                },
+                                highlightedText = null,
+                                messageSenderInfo = { messageCallback ->
+                                    when {
+                                        messageCallback.sender == chat.contactIds.firstOrNull() -> {
+                                            val accountOwner = contactRepository.accountOwner.value
+
+                                            Triple(
+                                                accountOwner?.photoUrl,
+                                                accountOwner?.alias,
+                                                accountOwner?.getColorKey() ?: ""
+                                            )
+                                        }
+
+                                        chat.type.isConversation() -> {
+                                            Triple(
+                                                chatPhotoUrl,
+                                                chatName?.value?.toContactAlias(),
+                                                chatColorKey
+                                            )
+                                        }
+
+                                        else -> {
+                                            Triple(
+                                                messageCallback.senderPic,
+                                                messageCallback.senderAlias?.value?.toContactAlias(),
+                                                messageCallback.getColorKey()
+                                            )
+                                        }
+                                    }
+                                },
+                                accountOwner = { owner },
+                                urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
+                                previewProvider = { link -> handleLinkPreview(link) },
+                                paidTextMessageContentProvider = { messageCallback ->
+                                    handlePaidTextMessageContent(messageCallback)
+                                },
+                                onBindDownloadMedia = {
+                                    repositoryMedia.downloadMediaIfApplicable(message, sent)
                                 }
-                            },
-                            accountOwner = { owner },
-                            urlLinkPreviewsEnabled = areUrlLinkPreviewsEnabled(),
-                            previewProvider = { link -> handleLinkPreview(link) },
-                            paidTextMessageContentProvider = { messageCallback ->
-                                handlePaidTextMessageContent(messageCallback)
-                            },
-                            onBindDownloadMedia = {
-                                repositoryMedia.downloadMediaIfApplicable(message, sent)
-                            }
+                            )
                         )
-                    )
+                    }
                 }
 
                 if (message.isPaidInvoice) {
@@ -672,6 +704,41 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         }
 
         return newList
+    }
+
+    private fun filterAndSortMessagesIfNecessary(
+        chat: Chat,
+        messages: List<Message>,
+    ): List<Message> {
+        val filteredMessages: MutableList<Message> = mutableListOf()
+        val threadMessageMap: MutableMap<String, Int> = mutableMapOf()
+
+        // Filter messages to do not show thread replies on chat
+        if (chat.isTribe() && !isThreadChat()) {
+            for (message in messages) {
+
+                if (message.thread?.isNotEmpty() == true) {
+                    message.uuid?.value?.let { uuid ->
+                        threadMessageMap[uuid] = message.thread?.count() ?: 0
+                    }
+                }
+
+                val shouldAddMessage = message.threadUUID?.let { threadUUID ->
+                    val count = threadMessageMap[threadUUID.value] ?: 0
+                    count <= 1
+                } ?: true
+
+                if (shouldAddMessage) {
+                    filteredMessages.add(message)
+                }
+            }
+        } else {
+            filteredMessages.addAll(messages)
+        }
+
+        // Sort messages list by the last thread message date if applicable
+
+        return filteredMessages.sortedBy { it.thread?.last()?.date?.value ?: it.date.value }
     }
 
     internal val messageHolderViewStateFlow: MutableStateFlow<List<MessageHolderViewState>> by lazy {
@@ -903,25 +970,24 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
             if (isThreadChat()) {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 0, getThreadUUID()).distinctUntilChanged().collect { messages ->
-                    val list = getMessageHolderViewStateList(messages.reversed()).toList()
+                    delay(200)
+
+                    val originalMessage = messageRepository.getMessageByUUID(MessageUUID(getThreadUUID()?.value!!)).firstOrNull()
+                    val completeThread = listOf(originalMessage) + messages.reversed()
+                    val list = getMessageHolderViewStateList(completeThread.filterNotNull()).toList()
+
                     messageHolderViewStateFlow.value = list
+                    changeThreadHeaderState(true)
+                    shimmerViewState.updateViewState(ShimmerViewState.Off)
 
-                    scrollDownButtonCount.value = list.size.toLong()
-
-                    if (!isScrollDownButtonSetup) {
-                        setupScrollDownButtonCount()
-                        isScrollDownButtonSetup = true
-                    }
+                    scrollDownButtonCount.value = messages.size.toLong()
                 }
             } else {
-                messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
-                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
-                }
-
-                delay(1000L)
-
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+                    delay(200)
+
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+                    shimmerViewState.updateViewState(ShimmerViewState.Off)
 
                     reloadPinnedMessage()
 
@@ -947,7 +1013,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 ScrollDownViewState.Off
             )
         }
-
     }
 
     abstract val checkRoute: Flow<LoadResponse<Boolean, ResponseError>>
@@ -1233,7 +1298,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     @JvmSynthetic
     internal fun getFooterViewStateFlow(): StateFlow<FooterViewState> =
-        footerViewStateContainer.viewStateFlow
+        if (isThreadChat()) {
+            MutableStateFlow(FooterViewState.ThreadChat)
+        } else {
+            footerViewStateContainer.viewStateFlow
+        }
 
     @JvmSynthetic
     internal fun updateFooterViewState(viewState: FooterViewState) {
@@ -1381,6 +1450,36 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
                 is Response.Success -> {}
             }
+        }
+    }
+
+    fun toggleThreadDescriptionExpanded() {
+        val currentList = messageHolderViewStateFlow.value
+
+        val newList = currentList.map { item ->
+            if (item is MessageHolderViewState.ThreadHeader) {
+                item.copy(isExpanded = !item.isExpanded)
+            } else {
+                item
+            }
+        }
+        messageHolderViewStateFlow.value = newList
+    }
+
+    fun changeThreadHeaderState(isFullHeader: Boolean){
+        if (isFullHeader) {
+            (messageHolderViewStateFlow.value.getOrNull(0) as? MessageHolderViewState.ThreadHeader)?.let { originalMessage ->
+                val threadHeader = ThreadHeaderViewState.FullHeader(
+                    originalMessage.aliasAndColorKey,
+                    originalMessage.photoUrl,
+                    originalMessage.date,
+                    originalMessage.messageText
+                )
+                threadHeaderViewState.updateViewState(threadHeader)
+            }
+        }
+        else {
+            threadHeaderViewState.updateViewState(ThreadHeaderViewState.BasicHeader)
         }
     }
 

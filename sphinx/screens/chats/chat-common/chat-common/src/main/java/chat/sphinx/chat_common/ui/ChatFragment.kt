@@ -51,6 +51,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
+import chat.sphinx.chat_common.ui.viewstate.shimmer.ShimmerViewState
 import chat.sphinx.chat_common.ui.widgets.SlideToCancelImageView
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
 import chat.sphinx.chat_common.util.AudioRecorderController
@@ -128,7 +129,9 @@ abstract class ChatFragment<
     protected abstract val moreMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
     protected abstract val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+    protected abstract val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
     protected abstract val scrollDownButtonBinding: LayoutScrollDownButtonBinding
+    protected abstract val shimmerBinding: LayoutShimmerContainerBinding
 
     protected abstract val menuEnablePayments: Boolean
 
@@ -464,8 +467,8 @@ abstract class ChatFragment<
             editTextChatFooter.addTextChangedListener { editable ->
                 //Do not toggle microphone and send icon if on attachment mode
                 if (viewModel.getFooterViewStateFlow().value !is FooterViewState.Attachment) {
-                    textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty())
-                    imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty())
+                    textViewChatFooterSend.goneIfTrue(editable.isNullOrEmpty() && !viewModel.isThreadChat())
+                    imageViewChatFooterMicrophone.goneIfFalse(editable.isNullOrEmpty() && !viewModel.isThreadChat())
                 }
             }
         }
@@ -835,6 +838,7 @@ abstract class ChatFragment<
             isThreadChat = viewModel.isThreadChat()
         )
         val footerAdapter = MessageListFooterAdapter()
+
         recyclerView.apply {
             setHasFixedSize(false)
             layoutManager = linearLayoutManager
@@ -842,6 +846,22 @@ abstract class ChatFragment<
             itemAnimator = null
 
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+
+                    if (viewModel.isThreadChat()) {
+                        val firstVisiblePosition = linearLayoutManager.findFirstVisibleItemPosition()
+
+                        if (firstVisiblePosition > 0) {
+                            viewModel.changeThreadHeaderState(true)
+                        }
+
+                        if (firstVisiblePosition == 0) {
+                            viewModel.changeThreadHeaderState(false)
+                        }
+                    }
+                }
+
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
 
@@ -920,6 +940,23 @@ abstract class ChatFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.shimmerViewState.collect { viewState ->
+                shimmerBinding.apply {
+                    when (viewState) {
+                        is ShimmerViewState.On -> {
+                            root.visible
+                            shimmer.startShimmer()
+                        }
+                        is ShimmerViewState.Off -> {
+                            root.gone
+                            shimmer.stopShimmer()
+                        }
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageReplyViewStateContainer.collect { viewState ->
@@ -1352,6 +1389,11 @@ abstract class ChatFragment<
                         textViewRecordingTimer.text = viewState.duration.getHHMMString()
                     } else {
                         layoutConstraintChatFooterActions.translationX = 0f
+                    }
+                    if (viewState is FooterViewState.ThreadChat) {
+                        textViewChatFooterAttachment.gone
+                        imageViewChatFooterMicrophone.gone
+                        textViewChatFooterSend.visible
                     }
                 }
 

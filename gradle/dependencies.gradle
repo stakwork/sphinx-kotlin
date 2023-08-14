@@ -134,8 +134,10 @@ ext.deps = [
     ],
     jna: [
             sdk: "net.java.dev.jna:jna:5.8.0@aar"
+    ],
+    facebook: [
+            shimmer: "com.facebook.shimmer:shimmer:0.5.0"
     ]
-
 ]
 
 /**

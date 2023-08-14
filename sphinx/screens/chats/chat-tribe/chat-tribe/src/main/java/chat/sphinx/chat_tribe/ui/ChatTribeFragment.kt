@@ -30,6 +30,7 @@ import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
+import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -123,12 +124,17 @@ internal class ChatTribeFragment: ChatFragment<
         get() = binding.includeLayoutMenuBottomMore
     override val scrollDownButtonBinding: LayoutScrollDownButtonBinding
         get() = binding.includeChatTribeScrollDown
+    override val shimmerBinding: LayoutShimmerContainerBinding
+        get() = binding.includeChatTribeShimmerContainer
     override val attachmentFullscreenBinding: LayoutAttachmentFullscreenBinding
         get() = binding.includeChatTribeAttachmentFullscreen
     private val mentionMembersPopup: LayoutChatTribeMemberMentionPopupBinding
         get() = binding.includeChatTribeMembersMentionPopup
     override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
         get() = binding.includeChatPinedMessageHeader
+
+    override val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
+        get() = binding.includeLayoutThreadOriginalMessage
 
     private val layoutChatPinPopupBinding: LayoutChatPinPopupBinding
         get() = binding.includePinMessagePopup
@@ -191,16 +197,16 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         binding.includeLayoutThreadHeader.apply {
-            (requireActivity() as InsetterActivity).addStatusBarPadding(root)
+            val insetterActivity = (requireActivity() as InsetterActivity)
+            insetterActivity.addStatusBarPadding(root)
+
+            root.layoutParams.height = root.layoutParams.height + insetterActivity.statusBarInsetHeight.top
+            root.requestLayout()
 
             textViewChatHeaderNavBack.setOnClickListener {
                 lifecycleScope.launch {
                     viewModel.chatNavigator.popBackStack()
                 }
-            }
-
-            constraintShowMoreContainer.setOnClickListener {
-                viewModel.toggleThreadDescriptionExpanded()
             }
         }
 
@@ -462,10 +468,7 @@ internal class ChatTribeFragment: ChatFragment<
                         tribeAppViewModel.webViewLayoutScreenViewStateContainer.updateViewState(WebViewLayoutScreenViewState.Closed)
                     } ?: (viewModel.pinedMessageBottomViewState.value as? PinMessageBottomViewState.Open)?.let {
                         viewModel.pinedMessageBottomViewState.updateViewState(PinMessageBottomViewState.Closed)
-                    } ?: (viewModel.threadViewState.value as? ThreadViewState.ThreadHeader)?.let {
-                        viewModel.navigateToTribeFromThread()
-                    } ?:
-                    run {
+                    } ?: run {
                         lifecycleScope.launch(viewModel.mainImmediate) {
                             viewModel.handleCommonChatOnBackPressed()
                         }
@@ -726,33 +729,36 @@ internal class ChatTribeFragment: ChatFragment<
         }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.threadViewState.collect { viewState ->
-                @Exhaustive
-                when(viewState) {
-                    is ThreadViewState.Idle -> {}
-                    is ThreadViewState.ThreadHeader -> {
-                        binding.layoutConstraintChatHeader.gone
-                        threadHeader.apply {
+            viewModel.threadHeaderViewState.collect { viewState ->
+                threadHeader.apply {
+                    @Exhaustive
+                    when(viewState) {
+                        is ThreadHeaderViewState.Idle -> {
+                            root.gone
+                        }
+                        is ThreadHeaderViewState.BasicHeader -> {
                             root.visible
 
+                            binding.includeChatTribeHeader.root.gone
+                            binding.includeChatPinedMessageHeader.root.gone
+                            threadOriginalMessageBinding?.root?.gone
+
+                            layoutConstraintThreadContactName.gone
+                            textViewHeader.visible
+                        }
+                        is ThreadHeaderViewState.FullHeader -> {
+                            root.visible
+                            binding.includeChatTribeHeader.root.gone
+                            binding.includeChatPinedMessageHeader.root.gone
+
+                            threadOriginalMessageBinding?.root?.visible
+
+                            layoutConstraintThreadContactName.visible
+                            textViewHeader.gone
+
                             textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
-                            textViewThreadDate.text = viewState.date
-                            textViewThreadMessageContent.text = viewState.message
-
-                            if (viewState.message.length < 165) {
-                                textViewShowMore.gone
-                            } else {
-
-                                if (viewState.isExpanded) {
-                                    textViewThreadMessageContent.maxLines = Int.MAX_VALUE
-                                    textViewShowMore.text =
-                                        getString(R.string.episode_description_show_less)
-                                } else {
-                                    textViewThreadMessageContent.maxLines = 4
-                                    textViewShowMore.text =
-                                        getString(R.string.episode_description_show_more)
-                                }
-                            }
+                                textViewThreadDate.text = viewState.date
+                            threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible
@@ -792,6 +798,7 @@ internal class ChatTribeFragment: ChatFragment<
                 }
             }
         }
+
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.tribeMemberProfileViewStateContainer.collect { viewState ->

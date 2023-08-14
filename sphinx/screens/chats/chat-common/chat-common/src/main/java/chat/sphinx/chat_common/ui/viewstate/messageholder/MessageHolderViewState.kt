@@ -268,8 +268,7 @@ internal sealed class MessageHolderViewState(
                     val ownerUserHolder = ReplyUserHolder(
                         owner.photoUrl,
                         owner.alias,
-                        owner.getColorKey(),
-                        null
+                        owner.getColorKey()
                     )
 
                     replies.forEach { replyMessage ->
@@ -280,8 +279,7 @@ internal sealed class MessageHolderViewState(
                                 ReplyUserHolder(
                                     replyMessage.senderPic,
                                     replyMessage.senderAlias?.value?.toContactAlias(),
-                                    replyMessage.getColorKey(),
-                                    null
+                                    replyMessage.getColorKey()
                                 )
                             }
                         )
@@ -294,8 +292,7 @@ internal sealed class MessageHolderViewState(
                             ReplyUserHolder(
                                 it.senderPic,
                                 it.senderAlias?.value?.toContactAlias(),
-                                it.getColorKey(),
-                                null
+                                it.getColorKey()
                             )
                         }
                     }
@@ -844,4 +841,53 @@ internal sealed class MessageHolderViewState(
         paidTextAttachmentContentProvider = { null },
         onBindDownloadMedia = {}
     )
+
+    class ThreadHeader(
+        messageHolderType: MessageHolderType,
+        val chat: Chat,
+        val tribeAdmin: Contact?,
+        background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
+        initialHolder: InitialHolderViewState,
+        val accountOwner: () -> Contact,
+        val aliasAndColorKey: Pair<ContactAlias?, String?>,
+        val photoUrl: PhotoUrl?,
+        val date: String,
+        val messageText: String,
+        val isExpanded: Boolean = false
+    ) : MessageHolderViewState(
+        null,
+        chat,
+        tribeAdmin,
+        messageHolderType,
+        null,
+        background,
+        invoiceLinesHolderViewState,
+        initialHolder,
+        null,
+        { null },
+        accountOwner,
+        false,
+        { null },
+        { null },
+        {}
+    ) {
+        fun copy(isExpanded: Boolean = this.isExpanded): ThreadHeader {
+            return ThreadHeader(
+                messageHolderType,
+                chat,
+                tribeAdmin,
+                background,
+                invoiceLinesHolderViewState,
+                initialHolder,
+                accountOwner,
+                aliasAndColorKey,
+                photoUrl,
+                date,
+                messageText,
+                isExpanded
+            )
+        }
+    }
+
 }
