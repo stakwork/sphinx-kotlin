@@ -1,5 +1,9 @@
 # ChangeLog
 
+# Version 1.0.0-beta01 (2023-08-14)
+- Fixes thread issues
+- Adds pagination on contacts/chats fetch
+
 # Version 1.0.0-beta00 (2023-07-30)
 - Adds support for threading
 
