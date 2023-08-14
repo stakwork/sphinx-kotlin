@@ -10,19 +10,23 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.viewstate.messageholder.ReplyUserHolder
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.OnImageLoadListener
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.threads.R
 import chat.sphinx.threads.databinding.ThreadsListItemHolderBinding
 import chat.sphinx.threads.model.ThreadItem
 import chat.sphinx.threads.ui.ThreadsViewModel
 import chat.sphinx.threads.viewstate.ThreadsViewState
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
@@ -224,6 +228,79 @@ internal class ThreadsAdapter(
                                     disposables.add(it)
                                 }
                             }
+                        }
+                    }
+                }
+
+                if (threadItem.imageAttachment != null) {
+                    constraintMediaThreadContainer.rootView.visible
+                    binding.includeMessageTypeImageAttachment.apply {
+                        layoutConstraintPaidImageOverlay.gone
+
+                        loadingImageProgressContainer.visible
+                        imageViewAttachmentImage.visible
+
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            if (threadItem.imageAttachment.second != null) {
+                                imageLoader.load(
+                                    imageViewAttachmentImage,
+                                    threadItem.imageAttachment.second!!,
+                                    imageLoaderOptions
+                                ).also {
+                                    disposables.add(it)
+                                }
+                            } else {
+                                imageLoader.load(
+                                    imageViewAttachmentImage,
+                                    threadItem.imageAttachment.first,
+                                    imageLoaderOptions
+                                ).also {
+                                    disposables.add(it)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (threadItem.videoAttachment != null) {
+                    constraintMediaThreadContainer.rootView.visible
+                    binding.includeMessageTypeVideoAttachment.apply {
+                        root.visible
+
+                        val thumbnail = VideoThumbnailUtil.loadThumbnail(threadItem.videoAttachment)
+
+                        if (thumbnail != null) {
+                            imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                            layoutConstraintVideoPlayButton.visible
+                        }
+
+                        imageViewAttachmentThumbnail.visible
+                    }
+                }
+
+                if (threadItem.fileAttachment != null) {
+                    constraintMediaThreadContainer.rootView.visible
+                    binding.includeMessageTypeFileAttachment.apply {
+
+                        progressBarAttachmentFileDownload.gone
+                        buttonAttachmentFileDownload.visible
+
+                        textViewAttachmentFileIcon.text = if (threadItem.fileAttachment.isPdf) {
+                            getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
+                        } else {
+                            getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
+                        }
+
+                        textViewAttachmentFileName.text = threadItem.fileAttachment.fileName?.value ?: "File.txt"
+
+                        textViewAttachmentFileSize.text = if (threadItem.fileAttachment.isPdf) {
+                            if (threadItem.fileAttachment.pageCount > 1) {
+                                "${threadItem.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_pages)}"
+                            } else {
+                                "${threadItem.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_page)}"
+                            }
+                        } else {
+                            threadItem.fileAttachment.fileSize.asFormattedString()
                         }
                     }
                 }
