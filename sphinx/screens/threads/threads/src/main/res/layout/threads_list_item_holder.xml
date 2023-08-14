@@ -105,7 +105,6 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_thread_message_content"
             android:layout_width="0dp"
