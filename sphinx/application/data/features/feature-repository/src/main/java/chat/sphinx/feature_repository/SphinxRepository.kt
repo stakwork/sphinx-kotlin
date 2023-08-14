@@ -926,7 +926,6 @@ abstract class SphinxRepository(
 
             var offset = 0
             var limit = 1000
-            var page = 1
 
             while (currentCoroutineContext().isActive && offset >= 0 ) {
                 networkQueryContact.getLatestContacts(
@@ -1012,7 +1011,24 @@ abstract class SphinxRepository(
 
                                 error?.let {
                                     throw it
-                                } ?: run {
+                                }
+
+                                emit(
+                                    if (processChatsResponse is Response.Success) {
+                                        Response.Success(
+                                            RestoreProgress(restoring, latestContactsPercentage)
+                                        )
+                                    } else {
+                                        Response.Error(ResponseError("Failed to refresh contacts and chats"))
+                                    }
+                                )
+
+                                if (loadResponse.value.chats.size >= limit || loadResponse.value.contacts.size >= limit) {
+                                    offset += limit
+                                    latestContactsPercentage += 1
+                                } else {
+                                    offset = -1
+
                                     if (
                                         loadResponse.value.contacts.size > 1 ||
                                         loadResponse.value.chats.isNotEmpty()
@@ -1022,23 +1038,6 @@ abstract class SphinxRepository(
                                             now
                                         )
                                     }
-                                }
-
-                                emit(
-                                    if (processChatsResponse is Response.Success) {
-                                        Response.Success(
-                                            RestoreProgress(restoring, page)
-                                        )
-                                    } else {
-                                        Response.Error(ResponseError("Failed to refresh contacts and chats"))
-                                    }
-                                )
-                                if (loadResponse.value.chats.size >= limit || loadResponse.value.contacts.size >= limit) {
-                                    offset += limit
-                                    page++
-                                    latestContactsPercentage = page
-                                } else {
-                                    offset = -1
                                 }
 
                             } catch (e: ParseException) {
