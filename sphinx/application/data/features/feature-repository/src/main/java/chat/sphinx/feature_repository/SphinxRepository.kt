@@ -902,10 +902,11 @@ abstract class SphinxRepository(
         }
     }
 
+    var latestContactsPercentage = 1
+
     private val inviteLock = Mutex()
     override val networkRefreshLatestContacts: Flow<LoadResponse<RestoreProgress, ResponseError>> by lazy {
         flow {
-
             val lastSeenContactsDate: String? = authenticationStorage.getString(
                 REPOSITORY_LAST_SEEN_CONTACTS_DATE,
                 null
@@ -919,119 +920,134 @@ abstract class SphinxRepository(
 
             emit(
                 Response.Success(
-                    RestoreProgress(restoring, 2)
+                    RestoreProgress(restoring, 1)
                 )
             )
 
-            networkQueryContact.getLatestContacts(
-                lastSeenContactsDateResolved
-            ).collect { loadResponse ->
+            var offset = 0
+            var limit = 1000
 
-                @Exhaustive
-                when (loadResponse) {
-                    is Response.Error -> {
-                        emit(loadResponse)
-                    }
-                    is Response.Success -> {
+            while (currentCoroutineContext().isActive && offset >= 0 ) {
+                networkQueryContact.getLatestContacts(
+                    lastSeenContactsDateResolved,
+                    limit,
+                    offset,
+                ).collect { loadResponse ->
 
-                        val queries = coreDB.getSphinxDatabaseQueries()
+                    @Exhaustive
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
 
-                        try {
-                            var error: Throwable? = null
-                            val handler = CoroutineExceptionHandler { _, throwable ->
-                                error = throwable
-                            }
+                        is Response.Error -> {
+                            emit(loadResponse)
+                            offset = -1
+                        }
 
-                            var processChatsResponse: Response<Boolean, ResponseError> =
-                                Response.Success(true)
+                        is Response.Success -> {
 
-                            applicationScope.launch(io + handler) {
+                            val queries = coreDB.getSphinxDatabaseQueries()
 
-                                val contactsToInsert =
-                                    loadResponse.value.contacts.filter { dto -> !dto.deletedActual && !dto.fromGroupActual }
-                                val contactMap: MutableMap<ContactId, ContactDto> =
-                                    LinkedHashMap(contactsToInsert.size)
+                            try {
+                                var error: Throwable? = null
+                                val handler = CoroutineExceptionHandler { _, throwable ->
+                                    error = throwable
+                                }
 
-                                chatLock.withLock {
-                                    messageLock.withLock {
-                                        contactLock.withLock {
-                                            queries.transaction {
-                                                for (dto in loadResponse.value.contacts) {
-                                                    if (dto.deletedActual || dto.fromGroupActual) {
-                                                        deleteContactById(
-                                                            ContactId(dto.id),
-                                                            queries
-                                                        )
-                                                    } else {
-                                                        upsertContact(dto, queries)
-                                                        contactMap[ContactId(dto.id)] = dto
+                                var processChatsResponse: Response<Boolean, ResponseError> =
+                                    Response.Success(true)
+
+                                applicationScope.launch(io + handler) {
+
+                                    val contactsToInsert =
+                                        loadResponse.value.contacts.filter { dto -> !dto.deletedActual && !dto.fromGroupActual }
+                                    val contactMap: MutableMap<ContactId, ContactDto> =
+                                        LinkedHashMap(contactsToInsert.size)
+
+                                    chatLock.withLock {
+                                        messageLock.withLock {
+                                            contactLock.withLock {
+                                                queries.transaction {
+                                                    for (dto in loadResponse.value.contacts) {
+                                                        if (dto.deletedActual || dto.fromGroupActual) {
+                                                            deleteContactById(
+                                                                ContactId(dto.id),
+                                                                queries
+                                                            )
+                                                        } else {
+                                                            upsertContact(dto, queries)
+                                                            contactMap[ContactId(dto.id)] = dto
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
                                     }
-                                }
 
-                                processChatsResponse = processChatDtos(
-                                    loadResponse.value.chats,
-                                    contactMap,
-                                )
+                                    processChatsResponse = processChatDtos(
+                                        loadResponse.value.chats,
+                                        contactMap,
+                                    )
 
-                                inviteLock.withLock {
-                                    contactLock.withLock {
-                                        queries.transaction {
-                                            for (dto in loadResponse.value.invites) {
-                                                updatedContactIds.add(ContactId(dto.contact_id))
-                                                upsertInvite(dto, queries)
+                                    inviteLock.withLock {
+                                        contactLock.withLock {
+                                            queries.transaction {
+                                                for (dto in loadResponse.value.invites) {
+                                                    updatedContactIds.add(ContactId(dto.contact_id))
+                                                    upsertInvite(dto, queries)
+                                                }
                                             }
                                         }
                                     }
+
+                                    subscriptionLock.withLock {
+                                        queries.transaction {
+                                            for (dto in loadResponse.value.subscriptions) {
+                                                upsertSubscription(dto, queries)
+                                            }
+                                        }
+                                    }
+
+                                }.join()
+
+                                error?.let {
+                                    throw it
                                 }
 
-                                subscriptionLock.withLock {
-                                    queries.transaction {
-                                        for (dto in loadResponse.value.subscriptions) {
-                                            upsertSubscription(dto, queries)
-                                        }
+                                emit(
+                                    if (processChatsResponse is Response.Success) {
+                                        Response.Success(
+                                            RestoreProgress(restoring, latestContactsPercentage)
+                                        )
+                                    } else {
+                                        Response.Error(ResponseError("Failed to refresh contacts and chats"))
+                                    }
+                                )
+
+                                if (loadResponse.value.chats.size >= limit || loadResponse.value.contacts.size >= limit) {
+                                    offset += limit
+                                    latestContactsPercentage += 1
+                                } else {
+                                    offset = -1
+
+                                    if (
+                                        loadResponse.value.contacts.size > 1 ||
+                                        loadResponse.value.chats.isNotEmpty()
+                                    ) {
+                                        authenticationStorage.putString(
+                                            REPOSITORY_LAST_SEEN_CONTACTS_DATE,
+                                            now
+                                        )
                                     }
                                 }
 
-                            }.join()
-
-                            error?.let {
-                                throw it
-                            } ?: run {
-                                if (
-                                    loadResponse.value.contacts.size > 1 ||
-                                    loadResponse.value.chats.isNotEmpty()
-                                ) {
-                                    authenticationStorage.putString(
-                                        REPOSITORY_LAST_SEEN_CONTACTS_DATE,
-                                        now
-                                    )
-                                }
+                            } catch (e: ParseException) {
+                                val msg =
+                                    "Failed to convert date/time from Relay while processing Contacts"
+                                LOG.e(TAG, msg, e)
+                                emit(Response.Error(ResponseError(msg, e)))
+                                offset = -1
                             }
-
-                            emit(
-                                if (processChatsResponse is Response.Success) {
-                                    Response.Success(
-                                        RestoreProgress(restoring, 5)
-                                    )
-                                } else {
-                                    Response.Error(ResponseError("Failed to refresh contacts and chats"))
-                                }
-                            )
-
-                        } catch (e: ParseException) {
-                            val msg =
-                                "Failed to convert date/time from Relay while processing Contacts"
-                            LOG.e(TAG, msg, e)
-                            emit(Response.Error(ResponseError(msg, e)))
                         }
-
-                    }
-                    is LoadResponse.Loading -> {
-                        emit(loadResponse)
                     }
                 }
             }
@@ -5138,12 +5154,11 @@ abstract class SphinxRepository(
             newMessagesTotal / MESSAGE_PAGINATION_LIMIT
         }
 
-        val contactsRestoreProgressTotal = 5
         val feedRestoreProgressTotal = 10
-        val messagesRestoreProgressTotal = 85
+        val messagesRestoreProgressTotal = 100 - feedRestoreProgressTotal - latestContactsPercentage
         val currentPage: Int = offset / MESSAGE_PAGINATION_LIMIT
 
-        val progress: Int = contactsRestoreProgressTotal + feedRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
+        val progress: Int = latestContactsPercentage + feedRestoreProgressTotal + (currentPage * messagesRestoreProgressTotal / pages)
 
         return RestoreProgress(
             true,
@@ -5156,11 +5171,10 @@ abstract class SphinxRepository(
         currentIndex: Int
     ): RestoreProgress {
 
-        val contactsRestoreProgressTotal = 5
         val feedRestoreProgressTotal = 10
         val feedPercentage = feedRestoreProgressTotal.toDouble() / feedTotal.toDouble() * currentIndex
 
-        val progress: Int = contactsRestoreProgressTotal + round(feedPercentage).toInt()
+        val progress: Int = latestContactsPercentage + round(feedPercentage).toInt()
 
         return RestoreProgress(
             true,
