@@ -31,6 +31,7 @@ import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
@@ -734,6 +735,82 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                     }
                                 ),
                             )
+                        }
+
+                        val imageLoaderOptions: ImageLoaderOptions by lazy {
+                            ImageLoaderOptions.Builder()
+                                .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                .transformation(Transformation.CircleCrop)
+                                .build()
+                        }
+
+                        if (threadHeader.imageAttachment != null) {
+                            constraintMediaThreadContainer.rootView.visible
+                            binding.includeMessageTypeImageAttachment.apply {
+                                layoutConstraintPaidImageOverlay.gone
+
+                                loadingImageProgressContainer.visible
+                                imageViewAttachmentImage.visible
+
+                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                    if (threadHeader.imageAttachment.second != null) {
+                                        imageLoader.load(
+                                            imageViewAttachmentImage,
+                                            threadHeader.imageAttachment.second!!,
+                                            imageLoaderOptions
+                                        )
+                                    } else {
+                                        imageLoader.load(
+                                            imageViewAttachmentImage,
+                                            threadHeader.imageAttachment.first,
+                                            imageLoaderOptions
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        if (threadHeader.videoAttachment != null) {
+                            constraintMediaThreadContainer.rootView.visible
+                            binding.includeMessageTypeVideoAttachment.apply {
+                                root.visible
+
+                                val thumbnail = VideoThumbnailUtil.loadThumbnail(threadHeader.videoAttachment)
+
+                                if (thumbnail != null) {
+                                    imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                                    layoutConstraintVideoPlayButton.visible
+                                }
+
+                                imageViewAttachmentThumbnail.visible
+                            }
+                        }
+
+                        if (threadHeader.fileAttachment != null) {
+                            constraintMediaThreadContainer.rootView.visible
+                            binding.includeMessageTypeFileAttachment.apply {
+
+                                progressBarAttachmentFileDownload.gone
+                                buttonAttachmentFileDownload.visible
+
+                                textViewAttachmentFileIcon.text = if (threadHeader.fileAttachment.isPdf) {
+                                    getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
+                                } else {
+                                    getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
+                                }
+
+                                textViewAttachmentFileName.text = threadHeader.fileAttachment.fileName?.value ?: "File.txt"
+
+                                textViewAttachmentFileSize.text = if (threadHeader.fileAttachment.isPdf) {
+                                    if (threadHeader.fileAttachment.pageCount > 1) {
+                                        "${threadHeader.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_pages)}"
+                                    } else {
+                                        "${threadHeader.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_page)}"
+                                    }
+                                } else {
+                                    threadHeader.fileAttachment.fileSize.asFormattedString()
+                                }
+                            }
                         }
 
                         threadHeader.photoUrl?.let { photoUrl ->

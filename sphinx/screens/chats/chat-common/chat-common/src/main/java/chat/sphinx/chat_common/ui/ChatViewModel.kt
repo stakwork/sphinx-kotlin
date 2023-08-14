@@ -491,6 +491,30 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                 val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0)
 
+                val imageAttachment = message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+                    Pair(mediaData.first, mediaData.second?.localFile)
+                }
+                val videoAttachment: File? = message.messageMedia?.let { nnMessageMedia ->
+                    if (nnMessageMedia.mediaType.isVideo) { nnMessageMedia.localFile } else null
+                }
+                val fileAttachment: MessageHolderViewState.FileAttachment? = message.messageMedia?.let { nnMessageMedia ->
+                    nnMessageMedia.localFile?.let { nnFile ->
+
+                        val pageCount = if (nnMessageMedia.mediaType.isPdf) {
+                            val fileDescriptor = ParcelFileDescriptor.open(nnFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                            val renderer = PdfRenderer(fileDescriptor)
+                            renderer.pageCount
+                        } else { 0 }
+
+                        MessageHolderViewState.FileAttachment(
+                            nnMessageMedia.fileName,
+                            FileSize(nnFile.length()),
+                            nnMessageMedia.mediaType.isPdf,
+                            pageCount
+                        )
+                    }
+                }
+
                 if (isThreadHeaderMessage) {
                     newList.add(
                         MessageHolderViewState.ThreadHeader(
@@ -504,7 +528,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                             threadAliasAndColor,
                             threadPhotoUrl,
                             message.date.chatTimeFormat(),
-                            message.messageContentDecrypted?.value ?: ""
+                            message.messageContentDecrypted?.value ?: "",
+                            imageAttachment = imageAttachment,
+                            videoAttachment = videoAttachment,
+                            fileAttachment = fileAttachment
                         )
                     )
                     continue

@@ -23,6 +23,7 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.File
 
 
 // TODO: Remove
@@ -854,7 +855,10 @@ internal sealed class MessageHolderViewState(
         val photoUrl: PhotoUrl?,
         val date: String,
         val messageText: String,
-        val isExpanded: Boolean = false
+        val isExpanded: Boolean = false,
+        val imageAttachment: Pair<String, File?>? = null,
+        val videoAttachment: File? = null,
+        val fileAttachment: FileAttachment? = null,
     ) : MessageHolderViewState(
         null,
         chat,
@@ -885,9 +889,19 @@ internal sealed class MessageHolderViewState(
                 photoUrl,
                 date,
                 messageText,
-                isExpanded
+                isExpanded,
+                imageAttachment,
+                videoAttachment,
+                fileAttachment
             )
         }
     }
+
+    data class FileAttachment(
+        val fileName: FileName?,
+        val fileSize: FileSize,
+        val isPdf: Boolean,
+        val pageCount: Int
+    )
 
 }
