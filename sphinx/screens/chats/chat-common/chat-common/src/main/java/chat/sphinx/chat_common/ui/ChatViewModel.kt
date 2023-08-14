@@ -40,6 +40,7 @@ import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.scrolldown.ScrollDownViewState
 import chat.sphinx.chat_common.ui.viewstate.search.MessagesSearchViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
+import chat.sphinx.chat_common.ui.viewstate.shimmer.ShimmerViewState
 import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_common.util.AudioPlayerController
 import chat.sphinx.chat_common.util.AudioPlayerControllerImpl
@@ -185,7 +186,17 @@ abstract class ChatViewModel<ARGS : NavArgs>(
     }
 
     val threadHeaderViewState: ViewStateContainer<ThreadHeaderViewState> by lazy {
-        ViewStateContainer(ThreadHeaderViewState.Idle)
+        ViewStateContainer(
+            if (isThreadChat()) {
+                ThreadHeaderViewState.BasicHeader
+            } else {
+                ThreadHeaderViewState.Idle
+            }
+        )
+    }
+
+    val shimmerViewState: ViewStateContainer<ShimmerViewState> by lazy {
+        ViewStateContainer(ShimmerViewState.On)
     }
 
     private val latestThreadMessagesFlow: MutableStateFlow<List<Message>?> = MutableStateFlow(null)
@@ -959,26 +970,24 @@ abstract class ChatViewModel<ARGS : NavArgs>(
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
             if (isThreadChat()) {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 0, getThreadUUID()).distinctUntilChanged().collect { messages ->
+                    delay(200)
 
                     val originalMessage = messageRepository.getMessageByUUID(MessageUUID(getThreadUUID()?.value!!)).firstOrNull()
                     val completeThread = listOf(originalMessage) + messages.reversed()
-
                     val list = getMessageHolderViewStateList(completeThread.filterNotNull()).toList()
 
                     messageHolderViewStateFlow.value = list
+                    changeThreadHeaderState(true)
+                    shimmerViewState.updateViewState(ShimmerViewState.Off)
 
                     scrollDownButtonCount.value = messages.size.toLong()
-
                 }
             } else {
-                messageRepository.getAllMessagesToShowByChatId(getChat().id, 20).firstOrNull()?.let { messages ->
-                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
-                }
-
-                delay(1000L)
-
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+                    delay(200)
+
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+                    shimmerViewState.updateViewState(ShimmerViewState.Off)
 
                     reloadPinnedMessage()
 

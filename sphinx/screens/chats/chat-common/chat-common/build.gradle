@@ -84,6 +84,7 @@ dependencies {
     implementation deps.square.moshi
     implementation deps.giphy.sdk
     implementation deps.jitsi.sdk
+    implementation deps.facebook.shimmer
 }
 
 secrets {

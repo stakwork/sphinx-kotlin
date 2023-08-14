@@ -5,7 +5,9 @@
     android:id="@+id/layout_constraint_chat_holder"
     android:layout_width="match_parent"
     android:layout_height="@dimen/recycler_view_holder_height"
-    android:background="@color/headerBG"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/chat_holder_ripple"
     android:elevation="4dp"
     tools:ignore="RtlSymmetry">
 

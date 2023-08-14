@@ -51,6 +51,7 @@ import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuColor
 import chat.sphinx.chat_common.ui.viewstate.selected.setMenuItems
+import chat.sphinx.chat_common.ui.viewstate.shimmer.ShimmerViewState
 import chat.sphinx.chat_common.ui.widgets.SlideToCancelImageView
 import chat.sphinx.chat_common.ui.widgets.SphinxFullscreenImageView
 import chat.sphinx.chat_common.util.AudioRecorderController
@@ -128,7 +129,9 @@ abstract class ChatFragment<
     protected abstract val moreMenuBinding: LayoutMenuBottomBinding
     protected abstract val recyclerView: RecyclerView
     protected abstract val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+    protected abstract val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
     protected abstract val scrollDownButtonBinding: LayoutScrollDownButtonBinding
+    protected abstract val shimmerBinding: LayoutShimmerContainerBinding
 
     protected abstract val menuEnablePayments: Boolean
 
@@ -937,6 +940,23 @@ abstract class ChatFragment<
 
     override fun subscribeToViewStateFlow() {
         super.subscribeToViewStateFlow()
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.shimmerViewState.collect { viewState ->
+                shimmerBinding.apply {
+                    when (viewState) {
+                        is ShimmerViewState.On -> {
+                            root.visible
+                            shimmer.startShimmer()
+                        }
+                        is ShimmerViewState.Off -> {
+                            root.gone
+                            shimmer.stopShimmer()
+                        }
+                    }
+                }
+            }
+        }
 
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.messageReplyViewStateContainer.collect { viewState ->
