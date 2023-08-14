@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/layout_thread_original_message_header"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/default_pin_header_height"
+    android:layout_height="wrap_content"
     android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
 
@@ -14,6 +14,7 @@
         android:layout_height="match_parent"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
         android:layout_marginTop="@dimen/default_small_layout_margin"
+        android:layout_marginBottom="@dimen/default_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -26,7 +27,6 @@
             android:gravity="start|center_vertical"
             android:maxLines="2"
             android:paddingEnd="@dimen/default_small_layout_margin"
-            android:paddingBottom="8dp"
             android:textColor="@color/textMessages"
             android:textSize="@dimen/chat_footer_recording_audio_slide_text_size"
             app:layout_constraintBottom_toBottomOf="parent"

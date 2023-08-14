@@ -193,8 +193,7 @@ internal class ThreadsAdapter(
                 layoutLayoutChatImageSmallInitialHolder.apply {
                     textViewInitialsName.visible
                     textViewInitialsName.text =
-                        threadItem.aliasAndColorKey.first?.value ?: root.context.getString(R.string.unknown)
-                            .getInitials(1)
+                        (threadItem.aliasAndColorKey.first?.value ?: root.context.getString(R.string.unknown)).getInitials()
                     imageViewChatPicture.gone
 
                     onStopSupervisor.scope.launch(viewModel.mainImmediate) {
