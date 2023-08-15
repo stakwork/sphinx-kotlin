@@ -2347,10 +2347,11 @@ abstract class SphinxRepository(
     }
 
     override suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message> {
-        return coreDB.getSphinxDatabaseQueries()
-            .messageGetAllByUUID(messageUUIDs)
+        val queries = coreDB.getSphinxDatabaseQueries()
+
+        return queries.messageGetAllByUUID(messageUUIDs)
             .executeAsList()
-            .map { messageDboPresenterMapper.mapFrom(it) }
+            .map { mapMessageDboAndDecryptContentIfNeeded(queries, it) }
     }
 
     override suspend fun fetchPinnedMessageByUUID(

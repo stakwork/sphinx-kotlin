@@ -489,7 +489,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                 val threadPhotoUrl = if (isOwner) owner.photoUrl else message.senderPic
 
-                val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0)
+                val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0 && !message.type.isGroupAction())
 
                 val imageAttachment = message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                     Pair(mediaData.first, mediaData.second?.localFile)
@@ -639,7 +639,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                         )
                     )
                 } else {
-                    if (message.uuid?.value != getThreadUUID()?.value) {
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
@@ -717,7 +716,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                                 }
                             )
                         )
-                    }
                 }
 
                 if (message.isPaidInvoice) {

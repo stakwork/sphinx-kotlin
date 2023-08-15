@@ -29,6 +29,7 @@ import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message.getColorKey
 import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
 import chat.sphinx.wrapper_message_media.isAudio
+import chat.sphinx.wrapper_message_media.isImage
 import chat.sphinx.wrapper_message_media.isPdf
 import chat.sphinx.wrapper_message_media.isUnknown
 import chat.sphinx.wrapper_message_media.isVideo
@@ -208,20 +209,26 @@ internal class ThreadsViewModel @Inject constructor(
             if (nnMessageMedia.mediaType.isVideo) { nnMessageMedia.localFile } else null
         }
         val fileAttachment: FileAttachment? = originalMessage?.messageMedia?.let { nnMessageMedia ->
-            nnMessageMedia.localFile?.let { nnFile ->
+            if(nnMessageMedia.mediaType.isImage) {
+                null
+            } else {
+                nnMessageMedia.localFile?.let { nnFile ->
+                    val pageCount = if (nnMessageMedia.mediaType.isPdf) {
+                        val fileDescriptor =
+                            ParcelFileDescriptor.open(nnFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                        val renderer = PdfRenderer(fileDescriptor)
+                        renderer.pageCount
+                    } else {
+                        0
+                    }
 
-                val pageCount = if (nnMessageMedia.mediaType.isPdf) {
-                    val fileDescriptor = ParcelFileDescriptor.open(nnFile, ParcelFileDescriptor.MODE_READ_ONLY)
-                    val renderer = PdfRenderer(fileDescriptor)
-                    renderer.pageCount
-                } else { 0 }
-
-                FileAttachment(
-                    nnMessageMedia.fileName,
-                    FileSize(nnFile.length()),
-                    nnMessageMedia.mediaType.isPdf,
-                    pageCount
-                )
+                    FileAttachment(
+                        nnMessageMedia.fileName,
+                        FileSize(nnFile.length()),
+                        nnMessageMedia.mediaType.isPdf,
+                        pageCount
+                    )
+                }
             }
         }
 
