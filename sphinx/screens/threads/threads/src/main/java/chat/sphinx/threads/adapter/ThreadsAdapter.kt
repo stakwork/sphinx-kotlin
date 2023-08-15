@@ -31,6 +31,7 @@ import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
@@ -245,7 +246,6 @@ internal class ThreadsAdapter(
 
                         loadingImageProgressContainer.visible
                         imageViewAttachmentImage.visible
-
 
                         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                             if (threadItem.imageAttachment.second != null) {

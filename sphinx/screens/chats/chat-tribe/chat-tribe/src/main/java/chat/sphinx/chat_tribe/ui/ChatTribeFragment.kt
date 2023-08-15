@@ -31,6 +31,7 @@ import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -64,6 +65,7 @@ import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_chat.protocolLessUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_view.Px
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -166,7 +168,6 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
-
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -728,6 +729,10 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
+        val imageAttachmentLoader = ImageLoaderOptions.Builder()
+            .transformation(Transformation.RoundedCorners(Px(5f), Px(5f), Px(5f), Px(5f)))
+            .build()
+
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.threadHeaderViewState.collect { viewState ->
                 threadHeader.apply {
@@ -757,8 +762,9 @@ internal class ChatTribeFragment: ChatFragment<
                             textViewHeader.gone
 
                             textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
-                                textViewThreadDate.text = viewState.date
+                            textViewThreadDate.text = viewState.date
                             threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
+
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible
@@ -777,6 +783,45 @@ internal class ChatTribeFragment: ChatFragment<
                                             }
                                         ),
                                     )
+                                }
+
+                                threadOriginalMessageBinding?.apply {
+                                    if (viewState.imageAttachment != null) {
+                                        imageViewThreadCardView.visible
+
+                                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                            if (viewState.imageAttachment!!.second != null) {
+                                                imageLoader.load(
+                                                    imageViewElementPicture,
+                                                    viewState.imageAttachment!!.second!!,
+                                                    imageAttachmentLoader
+                                                )
+                                            } else {
+                                                imageLoader.load(
+                                                    imageViewElementPicture,
+                                                    viewState!!.imageAttachment!!.first!!,
+                                                    imageAttachmentLoader
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    if (viewState.videoAttachment != null) {
+                                        imageViewThreadCardView.visible
+
+                                        val thumbnail = VideoThumbnailUtil.loadThumbnail(viewState.videoAttachment!!)
+
+                                        if (thumbnail != null) {
+                                            imageViewElementPicture.setImageBitmap(thumbnail)
+                                            imageViewAlpha.visible
+                                            textViewAttachmentPlayButton.visible
+                                        }
+                                    }
+
+                                    if (viewState.isPdf == true) {
+                                        imageViewThreadCardView.gone
+                                        textViewAttachmentFileIcon.visible
+                                    }
                                 }
 
                                 viewState.photoUrl?.let { photoUrl ->

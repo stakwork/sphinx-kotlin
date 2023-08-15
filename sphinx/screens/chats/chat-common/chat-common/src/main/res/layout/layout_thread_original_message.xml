@@ -10,7 +10,7 @@
     android:elevation="@dimen/default_elevation">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/image_view_storage_cardview"
+        android:id="@+id/image_view_thread_card_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/body"
@@ -25,16 +25,16 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_element_picture"
-            android:layout_width="@dimen/badges_icon_row_size"
-            android:layout_height="@dimen/badges_icon_row_size"
+            android:layout_width="@dimen/player_bar_play_button_xy"
+            android:layout_height="@dimen/player_bar_play_button_xy"
             android:layout_centerInParent="true"
             android:src="@drawable/ic_podcast_type"
             tools:visibility="visible" />
 
         <View
             android:id="@+id/image_view_alpha"
-            android:layout_width="@dimen/badges_icon_row_size"
-            android:layout_height="@dimen/badges_icon_row_size"
+            android:layout_width="@dimen/player_bar_play_button_xy"
+            android:layout_height="@dimen/player_bar_play_button_xy"
             android:background="@color/blackSemiTransparent"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -44,15 +44,15 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_attachment_play_button"
-            android:layout_width="@dimen/badges_icon_row_size"
-            android:layout_height="@dimen/badges_icon_row_size"
+            android:layout_width="@dimen/player_bar_play_button_xy"
+            android:layout_height="@dimen/player_bar_play_button_xy"
             android:clickable="false"
             android:focusable="true"
             android:gravity="center"
             android:textColor="@android:color/white"
             android:text="@string/material_icon_name_play_outline"
             android:fontFamily="@font/material_icons_regular"
-            android:textSize="@dimen/default_text_size_large_title"
+            android:textSize="@dimen/default_small_tap_target_xy"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -60,6 +60,21 @@
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.cardview.widget.CardView>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_attachment_file_icon"
+        android:layout_width="@dimen/icon_file_attachment_xy"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_small_layout_margin"
+        android:fontFamily="@font/material_icons_regular"
+        android:text="@string/material_icon_name_file_pdf"
+        android:textColor="@color/primaryText"
+        android:textSize="@dimen/icon_file_attachment_text_size"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_original_message"
@@ -69,7 +84,7 @@
         android:layout_marginTop="@dimen/default_small_layout_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/image_view_storage_cardview"
+        app:layout_constraintStart_toEndOf="@+id/image_view_thread_card_view"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView

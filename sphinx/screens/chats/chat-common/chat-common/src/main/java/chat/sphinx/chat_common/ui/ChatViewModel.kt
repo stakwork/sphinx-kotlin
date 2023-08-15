@@ -498,20 +498,29 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     if (nnMessageMedia.mediaType.isVideo) { nnMessageMedia.localFile } else null
                 }
                 val fileAttachment: MessageHolderViewState.FileAttachment? = message.messageMedia?.let { nnMessageMedia ->
-                    nnMessageMedia.localFile?.let { nnFile ->
+                    if(nnMessageMedia.mediaType.isImage) {
+                        null
+                    } else {
+                        nnMessageMedia.localFile?.let { nnFile ->
 
-                        val pageCount = if (nnMessageMedia.mediaType.isPdf) {
-                            val fileDescriptor = ParcelFileDescriptor.open(nnFile, ParcelFileDescriptor.MODE_READ_ONLY)
-                            val renderer = PdfRenderer(fileDescriptor)
-                            renderer.pageCount
-                        } else { 0 }
+                            val pageCount = if (nnMessageMedia.mediaType.isPdf) {
+                                val fileDescriptor = ParcelFileDescriptor.open(
+                                    nnFile,
+                                    ParcelFileDescriptor.MODE_READ_ONLY
+                                )
+                                val renderer = PdfRenderer(fileDescriptor)
+                                renderer.pageCount
+                            } else {
+                                0
+                            }
 
-                        MessageHolderViewState.FileAttachment(
-                            nnMessageMedia.fileName,
-                            FileSize(nnFile.length()),
-                            nnMessageMedia.mediaType.isPdf,
-                            pageCount
-                        )
+                            MessageHolderViewState.FileAttachment(
+                                nnMessageMedia.fileName,
+                                FileSize(nnFile.length()),
+                                nnMessageMedia.mediaType.isPdf,
+                                pageCount
+                            )
+                        }
                     }
                 }
 
@@ -1498,7 +1507,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     originalMessage.aliasAndColorKey,
                     originalMessage.photoUrl,
                     originalMessage.date,
-                    originalMessage.messageText
+                    originalMessage.messageText,
+                    originalMessage.imageAttachment,
+                    originalMessage.videoAttachment,
+                    originalMessage.fileAttachment?.isPdf
                 )
                 threadHeaderViewState.updateViewState(threadHeader)
             }

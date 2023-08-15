@@ -737,17 +737,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             )
                         }
 
-                        val imageLoaderOptions: ImageLoaderOptions by lazy {
-                            ImageLoaderOptions.Builder()
-                                .placeholderResId(R.drawable.ic_profile_avatar_circle)
-                                .transformation(Transformation.CircleCrop)
-                                .build()
-                        }
+                        val imageAttachmentLoader = ImageLoaderOptions.Builder()
+                            .transformation(Transformation.RoundedCorners(Px(5f), Px(5f), Px(5f), Px(5f)))
+                            .build()
 
+                        binding.includeMessageTypeImageAttachment.apply {
                         if (threadHeader.imageAttachment != null) {
-                            constraintMediaThreadContainer.rootView.visible
-                            binding.includeMessageTypeImageAttachment.apply {
-                                layoutConstraintPaidImageOverlay.gone
+                            root.visible
+                            layoutConstraintPaidImageOverlay.gone
 
                                 loadingImageProgressContainer.visible
                                 imageViewAttachmentImage.visible
@@ -757,22 +754,22 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                         imageLoader.load(
                                             imageViewAttachmentImage,
                                             threadHeader.imageAttachment.second!!,
-                                            imageLoaderOptions
+                                            imageAttachmentLoader
                                         )
                                     } else {
                                         imageLoader.load(
                                             imageViewAttachmentImage,
                                             threadHeader.imageAttachment.first,
-                                            imageLoaderOptions
+                                            imageAttachmentLoader
                                         )
                                     }
                                 }
+                            } else {
+                                root.gone
                             }
                         }
-
+                        binding.includeMessageTypeVideoAttachment.apply {
                         if (threadHeader.videoAttachment != null) {
-                            constraintMediaThreadContainer.rootView.visible
-                            binding.includeMessageTypeVideoAttachment.apply {
                                 root.visible
 
                                 val thumbnail = VideoThumbnailUtil.loadThumbnail(threadHeader.videoAttachment)
@@ -783,17 +780,20 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                 }
 
                                 imageViewAttachmentThumbnail.visible
+                            } else {
+                                root.gone
                             }
                         }
 
+                        binding.includeMessageTypeFileAttachment.apply {
                         if (threadHeader.fileAttachment != null) {
-                            constraintMediaThreadContainer.rootView.visible
-                            binding.includeMessageTypeFileAttachment.apply {
-
+                                root.visible
                                 progressBarAttachmentFileDownload.gone
                                 buttonAttachmentFileDownload.visible
 
-                                textViewAttachmentFileIcon.text = if (threadHeader.fileAttachment.isPdf) {
+                            layoutConstraintAttachmentFileDownloadButtonGroup.gone
+
+                            textViewAttachmentFileIcon.text = if (threadHeader.fileAttachment.isPdf) {
                                     getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
                                 } else {
                                     getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
@@ -810,6 +810,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                                 } else {
                                     threadHeader.fileAttachment.fileSize.asFormattedString()
                                 }
+                            } else {
+                                root.gone
                             }
                         }
 
