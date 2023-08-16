@@ -291,9 +291,9 @@ internal class ThreadsAdapter(
 
                 // File Attachment header
                 binding.includeMessageTypeFileAttachment.apply {
-                if (threadItem.fileAttachment != null) {
+                    if (threadItem.fileAttachment != null) {
                         root.visible
-
+                        includeMessageTypeFileAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
                         layoutConstraintAttachmentFileDownloadButtonGroup.gone
 
                         progressBarAttachmentFileDownload.gone
@@ -305,7 +305,8 @@ internal class ThreadsAdapter(
                             getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
                         }
 
-                        textViewAttachmentFileName.text = threadItem.fileAttachment.fileName?.value ?: "File.txt"
+                        textViewAttachmentFileName.text =
+                            threadItem.fileAttachment.fileName?.value ?: "File.txt"
 
                         textViewAttachmentFileSize.text = if (threadItem.fileAttachment.isPdf) {
                             if (threadItem.fileAttachment.pageCount > 1) {

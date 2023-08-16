@@ -707,6 +707,20 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                 }
+                includeMessageTypeFileAttachment.apply {
+                    buttonAttachmentFileDownload.setOnClickListener {
+                        currentHeader?.message?.let { message ->
+                            viewModel.saveFile(message, null)
+                        }
+                    }
+                    layoutConstraintAttachmentFileMainInfoGroup.setOnClickListener {
+                        currentHeader?.message?.let { message ->
+                            viewModel.showAttachmentPdfFullscreen(message, 0)
+                        }
+                    }
+                }
+
+                includeMessageTypeFileAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
             }
         }
 
@@ -806,30 +820,39 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
 
                         binding.includeMessageTypeFileAttachment.apply {
-                        if (threadHeader.fileAttachment != null) {
+                            if (threadHeader.fileAttachment != null) {
                                 root.visible
                                 progressBarAttachmentFileDownload.gone
                                 buttonAttachmentFileDownload.visible
 
-                            layoutConstraintAttachmentFileDownloadButtonGroup.gone
-
-                            textViewAttachmentFileIcon.text = if (threadHeader.fileAttachment.isPdf) {
-                                    getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
-                                } else {
-                                    getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
-                                }
-
-                                textViewAttachmentFileName.text = threadHeader.fileAttachment.fileName?.value ?: "File.txt"
-
-                                textViewAttachmentFileSize.text = if (threadHeader.fileAttachment.isPdf) {
-                                    if (threadHeader.fileAttachment.pageCount > 1) {
-                                        "${threadHeader.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_pages)}"
+                                textViewAttachmentFileIcon.text =
+                                    if (threadHeader.fileAttachment.isPdf) {
+                                        getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
                                     } else {
-                                        "${threadHeader.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_page)}"
+                                        getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
                                     }
-                                } else {
-                                    threadHeader.fileAttachment.fileSize.asFormattedString()
-                                }
+
+                                textViewAttachmentFileName.text =
+                                    threadHeader.fileAttachment.fileName?.value ?: "File.txt"
+
+                                textViewAttachmentFileSize.text =
+                                    if (threadHeader.fileAttachment.isPdf) {
+                                        if (threadHeader.fileAttachment.pageCount > 1) {
+                                            "${threadHeader.fileAttachment.pageCount} ${
+                                                getString(
+                                                    chat.sphinx.chat_common.R.string.pdf_pages
+                                                )
+                                            }"
+                                        } else {
+                                            "${threadHeader.fileAttachment.pageCount} ${
+                                                getString(
+                                                    chat.sphinx.chat_common.R.string.pdf_page
+                                                )
+                                            }"
+                                        }
+                                    } else {
+                                        threadHeader.fileAttachment.fileSize.asFormattedString()
+                                    }
                             } else {
                                 root.gone
                             }
