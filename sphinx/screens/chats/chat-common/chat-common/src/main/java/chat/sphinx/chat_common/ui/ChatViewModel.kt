@@ -527,6 +527,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 if (isThreadHeaderMessage) {
                     newList.add(
                         MessageHolderViewState.ThreadHeader(
+                            message,
                             MessageHolderType.ThreadHeader,
                             chat,
                             tribeAdmin,

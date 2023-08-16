@@ -844,6 +844,7 @@ internal sealed class MessageHolderViewState(
     )
 
     class ThreadHeader(
+        message: Message?,
         messageHolderType: MessageHolderType,
         val chat: Chat,
         val tribeAdmin: Contact?,
@@ -860,7 +861,7 @@ internal sealed class MessageHolderViewState(
         val videoAttachment: File? = null,
         val fileAttachment: FileAttachment? = null,
     ) : MessageHolderViewState(
-        null,
+        message,
         chat,
         tribeAdmin,
         messageHolderType,
@@ -878,6 +879,7 @@ internal sealed class MessageHolderViewState(
     ) {
         fun copy(isExpanded: Boolean = this.isExpanded): ThreadHeader {
             return ThreadHeader(
+                message,
                 messageHolderType,
                 chat,
                 tribeAdmin,

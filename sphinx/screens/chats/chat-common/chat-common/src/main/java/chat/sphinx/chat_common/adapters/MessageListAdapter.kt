@@ -685,15 +685,35 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     inner class ThreadHeaderViewHolder(
         private val binding: LayoutThreadMessageHeaderBinding
     ) : RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
+        private var currentHeader: MessageHolderViewState.ThreadHeader? = null
 
         init {
-            binding.constraintShowMoreContainer.setOnClickListener {
-                viewModel.toggleThreadDescriptionExpanded()
+            binding.apply {
+
+                constraintShowMoreContainer.setOnClickListener {
+                    viewModel.toggleThreadDescriptionExpanded()
+                }
+
+                includeMessageTypeImageAttachment.imageViewAttachmentImage.setOnClickListener {
+                    currentHeader?.message?.let { message ->
+                        viewModel.showAttachmentImageFullscreen(message)
+                    }
+                }
+
+                includeMessageTypeVideoAttachment.apply {
+                    textViewAttachmentPlayButton.setOnClickListener {
+                        currentHeader?.message?.let { message ->
+                            viewModel.goToFullscreenVideo(message.id)
+                        }
+                    }
+                }
             }
         }
 
         fun bind(position: Int) {
             val threadHeader = messages.getOrNull(position) as MessageHolderViewState.ThreadHeader
+            currentHeader = threadHeader
+
             binding.apply {
                 root.visible
 
