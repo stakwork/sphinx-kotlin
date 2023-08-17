@@ -138,6 +138,9 @@ ext.deps = [
     ],
     facebook: [
             shimmer: "com.facebook.shimmer:shimmer:0.5.0"
+    ],
+    paho: [
+            sdk: "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
     ]
 ]
 
