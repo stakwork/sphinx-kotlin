@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="recommended_list_item_cover_image_xy">48dp</dimen>
+    <dimen name="item_details_controls_height">220dp</dimen>
+    <dimen name="player_slider_control_margin">14dp</dimen>
+    <dimen name="video_player_height">200dp</dimen>
+</resources>

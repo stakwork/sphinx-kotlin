@@ -19,6 +19,7 @@ class DashboardFragmentsAdapter(
         const val FEED_TAB_POSITION = 0
         const val FRIENDS_TAB_POSITION = 1
         const val TRIBES_TAB_POSITION = 2
+        const val FIRST_INIT = 3
 
         val TAB_TITLES = arrayOf(
             R.string.dashboard_feed_tab_name,

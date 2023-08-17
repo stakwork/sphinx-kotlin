@@ -88,6 +88,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     latest_message_idAdapter = MessageIdAdapter.getInstance(),
                     content_seen_atAdapter = DateTimeAdapter.getInstance(),
                     notifyAdapter = NotifyAdapter(),
+                    pin_messageAdapter = PinMessageAdapter.getInstance(),
                 ),
                 contactDboAdapter = ContactDbo.Adapter(
                     idAdapter = ContactIdAdapter.getInstance(),
@@ -153,6 +154,7 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     recipient_picAdapter = PhotoUrlAdapter.getInstance(),
                     pushAdapter = PushAdapter(),
                     personAdapter = PersonAdapter(),
+                    thread_uuidAdapter = ThreadUUIDAdapter()
                 ),
                 messageMediaDboAdapter = MessageMediaDbo.Adapter(
                     idAdapter = MessageIdAdapter.getInstance(),
@@ -194,7 +196,8 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     items_countAdapter = FeedItemsCountAdapter(),
                     current_item_idAdapter = FeedIdAdapter(),
                     chat_idAdapter = ChatIdAdapter.getInstance(),
-                    subscribedAdapter = SubscribedAdapter.getInstance()
+                    subscribedAdapter = SubscribedAdapter.getInstance(),
+                    last_playedAdapter = DateTimeAdapter.getInstance()
                 ),
                 feedItemDboAdapter = FeedItemDbo.Adapter(
                     idAdapter = FeedIdAdapter(),
@@ -230,6 +233,21 @@ abstract class CoreDBImpl(private val moshi: Moshi): CoreDB() {
                     typeAdapter = ActionTrackTypeAdapter(),
                     meta_dataAdapter = ActionTrackMetaDataAdapter(),
                     uploadedAdapter = ActionTrackUploadedAdapter()
+                ),
+                contentFeedStatusDboAdapter = ContentFeedStatusDbo.Adapter(
+                    feed_idAdapter = FeedIdAdapter(),
+                    feed_urlAdapter = FeedUrlAdapter.getInstance(),
+                    subscription_statusAdapter = SubscribedAdapter.getInstance(),
+                    chat_idAdapter = ChatIdAdapter.getInstance(),
+                    item_idAdapter = FeedIdAdapter(),
+                    sats_per_minuteAdapter = SatAdapter.getInstance(),
+                    player_speedAdapter = PlayerSpeedAdapter()
+                ),
+                contentEpisodeStatusDboAdapter = ContentEpisodeStatusDbo.Adapter(
+                    feed_idAdapter = FeedIdAdapter(),
+                    item_idAdapter = FeedIdAdapter(),
+                    durationAdapter = FeedItemDurationAdapter(),
+                    current_timeAdapter = FeedItemDurationAdapter()
                 )
             ).sphinxDatabaseQueries
         }

@@ -8,9 +8,6 @@
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view_content"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:background="@color/headerBG">
@@ -27,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_bold"
-                android:text="@string/listen_now"
+                android:text="@string/recently_released"
                 android:textSize="@dimen/default_text_size_large_title"
                 android:textColor="@color/text"
                 android:gravity="center"
@@ -48,14 +45,22 @@
                 android:id="@+id/recycler_view_listen_now"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_marginTop="@dimen/default_layout_margin"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
                 android:paddingStart="@dimen/default_half_layout_margin"
                 android:paddingEnd="@dimen/default_half_layout_margin"
-                android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_listen_now_header"
                 tools:listitem="@layout/layout_feed_squared_row_holder" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_recently_played"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view_listen_now">
 
             <TextView
                 android:id="@+id/text_view_listen_following_header"
@@ -63,12 +68,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/default_layout_margin"
                 android:layout_marginTop="@dimen/default_layout_margin"
-                android:text="@string/following"
+                android:text="@string/recently_played"
                 android:textSize="@dimen/default_text_size_large_title"
                 android:textColor="@color/text"
                 android:fontFamily="@font/roboto_bold"
                 android:gravity="center"
-                app:layout_constraintTop_toBottomOf="@+id/recycler_view_listen_now"
+                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
@@ -82,7 +87,7 @@
                 app:layout_constraintStart_toEndOf="@+id/text_view_listen_following_header" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_following"
+                android:id="@+id/recycler_view_recently_played"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -93,6 +98,8 @@
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintTop_toBottomOf="@+id/text_view_listen_following_header"
                 tools:listitem="@layout/layout_feed_squared_row_holder" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

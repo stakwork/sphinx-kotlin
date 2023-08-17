@@ -3,6 +3,7 @@ package chat.sphinx.video_screen.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -11,16 +12,16 @@ import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
 import chat.sphinx.resources.getColor
+import chat.sphinx.resources.getString
 import chat.sphinx.video_screen.R
-import chat.sphinx.video_screen.databinding.LayoutVideoListItemHolderBinding
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.VideoFeedScreenViewState
 import chat.sphinx.wrapper_common.feed.isYoutubeVideo
 import chat.sphinx.wrapper_common.hhmmElseDate
 import chat.sphinx.wrapper_feed.FeedItem
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
@@ -138,7 +139,7 @@ internal class VideoFeedItemsAdapter (
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoEpisodeViewHolder {
-        val binding = LayoutVideoListItemHolderBinding.inflate(
+        val binding = LayoutEpisodeGenericListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -158,7 +159,7 @@ internal class VideoFeedItemsAdapter (
     }
 
     inner class VideoEpisodeViewHolder(
-        private val binding: LayoutVideoListItemHolderBinding
+        private val binding: LayoutEpisodeGenericListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var holderJob: Job? = null
@@ -167,14 +168,39 @@ internal class VideoFeedItemsAdapter (
         private var videoItem: FeedItem? = null
 
         init {
-            binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
+            binding.layoutConstraintEpisodeIconsContainer.setOnClickListener {
+                playEpisodeFromList()
+            }
+            binding.buttonPlayEpisode.setOnClickListener {
+                playEpisodeFromList()
+            }
+            binding.buttonAdditionalOptions.setOnClickListener {
                 videoItem?.let { nnVideoItem ->
-                    lifecycleOwner.lifecycleScope.launch {
-                        viewModel.videoItemSelected(nnVideoItem)
+                    viewModel.showOptionsFor(nnVideoItem)
+                }
+            }
+            binding.buttonEpisodeShare.setOnClickListener {
+                videoItem?.let { nnEpisode ->
+                    nnEpisode.link?.value?.let { link -> viewModel.share(link, binding.root.context) }
+                }
+            }
+            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+                videoItem?.let { nnEpisode ->
+                    onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
+                        viewModel.navigator.toEpisodeDescriptionScreen(nnEpisode.id)
                     }
                 }
             }
         }
+
+        private fun playEpisodeFromList(){
+            videoItem?.let { nnVideoItem ->
+                lifecycleOwner.lifecycleScope.launch {
+                    viewModel.videoItemSelected(nnVideoItem)
+                }
+            }
+        }
+
 
         fun bind(position: Int) {
             binding.apply {
@@ -186,10 +212,23 @@ internal class VideoFeedItemsAdapter (
                 disposable?.dispose()
                 holderJob?.cancel()
 
+                // General info
+                textViewEpisodeHeader.text = f.titleToShow
+                textViewEpisodeDescription.text = f.descriptionToShow
+                textViewEpisodeDate.text = f.datePublished?.hhmmElseDate()
+                buttonDownloadArrow.alpha = 0.3F
+                seekBarCurrentTimeEpisodeProgress.gone
+                textViewItemEpisodeTime.gone
+                circleSplit.gone
+                buttonPlayEpisode.visible
+                layoutConstraintAlpha.gone
+
+
+                // Image
                 f.thumbnailUrlToShow?.let { imageUrl ->
                     onStopSupervisor.scope.launch(viewModelDispatcher.mainImmediate) {
                         imageLoader.load(
-                            imageViewVideoImage,
+                            imageViewEpisodeImage,
                             imageUrl.value,
                             imageLoaderOptions
                         ).also {
@@ -200,39 +239,8 @@ internal class VideoFeedItemsAdapter (
                     }
                 }
 
-                textViewVideoTitle.text = f.titleToShow
-                textViewVideoDate.text = f.datePublished?.hhmmElseDate()
+                imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_youtube_type))
 
-                textViewDownloadVideoButton.goneIfTrue(
-                    f.enclosureUrl.isYoutubeVideo()
-                )
-
-                swipeRevealLayoutVideoFeedItem.setLockDrag(!f.downloaded)
-                layoutConstraintDeleteButtonContainer.setOnClickListener {
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        viewModel.deleteDownloadedMedia(f)
-                        notifyItemChanged(position)
-                        swipeRevealLayoutVideoFeedItem.close(true)
-                    }
-                }
-                if (f.downloaded) {
-                    textViewDownloadVideoButton.setTextColor(getColor(R.color.greenBorder))
-                } else {
-                    textViewDownloadVideoButton.setTextColor(getColor(R.color.secondaryText))
-                    textViewDownloadVideoButton.setOnClickListener {
-                        viewModel.downloadMedia(f)  { downloadedFile ->
-                            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                f.localFile = downloadedFile
-                                notifyItemChanged(position)
-                            }
-                        }
-                        notifyItemChanged(position)
-                    }
-                }
-                val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(f.id) && !f.downloaded
-
-                textViewDownloadVideoButton.goneIfTrue(isFeedItemDownloadInProgress)
-                progressBarVideoDownload.goneIfFalse(isFeedItemDownloadInProgress)
             }
         }
 

@@ -11,12 +11,16 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentFeedWatchBinding
 import chat.sphinx.dashboard.ui.adapter.FeedFollowingAdapter
+import chat.sphinx.dashboard.ui.adapter.FeedRecentlyPlayedAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedWatchNowAdapter
 import chat.sphinx.dashboard.ui.feed.FeedFragment
+import chat.sphinx.dashboard.ui.feed.FeedRecentlyPlayedViewModel
 import chat.sphinx.dashboard.ui.viewstates.FeedWatchViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -42,7 +46,7 @@ internal class FeedWatchFragment : SideEffectFragment<
 
         setupNestedScrollView()
         setupListenNowAdapter()
-        setupFollowingAdapter()
+        setupRecentlyPlayedAdapter()
     }
 
     @SuppressLint("RestrictedApi")
@@ -75,9 +79,9 @@ internal class FeedWatchFragment : SideEffectFragment<
         }
     }
 
-    private fun setupFollowingAdapter() {
+    private fun setupRecentlyPlayedAdapter() {
         binding.recyclerViewFollowing.apply {
-            val followingAdapter = FeedFollowingAdapter(
+            val recentlyPlayedAdapter = FeedRecentlyPlayedAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
@@ -86,7 +90,7 @@ internal class FeedWatchFragment : SideEffectFragment<
             )
 
             this.setHasFixedSize(false)
-            adapter = followingAdapter
+            adapter = recentlyPlayedAdapter
             itemAnimator = null
         }
     }
@@ -112,6 +116,16 @@ internal class FeedWatchFragment : SideEffectFragment<
                 toggleElements(
                     list.isNotEmpty()
                 )
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.lastPlayedFeedsHolderViewStateFlow.collect { list ->
+                if (list.isEmpty()) {
+                    binding.layoutConstraintRecentlyPlayed.gone
+                } else {
+                    binding.layoutConstraintRecentlyPlayed.visible
+                }
             }
         }
     }

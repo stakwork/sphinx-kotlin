@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--
+          Set 1: Member Profile Closed
+    -->
+
+    <ConstraintSet android:id="@+id/motion_scene_tribe_app_closed">
+
+        <Constraint android:id="@+id/view_auth_black_lock">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_tribe_app_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <!--
+           Set 2: Member Profile Open
+    -->
+
+    <ConstraintSet
+        android:id="@+id/motion_scene_tribe_app_open"
+        app:deriveConstraintsFrom="@+id/motion_scene_tribe_app_closed">
+
+        <Constraint android:id="@+id/view_auth_black_lock">
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_tribe_app_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <Transition
+        android:id="@+id/transition_tribe_app_closed_to_open"
+        app:constraintSetEnd="@+id/motion_scene_tribe_app_open"
+        app:constraintSetStart="@+id/motion_scene_tribe_app_closed"
+        app:duration="300"/>
+
+</MotionScene>

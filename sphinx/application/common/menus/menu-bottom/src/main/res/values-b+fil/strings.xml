@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_bottom_header_subtext">Mangyaring pumili ng opsyon</string>
+    <string name="menu_bottom_dismiss">I-dismiss</string>
+    <string name="menu_bottom_cancel">Kanselahin</string>
+</resources>

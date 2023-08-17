@@ -3,6 +3,9 @@
     <string name="add_icon"></string>
     <string name="join_tribe_link">Código QR de la tribu</string>
     <string name="add_friend">Agregar Amigo</string>
+    <string name="add_tribe">Agregar Tribu</string>
+    <string name="discover_tags">Tags</string>
+    <string name="discover_open">Open</string>
     <string name="create_tribe">Crear Tribu</string>
     <string name="contacts">Contactos</string>
     <string name="profile">Perfil</string>
@@ -24,6 +27,7 @@
     <string name="alert_confirm_delete_invite_message">¿Estás seguro que deseas eliminar esta invitación?</string>
 
     <string name="paste_invoice_of_tribe_link">Pega la solicitud de pago o el enlace de la tribu</string>
+    <string name="paste_invoice_or_public_key">Solicitud de pago o Public Key</string>
     <string name="alert_confirm_pay_invoice_title">Pagar solicitud</string>
     <string name="alert_confirm_pay_invoice_message">¿Estás seguro que deseas pagar esta solicitud?\n\nMonto: %d sat\n\nMemo: %s</string>
 
@@ -79,6 +83,9 @@
     <string name="dashboard_authorize_button">AUTORIZAR</string>
     <string name="dashboard_authorize_generic_error">Ocurrió un error al intentar autorizar a una fuente externa. Por favor volvé a intentarlo más tarde</string>
 
+    <string name="dashboard_redeem_sats_popup_title">Canjear %s sats de:</string>
+    <string name="dashboard_redeem_sats_button">Confirmar</string>
+
     <string name="dashboard_connect_button">CONECTAR</string>
     <string name="dashboard_connect_price_to_meet">Precio para conectar: %s</string>
     <string name="dashboard_connect_description_missing">Sin descriptión</string>
@@ -114,8 +121,18 @@
     <string name="play">Jugar</string>
     <string name="listen_now">Escuchar ahora</string>
     <string name="following">Siguiendo</string>
+    <string name="recently_played">Consumido recientemente</string>
+    <string name="recently_read">Leido recientemente</string>
+    <string name="recently_released">Lanzado recientemente</string>
+    <string name="recently_published">Publicado recientemente</string>
+
     <string name="read_now">Read Now</string>
     <string name="watch_now">Watch Now</string>
+
+    <string name="downloaded">Contenido Descargado</string>
+
+    <string name="recommendations">Recomendaciones</string>
+    <string name="refresh">Refresh</string>
 
     <string name="all_place_holder">No se encontraron resultados</string>
     <string name="listen_place_holder">No se encontraron resultados para \"Escuchar\"</string>
@@ -126,6 +143,8 @@
     <string name="feed_search_placeholder_1">Buscá entre</string>
     <string name="feed_search_placeholder_2">los feeds a los que está suscripto</string>
 
+    <string name="feed_search_result_load_error">Ocurrió un error al intentar cargar el contentido del Feed. Por favor volvé a intentarlo más tarde</string>
+
     <string name="video_search_placeholder_1">Buscá entre</string>
     <string name="video_search_placeholder_2">miles de videos</string>
     <string name="video_search_placeholder_3">en Youtube</string>
@@ -135,5 +154,13 @@
     <string name="podcast_search_placeholder_3">en el Podcast Index</string>
 
     <string name="dashboard_restore_progress">Restaurando: %s</string>
+    <string name="dashboard_restore_progress_contacts">Restaurando Contactos: %s</string>
+    <string name="dashboard_restore_progress_feeds">Restaurando Feeds: %s</string>
+    <string name="dashboard_restore_progress_messages">Restaurando Mensajes: %s</string>
     <string name="dashboard_stop_restore">Continuar más tarde</string>
+
+    <string name="loading_recommendations">Cargando Recomendaciones...</string>
+    <string name="refresh_while_loading">You can\'t get new recommendations while playing them. Please stop playing before refreshing</string>
+
+    <string name="time_left">Faltan %s</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
+import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
@@ -18,6 +19,8 @@ import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.concept_repository_message.model.SendMessage
@@ -32,7 +35,6 @@ import chat.sphinx.wrapper_chat.ChatName
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
-import chat.sphinx.wrapper_common.feed.FeedId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_contact.Contact
@@ -41,8 +43,11 @@ import chat.sphinx.wrapper_contact.getColorKey
 import chat.sphinx.wrapper_contact.isEncrypted
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.PodcastClip
+import chat.sphinx.wrapper_message.ThreadUUID
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
+import io.matthewnelson.android_feature_viewmodel.submitSideEffect
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_media_cache.MediaCacheHandler
 import kotlinx.coroutines.delay
@@ -68,10 +73,12 @@ internal class ChatContactViewModel @Inject constructor(
     memeServerTokenHandler: MemeServerTokenHandler,
     contactChatNavigator: ContactChatNavigator,
     repositoryMedia: RepositoryMedia,
+    feedRepository: FeedRepository,
     chatRepository: ChatRepository,
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     actionsRepository: ActionsRepository,
+    repositoryDashboard: RepositoryDashboardAndroid<Any>,
     networkQueryLightning: NetworkQueryLightning,
     networkQueryPeople: NetworkQueryPeople,
     mediaCacheHandler: MediaCacheHandler,
@@ -79,6 +86,7 @@ internal class ChatContactViewModel @Inject constructor(
     cameraViewModelCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     linkPreviewHandler: LinkPreviewHandler,
     memeInputStreamHandler: MemeInputStreamHandler,
+    moshi: Moshi,
     LOG: SphinxLogger,
 ): ChatViewModel<ChatContactFragmentArgs>(
     app,
@@ -86,10 +94,12 @@ internal class ChatContactViewModel @Inject constructor(
     memeServerTokenHandler,
     contactChatNavigator,
     repositoryMedia,
+    feedRepository,
     chatRepository,
     contactRepository,
     messageRepository,
     actionsRepository,
+    repositoryDashboard,
     networkQueryLightning,
     networkQueryPeople,
     mediaCacheHandler,
@@ -97,6 +107,7 @@ internal class ChatContactViewModel @Inject constructor(
     cameraViewModelCoordinator,
     linkPreviewHandler,
     memeInputStreamHandler,
+    moshi,
     LOG,
 ) {
     override val args: ChatContactFragmentArgs by savedStateHandle.navArgs()
@@ -189,6 +200,9 @@ internal class ChatContactViewModel @Inject constructor(
             )
         }
     }
+
+    override val threadSharedFlow: SharedFlow<List<Message>>?
+        get() = null
 
     override fun forceKeyExchange() {
         viewModelScope.launch(io) {
@@ -295,6 +309,25 @@ internal class ChatContactViewModel @Inject constructor(
         ))
     }
 
+    private suspend fun getContact() : Contact? {
+        var contact: Contact? = contactSharedFlow.replayCache.firstOrNull()
+            ?: contactSharedFlow.firstOrNull()
+
+        if (contact == null) {
+            try {
+                contactSharedFlow.collect {
+                    if (contact != null) {
+                        contact = it
+                        throw Exception()
+                    }
+                }
+            } catch (e: Exception) {}
+            delay(25L)
+        }
+
+        return contact
+    }
+
     override fun readMessages() {
         val idResolved: ChatId? = chatId ?: chatSharedFlow.replayCache.firstOrNull()?.id
         if (idResolved != null) {
@@ -304,9 +337,31 @@ internal class ChatContactViewModel @Inject constructor(
         }
     }
 
-    override fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+    override fun reloadPinnedMessage() {}
+
+    override fun getThreadUUID(): ThreadUUID? {
+        return null
+    }
+
+    override fun isThreadChat(): Boolean {
+        return false
+    }
+
+    override suspend fun sendMessage(builder: SendMessage.Builder): SendMessage? {
+        getContact()?.let { nnContact ->
+            if (nnContact.rsaPublicKey == null) {
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(
+                        ChatSideEffect.NotEncryptedContact
+                    )
+                }
+                return null
+            }
+        }
+
         builder.setContactId(contactId)
         builder.setChatId(chatId)
+
         return super.sendMessage(builder)
     }
 

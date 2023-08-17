@@ -7,11 +7,13 @@ import chat.sphinx.concept_meme_server.MemeServerTokenHandler
 import chat.sphinx.concept_network_query_action_track.NetworkQueryActionTrack
 import chat.sphinx.concept_network_query_chat.NetworkQueryChat
 import chat.sphinx.concept_network_query_contact.NetworkQueryContact
+import chat.sphinx.concept_network_query_discover_tribes.NetworkQueryDiscoverTribes
 import chat.sphinx.concept_network_query_invite.NetworkQueryInvite
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_meme_server.NetworkQueryMemeServer
 import chat.sphinx.concept_network_query_message.NetworkQueryMessage
 import chat.sphinx.concept_network_query_feed_search.NetworkQueryFeedSearch
+import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_network_query_people.NetworkQueryPeople
 import chat.sphinx.concept_network_query_redeem_badge_token.NetworkQueryRedeemBadgeToken
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
@@ -136,6 +138,7 @@ object RepositoryModule {
         memeServerTokenHandler: MemeServerTokenHandler,
         networkQueryMemeServer: NetworkQueryMemeServer,
         networkQueryActionTrack: NetworkQueryActionTrack,
+        networkQueryDiscoverTribes: NetworkQueryDiscoverTribes,
         networkQueryChat: NetworkQueryChat,
         networkQueryContact: NetworkQueryContact,
         networkQueryLightning: NetworkQueryLightning,
@@ -147,6 +150,7 @@ object RepositoryModule {
         networkQuerySubscription: NetworkQuerySubscription,
         networkQueryFeedSearch: NetworkQueryFeedSearch,
         networkQueryRelayKeys: NetworkQueryRelayKeys,
+        networkQueryFeedStatus: NetworkQueryFeedStatus,
         rsa: RSA,
         socketIOManager: SocketIOManager,
         sphinxNotificationManager: SphinxNotificationManager,
@@ -165,6 +169,7 @@ object RepositoryModule {
             memeInputStreamHandler,
             memeServerTokenHandler,
             networkQueryActionTrack,
+            networkQueryDiscoverTribes,
             networkQueryMemeServer,
             networkQueryChat,
             networkQueryContact,
@@ -177,6 +182,7 @@ object RepositoryModule {
             networkQuerySubscription,
             networkQueryFeedSearch,
             networkQueryRelayKeys,
+            networkQueryFeedStatus,
             rsa,
             socketIOManager,
             sphinxNotificationManager,

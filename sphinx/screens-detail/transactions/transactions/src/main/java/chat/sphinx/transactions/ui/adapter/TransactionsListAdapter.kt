@@ -4,10 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
-import chat.sphinx.concept_network_query_message.model.TransactionDto
+import chat.sphinx.resources.getString
+import chat.sphinx.transactions.R
 import chat.sphinx.transactions.databinding.LayoutTransactionHolderBinding
 import chat.sphinx.transactions.ui.TransactionsViewModel
 import chat.sphinx.transactions.ui.TransactionsViewState
@@ -23,7 +25,6 @@ import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
-import kotlin.collections.ArrayList
 
 internal class TransactionsListAdapter(
     private val lifecycleOwner: LifecycleOwner,
@@ -67,6 +68,13 @@ internal class TransactionsListAdapter(
 
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
             val same: Boolean = try {
+                (
+                    oldList[oldItemPosition] is TransactionHolderViewState.Failed.Open || newList[oldItemPosition] is TransactionHolderViewState.Failed.Open ||
+                    oldList[oldItemPosition] is TransactionHolderViewState.Failed.Closed || newList[oldItemPosition] is TransactionHolderViewState.Failed.Closed ||
+                    oldList[oldItemPosition] is TransactionHolderViewState.Incoming || newList[oldItemPosition] is TransactionHolderViewState.Incoming ||
+                    oldList[oldItemPosition] is TransactionHolderViewState.Outgoing || newList[oldItemPosition] is TransactionHolderViewState.Outgoing ||
+                    oldList[oldItemPosition] is TransactionHolderViewState.Loader || newList[oldItemPosition] is TransactionHolderViewState.Loader
+                ) &&
                 oldList[oldItemPosition].toString() == newList[newItemPosition].toString()
             } catch (e: IndexOutOfBoundsException) {
                 false
@@ -100,13 +108,12 @@ internal class TransactionsListAdapter(
                                 DiffUtil.calculateDiff(diff)
                             }.let {
                                 if (!diff.sameList) {
-                                    transactions.removeLast()
+                                    transactions.clear()
                                     transactions.addAll(viewState.list)
                                 }
                             }
                         }
                         this@TransactionsListAdapter.notifyDataSetChanged()
-
                     }
                 }
             }
@@ -138,6 +145,16 @@ internal class TransactionsListAdapter(
         private var disposable: Disposable? = null
         private var transactionHolderViewState: TransactionHolderViewState? = null
 
+        init {
+            binding.root.setOnClickListener {
+                transactionHolderViewState?.let { nnTransactionHolderViewState ->
+                    lifecycleOwner.lifecycleScope.launch {
+                        viewModel.toggleFailed(nnTransactionHolderViewState, absoluteAdapterPosition)
+                    }
+                }
+            }
+        }
+
         fun bind(position: Int) {
             binding.apply {
                 val t: TransactionHolderViewState = transactions.getOrNull(position) ?: let {
@@ -149,7 +166,11 @@ internal class TransactionsListAdapter(
 
                 val amount = t.transaction?.amount?.toSat()?.asFormattedString() ?: "0"
                 val date = t.transaction?.date?.toDateTime()?.value ?: Date(System.currentTimeMillis())
-                val dateString = DateTime.getFormateeemmddhmma().format(date)
+
+                val hourString = DateTime.getFormathmma().format(date)
+                val dayOfMonthString = DateTime.getFormatEEEdd().format(date)
+                val dayOfWeekString = DateTime.getFormatMMM().format(date)
+
                 val senderReceiverName = t.messageSenderName ?: "-"
 
                 includeLoadingMoreTransactions.apply {
@@ -160,16 +181,36 @@ internal class TransactionsListAdapter(
                     root.goneIfFalse(t is TransactionHolderViewState.Incoming)
 
                     textViewTransactionAmount.text = amount
-                    textViewTransactionDate.text = dateString
-                    textViewTransactionSenderReceiver.text = senderReceiverName
+                    textViewTransactionAddress.text = senderReceiverName
+
+                    textViewTransactionHour.text = hourString
+                    textViewTransactionDayOfMonth.text = dayOfMonthString
+                    textViewTransactionDayOfWeek.text = dayOfWeekString
                 }
 
                 includeOutgoingTransaction.apply {
                     root.goneIfFalse(t is TransactionHolderViewState.Outgoing)
 
                     textViewTransactionAmount.text = amount
-                    textViewTransactionDate.text = dateString
-                    textViewTransactionSenderReceiver.text = senderReceiverName
+                    textViewTransactionAddress.text = senderReceiverName
+
+                    textViewTransactionHour.text = hourString
+                    textViewTransactionDayOfMonth.text = dayOfMonthString
+                    textViewTransactionDayOfWeek.text = dayOfWeekString
+                }
+
+                includeFailedTransaction.apply {
+                    root.goneIfFalse(t is TransactionHolderViewState.Failed)
+
+                    textViewTransactionAmount.text = amount
+                    textViewTransactionAddress.text = senderReceiverName
+
+                    textViewTransactionHour.text = hourString
+                    textViewTransactionDayOfMonth.text = dayOfMonthString
+                    textViewTransactionDayOfWeek.text = dayOfWeekString
+
+                    textViewTransactionFailure.text = binding.root.context.getString(R.string.failure_reason, t.transaction?.error_message ?: "")
+                    layoutConstraintTransactionFailure.goneIfFalse(t is TransactionHolderViewState.Failed.Open)
                 }
             }
         }

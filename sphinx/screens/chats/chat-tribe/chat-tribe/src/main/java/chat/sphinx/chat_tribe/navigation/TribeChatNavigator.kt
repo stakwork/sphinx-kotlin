@@ -11,7 +11,13 @@ abstract class TribeChatNavigator(
     navigationDriver: BaseNavigationDriver<NavController>
 ): ChatNavigator(navigationDriver)
 {
-    abstract suspend fun toPodcastPlayerScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl, currentEpisodeDuration: Long)
+    abstract suspend fun toPodcastPlayerScreen(
+        chatId: ChatId,
+        feedId: FeedId,
+        feedUrl: FeedUrl,
+        fromDownloadedSection: Boolean = false
+    )
+
     abstract suspend fun toTribeDetailScreen(chatId: ChatId)
 
     abstract suspend fun toShareTribeScreen(
@@ -21,4 +27,8 @@ abstract class TribeChatNavigator(
     )
 
     abstract suspend fun toNotificationsLevel(chatId: ChatId)
+
+    abstract suspend fun toKnownBadges(badgeIds: Array<String>)
+
+    abstract suspend fun toThreads(chatId: ChatId)
 }

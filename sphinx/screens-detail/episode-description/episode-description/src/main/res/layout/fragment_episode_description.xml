@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context="chat.sphinx.episode_description.ui.EpisodeDescriptionFragment">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view_description"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_scroll_view_content"
+            android:paddingTop="@dimen/default_big_layout_margin"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_item_title"
+                android:paddingHorizontal="@dimen/default_layout_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_bold"
+                android:maxLines="6"
+                android:textColor="@color/text"
+                android:textSize="@dimen/chat_footer_button_icon_text_size"
+                android:gravity="start"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="DeFi Smart Contracts" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraint_episode_info_container"
+                android:paddingRight="@dimen/default_layout_margin"
+                android:layout_marginTop="@dimen/custom_boost_height"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_item_title"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_feed_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_regular"
+                    android:maxLines="1"
+                    android:textColor="@color/primaryText"
+                    android:textSize="@dimen/default_text_size_list_row_headline"
+                    android:layout_marginLeft="@dimen/default_layout_margin"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Podcast Name Goes Here" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_view_image_type_wrapper"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/default_header_headline_margin_horizontal"
+                    app:cardCornerRadius="@dimen/episode_type_radius"
+                    app:layout_constraintStart_toStartOf="@+id/text_view_feed_title"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_feed_title">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/image_view_item_row_episode_type"
+                        android:layout_width="@dimen/default_feed_play_elevation"
+                        android:layout_height="@dimen/default_feed_play_elevation"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_podcast_placeholder" />
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_episode_date"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/roboto_regular"
+                    android:maxLines="2"
+                    android:textColor="@color/text"
+                    android:alpha="0.75"
+                    android:textSize="@dimen/default_text_size_body"
+                    app:layout_constraintBottom_toBottomOf="@+id/card_view_image_type_wrapper"
+                    app:layout_constraintStart_toEndOf="@+id/card_view_image_type_wrapper"
+                    app:layout_constraintTop_toTopOf="@+id/card_view_image_type_wrapper"
+                    tools:text="3 Apr 2022" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/circle_split"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginStart="8dp"
+                    android:src="@drawable/circular_split"
+                    android:tint="@color/text"
+                    android:alpha="0.75"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_episode_date"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_episode_date"
+                    app:layout_constraintTop_toTopOf="@+id/text_view_episode_date" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_item_episode_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:fontFamily="@font/roboto_regular"
+                    android:maxLines="1"
+                    android:textColor="@color/text"
+                    android:alpha="0.75"
+                    android:textSize="@dimen/default_text_size_body"
+                    app:layout_constraintBottom_toBottomOf="@+id/circle_split"
+                    app:layout_constraintStart_toEndOf="@+id/circle_split"
+                    app:layout_constraintTop_toTopOf="@+id/circle_split"
+                    tools:text="1h 19 min left" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/button_check_mark_played"
+                    android:layout_width="@dimen/default_layout_margin"
+                    android:layout_height="@dimen/default_layout_margin"
+                    android:layout_marginStart="@dimen/default_vertical_spacing_action_button_column"
+                    android:src="@drawable/ic_mark_played"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_item_episode_time"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_item_episode_time"
+                    app:layout_constraintTop_toTopOf="@+id/text_view_item_episode_time" />
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_view_download_wrapper"
+                    android:layout_width="@dimen/default_double_layout_margin"
+                    android:layout_height="@dimen/default_double_layout_margin"
+                    android:layout_marginTop="@dimen/default_layout_margin"
+                    app:cardBackgroundColor="@color/body"
+                    app:cardElevation="0dp"
+                    app:layout_constraintStart_toStartOf="@+id/card_view_image_type_wrapper"
+                    app:layout_constraintEnd_toEndOf="@+id/card_view_image_type_wrapper"
+                    app:layout_constraintTop_toBottomOf="@+id/card_view_image_type_wrapper">
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar_episode_download"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:indeterminateTint="@color/receivedIcon"
+                        android:visibility="gone"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:visibility="visible" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/button_stop"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="@dimen/default_medium_layout_margin"
+                        android:src="@drawable/ic_stop_icon"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/button_download_arrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_download_arrow"
+                        android:visibility="visible" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/image_downloaded_episode_arrow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_downloaded_arrow"
+                        android:visibility="gone" />
+
+                </androidx.cardview.widget.CardView>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/button_episode_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/default_header_margin_horizontal"
+                    android:src="@drawable/ic_episode_share"
+                    app:layout_constraintStart_toEndOf="@+id/card_view_download_wrapper"
+                    app:layout_constraintTop_toTopOf="@+id/card_view_download_wrapper"
+                    app:layout_constraintBottom_toBottomOf="@+id/card_view_download_wrapper"/>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/button_additional_options"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/default_header_margin_horizontal"
+                    android:src="@drawable/ic_additional_options"
+                    app:layout_constraintStart_toEndOf="@+id/button_episode_share"
+                    app:layout_constraintTop_toTopOf="@+id/card_view_download_wrapper"
+                    app:layout_constraintBottom_toBottomOf="@+id/card_view_download_wrapper" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/button_play_episode"
+                    android:layout_width="@dimen/tribe_member_image_corner_radius"
+                    android:layout_height="@dimen/tribe_member_image_corner_radius"
+                    android:src="@drawable/ic_play_episode"
+                    android:background="@drawable/circular_button"
+                    android:backgroundTint="@color/body"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/card_view_download_wrapper"
+                    app:layout_constraintBottom_toBottomOf="@+id/card_view_download_wrapper" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_description_text_container"
+                android:paddingHorizontal="@dimen/default_layout_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_feed_play_elevation"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraint_episode_info_container">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_description_episode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textColor="@color/text"
+                    android:alpha="0.75"
+                    android:textSize="@dimen/chat_footer_episode_title_text_size"
+                    android:maxLines="5"
+                    android:ellipsize="end"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraint_show_more_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/default_half_layout_margin"
+                android:paddingVertical="@dimen/default_half_layout_margin"
+                android:layout_marginHorizontal="@dimen/default_layout_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_constraint_description_text_container">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_show_more"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_regular"
+                    android:letterSpacing="0.1"
+                    android:maxLines="1"
+                    android:text="@string/episode_description_show_more"
+                    android:textColor="@color/primaryText"
+                    android:textSize="@dimen/default_text_size_caption1"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="SHOW MORE" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                app:layout_constraintDimensionRatio="H,1:1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraint_show_more_container">
+
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_view_image_episode_wrap"
+                    android:layout_marginHorizontal="@dimen/default_layout_margin"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginVertical="@dimen/default_header_margin_horizontal"
+                    app:cardCornerRadius="@dimen/episode_detail_image_radius"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/constraint_show_more_container">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/image_view_episode_detail_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:srcCompat="@drawable/ic_podcast_placeholder" />
+
+                </androidx.cardview.widget.CardView>
+
+            </FrameLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_header_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_big_layout_margin"
+        android:visibility="visible"
+        android:paddingLeft="@dimen/default_large_layout_margin"
+        android:background="@color/body"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_episode_title_scroll"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="@color/text"
+            android:ellipsize="end"
+            android:textSize="@dimen/custom_boost_text_size"
+            android:maxLines="1"
+            android:layout_marginRight="88dp"
+            android:gravity="start"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="DeFi Smart Contracts On "/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_play_episode_header"
+        android:layout_width="@dimen/tribe_member_image_corner_radius"
+        android:layout_height="@dimen/tribe_member_image_corner_radius"
+        android:visibility="visible"
+        android:src="@drawable/ic_play_episode"
+        android:background="@drawable/circular_button"
+        android:backgroundTint="@color/body"
+        android:layout_marginTop="@dimen/default_double_layout_margin"
+        android:layout_marginRight="@dimen/default_layout_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/button_nav_back"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/default_header_height"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_back_screen"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@drawable/ic_back_screen" />
+
+    <include
+        android:id="@+id/include_layout_feed_item"
+        layout="@layout/layout_feed_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

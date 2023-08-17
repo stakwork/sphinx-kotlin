@@ -39,7 +39,7 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_tribe_profile_role"
+        android:id="@+id/text_view_tribe_badge_role"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/default_header_margin_horizontal"
@@ -54,7 +54,7 @@
         app:layout_constraintBottom_toTopOf="@+id/text_view_tribe_profile_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/card_view_tribe_profile_image"
-        android:text="TRIBE MEMBER" />
+        android:text="@string/tribe_member" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/text_view_tribe_profile_name"

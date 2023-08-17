@@ -16,7 +16,9 @@ import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.dashboard.ui.viewstates.FeedReadViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -113,6 +115,16 @@ internal class FeedReadFragment : SideEffectFragment<
                 toggleElements(
                     list.isNotEmpty()
                 )
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.lastPlayedFeedsHolderViewStateFlow.collect { list ->
+                if (list.isEmpty()) {
+                    binding.layoutConstraintRecentlyPlayed.gone
+                } else {
+                    binding.layoutConstraintRecentlyPlayed.visible
+                }
             }
         }
     }

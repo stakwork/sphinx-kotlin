@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_recommended_holder"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_detail_screen">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_item_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/discover_tribes_list_item_height"
+        android:padding="@dimen/default_layout_margin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/image_view_tribe_cardview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/default_radius"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_tribe_image"
+                android:layout_width="@dimen/discover_tribe_image_size"
+                android:layout_height="@dimen/discover_tribe_image_size"
+                android:scaleType="centerCrop"
+                android:background="@color/addressBookHeader"
+                tools:srcCompat="@drawable/ic_tribe_placeholder"/>
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/text_view_tribe_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="1"
+            android:textColor="@color/text"
+            android:textSize="17sp"
+            app:layout_constraintStart_toEndOf="@id/image_view_tribe_cardview"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/image_view_tribe_cardview"
+            tools:text="Show title" />
+
+        <TextView
+            android:id="@+id/text_view_tribe_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:layout_marginTop="6dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="14sp"
+            app:layout_constraintStart_toEndOf="@id/image_view_tribe_cardview"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_tribe_title"
+            tools:text="Who Will Build the Roads?" />
+
+        <include
+            android:id="@+id/layout_button_join"
+            layout="@layout/layout_button_small"
+            android:layout_width="@dimen/discover_tribes_item_join_button_width"
+            android:layout_height="@dimen/discover_tribes_item_join_button_height"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/image_view_tribe_cardview"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/include_loading_more_tribes"
+        layout="@layout/layout_discover_tribes_loading_details"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/discover_tribes_loading_item_height"
+        android:visibility="gone" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

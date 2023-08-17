@@ -68,12 +68,16 @@ class NetworkQueryContactImpl(
 
     override fun getLatestContacts(
         date: DateTime?,
+        limit: Int,
+        offset: Int,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
     ): Flow<LoadResponse<GetLatestContactsResponse, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetLatestContactsRelayResponse::class.java,
             relayEndpoint = if (date != null) {
-                "$ENDPOINT_LATEST_CONTACTS?date=${MessagePagination.getFormatPaginationPercentEscaped().format(date?.value)}"
+                "$ENDPOINT_LATEST_CONTACTS" +
+                        "?date=${MessagePagination.getFormatPaginationPercentEscaped().format(date?.value)}" +
+                        "&offset=${offset}&limit=${limit}"
             } else {
                 ENDPOINT_LATEST_CONTACTS
             },

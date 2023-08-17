@@ -1,8 +1,10 @@
 package chat.sphinx.podcast_player.ui.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,15 +15,16 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_service_media.MediaPlayerServiceState
 import chat.sphinx.podcast_player.R
-import chat.sphinx.podcast_player.databinding.LayoutEpisodeListItemHolderBinding
 import chat.sphinx.podcast_player.ui.PodcastPlayerViewModel
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
+import chat.sphinx.resources.databinding.LayoutEpisodeGenericListItemHolderBinding
+import chat.sphinx.resources.getString
 import chat.sphinx.wrapper_chat.*
 import chat.sphinx.wrapper_podcast.PodcastEpisode
-import io.matthewnelson.android_feature_screens.util.goneIfFalse
-import io.matthewnelson.android_feature_screens.util.goneIfTrue
+import io.matthewnelson.android_feature_screens.util.*
 import io.matthewnelson.android_feature_viewmodel.collectViewState
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.*
@@ -77,7 +80,13 @@ internal class PodcastEpisodesListAdapter(
                 val old = oldList[oldItemPosition]
                 val new = newList[newItemPosition]
 
-                val same: Boolean = old.playing == new.playing
+                val same: Boolean = old.playing == new.playing &&
+                                    old.downloaded == new.downloaded &&
+                                    old.played == new.played &&
+                                    old.durationMilliseconds == new.durationMilliseconds &&
+                                    old.currentTimeSeconds == new.currentTimeSeconds &&
+                                    viewModel.isFeedItemDownloadInProgress(old.id) == viewModel.isFeedItemDownloadInProgress(new.id) &&
+                                    viewModel.isEpisodeSoundPlaying(old) == viewModel.isEpisodeSoundPlaying(new)
 
                 if (sameList) {
                     sameList = same
@@ -103,18 +112,32 @@ internal class PodcastEpisodesListAdapter(
                 var episodes = ArrayList<PodcastEpisode>()
 
                 if (viewState is PodcastPlayerViewState.PodcastLoaded) {
-                    episodes = viewState.podcast.getEpisodesListCopy()
+                    episodes = if (viewState.downloadedOnly) {
+                        viewState.podcast.getDownloadedEpisodesListCopy()
+                    } else {
+                        viewState.podcast.getEpisodesListCopy()
+                    }
                 }
 
                 if (viewState is PodcastPlayerViewState.EpisodePlayed) {
-                    episodes = viewState.podcast.getEpisodesListCopy()
+                    episodes = if (viewState.downloadedOnly) {
+                        viewState.podcast.getDownloadedEpisodesListCopy()
+                    } else {
+                        viewState.podcast.getEpisodesListCopy()
+                    }
                 }
 
                 if (viewState is PodcastPlayerViewState.MediaStateUpdate) {
-                    if (viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Paused ||
-                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended)
-                    {
-                        episodes = viewState.podcast.getEpisodesListCopy()
+                    if (
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Paused ||
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Ended ||
+                        viewState.state is MediaPlayerServiceState.ServiceActive.MediaState.Playing
+                    ) {
+                        episodes = if (viewState.downloadedOnly) {
+                            viewState.podcast.getDownloadedEpisodesListCopy()
+                        } else {
+                            viewState.podcast.getEpisodesListCopy()
+                        }
                     }
                 }
 
@@ -131,20 +154,10 @@ internal class PodcastEpisodesListAdapter(
                         }.let { result ->
 
                             if (!diff.sameList) {
-                                val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-
                                 podcastEpisodes.clear()
                                 podcastEpisodes.addAll(episodes)
                                 result.dispatchUpdatesTo(this@PodcastEpisodesListAdapter)
-
-                                if (
-                                    firstVisibleItemPosition == 0                               &&
-                                    recyclerView.scrollState == RecyclerView.SCROLL_STATE_IDLE
-                                ) {
-                                    recyclerView.scrollToPosition(0)
-                                }
                             }
-
                         }
                     }
                 }
@@ -157,7 +170,7 @@ internal class PodcastEpisodesListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PodcastEpisodesListAdapter.EpisodeViewHolder {
-        val binding = LayoutEpisodeListItemHolderBinding.inflate(
+        val binding = LayoutEpisodeGenericListItemHolderBinding.inflate(
             LayoutInflater.from(parent.context),
             parent,
             false
@@ -172,23 +185,58 @@ internal class PodcastEpisodesListAdapter(
 
     private val imageLoaderOptions: ImageLoaderOptions by lazy {
         ImageLoaderOptions.Builder()
-            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+            .placeholderResId(R.drawable.ic_podcast_placeholder)
             .build()
     }
 
     inner class EpisodeViewHolder(
-        private val binding: LayoutEpisodeListItemHolderBinding
+        private val binding: LayoutEpisodeGenericListItemHolderBinding
     ): RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
 
         private var disposable: Disposable? = null
         private var episode: PodcastEpisode? = null
 
         init {
-            binding.layoutConstraintEpisodeListItemHolder.setOnClickListener {
-                episode?.let { podcastEpisode ->
-                    if (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded) {
-                        viewModel.playEpisodeFromList(podcastEpisode, 0)
+            binding.buttonPlayEpisode.setOnClickListener {
+                playEpisodeFromList()
+            }
+            binding.layoutConstraintEpisodeInfoContainer.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.toEpisodeDescriptionScreen(nnEpisode.id)
                     }
+                }
+            }
+
+            binding.buttonDownloadArrow.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.downloadMedia(nnEpisode) { downloadedFile ->
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            nnEpisode.localFile = downloadedFile
+                            notifyItemChanged(position)
+                        }
+                    }
+                    notifyItemChanged(position)
+                }
+            }
+
+            binding.buttonAdditionalOptions.setOnClickListener {
+                episode?.let { nnEpisode ->
+                    viewModel.showOptionsFor(nnEpisode)
+                }
+            }
+
+            binding.buttonEpisodeShare.setOnClickListener {
+                episode?.id?.let { feedId ->
+                    viewModel.share(feedId, binding.root.context)
+                }
+            }
+        }
+
+        private fun playEpisodeFromList(){
+            episode?.let { podcastEpisode ->
+                if (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded) {
+                    viewModel.playEpisodeFromList(podcastEpisode)
                 }
             }
         }
@@ -202,24 +250,62 @@ internal class PodcastEpisodesListAdapter(
                 episode = podcastEpisode
                 disposable?.dispose()
 
-                val episodeAvailable = (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded)
-                root.alpha = if (episodeAvailable) 1.0f else 0.5f
+                // General info
+                textViewEpisodeHeader.text = podcastEpisode.titleToShow
+                textViewEpisodeDescription.text = podcastEpisode.descriptionToShow
+                textViewEpisodeDate.text = podcastEpisode.dateString
 
-                swipeRevealLayoutPodcastFeedItem.setLockDrag(!podcastEpisode.downloaded)
-                layoutConstraintDeleteButtonContainer.setOnClickListener {
-                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                        viewModel.deleteDownloadedMedia(podcastEpisode)
-                        notifyItemChanged(position)
-                        swipeRevealLayoutPodcastFeedItem.close(true)
-                    }
+                // Set Duration Time
+                val currentTime = (podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0).toInt()
+                val duration = (podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0).toInt()
+
+                textViewItemEpisodeTime.goneIfFalse(currentTime > 0 || duration > 0)
+                circleSplit.goneIfFalse(currentTime > 0 || duration > 0)
+
+                val progress = getSeekbarProgress(duration, currentTime)
+                seekBarCurrentTimeEpisodeProgress.progress = progress
+                seekBarCurrentTimeEpisodeProgress.goneIfFalse(currentTime > 0)
+
+                if (currentTime > 0 && duration > 0) {
+                    val timeLeft = duration - currentTime
+                    textViewItemEpisodeTime.text = binding.root.context.getString(R.string.time_left, "${timeLeft.toHrAndMin()}")
+                } else if (duration > 0) {
+                    textViewItemEpisodeTime.text = duration.toHrAndMin()
                 }
+
+                val seekBarDrawableEnable = ContextCompat.getDrawable(binding.root.context, R.drawable.podcast_episode_progress_bar_duration_holder)
+                val seekBarDrawableDisable = ContextCompat.getDrawable(binding.root.context, R.drawable.podcast_episode_disabled_progress_bar_duration_holder)
+
+                // played
+
+                if (podcastEpisode.played) {
+                    seekBarCurrentTimeEpisodeProgress.gone
+                    buttonCheckMarkPlayed.visible
+                    textViewItemEpisodeTime.text = getString(R.string.episode_detail_played_holder)
+                } else {
+                    buttonCheckMarkPlayed.gone
+                 }
+
                 //Playing State
-                layoutConstraintEpisodeListItemHolder.setBackgroundColor(
-                    root.context.getColor(
-                        if (podcastEpisode.playing) R.color.chatListSelected else R.color.headerBG
+                if (podcastEpisode.playing) {
+                    layoutConstraintAlpha.visible
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_pause_episode)
                     )
-                )
-                textViewPlayArrowIndicator.goneIfFalse(podcastEpisode.playing)
+
+                    seekBarCurrentTimeEpisodeProgress.progressDrawable = seekBarDrawableEnable
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.receivedIcon))
+                } else {
+                    layoutConstraintAlpha.gone
+
+                    buttonPlayEpisode.setImageDrawable(
+                        ContextCompat.getDrawable(binding.root.context, R.drawable.ic_play_episode)
+                    )
+
+                    seekBarCurrentTimeEpisodeProgress.progressDrawable = seekBarDrawableDisable
+                    textViewEpisodeHeader.setTextColor(ContextCompat.getColor(root.context, R.color.primaryText))
+                }
 
                 // Image
                 podcastEpisode.imageUrlToShow?.value?.let { episodeImage ->
@@ -231,31 +317,44 @@ internal class PodcastEpisodesListAdapter(
                         )
                     }
                 }
+                imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, R.drawable.ic_podcast_type))
 
-                //Name
-                textViewEpisodeTitle.text = podcastEpisode.title.value
+                //Download
+                val episodeAvailable = (connectivityHelper.isNetworkConnected() || podcastEpisode.downloaded)
+                root.alpha = if (episodeAvailable) 1.0f else 0.5f
 
-                //Download button
-                textViewDownloadEpisodeButton.setTextColor(
-                    root.context.getColor(
-                        if (podcastEpisode.downloaded) R.color.primaryGreen else R.color.secondaryText
-                    )
-                )
+                if (podcastEpisode.downloaded) {
+                    imageDownloadedEpisodeArrow.visible
+                    buttonDownloadArrow.gone
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                }
 
-                textViewDownloadEpisodeButton.setOnClickListener {
-                    viewModel.downloadMedia(podcastEpisode) { downloadedFile ->
-                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                            podcastEpisode.localFile = downloadedFile
-                            notifyItemChanged(position)
-                        }
-                    }
-                    notifyItemChanged(position)
+                if (!podcastEpisode.downloaded) {
+                    buttonDownloadArrow.visible
+                    buttonStop.gone
+                    progressBarEpisodeDownload.gone
+                    imageDownloadedEpisodeArrow.gone
                 }
 
                 val isFeedItemDownloadInProgress = viewModel.isFeedItemDownloadInProgress(podcastEpisode.id) && !podcastEpisode.downloaded
 
-                textViewDownloadEpisodeButton.goneIfTrue(isFeedItemDownloadInProgress)
-                progressBarEpisodeDownload.goneIfFalse(isFeedItemDownloadInProgress)
+                if (isFeedItemDownloadInProgress) {
+                    buttonDownloadArrow.gone
+                    progressBarEpisodeDownload.visible
+                    imageDownloadedEpisodeArrow.gone
+                    buttonStop.visible
+                }
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                    delay(100L)
+
+                    if (viewModel.isEpisodeSoundPlaying(podcastEpisode)) {
+                        animationViewPlay.playAnimation()
+                    } else {
+                        animationViewPlay.pauseAnimation()
+                    }
+                }
             }
         }
     }
@@ -263,4 +362,21 @@ internal class PodcastEpisodesListAdapter(
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }
+}
+
+private fun getSeekbarProgress(duration: Int, currentTime: Int): Int {
+    return try {
+        currentTime * 100 / duration
+    } catch (e: ArithmeticException) {
+        0
+    }
+}
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
 }

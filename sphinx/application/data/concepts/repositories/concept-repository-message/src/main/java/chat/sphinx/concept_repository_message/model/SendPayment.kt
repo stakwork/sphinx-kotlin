@@ -3,6 +3,7 @@ package chat.sphinx.concept_repository_message.model
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
+import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.payment.PaymentTemplate
 
 class SendPayment private constructor(
@@ -12,6 +13,7 @@ class SendPayment private constructor(
     val destinationKey: LightningNodePubKey?,
     val amount: Long,
     val paymentTemplate: PaymentTemplate?,
+    val routeHint: LightningRouteHint?
 ) {
     class Builder {
         private var chatId: ChatId?                      = null
@@ -20,6 +22,7 @@ class SendPayment private constructor(
         private var destinationKey: LightningNodePubKey? = null
         private var amount: Long                         = 0
         private var paymentTemplate: PaymentTemplate?    = null
+        private var routeHint: LightningRouteHint?       = null
 
         @Synchronized
         fun clear() {
@@ -29,6 +32,7 @@ class SendPayment private constructor(
             amount = 0
             destinationKey = null
             paymentTemplate = null
+            routeHint = null
         }
 
         @get:Synchronized
@@ -83,6 +87,12 @@ class SendPayment private constructor(
         }
 
         @Synchronized
+        fun setRouteHint(routeHint: LightningRouteHint?): Builder {
+            this.routeHint = routeHint
+            return this
+        }
+
+        @Synchronized
         fun setAmount(amount: Long): Builder {
             this.amount = amount
             return this
@@ -115,7 +125,8 @@ class SendPayment private constructor(
                     text,
                     destinationKey,
                     amount,
-                    paymentTemplate
+                    paymentTemplate,
+                    routeHint
                 )
             }
     }

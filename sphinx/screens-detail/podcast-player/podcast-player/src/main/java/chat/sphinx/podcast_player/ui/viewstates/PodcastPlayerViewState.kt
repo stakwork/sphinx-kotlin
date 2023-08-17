@@ -13,18 +13,21 @@ internal sealed class PodcastPlayerViewState: ViewState<PodcastPlayerViewState>(
 
     class PodcastLoaded(
         val podcast: Podcast,
+        val downloadedOnly: Boolean
     ): PodcastPlayerViewState()
 
     class LoadingEpisode(
-        val episode: PodcastEpisode
+        val episode: PodcastEpisode,
     ): PodcastPlayerViewState()
 
     class EpisodePlayed(
-        val podcast: Podcast
+        val podcast: Podcast,
+        val downloadedOnly: Boolean
     ): PodcastPlayerViewState()
 
     class MediaStateUpdate(
         val podcast: Podcast,
+        val downloadedOnly: Boolean,
         val state: MediaPlayerServiceState.ServiceActive.MediaState
     ): PodcastPlayerViewState()
 }

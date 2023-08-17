@@ -13,12 +13,44 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent">
 
-        <include
-            android:id="@+id/include_chat_tribe_header"
-            layout="@layout/layout_chat_header"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_chat_header"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/default_header_height"
-            android:visibility="visible"/>
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <include
+                android:id="@+id/include_chat_tribe_header"
+                layout="@layout/layout_chat_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_header_height"
+                android:visibility="visible"/>
+
+            <include
+                android:id="@+id/include_layout_thread_header"
+                layout="@layout/layout_thread_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_header_height"
+                android:visibility="gone"/>
+
+            <include
+                android:id="@+id/include_chat_pined_message_header"
+                layout="@layout/layout_chat_pined_message_header"
+                app:layout_constraintTop_toBottomOf="@id/include_chat_tribe_header"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/default_pin_header_height"
+                android:visibility="gone" />
+
+            <include
+                android:id="@+id/include_layout_thread_original_message"
+                layout="@layout/layout_thread_original_message"
+                app:layout_constraintTop_toBottomOf="@id/include_layout_thread_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <include
             android:id="@+id/include_chat_tribe_search_header"
@@ -38,12 +70,32 @@
         app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
         tools:listitem="@layout/layout_message_holder" />
 
+    <include
+        android:id="@+id/include_chat_tribe_members_mention_popup"
+        layout="@layout/layout_chat_tribe_member_mention_popup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container" />
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/image_view_chat_footer_shadow"
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:src="@drawable/bottom_bar_elevation_gradient"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container" />
+
+    <include
+        android:id="@+id/include_chat_tribe_scroll_down"
+        layout="@layout/layout_scroll_down_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:visibility="visible"
+        android:layout_marginBottom="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_chat_footer_container"
@@ -128,7 +180,9 @@
 
     <include
         android:id="@+id/include_chat_tribe_menu"
-        layout="@layout/layout_chat_menu" />
+        layout="@layout/layout_chat_menu"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
 
     <include
         android:id="@+id/include_layout_menu_bottom_call"
@@ -155,10 +209,43 @@
         android:visibility="gone"/>
 
     <include
+        android:id="@+id/include_pin_message_popup"
+        layout="@layout/layout_chat_pin_popup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_bottom_pinned"
+        layout="@layout/layout_bottom_pinned"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <include
         android:id="@+id/include_layout_tribe_member_profile"
         layout="@layout/layout_tribe_member_profile"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_tribe_app"
+        layout="@layout/layout_tribe_app"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@+id/include_chat_tribe_shimmer_container"
+        layout="@layout/layout_shimmer_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

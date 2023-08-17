@@ -1,7 +1,6 @@
 package chat.sphinx.feature_repository.util
 
 import chat.sphinx.concept_network_query_chat.model.ChatDto
-import chat.sphinx.concept_network_query_chat.model.podcast.PodcastDto
 import chat.sphinx.concept_network_query_chat.model.TribeDto
 import chat.sphinx.concept_network_query_chat.model.feed.FeedDto
 import chat.sphinx.concept_network_query_contact.model.ContactDto
@@ -128,12 +127,14 @@ inline fun TransactionCallbacks.updateChatTribeData(
     val escrowAmount = tribe.escrow_amount.toSat()
     val name = tribe.name.toChatName()
     val photoUrl = tribe.img?.toPhotoUrl()
+    val pinMessage = tribe.pin?.toMessageUUID()
 
     queries.chatUpdateTribeData(
         pricePerMessage,
         escrowAmount,
         name,
         photoUrl,
+        pinMessage,
         chatId,
     )
 
@@ -164,6 +165,7 @@ inline fun TransactionCallbacks.upsertChat(
     val escrowAmount = dto.escrow_amount?.toSat()
     val chatName = dto.name?.toChatName()
     val adminPubKey = dto.owner_pub_key?.toLightningNodePubKey()
+    val pinedMessage = dto.pin?.toMessageUUID()
 
     queries.chatUpsert(
         chatName,
@@ -177,21 +179,33 @@ inline fun TransactionCallbacks.upsertChat(
         dto.privateActual.toChatPrivate(),
         dto.owner_pub_key?.toLightningNodePubKey(),
         seen,
-        dto.meta?.toChatMetaDataOrNull(moshi),
+        null,
         dto.my_photo_url?.toPhotoUrl(),
         dto.my_alias?.toChatAlias(),
         dto.pending_contact_ids?.map { ContactId(it) },
         dto.notify?.toNotificationLevel(),
+        pinedMessage,
         chatId,
         ChatUUID(dto.uuid),
         chatType,
         createdAt,
         pricePerMessage,
-        escrowAmount,
+        escrowAmount
     )
 
-    if (chatType.isTribe() && (ownerPubKey == adminPubKey) && (pricePerMessage != null || escrowAmount != null)) {
-        queries.chatUpdateTribeData(pricePerMessage, escrowAmount, chatName, chatPhotoUrl, chatId)
+    if (
+        chatType.isTribe() &&
+        (ownerPubKey == adminPubKey) &&
+        (pricePerMessage != null || escrowAmount != null || pinedMessage != null)
+    ) {
+        queries.chatUpdateTribeData(
+            pricePerMessage,
+            escrowAmount,
+            chatName,
+            chatPhotoUrl,
+            pinedMessage,
+            chatId
+        )
     }
 
     val conversationContactId: ContactId? = if (chatType.isConversation()) {
@@ -380,6 +394,7 @@ fun TransactionCallbacks.upsertMessage(
         dto.recipient_pic?.toPhotoUrl(),
         dto.pushActual.toPush(),
         dto.person?.toMessagePerson(),
+        dto.thread_uuid?.toThreadUUID(),
         MessageId(dto.id),
         dto.uuid?.toMessageUUID(),
         chatId,
@@ -477,16 +492,14 @@ fun TransactionCallbacks.upsertFeed(
     searchResultDescription: FeedDescription? = null,
     searchResultImageUrl: PhotoUrl? = null,
     chatId: ChatId,
-    currentItemId: FeedId?,
     subscribed: Subscribed,
+    currentItemId: FeedId? = null,
     queries: SphinxDatabaseQueries
 ) {
 
-    if (feedDto.items.count() == 0) {
+    if (feedDto.items.isEmpty()) {
         return
     }
-
-    var cItemId: FeedId? = null
 
     if (chatId.value != ChatId.NULL_CHAT_ID.toLong()) {
         queries.feedGetAllByChatId(chatId).executeAsList()?.forEach { feedDbo ->
@@ -496,14 +509,11 @@ fun TransactionCallbacks.upsertFeed(
                     feedDbo.id,
                     queries
                 )
-            } else {
-                //Using existing current item id on update if param is null
-                cItemId = currentItemId ?: feedDbo.current_item_id
             }
         }
     }
 
-    val feedId = FeedId(feedDto.id)
+    val feedId = FeedId(feedDto.fixedId)
 
     feedDto.value?.let { feedValueDto ->
         queries.feedModelUpsert(
@@ -542,12 +552,14 @@ fun TransactionCallbacks.upsertFeed(
     queries.feedItemsDeleteOldByFeedId(feedId, itemIds)
 
     for (destination in feedDto.value?.destinations ?: listOf()) {
-        queries.feedDestinationUpsert(
-            address = FeedDestinationAddress(destination.address),
-            split = FeedDestinationSplit(destination.split.toDouble()),
-            type = FeedDestinationType(destination.type),
-            feed_id = feedId
-        )
+        if (destination.address.toFeedDestinationAddress() != null) {
+            queries.feedDestinationUpsert(
+                address = FeedDestinationAddress(destination.address),
+                split = FeedDestinationSplit(destination.split.toDouble()),
+                type = FeedDestinationType(destination.type),
+                feed_id = feedId
+            )
+        }
     }
 
     val description = searchResultDescription
@@ -578,12 +590,47 @@ fun TransactionCallbacks.upsertFeed(
         content_type = feedDto.contentType?.toFeedContentType(),
         language = feedDto.language?.toFeedLanguage(),
         items_count = FeedItemsCount(feedDto.items.count().toLong()),
-        current_item_id = cItemId,
         chat_id = chatId,
         subscribed = subscribed,
         id = feedId,
         generator = feedDto.generator?.toFeedGenerator(),
+        current_item_id = currentItemId
     )
+}
+
+fun TransactionCallbacks.upsertFeedItems(
+    feedDto: FeedDto,
+    queries: SphinxDatabaseQueries
+) {
+    val feedId = FeedId(feedDto.fixedId)
+
+    val itemIds: MutableList<FeedId> = mutableListOf()
+
+    for (item in feedDto.items) {
+        val itemId = FeedId(item.id)
+
+        itemIds.add(itemId)
+
+        queries.feedItemUpsert(
+            title = FeedTitle(item.title),
+            description = item.description?.toFeedDescription(),
+            date_published = item.datePublished?.secondsToDateTime(),
+            date_updated = item.dateUpdated?.secondsToDateTime(),
+            author = item.author?.toFeedAuthor(),
+            content_type = item.contentType?.toFeedContentType(),
+            enclosure_length = item.enclosureLength?.toFeedEnclosureLength(),
+            enclosure_url = FeedUrl(item.enclosureUrl),
+            enclosure_type = item.enclosureType?.toFeedEnclosureType(),
+            image_url = item.imageUrl?.toPhotoUrl(),
+            thumbnail_url = item.thumbnailUrl?.toPhotoUrl(),
+            link = item.link?.toFeedUrl(),
+            feed_id = feedId,
+            id = itemId,
+            duration = item.duration?.toFeedItemDuration(),
+        )
+    }
+
+    queries.feedItemsDeleteOldByFeedId(feedId, itemIds)
 }
 
 
@@ -609,4 +656,14 @@ fun TransactionCallbacks.deleteFeedById(
         queries.feedDestinationDeleteByFeedId(feedDbo.id)
         queries.feedDeleteById(feedDbo.id)
     }
+}
+
+@Suppress("NOTHING_TO_INLINE", "SpellCheckingInspection")
+inline fun TransactionCallbacks.updateSubscriptionStatus(
+    queries: SphinxDatabaseQueries,
+    subscribed: Subscribed,
+    feedId: FeedId
+) {
+    queries.feedUpdateSubscribe(subscribed, feedId)
+    queries.contentFeedStatusUpdateSubscriptionStatus(subscribed, feedId)
 }

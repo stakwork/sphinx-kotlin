@@ -101,72 +101,18 @@
                     android:id="@+id/text_view_menu_button"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:fontFamily="@font/material_icons_regular"
                     android:gravity="center"
                     android:text="more_vert"
-                    android:fontFamily="@font/material_icons_regular"
+                    android:textColor="@color/secondaryText"
                     android:textSize="@dimen/default_text_size_large_title"
-                    android:textColor="@color/secondaryText" />
+                    tools:layout_editor_absoluteX="0dp"
+                    tools:layout_editor_absoluteY="0dp" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/constrain_layout_podcast_lightning_controls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/seek_bar_sats_container_margin_top"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_tribe_details"
-            tools:visibility="visible">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/constrain_layout_podcast_controls_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/default_form_horizontal_margin"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_view_podcast_sats_per_minute_field"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/podcast_sats_per_minute"
-                    android:textSize="@dimen/default_text_size_body"
-                    android:textColor="@color/textMessages"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/text_view_podcast_sats_per_minute_value" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/text_view_podcast_sats_per_minute_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="@dimen/default_text_size_body"
-                    android:textColor="@color/textMessages"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="0" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.appcompat.widget.AppCompatSeekBar
-                android:id="@+id/seek_bar_sats_per_minute"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/seek_bar_sats_per_minute_margin_vertical"
-                android:layout_marginHorizontal="@dimen/seek_bar_sats_per_minute_margin_horizontal"
-                android:secondaryProgressTint="@color/receivedIcon"
-                android:thumbTint="@color/receivedIcon"
-                android:progressDrawable="@drawable/podcast_player_seek_bar_progress"
-                android:thumb="@drawable/podcast_player_seek_bar_thumb"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constrain_layout_podcast_controls_text"
-                style="?android:attr/seekBarStyle" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_constraint_profile_alias_container"
@@ -174,7 +120,7 @@
             android:layout_marginTop="@dimen/default_double_layout_margin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/constrain_layout_podcast_lightning_controls">
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_tribe_details">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_constraint_profile_alias"
@@ -326,6 +272,55 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:background="@android:color/transparent"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_tribe_badges"
+            android:layout_marginHorizontal="@dimen/default_form_horizontal_margin"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/profile_form_field_container_height"
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_profile_picture_container">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/icon_tribe_badges"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:padding="2dp"
+                android:src="@drawable/ic_icon_badges"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:track="@drawable/switch_track_selector" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_tribe_badges_basic_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:layout_marginStart="8dp"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="2"
+                android:text="@string/tribe_badges"
+                android:textColor="@color/text"
+                android:textSize="@dimen/pin_text_view_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/icon_right_arrow"
+                app:layout_constraintStart_toEndOf="@+id/icon_tribe_badges"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/icon_right_arrow"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:fontFamily="@font/material_icons_regular"
+                android:gravity="center"
+                android:text="@string/material_icon_name_chevron_right_button"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/add_buttons_icon_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:track="@drawable/switch_track_selector" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

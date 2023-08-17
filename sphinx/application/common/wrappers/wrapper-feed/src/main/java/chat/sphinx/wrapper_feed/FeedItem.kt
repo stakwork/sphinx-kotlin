@@ -3,6 +3,7 @@ package chat.sphinx.wrapper_feed
 import chat.sphinx.wrapper_common.DateTime
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.feed.*
+import chat.sphinx.wrapper_common.time
 import java.io.File
 
 inline val FeedItem.isPodcast: Boolean
@@ -48,7 +49,7 @@ data class FeedItem(
             imageUrl?.let {
                 return it
             }
-            return null
+            return feed?.imageUrlToShow
         }
 
     var thumbnailUrlToShow: PhotoUrl? = null
@@ -67,6 +68,27 @@ data class FeedItem(
             return (description?.value ?: feed?.description?.value ?: "").htmlToPlainText().trim()
         }
 
+    var people: ArrayList<String> = arrayListOf()
+        get() {
+            author?.let {
+                return arrayListOf(it.value)
+            }
+            feed?.author?.let {
+                return arrayListOf(it.value)
+            }
+            return arrayListOf()
+        }
+
+    var datePublishedTime: Long = 0
+        get() {
+            return datePublished?.time ?: 0
+        }
+
     val downloaded: Boolean
         get()= localFile != null
+
+    var contentEpisodeStatus: ContentEpisodeStatus? = null
+
+    var showTitle: String? = null
+    var feedType: FeedType? = null
 }

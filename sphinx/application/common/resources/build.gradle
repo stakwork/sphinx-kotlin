@@ -38,6 +38,8 @@ dependencies {
     implementation deps.androidx.annotation
     implementation deps.androidx.appCompat
     implementation deps.androidx.constraintLayout
+    implementation deps.bip39.sdk
+    implementation deps.jna.sdk
 
     implementation deps.lottie.sdk
 }

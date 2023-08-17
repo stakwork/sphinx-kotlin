@@ -32,6 +32,7 @@ internal class ChatContactFragment: ChatFragment<
     override val headerBinding: LayoutChatHeaderBinding by viewBinding(
         LayoutChatHeaderBinding::bind, R.id.include_chat_contact_header
     )
+
     override val searchHeaderBinding: LayoutChatSearchHeaderBinding by viewBinding(
         LayoutChatSearchHeaderBinding::bind, R.id.include_chat_contact_search_header
     )
@@ -70,6 +71,20 @@ internal class ChatContactFragment: ChatFragment<
     override val moreMenuBinding: LayoutMenuBottomBinding by viewBinding(
         LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_more
     )
+
+    override val scrollDownButtonBinding: LayoutScrollDownButtonBinding by viewBinding(
+        LayoutScrollDownButtonBinding::bind, R.id.include_chat_contact_scroll_down
+    )
+
+    override val shimmerBinding: LayoutShimmerContainerBinding by viewBinding(
+        LayoutShimmerContainerBinding::bind, R.id.include_chat_contact_shimmer_container
+    )
+
+    override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+        get() = null
+
+    override val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
+        get() = null
 
     override val menuEnablePayments: Boolean
         get() = true

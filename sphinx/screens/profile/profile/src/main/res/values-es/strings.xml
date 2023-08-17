@@ -22,6 +22,7 @@
     <string name="profile_export_keys_pin_message">"Ingresa tu PIN para encriptar las claves. ¡Recuérdalo! Lo necesitarás para restaurar tu cuenta en otro dispositivo"</string>
     <string name="profile_keys_copied_clipboard">"Tus claves se copiarán al portapapeles. Guarda las claves y recuerda tu PIN antes de borrar la aplicación o toda la información se perderá"</string>
     <string name="profile_link_previews">Vista previa de enlaces activada</string>
+    <string name="profile_recommendations">Feed Recommendations</string>
     <string name="side_effect_backup_keys_exported">Claves copiadas al portapapeles</string>
     <string name="side_effect_wrong_pin">PIN incorrecto</string>
     <string name="side_effect_backup_keys_failed">Guardado de claves fallido</string>
@@ -43,23 +44,5 @@
     <string name="github_pat_succeed">El Personal Access Token de Github ha sido establecido con éxito</string>
     <string name="github_pat_failed">No se pudo establecer el Github Personal Access Token</string>
 
-    <string name="network_check_title">Verifica tu conexión WiFi</string>
-    <string name="network_check_message">Antes de comenzar tenes que conectarte a la red WiFi \"sphinxkey\". De lo contrario no vas a poder configurar tu dispositivo. ¿Estás actualmente conectado a esta red?</string>
-    <string name="network_name_title">Red WiFi</string>
-    <string name="network_name_message">Por favor especifica la red WiFi</string>
-    <string name="network_password_title">Contraseña de WiFi</string>
-    <string name="network_password_message">Ingresa la contraseña de WiFi para %s</string>
-    <string name="lightning_node_ip_title">IP del nodo de lightning</string>
-    <string name="lightning_node_ip_message">Ingresa la IP del nodo de lightning</string>
-    <string name="lightning_node_port_title">Puerto del nodo de lightning</string>
-    <string name="lightning_node_port_message">Ingresa el número de puerto del nodo de lightning</string>
-    <string name="store_mnemonic">Guarda tus palabras de seguridad cuidadosamente</string>
-    <string name="sending_seed">Enviando seed al dispositivo</string>
-    <string name="error_setting_up_signing_device">Ocurrió un error configurando el dispositivo de firma: %s</string>
-    <string name="signing_device_successfully_set">Seed envíado al dispositivo con éxito</string>
-    <string name="setup_signing_device">Configurar Dispositivo de Firma</string>
-    <string name="configure_signing_device">Configurar Dispositivo de Firma</string>
-    <string name="mnemonic_copied_to_clipboard">Palabras de seguridad copiadas al portapapeles</string>
-    <string name="bitcoin_network">Red de Bitcoin</string>
-    <string name="select_bitcoin_network">Seleccioná la red de Bitcoin</string>
+
 </resources>

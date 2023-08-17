@@ -4,11 +4,11 @@
     android:layout_height="@dimen/transactions_list_transaction_holder_height"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/body">
+    android:background="@color/headerBG">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_transactions_list_transaction_arrow"
-        android:layout_width="@dimen/transactions_list_transaction_arrow_width"
+        android:layout_width="@dimen/transactions_list_transaction_icon_container_width"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -16,106 +16,144 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/image_view_transaction_arrow"
-            android:layout_width="wrap_content"
+            android:layout_width="@dimen/transactions_list_transaction_icon_width"
             android:layout_height="wrap_content"
             android:scaleType="centerInside"
-            android:src="@drawable/ic_transaction_payment_sent"
-            android:tint="@color/secondaryRed"
-            android:padding="@dimen/transactions_list_transaction_arrow_margin"
+            android:src="@drawable/ic_transaction_sent"
+            android:tint="@color/primaryPurple"
+            android:layout_marginStart="@dimen/default_layout_margin"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_transaction_icon"
-        android:layout_width="@dimen/transactions_list_transaction_icon_width"
-        android:layout_height="match_parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/layout_constraint_transactions_list_transaction_arrow">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/image_view_transaction_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_transaction_item"
-            android:tint="@color/washedOutReceivedText"
-            android:padding="@dimen/transactions_list_transaction_icon_margin"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_transaction_sender_receiver"
+        android:id="@+id/text_view_transaction_address"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/transactions_list_transaction_amount_unit_margin"
         android:fontFamily="@font/roboto_regular"
         android:singleLine="true"
         android:gravity="left|center"
-        android:textColor="@color/washedOutReceivedText"
+        android:textColor="@color/mainBottomIcons"
         android:textSize="@dimen/transactions_list_transaction_sender_receiver_text_size"
         android:text=""
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/layout_constraint_transaction_icon"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_transaction_amount"
+        app:layout_constraintStart_toEndOf="@+id/layout_constraint_transactions_list_transaction_arrow"
+        app:layout_constraintEnd_toStartOf="@+id/layout_constraint_right_container"
         tools:text="Tomas Timinskas"/>
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_transaction_unit"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_right_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/default_layout_margin"
-        android:fontFamily="@font/roboto_regular"
-        android:singleLine="true"
-        android:textColor="@color/washedOutReceivedText"
-        android:textSize="@dimen/transactions_list_transaction_amount_unit_text_size"
-        android:text="@string/sat"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_transaction_amount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/transactions_list_transaction_amount_unit_margin"
-        android:fontFamily="@font/roboto_medium"
-        android:singleLine="true"
-        android:textColor="@color/text"
-        android:textSize="@dimen/transactions_list_transaction_amount_unit_text_size"
-        android:text=""
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_transaction_unit"
         app:layout_constraintTop_toTopOf="parent"
-        tools:text="1 000 000"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/text_view_transaction_address"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_transaction_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:fontFamily="@font/roboto_medium"
-        android:singleLine="true"
-        android:textColor="@color/secondaryText"
-        android:textSize="@dimen/transactions_list_transaction_date_text_size"
-        android:text=""
-        app:layout_constraintTop_toBottomOf="@+id/text_view_transaction_unit"
-        app:layout_constraintEnd_toEndOf="@+id/text_view_transaction_unit"
-        tools:text="Thu Jul 15, 01:08 PM"/>
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_transaction_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_medium"
+            android:singleLine="true"
+            android:textColor="@color/washedOutReceivedText"
+            android:textSize="@dimen/transactions_list_transaction_amount_unit_text_size"
+            android:text="@string/sat"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_transaction_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/transactions_list_transaction_amount_unit_margin"
+            android:fontFamily="@font/roboto_medium"
+            android:singleLine="true"
+            android:textColor="@color/text"
+            android:textSize="@dimen/transactions_list_transaction_amount_unit_text_size"
+            android:text=""
+            app:layout_constraintEnd_toStartOf="@+id/text_view_transaction_unit"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="1 000 000"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_transaction_hour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:fontFamily="@font/roboto_regular"
+            android:singleLine="true"
+            android:textColor="@color/placeholderText"
+            android:textSize="@dimen/transactions_list_transaction_date_text_size"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@+id/text_view_transaction_unit"
+            app:layout_constraintEnd_toEndOf="@+id/text_view_transaction_unit"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="01:08 PM"/>
+
+        <View
+            android:id="@+id/dot_1"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:background="@drawable/circular_button"
+            android:backgroundTint="@color/placeholderText"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintTop_toTopOf="@+id/text_view_transaction_hour"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_transaction_hour"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_transaction_hour"></View>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_transaction_day_of_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:singleLine="true"
+            android:textColor="@color/placeholderText"
+            android:textSize="@dimen/transactions_list_transaction_date_text_size"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@+id/text_view_transaction_unit"
+            app:layout_constraintEnd_toStartOf="@+id/dot_1"
+            tools:text="May 01"/>
+
+        <View
+            android:id="@+id/dot_2"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:background="@drawable/circular_button"
+            android:backgroundTint="@color/placeholderText"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            app:layout_constraintTop_toTopOf="@+id/text_view_transaction_hour"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_transaction_hour"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_transaction_day_of_month"></View>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_transaction_day_of_week"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:layout_marginEnd="@dimen/default_half_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:singleLine="true"
+            android:textColor="@color/placeholderText"
+            android:textSize="@dimen/transactions_list_transaction_date_text_size"
+            android:text=""
+            app:layout_constraintTop_toBottomOf="@+id/text_view_transaction_unit"
+            app:layout_constraintEnd_toStartOf="@+id/dot_2"
+            tools:text="Mon"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/lightDivider"
+        android:background="@color/transactionBGBorder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

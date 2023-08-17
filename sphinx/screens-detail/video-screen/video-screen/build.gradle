@@ -34,8 +34,6 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
 
-    implementation files('libs/YouTubeAndroidPlayerApi.jar')
-
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
 
@@ -43,6 +41,7 @@ dependencies {
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:activity:features:video-player-controller')
     implementation project(path: ':sphinx:screens-detail:common:detail-resources')
+    implementation project(path: ':sphinx:screens-detail:episode-description:episode-description')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-chat')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-feed')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-action-track')
@@ -57,6 +56,8 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-message')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-feed-status')
+
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt

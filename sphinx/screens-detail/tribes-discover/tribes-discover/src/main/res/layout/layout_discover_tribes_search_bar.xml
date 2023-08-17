@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_dashboard_search_bar"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/discover_tribes_search_field_height"
+    android:background="@android:color/transparent"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@drawable/button_background_white_rad_48"
+        android:backgroundTint="@color/inputBG1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_dashboard_search"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:src="@drawable/ic_baseline_search_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/edit_text_dashboard_search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:background="@null"
+            android:fontFamily="@font/roboto_regular"
+            android:hint="@string/search"
+            android:imeOptions="actionDone"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textColor="@color/text"
+            android:textColorHighlight="@color/primaryBlue"
+            android:textColorHint="@color/placeholderText"
+            android:textSize="@dimen/dashboard_search_text_size"
+            app:layout_constraintEnd_toEndOf="@+id/button_dashboard_search_clear"
+            app:layout_constraintStart_toEndOf="@+id/image_view_dashboard_search" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/button_dashboard_search_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_cancel"
+            android:textColor="@color/placeholderText"
+            android:textSize="@dimen/default_text_size_tap_target_material_icon"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

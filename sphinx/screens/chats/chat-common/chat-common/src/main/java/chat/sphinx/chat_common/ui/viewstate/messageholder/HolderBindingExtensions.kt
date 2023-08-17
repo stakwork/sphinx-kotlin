@@ -1,11 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.messageholder
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.pdf.PdfRenderer
-import android.os.ParcelFileDescriptor
-import android.os.ParcelFileDescriptor.MODE_READ_ONLY
 import android.view.Gravity
 import android.view.View
 import android.webkit.WebView
@@ -24,6 +19,7 @@ import chat.sphinx.chat_common.adapters.MessageListAdapter
 import chat.sphinx.chat_common.databinding.LayoutMessageHolderBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypeAttachmentAudioBinding
 import chat.sphinx.chat_common.databinding.LayoutMessageTypePodcastClipBinding
+import chat.sphinx.chat_common.model.FeedItemPreview
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.model.UnspecifiedUrl
@@ -98,7 +94,7 @@ internal fun  LayoutMessageHolderBinding.setView(
             }
 
             viewState.initialHolder.setInitialHolder(
-                includeMessageHolderChatImageInitialHolder.textViewInitials,
+                includeMessageHolderChatImageInitialHolder.textViewInitialsName,
                 includeMessageHolderChatImageInitialHolder.imageViewChatPicture,
                 includeMessageStatusHeader,
                 imageLoader,
@@ -232,6 +228,27 @@ internal fun  LayoutMessageHolderBinding.setView(
                 viewState.bubbleMessage,
                 onSphinxInteractionListener
             )
+            setBubbleThreadLayout(
+                viewState.bubbleThread,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+            ){ imageView, url ->
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    imageLoader.load(
+                        imageView,
+                        url,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .transformation(Transformation.CircleCrop)
+                            .build()
+                    )
+                        .also { disposables.add(it) }
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+            }
             setBubblePaidMessageLayout(
                 dispatchers,
                 holderJobs,
@@ -389,6 +406,7 @@ internal inline fun LayoutMessageHolderBinding.setUnsupportedMessageTypeLayout(
                 MessageType.DirectPayment,
                 MessageType.GroupAction.Join,
                 MessageType.GroupAction.Leave,
+                MessageType.CallLink,
                 MessageType.Message -> {
                     // 🤔 We should never get here since these message types ARE supported.
                     getString(R.string.placeholder_unsupported_message_type_default)
@@ -640,6 +658,7 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
 
         var bubbleWidth: Int = when {
             viewState.message?.shouldAdaptBubbleWidth == true -> {
+
                 val textWidth = viewState.bubbleMessage?.let { nnBubbleMessage ->
                     (includeMessageHolderBubble.textViewMessageText.paint.measureText(
                         nnBubbleMessage.text ?: getString(R.string.decryption_error)
@@ -705,6 +724,8 @@ internal fun LayoutMessageHolderBinding.setBubbleBackground(
                 }
             }
             is MessageHolderViewState.Separator -> { }
+
+            is MessageHolderViewState.ThreadHeader -> { }
         }
     }
 }
@@ -944,6 +965,92 @@ internal inline fun LayoutMessageHolderBinding.setInvoicePaymentLayout(
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
+    thread: LayoutState.Bubble.ContainerThird.Thread?,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    loadImage: (ImageView, String) -> Unit,
+) {
+    includeMessageHolderBubble.includeLayoutMessageThread.apply {
+        if (thread == null) {
+            root.gone
+        } else {
+            root.visible
+
+            val users = thread.users
+
+            setReplyRow(
+                users.elementAtOrNull(0),
+                layoutConstraintReplyOne,
+                layoutConstraintReplyOneBackground,
+                layoutLayoutChatImageSmallInitialHolderOne,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+                null,
+                thread.isSentMessage,
+                false,
+                loadImage
+            )
+
+            setReplyRow(
+                users.elementAtOrNull(1),
+                layoutConstraintReplyTwo,
+                layoutConstraintReplyTwoBackground,
+                layoutLayoutChatImageSmallInitialHolderTwo,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+                null,
+                thread.isSentMessage,
+                false,
+                loadImage
+            )
+
+            setReplyRow(
+                thread.lastReplyUser,
+                layoutConstraintLastReply,
+                layoutConstraintLastReplyBackground,
+                layoutLayoutChatImageSmallInitialHolderFour,
+                holderJobs,
+                dispatchers,
+                lifecycleScope,
+                userColorsHelper,
+                null,
+                thread.isSentMessage,
+                true,
+                loadImage
+            )
+
+            if (thread.replyCount > 3) {
+                layoutConstraintReplyThree.visible
+
+                layoutConstraintReplyThreeBackground.setBackgroundResource(
+                    if (thread.isSentMessage) {
+                        R.drawable.background_thread_row_reply_number_holder_sent
+                    } else {
+                        R.drawable.background_thread_row_reply_number_holder_received
+                    }
+                )
+                textViewRepliesCount.text = thread.replyCount.minus(3).toString()
+            }
+
+            layoutConstraintLastReply.apply {
+                textViewLastReplyMessageText.text = thread.lastReplyMessage
+                textViewLastReplyDate.text = thread.lastReplyDate
+                textViewLastReplyUserName.text = thread.lastReplyUser.alias?.value ?: "unknown"
+            }
+        }
+    }
+
+}
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
 internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
     message: LayoutState.Bubble.ContainerThird.Message?,
     onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener?
@@ -954,6 +1061,7 @@ internal inline fun LayoutMessageHolderBinding.setBubbleMessageLayout(
         } else {
             includeMessageHolderBubble.textViewPaidMessageText.gone
 
+            maxLines = if (message.isThread) 2 else Integer.MAX_VALUE
             visible
             text = message.text ?: getString(R.string.decryption_error)
 
@@ -1186,6 +1294,11 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
 
                     root.visible
                 }
+            }
+            is FeedItemPreview -> {
+                includeMessageLinkPreviewContact.root.gone
+                includeMessageLinkPreviewTribe.root.gone
+                includeMessageLinkPreviewUrl.root.gone
             }
             is UnspecifiedUrl -> {
                 includeMessageLinkPreviewContact.root.gone
@@ -1875,12 +1988,12 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
 
             imageHolderBinding.apply {
 
-                textViewInitials.visible
-                textViewInitials.text = (boostSenderHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
+                textViewInitialsName.visible
+                textViewInitialsName.text = (boostSenderHolder.alias?.value ?: root.context.getString(R.string.unknown)).getInitials()
                 imageViewChatPicture.gone
 
                 lifecycleScope.launch(dispatchers.mainImmediate) {
-                    textViewInitials.setBackgroundRandomColor(
+                    textViewInitialsName.setBackgroundRandomColor(
                         R.drawable.chat_initials_circle,
                         Color.parseColor(
                             userColorsHelper.getHexCodeForKey(
@@ -1893,7 +2006,7 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
                 }
 
                 boostSenderHolder.photoUrl?.let { photoUrl ->
-                    textViewInitials.gone
+                    textViewInitialsName.gone
                     imageViewChatPicture.visible
                     loadImage(imageViewChatPicture, photoUrl.value)
                 }
@@ -1901,6 +2014,78 @@ internal inline fun LayoutMessageHolderBinding.setReactionBoostSender(
         }
     }
 }
+
+@MainThread
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun LayoutMessageHolderBinding.setReplyRow(
+    replyUserHolder: ReplyUserHolder?,
+    container: ConstraintLayout,
+    backgroundContainer: ConstraintLayout,
+    imageHolderBinding: LayoutChatImageSmallInitialHolderBinding,
+    holderJobs: ArrayList<Job>,
+    dispatchers: CoroutineDispatchers,
+    lifecycleScope: CoroutineScope,
+    userColorsHelper: UserColorsHelper,
+    repliesNumber: String? = null,
+    isSentMessage: Boolean,
+    isLastReply: Boolean = false,
+    loadImage: (ImageView, String) -> Unit,
+) {
+    container.let { replyContainer ->
+        if (replyUserHolder == null) {
+            replyContainer.gone
+        } else {
+            replyContainer.visible
+
+            imageHolderBinding.apply {
+
+                val rowBackground = when {
+                    isLastReply -> if (isSentMessage) {
+                        R.drawable.background_thread_row_last_reply_holder_sent
+                    } else {
+                        R.drawable.background_thread_row_last_reply_holder_received
+                    }
+                    else -> if (isSentMessage) {
+                        R.drawable.background_thread_row_reply_holder_sent
+                    } else {
+                        R.drawable.background_thread_row_reply_holder_received
+                    }
+                }
+
+                backgroundContainer.setBackgroundResource(rowBackground)
+
+                val text = (replyUserHolder?.alias?.value ?: root.context.getString(
+                    R.string.unknown
+                )).getInitials()
+
+                textViewInitialsName.visible
+                textViewInitialsName.text = text
+                imageViewChatPicture.gone
+
+                lifecycleScope.launch(dispatchers.mainImmediate) {
+                    textViewInitialsName.setBackgroundRandomColor(
+                        R.drawable.chat_initials_circle,
+                        Color.parseColor(
+                            userColorsHelper.getHexCodeForKey(
+                                replyUserHolder!!.colorKey,
+                                root.context.getRandomHexCode(),
+                            )
+                        )
+                    )
+                }.let { job ->
+                    holderJobs.add(job)
+                }
+
+                replyUserHolder!!.photoUrl?.let { photoUrl ->
+                    textViewInitialsName.gone
+                    imageViewChatPicture.visible
+                    loadImage(imageViewChatPicture, photoUrl.value)
+                }
+            }
+        }
+    }
+}
+
 
 @MainThread
 @Suppress("NOTHING_TO_INLINE")

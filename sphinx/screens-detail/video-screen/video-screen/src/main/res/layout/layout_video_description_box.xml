@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:background="@color/headerBG">
+
+    <TextView
+        android:id="@+id/text_view_video_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginVertical="@dimen/default_half_layout_margin"
+        android:layout_marginStart="16dp"
+        android:fontFamily="@font/roboto_regular"
+        android:maxLines="2"
+        android:textColor="@color/text"
+        android:textSize="@dimen/default_text_size_headline"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Who Will Road the Builds?" />
+
+    <TextView
+        android:id="@+id/text_view_video_published_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/default_half_layout_margin"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/secondaryText"
+        android:maxLines="2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_video_title"
+        tools:text="22 Sep" />
+
+    <TextView
+        android:id="@+id/text_view_video_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        android:fontFamily="@font/roboto_regular"
+        android:textColor="@color/secondaryText"
+        android:maxLines="3"
+        app:layout_constraintTop_toBottomOf="@+id/text_view_video_published_date"
+        tools:text="This video about setting up layouts on the Android view and all the jazz. This video about setting up layouts on the Android view and all the jazz." />
+
+    <include
+        android:id="@+id/include_layout_custom_boost"
+        layout="@layout/layout_custom_boost"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/custom_boost_height"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_view_video_description" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_video_lightning_controls"
+        android:layout_width="0dp"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:layout_marginStart="@dimen/default_half_layout_margin"
+        android:layout_height="wrap_content"
+        android:background="@color/headerBG"
+        app:layout_constraintBottom_toBottomOf="@+id/include_layout_custom_boost"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/include_layout_custom_boost"
+        app:layout_constraintTop_toTopOf="@+id/include_layout_custom_boost">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constrain_layout_video_controls_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/player_time_labels_horizontal_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_video_sats_per_minute_field"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_medium"
+                android:text="@string/video_sats_per_minute"
+                android:textColor="@color/textMessages"
+                android:textSize="@dimen/default_text_size_body"
+                app:layout_constraintEnd_toStartOf="@+id/text_view_video_sats_per_minute_value"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_video_sats_per_minute_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_medium"
+                android:textColor="@color/textMessages"
+                android:textSize="@dimen/default_text_size_body"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="0" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/seek_bar_sats_per_minute"
+            style="?android:attr/seekBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="@dimen/default_elevation"
+            android:progressDrawable="@drawable/sats_seek_bar_progress"
+            android:secondaryProgressTint="@android:color/white"
+            android:thumb="@drawable/podcast_player_seek_bar_thumb"
+            android:thumbTint="@android:color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constrain_layout_video_controls_text" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_custom_boost">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_view_contributor_image_wrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_layout_margin"
+            app:cardCornerRadius="@dimen/default_feed_image_xy"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_contributor_image"
+                android:layout_width="@dimen/default_feed_watch_channel_image_xy"
+                android:layout_height="@dimen/default_feed_watch_channel_image_xy"
+                android:scaleType="centerCrop"
+                tools:srcCompat="@drawable/ic_profile_avatar_circle" />
+
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/text_view_contributor_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/default_half_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_headline"
+            android:maxLines="1"
+            app:layout_constraintStart_toEndOf="@+id/card_view_contributor_image_wrapper"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_subscribe_button"
+            app:layout_constraintTop_toTopOf="@+id/card_view_contributor_image_wrapper"
+            app:layout_constraintBottom_toBottomOf="@+id/card_view_contributor_image_wrapper"
+            tools:text="BTC Sessions"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_subscribe_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:background="@drawable/button_background"
+            android:backgroundTint="@android:color/white"
+            android:fontFamily="@font/roboto_medium"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/default_layout_margin"
+            android:paddingVertical="@dimen/default_small_layout_margin"
+            android:text="@string/subscribe"
+            android:textAllCaps="true"
+            android:textColor="@color/textInverted"
+            android:textSize="@dimen/default_text_size_headline"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightDivider"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

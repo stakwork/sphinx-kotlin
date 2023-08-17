@@ -1,10 +1,12 @@
 package chat.sphinx.chat_common.adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.core.view.isVisible
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +14,7 @@ import androidx.navigation.NavArgs
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import chat.sphinx.chat_common.R
 import chat.sphinx.chat_common.databinding.*
 import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
@@ -22,12 +25,15 @@ import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
-import chat.sphinx.wrapper_chat.isConversation
-import chat.sphinx.wrapper_chat.isPrivateTribe
-import chat.sphinx.wrapper_chat.isTribe
+import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.getString
+import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
@@ -35,6 +41,7 @@ import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,16 +49,23 @@ import kotlinx.coroutines.withContext
 internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerView: RecyclerView,
     private val headerBinding: LayoutChatHeaderBinding,
+    private val headerPinBinding: LayoutChatPinedMessageHeaderBinding?,
     private val layoutManager: LinearLayoutManager,
     private val lifecycleOwner: LifecycleOwner,
     private val onStopSupervisor: OnStopSupervisor,
     private val viewModel: ChatViewModel<ARGS>,
     private val imageLoader: ImageLoader<ImageView>,
     private val userColorsHelper: UserColorsHelper,
-) : RecyclerView.Adapter<MessageListAdapter<ARGS>.MessageViewHolder>(),
+    private val isThreadChat: Boolean
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(),
     DefaultLifecycleObserver,
     View.OnLayoutChangeListener
 {
+
+    companion object {
+        private const val VIEW_TYPE_MESSAGE = 0
+        private const val VIEW_TYPE_THREAD_HEADER = 1
+    }
 
     interface OnRowLayoutListener {
         fun onRowHeightChanged()
@@ -96,14 +110,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 when {
                     old is MessageHolderViewState.Received && new is MessageHolderViewState.Received -> {
-                        old.background                         == new.background        &&
-                        old.message                            == new.message           &&
-                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
+                        old.background                         == new.background                   &&
+                        old.message                            == new.message                      &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState  &&
+                        old.message?.thread                    == new.message?.thread
                     }
                     old is MessageHolderViewState.Sent && new is MessageHolderViewState.Sent -> {
-                        old.background                         == new.background        &&
-                        old.message                            == new.message           &&
-                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState
+                        old.background                         == new.background                    &&
+                        old.message                            == new.message                       &&
+                        old.invoiceLinesHolderViewState        == new.invoiceLinesHolderViewState   &&
+                        old.isPinned                           == new.isPinned                      &&
+                        old.message?.thread                    == new.message?.thread
                     }
                     else -> {
                         false
@@ -120,8 +137,10 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
 
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+        onStopSupervisor.scope.launch(viewModel.main) {
             viewModel.messageHolderViewStateFlow.collect { list ->
+
+                // Delay added to ensure navigation animation is done
                 if (messages.isEmpty()) {
                     messages.addAll(list)
                     notifyDataSetChanged()
@@ -140,6 +159,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return when (messages.getOrNull(position)) {
+            is MessageHolderViewState.ThreadHeader -> VIEW_TYPE_THREAD_HEADER
+            else -> VIEW_TYPE_MESSAGE
         }
     }
 
@@ -199,7 +225,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     }
 
     fun forceScrollToBottom() {
-        recyclerView.scrollToPosition(messages.size)
+        recyclerView.layoutManager?.smoothScrollToPosition(recyclerView, null, messages.size);
     }
 
     fun highlightAndScrollToSearchResult(
@@ -288,18 +314,37 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         recyclerView.removeOnLayoutChangeListener(this)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageViewHolder {
-        val binding = LayoutMessageHolderBinding.inflate(
-            LayoutInflater.from(parent.context),
-            parent,
-            false
-        )
-
-        return MessageViewHolder(binding)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            VIEW_TYPE_MESSAGE -> {
+                val binding = LayoutMessageHolderBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                MessageViewHolder(binding)
+            }
+            VIEW_TYPE_THREAD_HEADER -> {
+                val binding = LayoutThreadMessageHeaderBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+                ThreadHeaderViewHolder(binding)
+            }
+            else -> throw IllegalArgumentException("Invalid view type")
+        }
     }
 
-    override fun onBindViewHolder(holder: MessageViewHolder, position: Int) {
-        holder.bind(position)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when {
+            VIEW_TYPE_THREAD_HEADER == getItemViewType(position) -> {
+                (holder as MessageListAdapter<ARGS>.ThreadHeaderViewHolder).bind(position)
+            }
+            else -> {
+                (holder as MessageListAdapter<ARGS>.MessageViewHolder).bind(position)
+            }
+        }
     }
 
     override fun getItemCount(): Int {
@@ -309,11 +354,24 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     private val recyclerViewWidth: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.measuredWidth.toFloat())
     }
+
     private val headerHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(headerBinding.root.measuredHeight.toFloat())
     }
+
     private val screenHeight: Px by lazy(LazyThreadSafetyMode.NONE) {
         Px(recyclerView.rootView.measuredHeight.toFloat())
+    }
+
+    private val pinedMessageHeader: Px
+    get() {
+        return headerPinBinding?.let {
+            if (headerPinBinding.root.isVisible) {
+                Px(headerPinBinding.root.measuredHeight.toFloat())
+            } else {
+                Px(0f)
+            }
+        } ?: Px(0f)
     }
 
     inner class MessageViewHolder(
@@ -349,7 +407,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         bubbleHeight = Px(root.measuredHeight.toFloat()),
                         headerHeight = headerHeight,
                         recyclerViewWidth = recyclerViewWidth,
-                        screenHeight = screenHeight
+                        screenHeight = screenHeight,
+                        pinedHeaderHeight = pinedMessageHeader
                     ).let { vs ->
                         viewModel.updateSelectedMessageViewState(vs)
                     }
@@ -431,6 +490,14 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                     layoutConstraintAttachmentFileMainInfoGroup.setOnLongClickListener(selectedMessageLongClickListener)
+                }
+
+                includeLayoutMessageThread.apply {
+                    root.setOnClickListener {
+                        currentViewState?.message?.let { message ->
+                            message.uuid?.let { nnUUID -> viewModel.navigateToChatThread(nnUUID) }
+                        }
+                    }
                 }
 
                 includePaidMessageReceivedDetailsHolder.apply {
@@ -612,6 +679,84 @@ internal class MessageListAdapter<ARGS : NavArgs>(
             lifecycleOwner.lifecycle.addObserver(this)
         }
 
+    }
+
+    inner class ThreadHeaderViewHolder(
+        private val binding: LayoutThreadMessageHeaderBinding
+    ) : RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
+
+        init {
+            binding.constraintShowMoreContainer.setOnClickListener {
+                viewModel.toggleThreadDescriptionExpanded()
+            }
+        }
+
+        fun bind(position: Int) {
+            val threadHeader = messages.getOrNull(position) as MessageHolderViewState.ThreadHeader
+            binding.apply {
+                root.visible
+
+                textViewContactMessageHeaderName.text = threadHeader.aliasAndColorKey.first?.value
+                textViewThreadDate.text = threadHeader.date
+                textViewThreadMessageContent.text = threadHeader.messageText
+
+                if (threadHeader.messageText.length < 165) {
+                    textViewShowMore.gone
+                } else {
+
+                    if (threadHeader.isExpanded) {
+                        textViewThreadMessageContent.maxLines = Int.MAX_VALUE
+                        textViewShowMore.text =
+                            getString(R.string.episode_description_show_less)
+                    } else {
+                        textViewThreadMessageContent.maxLines = 4
+                        textViewShowMore.text =
+                            getString(R.string.episode_description_show_more)
+                    }
+                }
+
+                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+
+                    binding.layoutContactInitialHolder.apply {
+                        textViewInitialsName.visible
+                        imageViewChatPicture.gone
+
+                        textViewInitialsName.apply {
+                            text = threadHeader.aliasAndColorKey.first?.value?.getInitials()
+                            setBackgroundRandomColor(
+                                R.drawable.chat_initials_circle,
+                                Color.parseColor(
+                                    threadHeader.aliasAndColorKey.second?.let {
+                                        userColorsHelper.getHexCodeForKey(
+                                            it,
+                                            root.context.getRandomHexCode(),
+                                        )
+                                    }
+                                ),
+                            )
+                        }
+
+                        threadHeader.photoUrl?.let { photoUrl ->
+                            textViewInitialsName.gone
+                            imageViewChatPicture.visible
+
+                            imageLoader.load(
+                                layoutContactInitialHolder.imageViewChatPicture,
+                                photoUrl.value,
+                                ImageLoaderOptions.Builder()
+                                    .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                                    .transformation(Transformation.CircleCrop)
+                                    .build()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        init {
+            lifecycleOwner.lifecycle.addObserver(this)
+        }
     }
 
     init {

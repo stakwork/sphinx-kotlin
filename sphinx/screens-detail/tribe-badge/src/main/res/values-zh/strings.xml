@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="badge_already_exist">You already have a badge of this type. You can manage it in the Existing Badges section</string>
+</resources>

@@ -11,6 +11,9 @@ abstract class ProfileNavigator(
 {
     abstract suspend fun toQRCodeDetail(qrText: String, viewTitle: String)
 
+    abstract suspend fun toManageStorageDetail()
+
+
     suspend fun popBackStack() {
         navigationDriver.submitNavigationRequest(
                 PopBackStack()

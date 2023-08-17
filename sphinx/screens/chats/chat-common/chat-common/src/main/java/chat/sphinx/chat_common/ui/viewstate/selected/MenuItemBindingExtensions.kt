@@ -52,6 +52,8 @@ internal inline fun LayoutSelectedMessageBinding.setMenuColor(viewState: Message
                     .setBackgroundResource(R.drawable.selected_sent_message_bottom_arrow)
             }
             is MessageHolderViewState.Separator -> { }
+
+            is MessageHolderViewState.ThreadHeader -> { }
         }
     }
 }
@@ -149,6 +151,20 @@ internal inline fun LayoutSelectedMessageMenuItemBinding.setMenuItem(item: MenuI
                     getString(R.string.material_icon_name_message_action_flag)
                 textViewSelectedMessageMenuItem.text =
                     getString(R.string.selected_message_menu_item_flag)
+            }
+            is MenuItemState.PinMessage -> {
+                imageViewSelectedMessageMenuItemIcon.setImageDrawable(
+                    ContextCompat.getDrawable(root.context, R.drawable.ic_pin)
+                )
+                textViewSelectedMessageMenuItem.text =
+                    getString(R.string.selected_message_menu_item_pin)
+            }
+            is MenuItemState.UnpinMessage -> {
+                imageViewSelectedMessageMenuItemIcon.setImageDrawable(
+                    ContextCompat.getDrawable(root.context, R.drawable.ic_pin)
+                )
+                textViewSelectedMessageMenuItem.text =
+                    getString(R.string.selected_message_menu_item_unpin)
             }
         }
     }

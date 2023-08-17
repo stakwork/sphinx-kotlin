@@ -63,6 +63,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
 
     implementation project(path: ':sphinx:application:network:concepts:clients:concept-network-client-crypto')
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
 
     api project(path: ':sphinx:application:network:concepts:concept-link-preview')
     api project(path: ':sphinx:application:network:concepts:concept-meme-input-stream')
@@ -80,8 +81,10 @@ dependencies {
     kapt kaptDeps.google.hilt
 
     implementation deps.square.okio
+    implementation deps.square.moshi
     implementation deps.giphy.sdk
     implementation deps.jitsi.sdk
+    implementation deps.facebook.shimmer
 }
 
 secrets {

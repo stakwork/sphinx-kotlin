@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:visibility="gone"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:visibility="visible">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_redeem_sats_popup"
+        android:layout_width="@dimen/dashboard_authorize_popup_width"
+        android:layout_height="@dimen/dashboard_authorize_popup_height"
+        android:background="@drawable/background_popup"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_dashboard_popup_close"
+            android:layout_width="@dimen/default_header_navigation_xy"
+            android:layout_height="@dimen/default_header_navigation_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_close"
+            android:textColor="@color/primaryRed"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_dashboard_popup_verified_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_verified_user"
+            android:textColor="@color/primaryBlue"
+            android:textSize="@dimen/dashboard_authorize_popup_verified_icon_text_size"
+            android:layout_marginTop="@dimen/dashboard_authorize_popup_verified_icon_margin_top"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_dashboard_popup_redeem_sats_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:text="@string/dashboard_redeem_sats_popup_title"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/dashboard_authorize_popup_authorize_title_text_size"
+                android:layout_marginHorizontal="@dimen/default_layout_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_dashboard_popup_redeem_sats_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_bold"
+                android:gravity="center"
+                android:text="..."
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/dashboard_authorize_popup_authorize_name_text_size"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                android:layout_marginHorizontal="@dimen/default_layout_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/text_view_dashboard_popup_redeem_sats_title" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dashboard_authorize_popup_authorize_button_height"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:layout_marginBottom="@dimen/default_layout_margin"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_confirm"
+                style="@style/RoundedBlueButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="@string/dashboard_redeem_sats_button"
+                android:textSize="@dimen/dashboard_authorize_popup_authorize_button_text_size"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_background_white_rad_48"
+                android:backgroundTint="@color/primaryBlue" />
+
+            <ProgressBar
+                android:layout_width="@dimen/dashboard_authorize_popup_progress_bar_zy"
+                android:layout_height="@dimen/dashboard_authorize_popup_progress_bar_zy"
+                android:layout_marginLeft="@dimen/default_layout_margin"
+                android:id="@+id/progress_bar_redeem_sats"
+                style="?android:attr/progressBarStyle"
+                android:indeterminateTint="@android:color/white"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

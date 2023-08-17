@@ -4,10 +4,16 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
+import cash.z.ecc.android.bip39.Mnemonics
+import cash.z.ecc.android.bip39.toEntropy
+import cash.z.ecc.android.bip39.toSeed
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
+import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
@@ -19,42 +25,62 @@ import chat.sphinx.concept_network_query_people.model.isSaveMethod
 import chat.sphinx.concept_network_query_verify_external.NetworkQueryAuthorizeExternal
 import chat.sphinx.concept_network_query_version.NetworkQueryVersion
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndroid
+import chat.sphinx.concept_repository_feed.FeedRepository
+import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
 import chat.sphinx.dashboard.ui.viewstates.*
 import chat.sphinx.kotlin_response.*
+import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_scanner.ScannerMenuHandler
+import chat.sphinx.menu_bottom_scanner.ScannerMenuViewModel
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_chat.Chat
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.chat.ChatUUID
-import chat.sphinx.wrapper_common.dashboard.RestoreProgress
+import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.dashboard.RestoreProgressViewState
+import chat.sphinx.wrapper_common.feed.*
 import chat.sphinx.wrapper_common.lightning.*
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
 import chat.sphinx.wrapper_common.tribe.isValidTribeJoinLink
 import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
+import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
+import chat.sphinx.wrapper_lightning.WalletMnemonic
+import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.RelayUrl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
+import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
+import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import uniffi.sphinxrs.deriveSharedSecret
+import uniffi.sphinxrs.encrypt
+import uniffi.sphinxrs.pubkeyFromSecretKey
+import java.security.SecureRandom
 import javax.inject.Inject
 
 @HiltViewModel
@@ -75,24 +101,32 @@ internal class DashboardViewModel @Inject constructor(
     private val repositoryDashboard: RepositoryDashboardAndroid<Any>,
     private val contactRepository: ContactRepository,
     private val chatRepository: ChatRepository,
-
+    private val feedRepository: FeedRepository,
+    private val actionsRepository: ActionsRepository,
     private val networkQueryLightning: NetworkQueryLightning,
+
     private val networkQueryVersion: NetworkQueryVersion,
     private val networkQueryAuthorizeExternal: NetworkQueryAuthorizeExternal,
     private val networkQueryPeople: NetworkQueryPeople,
-
     private val pushNotificationRegistrar: PushNotificationRegistrar,
+    private val networkQueryCrypter: NetworkQueryCrypter,
+
+    private val walletDataHandler: WalletDataHandler,
 
     private val relayDataHandler: RelayDataHandler,
+    private val mediaPlayerServiceController: MediaPlayerServiceController,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+
+    private val LOG: SphinxLogger,
     private val socketIOManager: SocketIOManager,
 ) : MotionLayoutViewModel<
         Any,
         Context,
         ChatListSideEffect,
         DashboardMotionViewState
-        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible) {
+        >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible),
+    ScannerMenuViewModel{
 
     private val args: DashboardFragmentArgs by handler.navArgs()
 
@@ -104,6 +138,18 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow("-")
     }
 
+    private val scannedNodeAddress: MutableStateFlow<Pair<LightningNodePubKey, LightningRouteHint?>?> by lazy(LazyThreadSafetyMode.NONE) {
+        MutableStateFlow(null)
+    }
+
+    companion object {
+        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
+        const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
+
+        const val BITCOIN_NETWORK_REG_TEST = "regtest"
+        const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
+    }
+
     init {
         if (args.updateBackgroundLoginTime) {
             viewModelScope.launch(default) {
@@ -111,10 +157,16 @@ internal class DashboardViewModel @Inject constructor(
             }
         }
 
+        syncFeedRecommendationsState()
+
         getRelayKeys()
         checkAppVersion()
         handleDeepLink(args.argDeepLink)
-        repositoryDashboard.syncActions()
+
+        actionsRepository.syncActions()
+        feedRepository.restoreContentFeedStatuses()
+
+        networkRefresh(true)
     }
     
     private fun getRelayKeys() {
@@ -138,11 +190,27 @@ internal class DashboardViewModel @Inject constructor(
                 handleStakworkAuthorizeLink(stakworkAuthorizeLink)
             } ?: deepLink?.toCreateInvoiceLink()?.let { createInvoiceLink ->
                 handleCreateInvoiceLink(createInvoiceLink)
+            } ?: deepLink?.toRedeemSatsLink()?.let { redeemSatsLink ->
+                handleRedeemSatsLink(redeemSatsLink)
+            } ?: deepLink?.toFeedItemLink()?.let { feedItemLink ->
+                handleFeedItemLink(feedItemLink)
+            } ?: deepLink?.toLightningNodeLink()?.let { lightningNodeLink ->
+                handleLightningNodeLink(lightningNodeLink)
             }
         }
     }
 
-    fun toScanner() {
+    private fun syncFeedRecommendationsState() {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        val feedRecommendationsToggle = sharedPreferences.getBoolean(
+            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, false
+        )
+        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
+    }
+
+    fun toScanner(isPayment: Boolean) {
         viewModelScope.launch(mainImmediate) {
             val response = scannerCoordinator.submitRequest(
                 ScannerRequest(
@@ -155,6 +223,7 @@ internal class DashboardViewModel @Inject constructor(
                                 data.isValidLightningPaymentRequest ||
                                 data.isValidLightningNodePubKey ||
                                 data.isValidVirtualNodeAddress ||
+                                data.isValidLightningNodeLink ||
                                 data.isValidExternalRequestLink ->
                                 {
                                     Response.Success(Any())
@@ -166,7 +235,7 @@ internal class DashboardViewModel @Inject constructor(
                         }
                     },
                     showBottomView = true,
-                    scannerModeLabel = app.getString(R.string.paste_invoice_of_tribe_link)
+                    scannerModeLabel = if (isPayment) app.getString(R.string.paste_invoice_or_public_key) else " "
                 )
             )
 
@@ -228,8 +297,39 @@ internal class DashboardViewModel @Inject constructor(
                             )
                         }
                     } catch (e: Exception) {}
+                } ?: code.toLightningNodeLink()?.let { lightningNodeLink ->
+                    handleLightningNodeLink(lightningNodeLink)
                 }
             }
+        }
+    }
+
+    override val scannerMenuHandler: ScannerMenuHandler by lazy {
+        ScannerMenuHandler()
+    }
+
+    override fun createContact() {
+        viewModelScope.launch(default) {
+            scannedNodeAddress.value?.let { address ->
+                dashboardNavigator.toAddContactDetail(address.first, address.second)
+            }
+            scannerMenuDismiss()
+        }
+    }
+
+    override fun sendDirectPayment() {
+        viewModelScope.launch(default) {
+            scannedNodeAddress.value?.let { address ->
+                navBarNavigator.toPaymentSendDetail(address.first, address.second, null)
+            }
+            scannerMenuDismiss()
+        }
+    }
+
+    override fun scannerMenuDismiss() {
+        viewModelScope.launch(default) {
+            scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            scannedNodeAddress.value = null
         }
     }
 
@@ -250,11 +350,11 @@ internal class DashboardViewModel @Inject constructor(
     }
 
     private suspend fun handleContactLink(pubKey: LightningNodePubKey, routeHint: LightningRouteHint?) {
-        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { contact ->
+        scannedNodeAddress.value = Pair(pubKey, routeHint)
 
-            goToContactChat(contact)
-
-        } ?: dashboardNavigator.toAddContactDetail(pubKey, routeHint)
+        contactRepository.getContactByPubKey(pubKey).firstOrNull()?.let { _ ->
+            navBarNavigator.toPaymentSendDetail(pubKey, routeHint, null)
+        } ?: scannerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
     }
 
     private suspend fun goToContactChat(contact: Contact) {
@@ -274,6 +374,12 @@ internal class DashboardViewModel @Inject constructor(
     private fun handleStakworkAuthorizeLink(link: StakworkAuthorizeLink) {
         deepLinkPopupViewStateContainer.updateViewState(
             DeepLinkPopupViewState.StakworkAuthorizePopup(link)
+        )
+    }
+
+    private fun handleRedeemSatsLink(link: RedeemSatsLink) {
+        deepLinkPopupViewStateContainer.updateViewState(
+            DeepLinkPopupViewState.RedeemSatsPopup(link)
         )
     }
 
@@ -372,6 +478,244 @@ internal class DashboardViewModel @Inject constructor(
                 goToContactChat(contact)
 
             } ?: loadPeopleConnectPopup(link)
+        }
+    }
+
+    private suspend fun handleFeedItemLink(link: FeedItemLink) {
+        feedRepository.getFeedForLink(link).firstOrNull()?.let { feed ->
+            goToFeedDetailView(feed)
+        }
+    }
+
+    private var seedDto = SendSeedDto()
+
+    private fun resetSeedDto() {
+        seedDto = SendSeedDto()
+    }
+
+    private var setupSigningDeviceJob: Job? = null
+    private fun handleLightningNodeLink(link: LightningNodeLink) {
+        if (setupSigningDeviceJob?.isActive == true) return
+
+        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ChatListSideEffect.CheckNetwork {
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(ChatListSideEffect.SigningDeviceInfo(
+                        app.getString(R.string.network_name_title),
+                        app.getString(R.string.network_name_message)
+                    ) { networkName ->
+                        viewModelScope.launch(mainImmediate) {
+                            if (networkName == null) {
+                                submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
+                                return@launch
+                            }
+
+                            seedDto.ssid = networkName
+
+                            submitSideEffect(ChatListSideEffect.SigningDeviceInfo(
+                                app.getString(R.string.network_password_title),
+                                app.getString(
+                                    R.string.network_password_message,
+                                    networkName ?: "-"
+                                ),
+                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                            ) { networkPass ->
+                                viewModelScope.launch(mainImmediate) {
+                                    if (networkPass == null) {
+                                        submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
+                                        return@launch
+                                    }
+
+                                    seedDto.pass = networkPass
+                                    seedDto.lightningNodeUrl = link.lightningMqtt
+
+                                    if (link.lightningNetwork.isBitcoinNetwork()) {
+                                        seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                        linkSigningDevice()
+                                    }
+                                    else {
+                                        submitSideEffect(ChatListSideEffect.CheckBitcoinNetwork(
+                                            regTestCallback = {
+                                                seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                            }, mainNetCallback = {
+                                                seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                            }, callback = {
+                                                viewModelScope.launch(mainImmediate) {
+                                                    linkSigningDevice()
+                                                }
+                                            }
+                                        ))
+                                    }
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    }
+
+    private suspend fun linkSigningDevice() {
+        val secKey = ByteArray(32)
+        SecureRandom().nextBytes(secKey)
+
+        val sk1 = secKey.toHex()
+        val pk1 = pubkeyFromSecretKey(sk1)
+
+        var pk2 : String? = null
+
+        if (pk1 == null) {
+            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error generating secret key"))
+            resetSeedDto()
+            return
+        }
+
+        seedDto.pubkey = pk1
+
+        if (
+            seedDto.lightningNodeUrl == null ||
+            seedDto.lightningNodeUrl?.isEmpty() == true
+        ) {
+            resetSeedDto()
+            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("lightning node URL can't be empty"))
+            return
+        }
+
+        networkQueryCrypter.getCrypterPubKey().collect { loadResponse ->
+            when (loadResponse) {
+                is LoadResponse.Loading -> {}
+                is Response.Error -> {
+                    resetSeedDto()
+                    submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error getting public key from hardware"))
+                }
+                is Response.Success -> {
+                    pk2 = loadResponse.value.pubkey
+                }
+            }
+        }
+
+        pk2?.let { nnPk2 ->
+            val sec1 = deriveSharedSecret(nnPk2, sk1)
+            val seedAndMnemonic = generateAndPersistMnemonic()
+
+            seedAndMnemonic.second?.let { mnemonic ->
+                submitSideEffect(ChatListSideEffect.ShowMnemonicToUser(
+                    mnemonic.value
+                ) {
+                    seedAndMnemonic.first?.let { seed ->
+                        viewModelScope.launch(mainImmediate) {
+                            encryptAndSendSeed(seed, sec1)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    private suspend fun generateAndPersistMnemonic() : Pair<String?, WalletMnemonic?> {
+        var walletMnemonic: WalletMnemonic? = null
+        var seed: String? = null
+
+        viewModelScope.launch(mainImmediate) {
+            walletMnemonic = walletDataHandler.retrieveWalletMnemonic() ?: run {
+                val entropy = (Mnemonics.WordCount.COUNT_12).toEntropy()
+
+                Mnemonics.MnemonicCode(entropy).use { mnemonicCode ->
+                    val wordsArray:MutableList<String> = mutableListOf()
+                    mnemonicCode.words.forEach { word ->
+                        wordsArray.add(word.joinToString(""))
+                    }
+                    val words = wordsArray.joinToString(" ")
+
+                    words.toWalletMnemonic()?.let { walletMnemonic ->
+                        if (walletDataHandler.persistWalletMnemonic(walletMnemonic)) {
+                            LOG.d("MNEMONIC WORDS SAVED" , words)
+                            LOG.d("MNEMONIC WORDS SAVED" , words)
+                        }
+                        walletMnemonic
+                    }
+                }
+            }
+
+            walletMnemonic?.value?.toCharArray()?.let { words ->
+                val mnemonic = Mnemonics.MnemonicCode(words)
+
+                val seedData = mnemonic.toSeed().take(32).toByteArray()
+                seed = seedData.toHex()
+            }
+        }.join()
+
+        return Pair(seed, walletMnemonic)
+    }
+
+    private suspend fun encryptAndSendSeed(
+        seed: String,
+        sec1: String
+    ) {
+        val nonce = ByteArray(12)
+        SecureRandom().nextBytes(nonce)
+
+        encrypt(seed, sec1, nonce.toHex()).let { cipher ->
+            if (cipher.isNotEmpty()) {
+                seedDto.seed = cipher
+
+                submitSideEffect(ChatListSideEffect.SendingSeedToHardware)
+
+                networkQueryCrypter.sendEncryptedSeed(seedDto).collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            resetSeedDto()
+                            submitSideEffect(ChatListSideEffect.FailedToSetupSigningDevice("error sending seed to hardware"))
+                        }
+
+                        is Response.Success -> {
+                            submitSideEffect(ChatListSideEffect.SigningDeviceSuccessfullySet)
+                            setSigningDeviceSetupDone()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun setSigningDeviceSetupDone() {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            sharedPreferences.edit().putBoolean(SIGNING_DEVICE_SETUP_KEY, true)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                }
+        }
+    }
+
+
+    private suspend fun goToFeedDetailView(feed: Feed) {
+        when {
+            feed.isPodcast -> {
+                dashboardNavigator.toPodcastPlayerScreen(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isVideo -> {
+                dashboardNavigator.toVideoWatchScreen(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.id,
+                    feed.feedUrl
+                )
+            }
+            feed.isNewsletter -> {
+                dashboardNavigator.toNewsletterDetail(
+                    feed.chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    feed.feedUrl
+                )
+            }
         }
     }
 
@@ -554,6 +898,40 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
+    fun redeemSats() {
+        val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
+
+        viewModelScope.launch(mainImmediate) {
+
+            if (viewState is DeepLinkPopupViewState.RedeemSatsPopup) {
+                deepLinkPopupViewStateContainer.updateViewState(
+                    DeepLinkPopupViewState.RedeemSatsPopupProcessing
+                )
+
+                val response = repositoryDashboard.redeemSats(
+                    viewState.link.host,
+                    viewState.link.token,
+
+                )
+
+                when (response) {
+                    is Response.Error -> {
+                        submitSideEffect(
+                            ChatListSideEffect.Notify(response.cause.message)
+                        )
+                    }
+                    is Response.Success -> {
+                        networkRefresh(false)
+                    }
+                }
+            }
+
+            deepLinkPopupViewStateContainer.updateViewState(
+                DeepLinkPopupViewState.PopupDismissed
+            )
+        }
+    }
+
     suspend fun updatePeopleProfile() {
         val viewState = deepLinkPopupViewStateContainer.viewStateFlow.value
 
@@ -727,7 +1105,8 @@ internal class DashboardViewModel @Inject constructor(
             chatListFooterButtonsViewStateContainer.updateViewState(
                 ChatListFooterButtonsViewState.ButtonsVisibility(
                     addFriendVisible = true,
-                    createTribeVisible = !owner.isOnVirtualNode()
+                    createTribeVisible = !owner.isOnVirtualNode(),
+                    discoverTribesVisible = false
                 )
             )
         }
@@ -779,7 +1158,7 @@ internal class DashboardViewModel @Inject constructor(
                 else -> DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
             }
         }
-        return DashboardFragmentsAdapter.FRIENDS_TAB_POSITION
+        return DashboardFragmentsAdapter.FIRST_INIT
     }
 
     private suspend fun getOwner(): Contact {
@@ -820,7 +1199,11 @@ internal class DashboardViewModel @Inject constructor(
                     }
                     is Response.Error -> {
                         submitSideEffect(
-                            ChatListSideEffect.Notify(app.getString(R.string.failed_to_pay_request), true)
+                            ChatListSideEffect.Notify(
+                                String.format(
+                                    app.getString(R.string.error_payment_message),
+                                    loadResponse.exception?.message ?: loadResponse.cause.message
+                                ), true)
                         )
                     }
                     is Response.Success -> {
@@ -833,11 +1216,11 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    private val _networkStateFlow: MutableStateFlow<LoadResponse<Boolean, ResponseError>> by lazy {
-        MutableStateFlow(LoadResponse.Loading)
+    private val _networkStateFlow: MutableStateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>> by lazy {
+        MutableStateFlow(Pair(LoadResponse.Loading, true))
     }
 
-    private val _restoreStateFlow: MutableStateFlow<RestoreProgress?> by lazy {
+    private val _restoreProgressStateFlow: MutableStateFlow<RestoreProgressViewState?> by lazy {
         MutableStateFlow(null)
     }
 
@@ -851,15 +1234,18 @@ internal class DashboardViewModel @Inject constructor(
         }
     }
 
-    val networkStateFlow: StateFlow<LoadResponse<Boolean, ResponseError>>
+    val networkStateFlow: StateFlow<Pair<LoadResponse<Boolean, ResponseError>, Boolean>>
         get() = _networkStateFlow.asStateFlow()
 
-    val restoreStateFlow: StateFlow<RestoreProgress?>
-        get() = _restoreStateFlow.asStateFlow()
+    val restoreProgressStateFlow: StateFlow<RestoreProgressViewState?>
+        get() = _restoreProgressStateFlow.asStateFlow()
 
     private var jobNetworkRefresh: Job? = null
     private var jobPushNotificationRegistration: Job? = null
-    fun networkRefresh() {
+
+    fun networkRefresh(
+        screenStart: Boolean
+    ) {
         if (jobNetworkRefresh?.isActive == true) {
             return
         }
@@ -870,13 +1256,13 @@ internal class DashboardViewModel @Inject constructor(
                 when (response) {
                     is LoadResponse.Loading,
                     is Response.Error -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                     is Response.Success -> {}
                 }
             }
 
-            if (_networkStateFlow.value is Response.Error) {
+            if (_networkStateFlow.value.first is Response.Error) {
                 jobNetworkRefresh?.cancel()
             }
 
@@ -885,19 +1271,52 @@ internal class DashboardViewModel @Inject constructor(
                 when (response) {
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                     is Response.Success -> {
                         val restoreProgress = response.value
 
                         if (restoreProgress.restoring) {
-                            _restoreStateFlow.value = restoreProgress
+
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_contacts,
+                                false
+                            )
                         }
                     }
                 }
             }
 
-            if (_networkStateFlow.value is Response.Error) {
+            repositoryDashboard.networkRefreshFeedContent.collect { response ->
+                @Exhaustive
+                when (response) {
+                    is Response.Success -> {
+                        val restoreProgress = response.value
+
+                        if (restoreProgress.restoring && restoreProgress.progress < 100) {
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_feeds,
+                                false
+                            )
+                        } else {
+                            _restoreProgressStateFlow.value = null
+
+                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
+                        }
+                    }
+                    is Response.Error -> {
+                        _networkStateFlow.value = Pair(response, screenStart)
+                    }
+                    is LoadResponse.Loading -> {
+                        _networkStateFlow.value = Pair(response, screenStart)
+                    }
+                }
+            }
+
+
+            if (_networkStateFlow.value.first is Response.Error) {
                 jobNetworkRefresh?.cancel()
             }
 
@@ -925,18 +1344,22 @@ internal class DashboardViewModel @Inject constructor(
                         val restoreProgress = response.value
 
                         if (restoreProgress.restoring && restoreProgress.progress < 100) {
-                            _restoreStateFlow.value = restoreProgress
+                            _restoreProgressStateFlow.value = RestoreProgressViewState(
+                                response.value.progress,
+                                R.string.dashboard_restore_progress_messages,
+                                true
+                            )
                         } else {
-                            _restoreStateFlow.value = null
+                            _restoreProgressStateFlow.value = null
 
-                            _networkStateFlow.value = Response.Success(true)
+                            _networkStateFlow.value = Pair(Response.Success(true), screenStart)
                         }
                     }
                     is Response.Error -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                     is LoadResponse.Loading -> {
-                        _networkStateFlow.value = response
+                        _networkStateFlow.value = Pair(response, screenStart)
                     }
                 }
             }
@@ -948,8 +1371,8 @@ internal class DashboardViewModel @Inject constructor(
 
         viewModelScope.launch(mainImmediate) {
 
-            _networkStateFlow.value = Response.Success(true)
-            _restoreStateFlow.value = null
+            _networkStateFlow.value = Pair(Response.Success(true), true)
+            _restoreProgressStateFlow.value = null
 
             repositoryDashboard.didCancelRestore()
         }
@@ -971,7 +1394,7 @@ internal class DashboardViewModel @Inject constructor(
             submitSideEffect(
                 ChatListSideEffect.Notify(
                     app.getString(
-                        if (_networkStateFlow.value is Response.Error) {
+                        if (_networkStateFlow.value.first is Response.Error) {
                             R.string.dashboard_network_disconnected_node_toast
                         } else {
                             R.string.dashboard_network_connected_node_toast
@@ -980,6 +1403,10 @@ internal class DashboardViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun sendAppLog(appLog: String) {
+        actionsRepository.setAppLog(appLog)
     }
 }
 

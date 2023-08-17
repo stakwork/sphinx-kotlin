@@ -37,6 +37,8 @@ dependencies {
     implementation project(path: ':sphinx:activity:concepts:concept-view-model-coordinator')
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-chat')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-authorize-external')
+    implementation project(path: ':sphinx:application:network:features:queries:feature-network-query-message')
     implementation project(path: ':sphinx:application:common:resources')
 
     api project(path: ':sphinx:screens:chats:chat-common:chat-common')
@@ -44,6 +46,7 @@ dependencies {
     // TODO: Remove dependency on other screens
     implementation project(path: ':sphinx:screens-detail:chat-detail:tribe-detail')
     implementation project(path: ':sphinx:screens-detail:podcast-player:podcast-player')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-meme-server')
 
     api project(path: ':sphinx:service:concepts:concept-service-media-player')
 
@@ -52,6 +55,9 @@ dependencies {
 
     implementation deps.square.moshi
     implementation deps.lottie.sdk
+    implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
 
     kapt kaptDeps.google.hilt
+    kapt kaptDeps.square.moshiCodegen
+
 }

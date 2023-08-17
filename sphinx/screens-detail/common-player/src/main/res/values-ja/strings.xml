@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_loading_recommendations">Error loading recommendations. Please try again later.</string>
+    <string name="error_playing_clip">This clip can\'t be played.</string>
+</resources>

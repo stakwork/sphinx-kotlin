@@ -5,7 +5,9 @@
     android:id="@+id/layout_constraint_chat_holder"
     android:layout_width="match_parent"
     android:layout_height="@dimen/recycler_view_holder_height"
-    android:background="@color/headerBG"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/chat_holder_ripple"
     android:elevation="4dp"
     tools:ignore="RtlSymmetry">
 
@@ -284,22 +286,24 @@
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_dashboard_chat_holder_badge_count"
                 android:layout_width="wrap_content"
-                android:minWidth="@dimen/dashboard_badge_count_xy"
                 android:layout_height="@dimen/dashboard_badge_count_xy"
-                android:paddingHorizontal="@dimen/dashboard_badge_count_padding_horizontal"
                 android:layout_marginStart="@dimen/dashboard_badge_count_padding_horizontal"
-                android:fontFamily="@font/roboto_regular"
-                android:textSize="11sp"
-                android:textColor="@android:color/white"
-                tools:text="9999"
-                android:gravity="center"
                 android:background="@drawable/chat_initials_circle"
                 android:backgroundTint="@color/primaryBlue"
-                app:layout_constraintTop_toTopOf="parent"
+                android:fontFamily="@font/roboto_regular"
+                android:gravity="center"
+                android:minWidth="@dimen/dashboard_badge_count_xy"
+                android:paddingHorizontal="@dimen/dashboard_badge_count_padding_horizontal"
+                android:textColor="@android:color/white"
+                android:textSize="11sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/text_view_dashboard_chat_holder_mentions_count"
-                tools:visibility="visible"/>
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="9999"
+                tools:visibility="visible" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

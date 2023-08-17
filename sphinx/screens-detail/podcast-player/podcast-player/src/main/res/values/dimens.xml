@@ -15,6 +15,11 @@
     <dimen name="episode_list_item_download_button_xy">25dp</dimen>
     <dimen name="episode_list_item_delete_download_icon_xy">20dp</dimen>
 
+    <dimen name="seek_bar_sats_container_margin_bottom">16dp</dimen>
+    <dimen name="seek_bar_sats_per_minute_margin_vertical">6dp</dimen>
+    <dimen name="seek_bar_sats_per_minute_margin_horizontal">12dp</dimen>
+    <dimen name="seek_bar_sats_per_minute_padding">8dp</dimen>
+
     <dimen name="header_buttons_margin">22dp</dimen>
 
 </resources>

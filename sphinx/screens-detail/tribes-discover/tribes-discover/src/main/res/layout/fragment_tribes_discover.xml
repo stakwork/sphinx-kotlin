@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background_detail_screen"
+    tools:context=".ui.TribesDiscoverFragment">
+
+    <include
+        android:id="@+id/include_discover_tribes_header"
+        layout="@layout/layout_detail_screen_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_dashboard_chat_holder_avatar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/default_half_layout_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_discover_tribes_header">
+
+        <include
+            android:id="@+id/layout_search_bar"
+            layout="@layout/layout_discover_tribes_search_bar"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/discover_tribes_search_field_height"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/layout_button_tag"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <include
+            android:id="@+id/layout_button_tag"
+            layout="@layout/layout_button_tags_popup"
+            android:layout_width="@dimen/discover_tribes_tags_button_width"
+            android:layout_height="@dimen/discover_tribes_search_field_height"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            app:layout_constraintStart_toEndOf="@+id/layout_search_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/background_detail_screen"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_dashboard_chat_holder_avatar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/layout_discover_tribe_list_item_holder" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_no_tribes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:text="@string/discover_tribes_no_results"
+        android:textColor="@color/secondaryText"
+        android:textSize="@dimen/discover_tribes_no_tribes_text_size"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_discover_tribes"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="@dimen/discover_tribes_progress_bar_xy"
+        android:layout_height="@dimen/discover_tribes_progress_bar_xy"
+        android:gravity="center"
+        android:visibility="gone"
+        android:indeterminateTint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <include
+        android:id="@+id/include_layout_discover_tribes_tags"
+        layout="@layout/layout_discover_tribes_tags"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

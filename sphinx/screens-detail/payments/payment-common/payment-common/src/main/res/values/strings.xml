@@ -3,10 +3,12 @@
     <string name="payment_common_header_name">SEND PAYMENT</string>
 
     <string name="destination_key">Public Key</string>
+    <string name="balance_too_low">Balance too low</string>
     <string name="add_message_hint">Add Message</string>
     <string name="confirm_button">CONFIRM</string>
     <string name="continue_button">CONTINUE</string>
     <string name="error_processing_payment">There was an error processing payment, please try again later.</string>
+
     <string name="payment_sent">Payment of %1$d sat sent to %2$s</string>
 
     <string name="alert_confirm_payment_send_title">Send Payment</string>

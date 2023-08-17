@@ -2,156 +2,189 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/layout_constraint_chat_header"
+    android:id="@+id/layout_constraint_chat_header_and_pin"
     android:layout_width="match_parent"
     android:layout_height="@dimen/default_header_height"
     android:paddingEnd="@dimen/default_half_layout_margin"
     android:background="@color/headerBG"
     android:elevation="@dimen/default_elevation">
 
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_chat_header_nav_back"
-        android:layout_width="@dimen/default_chat_initial_image_xy"
-        android:layout_height="@dimen/default_chat_initial_image_xy"
-        android:fontFamily="@font/material_icons_regular"
-        android:textColor="@color/washedOutReceivedText"
-        android:textSize="@dimen/default_text_size_back_arrow"
-        android:text="@string/material_icon_name_nav_back"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
-
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/layout_constraint_chat_header_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:paddingVertical="8dp"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_nav_back"
-        app:layout_constraintEnd_toStartOf="@+id/image_view_chat_header_muted"
-        app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_nav_back"
-        app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_nav_back">
+        android:id="@+id/layout_constraint_chat_header"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Chat/ Profile Picture-->
-
-        <include
-            android:id="@+id/layout_chat_initial_holder"
-            layout="@layout/layout_chat_image_initial_holder"
-            android:layout_width="@dimen/chat_footer_initial_holder_xy"
-            android:layout_height="@dimen/chat_footer_initial_holder_xy"
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_chat_header_nav_back"
+            android:layout_width="@dimen/default_chat_initial_image_xy"
+            android:layout_height="@dimen/default_chat_initial_image_xy"
+            android:fontFamily="@font/material_icons_regular"
+            android:textColor="@color/washedOutReceivedText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            android:text="@string/material_icon_name_nav_back"
+            android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/layout_constraint_chat_header_main"
+            android:id="@+id/layout_constraint_chat_header_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/layout_chat_initial_holder">
+            android:paddingVertical="8dp"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_nav_back"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_threads_view"
+            app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_nav_back"
+            app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_nav_back">
+
+            <!-- Chat/ Profile Picture-->
+
+            <include
+                android:id="@+id/layout_chat_initial_holder"
+                layout="@layout/layout_chat_image_initial_holder"
+                android:layout_width="@dimen/chat_footer_initial_holder_xy"
+                android:layout_height="@dimen/chat_footer_initial_holder_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_chat_header_main"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/layout_chat_initial_holder">
 
 
-        <!-- Chat/Contact Name -->
+                <!-- Chat/Contact Name -->
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_chat_header_name"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
-            android:fontFamily="@font/roboto_regular"
-            android:paddingEnd="4dp"
-            android:singleLine="true"
-            android:textColor="@color/textMessages"
-            android:textSize="@dimen/chat_header_headline_text_size"
-            app:layout_constraintBottom_toTopOf="@+id/text_view_chat_header_contributions"
-            app:layout_constraintStart_toStartOf="parent"
-            tools:text="Some Chat Name" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_chat_header_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+                    android:fontFamily="@font/roboto_regular"
+                    android:paddingEnd="4dp"
+                    android:singleLine="true"
+                    android:textColor="@color/textMessages"
+                    android:textSize="@dimen/chat_header_headline_text_size"
+                    app:layout_constraintBottom_toTopOf="@+id/text_view_chat_header_contributions"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:text="Some Chat Name" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_chat_header_lock"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:fontFamily="@font/material_icons_regular"
-            android:textSize="15sp"
-            android:textColor="@color/washedOutReceivedText"
-            android:text="@string/material_icon_name_lock"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_name"
-            app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_name"
-            app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_name" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_chat_header_lock"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:textSize="15sp"
+                    android:textColor="@color/washedOutReceivedText"
+                    android:text="@string/material_icon_name_lock"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_name"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_name"
+                    app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_name" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_chat_header_connectivity"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:fontFamily="@font/material_icons_regular"
-            android:textSize="15sp"
-            android:textColor="@color/washedOutReceivedText"
-            android:text="@string/material_icon_name_bolt"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_name"
-            app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_lock"
-            app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_name" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_chat_header_connectivity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:textSize="15sp"
+                    android:textColor="@color/washedOutReceivedText"
+                    android:text="@string/material_icon_name_bolt"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_name"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_lock"
+                    app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_name" />
 
-        <!-- Pod Cast Contributions -->
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_chat_header_contributions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/secondaryText"
-            android:visibility="gone"
-            android:fontFamily="@font/roboto_regular"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="@+id/text_view_chat_header_name"
-            app:layout_constraintTop_toBottomOf="@+id/text_view_chat_header_name"
-            tools:text="Contributed: 1285 sats"
-            tools:visibility="visible" />
+                <!-- Pod Cast Contributions -->
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_chat_header_contributions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/secondaryText"
+                    android:visibility="gone"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="@+id/text_view_chat_header_name"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_chat_header_name"
+                    tools:text="Contributed: 1285 sats"
+                    tools:visibility="visible" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_chat_header_contributions_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/secondaryText"
-            android:visibility="gone"
-            android:fontFamily="@font/material_icons_regular"
-            android:textSize="14sp"
-            android:layout_marginStart="3dp"
-            android:text="@string/material_icon_name_verified_user"
-            app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_contributions"
-            app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_contributions"
-            app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_contributions"
-            tools:visibility="visible" />
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_chat_header_contributions_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/secondaryText"
+                    android:visibility="gone"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:textSize="14sp"
+                    android:layout_marginStart="3dp"
+                    android:text="@string/material_icon_name_verified_user"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_chat_header_contributions"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_chat_header_contributions"
+                    app:layout_constraintTop_toTopOf="@+id/text_view_chat_header_contributions"
+                    tools:visibility="visible" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_threads_view"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_threads"
+            android:tint="@color/placeholderText"
+            android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
+            android:clickable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_chat_web_view"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_chat_web_view"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_icon_web_view"
+            android:tint="@color/placeholderText"
+            android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
+            android:clickable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/image_view_chat_header_muted"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_chat_header_muted"
+            android:layout_width="30dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_baseline_notifications_24"
+            android:tint="@color/placeholderText"
+            android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_chat_header_more"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_chat_header_more"
+            android:layout_width="38dp"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/material_icons_regular"
+            android:textSize="@dimen/chat_header_phone_text_size"
+            android:text="@string/material_icon_name_more_horizontal"
+            android:textColor="@color/washedOutReceivedText"
+            android:gravity="center"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/image_view_chat_header_muted"
-        android:layout_width="30dp"
-        android:layout_height="match_parent"
-        android:src="@drawable/ic_baseline_notifications_24"
-        android:tint="@color/placeholderText"
-        android:paddingHorizontal="@dimen/chat_header_mute_padding_horizontal"
-        android:clickable="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/text_view_chat_header_more"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_chat_header_more"
-        android:layout_width="38dp"
-        android:layout_height="match_parent"
-        android:fontFamily="@font/material_icons_regular"
-        android:textSize="@dimen/chat_header_phone_text_size"
-        android:text="@string/material_icon_name_more_horizontal"
-        android:textColor="@color/washedOutReceivedText"
-        android:gravity="center"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,12 +9,15 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
+import chat.sphinx.wrapper_common.message.CallLinkMessage
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.MessageMedia
 
-class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
+class MessageDboWrapper(
+    val messageDbo: MessageDbo
+): Message() {
     override val id: MessageId
         get() = messageDbo.id
     override val uuid: MessageUUID?
@@ -59,6 +62,8 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
         get() = messageDbo.recipient_pic
     override val person: MessagePerson?
         get() = messageDbo.person
+    override val threadUUID: ThreadUUID?
+        get() = messageDbo.thread_uuid
 
 
     @Volatile
@@ -93,6 +98,12 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
 
     @Volatile
     @Suppress("PropertyName")
+    var _callLinkMessage: CallLinkMessage? = null
+    override val callLinkMessage: CallLinkMessage?
+        get() = _callLinkMessage
+
+    @Volatile
+    @Suppress("PropertyName")
     var _podcastClip: PodcastClip? = null
     override val podcastClip: PodcastClip?
         get() = _podcastClip
@@ -120,4 +131,16 @@ class MessageDboWrapper(val messageDbo: MessageDbo): Message() {
     var _replyMessage: Message? = null
     override val replyMessage: Message?
         get() = _replyMessage
+
+    @Volatile
+    @Suppress("PropertyName")
+    var _thread: List<Message>? = null
+    override val thread: List<Message>?
+        get() = _thread
+
+    @Volatile
+    @Suppress("PropertyName")
+    var _isPinned: Boolean = false
+    override val isPinned: Boolean
+        get() = _isPinned
 }

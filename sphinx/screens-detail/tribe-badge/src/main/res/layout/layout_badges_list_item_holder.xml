@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_badges_holder"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="@dimen/default_list_row_padding_vertical"
+    android:background="@color/body">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/default_layout_margin"
+        tools:layout_editor_absoluteX="10dp"
+        tools:layout_editor_absoluteY="10dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_badge_image"
+            android:layout_width="@dimen/badges_icon_row_size"
+            android:layout_height="wrap_content"
+            android:scaleType="centerInside"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:srcCompat="@drawable/ic_icon_badges_crown" />
+
+        <TextView
+            android:id="@+id/text_view_badge_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_bold"
+            android:maxLines="1"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_tab"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
+            app:layout_constraintTop_toTopOf="@+id/image_view_badge_image"
+            tools:text="Badge Name" />
+
+        <TextView
+            android:id="@+id/text_view_badge_description"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:layout_marginTop="@dimen/default_vertical_spacing_action_button_column"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:textColor="@color/secondaryTextInverted"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintEnd_toStartOf="@+id/icon_right_arrow"
+            app:layout_constraintStart_toEndOf="@id/image_view_badge_image"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badge_title"
+            tools:text="Earn at least 1000 sats in this tribe." />
+
+        <include
+            android:id="@+id/layout_button_template"
+            layout="@layout/layout_button_small"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/default_message_action_image_xy"
+            android:layout_marginTop="@dimen/default_header_headline_margin_vertical"
+            app:layout_constraintStart_toStartOf="@+id/text_view_badge_description"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badge_description" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_badges_row_count"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/badges_row_count_height"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="@dimen/default_half_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/layout_button_template"
+            app:layout_constraintStart_toEndOf="@+id/layout_button_template"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_badge_description"
+            tools:text="650" />
+
+        <TextView
+            android:id="@+id/text_view_badges_left"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="2"
+            android:text="@string/sats"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_badges_row_count"
+            app:layout_constraintStart_toEndOf="@+id/text_view_badges_row_count"
+            app:layout_constraintTop_toTopOf="@+id/text_view_badges_row_count"
+            tools:text="of 100 left" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/icon_right_arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_chevron_right_button"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/add_buttons_icon_xy"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_badge_description"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/text_view_badge_description"
+            app:track="@drawable/switch_track_selector" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

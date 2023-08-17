@@ -11,6 +11,7 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-invite')
     api project(path: ':sphinx:application:common:wrappers:wrapper-lightning')
     api project(path: ':sphinx:application:common:wrappers:wrapper-message')
+    api project(path: ':sphinx:application:common:wrappers:wrapper-podcast')
 
     implementation deps.kotlin.coroutinesCore
 }

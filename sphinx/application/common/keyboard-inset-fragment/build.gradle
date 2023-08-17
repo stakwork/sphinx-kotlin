@@ -33,6 +33,7 @@ dependencies {
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':android:features:android-feature-activity')
     implementation project(path: ':android:features:android-feature-screens')
+    implementation project(path: ':sphinx:application:common:screen-detail-fragment')
 
     implementation deps.androidx.appCompat
 }

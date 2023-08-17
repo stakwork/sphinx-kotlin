@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_manage_storage"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/headerBG">
+
+    <include
+        android:id="@+id/include_manage_storage_header"
+        layout="@layout/layout_detail_screen_alternative_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_manage_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/default_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_manage_storage_header">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_used"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:text="@string/manage_storage_used"
+            android:textColor="@color/mainBottomIcons"
+            android:textSize="@dimen/pin_help_text_view_size"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_occupied_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_medium_layout_margin"
+            android:fontFamily="@font/roboto_bold"
+            android:maxLines="1"
+            android:textColor="@color/text"
+            android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_used"
+            tools:text="50.12 GB" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_free_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:textColor="@color/mainBottomIcons"
+            android:textSize="@dimen/default_text_size_large_title"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_occupied_number"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="120 GB Free" />
+
+        <include
+            android:id="@+id/include_layout_manage_storage_progress_bar"
+            layout="@layout/layout_manage_storage_progress_bar"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_manage_storage_occupied_number" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_change_limit_container"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/default_large_layout_margin"
+            android:layout_marginHorizontal="@dimen/default_double_layout_margin"
+            android:layout_marginTop="@dimen/default_double_layout_margin"
+            android:maxWidth="@dimen/badges_constraint_badge_quantity_width"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_layout_manage_storage_progress_bar">
+
+            <ProgressBar
+                android:id="@+id/progress_bar_loading"
+                android:layout_width="@dimen/default_form_horizontal_margin"
+                android:layout_height="@dimen/default_form_horizontal_margin"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryText"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/button_change_storage_limit" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_loading"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_background_send_sats"
+                android:textSize="@dimen/default_text_size_list_row_headline"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:text="@string/loading_dots"
+                android:textAllCaps="false"
+                android:visibility="gone"
+                android:textColor="@color/secondaryText"
+                app:layout_constraintStart_toEndOf="@+id/progress_bar_loading"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_change_storage_limit"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/button_background_send_sats"
+                android:fontFamily="@font/roboto_medium"
+                android:gravity="center"
+                android:text="@string/manage_storage_limit"
+                android:textAllCaps="false"
+                android:textColor="@color/text"
+                android:textSize="@dimen/default_text_size_list_row_headline"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_storage_image_container"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/player_bar_height"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_change_limit_container">
+
+            <View
+                android:id="@+id/storage_progress_point_images"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/button_background_send_sats"
+                android:backgroundTint="@color/storageBarBlue"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_images_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:text="@string/manage_storage_images"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_help_text_view_size"
+                app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_images"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_images"
+                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_images" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_images_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_images"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12.37 GB" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_profile_trash_images"
+                android:layout_width="@dimen/default_layout_margin"
+                android:layout_height="@dimen/default_layout_margin"
+                android:background="@drawable/ic_delete"
+                android:backgroundTint="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_images"
+                android:layout_width="@dimen/default_header_margin_horizontal"
+                android:layout_height="@dimen/default_header_margin_horizontal"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryText"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/button_profile_trash_images"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/view_storage_separator_divider_one"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:background="@color/darkDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_images" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_storage_video_container"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/player_bar_height"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_image_container">
+
+            <View
+                android:id="@+id/storage_progress_point_video"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/button_background_send_sats"
+                android:backgroundTint="@color/storageBarPurple"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_video_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:text="@string/manage_storage_video"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_help_text_view_size"
+                app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_video"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_video"
+                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_video" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_video_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_video"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12.37 GB" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_profile_trash_video"
+                android:layout_width="@dimen/default_layout_margin"
+                android:layout_height="@dimen/default_layout_margin"
+                android:background="@drawable/ic_delete"
+                android:backgroundTint="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_video"
+                android:layout_width="@dimen/default_header_margin_horizontal"
+                android:layout_height="@dimen/default_header_margin_horizontal"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryText"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/button_profile_trash_video"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/view_storage_separator_divider_two"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:background="@color/darkDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_video" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_storage_audio_container"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/player_bar_height"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_video_container">
+
+            <View
+                android:id="@+id/storage_progress_point_audio"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/button_background_send_sats"
+                android:backgroundTint="@color/storageBarYellow"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_audio_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:text="@string/manage_storage_audio"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_help_text_view_size"
+                app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_audio"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_audio"
+                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_audio" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_audio_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_audio"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12.37 GB" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_profile_trash_audio"
+                android:layout_width="@dimen/default_layout_margin"
+                android:layout_height="@dimen/default_layout_margin"
+                android:background="@drawable/ic_delete"
+                android:backgroundTint="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_audio"
+                android:layout_width="@dimen/default_header_margin_horizontal"
+                android:layout_height="@dimen/default_header_margin_horizontal"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryText"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/button_profile_trash_audio"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/view_storage_separator_divider_three"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:background="@color/darkDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_audio" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_storage_files_container"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/player_bar_height"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_audio_container">
+
+            <View
+                android:id="@+id/storage_progress_point_files"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:background="@drawable/button_background_send_sats"
+                android:backgroundTint="@color/primaryGreen"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_files_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:text="@string/manage_storage_files"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_help_text_view_size"
+                app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_files"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_files"
+                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_files" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_files_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_trash_files"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12.37 GB" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_profile_trash_files"
+                android:layout_width="@dimen/default_layout_margin"
+                android:layout_height="@dimen/default_layout_margin"
+                android:background="@drawable/ic_delete"
+                android:backgroundTint="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_files"
+                android:layout_width="@dimen/default_header_margin_horizontal"
+                android:layout_height="@dimen/default_header_margin_horizontal"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryText"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/button_profile_trash_files"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/view_storage_separator_divider_files"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:background="@color/darkDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_files" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_storage_custom_type_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/background_detail_screen"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraint_layout_manage_bar_container">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_storage_chat_type_container"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/player_bar_height"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/storage_progress_point_chat_type"
+                android:layout_width="@dimen/badges_icon_size"
+                android:layout_height="@dimen/badges_icon_size"
+                android:backgroundTint="@color/storageBarYellow"
+                android:src="@drawable/ic_icon_web_view_chat"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_chat_type_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:text="@string/chats"
+                android:textColor="@color/primaryText"
+                android:textSize="@dimen/pin_help_text_view_size"
+                app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_chat_type"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_chat_type"
+                app:layout_constraintTop_toTopOf="@+id/storage_progress_point_chat_type" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_custom_chat_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow_custom_chat"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12.37 GB" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/button_profile_right_arrow_custom_chat"
+                android:layout_width="@dimen/default_form_scan_icon_width"
+                android:layout_height="@dimen/default_form_scan_icon_width"
+                android:background="@drawable/ic_arrow_right"
+                android:backgroundTint="@color/secondaryText"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_custom_chat"
+                android:layout_width="@dimen/default_header_margin_horizontal"
+                android:layout_height="@dimen/default_header_margin_horizontal"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/primaryText"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/view_storage_separator_divider_five"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginStart="@dimen/default_layout_margin"
+                android:background="@color/darkDivider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/storage_progress_point_chat_type" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_storage_podcast_type_container"
+            android:layout_marginHorizontal="@dimen/default_layout_margin"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/player_bar_height"
+            app:layout_constraintTop_toBottomOf="@+id/constraint_layout_storage_chat_type_container">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/storage_progress_point_custom_type"
+            android:layout_width="@dimen/badges_icon_size"
+            android:layout_height="@dimen/badges_icon_size"
+            android:backgroundTint="@color/storageBarYellow"
+            android:src="@drawable/ic_podcast_type"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_custom_type_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:text="@string/podcasts"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/pin_help_text_view_size"
+            app:layout_constraintBottom_toBottomOf="@+id/storage_progress_point_custom_type"
+            app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type"
+            app:layout_constraintTop_toTopOf="@+id/storage_progress_point_custom_type" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_custom_podcast_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_tab"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow_custom_type"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12.37 GB" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/button_profile_right_arrow_custom_type"
+            android:layout_width="@dimen/default_form_scan_icon_width"
+            android:layout_height="@dimen/default_form_scan_icon_width"
+            android:background="@drawable/ic_arrow_right"
+            android:backgroundTint="@color/secondaryText"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_manage_storage_custom_type_text"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar_custom_type"
+            android:layout_width="@dimen/default_header_margin_horizontal"
+            android:layout_height="@dimen/default_header_margin_horizontal"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/primaryText"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/button_profile_right_arrow_custom_type"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view_storage_separator_divider_four"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:background="@color/darkDivider"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/storage_progress_point_custom_type" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    <include
+        android:id="@+id/include_layout_change_limit"
+        layout="@layout/layout_change_limit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_manage_storage_delete_notification"
+        layout="@layout/layout_manage_storage_delete_notification"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

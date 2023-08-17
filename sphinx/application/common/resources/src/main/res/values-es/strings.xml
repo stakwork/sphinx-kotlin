@@ -15,6 +15,7 @@
     <string name="decryption_error">ERROR DE DECRIPTACIÓN...</string>
     <string name="null_name_error">ERROR: NOMBRE VACÍO</string>
     <string name="public_key">Clave Pública</string>
+    <string name="loading_dots">Cargando ...</string>
 
     <!--  Media Type Labels -->
     <string name="media_type_label_audio">Audio</string>
@@ -31,6 +32,7 @@
 
     <string name="amount_n_sats">Monto: %d sats</string>
     <string name="payment_request">Solicitud de Pago</string>
+    <string name="error_payment_message">Error de pago: %s </string>
     <string name="failed_to_request_payment">La solicitud de pago falló</string>
     <!-- Tribe Member error messages -->
     <string name="failed_to_approve_member">No se ha podido aprobar la solicitud</string>
@@ -42,6 +44,21 @@
     <string name="unsubscribe">DESUSCRIBIRSE</string>
     <string name="feed_search_following_section">SIGUIENDO</string>
     <string name="feed_search_directory_section">DIRECTORIO</string>
+    <string name="recommendations">Recomendaciones</string>
+    <string name="share_from_beginning">Comparte desde el comienzo</string>
+    <string name="share_from_current_time">Comparte desde el tiempo actual</string>
+
+    <string name="select_badges">Selecciona y customiza</string>
+    <string name="your_badges">tus tribe badges</string>
+    <string name="badges_template_description">%s al menos %s sats en esta tribe. </string>
+    <string name="badges_earn" >Ganar</string>
+    <string name="badges_spend" >Gastar</string>
+    <string name="badges_active">ACTIVO</string>
+    <string name="badges_inactive">INACTIVO</string>
+    <string name="badges_left" >de %s</string>
+    <string name="badges_create_error">Error al crear badge</string>
+    <string name="badges_state_error">Error al cambiar el estado del badge</string>
+
 
     <string name="balance_too_low">Balance demasiado bajo</string>
     <string name="boost_amount_too_low">El monto del Boost debe ser mayor a 0</string>
@@ -52,6 +69,86 @@
     <string name="tribe_member_profile_post">Publicaciones:</string>
     <string name="tribe_member_profile_twitter">Twitter:</string>
     <string name="tribe_member_profile_github">Github:</string>
+    <string name="tribe_member_profile_reputation">Reputación</string>
+    <string name="tribe_member_profile_contributions">Contribuciones:</string>
 
+
+    <string name="episode_detail_download">Descargar</string>
+    <string name="episode_detail_erase">Borrar del dispositivo</string>
+    <string name="episode_detail_share">Compartir</string>
+    <string name="episode_detail_copy_link">Copiar Link</string>
+    <string name="episode_detail_played">Desmarcar como escuchado</string>
+    <string name="episode_detail_upplayed">Mark as Unplayed</string>
+    <string name="episode_detail_close">CERRAR</string>
+    <string name="episode_detail_clipboard">Link copiado en portapapeles</string>
+    <string name="episode_detail_share_link">Compartir link del episodio</string>
+    <string name="time_left">Faltan %s</string>
+
+    <string name="episode_description_show_more">MOSTRAR MAS</string>
+    <string name="episode_description_show_less">MOSTRAR MENOS</string>
+
+    <string name="web_view_authorize">Autorizar</string>
+    <string name="web_view_withdraw">retirar hasta</string>
+    <string name="web_view_reauthorizing">sats antes de reautorizar</string>
+    <string name="web_view_remaining_budget">Presupuesto Restante: %s</string>
+
+    <string name="manage_storage">Administrar Almaceniamiento</string>
+    <string name="manage_storage_used">Usado</string>
+    <string name="manage_storage_limit">Cambiar Límite de almacenamiento</string>
+    <string name="manage_storage_images">Imágenes</string>
+    <string name="manage_storage_video">Video</string>
+    <string name="manage_storage_audio">Audio</string>
+    <string name="manage_storage_files">Archivos</string>
+    <string name="manage_storage_total_storage">de %s</string>
+    <string name="manage_storage_free_space">%s Libres</string>
+    <string name="manage_storage_save">Guardar</string>
+    <string name="manage_storage_delete">Borrar</string>
+    <string name="manage_storage_cancel">Cancelar</string>
+    <string name="manage_storage_got_it">Aceptar</string>
+    <string name="manage_storage_you_have_chosen">Has elegido</string>
+    <string name="manage_storage_delete_description">Eliminar todos los episodios de podcast.</string>
+    <string name="manage_storage_notification_description">Esta acción elimina todos los archivos seleccionados de forma permanente y no se puede deshacer.</string>
+    <string name="manage_storage_deleting">Borrando</string>
+    <string name="manage_storage_deleted_all_podcast">Todos los episodios del podcast</string>
+    <string name="manage_storage_deleted_successfully">Han sido eliminados exitosamente</string>
+    <string name="manage_storage_deleted_free_space">Has liberado %s de espacio de almacenamiento.</string>
+    <string name="manage_storage_delete_item">Borrar %s?</string>
+    <string name="manage_storage_error_delete">Hubo un error para borrar el archivo</string>
+    <string name="manage_storage_no_podcast_found">No se encontraron podcast descargados</string>
+    <string name="manage_storage_no_files_found">No se encontraron archivos</string>
+    <string name="manage_storage_delete_chats">Todos los archivos de chats</string>
+    <string name="manage_storage_delete_items_successfully">Archivos eliminados exitosamente</string>
+    <string name="manage_storage_delete_selected_items">Borrar archivos seleccionados?</string>
+    <string name="manage_storage_delete_feature_not_implemented">"Esta funcionalidad se encuentra actualmente en desarrollo."</string>
+    <string name="manage_storage_limit_warning" >Al guardar este límite\nse eliminarán 20 GB de tu contenido más antiguo</string>
+    <string name="delete_chat_media">Media</string>
+    <string name="delete_chat_files">Archivos</string>
+    <string name="manage_storage_deleted_all_files">Todos los archivos</string>
+
+    <string name="video_sats_per_minute">Sats por minuto</string>
     <string name="alias_allowed_characters">Solo se permiten letras, números y\nguiones bajos en el alias de la tribu</string>
+
+    <string name="network_check_title">Verifica tu conexión WiFi</string>
+    <string name="network_check_message">Antes de comenzar tenes que conectarte a la red WiFi \"sphinxkey\". De lo contrario no vas a poder configurar tu dispositivo. ¿Estás actualmente conectado a esta red?</string>
+    <string name="network_name_title">Red WiFi</string>
+    <string name="network_name_message">Por favor especifica la red WiFi</string>
+    <string name="network_password_title">Contraseña de WiFi</string>
+    <string name="network_password_message">Ingresa la contraseña de WiFi para %s</string>
+    <string name="lightning_node_ip_title">IP del nodo de lightning</string>
+    <string name="lightning_node_url_title">URL del nodo de lightning</string>
+    <string name="lightning_node_ip_message">Ingresa la IP del nodo de lightning</string>
+    <string name="lightning_node_url_message">Ingresa la URL del nodo de lightning</string>
+    <string name="lightning_node_port_title">Puerto del nodo de lightning</string>
+    <string name="lightning_node_port_message">Ingresa el número de puerto del nodo de lightning</string>
+    <string name="store_mnemonic">Guarda tus palabras de seguridad cuidadosamente</string>
+    <string name="sending_seed">Enviando seed al dispositivo</string>
+    <string name="error_setting_up_signing_device">Ocurrió un error configurando el dispositivo de firma: %s</string>
+    <string name="signing_device_successfully_set">Seed envíado al dispositivo con éxito</string>
+    <string name="setup_signing_device">Configurar Dispositivo de Firma</string>
+    <string name="configure_signing_device">Configurar Dispositivo de Firma</string>
+    <string name="mnemonic_copied_to_clipboard">Palabras de seguridad copiadas al portapapeles</string>
+    <string name="bitcoin_network">Red de Bitcoin</string>
+    <string name="select_bitcoin_network">Seleccioná la red de Bitcoin</string>
+    <string name="replies_amount">%s respuestas</string>
+    <string name="threads_more_replies">respuestas más</string>
 </resources>

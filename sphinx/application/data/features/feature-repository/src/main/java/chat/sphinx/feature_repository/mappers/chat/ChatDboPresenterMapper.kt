@@ -2,9 +2,8 @@ package chat.sphinx.feature_repository.mappers.chat
 
 import chat.sphinx.conceptcoredb.ChatDbo
 import chat.sphinx.feature_repository.mappers.ClassMapper
-import chat.sphinx.wrapper_chat.*
+import chat.sphinx.wrapper_chat.Chat
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
-
 import java.text.ParseException
 
 internal class ChatDboPresenterMapper(
@@ -40,7 +39,8 @@ internal class ChatDboPresenterMapper(
             pendingContactIds = value.pending_contact_ids,
             latestMessageId = value.latest_message_id,
             contentSeenAt = value.content_seen_at,
-            notify = value.notify
+            notify = value.notify,
+            pinedMessage = value.pin_message,
         )
     }
 
@@ -63,13 +63,14 @@ internal class ChatDboPresenterMapper(
             private_tribe = value.privateTribe,
             owner_pub_key = value.ownerPubKey,
             seen = value.seen,
-            meta_data = value.metaData,
+            meta_data = null,
             my_photo_url = value.myPhotoUrl,
             my_alias = value.myAlias,
             pending_contact_ids = value.pendingContactIds,
             latest_message_id = value.latestMessageId,
             content_seen_at = value.contentSeenAt,
-            notify = value.notify
+            notify = value.notify,
+            pin_message = value.pinedMessage,
         )
     }
 }

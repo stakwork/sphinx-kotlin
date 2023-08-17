@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!--
-          Set 1: Menu Closed
+          Set 1: Member Profile Closed
     -->
 
     <ConstraintSet android:id="@+id/motion_scene_tribe_member_profile_closed">
@@ -27,7 +27,7 @@
     </ConstraintSet>
 
     <!--
-           Set 2: Nav Drawer Open
+           Set 2: Member Profile Open
     -->
 
     <ConstraintSet
@@ -54,8 +54,39 @@
         android:id="@+id/transition_tribe_member_profile_closed_to_open"
         app:constraintSetEnd="@+id/motion_scene_tribe_member_profile_open"
         app:constraintSetStart="@+id/motion_scene_tribe_member_profile_closed"
-        app:duration="300"
-        app:motionInterpolator="cubic(0.41,0.39,0,1)">
+        app:duration="300">
     </Transition>
+
+    <!--
+       Set 3: Member Profile FullScreen
+-->
+
+    <ConstraintSet
+        android:id="@+id/motion_scene_tribe_member_profile_fullscreen"
+        app:deriveConstraintsFrom="@+id/motion_scene_tribe_member_profile_open">
+
+        <Constraint android:id="@+id/view_tribe_member_profile_lock">
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_tribe_member_profile_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <Transition
+        android:id="@+id/transition_tribe_member_profile_open_to_fullscreen"
+        app:constraintSetEnd="@+id/motion_scene_tribe_member_profile_fullscreen"
+        app:constraintSetStart="@+id/motion_scene_tribe_member_profile_open"
+        app:duration="300"/>
 
 </MotionScene>

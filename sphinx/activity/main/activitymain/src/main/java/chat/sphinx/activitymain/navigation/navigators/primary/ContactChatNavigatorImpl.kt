@@ -10,14 +10,20 @@ import chat.sphinx.chat_tribe.navigation.ToChatTribeScreen
 import chat.sphinx.edit_contact.navigation.ToEditContactDetail
 import chat.sphinx.join_tribe.navigation.ToJoinTribeDetail
 import chat.sphinx.new_contact.navigation.ToNewContactDetail
+import chat.sphinx.newsletter_detail.navigation.ToNewsletterDetailScreen
 import chat.sphinx.payment_receive.navigation.ToPaymentReceiveDetail
 import chat.sphinx.payment_send.navigation.ToPaymentSendDetail
+import chat.sphinx.podcast_player.navigation.ToPodcastPlayerScreen
+import chat.sphinx.video_screen.navigation.ToVideoWatchScreen
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.dashboard.ContactId
+import chat.sphinx.wrapper_common.feed.FeedId
+import chat.sphinx.wrapper_common.feed.FeedUrl
 import chat.sphinx.wrapper_common.lightning.LightningNodePubKey
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
 import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_common.tribe.TribeJoinLink
+import chat.sphinx.wrapper_message.ThreadUUID
 import javax.inject.Inject
 
 internal class ContactChatNavigatorImpl @Inject constructor(
@@ -58,6 +64,24 @@ internal class ContactChatNavigatorImpl @Inject constructor(
         detailDriver.submitNavigationRequest(ToJoinTribeDetail(tribeLink))
     }
 
+    override suspend fun toVideoWatchScreen(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
+            ToVideoWatchScreen(
+                chatId, feedId, feedUrl
+            )
+        )
+    }
+
+    override suspend fun toNewsletterDetail(chatId: ChatId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(
+            ToNewsletterDetailScreen(chatId, feedUrl)
+        )
+    }
+
+    override suspend fun toPodcastPlayer(chatId: ChatId, feedId: FeedId, feedUrl: FeedUrl) {
+        detailDriver.submitNavigationRequest(ToPodcastPlayerScreen(chatId, feedId, feedUrl, fromFeed = false, fromDownloaded = false))
+    }
+
     override suspend fun toChatContact(chatId: ChatId?, contactId: ContactId) {
         navigationDriver.submitNavigationRequest(
             ToChatContactScreen(
@@ -79,7 +103,7 @@ internal class ContactChatNavigatorImpl @Inject constructor(
         )
     }
 
-    override suspend fun toChatTribe(chatId: ChatId) {
+    override suspend fun toChatTribe(chatId: ChatId, threadUUID: ThreadUUID?) {
         navigationDriver.submitNavigationRequest(
             ToChatTribeScreen(
                 chatId = chatId,
@@ -88,4 +112,16 @@ internal class ContactChatNavigatorImpl @Inject constructor(
             )
         )
     }
+
+    override suspend fun toChatThread(chatId: ChatId, threadUUID: ThreadUUID?) {
+        navigationDriver.submitNavigationRequest(
+            ToChatTribeScreen(
+                chatId = chatId,
+                threadUUID = threadUUID,
+                popUpToId = R.id.navigation_chat_tribe_fragment,
+                popUpToInclusive = false,
+            )
+        )
+    }
+
 }

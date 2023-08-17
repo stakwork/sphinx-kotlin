@@ -1,0 +1,4 @@
+import java.lang.Boolean;
+
+
+ALTER TABLE contentEpisodeStatusDbo ADD COLUMN played INTEGER AS Boolean;

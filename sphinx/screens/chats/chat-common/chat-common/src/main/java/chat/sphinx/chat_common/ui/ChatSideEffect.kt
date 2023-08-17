@@ -97,6 +97,15 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
         }
     }
 
+    object NotEncryptedContact : ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            SphinxToastUtils(toastLengthLong = false).show(
+                value.chatFragmentContext,
+                value.chatFragmentContext.getString(R.string.alert_not_encrypted_contact)
+            )
+        }
+    }
+
     class Notify(
         private val msg: String,
         private val notificationLengthLong: Boolean = true
@@ -206,6 +215,17 @@ sealed class ChatSideEffect: SideEffect<ChatSideEffectFragment>() {
             value.chatFragmentWindow?.decorView?.performHapticFeedback(
                 HapticFeedbackConstants.LONG_PRESS,
                 HapticFeedbackConstants.FLAG_IGNORE_GLOBAL_SETTING
+            )
+        }
+    }
+
+    class InsufficientBudget(private val text: String): ChatSideEffect() {
+        override suspend fun execute(value: ChatSideEffectFragment) {
+            copyToClipBoard(
+                value,
+                text,
+                "text",
+                value.chatFragmentContext.getString(R.string.side_effect_text_copied)
             )
         }
     }

@@ -13,16 +13,27 @@ import chat.sphinx.camera.navigation.CameraNavigator
 import chat.sphinx.chat_contact.navigation.ContactChatNavigator
 import chat.sphinx.chat_group.navigation.GroupChatNavigator
 import chat.sphinx.chat_tribe.navigation.TribeChatNavigator
+import chat.sphinx.common_player.navigation.CommonPlayerNavigator
+import chat.sphinx.create_badge.navigation.CreateBadgeNavigator
 import chat.sphinx.create_tribe.navigation.CreateTribeNavigator
 import chat.sphinx.dashboard.navigation.DashboardBottomNavBarNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavDrawerNavigator
 import chat.sphinx.dashboard.navigation.DashboardNavigator
+import chat.sphinx.delete_chat_media.navigation.DeleteChatMediaNavigator
+import chat.sphinx.tribes_discover.navigation.TribesDiscoverNavigator
 import chat.sphinx.edit_contact.navigation.EditContactNavigator
+import chat.sphinx.episode_description.navigation.EpisodeDescriptionNavigator
+import chat.sphinx.episode_detail.navigation.EpisodeDetailNavigator
+import chat.sphinx.example.delete_chat_media_detail.navigation.DeleteChatMediaDetailNavigator
+import chat.sphinx.example.delete_media.navigation.DeleteMediaNavigator
+import chat.sphinx.example.delete_media_detail.navigation.DeleteMediaDetailNavigator
+import chat.sphinx.example.manage_storage.navigation.ManageStorageNavigator
 import chat.sphinx.hilt_qualifiers.AuthenticationDriver
 import chat.sphinx.hilt_qualifiers.DetailDriver
 import chat.sphinx.hilt_qualifiers.PrimaryDriver
 import chat.sphinx.invite_friend.navigation.InviteFriendNavigator
 import chat.sphinx.join_tribe.navigation.JoinTribeNavigator
+import chat.sphinx.known_badges.navigation.KnownBadgesNavigator
 import chat.sphinx.new_contact.navigation.NewContactNavigator
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
 import chat.sphinx.notification_level.navigation.NotificationLevelNavigator
@@ -47,7 +58,9 @@ import chat.sphinx.scanner.navigation.ScannerNavigator
 import chat.sphinx.splash.navigation.SplashNavigator
 import chat.sphinx.subscription.navigation.SubscriptionNavigator
 import chat.sphinx.support_ticket.navigation.SupportTicketNavigator
+import chat.sphinx.threads.navigation.ThreadsNavigator
 import chat.sphinx.transactions.navigation.TransactionsNavigator
+import chat.sphinx.tribe_badge.navigation.TribeBadgesNavigator
 import chat.sphinx.tribe_detail.navigation.TribeDetailNavigator
 import chat.sphinx.tribe_members_list.navigation.TribeMembersListNavigator
 import chat.sphinx.video_screen.navigation.VideoScreenNavigator
@@ -283,6 +296,42 @@ internal object NavigationModule {
         qrCodeNavigatorImpl
 
     @Provides
+    fun provideManageStorageNavigator(
+        manageStorageNavigatorImpl: ManageStorageNavigatorImpl
+    ): ManageStorageNavigator =
+        manageStorageNavigatorImpl
+
+    @Provides
+    fun provideThreadsNavigator(
+        threadsNavigatorImpl: ThreadsNavigatorImpl
+    ): ThreadsNavigator =
+        threadsNavigatorImpl
+
+    @Provides
+    fun provideDeleteMediaNavigator(
+        deleteMediaNavigatorImpl: DeleteMediaNavigatorImpl
+    ): DeleteMediaNavigator =
+        deleteMediaNavigatorImpl
+
+    @Provides
+    fun provideDeleteDetailMediaNavigator(
+        deleteMediaDetailNavigatorImpl: DeleteMediaDetailNavigatorImpl
+    ): DeleteMediaDetailNavigator =
+        deleteMediaDetailNavigatorImpl
+
+    @Provides
+    fun provideDeleteChatMediaNavigator(
+        deleteChatMediaNavigatorImpl: DeleteChatMediaNavigatorImpl
+    ): DeleteChatMediaNavigator =
+        deleteChatMediaNavigatorImpl
+
+    @Provides
+    fun provideDeleteChatMediaDetailNavigator(
+        deleteChatMediaDetailNavigatorImpl: DeleteChatMediaDetailNavigatorImpl
+    ): DeleteChatMediaDetailNavigator =
+        deleteChatMediaDetailNavigatorImpl
+
+    @Provides
     fun provideProfileNavigator(
         profileNavigatorImpl: ProfileNavigatorImpl
     ): ProfileNavigator =
@@ -317,6 +366,24 @@ internal object NavigationModule {
         addTribeMemberNavigatorImpl: AddTribeMemberNavigatorImpl
     ): AddTribeMemberNavigator =
         addTribeMemberNavigatorImpl
+
+    @Provides
+    fun provideDiscoverTribesNavigator(
+        discoverTribesNavigatorImpl: TribesDiscoverNavigatorImpl
+    ): TribesDiscoverNavigator =
+        discoverTribesNavigatorImpl
+
+    @Provides
+    fun provideTribeBadgesNavigator(
+        tribeBadgesNavigatorImpl: TribeBadgesNavigatorImpl
+    ): TribeBadgesNavigator =
+        tribeBadgesNavigatorImpl
+
+    @Provides
+    fun provideCreateBadgeNavigator(
+        createBadgeNavigatorImpl: CreateBadgeNavigatorImpl
+    ): CreateBadgeNavigator =
+        createBadgeNavigatorImpl
 
     @Provides
     fun provideJoinTribeNavigator(
@@ -361,9 +428,33 @@ internal object NavigationModule {
         newsletterDetailNavigatorImpl
 
     @Provides
+    fun provideCommonPlayerScreenNavigator(
+        commonPlayerNavigatorImpl: CommonPlayerNavigatorImpl
+    ): CommonPlayerNavigator =
+        commonPlayerNavigatorImpl
+
+    @Provides
     fun provideNotificationLevelNavigator(
         notificationLevelNavigatorImpl: NotificationLevelNavigatorImpl
     ): NotificationLevelNavigator =
         notificationLevelNavigatorImpl
+
+    @Provides
+    fun provideEpisodeDetailNavigator(
+        episodeNavigatorNavigatorImpl: EpisodeDetailNavigatorImpl
+    ): EpisodeDetailNavigator =
+        episodeNavigatorNavigatorImpl
+
+    @Provides
+    fun provideKnownBadgesNavigator(
+        knownBadgesNavigatorImpl: KnownBadgesNavigatorImpl
+    ): KnownBadgesNavigator =
+        knownBadgesNavigatorImpl
+
+    @Provides
+    fun provideEpisodeDescriptionNavigator(
+        episodeDescriptionNavigatorImpl: EpisodeDescriptionNavigatorImpl
+    ): EpisodeDescriptionNavigator =
+        episodeDescriptionNavigatorImpl
 
 }

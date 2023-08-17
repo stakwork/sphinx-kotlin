@@ -6,6 +6,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_message.GiphyData
 import chat.sphinx.wrapper_message.PodcastClip
 import chat.sphinx.wrapper_message.ReplyUUID
+import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message_media.isSphinxText
 import java.io.File
 
@@ -19,9 +20,11 @@ class SendMessage private constructor(
     val giphyData: GiphyData?,
     val podcastClip: PodcastClip?,
     val isBoost: Boolean,
+    val isCall: Boolean,
     val isTribePayment: Boolean,
     val paidMessagePrice: Sat?,
-    val priceToMeet: Sat?
+    val priceToMeet: Sat?,
+    val threadUUID: ThreadUUID?
 ) {
 
     class Builder {
@@ -34,9 +37,11 @@ class SendMessage private constructor(
         private var giphyData: GiphyData?           = null
         private var podcastClip: PodcastClip?       = null
         private var isBoost: Boolean                = false
+        private var isCall: Boolean                 = false
         private var isTribePayment: Boolean         = false
         private var paidMessagePrice: Sat?          = null
         private var priceToMeet: Sat?               = null
+        private var threadUUID: ThreadUUID?         = null
 
         enum class ValidationError {
             EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
@@ -56,6 +61,7 @@ class SendMessage private constructor(
             isTribePayment = false
             paidMessagePrice = null
             priceToMeet = null
+            threadUUID = null
         }
 
         @Synchronized
@@ -159,6 +165,12 @@ class SendMessage private constructor(
         }
 
         @Synchronized
+        fun setIsCall(isCall: Boolean): Builder {
+            this.isCall = isCall
+            return this
+        }
+
+        @Synchronized
         fun setIsTribePayment(isTribePayment: Boolean): Builder {
             this.isTribePayment = isTribePayment
             return this
@@ -173,6 +185,12 @@ class SendMessage private constructor(
         @Synchronized
         fun setPaidMessagePrice(paidMessagePrice: Sat?): Builder {
             this.paidMessagePrice = paidMessagePrice
+            return this
+        }
+
+        @Synchronized
+        fun setThreadUUID(threadUUID: ThreadUUID?): Builder {
+            this.threadUUID = threadUUID
             return this
         }
 
@@ -194,9 +212,11 @@ class SendMessage private constructor(
                         giphyData?.let { GiphyData(it.id, it.url, it.aspect_ratio, text) },
                         podcastClip?.let { PodcastClip(text, it.title, it.pubkey, it.url, it.feedID, it.itemID, it.ts) },
                         isBoost,
+                        isCall,
                         isTribePayment,
                         paidMessagePrice,
-                        priceToMeet
+                        priceToMeet,
+                        threadUUID
                     ), null
                 )
             }

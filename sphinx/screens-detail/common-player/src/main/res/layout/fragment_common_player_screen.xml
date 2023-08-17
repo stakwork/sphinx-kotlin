@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_common_player"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/headerBG"
+    tools:context=".ui.CommonPlayerScreenFragment">
+
+    <include
+        android:id="@+id/include_layout_players_container"
+        layout="@layout/layout_players_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <include
+        android:id="@+id/include_layout_player_description_and_controls"
+        layout="@layout/layout_player_description_and_controls"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/item_details_controls_height"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_players_container" />
+
+    <include
+        android:id="@+id/include_recommended_items_list"
+        layout="@layout/layout_recommended_items_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/include_layout_player_description_and_controls" />
+
+    <include
+        android:id="@+id/include_layout_boost_fireworks"
+        layout="@layout/layout_boost_fireworks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/include_layout_feed_item"
+        layout="@layout/layout_feed_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

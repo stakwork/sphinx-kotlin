@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_pinned_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="24dp"
+        android:paddingTop="@dimen/default_layout_margin"
+        android:background="@drawable/background_pin_bottom"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_pinned_bottom_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="@dimen/default_layout_margin"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_pinned_bottom_header_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_regular"
+                android:textColor="@color/text"
+                android:textSize="@dimen/menu_bottom_header_text_size"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:text="@string/pinned_message" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/text_view_pinned_bottom_header_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_pin"
+                android:tint="@color/whiteSeventyPercentOpacity"
+                app:layout_constraintTop_toTopOf="@id/text_view_pinned_bottom_header_text"
+                app:layout_constraintEnd_toStartOf="@id/text_view_pinned_bottom_header_text"
+                android:layout_marginEnd="8dp"
+                tools:text="Pinned Message" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_pinned_bottom_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/default_layout_margin"
+            android:layout_marginHorizontal="16dp"
+            app:layout_constraintTop_toBottomOf="@id/layout_constraint_pinned_bottom_header">
+
+            <include
+                android:id="@+id/message_holder_pin_image_initial_holder"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_marginTop="@dimen/default_medium_layout_margin"
+                android:layout_width="@dimen/message_holder_in_photo_holder_xy"
+                android:layout_height="@dimen/message_holder_in_photo_holder_xy"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="visible" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_pinned_bottom_body_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_medium"
+                android:textColor="@color/text"
+                android:textSize="11sp"
+                app:layout_constraintTop_toTopOf="@id/message_holder_pin_image_initial_holder"
+                app:layout_constraintStart_toEndOf="@id/message_holder_pin_image_initial_holder"
+                android:layout_marginHorizontal="8dp"
+                tools:text="MathRoda" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_pinned_bottom_body_message_holder"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginLeft="4dp"
+                app:layout_constraintTop_toBottomOf="@id/text_view_pinned_bottom_body_username"
+                app:layout_constraintStart_toStartOf="@id/text_view_pinned_bottom_body_username"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <include
+                    android:id="@+id/include_pinned_bottom_message_holder"
+                    layout="@layout/layout_pinned_bottom_message_holder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:id="@+id/received_bubble_arrow"
+                android:layout_width="4dp"
+                android:layout_height="10dp"
+                android:background="@drawable/received_bubble_arrow"
+                android:backgroundTint="@color/oldSentMsgBG"
+                app:layout_constraintStart_toStartOf="@+id/text_view_pinned_bottom_body_username"
+                app:layout_constraintTop_toTopOf="@+id/layout_constraint_pinned_bottom_body_message_holder"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_pinned_bottom_unpin_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="24dp"
+            android:background="@drawable/background_pin_bottom_unpin_message"
+            android:clickable="true"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/layout_constraint_pinned_bottom_body"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:focusable="true">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_unpin_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:fontFamily="@font/roboto_regular"
+                android:textColor="@color/text"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/text_view_unpin_icon"
+                android:text="@string/unpin_message" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/text_view_unpin_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:src="@drawable/ic_pin"
+                android:tint="@color/badgeRed"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginEnd="8dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

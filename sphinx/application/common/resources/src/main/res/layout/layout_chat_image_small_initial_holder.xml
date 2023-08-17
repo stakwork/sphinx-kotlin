@@ -6,9 +6,10 @@
     android:layout_height="@dimen/default_small_chat_initial_image_xy">
 
     <androidx.appcompat.widget.AppCompatTextView
-        android:id="@+id/text_view_initials"
+        android:id="@+id/text_view_initials_name"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_margin="1dp"
         android:layout_centerInParent="true"
         android:background="@drawable/chat_initials_circle"
         android:fontFamily="@font/montserrat_regular"
@@ -27,6 +28,7 @@
         android:id="@+id/image_view_chat_picture"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_margin="1dp"
         android:layout_centerInParent="true"
         android:src="@drawable/ic_profile_avatar_circle"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -34,5 +36,48 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="gone"/>
+
+    <View
+        android:id="@+id/image_view_default_alpha"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/chat_circle_black_alpha"
+        android:layout_margin="1dp"
+        android:alpha="0.6"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/text_view_replies_number"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_centerInParent="true"
+        android:fontFamily="@font/roboto_regular"
+        android:gravity="center"
+        android:singleLine="true"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/default_text_size_caption2"
+        android:textAllCaps="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="+8" />
+
+    <View
+        android:id="@+id/circular_border"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/chat_initials_circle_border"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

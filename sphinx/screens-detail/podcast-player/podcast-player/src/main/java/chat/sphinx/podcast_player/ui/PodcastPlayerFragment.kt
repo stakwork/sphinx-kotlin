@@ -1,18 +1,20 @@
 package chat.sphinx.podcast_player.ui
 
 import android.animation.Animator
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ConcatAdapter
@@ -24,10 +26,13 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.insetter_activity.InsetterActivity
+import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.podcast_player.R
 import chat.sphinx.podcast_player.databinding.FragmentPodcastPlayerBinding
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesFooterAdapter
 import chat.sphinx.podcast_player.ui.adapter.PodcastEpisodesListAdapter
+import chat.sphinx.podcast_player.ui.viewstates.BoostAnimationViewState
+import chat.sphinx.podcast_player.ui.viewstates.FeedItemDetailsViewState
 import chat.sphinx.podcast_player.ui.viewstates.PodcastPlayerViewState
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_common.PhotoUrl
@@ -43,8 +48,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -62,6 +69,10 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     override val viewModel: PodcastPlayerViewModel by viewModels()
     override val binding: FragmentPodcastPlayerBinding by viewBinding(FragmentPodcastPlayerBinding::bind)
 
+    companion object {
+        val SLIDER_VALUES = listOf(0,3,3,5,5,8,8,10,10,15,20,20,40,40,80,80,100)
+    }
+
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
@@ -72,8 +83,17 @@ internal class PodcastPlayerFragment : SideEffectFragment<
 
     private val args: PodcastPlayerFragmentArgs by navArgs()
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        viewModel.trackPodcastConsumed()
+        viewModel.forceFeedReload()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        BackPressHandler(viewLifecycleOwner, requireActivity())
 
         binding.apply {
             textViewDismissButton.setOnClickListener {
@@ -94,8 +114,80 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             }
         }
 
+        setupFeedItemDetails()
         setupBoost()
         setupEpisodes()
+        setupFragmentLayout()
+
+        viewModel.forceFeedReload()
+    }
+
+    private fun setupFragmentLayout() {
+        (requireActivity() as InsetterActivity)
+            .addNavigationBarPadding(binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.constraintLayoutFeedItem)
+    }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            if (viewModel.feedItemDetailsViewStateContainer.value is FeedItemDetailsViewState.Open) {
+                viewModel.feedItemDetailsViewStateContainer.updateViewState(FeedItemDetailsViewState.Closed)
+            } else {
+                lifecycleScope.launch(viewModel.mainImmediate) {
+                    viewModel.navigator.closeDetailScreen()
+                }
+            }
+        }
+    }
+
+    private fun setupFeedItemDetails() {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewClose.setOnClickListener {
+                viewModel.feedItemDetailsViewStateContainer.updateViewState(
+                    FeedItemDetailsViewState.Closed
+                )
+            }
+            layoutConstraintDownloadRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.feedId?.let { feedId ->
+                        if (viewState.feedItemDetail.downloaded == true) {
+                            viewModel.deleteDownloadedMediaByItemId(feedId)
+                        } else {
+                            viewModel.downloadMediaByItemId(feedId)
+                        }
+                    }
+                }
+            }
+            layoutConstraintCheckMarkRow.setOnClickListener {
+                viewModel.updatePlayedMark()
+            }
+            layoutConstraintCopyLinkRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.feedId?.let { feedId ->
+                        viewModel.copyCodeToClipboard(feedId)
+                    }
+                }
+            }
+            layoutConstraintShareRow.setOnClickListener {
+                (viewModel.feedItemDetailsViewStateContainer.value as? FeedItemDetailsViewState.Open)?.let { viewState ->
+                    viewState.feedItemDetail?.feedId?.let { feedId ->
+                        viewModel.share(feedId, binding.root.context)
+                    }
+                }
+            }
+        }
     }
 
     private fun setupBoost() {
@@ -161,7 +253,8 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         }
     }
 
-    private var dragging: Boolean = false
+    private var draggingTimeSlider: Boolean = false
+    private var draggingSatsSlider: Boolean = false
     private fun addPodcastOnClickListeners(podcast: Podcast) {
         binding.apply {
             includeLayoutEpisodeSliderControl.apply {
@@ -180,14 +273,14 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                         }
 
                         override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                            dragging = true
+                            draggingTimeSlider = true
                         }
 
                         override fun onStopTrackingTouch(seekBar: SeekBar?) {
                             onStopSupervisor.scope.launch(viewModel.mainImmediate) {
                                 seekTo(podcast, seekBar?.progress ?: 0)
                             }
-                            dragging = false
+                            draggingTimeSlider = false
                         }
                     }
                 )
@@ -203,22 +296,20 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
 
                 textViewReplay15Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime - 15000)
+                    viewModel.seekTo(podcast.timeMilliSeconds - 15000L)
                     updateViewAfterSeek(podcast)
                 }
 
                 textViewPlayPauseButton.setOnClickListener {
-                    val currentEpisode = podcast.getCurrentEpisode()
-
-                    if (currentEpisode.playing) {
-                        viewModel.pauseEpisode(currentEpisode)
-                    } else {
-                        viewModel.playEpisode(currentEpisode, podcast.currentTime)
+                    if (!podcast.getCurrentEpisode().playing) {
+                        toggleLoadingWheel(true)
                     }
+
+                    viewModel.togglePlayState()
                 }
 
                 textViewForward30Button.setOnClickListener {
-                    viewModel.seekTo(podcast.currentTime + 30000)
+                    viewModel.seekTo(podcast.timeMilliSeconds + 30000L)
                     updateViewAfterSeek(podcast)
                 }
 
@@ -248,6 +339,37 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             textViewSubscribeButton.setOnClickListener {
                 viewModel.toggleSubscribeState()
             }
+
+            seekBarSatsPerMinute.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+
+                        SLIDER_VALUES[progress].let {
+                            textViewPodcastSatsPerMinuteValue.text = it.toString()
+                        }
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = true
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                        draggingSatsSlider = false
+
+                        seekBar?.let {
+                            SLIDER_VALUES[seekBar.progress].let {
+                                viewModel.updateSatsPerMinute(it.toLong())
+                            }
+                        }
+                    }
+                }
+            )
+
         }
     }
 
@@ -264,7 +386,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
             }
 
             is PodcastPlayerViewState.PodcastLoaded -> {
-                toggleLoadingWheel(true)
                 showPodcastInfo(viewState.podcast)
             }
 
@@ -283,6 +404,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private suspend fun showPodcastInfo(podcast: Podcast) {
         binding.apply {
 
@@ -309,7 +431,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                     imageViewPodcastImage,
                     podcastImage,
                     ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                        .placeholderResId(R.drawable.ic_podcast_placeholder)
                         .build()
                 )
             }
@@ -333,9 +455,27 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
             }
 
+            if (!draggingSatsSlider) {
+                val satsPerMinute = podcast.satsPerMinute
+                val closest = SLIDER_VALUES.closestValue(satsPerMinute.toInt())
+                val index = SLIDER_VALUES.indexOf(closest)
+
+                seekBarSatsPerMinute.max = SLIDER_VALUES.size - 1
+                seekBarSatsPerMinute.progress = index
+                textViewPodcastSatsPerMinuteValue.text = closest.toString()
+
+                constraintLayoutPodcastLightningControls.alpha = if (podcast.hasDestinations) 1.0F else 0.5F
+
+                if (!podcast.hasDestinations) {
+                    seekBarSatsPerMinute.setOnTouchListener { _, _ -> true }
+                } else {
+                    seekBarSatsPerMinute.setOnTouchListener(null)
+                }
+            }
+
             togglePlayPauseButton(podcast.isPlaying)
 
-            if (!dragging && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
+            if (!draggingTimeSlider && currentEpisode != null) setTimeLabelsAndProgressBar(podcast)
 
             toggleLoadingWheel(false)
             addPodcastOnClickListeners(podcast)
@@ -346,7 +486,6 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         photoUrl: PhotoUrl?,
         amount: Sat?
     ) {
-
         binding.apply {
             includeLayoutEpisodePlaybackControls.includeLayoutCustomBoost.apply {
                 editTextCustomBoost.setText(
@@ -361,7 +500,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                         imageViewProfilePicture,
                         photoUrl.value,
                         ImageLoaderOptions.Builder()
-                            .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
                             .transformation(Transformation.CircleCrop)
                             .build()
                     )
@@ -403,7 +542,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                     imageViewPodcastImage,
                     podcastImage,
                     ImageLoaderOptions.Builder()
-                        .placeholderResId(R.drawable.ic_profile_avatar_circle)
+                        .placeholderResId(R.drawable.ic_podcast_placeholder)
                         .build()
                 )
             }
@@ -423,7 +562,7 @@ internal class PodcastPlayerFragment : SideEffectFragment<
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
-        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toInt()
+        val seekTime = (duration * (progress.toDouble() / 100.toDouble())).toLong()
         viewModel.seekTo(seekTime)
     }
 
@@ -434,13 +573,14 @@ internal class PodcastPlayerFragment : SideEffectFragment<
     }
 
     private suspend fun setTimeLabelsAndProgressBar(podcast: Podcast) {
-        podcast.setInitialEpisodeDuration(args.argEpisodeDuration)
+        val currentTime = podcast.timeMilliSeconds
 
-        val currentTime = podcast.currentTime.toLong()
+        toggleLoadingWheel(podcast.shouldLoadDuration)
 
         val duration = withContext(viewModel.io) {
             podcast.getCurrentEpisodeDuration(viewModel::retrieveEpisodeDuration)
         }
+
         val progress: Int =
             try {
                 ((currentTime * 100) / duration).toInt()
@@ -520,9 +660,98 @@ internal class PodcastPlayerFragment : SideEffectFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.feedItemDetailsViewStateContainer.collect { viewState ->
+
+                binding.includeLayoutFeedItem.apply {
+                    when (viewState) {
+                        is FeedItemDetailsViewState.Open -> {
+                            includeLayoutFeedItemDetails.apply {
+                                feedItemDetailsCommonInfoBinding(viewState)
+                                setFeedItemDetailsDownloadState(viewState)
+                                setPlayedMarkState(viewState)
+                            }
+
+                        }
+                        else -> {}
+                    }
+
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+    }
+
+    private fun feedItemDetailsCommonInfoBinding(viewState: FeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            textViewMainEpisodeTitle.text = viewState.feedItemDetail?.header
+            imageViewItemRowEpisodeType.setImageDrawable(ContextCompat.getDrawable(root.context, viewState.feedItemDetail?.episodeTypeImage ?: R.drawable.ic_podcast_type))
+            textViewEpisodeType.text = viewState.feedItemDetail?.episodeTypeText
+            textViewEpisodeDate.text = viewState.feedItemDetail?.episodeDate
+            textViewEpisodeDuration.text = viewState.feedItemDetail?.episodeDuration
+            textViewPodcastName.text = viewState.feedItemDetail?.podcastName
+
+            onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                viewState.feedItemDetail?.image?.let {
+                    imageLoader.load(
+                        imageViewEpisodeDetailImage,
+                        it,
+                        ImageLoaderOptions.Builder()
+                            .placeholderResId(R.drawable.ic_podcast_placeholder)
+                            .build()
+                    )
+                }
+            }
+        }
+    }
+
+    private fun setFeedItemDetailsDownloadState(viewState: FeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            if (viewState.feedItemDetail?.isDownloadInProgress == true) {
+                buttonDownloadArrow.gone
+                imageDownloadedEpisodeArrow.gone
+                progressBarEpisodeDownload.visible
+                buttonStop.visible
+            } else {
+                if (viewState.feedItemDetail?.downloaded == true) {
+                    buttonDownloadArrow.gone
+                    imageDownloadedEpisodeArrow.visible
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_erase)
+                }
+                else {
+                    buttonDownloadArrow.visible
+                    imageDownloadedEpisodeArrow.gone
+                    progressBarEpisodeDownload.gone
+                    buttonStop.gone
+                    textViewDownload.text = getString(R.string.episode_detail_download)
+                }
+            }
+        }
+    }
+
+    private fun setPlayedMarkState(viewState: FeedItemDetailsViewState.Open) {
+        binding.includeLayoutFeedItem.includeLayoutFeedItemDetails.apply {
+            if (viewState.feedItemDetail?.played == true) {
+                buttonCheckMarkPlayed.visible
+                buttonCheckMark.invisible
+                textViewCheckMark.text = getString(R.string.episode_detail_upplayed)
+            } else {
+                buttonCheckMarkPlayed.invisible
+                buttonCheckMark.visible
+                textViewCheckMark.text = getString(R.string.episode_detail_played)
+            }
+        }
     }
 
     override suspend fun onSideEffectCollect(sideEffect: PodcastPlayerSideEffect) {
         sideEffect.execute(requireActivity())
+    }
+
+    private fun List<Int>.closestValue(value: Int) = minByOrNull {
+        kotlin.math.abs(value - it)
     }
 }

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="@dimen/default_small_layout_margin"
+    android:layout_marginHorizontal="@dimen/default_small_layout_margin"
+    android:background="@color/headerBG">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_grid_image_container"
+        android:layout_width="@dimen/manage_storage_image_grid_size"
+        android:layout_height="@dimen/manage_storage_image_grid_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_file"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <View
+            android:id="@+id/image_view_default_alpha"
+            android:layout_width="@dimen/manage_storage_image_grid_size"
+            android:layout_height="@dimen/manage_storage_image_grid_size"
+            android:background="#1A000000"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_element_picture"
+            android:layout_width="@dimen/manage_storage_image_grid_size"
+            android:layout_height="@dimen/manage_storage_image_grid_size"
+            android:layout_centerInParent="true"
+            android:src="@drawable/paid_image_blurred_placeholder"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_file_size"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_half_layout_margin"
+            android:layout_marginEnd="@dimen/episode_image_radius"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:visibility="visible"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="9.5 MB"
+            tools:visibility="visible"/>
+
+        <View
+            android:id="@+id/image_view_alpha"
+            android:layout_width="@dimen/manage_storage_image_grid_size"
+            android:layout_height="@dimen/manage_storage_image_grid_size"
+            android:background="@color/blackSemiTransparent"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_place_holder"
+            android:layout_width="@dimen/default_form_scan_icon_container_width"
+            android:layout_height="@dimen/default_form_scan_icon_container_width"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_chat_delete_video"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image_view_check_mark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_blue_checkmark"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,7 +8,9 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.newsletter_detail.R
 import chat.sphinx.newsletter_detail.navigation.NewsletterDetailNavigator
+import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_common.dashboard.ChatId
+import chat.sphinx.wrapper_common.feed.isTrue
 import chat.sphinx.wrapper_common.feed.toFeedUrl
 import chat.sphinx.wrapper_common.feed.toSubscribed
 import chat.sphinx.wrapper_feed.Feed
@@ -66,20 +68,21 @@ internal class NewsletterDetailViewModel @Inject constructor(
     }
 
     private fun updateFeedContentInBackground() {
-        viewModelScope.launch(mainImmediate) {
-            chatRepository.getChatById(args.chatId).firstOrNull()?.let { chat ->
-                chat.host?.let { chatHost ->
-                    args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
-                        feedRepository.updateFeedContent(
-                            chatId = chat.id,
-                            host = chatHost,
-                            feedUrl = feedUrl,
-                            chatUUID = chat.uuid,
-                            subscribed = true.toSubscribed(),
-                            currentEpisodeId = null
-                        )
-                    }
-                }
+        viewModelScope.launch(io) {
+            val chat = chatRepository.getChatById(args.chatId).firstOrNull()
+            val newsletterFeed = newsletterSharedFlow.firstOrNull()
+            val chatHost = chat?.host ?: ChatHost(Feed.TRIBES_DEFAULT_SERVER_URL)
+            val subscribed = newsletterFeed?.subscribed?.isTrue() == true
+
+            args.argFeedUrl.toFeedUrl()?.let { feedUrl ->
+                feedRepository.updateFeedContent(
+                    chatId = chat?.id ?: ChatId(ChatId.NULL_CHAT_ID.toLong()),
+                    host = chatHost,
+                    feedUrl = feedUrl,
+                    chatUUID = chat?.uuid,
+                    subscribed = subscribed.toSubscribed(),
+                    currentItemId = null
+                )
             }
         }
     }
@@ -95,5 +98,6 @@ internal class NewsletterDetailViewModel @Inject constructor(
             )
         }
         actionsRepository.trackNewsletterConsumed(item.id)
+        feedRepository.updateLastPlayed(item.feedId)
     }
 }

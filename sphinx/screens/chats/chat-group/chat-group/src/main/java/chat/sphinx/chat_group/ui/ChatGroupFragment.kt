@@ -71,6 +71,20 @@ internal class ChatGroupFragment: ChatFragment<
         LayoutMenuBottomBinding::bind, R.id.include_layout_menu_bottom_more
     )
 
+    override val scrollDownButtonBinding: LayoutScrollDownButtonBinding by viewBinding(
+        LayoutScrollDownButtonBinding::bind, R.id.include_chat_group_scroll_down
+    )
+
+    override val shimmerBinding: LayoutShimmerContainerBinding by viewBinding(
+        LayoutShimmerContainerBinding::bind, R.id.include_chat_group_shimmer_container
+    )
+
+    override val pinHeaderBinding: LayoutChatPinedMessageHeaderBinding?
+        get() = null
+
+    override val threadOriginalMessageBinding: LayoutThreadOriginalMessageBinding?
+        get() = null
+
     override val menuEnablePayments: Boolean
         get() = false
 

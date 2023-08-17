@@ -29,6 +29,23 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_chat_pined_message_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        app:layout_constraintTop_toBottomOf="@id/layout_constraint_chat_header_container">
+
+        <include
+            android:id="@+id/include_chat_pined_message_header"
+            layout="@layout/layout_chat_pined_message_header"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/default_header_height"
+            android:visibility="gone" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_messages"
         android:layout_width="match_parent"
@@ -44,6 +61,17 @@
         android:layout_height="8dp"
         android:src="@drawable/bottom_bar_elevation_gradient"
         app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container" />
+
+    <include
+        android:id="@+id/include_chat_group_scroll_down"
+        layout="@layout/layout_scroll_down_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:visibility="visible"
+        android:layout_marginBottom="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_chat_footer_container"
@@ -130,5 +158,16 @@
         android:id="@+id/include_layout_menu_bottom_more"
         layout="@layout/layout_menu_bottom"
         tools:visibility="gone" />
+
+    <include
+        android:id="@+id/include_chat_group_shimmer_container"
+        layout="@layout/layout_shimmer_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/layout_constraint_chat_footer_container"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_chat_header_container"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

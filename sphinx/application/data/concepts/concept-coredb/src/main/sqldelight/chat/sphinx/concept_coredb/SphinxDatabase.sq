@@ -60,6 +60,7 @@ import chat.sphinx.wrapper_feed.FeedItemsCount;
 import chat.sphinx.wrapper_feed.FeedLanguage;
 import chat.sphinx.wrapper_feed.FeedModelSuggested;
 import chat.sphinx.wrapper_feed.FeedModelType;
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
 import chat.sphinx.wrapper_feed.FeedTitle;
 import chat.sphinx.wrapper_invite.InviteString;
 import chat.sphinx.wrapper_message.Flagged;
@@ -72,6 +73,7 @@ import chat.sphinx.wrapper_message.MessageType;
 import chat.sphinx.wrapper_message.RecipientAlias;
 import chat.sphinx.wrapper_message.ReplyUUID;
 import chat.sphinx.wrapper_message.SenderAlias;
+import chat.sphinx.wrapper_message.ThreadUUID;
 import chat.sphinx.wrapper_message_media.FileName;
 import chat.sphinx.wrapper_message_media.MediaKey;
 import chat.sphinx.wrapper_message_media.MediaKeyDecrypted;
@@ -105,7 +107,8 @@ CREATE TABLE chatDbo(
     pending_contact_ids         TEXT            AS List<ContactId>,
     latest_message_id           INTEGER         AS MessageId DEFAULT NULL,
     content_seen_at             INTEGER         AS DateTime,
-    notify                      INTEGER         AS NotificationLevel
+    notify                      INTEGER         AS NotificationLevel,
+    pin_message                 TEXT            AS MessageUUID DEFAULT NULL
 );
 
 chatUpdateLatestMessage:
@@ -184,7 +187,8 @@ chatUpsert {
         my_photo_url = :my_photo_url,
         my_alias = :my_alias,
         pending_contact_ids = :pending_contact_ids,
-        notify = :notify
+        notify = :notify,
+        pin_message = :pin_message
     WHERE id = :id;
 
     INSERT OR IGNORE INTO chatDbo(
@@ -209,7 +213,8 @@ chatUpsert {
         my_photo_url,
         my_alias,
         pending_contact_ids,
-        notify
+        notify,
+        pin_message
     )
     VALUES (
         :id,
@@ -233,7 +238,8 @@ chatUpsert {
         :my_photo_url,
         :my_alias,
         :pending_contact_ids,
-        :notify
+        :notify,
+        :pin_message
     );
 }
 
@@ -251,12 +257,18 @@ UPDATE chatDbo
 SET seen = :seen
 WHERE id = ?;
 
+chatUpdatePinMessage:
+UPDATE chatDbo
+SET pin_message = :pin_message
+WHERE id = ?;
+
 chatUpdateTribeData:
 UPDATE chatDbo
 SET price_per_message = :price_per_message,
     escrow_amount = :escrow_amount,
     name = :name,
-    photo_url = :photo_url
+    photo_url = :photo_url,
+    pin_message = :pin_message
 WHERE id = ?;
 
 CREATE TABLE contactDbo(
@@ -589,7 +601,8 @@ CREATE TABLE messageDbo(
     recipient_alias             TEXT            AS RecipientAlias,
     recipient_pic               TEXT            AS PhotoUrl,
     push                        INTEGER         AS Push DEFAULT 0,
-    person                      TEXT            AS MessagePerson
+    person                      TEXT            AS MessagePerson,
+    thread_uuid                 TEXT            AS ThreadUUID
 );
 
 messageGetAllReactionsByUUID:
@@ -597,8 +610,24 @@ SELECT *
 FROM messageDbo
 WHERE chat_id = :chat_id
 AND (type = 29
-    AND reply_uuid IN :reply_uuids
+AND reply_uuid IN :reply_uuids
 );
+
+messageGetAllMessagesByThreadUUID:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND type != 29
+AND thread_uuid IN :thread_uuid
+AND status != 5;
+
+messagesGetAllThreadUUIDByChatId:
+SELECT *
+FROM messageDbo
+WHERE chat_id = :chat_id
+AND type != 29
+AND thread_uuid IS NOT NULL
+ORDER BY date DESC;
 
 messageGetAllPurchaseItemsByMUID:
 SELECT *
@@ -663,7 +692,8 @@ AND (
     type = 21 OR
     type = 22 OR
     type = 25 OR
-    (type = 29 AND reply_uuid IS NULL)
+    (type = 29 AND reply_uuid IS NULL) OR
+    type = 32
 )
 ORDER BY date DESC
 LIMIT ?;
@@ -686,7 +716,8 @@ AND (
     type = 21 OR
     type = 22 OR
     type = 25 OR
-    (type = 29 AND reply_uuid IS NULL)
+    (type = 29 AND reply_uuid IS NULL) OR
+    type = 32
 )
 ORDER BY date DESC;
 
@@ -720,6 +751,11 @@ SELECT SUM(amount)
 FROM messageDbo
 WHERE (chat_id IS NULL OR chat_id = 0)
 AND (message_content LIKE :message_content1 OR message_content LIKE :message_content2);
+
+messageGetMessagesByIds:
+SELECT *
+FROM messageDbo
+WHERE id IN ?;
 
 messagesSearchByTerm:
 SELECT *
@@ -766,7 +802,8 @@ messageUpsert {
         recipient_alias = :recipient_alias,
         recipient_pic = :recipient_pic,
         push = :push,
-        person = :person
+        person = :person,
+        thread_uuid = :thread_uuid
     WHERE id = :id;
 
     INSERT OR IGNORE INTO messageDbo(
@@ -794,7 +831,8 @@ messageUpsert {
         recipient_alias,
         recipient_pic,
         push,
-        person
+        person,
+        thread_uuid
     )
     VALUES (
         :id,
@@ -821,7 +859,8 @@ messageUpsert {
         :recipient_alias,
         :recipient_pic,
         :push,
-        :person
+        :person,
+        :thread_uuid
     );
 }
 
@@ -860,6 +899,21 @@ SET local_file = :local_file,
     file_name = ?
 WHERE id = ?;
 
+messageMediaGetByChatId:
+SELECT *
+FROM messageMediaDbo
+WHERE chat_id = ?;
+
+messageMediaGetAllDownloaded:
+SELECT *
+FROM messageMediaDbo
+WHERE local_file IS NOT NULL;
+
+messageMediaGetAllDownloadedByChatId:
+SELECT *
+FROM messageMediaDbo
+WHERE chat_id = ? AND local_file IS NOT NULL;
+
 messageMediaUpsert {
     UPDATE messageMediaDbo
     SET media_key = :media_key,
@@ -896,6 +950,16 @@ WHERE id = ?;
 messageMediaDeleteByChatId:
 DELETE FROM messageMediaDbo
 WHERE chat_id = ?;
+
+messageMediaDeleteAllMediaByChatId:
+UPDATE messageMediaDbo
+SET local_file = NULL
+WHERE chat_id = ?;
+
+messageMediaDeleteMediaById:
+UPDATE messageMediaDbo
+SET local_file = NULL
+WHERE chat_id = ? AND id IN ?;
 
 CREATE TABLE subscriptionDbo(
     id                          INTEGER         AS SubscriptionId NOT NULL PRIMARY KEY,
@@ -1014,7 +1078,8 @@ CREATE TABLE feedDbo(
     items_count                 INTEGER            AS FeedItemsCount DEFAULT 0 NOT NULL,
     current_item_id             TEXT               AS FeedId,
     chat_id                     INTEGER            AS ChatId NOT NULL,
-    subscribed                  INTEGER            AS Subscribed NOT NULL DEFAULT 1
+    subscribed                  INTEGER            AS Subscribed NOT NULL DEFAULT 1,
+    last_played                 INTEGER            AS DateTime
 );
 
 feedUpsert {
@@ -1030,9 +1095,7 @@ feedUpsert {
         content_type = :content_type,
         language = :language,
         items_count = :items_count,
-        current_item_id = :current_item_id,
-        chat_id = :chat_id,
-        subscribed = :subscribed
+        chat_id = :chat_id
     WHERE id = :id;
 
     INSERT OR IGNORE INTO feedDbo(
@@ -1085,7 +1148,7 @@ ORDER BY id DESC;
 feedGetAllSubscribed:
 SELECT *
 FROM feedDbo
-WHERE subscribed = 1
+WHERE (subscribed = 1 OR chat_id != 2147483647)
 ORDER BY id DESC;
 
 feedGetByChatId:
@@ -1109,11 +1172,17 @@ AND feed_type = ?
 ORDER BY id DESC
 LIMIT 1;
 
+feedGetAllSubscribedByFeedType:
+SELECT *
+FROM feedDbo
+WHERE feed_type = ?
+AND (subscribed = 1 OR chat_id != 2147483647)
+ORDER BY id DESC;
+
 feedGetAllByFeedType:
 SELECT *
 FROM feedDbo
 WHERE feed_type = ?
-AND subscribed = 1
 ORDER BY id DESC;
 
 feedGetAllByIds:
@@ -1131,31 +1200,39 @@ SELECT *
 FROM feedDbo
 WHERE id IN ?;
 
-feedGetAllByTitle:
-SELECT *
-FROM feedDbo
-WHERE (title LIKE :title);
-
-feedGetAllByTitleAndType:
+feedGetSubscribedByTitle:
 SELECT *
 FROM feedDbo
 WHERE (title LIKE :title)
-AND feed_type = :feed_type;
+AND (subscribed = 1 OR chat_id != 2147483647);
 
-feedUpdateCurrentItemIdByChatId:
-UPDATE feedDbo
-SET current_item_id = :item_id
-WHERE chat_id = ?;
+feedGetSubscribedByTitleAndType:
+SELECT *
+FROM feedDbo
+WHERE (title LIKE :title)
+AND feed_type = :feed_type
+AND (subscribed = 1 || chat_id != 2147483647);
 
-feedUpdateCurrentItemId:
+feedUpdateSubscribeAndChat:
 UPDATE feedDbo
-SET current_item_id = :item_id
+SET subscribed = :subscribed,
+chat_id = :chat_id
 WHERE id = ?;
 
 feedUpdateSubscribe:
 UPDATE feedDbo
 SET subscribed = :subscribed
 WHERE id = ?;
+
+feedUpdateLastPlayed:
+UPDATE feedDbo
+SET last_played = :last_played
+WHERE id = ?;
+
+feedBatchUnsubscribe:
+UPDATE feedDbo
+SET subscribed = 0
+WHERE id NOT IN ?;
 
 feedDeleteById:
 DELETE
@@ -1252,6 +1329,17 @@ FROM feedItemDbo
 WHERE feed_id IN ?
 ORDER BY date_published DESC;
 
+feedItemGetAllDownloaded:
+SELECT *
+FROM feedItemDbo
+WHERE local_file IS NOT NULL;
+
+feedItemGetDownloadedByFeedId:
+SELECT *
+FROM feedItemDbo
+WHERE feed_id = ? AND local_file IS NOT NULL;
+
+
 feedItemDeleteById:
 DELETE
 FROM feedItemDbo
@@ -1272,6 +1360,17 @@ feedItemUpdateLocalFile:
 UPDATE feedItemDbo
 SET local_file = :local_file
 WHERE id = ?;
+
+feedItemUpdateLocalFileByIds:
+UPDATE feedItemDbo
+SET local_file = :local_file
+WHERE id IN ?;
+
+feedItemDeleteAllDownloadedByFeedId:
+UPDATE feedItemDbo
+SET local_file = NULL
+WHERE feed_id = ?;
+
 
 CREATE TABLE feedModelDbo(
     id                          TEXT               AS FeedId NOT NULL PRIMARY KEY,
@@ -1400,5 +1499,158 @@ UPDATE actionTrackDbo
 SET uploaded = 1
 WHERE id IN :ids;
 
+CREATE TABLE contentFeedStatusDbo(
+    feed_id                         TEXT            AS FeedId NOT NULL PRIMARY KEY,
+    feed_url                        TEXT            AS FeedUrl NOT NULL,
+    subscription_status             INTEGER         AS Subscribed NOT NULL DEFAULT 0,
+    chat_id                         INTEGER         AS ChatId,
+    item_id                         TEXT            AS FeedId,
+    sats_per_minute                 INTEGER         AS Sat,
+    player_speed                    REAL            AS FeedPlayerSpeed
+);
+
+contentFeedStatusUpsert {
+    UPDATE contentFeedStatusDbo
+    SET feed_url = :feed_url,
+        subscription_status = :subscription_status,
+        chat_id = :chat_id,
+        item_id = :item_id,
+        sats_per_minute = :sats_per_minute,
+        player_speed = :player_speed,
+        subscription_status = :subscription_status
+    WHERE feed_id = :feed_id;
+
+    INSERT OR IGNORE INTO contentFeedStatusDbo(
+           feed_id,
+           feed_url,
+           subscription_status,
+           chat_id,
+           item_id,
+           sats_per_minute,
+           player_speed
+    )
+    VALUES (
+           :feed_id,
+           :feed_url,
+           :subscription_status,
+           :chat_id,
+           :item_id,
+           :sats_per_minute,
+           :player_speed
+    );
+}
+
+contentFeedStatusUpdate:
+UPDATE contentFeedStatusDbo
+SET subscription_status = :subscription_status,
+    chat_id = :chat_id,
+    sats_per_minute = :sats_per_minute
+WHERE feed_id = :feed_id;
+
+contentFeedStatusUpdateItemId:
+UPDATE contentFeedStatusDbo
+SET item_id = :item_id
+WHERE feed_id = :feed_id;
+
+contentFeedStatusUpdateSubscriptionStatus:
+UPDATE contentFeedStatusDbo
+SET subscription_status = :subscription_status
+WHERE feed_id = ?;
+
+contentFeedStatusGetAll:
+SELECT *
+FROM contentFeedStatusDbo;
+
+contentFeedStatusGetByIds:
+SELECT *
+FROM contentFeedStatusDbo
+WHERE feed_id IN ?;
+
+contentFeedStatusGetByFeedId:
+SELECT *
+FROM contentFeedStatusDbo
+WHERE feed_id = ?;
+
+contentFeedStatusDeleteAll:
+DELETE FROM contentFeedStatusDbo;
+
+contentFeedStatusDeleteByFeedId:
+DELETE
+FROM contentFeedStatusDbo
+WHERE feed_id = ?;
 
 
+CREATE TABLE contentEpisodeStatusDbo(
+    item_id                         TEXT            AS FeedId NOT NULL,
+    feed_id                         TEXT            AS FeedId NOT NULL,
+    duration                        INTEGER         AS FeedItemDuration NOT NULL,
+    current_time                    INTEGER         AS FeedItemDuration NOT NULL,
+    played                          INTEGER         AS Boolean DEFAULT NULL,
+
+    PRIMARY KEY (item_id, feed_id)
+);
+
+contentEpisodeStatusUpsert {
+    UPDATE contentEpisodeStatusDbo
+    SET duration = :duration,
+        current_time = :current_time
+    WHERE item_id = :item_id AND feed_id = :feed_id;
+
+    INSERT OR IGNORE INTO contentEpisodeStatusDbo(
+           item_id,
+           feed_id,
+           duration,
+           current_time,
+           played
+    )
+    VALUES (
+           :item_id,
+           :feed_id,
+           :duration,
+           :current_time,
+           :played
+    );
+}
+
+contentEpisodeStatusUpdatePlayed:
+UPDATE contentEpisodeStatusDbo
+SET played = :played
+WHERE item_id = :item_id;
+
+contentEpisodeStatusGetPlayedByItemId:
+SELECT played
+FROM contentEpisodeStatusDbo
+WHERE item_id = :item_id;
+
+
+contentEpisodeStatusGetAll:
+SELECT *
+FROM contentEpisodeStatusDbo;
+
+contentEpisodeStatusGetByFeedIdAndItemId:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE feed_id = :feed_id AND item_id = :item_id;
+
+contentEpisodeStatusGetByFeedIdAndItemIds:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE feed_id = :feed_id AND item_id IN ?;
+
+contentEpisodeStatusGetByItemIds:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE item_id IN ?;
+
+contentEpisodeStatusGetByFeedIds:
+SELECT *
+FROM contentEpisodeStatusDbo
+WHERE feed_id IN ?;
+
+contentEpisodeStatusDeleteAll:
+DELETE FROM contentEpisodeStatusDbo;
+
+contentEpisodeStatusDeleteByFeedId:
+DELETE
+FROM contentEpisodeStatusDbo
+WHERE feed_id = ?;

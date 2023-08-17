@@ -1,9 +1,14 @@
 plugins {
     id 'java-library'
     id 'kotlin'
+    id 'kotlin-kapt'
 }
 
 dependencies {
     implementation project(path: ':kotlin:crypto:crypto-common')
+
     testImplementation testDeps.junit
+
+    implementation deps.square.moshi
+    kapt kaptDeps.square.moshiCodegen
 }

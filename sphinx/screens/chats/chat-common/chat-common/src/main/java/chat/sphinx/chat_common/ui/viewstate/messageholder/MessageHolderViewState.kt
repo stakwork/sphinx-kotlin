@@ -37,6 +37,7 @@ inline val Message.shouldAdaptBubbleWidth: Boolean
             podcastClip == null &&
             replyUUID == null &&
             !isCopyLinkAllowed &&
+            (thread == null || thread!!.isEmpty()) &&
             !status.isDeleted() &&
             !flagged.isTrue()) ||
             type.isDirectPayment()
@@ -75,6 +76,10 @@ internal sealed class MessageHolderViewState(
                 MessageType.GroupAction.TribeDelete,
             )
         }
+    }
+
+    val isPinned: Boolean by lazy(LazyThreadSafetyMode.NONE) {
+        (message?.uuid?.value == chat.pinedMessage?.value)
     }
 
     val searchHighlightedStatus: LayoutState.SearchHighlightedStatus?
@@ -223,11 +228,14 @@ internal sealed class MessageHolderViewState(
         if (message == null) {
             null
         } else {
+            val isThread = message.thread?.isNotEmpty() == true
+
             message.retrieveTextToShow()?.let { text ->
                 if (text.isNotEmpty()) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = text,
-                        decryptionError = false
+                        decryptionError = false,
+                        isThread = isThread
                     )
                 } else {
                     null
@@ -236,7 +244,8 @@ internal sealed class MessageHolderViewState(
                 if (decryptionError) {
                     LayoutState.Bubble.ContainerThird.Message(
                         text = null,
-                        decryptionError = true
+                        decryptionError = true,
+                        isThread = isThread
                     )
                 } else {
                     null
@@ -244,6 +253,65 @@ internal sealed class MessageHolderViewState(
             }
         }
     }
+
+    val bubbleThread: LayoutState.Bubble.ContainerThird.Thread? by lazy(LazyThreadSafetyMode.NONE) {
+        if (message == null) {
+            null
+        } else {
+            message.thread?.let { replies ->
+                if (replies.isEmpty() || chat.isConversation()){
+                    null
+                } else {
+                    val users: MutableList<ReplyUserHolder> = mutableListOf()
+
+                    val owner = accountOwner()
+                    val ownerUserHolder = ReplyUserHolder(
+                        owner.photoUrl,
+                        owner.alias,
+                        owner.getColorKey()
+                    )
+
+                    replies.forEach { replyMessage ->
+                        users.add(
+                            if (replyMessage.sender == owner.id) {
+                                ownerUserHolder
+                            } else {
+                                ReplyUserHolder(
+                                    replyMessage.senderPic,
+                                    replyMessage.senderAlias?.value?.toContactAlias(),
+                                    replyMessage.getColorKey()
+                                )
+                            }
+                        )
+                    }
+
+                    val lastReplyUser = replies.last().let {
+                        if (it.sender == owner.id) {
+                            ownerUserHolder
+                        } else {
+                            ReplyUserHolder(
+                                it.senderPic,
+                                it.senderAlias?.value?.toContactAlias(),
+                                it.getColorKey()
+                            )
+                        }
+                    }
+
+                    val sent = message.sender == chat.contactIds.firstOrNull()
+
+                    LayoutState.Bubble.ContainerThird.Thread(
+                        replyCount = replies.size,
+                        users = users,
+                        lastReplyMessage = replies.last().retrieveTextToShow(),
+                        lastReplyDate = replies.last().date.chatTimeFormat(),
+                        lastReplyUser = lastReplyUser,
+                        isSentMessage = sent
+                    )
+                }
+            }
+        }
+    }
+
 
     val bubblePaidMessage: LayoutState.Bubble.ContainerThird.PaidMessage? by lazy(LazyThreadSafetyMode.NONE) {
         if (message == null || message.retrieveTextToShow() != null || !message.isPaidTextMessage) {
@@ -379,11 +447,15 @@ internal sealed class MessageHolderViewState(
         if (message == null) {
             null
         } else {
+            val pendingPayment = this is Received && message.isPaidPendingMessage
+            if (!pendingPayment) {
+                onBindDownloadMedia.invoke()
+            }
             message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
                 LayoutState.Bubble.ContainerSecond.ImageAttachment(
                     mediaData.first,
                     mediaData.second,
-                    (this is Received && message.isPaidPendingMessage)
+                    pendingPayment
                 )
             }
         }
@@ -660,6 +732,17 @@ internal sealed class MessageHolderViewState(
                 list.add(MenuItemState.Flag)
             }
 
+            if(chat.isTribeOwnedByAccount(accountOwner().nodePubKey)) {
+                if (nnMessage.isPinAllowed(chat.pinedMessage)) {
+                    list.add(MenuItemState.PinMessage)
+                }
+
+                if (nnMessage.isUnPinAllowed(chat.pinedMessage)) {
+                    list.add(MenuItemState.UnpinMessage)
+                }
+            }
+
+
             if (list.isEmpty()) {
                 null
             } else {
@@ -758,4 +841,53 @@ internal sealed class MessageHolderViewState(
         paidTextAttachmentContentProvider = { null },
         onBindDownloadMedia = {}
     )
+
+    class ThreadHeader(
+        messageHolderType: MessageHolderType,
+        val chat: Chat,
+        val tribeAdmin: Contact?,
+        background: BubbleBackground,
+        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
+        initialHolder: InitialHolderViewState,
+        val accountOwner: () -> Contact,
+        val aliasAndColorKey: Pair<ContactAlias?, String?>,
+        val photoUrl: PhotoUrl?,
+        val date: String,
+        val messageText: String,
+        val isExpanded: Boolean = false
+    ) : MessageHolderViewState(
+        null,
+        chat,
+        tribeAdmin,
+        messageHolderType,
+        null,
+        background,
+        invoiceLinesHolderViewState,
+        initialHolder,
+        null,
+        { null },
+        accountOwner,
+        false,
+        { null },
+        { null },
+        {}
+    ) {
+        fun copy(isExpanded: Boolean = this.isExpanded): ThreadHeader {
+            return ThreadHeader(
+                messageHolderType,
+                chat,
+                tribeAdmin,
+                background,
+                invoiceLinesHolderViewState,
+                initialHolder,
+                accountOwner,
+                aliasAndColorKey,
+                photoUrl,
+                date,
+                messageText,
+                isExpanded
+            )
+        }
+    }
+
 }

@@ -15,14 +15,14 @@ import chat.sphinx.newsletter_detail.R
 import chat.sphinx.newsletter_detail.databinding.FragmentNewsletterDetailBinding
 import chat.sphinx.newsletter_detail.ui.adapter.NewsletterItemsFooterAdapter
 import chat.sphinx.newsletter_detail.ui.adapter.NewsletterItemsListAdapter
+import chat.sphinx.screen_detail_fragment.BaseDetailFragment
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.base.BaseFragment
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
 
 @AndroidEntryPoint
-internal class NewsletterDetailFragment: BaseFragment<
+internal class NewsletterDetailFragment: BaseDetailFragment<
         NewsletterDetailViewState,
         NewsletterDetailViewModel,
         FragmentNewsletterDetailBinding
@@ -47,6 +47,12 @@ internal class NewsletterDetailFragment: BaseFragment<
         }
 
         setupItems()
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
+        }
     }
 
     private fun setupItems() {

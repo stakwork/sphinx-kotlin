@@ -113,6 +113,8 @@
     <string name="side_effect_call_link_copied">コールリンクをクリップボードにコピーしました</string>
     <string name="side_effect_link_copied">%sをコピーしました</string>
     <string name="side_effect_no_link_to_copy">コピーするリンクがありません</string>
+    <string name="side_effect_insufficient_budget">Budget is not enough to perform the search</string>
+    <string name="side_effect_error_pay_lsat">There was an error trying to pay Lsat</string>
 
     <string name="file_name_loading">Loading...</string>
     <string name="pdf_page">page</string>
@@ -185,5 +187,13 @@
     <string name="alert_confirm_block_contact_title">Block Contact</string>
     <string name="alert_confirm_unblock_contact_title">Unblock Contact</string>
     <string name="alert_confirm_unblock_contact">Are you sure you want to unblock this contact?</string>
+    <string name="alert_not_encrypted_contact">You can\'t send a message to an unencrypted contact</string>
 
+    <string name="unpin_message">Unpin Message</string>
+    <string name="pinned_message">Pinned Message</string>
+    <string name="message_pinned">Message Pinned</string>
+    <string name="message_unpinned">Message Unpinned</string>
+    <string name="pin_message_error">Something went wrong. Please try again later</string>
+
+    <string name="cancel_search">CANCEL</string>
 </resources>

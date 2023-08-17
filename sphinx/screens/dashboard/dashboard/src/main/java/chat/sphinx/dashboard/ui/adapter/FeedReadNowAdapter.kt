@@ -106,7 +106,7 @@ class FeedReadNowAdapter(
                 val episodesList = mutableListOf<FeedItem>()
 
                 list.forEach { feed ->
-                    feed.lastItem?.let { feedItem ->
+                    feed.lastPublished?.let { feedItem ->
                         episodesList.add(feedItem)
                     }
                 }
@@ -237,9 +237,10 @@ class FeedReadNowAdapter(
                         holderJobs.add(job)
                     }
                 }
-
+                
                 textViewItemName.text = newsletterItem.titleToShow
                 textViewItemDescription.text = newsletterItem.descriptionToShow
+
                 textViewEntryTimestamp.text = newsletterItem.datePublished?.hhmmElseDate()
 
                 val hasAuthor = newsletterItem.author != null && newsletterItem.author?.value?.isNotEmpty() == true

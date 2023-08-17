@@ -1,0 +1,3 @@
+import chat.sphinx.wrapper_common.DateTime;
+
+ALTER TABLE feedDbo ADD COLUMN last_played INTEGER AS DateTime;

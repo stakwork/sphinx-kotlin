@@ -17,7 +17,12 @@ import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.FeedFollowingViewModel
 import chat.sphinx.wrapper_common.feed.FeedType
 import chat.sphinx.wrapper_common.lightning.LightningRouteHint
+import chat.sphinx.wrapper_common.time
+import chat.sphinx.wrapper_common.timeAgo
 import chat.sphinx.wrapper_feed.Feed
+import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.Job
@@ -221,8 +226,15 @@ class FeedFollowingAdapter(
                     )
                 }
 
+                textViewItemName.goneIfFalse(f.titleToShow.isNotEmpty())
+                textViewItemDescription.goneIfFalse(f.descriptionToShow.isNotEmpty())
+
                 textViewItemName.text = f.titleToShow
                 textViewItemDescription.text = f.descriptionToShow
+
+                textViewItemEpisodeTime.gone
+                seekBarCurrentTimeEpisodeProgress.gone
+                textViewItemPublishTime.text = f.lastItem?.datePublished?.timeAgo()
             }
         }
 

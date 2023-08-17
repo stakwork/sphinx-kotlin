@@ -11,6 +11,7 @@
     <include app:graph="@navigation/chat_contact_nav_graph" />
     <include app:graph="@navigation/chat_group_nav_graph" />
     <include app:graph="@navigation/chat_tribe_nav_graph" />
+    <include app:graph="@navigation/threads_nav_graph" />
     <include app:graph="@navigation/dashboard_nav_graph" />
     <include app:graph="@navigation/fullscreen_video_nav_graph" />
     <include app:graph="@navigation/on_board_welcome_nav_graph" />

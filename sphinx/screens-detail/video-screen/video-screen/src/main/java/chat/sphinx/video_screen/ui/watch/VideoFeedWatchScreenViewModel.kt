@@ -5,6 +5,7 @@ import android.net.Uri
 import android.widget.VideoView
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_feed_status.NetworkQueryFeedStatus
 import chat.sphinx.concept_repository_actions.ActionsRepository
 import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
@@ -13,6 +14,7 @@ import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.video_player_controller.VideoPlayerController
+import chat.sphinx.video_screen.navigation.VideoScreenNavigator
 import chat.sphinx.video_screen.ui.VideoFeedScreenViewModel
 import chat.sphinx.video_screen.ui.viewstate.BoostAnimationViewState
 import chat.sphinx.video_screen.ui.viewstate.LoadingVideoViewState
@@ -47,6 +49,8 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     contactRepository: ContactRepository,
     messageRepository: MessageRepository,
     lightningRepository: LightningRepository,
+    networkQueryFeedStatus: NetworkQueryFeedStatus,
+    navigator: VideoScreenNavigator,
 ): VideoFeedScreenViewModel(
     dispatchers,
     app,
@@ -56,7 +60,9 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     actionsRepository,
     contactRepository,
     messageRepository,
-    lightningRepository
+    lightningRepository,
+    networkQueryFeedStatus,
+    navigator
 )
 {
     private val args: VideoFeedWatchScreenFragmentArgs by savedStateHandle.navArgs()
@@ -130,4 +136,5 @@ internal class VideoFeedWatchScreenViewModel @Inject constructor(
     override fun getArgFeedId(): FeedId? {
         return args.feedId
     }
+
 }

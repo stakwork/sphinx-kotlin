@@ -8,7 +8,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
@@ -16,7 +15,9 @@ import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.LayoutFeedSquaredRowHolderBinding
 import chat.sphinx.dashboard.ui.feed.listen.FeedListenViewModel
+import chat.sphinx.wrapper_common.timeAgo
 import chat.sphinx.wrapper_feed.FeedItem
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
@@ -72,10 +73,12 @@ class FeedListenNowAdapter(
                 val new = newList[newItemPosition]
 
                 val same: Boolean =
-                    old.title                   == new.title                &&
-                    old.description             == new.description          &&
-                    old.feed?.itemsCount        == new.feed?.itemsCount      &&
-                    old.feed?.lastItem?.id      == new.feed?.lastItem?.id
+                    old.title                             == new.title                              &&
+                    old.description                       == new.description                        &&
+                    old.feed?.itemsCount                  == new.feed?.itemsCount                   &&
+                    old.feed?.lastItem?.id                == new.feed?.lastItem?.id                 &&
+                    old.contentEpisodeStatus?.currentTime == new.contentEpisodeStatus?.currentTime  &&
+                    old.contentEpisodeStatus?.duration    == new.contentEpisodeStatus?.duration
 
                 if (sameList) {
                     sameList = same
@@ -101,7 +104,7 @@ class FeedListenNowAdapter(
                 val episodesList = mutableListOf<FeedItem>()
 
                 list.forEach { feed ->
-                    feed.lastItem?.let { feedItem ->
+                    feed.lastPublished?.let { feedItem ->
                         episodesList.add(feedItem)
                     }
                 }
@@ -169,6 +172,7 @@ class FeedListenNowAdapter(
                     }
                 }
             }
+            binding.seekBarCurrentTimeEpisodeProgress.setOnTouchListener { _, _ -> true }
         }
 
         fun bind(position: Int) {
@@ -199,8 +203,29 @@ class FeedListenNowAdapter(
                     )
                 }
 
+                textViewItemName.goneIfFalse(podcastEpisode.titleToShow.isNotEmpty())
+                textViewItemDescription.goneIfFalse(podcastEpisode.descriptionToShow.isNotEmpty())
+
                 textViewItemName.text = podcastEpisode.titleToShow
                 textViewItemDescription.text = podcastEpisode.descriptionToShow
+
+                textViewItemPublishTime.text = podcastEpisode.datePublished?.timeAgo()
+
+                val currentTime = (podcastEpisode.contentEpisodeStatus?.currentTime?.value ?: 0).toInt()
+                val duration = (podcastEpisode.contentEpisodeStatus?.duration?.value ?: 0).toInt()
+
+                textViewItemEpisodeTime.goneIfFalse(currentTime > 0 || duration > 0)
+
+                val progress = getSeekbarProgress(duration, currentTime)
+                seekBarCurrentTimeEpisodeProgress.progress = progress
+                seekBarCurrentTimeEpisodeProgress.goneIfFalse(currentTime > 0)
+
+                if (currentTime > 0 && duration > 0) {
+                    val timeLeft = duration - currentTime
+                    textViewItemEpisodeTime.text = binding.root.context.getString(R.string.time_left, "${timeLeft.toHrAndMin()}")
+                } else if (duration > 0) {
+                    textViewItemEpisodeTime.text = "${duration.toHrAndMin()}"
+                }
             }
         }
 
@@ -213,4 +238,22 @@ class FeedListenNowAdapter(
     init {
         lifecycleOwner.lifecycle.addObserver(this)
     }
+
+    private fun getSeekbarProgress(duration: Int, currentTime: Int): Int {
+        return try {
+            currentTime * 100 / duration
+        } catch (e: ArithmeticException) {
+            0
+        }
+    }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Int.toHrAndMin(): String {
+    val hours = this / 3600
+    val minutes = (this % 3600) / 60
+
+    return if (hours > 0) {
+        "$hours hr $minutes min"
+    } else "$minutes min"
 }

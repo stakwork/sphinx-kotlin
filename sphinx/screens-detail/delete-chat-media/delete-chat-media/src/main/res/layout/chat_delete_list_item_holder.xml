@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/default_extra_big_layout_margin"
+    android:background="@drawable/background_detail_screen">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraint_layout_storage_element_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <include
+            android:id="@+id/include_layout_chat_image_initial_holder"
+            layout="@layout/layout_chat_image_initial_holder"
+            android:layout_width="@dimen/chat_footer_initial_holder_xy"
+            android:layout_height="@dimen/chat_footer_initial_holder_xy"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_element_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="@string/manage_storage_images"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/pin_help_text_view_size"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_manage_storage_element_number"
+            app:layout_constraintStart_toEndOf="@+id/include_layout_chat_image_initial_holder"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_element_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/default_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:maxLines="1"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_tab"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_profile_right_arrow"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="12.37 GB" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_profile_right_arrow"
+            android:layout_width="@dimen/default_form_scan_icon_width"
+            android:layout_height="@dimen/default_form_scan_icon_width"
+            android:background="@drawable/ic_arrow_right"
+            android:backgroundTint="@color/secondaryText"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/view_storage_separator_divider_one"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginStart="@dimen/default_extra_big_layout_margin"
+        android:layout_marginEnd="@dimen/default_layout_margin"
+        android:background="@color/darkDivider"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

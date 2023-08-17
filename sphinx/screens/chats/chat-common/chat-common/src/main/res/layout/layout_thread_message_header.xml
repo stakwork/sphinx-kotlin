@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_thread_message_header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/headerBG"
+    android:elevation="@dimen/default_elevation">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_chat_thread_message_header"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/default_half_layout_margin"
+        android:layout_marginHorizontal="@dimen/default_layout_margin"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_constraint_thread_message_contact_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Profile Picture-->
+
+            <include
+                android:id="@+id/layout_contact_initial_holder"
+                layout="@layout/layout_chat_image_small_initial_holder"
+                android:layout_width="@dimen/chat_footer_initial_holder_xy"
+                android:layout_height="@dimen/chat_footer_initial_holder_xy"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_message_chat_header_main"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/layout_contact_initial_holder"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <!-- Contact name-->
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_contact_message_header_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="@dimen/default_header_headline_margin_horizontal"
+                    android:fontFamily="@font/roboto_regular"
+                    android:paddingEnd="@dimen/default_small_layout_margin"
+                    android:singleLine="true"
+                    android:textColor="@color/textMessages"
+                    android:textSize="@dimen/chat_footer_recording_audio_slide_text_size"
+                    app:layout_constraintBottom_toTopOf="@+id/text_view_thread_date"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:text="Some Chat Name" />
+
+                <!-- Date -->
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/text_view_thread_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/roboto_regular"
+                    android:textColor="@color/secondaryText"
+                    android:textSize="@dimen/default_text_size_body"
+                    android:visibility="visible"
+                    app:layout_constraintStart_toStartOf="@+id/text_view_contact_message_header_name"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_contact_message_header_name"
+                    tools:text="August 12th at 7:12 PM"
+                    tools:visibility="visible" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_thread_message_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/default_layout_margin"
+            android:layout_marginBottom="@dimen/default_half_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:gravity="start"
+            android:paddingEnd="@dimen/default_small_layout_margin"
+            android:textColor="@color/textMessages"
+            android:textSize="@dimen/option_title_text_size"
+            app:layout_constraintBottom_toTopOf="@+id/constraint_show_more_container"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_constraint_thread_message_contact_name"
+            tools:text="The bitcoin blockchain is a public ledger that records bitcoin transactions.[27] It is implemented as a chain of blocks, each block containing a cryptographic hash of then" />
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_show_more_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingVertical="@dimen/default_half_layout_margin"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_show_more"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/default_half_layout_margin"
+            android:fontFamily="@font/roboto_regular"
+            android:letterSpacing="0.1"
+            android:maxLines="1"
+            android:text="@string/episode_description_show_more"
+            android:textColor="@color/receivedIcon"
+            android:textSize="@dimen/default_text_size_caption1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="SHOW MORE" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

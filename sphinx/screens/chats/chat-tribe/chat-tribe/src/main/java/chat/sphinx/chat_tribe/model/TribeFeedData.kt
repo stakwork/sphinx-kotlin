@@ -1,5 +1,6 @@
 package chat.sphinx.chat_tribe.model
 
+import chat.sphinx.wrapper_chat.AppUrl
 import chat.sphinx.wrapper_chat.ChatHost
 import chat.sphinx.wrapper_chat.ChatMetaData
 import chat.sphinx.wrapper_common.chat.ChatUUID
@@ -14,10 +15,11 @@ sealed class TribeFeedData {
 
         data class FeedData(
             val host: ChatHost,
-            val feedUrl: FeedUrl,
+            val feedUrl: FeedUrl?,
             val chatUUID: ChatUUID,
             val feedType: FeedType,
-            val metaData: ChatMetaData?,
+            val appUrl: AppUrl?,
+            val badges: Array<String>,
         ) : Result()
     }
 }

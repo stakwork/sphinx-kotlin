@@ -8,6 +8,14 @@ inline fun String.toMessageUUID(): MessageUUID? =
         null
     }
 
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toPinnedMessageUUID(): MessageUUID =
+    try {
+        MessageUUID(this)
+    } catch (e: IllegalArgumentException) {
+        MessageUUID("_")
+    }
+
 @JvmInline
 value class MessageUUID(val value: String) {
     init {

@@ -11,6 +11,7 @@ import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.message.MessagePagination
+import chat.sphinx.wrapper_common.message.MessageUUID
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_message.isMemberApprove
 import chat.sphinx.wrapper_message_media.MediaToken
@@ -28,14 +29,14 @@ class NetworkQueryMessageImpl(
         private const val ENDPOINT_ATTACHMENT = "/attachment"
 
         private const val ENDPOINT_MSGS = "/msgs"
-        private const val ENDPOINT_MESSAGE = "/message"
+        private const val ENDPOINT_MESSAGE = "/message/%s"
         private const val ENDPOINT_DELETE_MESSAGE = "/message/%d"
         private const val ENDPOINT_MEMBER_APPROVED = "/member/%d/approved/%d"
         private const val ENDPOINT_MEMBER_REJECTED = "/member/%d/rejected/%d"
         private const val ENDPOINT_MESSAGES_READ = "/messages/%d/read"
-        private const val ENDPOINT_MESSAGES = "${ENDPOINT_MESSAGE}s"
+        private const val ENDPOINT_MESSAGES = "/messages"
         private const val ENDPOINT_PAYMENT = "/payment"
-        private const val ENDPOINT_PAYMENTS = "${ENDPOINT_PAYMENT}s"
+        private const val ENDPOINT_PAYMENTS = "payments"
         private const val ENDPOINT_PAY_ATTACHMENT = "/purchase"
         private const val ENDPOINT_INVOICES = "/invoices"
     }
@@ -50,6 +51,16 @@ class NetworkQueryMessageImpl(
             relayData = relayData
         )
 
+    override fun getMessage(
+        uuid: MessageUUID,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+    ): Flow<LoadResponse<GetMessageDto, ResponseError>> =
+        networkRelayCall.relayGet(
+            responseJsonClass = GetMessageRelayResponse::class.java,
+            relayEndpoint = String.format(ENDPOINT_MESSAGE, uuid.value),
+            relayData = relayData
+        )
+
     override fun getPayments(
         offset: Int,
         limit: Int,
@@ -57,7 +68,7 @@ class NetworkQueryMessageImpl(
     ): Flow<LoadResponse<List<TransactionDto>, ResponseError>> =
         networkRelayCall.relayGet(
             responseJsonClass = GetPaymentsRelayResponse::class.java,
-            relayEndpoint = "$ENDPOINT_PAYMENTS?offset=$offset&limit=$limit",
+            relayEndpoint = "$ENDPOINT_PAYMENTS?offset=$offset&limit=$limit&include_failures=true",
             relayData = relayData
         )
 

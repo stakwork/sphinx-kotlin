@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!--
+          Set 1: Manage Storage Closed
+    -->
+
+    <ConstraintSet android:id="@+id/motion_scene_storage_delete_closed">
+
+        <Constraint android:id="@+id/view_manage_storage_notification_lock">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_manage_storage_delete_details">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="parent" />
+            <PropertySet android:visibility="invisible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <!--
+           Set 2: Manage Storage Open
+    -->
+
+    <ConstraintSet
+        android:id="@+id/motion_scene_storage_delete_open"
+        app:deriveConstraintsFrom="@+id/motion_scene_storage_delete_closed">
+
+        <Constraint android:id="@+id/view_manage_storage_notification_lock">
+            <PropertySet
+                android:alpha="@dimen/options_menu_input_lock_alpha"
+                android:visibility="visible" />
+        </Constraint>
+
+        <Constraint android:id="@+id/include_layout_manage_storage_delete_details"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="match_parent">
+            <Layout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="parent" />
+            <PropertySet android:visibility="visible" />
+        </Constraint>
+
+    </ConstraintSet>
+
+    <Transition
+        android:id="@+id/transition_tribe_app_closed_to_open"
+        app:constraintSetEnd="@+id/motion_scene_storage_delete_open"
+        app:constraintSetStart="@+id/motion_scene_storage_delete_closed"
+        app:duration="300"/>
+
+</MotionScene>

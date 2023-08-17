@@ -9,6 +9,9 @@ import chat.sphinx.wrapper_common.lightning.LightningPaymentHash
 import chat.sphinx.wrapper_common.lightning.LightningPaymentRequest
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.MessageId
+import chat.sphinx.wrapper_common.message.MessageUUID
+import chat.sphinx.wrapper_common.message.toMessageUUID
+import chat.sphinx.wrapper_common.message.toPinnedMessageUUID
 import chat.sphinx.wrapper_common.subscription.SubscriptionId
 import com.squareup.sqldelight.ColumnAdapter
 import java.io.File
@@ -78,6 +81,27 @@ internal class ContactIdsAdapter private constructor(): ColumnAdapter<List<Conta
     override fun encode(value: List<ContactId>): String {
         return value.joinToString(",") { it.value.toString() }
     }
+}
+
+internal class PinMessageAdapter: ColumnAdapter<MessageUUID, String> {
+
+    companion object {
+        @Volatile
+        private var instance: PinMessageAdapter? = null
+        fun getInstance(): PinMessageAdapter =
+            instance ?: synchronized(this) {
+                instance ?: PinMessageAdapter()
+                    .also { instance = it }
+            }
+    }
+    override fun decode(databaseValue: String): MessageUUID {
+        return databaseValue.toPinnedMessageUUID()
+    }
+
+    override fun encode(value: MessageUUID): String {
+        return value.value
+    }
+
 }
 
 internal class DashboardIdAdapter: ColumnAdapter<DashboardItemId, String> {

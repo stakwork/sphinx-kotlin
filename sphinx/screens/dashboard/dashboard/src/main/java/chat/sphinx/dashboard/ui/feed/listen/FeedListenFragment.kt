@@ -15,12 +15,15 @@ import chat.sphinx.dashboard.databinding.FragmentFeedListenBinding
 import chat.sphinx.dashboard.ui.DashboardFragment
 import chat.sphinx.dashboard.ui.adapter.FeedListenNowAdapter
 import chat.sphinx.dashboard.ui.adapter.FeedFollowingAdapter
+import chat.sphinx.dashboard.ui.adapter.FeedRecentlyPlayedAdapter
 import chat.sphinx.dashboard.ui.feed.FeedFragment
 import chat.sphinx.dashboard.ui.placeholder.PlaceholderContent
 import chat.sphinx.dashboard.ui.viewstates.FeedListenViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
+import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,8 +49,8 @@ internal class FeedListenFragment : SideEffectFragment<
         super.onViewCreated(view, savedInstanceState)
 
         setupNestedScrollView()
-        setupListenNowAdapter()
-        setupFollowingAdapter()
+        setupRecentlyReleaseAdapter()
+        setupRecentlyPlayedAdapter()
     }
 
     @SuppressLint("RestrictedApi")
@@ -57,6 +60,7 @@ internal class FeedListenFragment : SideEffectFragment<
                 val bottomOfScroll = !binding.scrollViewContent.canScrollVertically(1)
                 val topOfScroll = !binding.scrollViewContent.canScrollVertically(-1)
                 val scrollNotAvailable = (bottomOfScroll && topOfScroll)
+
                 (parentFragment as FeedFragment)?.shouldToggleNavBar(
                     (scrollY <= oldScrollY && !bottomOfScroll) || scrollNotAvailable
                 )
@@ -64,7 +68,7 @@ internal class FeedListenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupListenNowAdapter() {
+    private fun setupRecentlyReleaseAdapter() {
         binding.recyclerViewListenNow.apply {
             val listenNowAdapter = FeedListenNowAdapter(
                 imageLoader,
@@ -79,9 +83,9 @@ internal class FeedListenFragment : SideEffectFragment<
         }
     }
 
-    private fun setupFollowingAdapter() {
-        binding.recyclerViewFollowing.apply {
-            val listenNowAdapter = FeedFollowingAdapter(
+    private fun setupRecentlyPlayedAdapter() {
+        binding.recyclerViewRecentlyPlayed.apply {
+            val recentlyPlayedAdapter = FeedRecentlyPlayedAdapter(
                 imageLoader,
                 viewLifecycleOwner,
                 onStopSupervisor,
@@ -90,7 +94,7 @@ internal class FeedListenFragment : SideEffectFragment<
             )
 
             this.setHasFixedSize(false)
-            adapter = listenNowAdapter
+            adapter = recentlyPlayedAdapter
             itemAnimator = null
         }
     }
@@ -117,6 +121,16 @@ internal class FeedListenFragment : SideEffectFragment<
                 toggleElements(
                     list.isNotEmpty()
                 )
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.lastPlayedFeedsHolderViewStateFlow.collect { list ->
+                if (list.isEmpty()) {
+                    binding.layoutConstraintRecentlyPlayed.gone
+                } else {
+                    binding.layoutConstraintRecentlyPlayed.visible
+                }
             }
         }
     }

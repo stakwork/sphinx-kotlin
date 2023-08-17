@@ -24,6 +24,11 @@ abstract class NetworkQueryMessage {
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
     ): Flow<LoadResponse<GetMessagesResponse, ResponseError>>
 
+    abstract fun getMessage(
+        uuid: MessageUUID,
+        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
+    ): Flow<LoadResponse<GetMessageDto, ResponseError>>
+
     abstract fun getPayments(
         offset: Int = 0,
         limit: Int = 50,
@@ -59,6 +64,7 @@ abstract class NetworkQueryMessage {
         postPaymentDto: PostPaymentDto,
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null,
     ): Flow<LoadResponse<KeySendPaymentDto, ResponseError>>
+
 
     abstract fun payAttachment(
         chatId: ChatId,

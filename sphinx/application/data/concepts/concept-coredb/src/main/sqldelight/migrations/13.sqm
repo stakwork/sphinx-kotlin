@@ -1,0 +1,25 @@
+import chat.sphinx.wrapper_common.dashboard.ChatId;
+import chat.sphinx.wrapper_common.feed.FeedId;
+import chat.sphinx.wrapper_common.feed.FeedUrl;
+import chat.sphinx.wrapper_common.feed.Subscribed;
+import chat.sphinx.wrapper_common.lightning.Sat;
+import chat.sphinx.wrapper_feed.FeedItemDuration;
+import chat.sphinx.wrapper_feed.FeedPlayerSpeed;
+
+CREATE TABLE contentFeedStatusDbo(
+    feed_id                         TEXT            AS FeedId NOT NULL PRIMARY KEY,
+    feed_url                        TEXT            AS FeedUrl NOT NULL,
+    subscription_status             INTEGER         AS Subscribed NOT NULL DEFAULT 0,
+    chat_id                         INTEGER         AS ChatId,
+    item_id                         TEXT            AS FeedId,
+    sats_per_minute                 INTEGER         AS Sat,
+    player_speed                    REAL            AS FeedPlayerSpeed
+);
+
+CREATE TABLE contentEpisodeStatusDbo(
+    item_id                         TEXT            AS FeedId NOT NULL,
+    feed_id                         TEXT            AS FeedId NOT NULL,
+    duration                        INTEGER         AS FeedItemDuration NOT NULL,
+    current_time                    INTEGER         AS FeedItemDuration NOT NULL,
+    PRIMARY KEY (item_id, feed_id)
+);

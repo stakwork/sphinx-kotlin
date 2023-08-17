@@ -18,19 +18,31 @@ import chat.sphinx.wrapper_message.FeedBoost
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageContentDecrypted
 import chat.sphinx.wrapper_message.MessageType
+import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_podcast.Podcast
 import kotlinx.coroutines.flow.Flow
 
 interface MessageRepository {
-    fun getAllMessagesToShowByChatId(chatId: ChatId, limit: Long): Flow<List<Message>>
+    fun getAllMessagesToShowByChatId(
+        chatId: ChatId,
+        limit: Long,
+        chatThreadUUID: ThreadUUID? = null
+    ): Flow<List<Message>>
+
     fun searchMessagesBy(chatId: ChatId, term: String): Flow<List<Message>>
 
     fun getMessageById(messageId: MessageId): Flow<Message?>
+    fun getMessagesByIds(messagesIds: List<MessageId>): Flow<List<Message?>>
     fun getTribeLastMemberRequestByContactId(contactId: ContactId, chatId: ChatId, ): Flow<Message?>
     fun getMessageByUUID(messageUUID: MessageUUID): Flow<Message?>
     fun getPaymentsTotalFor(feedId: FeedId): Flow<Sat?>
 
+    fun getThreadUUIDMessagesByChatId(chatId: ChatId): Flow<List<Message>>
+    fun getThreadUUIDMessagesByUUID(chatId: ChatId, threadUUID: ThreadUUID): Flow<List<Message>>
+
     suspend fun getAllMessagesByUUID(messageUUIDs: List<MessageUUID>): List<Message>
+
+    suspend fun fetchPinnedMessageByUUID(messageUUID: MessageUUID, chatId: ChatId)
 
     fun updateMessageContentDecrypted(messageId: MessageId, messageContentDecrypted: MessageContentDecrypted)
 

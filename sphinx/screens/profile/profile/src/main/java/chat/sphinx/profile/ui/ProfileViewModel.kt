@@ -2,6 +2,8 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
+import android.os.Environment
+import android.os.StatFs
 import android.text.InputType
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
@@ -18,7 +20,9 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
 import chat.sphinx.concept_repository_contact.ContactRepository
+import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
+import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
@@ -30,10 +34,14 @@ import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
 import chat.sphinx.profile.R
+import chat.sphinx.wrapper_common.FeedRecommendationsToggle
 import chat.sphinx.wrapper_common.PreviewsEnabled
+import chat.sphinx.wrapper_common.calculateSize
+import chat.sphinx.wrapper_common.calculateStoragePercentage
 import chat.sphinx.wrapper_common.isTrue
 import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
+import chat.sphinx.wrapper_common.toFileSize
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
 import chat.sphinx.wrapper_lightning.NodeBalance
@@ -78,6 +86,8 @@ internal class ProfileViewModel @Inject constructor(
     private val cameraCoordinator: ViewModelCoordinator<CameraRequest, CameraResponse>,
     private val contactRepository: ContactRepository,
     private val lightningRepository: LightningRepository,
+    private val feedRepository: FeedRepository,
+    private val repositoryMedia: RepositoryMedia,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val networkQueryCrypter: NetworkQueryCrypter,
     private val relayDataHandler: RelayDataHandler,
@@ -90,13 +100,20 @@ internal class ProfileViewModel @Inject constructor(
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
     PictureMenuViewModel
 {
-
     companion object {
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
         const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
 
         const val BITCOIN_NETWORK_REG_TEST = "regtest"
         const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
+    }
+
+    val storageBarViewStateContainer: ViewStateContainer<StorageBarViewState> by lazy {
+        ViewStateContainer(StorageBarViewState.Loading)
+    }
+
+    val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
+        ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
@@ -141,8 +158,29 @@ internal class ProfileViewModel @Inject constructor(
         )
     }
 
-    val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
-        ViewStateContainer(UpdatingImageViewState.Idle)
+    private fun setUpManageStorage(){
+        viewModelScope.launch(mainImmediate) {
+            repositoryMedia.getStorageDataInfo().collect { storageData ->
+                val totalStorage = getTotalStorage()
+                val usedStorage = storageData.usedStorage
+                val freeStorage = (totalStorage - usedStorage.value).toFileSize()
+                val modifiedStorageDataInfo = storageData.copy(freeStorage = freeStorage)
+                val storagePercentage = calculateStoragePercentage(modifiedStorageDataInfo)
+
+                storageBarViewStateContainer.updateViewState(
+                    StorageBarViewState.StorageData(
+                        storagePercentage,
+                        usedStorage.calculateSize(),
+                        totalStorage.toFileSize()?.calculateSize() ?: "0 Bytes"
+                    )
+                )
+            }
+        }
+    }
+
+    private fun getTotalStorage(): Long {
+        val stat = StatFs(Environment.getDataDirectory().path)
+        return stat.blockSizeLong * stat.availableBlocksLong
     }
 
     private var resetPINJob: Job? = null
@@ -250,6 +288,25 @@ internal class ProfileViewModel @Inject constructor(
 
         withContext(dispatchers.io) {
             generalSettingsSharedPreferences.edit().putBoolean(PreviewsEnabled.LINK_PREVIEWS_ENABLED_KEY, enabled)
+                .let { editor ->
+                    if (!editor.commit()) {
+                        editor.apply()
+                    }
+                }
+        }
+    }
+
+    suspend fun updateFeedRecommendationsToggle(enabled: Boolean) {
+        _feedRecommendationsStateFlow.value = enabled
+        feedRepository.setRecommendationsToggle(enabled)
+
+        delay(50L)
+
+        val appContext: Context = app.applicationContext
+        val generalSettingsSharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        withContext(dispatchers.io) {
+            generalSettingsSharedPreferences.edit().putBoolean(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, enabled)
                 .let { editor ->
                     if (!editor.commit()) {
                         editor.apply()
@@ -457,6 +514,10 @@ internal class ProfileViewModel @Inject constructor(
         MutableStateFlow(true)
     }
 
+    private val _feedRecommendationsStateFlow: MutableStateFlow<Boolean> by lazy {
+        MutableStateFlow(false)
+    }
+
     val relayUrlStateFlow: StateFlow<String?>
         get() = _relayUrlStateFlow.asStateFlow()
     val pinTimeoutStateFlow: StateFlow<Int?>
@@ -467,6 +528,8 @@ internal class ProfileViewModel @Inject constructor(
         get() = contactRepository.accountOwner
     val linkPreviewsEnabledStateFlow: StateFlow<Boolean>
         get() = _linkPreviewsEnabledStateFlow.asStateFlow()
+    val feedRecommendationsStateFlow: StateFlow<Boolean>
+        get() = _feedRecommendationsStateFlow.asStateFlow()
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -475,6 +538,8 @@ internal class ProfileViewModel @Inject constructor(
 
             setServerUrls()
             setLinkPreviewsEnabled()
+            setFeedRecommendationsToggle()
+            setUpManageStorage()
         }
     }
 
@@ -500,6 +565,17 @@ internal class ProfileViewModel @Inject constructor(
         )
 
         _linkPreviewsEnabledStateFlow.value = linkPreviewsEnabled
+    }
+
+    private fun setFeedRecommendationsToggle() {
+        val appContext: Context = app.applicationContext
+        val sharedPreferences = appContext.getSharedPreferences(FeedRecommendationsToggle.FEED_RECOMMENDATIONS_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+        val feedRecommendationsToggle = sharedPreferences.getBoolean(
+            FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, false
+        )
+        feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
+        _feedRecommendationsStateFlow.value = feedRecommendationsToggle
     }
 
     private var setupSigningDeviceJob: Job? = null
@@ -544,45 +620,28 @@ internal class ProfileViewModel @Inject constructor(
                                     seedDto.pass = networkPass
 
                                     submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                        app.getString(R.string.lightning_node_ip_title),
-                                        app.getString(R.string.lightning_node_ip_message),
-                                    ) { lightningNodeIP ->
+                                        app.getString(R.string.lightning_node_url_title),
+                                        app.getString(R.string.lightning_node_url_message),
+                                    ) { lightningNodeUrl ->
                                         viewModelScope.launch(mainImmediate) {
-                                            if (lightningNodeIP == null) {
-                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node IP can not be empty"))
+                                            if (lightningNodeUrl == null) {
+                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
                                                 return@launch
                                             }
 
-                                            seedDto.lightningNodeIP = lightningNodeIP
+                                            seedDto.lightningNodeUrl = lightningNodeUrl
 
-                                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                                                app.getString(R.string.lightning_node_port_title),
-                                                app.getString(R.string.lightning_node_port_message),
-                                                "1883"
-                                            ) { lightningNodePort ->
-
-                                                viewModelScope.launch(mainImmediate) {
-
-                                                    if (lightningNodePort == null) {
-                                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node port can not be empty"))
-                                                        return@launch
+                                            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
+                                                regTestCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                                }, mainNetCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                                }, callback = {
+                                                    viewModelScope.launch(mainImmediate) {
+                                                        linkSigningDevice()
                                                     }
-
-                                                    seedDto.lightningNodePort = lightningNodePort
-
-                                                    submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
-                                                        regTestCallback = {
-                                                            seedDto.network = BITCOIN_NETWORK_REG_TEST
-                                                        }, mainNetCallback = {
-                                                            seedDto.network = BITCOIN_NETWORK_MAIN_NET
-                                                        }, callback = {
-                                                            viewModelScope.launch(mainImmediate) {
-                                                                linkSigningDevice()
-                                                            }
-                                                        }
-                                                    ))
                                                 }
-                                            })
+                                            ))
                                         }
                                     })
                                 }
@@ -612,11 +671,11 @@ internal class ProfileViewModel @Inject constructor(
         seedDto.pubkey = pk1
 
         if (
-            seedDto.lightningNodeIP == null ||
-            seedDto.lightningNodeIP?.isEmpty() == true
+            seedDto.lightningNodeUrl == null ||
+            seedDto.lightningNodeUrl?.isEmpty() == true
         ) {
             resetSeedDto()
-            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("lightning node IP can't be empty"))
+            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("lightning node URL can't be empty"))
             return
         }
 
@@ -694,7 +753,7 @@ internal class ProfileViewModel @Inject constructor(
         val nonce = ByteArray(12)
         SecureRandom().nextBytes(nonce)
 
-        encrypt(seed, sec1, nonce.toHex())?.let { cipher ->
+        encrypt(seed, sec1, nonce.toHex()).let { cipher ->
             if (cipher.isNotEmpty()) {
                 seedDto.seed = cipher
 
@@ -707,6 +766,7 @@ internal class ProfileViewModel @Inject constructor(
                             resetSeedDto()
                             submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("error sending seed to hardware"))
                         }
+
                         is Response.Success -> {
                             submitSideEffect(ProfileSideEffect.SigningDeviceSuccessfullySet)
 

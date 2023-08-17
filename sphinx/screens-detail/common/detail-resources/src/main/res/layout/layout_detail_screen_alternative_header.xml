@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/default_header_height">
+
+    <!-- Header screen-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/change_storage_header_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:background="@color/headerBG"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_close"
+            android:layout_width="@dimen/default_header_height"
+            android:layout_height="@dimen/default_header_height"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_nav_back"
+            android:textColor="@color/placeholderText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_elevation"
+            android:ellipsize="none"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="1"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/pin_text_view_size"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_detail_screen_close"
+            app:layout_constraintEnd_toStartOf="@+id/constraint_layout_delete_element_container_trash"
+            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_close"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Manage Storage" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraint_layout_delete_element_container_trash"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_manage_storage_element_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/default_half_layout_margin"
+                android:fontFamily="@font/roboto_regular"
+                android:maxLines="1"
+                android:textColor="@color/secondaryText"
+                android:textSize="@dimen/default_text_size_list_row_headline_variation"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="@+id/image_view_delete_icon"
+                app:layout_constraintEnd_toStartOf="@+id/image_view_delete_icon"
+                app:layout_constraintTop_toTopOf="@+id/image_view_delete_icon"
+                tools:text="12.37 GB" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_delete_icon"
+                android:layout_width="@dimen/badges_icon_radius"
+                android:layout_height="@dimen/badges_icon_radius"
+                android:layout_marginEnd="@dimen/default_layout_margin"
+                android:background="@drawable/ic_delete"
+                android:backgroundTint="@color/secondaryText"
+                android:visibility="visible"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/button_header_delete"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:background="@android:color/transparent">
+
+            </androidx.appcompat.widget.AppCompatButton>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/view_storage_separator_divider_one"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_detail_screen_close" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+<!--    Selection header screen-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/change_storage_header_selection_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/primaryBlue"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_detail_screen_selection_close"
+            android:layout_width="@dimen/default_header_height"
+            android:layout_height="@dimen/default_header_height"
+            android:fontFamily="@font/material_icons_regular"
+            android:gravity="center"
+            android:text="@string/material_icon_name_close"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_selection_header"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/default_elevation"
+            android:ellipsize="none"
+            android:fontFamily="@font/roboto_medium"
+            android:maxLines="1"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/pin_text_view_size"
+            app:layout_constraintBottom_toBottomOf="@+id/text_view_detail_screen_selection_close"
+            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_selection_close"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="3" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_manage_storage_element_selection_number"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_regular"
+            android:layout_marginEnd="12dp"
+            android:maxLines="1"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline_variation"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/button_delete_container"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="12.37 GB" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/button_delete_container"
+            android:layout_width="@dimen/manage_storage_button_cancel_width"
+            android:layout_height="@dimen/player_bar_play_button_xy"
+            android:layout_marginRight="@dimen/default_medium_layout_margin"
+            android:background="@drawable/background_button_open_white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/button_delete_selected_items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/roboto_medium"
+                android:layout_marginLeft="@dimen/default_form_scan_icon_width"
+                android:text="@string/manage_storage_delete"
+                android:textColor="@color/primaryBlue"
+                android:textSize="@dimen/chat_footer_episode_title_text_size"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_delete_selection_icon"
+                android:layout_width="@dimen/default_layout_margin"
+                android:layout_height="@dimen/default_layout_margin"
+                android:layout_marginEnd="@dimen/default_small_layout_margin"
+                android:background="@drawable/ic_delete"
+                android:backgroundTint="@color/primaryBlue"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/button_delete_selected_items"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/view_storage_separator_divider_selection"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!--  Save Limit header screen-->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/change_storage_header_save_limit_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/default_header_height"
+        android:background="@color/primaryRed"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/text_view_detail_screen_save_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_warning"
+            android:text="@string/material_icon_name_close"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_back_arrow"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_warning_undersized"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:ellipsize="none"
+            android:fontFamily="@font/roboto_medium"
+            android:layout_marginStart="@dimen/default_text_size_tab"
+            android:maxLines="2"
+            android:text="@string/manage_storage_limit_warning"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_view_detail_screen_save_close"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/view_storage_separator_divider_save"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/divider"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

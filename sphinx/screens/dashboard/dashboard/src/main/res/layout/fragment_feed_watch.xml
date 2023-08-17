@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/default_layout_margin"
                 android:fontFamily="@font/roboto_bold"
-                android:text="@string/watch_now"
+                android:text="@string/recently_released"
                 android:textSize="@dimen/default_text_size_large_title"
                 android:textColor="@color/text"
                 android:gravity="center"
@@ -57,42 +57,50 @@
                 app:layout_constraintTop_toBottomOf="@+id/text_view_watch_now_header"
                 tools:listitem="@layout/layout_feed_watch_now_row_holder" />
 
-            <TextView
-                android:id="@+id/text_view_watch_following_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/default_layout_margin"
-                android:layout_marginTop="@dimen/default_layout_margin"
-                android:text="@string/following"
-                android:textSize="@dimen/default_text_size_large_title"
-                android:textColor="@color/text"
-                android:fontFamily="@font/roboto_bold"
-                android:gravity="center"
-                app:layout_constraintTop_toBottomOf="@+id/recycler_view_watch_now"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/material_icons_regular"
-                android:text="@string/material_icon_name_chevron_right_button"
-                android:textColor="@color/text"
-                android:textSize="@dimen/default_text_size_large_title_chevron_icon"
-                app:layout_constraintBottom_toBottomOf="@+id/text_view_watch_following_header"
-                app:layout_constraintStart_toEndOf="@+id/text_view_watch_following_header" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_following"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_constraint_recently_played"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="@dimen/default_layout_margin"
-                android:paddingStart="@dimen/default_half_layout_margin"
-                android:paddingEnd="@dimen/default_half_layout_margin"
-                android:clipToPadding="false"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintTop_toBottomOf="@+id/text_view_watch_following_header"
-                tools:listitem="@layout/layout_feed_squared_row_holder" />
+                app:layout_constraintTop_toBottomOf="@id/recycler_view_watch_now">
+
+                <TextView
+                    android:id="@+id/text_view_watch_following_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/default_layout_margin"
+                    android:layout_marginTop="@dimen/default_layout_margin"
+                    android:text="@string/recently_played"
+                    android:textSize="@dimen/default_text_size_large_title"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/roboto_bold"
+                    android:gravity="center"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/material_icons_regular"
+                    android:text="@string/material_icon_name_chevron_right_button"
+                    android:textColor="@color/text"
+                    android:textSize="@dimen/default_text_size_large_title_chevron_icon"
+                    app:layout_constraintBottom_toBottomOf="@+id/text_view_watch_following_header"
+                    app:layout_constraintStart_toEndOf="@+id/text_view_watch_following_header" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_view_following"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="@dimen/default_layout_margin"
+                    android:paddingStart="@dimen/default_half_layout_margin"
+                    android:paddingEnd="@dimen/default_half_layout_margin"
+                    android:clipToPadding="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layout_constraintTop_toBottomOf="@+id/text_view_watch_following_header"
+                    tools:listitem="@layout/layout_feed_squared_row_holder" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

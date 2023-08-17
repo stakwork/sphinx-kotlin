@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_constraint_feed_recommended_list"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/headerBG">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_videos_list"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_list_count"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/default_layout_margin"
+            android:layout_marginEnd="@dimen/default_inner_spacing_list_item_title"
+            android:fontFamily="@font/montserrat_regular"
+            android:gravity="start|center"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="37" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_list_header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="@dimen/default_inner_spacing_list_item_title"
+            android:fontFamily="@font/montserrat_regular"
+            android:gravity="start|center"
+            android:text="@string/recommendations"
+            android:textAlignment="textStart"
+            android:textColor="@color/secondaryText"
+            android:textSize="@dimen/default_text_size_list_row_headline"
+            android:elevation="8dp"
+            app:layout_constraintStart_toEndOf="@+id/text_view_list_count" />
+
+<!--        <TextView-->
+<!--            android:id="@+id/text_view_refresh_recommendations"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginEnd="8dp"-->
+<!--            android:fontFamily="@font/roboto_medium"-->
+<!--            android:gravity="center"-->
+<!--            android:text="@string/refresh"-->
+<!--            android:textColor="@color/secondaryText"-->
+<!--            android:textSize="@dimen/default_header_text_size"-->
+<!--            app:layout_constraintBaseline_toBaselineOf="@+id/text_view_videos_list_header_title"-->
+<!--            app:layout_constraintEnd_toStartOf="@+id/textView" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/textView"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginEnd="16dp"-->
+<!--            android:fontFamily="@font/material_icons_regular"-->
+<!--            android:text="@string/refresh_icon"-->
+<!--            android:textColor="@color/secondaryText"-->
+<!--            android:textSize="@dimen/default_text_size_large_title_chevron_icon"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/body"
+        app:layout_constraintTop_toBottomOf="@+id/layout_constraint_videos_list"
+        app:layout_constraintBottom_toBottomOf="parent"
+        tools:listitem="@layout/layout_episode_generic_list_item_holder" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

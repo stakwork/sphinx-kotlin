@@ -2,6 +2,7 @@ package chat.sphinx.concept_repository_actions
 
 import chat.sphinx.wrapper_action_track.action_wrappers.ContentConsumedHistoryItem
 import chat.sphinx.wrapper_common.feed.FeedId
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface ActionsRepository {
 
@@ -23,18 +24,22 @@ interface ActionsRepository {
         feedItemId: FeedId
     )
 
-    fun trackVideoConsumed(
+    fun trackMediaContentConsumed(
         feedItemId: FeedId,
-        history: java.util.ArrayList<ContentConsumedHistoryItem>
+        history: ArrayList<ContentConsumedHistoryItem>
     )
 
-    fun trackPodcastConsumed(
+    fun trackRecommendationsConsumed(
         feedItemId: FeedId,
-        history: java.util.ArrayList<ContentConsumedHistoryItem>
+        history: ArrayList<ContentConsumedHistoryItem>
     )
 
     fun trackMessageContent(
         keywords: List<String>
     )
 
+    fun syncActions()
+
+    val appLogsStateFlow: MutableStateFlow<String>
+    fun setAppLog(log: String)
 }

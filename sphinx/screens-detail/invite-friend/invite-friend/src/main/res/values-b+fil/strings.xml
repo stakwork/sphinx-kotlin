@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="invite_friend_header_name">INVITE FRIEND</string>
+    <string name="invite_friend_nickname_label">PALAYAW</string>
+    <string name="invite_friend_message_label">MAGSAMA NG MENSAHE...</string>
+    <string name="invite_friend_message_hint">Maligayang pagdating sa Sphinx!</string>
+    <string name="invite_friend_create_invitation_button">Gumawa ng Imbitasyon</string>
+    <string name="invite_friend_estimated_cost_text_view">TINATAYANG HALAGA</string>
+    <string name="invite_friend_nickname_empty">Nickname can not be empty</string>
+    <string name="invite_failed">Invite failed. Please try again later.</string>
+</resources>

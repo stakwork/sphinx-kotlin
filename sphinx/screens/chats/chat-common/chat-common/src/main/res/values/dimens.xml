@@ -23,6 +23,7 @@
     <dimen name="chat_message_attachment_price_edit_text_text_size">14sp</dimen>
 
     <dimen name="chat_header_headline_text_size">16sp</dimen>
+    <dimen name="chat_header_pined_message_text_size">14sp</dimen>
     <dimen name="chat_header_phone_text_size">25sp</dimen>
     <dimen name="chat_message_text_size">17sp</dimen>
     <dimen name="chat_paid_message_notice_text_size">14sp</dimen>
@@ -169,4 +170,17 @@
     <dimen name="chat_tribe_direct_payment_popup_button_width">171dp</dimen>
     <dimen name="chat_tribe_direct_payment_popup_button_text_size">16sp</dimen>
     <dimen name="chat_tribe_direct_payment_popup_initials_text_size">30sp</dimen>
+
+    <!-- Pin Message Popup -->
+    <dimen name="chat_tribe_pin_message_popup_width">280dp</dimen>
+    <dimen name="chat_tribe_pin_message_popup_height">280dp</dimen>
+    <dimen name="chat_tribe_pin_icon_width">94dp</dimen>
+    <dimen name="chat_tribe_pin_icon_height">94dp</dimen>
+    <dimen name="chat_tribe_pin_icon_margin_top">48dp</dimen>
+
+    <dimen name="scroll_down_button_width">50dp</dimen>
+    <dimen name="scroll_down_button_height">40dp</dimen>
+
+    <!-- Thread -->
+    <dimen name="thread_height">256dp</dimen>
 </resources>

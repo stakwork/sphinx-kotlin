@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
+import chat.sphinx.screen_detail_fragment.SideEffectDetailFragment
 import chat.sphinx.subscription.R
 import chat.sphinx.subscription.databinding.FragmentSubscriptionBinding
 import chat.sphinx.wrapper_common.DateTime
@@ -20,7 +21,6 @@ import chat.sphinx.wrapper_common.lightning.toSat
 import chat.sphinx.wrapper_common.toDateTime
 import chat.sphinx.wrapper_common.toDateTimeWithFormat
 import dagger.hilt.android.AndroidEntryPoint
-import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
@@ -30,7 +30,7 @@ import java.util.*
 import javax.annotation.meta.Exhaustive
 
 @AndroidEntryPoint
-internal class SubscriptionFragment: SideEffectFragment<
+internal class SubscriptionFragment: SideEffectDetailFragment<
         Context,
         SubscriptionSideEffect,
         SubscriptionViewState,
@@ -165,6 +165,12 @@ internal class SubscriptionFragment: SideEffectFragment<
                 )
             }
             (requireActivity() as InsetterActivity).addNavigationBarPadding(layoutConstraintSubscription)
+        }
+    }
+
+    override fun closeDetailsScreen() {
+        lifecycleScope.launch(viewModel.mainImmediate) {
+            viewModel.navigator.closeDetailScreen()
         }
     }
 

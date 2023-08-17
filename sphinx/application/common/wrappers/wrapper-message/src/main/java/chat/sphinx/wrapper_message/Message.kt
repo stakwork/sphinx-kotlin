@@ -202,7 +202,11 @@ inline fun Message.retrievePurchaseStatus(): PurchaseStatus? {
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.retrieveSphinxCallLink(): SphinxCallLink? =
-    messageContentDecrypted?.value?.toSphinxCallLink()
+    messageContentDecrypted?.value?.toSphinxCallLink()?.let {
+        it
+    } ?: callLinkMessage?.let {
+        it.link
+    }
 
 @Suppress("NOTHING_TO_INLINE")
 inline fun Message.getColorKey(): String {
@@ -240,6 +244,26 @@ inline fun Message.shouldAvoidGrouping(): Boolean {
 }
 
 //Message Actions
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.isPinAllowed(chatPinnedMessage: MessageUUID?): Boolean {
+    chatPinnedMessage?.let {
+        if (it == this.uuid) {
+            return false
+        }
+    }
+    return true
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun Message.isUnPinAllowed(chatPinnedMessage: MessageUUID?): Boolean {
+    chatPinnedMessage?.let {
+        if (it == this.uuid) {
+            return true
+        }
+    }
+    return false
+}
+
 inline val Message.isBoostAllowed: Boolean
     get() = status.isReceived() &&
             !type.isInvoice() &&
@@ -275,7 +299,15 @@ inline val Message.isPaidTextMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isSphinxText == true && (messageMedia?.price?.value ?: 0L) > 0L
 
 inline val Message.isSphinxCallLink: Boolean
-    get() = type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)
+    get() {
+        if (type.isMessage() && (messageContentDecrypted?.value?.isValidSphinxCallLink == true)) {
+            return true
+        }
+        if (type.isCallLink() && callLinkMessage != null) {
+            return true
+        }
+        return false
+    }
 
 inline val Message.isAudioMessage: Boolean
     get() = type.isAttachment() && messageMedia?.mediaType?.isAudio == true
@@ -324,17 +356,21 @@ abstract class Message {
     abstract val recipientAlias: RecipientAlias?
     abstract val recipientPic: PhotoUrl?
     abstract val person: MessagePerson?
+    abstract val threadUUID: ThreadUUID?
+    abstract val isPinned: Boolean
 
     abstract val messageContentDecrypted: MessageContentDecrypted?
     abstract val messageDecryptionError: Boolean
     abstract val messageDecryptionException: Exception?
     abstract val messageMedia: MessageMedia?
     abstract val feedBoost: FeedBoost?
+    abstract val callLinkMessage: CallLinkMessage?
     abstract val podcastClip: PodcastClip?
     abstract val giphyData: GiphyData?
     abstract val reactions: List<Message>?
     abstract val purchaseItems: List<Message>?
     abstract val replyMessage: Message?
+    abstract val thread: List<Message>?
 
     override fun equals(other: Any?): Boolean {
         return  other                               is Message                      &&
@@ -362,11 +398,14 @@ abstract class Message {
                 other.messageDecryptionException    == messageDecryptionException   &&
                 other.messageMedia                  == messageMedia                 &&
                 other.feedBoost                     == feedBoost                    &&
+                other.callLinkMessage               == callLinkMessage              &&
                 other.podcastClip                   == podcastClip                  &&
                 other.giphyData                     == giphyData                    &&
                 other.recipientAlias                == recipientAlias               &&
                 other.recipientPic                  == recipientPic                 &&
                 other.person                        == person                       &&
+                other.threadUUID                    == threadUUID                   &&
+                other.isPinned                      == isPinned                     &&
                 other.reactions.let { a ->
                     reactions.let { b ->
                         (a.isNullOrEmpty() && b.isNullOrEmpty()) ||
@@ -415,11 +454,14 @@ abstract class Message {
         result = _31 * result + messageDecryptionException.hashCode()
         result = _31 * result + messageMedia.hashCode()
         result = _31 * result + feedBoost.hashCode()
+        result = _31 * result + callLinkMessage.hashCode()
         result = _31 * result + podcastClip.hashCode()
         result = _31 * result + giphyData.hashCode()
         result = _31 * result + recipientAlias.hashCode()
         result = _31 * result + recipientPic.hashCode()
         result = _31 * result + person.hashCode()
+        result = _31 * result + threadUUID.hashCode()
+        result = _31 * result + isPinned.hashCode()
         reactions?.forEach { result = _31 * result + it.hashCode() }
         purchaseItems?.forEach { result = _31 * result + it.hashCode() }
         result = _31 * result + replyMessage.hashCode()
@@ -439,6 +481,8 @@ abstract class Message {
                 "messageMedia=$messageMedia,feedBoost=$feedBoost,podcastClip=$podcastClip,"     +
                 "giphyData=$giphyData,reactions=$reactions,purchaseItems=$purchaseItems,"       +
                 "replyMessage=$replyMessage),recipientAlias=$recipientAlias,"                   +
-                "recipientPic=$recipientPic,person=$person"
+                "recipientPic=$recipientPic,person=$person,threadUUID=$threadUUID,"             +
+                "callLink=$callLinkMessage"                                                     +
+                "isPinned=$isPinned"
     }
 }
