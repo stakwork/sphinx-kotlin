@@ -21,7 +21,7 @@ import chat.sphinx.wrapper_message_media.FileName
 import chat.sphinx.wrapper_message_media.MessageMedia
 import java.io.File
 
-internal sealed class LayoutState private constructor() {
+sealed class LayoutState private constructor() {
 
     data class SearchHighlightedStatus(
         val highlightedText: String

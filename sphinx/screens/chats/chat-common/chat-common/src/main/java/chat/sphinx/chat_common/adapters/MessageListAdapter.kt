@@ -20,28 +20,29 @@ import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
+import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
-import chat.sphinx.concept_image_loader.Disposable
-import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_image_loader.*
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_common.PhotoUrl
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -684,59 +685,184 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     inner class ThreadHeaderViewHolder(
         private val binding: LayoutThreadMessageHeaderBinding
     ) : RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
+        private var threadHeaderViewState: MessageHolderViewState.ThreadHeader? = null
 
         init {
-            binding.constraintShowMoreContainer.setOnClickListener {
-                viewModel.toggleThreadDescriptionExpanded()
+            binding.apply {
+
+                constraintShowMoreContainer.setOnClickListener {
+                    viewModel.toggleThreadDescriptionExpanded()
+                }
+
+                includeMessageTypeImageAttachment.imageViewAttachmentImage.setOnClickListener {
+                    threadHeaderViewState?.message?.let { message ->
+                        viewModel.showAttachmentImageFullscreen(message)
+                    }
+                }
+
+                includeMessageTypeVideoAttachment.apply {
+                    textViewAttachmentPlayButton.setOnClickListener {
+                        threadHeaderViewState?.message?.let { message ->
+                            viewModel.goToFullscreenVideo(message.id)
+                        }
+                    }
+                }
+                includeMessageTypeFileAttachment.apply {
+                    buttonAttachmentFileDownload.setOnClickListener {
+                        threadHeaderViewState?.message?.let { message ->
+                            viewModel.saveFile(message, null)
+                        }
+                    }
+                    layoutConstraintAttachmentFileMainInfoGroup.setOnClickListener {
+                        threadHeaderViewState?.message?.let { message ->
+                            viewModel.showAttachmentPdfFullscreen(message, 0)
+                        }
+                    }
+                }
+
+                includeMessageTypeFileAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
             }
         }
 
         fun bind(position: Int) {
             val threadHeader = messages.getOrNull(position) as MessageHolderViewState.ThreadHeader
+            threadHeaderViewState = threadHeader
+
             binding.apply {
                 root.visible
 
-                textViewContactMessageHeaderName.text = threadHeader.aliasAndColorKey.first?.value
-                textViewThreadDate.text = threadHeader.date
-                textViewThreadMessageContent.text = threadHeader.messageText
-
-                if (threadHeader.messageText.length < 165) {
-                    textViewShowMore.gone
+                val senderInfo: Triple<PhotoUrl?, ContactAlias?, String>? = if (threadHeader.message != null) {
+                    threadHeader.messageSenderInfo(threadHeader.message!!)
                 } else {
-
-                    if (threadHeader.isExpanded) {
-                        textViewThreadMessageContent.maxLines = Int.MAX_VALUE
-                        textViewShowMore.text =
-                            getString(R.string.episode_description_show_less)
-                    } else {
-                        textViewThreadMessageContent.maxLines = 4
-                        textViewShowMore.text =
-                            getString(R.string.episode_description_show_more)
-                    }
+                    null
                 }
+
+                textViewContactMessageHeaderName.text = senderInfo?.second?.value ?: ""
+                textViewThreadDate.text = threadHeader.timestamp
+                textViewThreadMessageContent.text = threadHeader.bubbleMessage?.text ?: ""
+                textViewThreadMessageContent.goneIfFalse(threadHeader.bubbleMessage?.text?.isNotEmpty() == true)
+
+                textViewThreadDate.post(Runnable {
+                    val linesCount: Int = textViewThreadDate.lineCount
+
+                    if (linesCount <= 12) {
+                        textViewShowMore.gone
+                    } else {
+                        if (threadHeader.isExpanded) {
+                            textViewThreadMessageContent.maxLines = Int.MAX_VALUE
+                            textViewShowMore.text =
+                                getString(R.string.episode_description_show_less)
+                        } else {
+                            textViewThreadMessageContent.maxLines = 12
+                            textViewShowMore.text =
+                                getString(R.string.episode_description_show_more)
+                        }
+                    }
+                })
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
 
                     binding.layoutContactInitialHolder.apply {
-                        textViewInitialsName.visible
-                        imageViewChatPicture.gone
+                        senderInfo?.third?.let {
+                            textViewInitialsName.visible
+                            imageViewChatPicture.gone
 
-                        textViewInitialsName.apply {
-                            text = threadHeader.aliasAndColorKey.first?.value?.getInitials()
-                            setBackgroundRandomColor(
-                                R.drawable.chat_initials_circle,
-                                Color.parseColor(
-                                    threadHeader.aliasAndColorKey.second?.let {
+                            textViewInitialsName.apply {
+                                text = (senderInfo?.second?.value ?: "")?.getInitials()
+
+                                setBackgroundRandomColor(
+                                    R.drawable.chat_initials_circle,
+                                    Color.parseColor(
                                         userColorsHelper.getHexCodeForKey(
                                             it,
                                             root.context.getRandomHexCode(),
                                         )
-                                    }
-                                ),
-                            )
+                                    ),
+                                )
+                            }
                         }
 
-                        threadHeader.photoUrl?.let { photoUrl ->
+                        binding.constraintMediaThreadContainer.gone
+                        binding.includeMessageTypeFileAttachment.root.gone
+                        binding.includeMessageTypeVideoAttachment.root.gone
+                        binding.includeMessageTypeImageAttachment.root.gone
+
+                        binding.includeMessageTypeImageAttachment.apply {
+                            threadHeader.bubbleImageAttachment?.let {
+                                binding.constraintMediaThreadContainer.visible
+                                root.visible
+                                layoutConstraintPaidImageOverlay.gone
+                                loadingImageProgressContainer.visible
+                                imageViewAttachmentImage.visible
+
+                                onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                    imageViewAttachmentImage.scaleType = ImageView.ScaleType.CENTER_CROP
+
+                                    it.media?.localFile?.let {
+                                        imageLoader.load(
+                                            imageViewAttachmentImage,
+                                            it,
+                                            ImageLoaderOptions.Builder().build()
+                                        )
+                                    } ?: it?.url?.let {
+                                        imageLoader.load(
+                                            imageViewAttachmentImage,
+                                            it,
+                                            ImageLoaderOptions.Builder().build()
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        binding.includeMessageTypeVideoAttachment.apply {
+                            (threadHeader.bubbleVideoAttachment as? LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable)?.let {
+                                VideoThumbnailUtil.loadThumbnail(it.file)?.let { thumbnail ->
+                                    binding.constraintMediaThreadContainer.visible
+                                    root.visible
+
+                                    imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                                    imageViewAttachmentThumbnail.visible
+                                    layoutConstraintVideoPlayButton.visible
+                                }
+                            }
+                        }
+
+                        binding.includeMessageTypeFileAttachment.apply {
+                            (threadHeader.bubbleFileAttachment as? LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable)?.let { fileAttachment ->
+                                binding.constraintMediaThreadContainer.visible
+                                root.visible
+                                progressBarAttachmentFileDownload.gone
+                                buttonAttachmentFileDownload.visible
+
+                                textViewAttachmentFileIcon.text =
+                                    if (fileAttachment.isPdf) {
+                                        getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
+                                    } else {
+                                        getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
+                                    }
+
+                                textViewAttachmentFileName.text =
+                                    fileAttachment.fileName?.value ?: "File.txt"
+
+                                textViewAttachmentFileSize.text =
+                                    if (fileAttachment.isPdf) {
+                                        if (fileAttachment.pageCount > 1) {
+                                            "${fileAttachment.pageCount} ${getString(
+                                                    chat.sphinx.chat_common.R.string.pdf_pages
+                                                )}"
+                                        } else {
+                                            "${fileAttachment.pageCount} ${getString(
+                                                    chat.sphinx.chat_common.R.string.pdf_page
+                                                )}"
+                                        }
+                                    } else {
+                                        fileAttachment.fileSize.asFormattedString()
+                                    }
+                            }
+                        }
+
+                        senderInfo?.first?.let { photoUrl ->
                             textViewInitialsName.gone
                             imageViewChatPicture.visible
 

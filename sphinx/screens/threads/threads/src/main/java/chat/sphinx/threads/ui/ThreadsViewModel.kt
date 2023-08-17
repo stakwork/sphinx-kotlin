@@ -2,6 +2,8 @@ package chat.sphinx.threads.ui
 
 import android.app.Application
 import android.content.*
+import android.graphics.pdf.PdfRenderer
+import android.os.ParcelFileDescriptor
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.chat_common.ui.viewstate.messageholder.ReplyUserHolder
@@ -9,10 +11,12 @@ import chat.sphinx.concept_repository_chat.ChatRepository
 import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_message.MessageRepository
 import chat.sphinx.threads.R
+import chat.sphinx.threads.model.FileAttachment
 import chat.sphinx.threads.model.ThreadItem
 import chat.sphinx.threads.navigation.ThreadsNavigator
 import chat.sphinx.threads.viewstate.ThreadsViewState
 import chat.sphinx.wrapper_chat.Chat
+import chat.sphinx.wrapper_common.FileSize
 import chat.sphinx.wrapper_common.chatTimeFormat
 import chat.sphinx.wrapper_common.dashboard.ChatId
 import chat.sphinx.wrapper_common.message.toMessageUUID
@@ -23,6 +27,12 @@ import chat.sphinx.wrapper_contact.toContactAlias
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.ThreadUUID
 import chat.sphinx.wrapper_message.getColorKey
+import chat.sphinx.wrapper_message.retrieveImageUrlAndMessageMedia
+import chat.sphinx.wrapper_message_media.isAudio
+import chat.sphinx.wrapper_message_media.isImage
+import chat.sphinx.wrapper_message_media.isPdf
+import chat.sphinx.wrapper_message_media.isUnknown
+import chat.sphinx.wrapper_message_media.isVideo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -31,6 +41,7 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -191,6 +202,36 @@ internal class ThreadsViewModel @Inject constructor(
 
         val repliesList = messagesForThread?.drop(1)?.distinctBy { it.senderAlias }
 
+        val imageAttachment = originalMessage?.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+            Pair(mediaData.first, mediaData.second?.localFile)
+        }
+        val videoAttachment: File? = originalMessage?.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isVideo) { nnMessageMedia.localFile } else null
+        }
+        val fileAttachment: FileAttachment? = originalMessage?.messageMedia?.let { nnMessageMedia ->
+            if(nnMessageMedia.mediaType.isImage) {
+                null
+            } else {
+                nnMessageMedia.localFile?.let { nnFile ->
+                    val pageCount = if (nnMessageMedia.mediaType.isPdf) {
+                        val fileDescriptor =
+                            ParcelFileDescriptor.open(nnFile, ParcelFileDescriptor.MODE_READ_ONLY)
+                        val renderer = PdfRenderer(fileDescriptor)
+                        renderer.pageCount
+                    } else {
+                        0
+                    }
+
+                    FileAttachment(
+                        nnMessageMedia.fileName,
+                        FileSize(nnFile.length()),
+                        nnMessageMedia.mediaType.isPdf,
+                        pageCount
+                    )
+                }
+            }
+        }
+
         return ThreadItem(
             aliasAndColorKey = senderInfo,
             photoUrl = senderPhotoUrl,
@@ -200,7 +241,10 @@ internal class ThreadsViewModel @Inject constructor(
             usersCount = repliesList?.size ?: 0,
             repliesAmount = String.format(app.getString(R.string.replies_amount), messagesForThread?.drop(1)?.size?.toString() ?: "0"),
             lastReplyDate = messagesForThread?.last()?.date?.timeAgo(),
-            uuid = uuid ?: ""
+            uuid = uuid ?: "",
+            imageAttachment = imageAttachment,
+            videoAttachment = videoAttachment,
+            fileAttachment = fileAttachment
         )
     }
 

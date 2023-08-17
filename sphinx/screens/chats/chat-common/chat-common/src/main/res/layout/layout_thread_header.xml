@@ -57,7 +57,6 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <!-- Profile Picture-->
-
             <include
                 android:id="@+id/layout_contact_initial_holder"
                 layout="@layout/layout_chat_image_small_initial_holder"
@@ -77,7 +76,6 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <!-- Contact name-->
-
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/text_view_contact_header_name"
                     android:layout_width="wrap_content"

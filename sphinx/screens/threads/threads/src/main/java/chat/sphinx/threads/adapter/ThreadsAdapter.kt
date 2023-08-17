@@ -1,6 +1,7 @@
 package chat.sphinx.threads.adapter
 
 import android.graphics.Color
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -10,21 +11,27 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import chat.sphinx.chat_common.ui.viewstate.messageholder.ReplyUserHolder
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_image_loader.OnImageLoadListener
 import chat.sphinx.concept_image_loader.Transformation
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.databinding.LayoutChatImageSmallInitialHolderBinding
 import chat.sphinx.resources.getRandomHexCode
+import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.threads.R
 import chat.sphinx.threads.databinding.ThreadsListItemHolderBinding
 import chat.sphinx.threads.model.ThreadItem
 import chat.sphinx.threads.ui.ThreadsViewModel
 import chat.sphinx.threads.viewstate.ThreadsViewState
+import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
@@ -155,6 +162,9 @@ internal class ThreadsAdapter(
             .transformation(Transformation.CircleCrop)
             .build()
     }
+    private val imageAttachmentLoader = ImageLoaderOptions.Builder()
+        .transformation(Transformation.RoundedCorners(Px(5f), Px(5f), Px(5f), Px(5f)))
+        .build()
 
     inner class MediaSectionViewHolder(
         private val binding: ThreadsListItemHolderBinding
@@ -189,7 +199,7 @@ internal class ThreadsAdapter(
                 textViewRepliesQuantity.text = threadItem.repliesAmount
                 textViewThreadTime.text = threadItem.lastReplyDate
 
-//                 User Profile Picture
+                // User Profile Picture
                 layoutLayoutChatImageSmallInitialHolder.apply {
                     textViewInitialsName.visible
                     textViewInitialsName.text =
@@ -225,6 +235,90 @@ internal class ThreadsAdapter(
                                 }
                             }
                         }
+                    }
+                }
+
+                // Image Attachment header
+                binding.includeMessageTypeImageAttachment.apply {
+                    if (threadItem.imageAttachment != null) {
+                        root.visible
+                        layoutConstraintPaidImageOverlay.gone
+
+                        loadingImageProgressContainer.visible
+                        imageViewAttachmentImage.visible
+
+                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                            if (threadItem.imageAttachment.second != null) {
+                                imageLoader.load(
+                                    imageViewAttachmentImage,
+                                    threadItem.imageAttachment.second!!,
+                                    imageAttachmentLoader
+                                ).also {
+                                    disposables.add(it)
+                                }
+                            } else {
+                                imageLoader.load(
+                                    imageViewAttachmentImage,
+                                    threadItem.imageAttachment.first,
+                                    imageAttachmentLoader
+                                ).also {
+                                    disposables.add(it)
+                                }
+                            }
+                        }
+                    } else {
+                        root.gone
+                    }
+                }
+
+                // Video Attachment header
+                binding.includeMessageTypeVideoAttachment.apply {
+                if (threadItem.videoAttachment != null) {
+                        root.visible
+
+                        val thumbnail = VideoThumbnailUtil.loadThumbnail(threadItem.videoAttachment)
+
+                        if (thumbnail != null) {
+                            imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                            layoutConstraintVideoPlayButton.visible
+                        }
+
+                        imageViewAttachmentThumbnail.visible
+                    } else {
+                        root.gone
+                    }
+                }
+
+                // File Attachment header
+                binding.includeMessageTypeFileAttachment.apply {
+                    if (threadItem.fileAttachment != null) {
+                        root.visible
+                        includeMessageTypeFileAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
+                        layoutConstraintAttachmentFileDownloadButtonGroup.gone
+
+                        progressBarAttachmentFileDownload.gone
+                        buttonAttachmentFileDownload.visible
+
+                        textViewAttachmentFileIcon.text = if (threadItem.fileAttachment.isPdf) {
+                            getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
+                        } else {
+                            getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
+                        }
+
+                        textViewAttachmentFileName.text =
+                            threadItem.fileAttachment.fileName?.value ?: "File.txt"
+
+                        textViewAttachmentFileSize.text = if (threadItem.fileAttachment.isPdf) {
+                            if (threadItem.fileAttachment.pageCount > 1) {
+                                "${threadItem.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_pages)}"
+                            } else {
+                                "${threadItem.fileAttachment.pageCount} ${getString(chat.sphinx.chat_common.R.string.pdf_page)}"
+                            }
+                        } else {
+                            threadItem.fileAttachment.fileSize.asFormattedString()
+                        }
+                    } else {
+                        root.gone
                     }
                 }
 

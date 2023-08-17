@@ -26,6 +26,4 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include_layout_detail_screen_alternative_header" />
 
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

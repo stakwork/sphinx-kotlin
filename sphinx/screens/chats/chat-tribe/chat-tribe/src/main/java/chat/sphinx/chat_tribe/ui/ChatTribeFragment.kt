@@ -29,8 +29,10 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
+import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
 import chat.sphinx.chat_tribe.adapters.MessageMentionsAdapter
@@ -64,6 +66,7 @@ import chat.sphinx.resources.setBackgroundRandomColor
 import chat.sphinx.wrapper_chat.protocolLessUrl
 import chat.sphinx.wrapper_common.lightning.asFormattedString
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_view.Px
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
@@ -166,7 +169,6 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
-
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -756,41 +758,88 @@ internal class ChatTribeFragment: ChatFragment<
                             layoutConstraintThreadContactName.visible
                             textViewHeader.gone
 
-                            textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
-                                textViewThreadDate.text = viewState.date
+                            textViewThreadDate.text = viewState.date
                             threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible
                                 imageViewChatPicture.gone
 
-                                textViewInitialsName.apply {
-                                    text = viewState.aliasAndColorKey.first?.value?.getInitials()
-                                    setBackgroundRandomColor(
-                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
-                                        Color.parseColor(
-                                            viewState.aliasAndColorKey.second?.let {
-                                                userColorsHelper.getHexCodeForKey(
-                                                    it,
-                                                    root.context.getRandomHexCode(),
-                                                )
-                                            }
-                                        ),
-                                    )
+                                viewState.senderInfo?.let { senderInfo ->
+                                    textViewContactHeaderName.text = senderInfo.second?.value ?: ""
+
+                                    textViewInitialsName.apply {
+                                        text = (senderInfo.second?.value ?: "").getInitials()
+
+                                        senderInfo.third?.let { colorKey ->
+                                            setBackgroundRandomColor(
+                                                chat.sphinx.chat_common.R.drawable.chat_initials_circle,
+                                                Color.parseColor(
+                                                    userColorsHelper.getHexCodeForKey(
+                                                        colorKey,
+                                                        root.context.getRandomHexCode(),
+                                                    )
+                                                ),
+                                            )
+                                        }
+
+                                        senderInfo.first?.let { photoUrl ->
+                                            textViewInitialsName.gone
+                                            imageViewChatPicture.visible
+
+                                            imageLoader.load(
+                                                layoutContactInitialHolder.imageViewChatPicture,
+                                                photoUrl.value,
+                                                ImageLoaderOptions.Builder()
+                                                    .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                    .transformation(Transformation.CircleCrop)
+                                                    .build()
+                                            )
+                                        }
+                                    }
                                 }
+                            }
 
-                                viewState.photoUrl?.let { photoUrl ->
-                                    textViewInitialsName.gone
-                                    imageViewChatPicture.visible
+                            threadOriginalMessageBinding?.apply {
+                                layoutConstraintMediaContainer.gone
 
-                                    imageLoader.load(
-                                        layoutContactInitialHolder.imageViewChatPicture,
-                                        photoUrl.value,
-                                        ImageLoaderOptions.Builder()
-                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
-                                            .transformation(Transformation.CircleCrop)
-                                            .build()
-                                    )
+                                viewState.imageAttachment?.let { imageAttachment ->
+                                    layoutConstraintMediaContainer.visible
+                                    imageViewThreadCardView.visible
+
+                                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                        imageAttachment.media?.localFile?.let {
+                                            imageLoader.load(
+                                                imageViewElementPicture,
+                                                it,
+                                                ImageLoaderOptions.Builder().build()
+                                            )
+                                        } ?: imageAttachment?.url?.let {
+                                            imageLoader.load(
+                                                imageViewElementPicture,
+                                                it,
+                                                ImageLoaderOptions.Builder().build()
+                                            )
+                                        }
+                                    }
+                                }
+                                
+                                viewState.videoAttachment?.let { videoAttachment ->
+                                    layoutConstraintMediaContainer.visible
+                                    imageViewThreadCardView.visible
+
+                                    (videoAttachment as? LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable)?.let {
+                                        VideoThumbnailUtil.loadThumbnail(it.file)?.let { thumbnail ->
+                                            imageViewElementPicture.setImageBitmap(thumbnail)
+                                            imageViewAlpha.visible
+                                            textViewAttachmentPlayButton.visible
+                                        }
+                                    }
+                                }
+                                
+                                viewState.fileAttachment?.let {
+                                    layoutConstraintMediaContainer.visible
+                                    textViewAttachmentFileIcon.visible
                                 }
                             }
                         }

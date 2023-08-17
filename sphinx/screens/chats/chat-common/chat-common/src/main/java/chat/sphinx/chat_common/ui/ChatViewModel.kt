@@ -478,38 +478,51 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                 val isOwner: Boolean = message.sender == owner.id
 
-                val threadAliasAndColor = if (isOwner) {
-                    Pair(owner.alias, owner.getColorKey())
-                } else {
-                    Pair(
-                        message.senderAlias?.value?.toContactAlias(),
-                        message.getColorKey()
-                    )
-                }
-
-                val threadPhotoUrl = if (isOwner) owner.photoUrl else message.senderPic
-
-                val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0)
+                val isThreadHeaderMessage = (message.uuid?.value == getThreadUUID()?.value && index == 0 && !message.type.isGroupAction())
 
                 if (isThreadHeaderMessage) {
                     newList.add(
                         MessageHolderViewState.ThreadHeader(
+                            message,
                             MessageHolderType.ThreadHeader,
                             chat,
                             tribeAdmin,
-                            BubbleBackground.Gone(setSpacingEqual = true),
-                            invoiceLinesHolderViewState,
                             InitialHolderViewState.None,
+                            messageSenderInfo = { messageCallback ->
+                                when {
+                                    messageCallback.sender == chat.contactIds.firstOrNull() -> {
+                                        val accountOwner = contactRepository.accountOwner.value
+
+                                        Triple(
+                                            accountOwner?.photoUrl,
+                                            accountOwner?.alias,
+                                            accountOwner?.getColorKey() ?: ""
+                                        )
+                                    }
+
+                                    chat.type.isConversation() -> {
+                                        Triple(
+                                            chatPhotoUrl,
+                                            chatName?.value?.toContactAlias(),
+                                            chatColorKey
+                                        )
+                                    }
+
+                                    else -> {
+                                        Triple(
+                                            messageCallback.senderPic,
+                                            messageCallback.senderAlias?.value?.toContactAlias(),
+                                            messageCallback.getColorKey()
+                                        )
+                                    }
+                                }
+                            },
                             accountOwner = { owner },
-                            threadAliasAndColor,
-                            threadPhotoUrl,
-                            message.date.chatTimeFormat(),
-                            message.messageContentDecrypted?.value ?: ""
+                            message.date.chatTimeFormat()
                         )
                     )
                     continue
                 }
-
 
                 if (!message.seen.isTrue() && !sent && !unseenSeparatorAdded) {
                     newList.add(
@@ -612,7 +625,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                         )
                     )
                 } else {
-                    if (message.uuid?.value != getThreadUUID()?.value) {
                         newList.add(
                             MessageHolderViewState.Received(
                                 message,
@@ -690,7 +702,6 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                                 }
                             )
                         )
-                    }
                 }
 
                 if (message.isPaidInvoice) {
@@ -966,6 +977,10 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     var messagesLoadJob: Job? = null
     fun screenInit() {
+        if (messageHolderViewStateFlow.value.isNotEmpty()) {
+            return
+        }
+
         var isScrollDownButtonSetup = false
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
             if (isThreadChat()) {
@@ -983,9 +998,16 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     scrollDownButtonCount.value = messages.size.toLong()
                 }
             } else {
-                messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+                messageRepository.getAllMessagesToShowByChatId(getChat().id, 100).firstOrNull()?.let { messages ->
                     delay(200)
 
+                    messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
+                    shimmerViewState.updateViewState(ShimmerViewState.Off)
+                }
+
+                delay(1000L)
+
+                messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
                     shimmerViewState.updateViewState(ShimmerViewState.Off)
 
@@ -1468,12 +1490,14 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     fun changeThreadHeaderState(isFullHeader: Boolean){
         if (isFullHeader) {
-            (messageHolderViewStateFlow.value.getOrNull(0) as? MessageHolderViewState.ThreadHeader)?.let { originalMessage ->
+            (messageHolderViewStateFlow.value.getOrNull(0) as? MessageHolderViewState.ThreadHeader)?.let { viewState ->
                 val threadHeader = ThreadHeaderViewState.FullHeader(
-                    originalMessage.aliasAndColorKey,
-                    originalMessage.photoUrl,
-                    originalMessage.date,
-                    originalMessage.messageText
+                    viewState.messageSenderInfo(viewState.message!!),
+                    viewState.timestamp,
+                    viewState.bubbleMessage?.text,
+                    viewState.bubbleImageAttachment,
+                    viewState.bubbleVideoAttachment,
+                    viewState.bubbleFileAttachment
                 )
                 threadHeaderViewState.updateViewState(threadHeader)
             }

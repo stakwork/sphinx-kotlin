@@ -62,7 +62,7 @@
             android:clickable="false"
             android:focusable="true"
             android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
