@@ -6,22 +6,102 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/headerBG"
+    android:paddingBottom="@dimen/default_layout_margin"
     android:elevation="@dimen/default_elevation">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_constraint_media_container"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="@dimen/default_layout_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/image_view_thread_card_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/body"
+            app:cardCornerRadius="@dimen/episode_image_radius"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/image_view_element_picture"
+                android:layout_width="@dimen/player_bar_play_button_xy"
+                android:layout_height="@dimen/player_bar_play_button_xy"
+                android:layout_centerInParent="true"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_podcast_type"
+                tools:visibility="visible" />
+
+            <View
+                android:id="@+id/image_view_alpha"
+                android:layout_width="@dimen/player_bar_play_button_xy"
+                android:layout_height="@dimen/player_bar_play_button_xy"
+                android:background="@color/blackSemiTransparent"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/text_view_attachment_play_button"
+                android:layout_width="@dimen/player_bar_play_button_xy"
+                android:layout_height="@dimen/player_bar_play_button_xy"
+                android:clickable="false"
+                android:focusable="true"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                android:text="@string/material_icon_name_play_outline"
+                android:fontFamily="@font/material_icons_regular"
+                android:textSize="@dimen/default_small_tap_target_xy"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.cardview.widget.CardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/text_view_attachment_file_icon"
+            android:layout_width="@dimen/icon_file_attachment_xy"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/material_icons_regular"
+            android:text="@string/material_icon_name_file_pdf"
+            android:textColor="@color/primaryText"
+            android:textSize="@dimen/icon_file_attachment_text_size"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layout_constraint_original_message"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_marginHorizontal="@dimen/default_layout_margin"
-        android:layout_marginTop="@dimen/default_small_layout_margin"
-        android:layout_marginBottom="@dimen/default_layout_margin"
+        android:foregroundGravity="center_vertical"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/layout_constraint_media_container"
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text_view_thread_message_content"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:ellipsize="end"
             android:fontFamily="@font/roboto_regular"
             android:gravity="start|center_vertical"
@@ -33,7 +113,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="The bitcoin blockchain is a public ledger that records bitcoin transactions.[27] It is implemented as a chain of blocks, each block containing a cryptographic hash of then" />
+            tools:text="The bitcoin blockchain The bitcoin blockchain The bitcoin blockchain The bitcoin blockchain The bitcoin blockchain The bitcoin blockchain The bitcoin blockchain" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

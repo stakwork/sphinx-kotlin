@@ -23,6 +23,7 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.io.File
 
 
 // TODO: Remove
@@ -123,7 +124,7 @@ internal sealed class MessageHolderViewState(
                     this is Sent && (message.status.isReceived() || message.status.isConfirmed()),
                     this is Sent && message.status.isFailed(),
                     message.messageContentDecrypted != null || message.messageMedia?.mediaKeyDecrypted != null,
-                    message.date.chatTimeFormat(),
+                    message.date.messageTimeFormat(),
                 )
             } else {
                 null
@@ -843,29 +844,26 @@ internal sealed class MessageHolderViewState(
     )
 
     class ThreadHeader(
+        message: Message?,
         messageHolderType: MessageHolderType,
         val chat: Chat,
         val tribeAdmin: Contact?,
-        background: BubbleBackground,
-        invoiceLinesHolderViewState: InvoiceLinesHolderViewState,
         initialHolder: InitialHolderViewState,
+        val messageSenderInfo: (Message) -> Triple<PhotoUrl?, ContactAlias?, String>?,
         val accountOwner: () -> Contact,
-        val aliasAndColorKey: Pair<ContactAlias?, String?>,
-        val photoUrl: PhotoUrl?,
-        val date: String,
-        val messageText: String,
+        val timestamp: String,
         val isExpanded: Boolean = false
     ) : MessageHolderViewState(
-        null,
+        message,
         chat,
         tribeAdmin,
         messageHolderType,
         null,
-        background,
-        invoiceLinesHolderViewState,
+        BubbleBackground.Gone(false),
+        InvoiceLinesHolderViewState(false, false),
         initialHolder,
         null,
-        { null },
+        messageSenderInfo,
         accountOwner,
         false,
         { null },
@@ -874,20 +872,24 @@ internal sealed class MessageHolderViewState(
     ) {
         fun copy(isExpanded: Boolean = this.isExpanded): ThreadHeader {
             return ThreadHeader(
+                message,
                 messageHolderType,
                 chat,
                 tribeAdmin,
-                background,
-                invoiceLinesHolderViewState,
                 initialHolder,
+                messageSenderInfo,
                 accountOwner,
-                aliasAndColorKey,
-                photoUrl,
-                date,
-                messageText,
+                timestamp,
                 isExpanded
             )
         }
     }
+
+    data class FileAttachment(
+        val fileName: FileName?,
+        val fileSize: FileSize,
+        val isPdf: Boolean,
+        val pageCount: Int
+    )
 
 }
