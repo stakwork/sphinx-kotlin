@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Environment
 import android.os.StatFs
+import android.util.Log
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -77,6 +78,15 @@ import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 import kotlinx.serialization.Serializable
+import org.eclipse.paho.client.mqttv3.IMqttActionListener
+import org.eclipse.paho.client.mqttv3.IMqttToken
+import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.MqttException
+import uniffi.sphinxrs.Keys
+import uniffi.sphinxrs.makeAuthToken
+import uniffi.sphinxrs.nodeKeys
+import java.util.Date
 
 @Serializable
 data class SampleClass(
@@ -736,6 +746,53 @@ internal class ProfileViewModel @Inject constructor(
 //                }
 //            })
 //        }
+        start()
+    }
+
+    fun start() {
+        viewModelScope.launch(mainImmediate) {
+            val (seed, mnemonic) = generateAndPersistMnemonic()
+            val seed32Bytes = seed?.encodeToByteArray()
+
+            val keys: Keys? = try {
+                nodeKeys(net = "regtest", seed = seed!!)
+            } catch (e: Exception) {
+                println(e.message)
+                null
+            }
+
+            val password: String? = try {
+                makeAuthToken(ts = (Date().time / 1000).toUInt(), secret = keys?.secret!!)
+            } catch (e: Exception) {
+                println(e.message)
+                null
+            }
+
+            if (keys != null && password != null) {
+                connectToMQTTWith(keys, password)
+            }
+        }
+}
+
+    private fun connectToMQTTWith(keys: Keys, password: String) {
+        val serverURI = "tcp://192.168.0.199:1883"
+        val clientID = "clientID"
+        val mqttClient = MqttClient(serverURI, clientID, null)
+
+        val options = MqttConnectOptions()
+        options.userName = keys.pubkey
+        options.password = password.toCharArray()
+
+        try {
+            mqttClient.connect(options)
+            if (mqttClient.isConnected) {
+                Log.d("MQTT", "Connected!")
+            } else {
+                Log.d("MQTT", "Failed to connect!")
+            }
+        } catch (e: MqttException) {
+            e.printStackTrace()
+        }
     }
 
     fun littleEndianConversion(bytes: ByteArray): Int {
