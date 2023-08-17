@@ -746,13 +746,12 @@ internal class ProfileViewModel @Inject constructor(
 //                }
 //            })
 //        }
-        start()
+        setupSigner()
     }
 
-    fun start() {
+    private fun setupSigner() {
         viewModelScope.launch(mainImmediate) {
             val (seed, mnemonic) = generateAndPersistMnemonic()
-            val seed32Bytes = seed?.encodeToByteArray()
 
             val keys: Keys? = try {
                 nodeKeys(net = "regtest", seed = seed!!)
