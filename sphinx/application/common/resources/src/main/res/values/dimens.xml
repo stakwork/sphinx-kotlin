@@ -189,6 +189,6 @@
     <dimen name="thread_reply_height">36dp</dimen>
     <dimen name="thread_reply_double_height">72dp</dimen>
     <dimen name="thread_reply_half_height">18dp</dimen>
-    <dimen name="thread_thumbnail_height">179dp</dimen>
+    <dimen name="thread_thumbnail_height">230dp</dimen>
 
 </resources>

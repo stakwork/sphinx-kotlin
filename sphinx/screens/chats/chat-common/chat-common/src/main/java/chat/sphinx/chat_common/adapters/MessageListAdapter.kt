@@ -20,29 +20,29 @@ import chat.sphinx.chat_common.model.NodeDescriptor
 import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
+import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
-import chat.sphinx.concept_image_loader.Disposable
-import chat.sphinx.concept_image_loader.ImageLoader
-import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_image_loader.*
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.resources.getRandomHexCode
 import chat.sphinx.resources.getString
 import chat.sphinx.resources.setBackgroundRandomColor
+import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_common.asFormattedString
 import chat.sphinx.wrapper_common.dashboard.ContactId
 import chat.sphinx.wrapper_common.message.MessageId
 import chat.sphinx.wrapper_common.util.getInitials
+import chat.sphinx.wrapper_contact.ContactAlias
 import chat.sphinx.wrapper_message.Message
 import chat.sphinx.wrapper_message.MessageType
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
+import io.matthewnelson.android_feature_screens.util.goneIfFalse
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -685,7 +685,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     inner class ThreadHeaderViewHolder(
         private val binding: LayoutThreadMessageHeaderBinding
     ) : RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
-        private var currentHeader: MessageHolderViewState.ThreadHeader? = null
+        private var threadHeaderViewState: MessageHolderViewState.ThreadHeader? = null
 
         init {
             binding.apply {
@@ -695,26 +695,26 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
 
                 includeMessageTypeImageAttachment.imageViewAttachmentImage.setOnClickListener {
-                    currentHeader?.message?.let { message ->
+                    threadHeaderViewState?.message?.let { message ->
                         viewModel.showAttachmentImageFullscreen(message)
                     }
                 }
 
                 includeMessageTypeVideoAttachment.apply {
                     textViewAttachmentPlayButton.setOnClickListener {
-                        currentHeader?.message?.let { message ->
+                        threadHeaderViewState?.message?.let { message ->
                             viewModel.goToFullscreenVideo(message.id)
                         }
                     }
                 }
                 includeMessageTypeFileAttachment.apply {
                     buttonAttachmentFileDownload.setOnClickListener {
-                        currentHeader?.message?.let { message ->
+                        threadHeaderViewState?.message?.let { message ->
                             viewModel.saveFile(message, null)
                         }
                     }
                     layoutConstraintAttachmentFileMainInfoGroup.setOnClickListener {
-                        currentHeader?.message?.let { message ->
+                        threadHeaderViewState?.message?.let { message ->
                             viewModel.showAttachmentPdfFullscreen(message, 0)
                         }
                     }
@@ -726,139 +726,143 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
         fun bind(position: Int) {
             val threadHeader = messages.getOrNull(position) as MessageHolderViewState.ThreadHeader
-            currentHeader = threadHeader
+            threadHeaderViewState = threadHeader
 
             binding.apply {
                 root.visible
 
-                textViewContactMessageHeaderName.text = threadHeader.aliasAndColorKey.first?.value
-                textViewThreadDate.text = threadHeader.date
-                textViewThreadMessageContent.text = threadHeader.messageText
-
-                if (threadHeader.messageText.length < 165) {
-                    textViewShowMore.gone
+                val senderInfo: Triple<PhotoUrl?, ContactAlias?, String>? = if (threadHeader.message != null) {
+                    threadHeader.messageSenderInfo(threadHeader.message!!)
                 } else {
-
-                    if (threadHeader.isExpanded) {
-                        textViewThreadMessageContent.maxLines = Int.MAX_VALUE
-                        textViewShowMore.text =
-                            getString(R.string.episode_description_show_less)
-                    } else {
-                        textViewThreadMessageContent.maxLines = 4
-                        textViewShowMore.text =
-                            getString(R.string.episode_description_show_more)
-                    }
+                    null
                 }
+
+                textViewContactMessageHeaderName.text = senderInfo?.second?.value ?: ""
+                textViewThreadDate.text = threadHeader.timestamp
+                textViewThreadMessageContent.text = threadHeader.bubbleMessage?.text ?: ""
+                textViewThreadMessageContent.goneIfFalse(threadHeader.bubbleMessage?.text?.isNotEmpty() == true)
+
+                textViewThreadDate.post(Runnable {
+                    val linesCount: Int = textViewThreadDate.lineCount
+
+                    if (linesCount <= 12) {
+                        textViewShowMore.gone
+                    } else {
+                        if (threadHeader.isExpanded) {
+                            textViewThreadMessageContent.maxLines = Int.MAX_VALUE
+                            textViewShowMore.text =
+                                getString(R.string.episode_description_show_less)
+                        } else {
+                            textViewThreadMessageContent.maxLines = 12
+                            textViewShowMore.text =
+                                getString(R.string.episode_description_show_more)
+                        }
+                    }
+                })
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
 
                     binding.layoutContactInitialHolder.apply {
-                        textViewInitialsName.visible
-                        imageViewChatPicture.gone
+                        senderInfo?.third?.let {
+                            textViewInitialsName.visible
+                            imageViewChatPicture.gone
 
-                        textViewInitialsName.apply {
-                            text = threadHeader.aliasAndColorKey.first?.value?.getInitials()
-                            setBackgroundRandomColor(
-                                R.drawable.chat_initials_circle,
-                                Color.parseColor(
-                                    threadHeader.aliasAndColorKey.second?.let {
+                            textViewInitialsName.apply {
+                                text = (senderInfo?.second?.value ?: "")?.getInitials()
+
+                                setBackgroundRandomColor(
+                                    R.drawable.chat_initials_circle,
+                                    Color.parseColor(
                                         userColorsHelper.getHexCodeForKey(
                                             it,
                                             root.context.getRandomHexCode(),
                                         )
-                                    }
-                                ),
-                            )
+                                    ),
+                                )
+                            }
                         }
 
-                        val imageAttachmentLoader = ImageLoaderOptions.Builder()
-                            .transformation(Transformation.RoundedCorners(Px(5f), Px(5f), Px(5f), Px(5f)))
-                            .build()
+                        binding.constraintMediaThreadContainer.gone
+                        binding.includeMessageTypeFileAttachment.root.gone
+                        binding.includeMessageTypeVideoAttachment.root.gone
+                        binding.includeMessageTypeImageAttachment.root.gone
 
                         binding.includeMessageTypeImageAttachment.apply {
-                        if (threadHeader.imageAttachment != null) {
-                            root.visible
-                            layoutConstraintPaidImageOverlay.gone
-
+                            threadHeader.bubbleImageAttachment?.let {
+                                binding.constraintMediaThreadContainer.visible
+                                root.visible
+                                layoutConstraintPaidImageOverlay.gone
                                 loadingImageProgressContainer.visible
                                 imageViewAttachmentImage.visible
 
                                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                    if (threadHeader.imageAttachment.second != null) {
+                                    imageViewAttachmentImage.scaleType = ImageView.ScaleType.CENTER_CROP
+
+                                    it.media?.localFile?.let {
                                         imageLoader.load(
                                             imageViewAttachmentImage,
-                                            threadHeader.imageAttachment.second!!,
-                                            imageAttachmentLoader
+                                            it,
+                                            ImageLoaderOptions.Builder().build()
                                         )
-                                    } else {
+                                    } ?: it?.url?.let {
                                         imageLoader.load(
                                             imageViewAttachmentImage,
-                                            threadHeader.imageAttachment.first,
-                                            imageAttachmentLoader
+                                            it,
+                                            ImageLoaderOptions.Builder().build()
                                         )
                                     }
                                 }
-                            } else {
-                                root.gone
                             }
                         }
+
                         binding.includeMessageTypeVideoAttachment.apply {
-                        if (threadHeader.videoAttachment != null) {
-                                root.visible
+                            (threadHeader.bubbleVideoAttachment as? LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable)?.let {
+                                VideoThumbnailUtil.loadThumbnail(it.file)?.let { thumbnail ->
+                                    binding.constraintMediaThreadContainer.visible
+                                    root.visible
 
-                                val thumbnail = VideoThumbnailUtil.loadThumbnail(threadHeader.videoAttachment)
-
-                                if (thumbnail != null) {
                                     imageViewAttachmentThumbnail.setImageBitmap(thumbnail)
+                                    imageViewAttachmentThumbnail.visible
                                     layoutConstraintVideoPlayButton.visible
                                 }
-
-                                imageViewAttachmentThumbnail.visible
-                            } else {
-                                root.gone
                             }
                         }
 
                         binding.includeMessageTypeFileAttachment.apply {
-                            if (threadHeader.fileAttachment != null) {
+                            (threadHeader.bubbleFileAttachment as? LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable)?.let { fileAttachment ->
+                                binding.constraintMediaThreadContainer.visible
                                 root.visible
                                 progressBarAttachmentFileDownload.gone
                                 buttonAttachmentFileDownload.visible
 
                                 textViewAttachmentFileIcon.text =
-                                    if (threadHeader.fileAttachment.isPdf) {
+                                    if (fileAttachment.isPdf) {
                                         getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
                                     } else {
                                         getString(chat.sphinx.chat_common.R.string.material_icon_name_file_attachment)
                                     }
 
                                 textViewAttachmentFileName.text =
-                                    threadHeader.fileAttachment.fileName?.value ?: "File.txt"
+                                    fileAttachment.fileName?.value ?: "File.txt"
 
                                 textViewAttachmentFileSize.text =
-                                    if (threadHeader.fileAttachment.isPdf) {
-                                        if (threadHeader.fileAttachment.pageCount > 1) {
-                                            "${threadHeader.fileAttachment.pageCount} ${
-                                                getString(
+                                    if (fileAttachment.isPdf) {
+                                        if (fileAttachment.pageCount > 1) {
+                                            "${fileAttachment.pageCount} ${getString(
                                                     chat.sphinx.chat_common.R.string.pdf_pages
-                                                )
-                                            }"
+                                                )}"
                                         } else {
-                                            "${threadHeader.fileAttachment.pageCount} ${
-                                                getString(
+                                            "${fileAttachment.pageCount} ${getString(
                                                     chat.sphinx.chat_common.R.string.pdf_page
-                                                )
-                                            }"
+                                                )}"
                                         }
                                     } else {
-                                        threadHeader.fileAttachment.fileSize.asFormattedString()
+                                        fileAttachment.fileSize.asFormattedString()
                                     }
-                            } else {
-                                root.gone
                             }
                         }
 
-                        threadHeader.photoUrl?.let { photoUrl ->
+                        senderInfo?.first?.let { photoUrl ->
                             textViewInitialsName.gone
                             imageViewChatPicture.visible
 

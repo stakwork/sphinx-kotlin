@@ -1,5 +1,6 @@
 package chat.sphinx.chat_common.ui.viewstate.thread
 
+import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.MessageHolderViewState
 import chat.sphinx.wrapper_common.PhotoUrl
 import chat.sphinx.wrapper_contact.ContactAlias
@@ -12,13 +13,12 @@ sealed class ThreadHeaderViewState: ViewState<ThreadHeaderViewState>() {
     object BasicHeader: ThreadHeaderViewState()
 
     data class FullHeader(
-        val aliasAndColorKey: Pair<ContactAlias?, String?>,
-        val photoUrl: PhotoUrl?,
+        val senderInfo: Triple<PhotoUrl?, ContactAlias?, String>?,
         val date: String,
-        val message: String,
-        val imageAttachment: Pair<String, File?>? = null,
-        val videoAttachment: File? = null,
-        val isPdf: Boolean? = null,
+        val message: String?,
+        val imageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? = null,
+        val videoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment? = null,
+        val fileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment? = null,
     ): ThreadHeaderViewState()
 
 }

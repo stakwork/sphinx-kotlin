@@ -29,6 +29,7 @@ import chat.sphinx.chat_common.ui.ChatFragment
 import chat.sphinx.chat_common.ui.ChatSideEffect
 import chat.sphinx.chat_common.ui.viewstate.mentions.MessageMentionsViewState
 import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
+import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
 import chat.sphinx.chat_common.util.VideoThumbnailUtil
@@ -729,10 +730,6 @@ internal class ChatTribeFragment: ChatFragment<
             }
         }
 
-        val imageAttachmentLoader = ImageLoaderOptions.Builder()
-            .transformation(Transformation.RoundedCorners(Px(5f), Px(5f), Px(5f), Px(5f)))
-            .build()
-
         onStopSupervisor.scope.launch(viewModel.mainImmediate) {
             viewModel.threadHeaderViewState.collect { viewState ->
                 threadHeader.apply {
@@ -761,81 +758,88 @@ internal class ChatTribeFragment: ChatFragment<
                             layoutConstraintThreadContactName.visible
                             textViewHeader.gone
 
-                            textViewContactHeaderName.text = viewState.aliasAndColorKey.first?.value
                             textViewThreadDate.text = viewState.date
                             threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
-
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible
                                 imageViewChatPicture.gone
 
-                                textViewInitialsName.apply {
-                                    text = viewState.aliasAndColorKey.first?.value?.getInitials()
-                                    setBackgroundRandomColor(
-                                        chat.sphinx.chat_common.R.drawable.chat_initials_circle,
-                                        Color.parseColor(
-                                            viewState.aliasAndColorKey.second?.let {
-                                                userColorsHelper.getHexCodeForKey(
-                                                    it,
-                                                    root.context.getRandomHexCode(),
-                                                )
-                                            }
-                                        ),
-                                    )
-                                }
+                                viewState.senderInfo?.let { senderInfo ->
+                                    textViewContactHeaderName.text = senderInfo.second?.value ?: ""
 
-                                threadOriginalMessageBinding?.apply {
-                                    if (viewState.imageAttachment != null) {
-                                        imageViewThreadCardView.visible
+                                    textViewInitialsName.apply {
+                                        text = (senderInfo.second?.value ?: "").getInitials()
 
-                                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-                                            if (viewState.imageAttachment!!.second != null) {
-                                                imageLoader.load(
-                                                    imageViewElementPicture,
-                                                    viewState.imageAttachment!!.second!!,
-                                                    imageAttachmentLoader
-                                                )
-                                            } else {
-                                                imageLoader.load(
-                                                    imageViewElementPicture,
-                                                    viewState!!.imageAttachment!!.first!!,
-                                                    imageAttachmentLoader
-                                                )
-                                            }
+                                        senderInfo.third?.let { colorKey ->
+                                            setBackgroundRandomColor(
+                                                chat.sphinx.chat_common.R.drawable.chat_initials_circle,
+                                                Color.parseColor(
+                                                    userColorsHelper.getHexCodeForKey(
+                                                        colorKey,
+                                                        root.context.getRandomHexCode(),
+                                                    )
+                                                ),
+                                            )
+                                        }
+
+                                        senderInfo.first?.let { photoUrl ->
+                                            textViewInitialsName.gone
+                                            imageViewChatPicture.visible
+
+                                            imageLoader.load(
+                                                layoutContactInitialHolder.imageViewChatPicture,
+                                                photoUrl.value,
+                                                ImageLoaderOptions.Builder()
+                                                    .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
+                                                    .transformation(Transformation.CircleCrop)
+                                                    .build()
+                                            )
                                         }
                                     }
+                                }
+                            }
 
-                                    if (viewState.videoAttachment != null) {
-                                        imageViewThreadCardView.visible
+                            threadOriginalMessageBinding?.apply {
+                                layoutConstraintMediaContainer.gone
 
-                                        val thumbnail = VideoThumbnailUtil.loadThumbnail(viewState.videoAttachment!!)
+                                viewState.imageAttachment?.let { imageAttachment ->
+                                    layoutConstraintMediaContainer.visible
+                                    imageViewThreadCardView.visible
 
-                                        if (thumbnail != null) {
+                                    onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                        imageAttachment.media?.localFile?.let {
+                                            imageLoader.load(
+                                                imageViewElementPicture,
+                                                it,
+                                                ImageLoaderOptions.Builder().build()
+                                            )
+                                        } ?: imageAttachment?.url?.let {
+                                            imageLoader.load(
+                                                imageViewElementPicture,
+                                                it,
+                                                ImageLoaderOptions.Builder().build()
+                                            )
+                                        }
+                                    }
+                                }
+                                
+                                viewState.videoAttachment?.let { videoAttachment ->
+                                    layoutConstraintMediaContainer.visible
+                                    imageViewThreadCardView.visible
+
+                                    (videoAttachment as? LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable)?.let {
+                                        VideoThumbnailUtil.loadThumbnail(it.file)?.let { thumbnail ->
                                             imageViewElementPicture.setImageBitmap(thumbnail)
                                             imageViewAlpha.visible
                                             textViewAttachmentPlayButton.visible
                                         }
                                     }
-
-                                    if (viewState.isPdf == true) {
-                                        imageViewThreadCardView.gone
-                                        textViewAttachmentFileIcon.visible
-                                    }
                                 }
-
-                                viewState.photoUrl?.let { photoUrl ->
-                                    textViewInitialsName.gone
-                                    imageViewChatPicture.visible
-
-                                    imageLoader.load(
-                                        layoutContactInitialHolder.imageViewChatPicture,
-                                        photoUrl.value,
-                                        ImageLoaderOptions.Builder()
-                                            .placeholderResId(chat.sphinx.podcast_player.R.drawable.ic_profile_avatar_circle)
-                                            .transformation(Transformation.CircleCrop)
-                                            .build()
-                                    )
+                                
+                                viewState.fileAttachment?.let {
+                                    layoutConstraintMediaContainer.visible
+                                    textViewAttachmentFileIcon.visible
                                 }
                             }
                         }
