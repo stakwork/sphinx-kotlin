@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta02 (2023-08-17)
+- Adds support for media on threads
+
 # Version 1.0.0-beta01 (2023-08-14)
 - Fixes thread issues
 - Adds pagination on contacts/chats fetch
