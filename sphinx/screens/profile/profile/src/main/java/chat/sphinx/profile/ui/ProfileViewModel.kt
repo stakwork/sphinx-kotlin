@@ -3,6 +3,8 @@ package chat.sphinx.profile.ui
 import android.app.Application
 import android.content.Context
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.os.StatFs
 import android.util.Log
 import android.webkit.URLUtil
@@ -49,6 +51,7 @@ import chat.sphinx.wrapper_relay.toRelayUrl
 import chat.sphinx.wrapper_rsa.RsaPublicKey
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
 import io.matthewnelson.android_feature_viewmodel.submitSideEffect
@@ -63,6 +66,7 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.crypto_common.clazzes.clear
+import io.matthewnelson.crypto_common.extensions.encodeToByteArray
 import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -78,12 +82,14 @@ import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 import kotlinx.serialization.Serializable
-import org.eclipse.paho.client.mqttv3.IMqttActionListener
-import org.eclipse.paho.client.mqttv3.IMqttToken
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
+import org.eclipse.paho.client.mqttv3.MqttMessage
 import uniffi.sphinxrs.Keys
+import uniffi.sphinxrs.VlsResponse
 import uniffi.sphinxrs.makeAuthToken
 import uniffi.sphinxrs.nodeKeys
 import java.util.Date
@@ -129,7 +135,8 @@ internal class ProfileViewModel @Inject constructor(
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
     private val walletDataHandler: WalletDataHandler,
-): SideEffectViewModel<
+    private val moshi: Moshi
+    ): SideEffectViewModel<
         Context,
         ProfileSideEffect,
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
@@ -746,10 +753,10 @@ internal class ProfileViewModel @Inject constructor(
 //                }
 //            })
 //        }
-        setupSigner()
+        start()
     }
 
-    private fun setupSigner() {
+    private fun start() {
         viewModelScope.launch(mainImmediate) {
             val (seed, mnemonic) = generateAndPersistMnemonic()
 
@@ -773,25 +780,177 @@ internal class ProfileViewModel @Inject constructor(
         }
 }
 
-    private fun connectToMQTTWith(keys: Keys, password: String) {
+    object Topics {
+        const val VLS = "vls"
+        const val VLS_RES = "vls-res"
+        const val CONTROL = "control"
+        const val CONTROL_RES = "control-res"
+        const val PROXY = "proxy"
+        const val PROXY_RES = "proxy-res"
+        const val ERROR = "error"
+        const val INIT_1_MSG = "init-1-msg"
+        const val INIT_1_RES = "init-1-res"
+        const val INIT_2_MSG = "init-2-msg"
+        const val INIT_2_RES = "init-2-res"
+        const val LSS_MSG = "lss-msg"
+        const val LSS_RES = "lss-res"
+        const val HELLO = "hello"
+        const val BYE = "bye"
+    }
+
+    private suspend fun connectToMQTTWith(keys: Keys, password: String) {
         val serverURI = "tcp://192.168.0.199:1883"
         val clientID = "clientID"
         val mqttClient = MqttClient(serverURI, clientID, null)
 
-        val options = MqttConnectOptions()
-        options.userName = keys.pubkey
-        options.password = password.toCharArray()
+        val options = MqttConnectOptions().apply {
+            userName = keys.pubkey
+            this.password = password.toCharArray()
+        }
 
         try {
             mqttClient.connect(options)
+
             if (mqttClient.isConnected) {
                 Log.d("MQTT", "Connected!")
+
+                val topics = arrayOf(
+                    "${clientID}/${Topics.VLS}",
+                    "${clientID}/${Topics.INIT_1_MSG}",
+                    "${clientID}/${Topics.INIT_2_MSG}",
+                    "${clientID}/${Topics.LSS_MSG}"
+                )
+
+                val qos = IntArray(topics.size) { 1 }
+                mqttClient.subscribe(topics, qos)
+
+                Log.d("MQTT", "Subscribed!")
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    val topic = "$clientID/${Topics.HELLO}"
+                    val message = MqttMessage()
+                    mqttClient.publish(topic, message)
+                }, 500)
+
             } else {
                 Log.d("MQTT", "Failed to connect!")
             }
+
+            mqttClient.setCallback(object : MqttCallback {
+                override fun connectionLost(cause: Throwable?) {
+                    Log.d("MQTT", "Connection lost!")
+                }
+
+                override fun messageArrived(topic: String?, message: MqttMessage?) {
+                    val payload = message?.payload ?: byteArrayOf()
+                    Log.d(
+                        "MQTT",
+                        "Message received in topic $topic with payload ${String(payload)}"
+                    )
+                    val modifiedTopic = topic?.replace("clientID", "") ?: ""
+                    processMessage(modifiedTopic, payload, mqttClient)
+
+                    if (topic?.contains("init-2-msg") == true) {
+                        Log.d("MQTT", "init-2-msg received")
+                    }
+                }
+
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                }
+            })
+
         } catch (e: MqttException) {
             e.printStackTrace()
+            Log.d("MQTT", "connectToMQTTWith: Error ${e.printStackTrace()}")
         }
+    }
+
+    fun processMessage(topic: String, payload: ByteArray, mqttClient: MqttClient) {
+        viewModelScope.launch(mainImmediate) {
+            val (args, state) = argsAndState()
+            var ret: VlsResponse? =
+                try {
+                    uniffi.sphinxrs.run(
+                        topic,
+                        args,
+                        state,
+                        payload,
+                        UShort.MIN_VALUE
+                    )
+                } catch (e: Exception) {
+                    println(e.message)
+                    Log.d("MQTT", "processMessage: Error ${e.message}")
+                    null
+
+                }
+            ret?.let {
+                mqttClient.publish(it.topic, MqttMessage(it.bytes))
+            }
+        }
+    }
+
+    private suspend fun argsAndState(): Pair<String, ByteArray> {
+        val args = makeArgs()
+        val stringArgs = argsToJson(args) ?: ""  // Ensures it's non-nullable
+
+        val sta: Map<String, ByteArray> = emptyMap()
+
+        val mpDic: MutableMap<Any, Any> = mutableMapOf()
+        sta.forEach { (key, value) ->
+            try {
+                val decodedKey = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, key.encodeToByteArray())
+                val decodedValue = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, value)
+                mpDic[decodedKey] = decodedValue
+            } catch (e: IllegalArgumentException) {
+                Log.d("MQTT", "argsAndState: Error decoding from byte array")
+            }
+        }
+
+        val mapString = mpDic.toString()
+        val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, mapString)
+
+        return Pair(stringArgs, state)
+    }
+
+    private suspend fun makeArgs(): Map<String, Any>? {
+        val seedBytes = generateAndPersistMnemonic().first?.encodeToByteArray()
+        val lssN = generateRandomBytes().toHex()
+
+        if (seedBytes == null) {
+            Log.d("MQTT", "Seed vacio")
+            return null
+        }
+
+        val defaultPolicy = mapOf(
+            "msat_per_interval" to 21000000000L,
+            "interval" to "daily",
+            "htlc_limit_msat" to 1000000000L
+        )
+
+        val args = mapOf(
+            "seed" to seedBytes,
+            "network" to "regtest",
+            "policy" to defaultPolicy,
+            "allowlist" to emptyList<Any>(),
+            "timestamp" to Date().time / 1000L,
+            "lss_nonce" to lssN
+        )
+
+        Log.d("MQTT", "The args are: $args")
+
+        return args
+    }
+
+    private fun argsToJson(map: Map<String, Any>?): String? {
+        val adapter = moshi.adapter(Map::class.java)
+        return adapter.toJson(map)
+    }
+
+    private fun generateRandomBytes(): ByteArray {
+        val random = SecureRandom()
+        val bytes = ByteArray(32)
+        random.nextBytes(bytes)
+        return bytes
     }
 
     fun littleEndianConversion(bytes: ByteArray): Int {
