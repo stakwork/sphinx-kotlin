@@ -70,6 +70,7 @@ dependencies {
     implementation deps.paho.sdk
     implementation deps.kotlinx.serialization
     implementation deps.msgpack.sdk
+    implementation deps.square.moshi
 
     kapt kaptDeps.google.hilt
 }
