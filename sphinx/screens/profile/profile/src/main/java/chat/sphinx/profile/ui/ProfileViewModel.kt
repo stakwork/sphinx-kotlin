@@ -159,8 +159,15 @@ internal class ProfileViewModel @Inject constructor(
         ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
+    private val _mutsStateFlow: MutableStateFlow<MutableMap<String, ByteArray>> by lazy {
+        MutableStateFlow(mutableMapOf())
+    }
+
+    val mutsStateFlow: StateFlow<MutableMap<String, ByteArray>>
+        get() = _mutsStateFlow.asStateFlow()
+
     val clientID = "asdkjahsdkajshdkjsadh"
-    val muts: MutableMap<String, ByteArray> = mutableMapOf()
+    val lssN = generateRandomBytes().take(32)
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
         PictureMenuHandler(
@@ -743,7 +750,7 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private fun connectToMQTTWith(keys: Keys, password: String) {
-        val serverURI = "tcp://192.168.0.24:1883"
+        val serverURI = "tcp://192.168.0.199:1883"
         val mqttClient = MqttClient(serverURI, clientID, null)
 
         val options = MqttConnectOptions().apply {
@@ -790,9 +797,9 @@ internal class ProfileViewModel @Inject constructor(
                         "MQTT",
                         "Message received in topic $topic with payload ${String(payload)}"
                     )
-                    val modifiedTopic = topic?.replace("${clientID}/", "")
+                    val modifiedTopic = topic?.replace("${clientID}/", "") ?: ""
 
-                    processMessage(modifiedTopic ?: "", payload, mqttClient)
+                    processMessage(modifiedTopic, payload, mqttClient)
 
                     if (topic?.contains("init-2-msg") == true) {
                         Log.d("MQTT", "init-2-msg received")
@@ -831,20 +838,24 @@ internal class ProfileViewModel @Inject constructor(
             Log.d("MQTT", "params on run: topic: ${topic} args: ${args} state: ${state} payload: ${payload}")
 
             ret?.let {
-                storeMutations(it.bytes)
-
+                storeMutations(it.state)
                 mqttClient.publish("${clientID}/${it.topic}", MqttMessage(it.bytes))
+
+                Log.d("MQTT", "PUBLISH WITH TOPIC: ${it.topic}")
             }
         }
     }
 
     private suspend fun argsAndState(): Pair<String, ByteArray> {
         val args = makeArgs()
-        val stringArgs = argsToJson(args) ?: ""  // Ensures it's non-nullable
+        val stringArgs = argsToJson(args) ?: ""
 
         Log.d("MQTT", "MQTT JSON: $stringArgs ")
 
         val sta: Map<String, ByteArray> = loadMuts()
+
+        Log.d("MQTT", "LOADMUTS $sta ")
+
 
         val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, sta)
 
@@ -852,20 +863,31 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private fun loadMuts(): Map<String, ByteArray> {
-        return muts
+        return mutsStateFlow.value
     }
 
     private fun storeMutations(inc: ByteArray) {
-        val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
+        viewModelScope.launch(mainImmediate) {
+            val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
 
-        // Unpack with MessagePack byte array
-        // Get dictionary from unpacked data
-        // persist dictionary to muts
+            if (decoded is LinkedHashMap<*, *>) {
+                try {
+                    val resultMap: MutableMap<String, ByteArray> =
+                        decoded as MutableMap<String, ByteArray>
+                    _mutsStateFlow.value = resultMap
+                    Log.d("MQTT", "mutStateFlow is: $resultMap")
+
+                } catch (e: ClassCastException) {
+                    Log.d("MQTT", "Error in casting. The data may not fit the expected types.")
+                }
+            } else {
+                Log.d("MQTT", "Decoded data is not a LinkedHashMap!")
+            }
+        }
     }
 
     private suspend fun makeArgs(): Map<String, Any>? {
         val seedBytes = generateAndPersistMnemonic().first?.encodeToByteArray()?.take(32)
-        val lssN = generateRandomBytes().take(32)
 
         if (seedBytes == null) {
             Log.d("MQTT", "Seed vacio")
