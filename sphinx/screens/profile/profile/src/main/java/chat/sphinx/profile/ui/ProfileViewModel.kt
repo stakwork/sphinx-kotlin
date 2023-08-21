@@ -849,7 +849,7 @@ internal class ProfileViewModel @Inject constructor(
                     )
                     val modifiedTopic = topic?.replace("clientID", "")?.replace("/", "") ?: ""
 
-                    processMessage(modifiedTopic, payload, mqttClient)
+                    processMessage(topic ?: "", payload, mqttClient)
 
                     if (topic?.contains("init-2-msg") == true) {
                         Log.d("MQTT", "init-2-msg received")
@@ -912,8 +912,7 @@ internal class ProfileViewModel @Inject constructor(
             }
         }
 
-        val mapString = mpDic.toString()
-        val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, mapString)
+        val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, mpDic)
 
         return Pair(stringArgs, state)
     }
