@@ -159,15 +159,9 @@ internal class ProfileViewModel @Inject constructor(
         ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
-    private val _mutsStateFlow: MutableStateFlow<MutableMap<String, ByteArray>> by lazy {
-        MutableStateFlow(mutableMapOf())
-    }
-
-    val mutsStateFlow: StateFlow<MutableMap<String, ByteArray>>
-        get() = _mutsStateFlow.asStateFlow()
-
     val clientID = "asdkjahsdkajshdkjsadh"
     val lssN = generateRandomBytes().take(32)
+    val mut: MutableMap<String, ByteArray> = mutableMapOf()
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
         PictureMenuHandler(
@@ -863,25 +857,25 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private fun loadMuts(): Map<String, ByteArray> {
-        return mutsStateFlow.value
+        return mut
     }
 
     private fun storeMutations(inc: ByteArray) {
         viewModelScope.launch(mainImmediate) {
-            val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
+            try {
+                val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
 
-            if (decoded is LinkedHashMap<*, *>) {
-                try {
-                    val resultMap: MutableMap<String, ByteArray> =
-                        decoded as MutableMap<String, ByteArray>
-                    _mutsStateFlow.value = resultMap
+                if (decoded is MutableMap<*, *> && decoded.all { it.key is String && it.value is ByteArray }) {
+                    val resultMap = decoded as MutableMap<String, ByteArray>
+
+                    mut.putAll(resultMap)
+
                     Log.d("MQTT", "mutStateFlow is: $resultMap")
-
-                } catch (e: ClassCastException) {
-                    Log.d("MQTT", "Error in casting. The data may not fit the expected types.")
+                } else {
+                    Log.d("MQTT", "Decoded data doesn't fit the expected types.")
                 }
-            } else {
-                Log.d("MQTT", "Decoded data is not a LinkedHashMap!")
+            } catch (e: Exception) {
+                Log.d("MQTT", "Error during decoding or casting: ${e.message}")
             }
         }
     }
