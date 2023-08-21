@@ -82,6 +82,7 @@ import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromByteArray
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -157,6 +158,9 @@ internal class ProfileViewModel @Inject constructor(
     val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
         ViewStateContainer(UpdatingImageViewState.Idle)
     }
+
+    val clientID = "asdkjahsdkajshdkjsadh"
+    val muts: MutableMap<String, ByteArray> = mutableMapOf()
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
         PictureMenuHandler(
@@ -628,66 +632,6 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     fun setupSigningDevice() {
-        val byteArray = byteArrayOf(
-            147.toByte(),
-            146.toByte(),
-            164.toByte(),
-            97.toByte(),
-            97.toByte(),
-            97.toByte(),
-            97.toByte(),
-            146.toByte(),
-            15.toByte(),
-            196.toByte(),
-            3.toByte(),
-            255.toByte(),
-            255.toByte(),
-            255.toByte(),
-            146.toByte(),
-            164.toByte(),
-            98.toByte(),
-            98.toByte(),
-            98.toByte(),
-            98.toByte(),
-            146.toByte(),
-            15.toByte(),
-            196.toByte(),
-            3.toByte(),
-            255.toByte(),
-            255.toByte(),
-            255.toByte(),
-            146.toByte(),
-            164.toByte(),
-            99.toByte(),
-            99.toByte(),
-            99.toByte(),
-            99.toByte(),
-            146.toByte(),
-            15.toByte(),
-            196.toByte(),
-            3.toByte(),
-            255.toByte(),
-            255.toByte(),
-            255.toByte()
-        )
-
-        var decoded: Any? = null
-
-        try {
-            decoded = MsgPack.decodeFromByteArray(
-                MsgPackDynamicSerializer,
-//                "9392a461616161920fc403ffffff92a462626262920fc403ffffff92a463636363920fc403ffffff".let { bytesString ->
-//                    ByteArray(bytesString.length / 2) { bytesString.substring(it * 2, it * 2 + 2).toInt(16).toByte() }
-//                }
-                byteArray
-            )
-        } catch (e: IllegalArgumentException) {
-            println("ERROR")
-        }
-
-        println(decoded)
-        println((((((decoded as List<Any>)[0] as List<Any>)[1] as List<Any>)[1] as ByteArray)[2]).toUByte().toInt())
-
 //        if (setupSigningDeviceJob?.isActive == true) return
 //
 //        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
@@ -799,8 +743,7 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private fun connectToMQTTWith(keys: Keys, password: String) {
-        val serverURI = "tcp://192.168.0.199:1883"
-        val clientID = "clientID"
+        val serverURI = "tcp://192.168.0.24:1883"
         val mqttClient = MqttClient(serverURI, clientID, null)
 
         val options = MqttConnectOptions().apply {
@@ -847,9 +790,9 @@ internal class ProfileViewModel @Inject constructor(
                         "MQTT",
                         "Message received in topic $topic with payload ${String(payload)}"
                     )
-                    val modifiedTopic = topic?.replace("clientID", "")?.replace("/", "") ?: ""
+                    val modifiedTopic = topic?.replace("${clientID}/", "")
 
-                    processMessage(topic ?: "", payload, mqttClient)
+                    processMessage(modifiedTopic ?: "", payload, mqttClient)
 
                     if (topic?.contains("init-2-msg") == true) {
                         Log.d("MQTT", "init-2-msg received")
@@ -857,6 +800,7 @@ internal class ProfileViewModel @Inject constructor(
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {
+
                 }
             })
 
@@ -884,10 +828,12 @@ internal class ProfileViewModel @Inject constructor(
                     Log.d("MQTT", "processMessage: Error ${e.message}")
                     null
                 }
-            Log.d("MQTT", "parms on run: topic: ${topic} args: ${args} state: ${state} payload: ${payload}")
+            Log.d("MQTT", "params on run: topic: ${topic} args: ${args} state: ${state} payload: ${payload}")
 
             ret?.let {
-                mqttClient.publish(it.topic, MqttMessage(it.bytes))
+                storeMutations(it.bytes)
+
+                mqttClient.publish("${clientID}/${it.topic}", MqttMessage(it.bytes))
             }
         }
     }
@@ -898,23 +844,23 @@ internal class ProfileViewModel @Inject constructor(
 
         Log.d("MQTT", "MQTT JSON: $stringArgs ")
 
+        val sta: Map<String, ByteArray> = loadMuts()
 
-        val sta: Map<String, ByteArray> = emptyMap()
-        val mpDic: MutableMap<Any, Any> = mutableMapOf()
-
-        sta.forEach { (key, value) ->
-            try {
-                val decodedKey = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, key.encodeToByteArray())
-                val decodedValue = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, value)
-                mpDic[decodedKey] = decodedValue
-            } catch (e: IllegalArgumentException) {
-                Log.d("MQTT", "argsAndState: Error decoding from byte array")
-            }
-        }
-
-        val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, mpDic)
+        val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, sta)
 
         return Pair(stringArgs, state)
+    }
+
+    private fun loadMuts(): Map<String, ByteArray> {
+        return muts
+    }
+
+    private fun storeMutations(inc: ByteArray) {
+        val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
+
+        // Unpack with MessagePack byte array
+        // Get dictionary from unpacked data
+        // persist dictionary to muts
     }
 
     private suspend fun makeArgs(): Map<String, Any>? {
@@ -960,14 +906,6 @@ internal class ProfileViewModel @Inject constructor(
             uByteArray[i] = bytes[i].toUByte()
         }
         return uByteArray
-    }
-
-    fun littleEndianConversion(bytes: ByteArray): Int {
-        var result = 0
-        for (i in bytes.indices) {
-            result = result or (bytes[i].toInt() shl 8 * i)
-        }
-        return result
     }
 
     private suspend fun linkSigningDevice() {
