@@ -798,13 +798,13 @@ internal class ProfileViewModel @Inject constructor(
         const val BYE = "bye"
     }
 
-    private suspend fun connectToMQTTWith(keys: Keys, password: String) {
+    private fun connectToMQTTWith(keys: Keys, password: String) {
         val serverURI = "tcp://192.168.0.199:1883"
         val clientID = "clientID"
         val mqttClient = MqttClient(serverURI, clientID, null)
 
         val options = MqttConnectOptions().apply {
-            userName = keys.pubkey
+            this.userName = keys.pubkey
             this.password = password.toCharArray()
         }
 
@@ -820,17 +820,17 @@ internal class ProfileViewModel @Inject constructor(
                     "${clientID}/${Topics.INIT_2_MSG}",
                     "${clientID}/${Topics.LSS_MSG}"
                 )
-
                 val qos = IntArray(topics.size) { 1 }
+
                 mqttClient.subscribe(topics, qos)
 
                 Log.d("MQTT", "Subscribed!")
 
-                Handler(Looper.getMainLooper()).postDelayed({
-                    val topic = "$clientID/${Topics.HELLO}"
-                    val message = MqttMessage()
-                    mqttClient.publish(topic, message)
-                }, 500)
+                val topic = "$clientID/${Topics.HELLO}"
+                val message = MqttMessage()
+
+                mqttClient.publish(topic, message)
+
 
             } else {
                 Log.d("MQTT", "Failed to connect!")
@@ -847,7 +847,8 @@ internal class ProfileViewModel @Inject constructor(
                         "MQTT",
                         "Message received in topic $topic with payload ${String(payload)}"
                     )
-                    val modifiedTopic = topic?.replace("clientID", "") ?: ""
+                    val modifiedTopic = topic?.replace("clientID", "")?.replace("/", "") ?: ""
+
                     processMessage(modifiedTopic, payload, mqttClient)
 
                     if (topic?.contains("init-2-msg") == true) {
@@ -868,6 +869,7 @@ internal class ProfileViewModel @Inject constructor(
     fun processMessage(topic: String, payload: ByteArray, mqttClient: MqttClient) {
         viewModelScope.launch(mainImmediate) {
             val (args, state) = argsAndState()
+
             var ret: VlsResponse? =
                 try {
                     uniffi.sphinxrs.run(
@@ -875,14 +877,15 @@ internal class ProfileViewModel @Inject constructor(
                         args,
                         state,
                         payload,
-                        UShort.MIN_VALUE
+                        UShort.MIN_VALUE,
                     )
                 } catch (e: Exception) {
                     println(e.message)
                     Log.d("MQTT", "processMessage: Error ${e.message}")
                     null
-
                 }
+            Log.d("MQTT", "parms on run: topic: ${topic} args: ${args} state: ${state} payload: ${payload}")
+
             ret?.let {
                 mqttClient.publish(it.topic, MqttMessage(it.bytes))
             }
@@ -893,9 +896,12 @@ internal class ProfileViewModel @Inject constructor(
         val args = makeArgs()
         val stringArgs = argsToJson(args) ?: ""  // Ensures it's non-nullable
 
-        val sta: Map<String, ByteArray> = emptyMap()
+        Log.d("MQTT", "MQTT JSON: $stringArgs ")
 
+
+        val sta: Map<String, ByteArray> = emptyMap()
         val mpDic: MutableMap<Any, Any> = mutableMapOf()
+
         sta.forEach { (key, value) ->
             try {
                 val decodedKey = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, key.encodeToByteArray())
@@ -913,8 +919,8 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     private suspend fun makeArgs(): Map<String, Any>? {
-        val seedBytes = generateAndPersistMnemonic().first?.encodeToByteArray()
-        val lssN = generateRandomBytes().toHex()
+        val seedBytes = generateAndPersistMnemonic().first?.encodeToByteArray()?.take(32)
+        val lssN = generateRandomBytes().take(32)
 
         if (seedBytes == null) {
             Log.d("MQTT", "Seed vacio")
@@ -933,7 +939,7 @@ internal class ProfileViewModel @Inject constructor(
             "policy" to defaultPolicy,
             "allowlist" to emptyList<Any>(),
             "timestamp" to Date().time / 1000L,
-            "lss_nonce" to lssN
+            "lss_nonce" to lssN.map { it.toInt() }
         )
 
         Log.d("MQTT", "The args are: $args")
@@ -946,11 +952,15 @@ internal class ProfileViewModel @Inject constructor(
         return adapter.toJson(map)
     }
 
-    private fun generateRandomBytes(): ByteArray {
+    private fun generateRandomBytes(): UByteArray {
         val random = SecureRandom()
         val bytes = ByteArray(32)
         random.nextBytes(bytes)
-        return bytes
+        val uByteArray = UByteArray(32)
+        for (i in bytes.indices) {
+            uByteArray[i] = bytes[i].toUByte()
+        }
+        return uByteArray
     }
 
     fun littleEndianConversion(bytes: ByteArray): Int {
