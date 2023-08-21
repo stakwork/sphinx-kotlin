@@ -13,7 +13,7 @@ android {
     buildFeatures.viewBinding = true
     defaultConfig {
         minSdkVersion versions.minSdk
-        targetSdkVersion versions.compileSdk
+        targetSdkVersion versions.targetSdk
         versionCode VERSION_CODE.toInteger()
         versionName VERSION_NAME
 
