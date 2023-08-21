@@ -161,7 +161,8 @@ internal class ProfileViewModel @Inject constructor(
 
     val clientID = "asdkjahsdkajshdkjsadh"
     val lssN = generateRandomBytes().take(32)
-    val mut: MutableMap<String, ByteArray> = mutableMapOf()
+    val muts: MutableMap<String, ByteArray> = mutableMapOf()
+    val sequence: UShort? = null
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
         PictureMenuHandler(
@@ -822,7 +823,7 @@ internal class ProfileViewModel @Inject constructor(
                         args,
                         state,
                         payload,
-                        UShort.MIN_VALUE,
+                        sequence,
                     )
                 } catch (e: Exception) {
                     println(e.message)
@@ -836,6 +837,8 @@ internal class ProfileViewModel @Inject constructor(
                 mqttClient.publish("${clientID}/${it.topic}", MqttMessage(it.bytes))
 
                 Log.d("MQTT", "PUBLISH WITH TOPIC: ${it.topic}")
+
+                //Increment sequence if needed
             }
         }
     }
@@ -850,14 +853,13 @@ internal class ProfileViewModel @Inject constructor(
 
         Log.d("MQTT", "LOADMUTS $sta ")
 
-
         val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, sta)
 
         return Pair(stringArgs, state)
     }
 
     private fun loadMuts(): Map<String, ByteArray> {
-        return mut
+        return muts
     }
 
     private fun storeMutations(inc: ByteArray) {
@@ -865,13 +867,11 @@ internal class ProfileViewModel @Inject constructor(
             try {
                 val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
 
-                if (decoded is MutableMap<*, *> && decoded.all { it.key is String && it.value is ByteArray }) {
-                    val resultMap = decoded as MutableMap<String, ByteArray>
+                (decoded as? MutableMap<String, ByteArray>)?.let {
+                    muts.putAll(it)
 
-                    mut.putAll(resultMap)
-
-                    Log.d("MQTT", "mutStateFlow is: $resultMap")
-                } else {
+                    Log.d("MQTT", "mutStateFlow is: $it")
+                } ?: run {
                     Log.d("MQTT", "Decoded data doesn't fit the expected types.")
                 }
             } catch (e: Exception) {
