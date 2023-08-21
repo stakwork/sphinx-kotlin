@@ -1,5 +1,8 @@
 # ChangeLog
 
+# Version 1.0.0-beta03 (2023-08-21)
+- Upgrades target SDK
+
 # Version 1.0.0-beta02 (2023-08-17)
 - Adds support for media on threads
 
