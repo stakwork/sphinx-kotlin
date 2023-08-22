@@ -2,10 +2,10 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.os.StatFs
+import android.util.Base64
 import android.util.Log
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
@@ -82,13 +82,13 @@ import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromByteArray
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.json.JSONObject
 import uniffi.sphinxrs.Keys
 import uniffi.sphinxrs.VlsResponse
 import uniffi.sphinxrs.makeAuthToken
@@ -149,6 +149,13 @@ internal class ProfileViewModel @Inject constructor(
 
         const val BITCOIN_NETWORK_REG_TEST = "regtest"
         const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
+
+        const val SIGNER_CLIENT_ID = "signer_client_id"
+        const val SIGNER_LSS_NONCE = "signer_lss_nonce"
+        const val SIGNER_MUTATIONS = "signer_mutations"
+        const val SIGNER_SEQUENCE = "signer_sequence"
+
+        const val VLS_ERROR = "Error: VLS Failed: invalid sequence"
     }
 
     val storageBarViewStateContainer: ViewStateContainer<StorageBarViewState> by lazy {
@@ -159,10 +166,21 @@ internal class ProfileViewModel @Inject constructor(
         ViewStateContainer(UpdatingImageViewState.Idle)
     }
 
-    val clientID = "asdkjahsdkajshdkjsadh"
-    val lssN = generateRandomBytes().take(32)
-    val muts: MutableMap<String, ByteArray> = mutableMapOf()
-    val sequence: UShort? = null
+    // generate random string of 20 length
+    private val clientIdSharedPreferences: SharedPreferences =
+        app.applicationContext.getSharedPreferences(SIGNER_CLIENT_ID, Context.MODE_PRIVATE)
+
+    // generateRandomBytes().take(32)
+    private val lssNonceSharedPreferences: SharedPreferences =
+        app.applicationContext.getSharedPreferences(SIGNER_LSS_NONCE, Context.MODE_PRIVATE)
+
+    // MutableMap<String, ByteArray> = mutableMapOf()
+    private val mutationsSharedPreferences: SharedPreferences =
+        app.applicationContext.getSharedPreferences(SIGNER_MUTATIONS, Context.MODE_PRIVATE)
+
+    // Ushort? = null
+    private val sequenceSharedPreferences: SharedPreferences =
+    app.applicationContext.getSharedPreferences(SIGNER_SEQUENCE, Context.MODE_PRIVATE)
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
         PictureMenuHandler(
@@ -726,27 +744,11 @@ internal class ProfileViewModel @Inject constructor(
         }
 }
 
-    object Topics {
-        const val VLS = "vls"
-        const val VLS_RES = "vls-res"
-        const val CONTROL = "control"
-        const val CONTROL_RES = "control-res"
-        const val PROXY = "proxy"
-        const val PROXY_RES = "proxy-res"
-        const val ERROR = "error"
-        const val INIT_1_MSG = "init-1-msg"
-        const val INIT_1_RES = "init-1-res"
-        const val INIT_2_MSG = "init-2-msg"
-        const val INIT_2_RES = "init-2-res"
-        const val LSS_MSG = "lss-msg"
-        const val LSS_RES = "lss-res"
-        const val HELLO = "hello"
-        const val BYE = "bye"
-    }
-
     private fun connectToMQTTWith(keys: Keys, password: String) {
         val serverURI = "tcp://192.168.0.199:1883"
-        val mqttClient = MqttClient(serverURI, clientID, null)
+        val clientId = retrieveOrGenerateClientId()
+        Log.d("SharedPSigner", "Retrieve ClientID: $clientId")
+        val mqttClient = MqttClient(serverURI, clientId, null)
 
         val options = MqttConnectOptions().apply {
             this.userName = keys.pubkey
@@ -760,10 +762,10 @@ internal class ProfileViewModel @Inject constructor(
                 Log.d("MQTT", "Connected!")
 
                 val topics = arrayOf(
-                    "${clientID}/${Topics.VLS}",
-                    "${clientID}/${Topics.INIT_1_MSG}",
-                    "${clientID}/${Topics.INIT_2_MSG}",
-                    "${clientID}/${Topics.LSS_MSG}"
+                    "${clientId}/${SignerTopics.VLS}",
+                    "${clientId}/${SignerTopics.INIT_1_MSG}",
+                    "${clientId}/${SignerTopics.INIT_2_MSG}",
+                    "${clientId}/${SignerTopics.LSS_MSG}"
                 )
                 val qos = IntArray(topics.size) { 1 }
 
@@ -771,7 +773,7 @@ internal class ProfileViewModel @Inject constructor(
 
                 Log.d("MQTT", "Subscribed!")
 
-                val topic = "$clientID/${Topics.HELLO}"
+                val topic = "${clientId}/${SignerTopics.HELLO}"
                 val message = MqttMessage()
 
                 mqttClient.publish(topic, message)
@@ -783,27 +785,19 @@ internal class ProfileViewModel @Inject constructor(
 
             mqttClient.setCallback(object : MqttCallback {
                 override fun connectionLost(cause: Throwable?) {
-                    Log.d("MQTT", "Connection lost!")
+                    restart(mqttClient)
                 }
 
                 override fun messageArrived(topic: String?, message: MqttMessage?) {
                     val payload = message?.payload ?: byteArrayOf()
-                    Log.d(
-                        "MQTT",
-                        "Message received in topic $topic with payload ${String(payload)}"
-                    )
-                    val modifiedTopic = topic?.replace("${clientID}/", "") ?: ""
+                    val modifiedTopic = topic?.replace("${clientId}/", "") ?: ""
 
                     processMessage(modifiedTopic, payload, mqttClient)
 
-                    if (topic?.contains("init-2-msg") == true) {
-                        Log.d("MQTT", "init-2-msg received")
-                    }
+                    Log.d("MQTT", "Message received in topic $topic with payload ${String(payload)}")
                 }
 
-                override fun deliveryComplete(token: IMqttDeliveryToken?) {
-
-                }
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
             })
 
         } catch (e: MqttException) {
@@ -823,22 +817,26 @@ internal class ProfileViewModel @Inject constructor(
                         args,
                         state,
                         payload,
-                        sequence,
+                        retrieveSequence(),
                     )
                 } catch (e: Exception) {
-                    println(e.message)
-                    Log.d("MQTT", "processMessage: Error ${e.message}")
+                    if (e.localizedMessage?.contains(VLS_ERROR) == true){
+                        restart(mqttClient)
+                    }
                     null
                 }
             Log.d("MQTT", "params on run: topic: ${topic} args: ${args} state: ${state} payload: ${payload}")
 
             ret?.let {
                 storeMutations(it.state)
-                mqttClient.publish("${clientID}/${it.topic}", MqttMessage(it.bytes))
+
+                mqttClient.publish("${mqttClient.clientId}/${it.topic}", MqttMessage(it.bytes))
 
                 Log.d("MQTT", "PUBLISH WITH TOPIC: ${it.topic}")
 
-                //Increment sequence if needed
+                if (topic.contains(SignerTopics.VLS)) {
+                    storeAndIncrementSequence(ret.sequence)
+                }
             }
         }
     }
@@ -849,18 +847,31 @@ internal class ProfileViewModel @Inject constructor(
 
         Log.d("MQTT", "MQTT JSON: $stringArgs ")
 
-        val sta: Map<String, ByteArray> = loadMuts()
+        val mutationsState: Map<String, ByteArray> = retrieveMutations()
 
-        Log.d("MQTT", "LOADMUTS $sta ")
+        Log.d("MQTT", "LOADMUTS $mutationsState ")
 
-        val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, sta)
+        val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, mutationsState)
 
         return Pair(stringArgs, state)
     }
 
-    private fun loadMuts(): Map<String, ByteArray> {
-        return muts
+    private fun restart(mqttClient: MqttClient) {
+        val mutationsEditor = mutationsSharedPreferences.edit()
+        val sequenceEditor = sequenceSharedPreferences.edit()
+
+        mutationsEditor.putString(SIGNER_MUTATIONS, "")
+        mutationsEditor.apply()
+
+        sequenceEditor.putInt(SIGNER_SEQUENCE, 0)
+        sequenceEditor.apply()
+
+        val topic = "${mqttClient.clientId}/${SignerTopics.HELLO}"
+        val message = MqttMessage()
+
+        mqttClient.publish(topic, message)
     }
+
 
     private fun storeMutations(inc: ByteArray) {
         viewModelScope.launch(mainImmediate) {
@@ -868,7 +879,8 @@ internal class ProfileViewModel @Inject constructor(
                 val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
 
                 (decoded as? MutableMap<String, ByteArray>)?.let {
-                    muts.putAll(it)
+
+                    storeMutationsOnSharedPreferences(it)
 
                     Log.d("MQTT", "mutStateFlow is: $it")
                 } ?: run {
@@ -882,6 +894,8 @@ internal class ProfileViewModel @Inject constructor(
 
     private suspend fun makeArgs(): Map<String, Any>? {
         val seedBytes = generateAndPersistMnemonic().first?.encodeToByteArray()?.take(32)
+
+        val lssNonce = retrieveOrGenerateLssNonce()
 
         if (seedBytes == null) {
             Log.d("MQTT", "Seed vacio")
@@ -900,12 +914,113 @@ internal class ProfileViewModel @Inject constructor(
             "policy" to defaultPolicy,
             "allowlist" to emptyList<Any>(),
             "timestamp" to Date().time / 1000L,
-            "lss_nonce" to lssN.map { it.toInt() }
+            "lss_nonce" to lssNonce
         )
 
         Log.d("MQTT", "The args are: $args")
 
         return args
+    }
+
+    private fun retrieveOrGenerateClientId(): String {
+        val storedClientId = clientIdSharedPreferences.getString(SIGNER_CLIENT_ID, "") ?: ""
+
+        val result = storedClientId.ifEmpty {
+            val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+            val newClientId = (1..20).map { allowedChars.random() }
+                .joinToString("")
+
+            val editor = clientIdSharedPreferences.edit()
+            editor.putString(SIGNER_CLIENT_ID, newClientId)
+            editor.apply()
+
+            newClientId
+        }
+
+        return result
+    }
+
+    private fun retrieveOrGenerateLssNonce(): List<Int> {
+        val storedLssNonceString = lssNonceSharedPreferences.getString(SIGNER_LSS_NONCE, "")
+        val storedLssNonce = storedLssNonceString?.split(",")?.mapNotNull { it.toIntOrNull() }
+
+        val result = if (!storedLssNonce.isNullOrEmpty()) {
+            storedLssNonce
+        } else {
+            val editor = lssNonceSharedPreferences.edit()
+            val randomBytes = generateRandomBytes().take(32)
+            val randomBytesString = randomBytes.joinToString(",") { it.toString() }
+
+            editor.putString(SIGNER_LSS_NONCE, randomBytesString)
+            editor.apply()
+
+            randomBytes.map { it.toInt() }
+        }
+
+        return result
+    }
+
+
+    private fun storeMutationsOnSharedPreferences(newMutations: MutableMap<String, ByteArray>) {
+        val existingMutations = retrieveMutations()
+        existingMutations.putAll(newMutations)
+
+        val encodedString = encodeMapToBase64(existingMutations)
+        val editor = mutationsSharedPreferences.edit()
+
+        editor.putString(SIGNER_MUTATIONS, encodedString)
+        editor.apply()
+    }
+
+    private fun retrieveMutations(): MutableMap<String, ByteArray> {
+        val encodedString = mutationsSharedPreferences.getString(SIGNER_MUTATIONS, null)
+        val result = encodedString?.let {
+            decodeBase64ToMap(it)
+        } ?: mutableMapOf()
+
+        return result
+    }
+
+    private fun storeAndIncrementSequence(sequence: UShort) {
+        val newSequence = sequence.toInt().plus(1)
+        val editor = sequenceSharedPreferences.edit()
+
+        editor.putInt(SIGNER_SEQUENCE, newSequence)
+        editor.apply()
+    }
+
+    private fun retrieveSequence(): UShort {
+        val sequence = sequenceSharedPreferences.getInt(SIGNER_SEQUENCE, 0)
+        val result = sequence.toUShort()
+
+        return result
+    }
+
+    private fun encodeMapToBase64(map: MutableMap<String, ByteArray>): String {
+        val encodedMap = mutableMapOf<String, String>()
+
+        for ((key, value) in map) {
+            encodedMap[key] = Base64.encodeToString(value, Base64.DEFAULT)
+        }
+
+        val result = (encodedMap as Map<*, *>?)?.let { JSONObject(it).toString() } ?: ""
+
+        return result
+    }
+
+    private fun decodeBase64ToMap(encodedString: String): MutableMap<String, ByteArray> {
+        val decodedMap = mutableMapOf<String, ByteArray>()
+        val jsonObject = JSONObject(encodedString)
+        val keys = jsonObject.keys()
+
+        while (keys.hasNext()) {
+            val key = keys.next()
+            val encodedValue = jsonObject.getString(key)
+            val decodedValue = Base64.decode(encodedValue, Base64.DEFAULT)
+            decodedMap[key] = decodedValue
+        }
+
+        return decodedMap
     }
 
     private fun argsToJson(map: Map<String, Any>?): String? {
@@ -918,9 +1033,11 @@ internal class ProfileViewModel @Inject constructor(
         val bytes = ByteArray(32)
         random.nextBytes(bytes)
         val uByteArray = UByteArray(32)
+
         for (i in bytes.indices) {
             uByteArray[i] = bytes[i].toUByte()
         }
+
         return uByteArray
     }
 
