@@ -742,12 +742,11 @@ internal class ProfileViewModel @Inject constructor(
                 connectToMQTTWith(keys, password)
             }
         }
-}
+    }
 
     private fun connectToMQTTWith(keys: Keys, password: String) {
         val serverURI = "tcp://192.168.0.199:1883"
         val clientId = retrieveOrGenerateClientId()
-        Log.d("SharedPSigner", "Retrieve ClientID: $clientId")
         val mqttClient = MqttClient(serverURI, clientId, null)
 
         val options = MqttConnectOptions().apply {
@@ -759,7 +758,6 @@ internal class ProfileViewModel @Inject constructor(
             mqttClient.connect(options)
 
             if (mqttClient.isConnected) {
-                Log.d("MQTT", "Connected!")
 
                 val topics = arrayOf(
                     "${clientId}/${SignerTopics.VLS}",
@@ -771,19 +769,15 @@ internal class ProfileViewModel @Inject constructor(
 
                 mqttClient.subscribe(topics, qos)
 
-                Log.d("MQTT", "Subscribed!")
-
                 val topic = "${clientId}/${SignerTopics.HELLO}"
                 val message = MqttMessage()
 
                 mqttClient.publish(topic, message)
 
-
-            } else {
-                Log.d("MQTT", "Failed to connect!")
             }
 
             mqttClient.setCallback(object : MqttCallback {
+
                 override fun connectionLost(cause: Throwable?) {
                     restart(mqttClient)
                 }
@@ -793,8 +787,6 @@ internal class ProfileViewModel @Inject constructor(
                     val modifiedTopic = topic?.replace("${clientId}/", "") ?: ""
 
                     processMessage(modifiedTopic, payload, mqttClient)
-
-                    Log.d("MQTT", "Message received in topic $topic with payload ${String(payload)}")
                 }
 
                 override fun deliveryComplete(token: IMqttDeliveryToken?) {}
@@ -802,7 +794,6 @@ internal class ProfileViewModel @Inject constructor(
 
         } catch (e: MqttException) {
             e.printStackTrace()
-            Log.d("MQTT", "connectToMQTTWith: Error ${e.printStackTrace()}")
         }
     }
 
@@ -810,7 +801,7 @@ internal class ProfileViewModel @Inject constructor(
         viewModelScope.launch(mainImmediate) {
             val (args, state) = argsAndState()
 
-            var ret: VlsResponse? =
+            val ret: VlsResponse? =
                 try {
                     uniffi.sphinxrs.run(
                         topic,
@@ -820,19 +811,16 @@ internal class ProfileViewModel @Inject constructor(
                         retrieveSequence(),
                     )
                 } catch (e: Exception) {
-                    if (e.localizedMessage?.contains(VLS_ERROR) == true){
+                    if (e.localizedMessage?.contains(VLS_ERROR) == true) {
                         restart(mqttClient)
                     }
                     null
                 }
-            Log.d("MQTT", "params on run: topic: ${topic} args: ${args} state: ${state} payload: ${payload}")
 
             ret?.let {
                 storeMutations(it.state)
 
                 mqttClient.publish("${mqttClient.clientId}/${it.topic}", MqttMessage(it.bytes))
-
-                Log.d("MQTT", "PUBLISH WITH TOPIC: ${it.topic}")
 
                 if (topic.contains(SignerTopics.VLS)) {
                     storeAndIncrementSequence(ret.sequence)
@@ -844,13 +832,7 @@ internal class ProfileViewModel @Inject constructor(
     private suspend fun argsAndState(): Pair<String, ByteArray> {
         val args = makeArgs()
         val stringArgs = argsToJson(args) ?: ""
-
-        Log.d("MQTT", "MQTT JSON: $stringArgs ")
-
         val mutationsState: Map<String, ByteArray> = retrieveMutations()
-
-        Log.d("MQTT", "LOADMUTS $mutationsState ")
-
         val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, mutationsState)
 
         return Pair(stringArgs, state)
@@ -879,26 +861,18 @@ internal class ProfileViewModel @Inject constructor(
                 val decoded = MsgPack.decodeFromByteArray(MsgPackDynamicSerializer, inc)
 
                 (decoded as? MutableMap<String, ByteArray>)?.let {
-
                     storeMutationsOnSharedPreferences(it)
-
-                    Log.d("MQTT", "mutStateFlow is: $it")
-                } ?: run {
-                    Log.d("MQTT", "Decoded data doesn't fit the expected types.")
                 }
-            } catch (e: Exception) {
-                Log.d("MQTT", "Error during decoding or casting: ${e.message}")
-            }
+
+            } catch (e: Exception) { }
         }
     }
 
     private suspend fun makeArgs(): Map<String, Any>? {
         val seedBytes = generateAndPersistMnemonic().first?.encodeToByteArray()?.take(32)
-
         val lssNonce = retrieveOrGenerateLssNonce()
 
         if (seedBytes == null) {
-            Log.d("MQTT", "Seed vacio")
             return null
         }
 
@@ -917,8 +891,6 @@ internal class ProfileViewModel @Inject constructor(
             "lss_nonce" to lssNonce
         )
 
-        Log.d("MQTT", "The args are: $args")
-
         return args
     }
 
@@ -927,8 +899,7 @@ internal class ProfileViewModel @Inject constructor(
 
         val result = storedClientId.ifEmpty {
             val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-            val newClientId = (1..20).map { allowedChars.random() }
-                .joinToString("")
+            val newClientId = (1..20).map { allowedChars.random() }.joinToString("")
 
             val editor = clientIdSharedPreferences.edit()
             editor.putString(SIGNER_CLIENT_ID, newClientId)
@@ -959,7 +930,6 @@ internal class ProfileViewModel @Inject constructor(
 
         return result
     }
-
 
     private fun storeMutationsOnSharedPreferences(newMutations: MutableMap<String, ByteArray>) {
         val existingMutations = retrieveMutations()
