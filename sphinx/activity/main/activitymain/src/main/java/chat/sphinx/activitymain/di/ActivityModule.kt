@@ -14,6 +14,7 @@ import dagger.hilt.android.components.ActivityComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ActivityScoped
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
+import javax.inject.Singleton
 
 @Module
 @InstallIn(ActivityComponent::class)
@@ -51,6 +52,13 @@ object ActivityModule {
     fun provideSignerManagerImpl(
         @ApplicationContext appContext: Context,
         dispatchers: CoroutineDispatchers,
-    ): SignerManager =
+    ): SignerManagerImpl =
         SignerManagerImpl(appContext, dispatchers)
+
+    @Provides
+    fun provideSignerManager(
+        signerManagerImpl: SignerManagerImpl
+    ): SignerManager =
+        signerManagerImpl
+
 }
