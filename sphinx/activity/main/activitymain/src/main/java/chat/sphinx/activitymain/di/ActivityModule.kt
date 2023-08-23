@@ -2,8 +2,10 @@ package chat.sphinx.activitymain.di
 
 import android.content.Context
 import chat.sphinx.concept_connectivity_helper.ConnectivityHelper
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_user_colors_helper.UserColorsHelper
 import chat.sphinx.connectivity_helper.ConnectivityHelperImpl
+import chat.sphinx.signer_manager.SignerManagerImpl
 import chat.sphinx.user_colors_helper.UserColorsHelperImpl
 import dagger.Module
 import dagger.Provides
@@ -43,4 +45,12 @@ object ActivityModule {
         connectivityHelperImpl: ConnectivityHelperImpl
     ): ConnectivityHelper =
         connectivityHelperImpl
+
+    @Provides
+    @ActivityScoped
+    fun provideSignerManagerImpl(
+        @ApplicationContext appContext: Context,
+        dispatchers: CoroutineDispatchers,
+    ): SignerManager =
+        SignerManagerImpl(appContext, dispatchers)
 }
