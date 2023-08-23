@@ -131,6 +131,8 @@ include ':sphinx:activity:features:connectivity-helper'
 include ':sphinx:activity:concepts:concept-view-model-coordinator'
 include ':sphinx:activity:features:feature-view-model-coordinator'
 include ':sphinx:activity:features:video-player-controller'
+include ':sphinx:activity:concepts:concept-signer-manager'
+include ':sphinx:activity:features:signer-manager'
 
 // Screens
 include ':sphinx:screens:add-sats:add-sats'

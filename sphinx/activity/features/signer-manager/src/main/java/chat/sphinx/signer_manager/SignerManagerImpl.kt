@@ -3,6 +3,7 @@ package chat.sphinx.signer_manager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
+import android.widget.ImageView
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toEntropy
 import cash.z.ecc.android.bip39.toSeed
@@ -14,6 +15,7 @@ import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
+import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.CoroutineScope
@@ -33,15 +35,23 @@ import uniffi.sphinxrs.makeAuthToken
 import uniffi.sphinxrs.nodeKeys
 import java.security.SecureRandom
 import java.util.Date
+import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+@AndroidEntryPoint
 class SignerManagerImpl(
     context: Context,
-    private val dispatchers: CoroutineDispatchers,
-    private val moshi: Moshi,
-    private val walletDataHandler: WalletDataHandler
+    private val dispatchers: CoroutineDispatchers
     ): SignerManager(), CoroutineScope
 {
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var moshi: Moshi
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var walletDataHandler: WalletDataHandler
+
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
         get() = job + dispatchers.mainImmediate
