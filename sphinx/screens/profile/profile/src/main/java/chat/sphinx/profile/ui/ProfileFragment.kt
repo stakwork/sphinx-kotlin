@@ -279,6 +279,7 @@ internal class ProfileFragment: SideEffectFragment<
                 }
 
                 buttonProfileAdvancedContainerSigningDevice.setOnClickListener {
+                    signerManager.setupPhoneSigner()
                     //Present options menu with 2 options:
                     //Title: Setup
                     //Message: Setup hardware device or phone signer
