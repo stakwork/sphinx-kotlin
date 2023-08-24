@@ -83,18 +83,6 @@ import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import javax.inject.Inject
 import kotlinx.serialization.Serializable
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttException
-import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.json.JSONObject
-import uniffi.sphinxrs.Keys
-import uniffi.sphinxrs.VlsResponse
-import uniffi.sphinxrs.makeAuthToken
-import uniffi.sphinxrs.nodeKeys
-import java.util.Date
 
 @Serializable
 data class SampleClass(
@@ -137,7 +125,6 @@ internal class ProfileViewModel @Inject constructor(
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
     private val walletDataHandler: WalletDataHandler,
-    private val signerManager: SignerManager,
     private val moshi: Moshi
     ): SideEffectViewModel<
         Context,
@@ -696,7 +683,6 @@ internal class ProfileViewModel @Inject constructor(
 //                }
 //            })
 //        }
-        signerManager.start()
     }
 
 

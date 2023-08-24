@@ -1,44 +1,4 @@
 plugins {
-    id 'app.cash.exhaustive'
-    id 'com.android.library'
-    id 'kotlin-android'
-}
-
-android {
-    compileSdkVersion versions.compileSdk
-    buildToolsVersion versions.buildTools
-
-    defaultConfig {
-        minSdkVersion versions.minSdk
-        targetSdkVersion versions.compileSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments disableAnalytics: 'true'
-        consumerProguardFiles "consumer-rules.pro"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-        }
-    }
-}
-
-dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-    // KotlinAndroid
-    implementation project(path: ':sphinx:application:common:resources')
-    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
-
-    implementation deps.jncryptor
-
-    implementation deps.bip39.sdk
-    implementation deps.jna.sdk
-    implementation deps.paho.sdk
-    implementation deps.msgpack.sdk
-    implementation deps.square.moshi
-
-
+    id 'java-library'
+    id 'kotlin'
 }
