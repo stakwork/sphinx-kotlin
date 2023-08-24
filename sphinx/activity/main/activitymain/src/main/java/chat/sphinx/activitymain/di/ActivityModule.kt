@@ -48,7 +48,6 @@ object ActivityModule {
         connectivityHelperImpl
 
     @Provides
-    @ActivityScoped
     fun provideSignerManagerImpl(
         @ApplicationContext appContext: Context,
         dispatchers: CoroutineDispatchers,

@@ -20,6 +20,7 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -59,6 +60,10 @@ internal class ProfileFragment: SideEffectFragment<
     @Inject
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
+
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var signerManager: SignerManager
 
     override val viewModel: ProfileViewModel by viewModels()
     override val binding: FragmentProfileBinding by viewBinding(FragmentProfileBinding::bind)
@@ -274,7 +279,11 @@ internal class ProfileFragment: SideEffectFragment<
                 }
 
                 buttonProfileAdvancedContainerSigningDevice.setOnClickListener {
-                    viewModel.setupSigningDevice()
+                    //Present options menu with 2 options:
+                    //Title: Setup
+                    //Message: Setup hardware device or phone signer
+                    //Option1: Hardware -> previous hardware logic (signerManager.setupSignerHardware())
+                    //Option2: Phone Signer -> new start() logic (signerManager.setupPhoneSigner())
                 }
 
                 buttonProfileAdvancedContainerChangePin.setOnClickListener {
