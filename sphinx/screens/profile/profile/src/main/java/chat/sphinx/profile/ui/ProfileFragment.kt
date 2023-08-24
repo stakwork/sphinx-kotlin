@@ -88,6 +88,8 @@ internal class ProfileFragment: SideEffectFragment<
         setupProfileHeader()
         setupProfileTabs()
         setupProfile()
+        setupSignerDependencies()
+
 
         bottomMenuPicture.initialize(
             R.string.bottom_menu_profile_pic_header_text,
@@ -119,6 +121,11 @@ internal class ProfileFragment: SideEffectFragment<
                 }
             }
         }
+    }
+
+    private fun setupSignerDependencies(){
+        signerManager.initWalletDataHandler(viewModel.walletDataHandler)
+        signerManager.initMoshi(viewModel.moshi)
     }
 
     private fun setupProfileHeader() {
@@ -268,7 +275,7 @@ internal class ProfileFragment: SideEffectFragment<
                         }
 
                         override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                            // only persist when tracking is stopped (key up)
+                            signerManager.initWalletDataHandler(viewModel.pictureMenuHandler)
                             viewModel.persistPINTimeout()
                         }
                     }

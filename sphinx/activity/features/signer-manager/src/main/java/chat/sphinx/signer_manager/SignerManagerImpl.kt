@@ -3,7 +3,6 @@ package chat.sphinx.signer_manager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
-import android.widget.ImageView
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toEntropy
 import cash.z.ecc.android.bip39.toSeed
@@ -15,7 +14,6 @@ import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
-import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +26,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttException
 import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.json.JSONException
 import org.json.JSONObject
 import uniffi.sphinxrs.Keys
 import uniffi.sphinxrs.VlsResponse
@@ -43,13 +42,20 @@ class SignerManagerImpl(
     private val dispatchers: CoroutineDispatchers
 ): SignerManager(), CoroutineScope {
 
-    @Inject
-    @Suppress("ProtectedInFinal")
-    protected lateinit var moshi: Moshi
+    lateinit var moshi: Moshi
+    lateinit var walletDataHandler: WalletDataHandler
 
-    @Inject
-    @Suppress("ProtectedInFinal")
-    protected lateinit var walletDataHandler: WalletDataHandler
+    override fun initWalletDataHandler(walletDataHandlerInstance: Any) {
+        (walletDataHandlerInstance as WalletDataHandler).let {
+            walletDataHandler = it
+        }
+    }
+
+    override fun initMoshi(moshiInstance: Any) {
+        (moshiInstance as Moshi).let {
+            moshi = it
+        }
+    }
 
     private val job = SupervisorJob()
     override val coroutineContext: CoroutineContext
@@ -344,16 +350,23 @@ class SignerManagerImpl(
     }
 
     private fun decodeBase64ToMap(encodedString: String): MutableMap<String, ByteArray> {
-        val decodedMap = mutableMapOf<String, ByteArray>()
-        val jsonObject = JSONObject(encodedString)
-        val keys = jsonObject.keys()
-
-        while (keys.hasNext()) {
-            val key = keys.next()
-            val encodedValue = jsonObject.getString(key)
-            val decodedValue = Base64.decode(encodedValue, Base64.DEFAULT)
-            decodedMap[key] = decodedValue
+        if (encodedString.isEmpty()) {
+            return mutableMapOf()
         }
+
+        val decodedMap = mutableMapOf<String, ByteArray>()
+
+        try {
+            val jsonObject = JSONObject(encodedString)
+            val keys = jsonObject.keys()
+
+            while (keys.hasNext()) {
+                val key = keys.next()
+                val encodedValue = jsonObject.getString(key)
+                val decodedValue = Base64.decode(encodedValue, Base64.DEFAULT)
+                decodedMap[key] = decodedValue
+            }
+        } catch (e: JSONException) { }
 
         return decodedMap
     }

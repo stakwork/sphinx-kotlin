@@ -124,8 +124,8 @@ internal class ProfileViewModel @Inject constructor(
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
-    private val walletDataHandler: WalletDataHandler,
-    private val moshi: Moshi
+    val walletDataHandler: WalletDataHandler,
+    val moshi: Moshi
     ): SideEffectViewModel<
         Context,
         ProfileSideEffect,
