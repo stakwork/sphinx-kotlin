@@ -118,7 +118,7 @@ internal class ProfileViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
-    private val networkQueryCrypter: NetworkQueryCrypter,
+    val networkQueryCrypter: NetworkQueryCrypter,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
@@ -940,12 +940,32 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     override fun failedToSetupSigningDevice(message: String) {
-        TODO("Not yet implemented")
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice(message))
+        }
+    }
+
+    override fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.ShowMnemonicToUser(message) {
+            callback.invoke(true)
+            })
+        }
     }
 
     override fun sendingSeedToHardware() {
-        TODO("Not yet implemented")
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.SendingSeedToHardware)
+        }
     }
+
+    override fun signingDeviceSuccessfullySet() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.SigningDeviceSuccessfullySet)
+            switchTabTo(false)
+        }
+    }
+
 
     override val sideEffectContainer: SideEffectContainer<Context, ProfileSideEffect>
         get() = super.sideEffectContainer

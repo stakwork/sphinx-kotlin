@@ -2,15 +2,17 @@ package chat.sphinx.signer_manager
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.text.InputType
 import android.util.Base64
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toEntropy
 import cash.z.ecc.android.bip39.toSeed
+import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
 import chat.sphinx.concept_signer_manager.SignerCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
+import chat.sphinx.kotlin_response.LoadResponse
+import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.SignerTopics
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
@@ -22,7 +24,9 @@ import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -33,8 +37,11 @@ import org.json.JSONException
 import org.json.JSONObject
 import uniffi.sphinxrs.Keys
 import uniffi.sphinxrs.VlsResponse
+import uniffi.sphinxrs.deriveSharedSecret
+import uniffi.sphinxrs.encrypt
 import uniffi.sphinxrs.makeAuthToken
 import uniffi.sphinxrs.nodeKeys
+import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
 import java.util.Date
 import kotlin.coroutines.CoroutineContext
@@ -44,8 +51,9 @@ class SignerManagerImpl(
     private val dispatchers: CoroutineDispatchers
 ): SignerManager(), CoroutineScope {
 
-    lateinit var moshi: Moshi
-    lateinit var walletDataHandler: WalletDataHandler
+    private lateinit var moshi: Moshi
+    private lateinit var walletDataHandler: WalletDataHandler
+    private lateinit var networkQueryCrypter: NetworkQueryCrypter
 
     override fun initWalletDataHandler(walletDataHandlerInstance: Any) {
         (walletDataHandlerInstance as WalletDataHandler).let {
@@ -56,6 +64,12 @@ class SignerManagerImpl(
     override fun initMoshi(moshiInstance: Any) {
         (moshiInstance as Moshi).let {
             moshi = it
+        }
+    }
+
+    override fun initNetworkQueryCrypter(networkQueryCrypterInstance: Any) {
+        (networkQueryCrypterInstance as NetworkQueryCrypter).let {
+            networkQueryCrypter = it
         }
     }
 
@@ -70,6 +84,9 @@ class SignerManagerImpl(
         const val SIGNER_SEQUENCE = "signer_sequence"
 
         const val VLS_ERROR = "Error: VLS Failed: invalid sequence"
+
+        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
+        const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
     }
 
     private val appContext: Context = context.applicationContext
@@ -86,10 +103,147 @@ class SignerManagerImpl(
     private val sequenceSharedPreferences: SharedPreferences =
         appContext.applicationContext.getSharedPreferences(SIGNER_SEQUENCE, Context.MODE_PRIVATE)
 
+    private val signingDeviceSharedPreferences =
+        appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+    private var seedDto = SendSeedDto()
+
+    override fun setupSignerHardware(signerCallback: SignerCallback) {
+        launch {
+            signerCallback.checkNetwork {
+                signerCallback.signingDeviceNetwork { networkName ->
+                    seedDto.ssid = networkName
+
+                    signerCallback.signingDevicePassword(networkName) { networkPass ->
+                        seedDto.pass = networkPass
+
+                        signerCallback.signingDeviceLightningNodeUrl { lightningNodeUrl ->
+                            seedDto.lightningNodeUrl = lightningNodeUrl
+
+                            signerCallback.signingDeviceCheckBitcoinNetwork(
+                                network = { seedDto.network = it },
+                                linkSigningDevice = { callback ->
+                                    if (callback) {
+                                        linkSigningDevice(signerCallback)
+                                    }
+                                }
+                            )
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
+    private fun linkSigningDevice(signerCallback: SignerCallback) {
+        launch {
+            val secKey = ByteArray(32)
+            SecureRandom().nextBytes(secKey)
+
+            val sk1 = secKey.toHex()
+            val pk1 = pubkeyFromSecretKey(sk1)
+
+            var pk2: String? = null
+
+            if (pk1 == null) {
+                signerCallback.failedToSetupSigningDevice("error generating secret key")
+                resetSeedDto()
+                return@launch
+            }
+
+            seedDto.pubkey = pk1
+
+            if (
+                seedDto.lightningNodeUrl == null ||
+                seedDto.lightningNodeUrl?.isEmpty() == true
+            ) {
+                resetSeedDto()
+                signerCallback.failedToSetupSigningDevice("lightning node URL can't be empty")
+                return@launch
+            }
+
+            networkQueryCrypter.getCrypterPubKey().collect { loadResponse ->
+                when (loadResponse) {
+                    is LoadResponse.Loading -> {}
+                    is Response.Error -> {
+                        resetSeedDto()
+                        signerCallback.failedToSetupSigningDevice("error getting public key from hardware")
+                    }
+
+                    is Response.Success -> {
+                        pk2 = loadResponse.value.pubkey
+                    }
+                }
+            }
+
+            pk2?.let { nnPk2 ->
+                val sec1 = deriveSharedSecret(nnPk2, sk1)
+                val seedAndMnemonic = generateAndPersistMnemonic()
+
+                seedAndMnemonic.second?.let { mnemonic ->
+                    signerCallback.showMnemonicToUser(mnemonic.value) { callback ->
+                         if (callback) {
+                             seedAndMnemonic.first?.let { seed ->
+                                 encryptAndSendSeed(seed, sec1, signerCallback)
+                             }
+                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun encryptAndSendSeed(
+        seed: String,
+        sec1: String,
+        signerCallback: SignerCallback
+    ) {
+        launch {
+            val nonce = ByteArray(12)
+            SecureRandom().nextBytes(nonce)
+
+            encrypt(seed, sec1, nonce.toHex()).let { cipher ->
+                if (cipher.isNotEmpty()) {
+                    seedDto.seed = cipher
+
+                    signerCallback.sendingSeedToHardware()
+
+                    networkQueryCrypter.sendEncryptedSeed(seedDto).collect { loadResponse ->
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {
+                                resetSeedDto()
+                                signerCallback.failedToSetupSigningDevice("error sending seed to hardware")
+                            }
+
+                            is Response.Success -> {
+                                setSigningDeviceSetupDone(signerCallback)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setSigningDeviceSetupDone(
+        signerCallback: SignerCallback
+    ) {
+        signingDeviceSharedPreferences.edit().putBoolean(SIGNING_DEVICE_SETUP_KEY, true)
+            .let { editor ->
+                if (!editor.commit()) {
+                    editor.apply()
+                }
+                signerCallback.signingDeviceSuccessfullySet()
+            }
+    }
+
+    private fun resetSeedDto() {
+        seedDto = SendSeedDto()
+    }
 
     override fun setupPhoneSigner() {
-        println("TESTING SIGNER MANAGER")
-
         launch {
             val (seed, mnemonic) = generateAndPersistMnemonic()
 
@@ -112,35 +266,6 @@ class SignerManagerImpl(
             }
         }
     }
-    private var seedDto = SendSeedDto()
-    override fun setupSignerHardware(signerCallback: SignerCallback) {
-            launch {
-                signerCallback.checkNetwork {
-                    signerCallback.signingDeviceNetwork { networkName ->
-                        seedDto.ssid = networkName
-
-                        signerCallback.signingDevicePassword(networkName) { networkPass ->
-                            seedDto.pass = networkPass
-
-                            signerCallback.signingDeviceLightningNodeUrl { lightningNodeUrl ->
-                                seedDto.lightningNodeUrl = lightningNodeUrl
-
-                                signerCallback.signingDeviceCheckBitcoinNetwork(
-                                    network = { seedDto.network = it },
-                                    linkSigningDevice = { callback ->
-                                        if (callback) {
-                                        }
-                                    }
-                                )
-                            }
-
-                        }
-                    }
-                }
-            }
-    }
-
-
 
     private fun connectToMQTTWith(keys: Keys, password: String) {
         val serverURI = "tcp://192.168.0.199:1883"
