@@ -24,9 +24,11 @@ import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
+import chat.sphinx.menu_bottom_signer.BottomSignerMenu
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
@@ -80,6 +82,13 @@ internal class ProfileFragment: SideEffectFragment<
         )
     }
 
+    private val bottomMenuSigner: BottomSignerMenu by lazy(LazyThreadSafetyMode.NONE) {
+        BottomSignerMenu(
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -94,6 +103,12 @@ internal class ProfileFragment: SideEffectFragment<
         bottomMenuPicture.initialize(
             R.string.bottom_menu_profile_pic_header_text,
             binding.includeLayoutMenuBottomProfilePic,
+            viewLifecycleOwner
+        )
+
+        bottomMenuSigner.initialize(
+            R.string.bottom_menu_signer_header_text,
+            binding.includeLayoutMenuBottomSigner,
             viewLifecycleOwner
         )
     }
@@ -115,7 +130,11 @@ internal class ProfileFragment: SideEffectFragment<
         override fun handleOnBackPressed() {
             if (viewModel.pictureMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
                 viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-            } else {
+            }
+            if (viewModel.signerMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
+                viewModel.signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
+            }
+            else {
                 lifecycleScope.launch(viewModel.mainImmediate) {
                     profileNavigator.popBackStack()
                 }
@@ -286,12 +305,7 @@ internal class ProfileFragment: SideEffectFragment<
                 }
 
                 buttonProfileAdvancedContainerSigningDevice.setOnClickListener {
-                    signerManager.setupPhoneSigner()
-                    //Present options menu with 2 options:
-                    //Title: Setup
-                    //Message: Setup hardware device or phone signer
-                    //Option1: Hardware -> previous hardware logic (signerManager.setupSignerHardware())
-                    //Option2: Phone Signer -> new start() logic (signerManager.setupPhoneSigner())
+                    viewModel.signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
                 }
 
                 buttonProfileAdvancedContainerChangePin.setOnClickListener {
@@ -560,6 +574,19 @@ internal class ProfileFragment: SideEffectFragment<
 
                             setProgressStorageBar(viewState)
                         }
+                    }
+                }
+            }
+        }
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.signerViewStateContainer.collect { viewState ->
+                when (viewState) {
+                    is SignerViewState.Idle -> {}
+                    is SignerViewState.HardwareDevice -> {
+                        signerManager.setupSignerHardware()
+                    }
+                    is SignerViewState.PhoneDevice -> {
+                        signerManager.setupPhoneSigner()
                     }
                 }
             }

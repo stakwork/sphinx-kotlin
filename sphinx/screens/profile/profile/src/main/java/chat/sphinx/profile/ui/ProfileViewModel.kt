@@ -33,9 +33,12 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
+import chat.sphinx.menu_bottom_signer.SignerMenuHandler
+import chat.sphinx.menu_bottom_signer.SignerMenuViewModel
 import chat.sphinx.profile.R
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -130,7 +133,7 @@ internal class ProfileViewModel @Inject constructor(
         Context,
         ProfileSideEffect,
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
-    PictureMenuViewModel
+    PictureMenuViewModel, SignerMenuViewModel
 {
     companion object {
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
@@ -146,6 +149,10 @@ internal class ProfileViewModel @Inject constructor(
 
     val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
         ViewStateContainer(UpdatingImageViewState.Idle)
+    }
+
+    val signerViewStateContainer: ViewStateContainer<SignerViewState> by lazy {
+        ViewStateContainer(SignerViewState.Idle)
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
@@ -188,6 +195,18 @@ internal class ProfileViewModel @Inject constructor(
                 }
             }
         )
+    }
+
+    override val signerMenuHandler: SignerMenuHandler by lazy {
+        SignerMenuHandler()
+    }
+
+    override fun setupHardwareSigner() {
+        signerViewStateContainer.updateViewState(SignerViewState.HardwareDevice)
+    }
+
+    override fun setupPhoneSigner() {
+        signerViewStateContainer.updateViewState(SignerViewState.PhoneDevice)
     }
 
     private fun setUpManageStorage(){

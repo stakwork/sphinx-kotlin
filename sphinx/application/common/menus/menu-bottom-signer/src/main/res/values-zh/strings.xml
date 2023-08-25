@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_signer_header_text">Signer Options</string>
+    <!-- Menu -->
+    <string name="bottom_menu_signer_option_set_hardware">Set up hardware device</string>
+    <string name="bottom_menu_signer_option_set_phone">Set up phone signer</string>
+</resources>
