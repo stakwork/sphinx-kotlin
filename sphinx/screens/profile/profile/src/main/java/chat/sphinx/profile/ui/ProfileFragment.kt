@@ -20,6 +20,7 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
+import chat.sphinx.concept_signer_manager.SignerCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
@@ -583,7 +584,7 @@ internal class ProfileFragment: SideEffectFragment<
                 when (viewState) {
                     is SignerViewState.Idle -> {}
                     is SignerViewState.HardwareDevice -> {
-                        signerManager.setupSignerHardware()
+                        signerManager.setupSignerHardware(viewModel)
                     }
                     is SignerViewState.PhoneDevice -> {
                         signerManager.setupPhoneSigner()

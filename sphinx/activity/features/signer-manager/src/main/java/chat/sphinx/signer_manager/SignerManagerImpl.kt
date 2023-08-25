@@ -2,10 +2,13 @@ package chat.sphinx.signer_manager
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.text.InputType
 import android.util.Base64
 import cash.z.ecc.android.bip39.Mnemonics
 import cash.z.ecc.android.bip39.toEntropy
 import cash.z.ecc.android.bip39.toSeed
+import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
+import chat.sphinx.concept_signer_manager.SignerCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.wrapper_common.SignerTopics
@@ -34,7 +37,6 @@ import uniffi.sphinxrs.makeAuthToken
 import uniffi.sphinxrs.nodeKeys
 import java.security.SecureRandom
 import java.util.Date
-import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class SignerManagerImpl(
@@ -110,10 +112,35 @@ class SignerManagerImpl(
             }
         }
     }
+    private var seedDto = SendSeedDto()
+    override fun setupSignerHardware(signerCallback: SignerCallback) {
+            launch {
+                signerCallback.checkNetwork {
+                    signerCallback.signingDeviceNetwork { networkName ->
+                        seedDto.ssid = networkName
 
-    override fun setupSignerHardware() {
-        ///Old logic moved from ProfileViewModel
+                        signerCallback.signingDevicePassword(networkName) { networkPass ->
+                            seedDto.pass = networkPass
+
+                            signerCallback.signingDeviceLightningNodeUrl { lightningNodeUrl ->
+                                seedDto.lightningNodeUrl = lightningNodeUrl
+
+                                signerCallback.signingDeviceCheckBitcoinNetwork(
+                                    network = { seedDto.network = it },
+                                    linkSigningDevice = { callback ->
+                                        if (callback) {
+                                        }
+                                    }
+                                )
+                            }
+
+                        }
+                    }
+                }
+            }
     }
+
+
 
     private fun connectToMQTTWith(keys: Keys, password: String) {
         val serverURI = "tcp://192.168.0.199:1883"
