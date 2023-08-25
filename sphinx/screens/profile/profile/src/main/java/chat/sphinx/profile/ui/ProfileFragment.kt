@@ -146,6 +146,7 @@ internal class ProfileFragment: SideEffectFragment<
     private fun setupSignerDependencies(){
         signerManager.initWalletDataHandler(viewModel.walletDataHandler)
         signerManager.initMoshi(viewModel.moshi)
+        signerManager.initNetworkQueryCrypter(viewModel.networkQueryCrypter)
     }
 
     private fun setupProfileHeader() {
