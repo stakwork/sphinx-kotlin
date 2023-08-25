@@ -22,6 +22,7 @@ import com.squareup.moshi.Moshi
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
@@ -107,9 +108,12 @@ class SignerManagerImpl(
         appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
     private var seedDto = SendSeedDto()
+    private var setupSignerHardwareJob: Job? = null
 
     override fun setupSignerHardware(signerCallback: SignerCallback) {
-        launch {
+        if (setupSignerHardwareJob?.isActive == true) return
+
+        setupSignerHardwareJob = launch {
             signerCallback.checkNetwork {
                 signerCallback.signingDeviceNetwork { networkName ->
                     seedDto.ssid = networkName
