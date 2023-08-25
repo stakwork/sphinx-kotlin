@@ -2,11 +2,9 @@ package chat.sphinx.profile.ui
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Environment
 import android.os.StatFs
-import android.util.Base64
-import android.util.Log
+import android.text.InputType
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
@@ -25,7 +23,7 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
-import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.concept_signer_manager.SignerCallback
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
@@ -33,7 +31,6 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
 import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.logger.d
-import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
@@ -53,8 +50,6 @@ import chat.sphinx.wrapper_relay.RelayUrl
 import chat.sphinx.wrapper_relay.isOnionAddress
 import chat.sphinx.wrapper_relay.toRelayUrl
 import chat.sphinx.wrapper_rsa.RsaPublicKey
-import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
-import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_viewmodel.SideEffectViewModel
@@ -66,11 +61,11 @@ import io.matthewnelson.concept_authentication.coordinator.AuthenticationRespons
 import io.matthewnelson.concept_authentication.coordinator.ConfirmedPinListener
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_encryption_key.EncryptionKey
+import io.matthewnelson.concept_views.sideeffect.SideEffectContainer
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import io.matthewnelson.crypto_common.annotations.RawPasswordAccess
 import io.matthewnelson.crypto_common.clazzes.Password
 import io.matthewnelson.crypto_common.clazzes.clear
-import io.matthewnelson.crypto_common.extensions.encodeToByteArray
 import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -133,7 +128,7 @@ internal class ProfileViewModel @Inject constructor(
         Context,
         ProfileSideEffect,
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
-    PictureMenuViewModel, SignerMenuViewModel
+    PictureMenuViewModel, SignerMenuViewModel, SignerCallback
 {
     companion object {
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
@@ -637,71 +632,71 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     fun setupSigningDevice() {
-//        if (setupSigningDeviceJob?.isActive == true) return
-//
-//        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
-//            submitSideEffect(ProfileSideEffect.CheckNetwork {
-//                viewModelScope.launch(mainImmediate) {
-//                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-//                        app.getString(R.string.network_name_title),
-//                        app.getString(R.string.network_name_message)
-//                    ) { networkName ->
-//                        viewModelScope.launch(mainImmediate) {
-//                            if (networkName == null) {
-//                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
-//                                return@launch
-//                            }
-//
-//                            seedDto.ssid = networkName
-//
-//                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-//                                app.getString(R.string.network_password_title),
-//                                app.getString(
-//                                    R.string.network_password_message,
-//                                    networkName ?: "-"
-//                                ),
-//                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-//                            ) { networkPass ->
-//                                viewModelScope.launch(mainImmediate) {
-//                                    if (networkPass == null) {
-//                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
-//                                        return@launch
-//                                    }
-//
-//                                    seedDto.pass = networkPass
-//
-//                                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-//                                        app.getString(R.string.lightning_node_url_title),
-//                                        app.getString(R.string.lightning_node_url_message),
-//                                    ) { lightningNodeUrl ->
-//                                        viewModelScope.launch(mainImmediate) {
-//                                            if (lightningNodeUrl == null) {
-//                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
-//                                                return@launch
-//                                            }
-//
-//                                            seedDto.lightningNodeUrl = lightningNodeUrl
-//
-//                                            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
-//                                                regTestCallback = {
-//                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
-//                                                }, mainNetCallback = {
-//                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
-//                                                }, callback = {
-//                                                    viewModelScope.launch(mainImmediate) {
-//                                                        linkSigningDevice()
-//                                                    }
-//                                                }
-//                                            ))
-//                                        }
-//                                    })
-//                                }
-//                            })
-//                        }
-//                    })
-//                }
-//            })
-//        }
+        if (setupSigningDeviceJob?.isActive == true) return
+
+        setupSigningDeviceJob = viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.CheckNetwork {
+                viewModelScope.launch(mainImmediate) {
+                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                        app.getString(R.string.network_name_title),
+                        app.getString(R.string.network_name_message)
+                    ) { networkName ->
+                        viewModelScope.launch(mainImmediate) {
+                            if (networkName == null) {
+                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
+                                return@launch
+                            }
+
+                            seedDto.ssid = networkName
+
+                            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                                app.getString(R.string.network_password_title),
+                                app.getString(
+                                    R.string.network_password_message,
+                                    networkName ?: "-"
+                                ),
+                                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                            ) { networkPass ->
+                                viewModelScope.launch(mainImmediate) {
+                                    if (networkPass == null) {
+                                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
+                                        return@launch
+                                    }
+
+                                    seedDto.pass = networkPass
+
+                                    submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                                        app.getString(R.string.lightning_node_url_title),
+                                        app.getString(R.string.lightning_node_url_message),
+                                    ) { lightningNodeUrl ->
+                                        viewModelScope.launch(mainImmediate) {
+                                            if (lightningNodeUrl == null) {
+                                                submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
+                                                return@launch
+                                            }
+
+                                            seedDto.lightningNodeUrl = lightningNodeUrl
+
+                                            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
+                                                regTestCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_REG_TEST
+                                                }, mainNetCallback = {
+                                                    seedDto.network = BITCOIN_NETWORK_MAIN_NET
+                                                }, callback = {
+                                                    viewModelScope.launch(mainImmediate) {
+                                                        linkSigningDevice()
+                                                    }
+                                                }
+                                            ))
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
     }
 
 
@@ -858,4 +853,100 @@ internal class ProfileViewModel @Inject constructor(
                 }
         }
     }
+
+    override fun checkNetwork(callback: (Boolean) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.CheckNetwork {
+                callback.invoke(true)
+            })
+        }
+    }
+
+    override fun signingDeviceNetwork(
+        callback: (String) -> Unit
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                app.getString(R.string.network_name_title),
+                app.getString(R.string.network_name_message)
+            ) { networkName ->
+                if (networkName == null) {
+                    viewModelScope.launch(mainImmediate) {
+                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
+                        return@launch
+                    }
+                } else {
+                    callback.invoke(networkName)
+                }
+            })
+        }
+    }
+
+    override fun signingDevicePassword(networkName: String, callback: (String) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                app.getString(R.string.network_password_title),
+                app.getString(
+                    R.string.network_password_message,
+                    networkName ?: "-"
+                ),
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            ) { networkPass ->
+                viewModelScope.launch(mainImmediate) {
+                    if (networkPass == null) {
+                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
+                        return@launch
+                    } else {
+                        callback.invoke(networkPass)
+                    }
+                }
+            })
+        }
+    }
+
+    override fun signingDeviceLightningNodeUrl(callback: (String) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
+                app.getString(R.string.lightning_node_url_title),
+                app.getString(R.string.lightning_node_url_message),
+            ) { lightningNodeUrl ->
+                viewModelScope.launch(mainImmediate) {
+                    if (lightningNodeUrl == null) {
+                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
+                        return@launch
+                    }
+                    else {
+                        callback.invoke(lightningNodeUrl)
+                    }
+                }
+            })
+        }
+    }
+
+    override fun signingDeviceCheckBitcoinNetwork(network: (String) -> Unit, linkSigningDevice: (Boolean) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
+                regTestCallback = {
+                    network.invoke(BITCOIN_NETWORK_REG_TEST)
+                }, mainNetCallback = {
+                    network.invoke(BITCOIN_NETWORK_MAIN_NET)
+                }, callback = {
+                    viewModelScope.launch(mainImmediate) {
+                        linkSigningDevice.invoke(true)
+                    }
+                }
+            ))
+        }
+    }
+
+    override fun failedToSetupSigningDevice(message: String) {
+        TODO("Not yet implemented")
+    }
+
+    override fun sendingSeedToHardware() {
+        TODO("Not yet implemented")
+    }
+
+    override val sideEffectContainer: SideEffectContainer<Context, ProfileSideEffect>
+        get() = super.sideEffectContainer
 }
