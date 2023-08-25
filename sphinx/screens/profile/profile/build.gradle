@@ -42,6 +42,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
 
     api project(path: ':sphinx:application:common:menus:menu-bottom-picture')
+    api project(path: ':sphinx:application:common:menus:menu-bottom-signer')
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:common:resources')

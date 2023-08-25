@@ -346,3 +346,4 @@ include ':sphinx:screens-detail:delete-chat-media-detail:delete-chat-media-detai
 include ':sphinx:screens:threads:threads'
 include ':sphinx:activity:concepts:concept-signer-manager'
 include ':sphinx:activity:features:signer-manager'
+include ':sphinx:application:common:menus:menu-bottom-signer'

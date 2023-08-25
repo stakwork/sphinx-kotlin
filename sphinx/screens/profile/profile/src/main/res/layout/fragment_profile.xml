@@ -54,4 +54,8 @@
         android:id="@+id/include_layout_menu_bottom_profile_pic"
         layout="@layout/layout_menu_bottom" />
 
+    <include
+        android:id="@+id/include_layout_menu_bottom_signer"
+        layout="@layout/layout_menu_bottom" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
