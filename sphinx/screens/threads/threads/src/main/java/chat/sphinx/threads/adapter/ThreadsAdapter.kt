@@ -199,6 +199,8 @@ internal class ThreadsAdapter(
                 textViewRepliesQuantity.text = threadItem.repliesAmount
                 textViewThreadTime.text = threadItem.lastReplyDate
 
+                textViewThreadMessageContent.goneIfFalse(threadItem.message.isNotEmpty())
+
                 // User Profile Picture
                 layoutLayoutChatImageSmallInitialHolder.apply {
                     textViewInitialsName.visible
