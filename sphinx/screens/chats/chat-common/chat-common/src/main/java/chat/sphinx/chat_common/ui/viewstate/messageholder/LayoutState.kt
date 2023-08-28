@@ -153,7 +153,8 @@ sealed class LayoutState private constructor() {
             data class ImageAttachment(
                 val url: String,
                 val media: MessageMedia?,
-                val showPaidOverlay: Boolean
+                val showPaidOverlay: Boolean,
+                val isThread: Boolean
             ): ContainerSecond()
 
             sealed class VideoAttachment : ContainerSecond()  {

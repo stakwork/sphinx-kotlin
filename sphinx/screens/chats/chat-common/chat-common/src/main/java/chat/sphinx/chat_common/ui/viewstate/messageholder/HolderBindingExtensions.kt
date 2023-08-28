@@ -5,6 +5,7 @@ import android.view.Gravity
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
@@ -1558,17 +1559,26 @@ internal inline fun LayoutMessageHolderBinding.setBubbleImageAttachment(
         } else {
             root.visible
 
+            val image = imageViewAttachmentImage
+
             if (imageAttachment.showPaidOverlay) {
                 layoutConstraintPaidImageOverlay.visible
 
-                imageViewAttachmentImage.gone
+                image.gone
             } else {
                 layoutConstraintPaidImageOverlay.gone
 
                 loadingImageProgressContainer.visible
-                imageViewAttachmentImage.visible
+                image.visible
 
-                loadImage(imageViewAttachmentImage, loadingImageProgressContainer, imageAttachment.url, imageAttachment.media)
+                if (imageAttachment.isThread) {
+                    val params = image.layoutParams as FrameLayout.LayoutParams
+                    params.height = 460
+
+                    image.layoutParams = params
+                }
+
+                loadImage(image, loadingImageProgressContainer, imageAttachment.url, imageAttachment.media)
             }
         }
     }
