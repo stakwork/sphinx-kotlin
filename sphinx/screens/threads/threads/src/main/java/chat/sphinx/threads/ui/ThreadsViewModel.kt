@@ -209,7 +209,7 @@ internal class ThreadsViewModel @Inject constructor(
             if (nnMessageMedia.mediaType.isVideo) { nnMessageMedia.localFile } else null
         }
         val fileAttachment: FileAttachment? = originalMessage?.messageMedia?.let { nnMessageMedia ->
-            if(nnMessageMedia.mediaType.isImage) {
+            if (nnMessageMedia.mediaType.isImage || nnMessageMedia.mediaType.isAudio) {
                 null
             } else {
                 nnMessageMedia.localFile?.let { nnFile ->
@@ -232,6 +232,15 @@ internal class ThreadsViewModel @Inject constructor(
             }
         }
 
+        val audioAttachment: Boolean? = originalMessage?.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isAudio) {
+                true
+            } else {
+                null
+            }
+        }
+
+
         return ThreadItem(
             aliasAndColorKey = senderInfo,
             photoUrl = senderPhotoUrl,
@@ -244,7 +253,8 @@ internal class ThreadsViewModel @Inject constructor(
             uuid = uuid ?: "",
             imageAttachment = imageAttachment,
             videoAttachment = videoAttachment,
-            fileAttachment = fileAttachment
+            fileAttachment = fileAttachment,
+            audioAttachment = audioAttachment
         )
     }
 
