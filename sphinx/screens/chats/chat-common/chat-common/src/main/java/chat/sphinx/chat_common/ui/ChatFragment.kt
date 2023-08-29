@@ -1390,11 +1390,6 @@ abstract class ChatFragment<
                     } else {
                         layoutConstraintChatFooterActions.translationX = 0f
                     }
-                    if (viewState is FooterViewState.ThreadChat) {
-                        textViewChatFooterAttachment.gone
-                        imageViewChatFooterMicrophone.gone
-                        textViewChatFooterSend.visible
-                    }
                 }
 
                 recordingCircleBinding.apply {
