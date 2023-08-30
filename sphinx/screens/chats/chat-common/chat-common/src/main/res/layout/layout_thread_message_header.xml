@@ -135,7 +135,6 @@
                     layout="@layout/layout_message_type_attachment_audio"
                     android:layout_width="0dp"
                     android:layout_height="@dimen/message_type_file_attachment_height"
-                    android:layout_marginStart="@dimen/default_list_row_padding_vertical"
                     android:layout_marginTop="@dimen/default_half_layout_margin"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
