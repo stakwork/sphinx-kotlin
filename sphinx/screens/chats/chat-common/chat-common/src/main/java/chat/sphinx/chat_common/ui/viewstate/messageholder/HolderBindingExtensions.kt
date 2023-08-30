@@ -1058,14 +1058,16 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                 textViewLastReplyMessageText.text = thread.lastReplyMessage
                 textViewLastReplyDate.text = thread.lastReplyDate
                 textViewLastReplyUserName.text = thread.lastReplyUser.alias?.value ?: "unknown"
+
+                textViewLastReplyMessageText.goneIfFalse(thread.lastReplyMessage?.isNotEmpty() == true)
             }
 
-            when(thread.mediaAttachment) {
+            when (thread.mediaAttachment) {
                 is LayoutState.Bubble.ContainerSecond.ImageAttachment -> {
                     setBubbleImageAttachment(thread.mediaAttachment, true, lastReplyImage)
                 }
                 is LayoutState.Bubble.ContainerSecond.VideoAttachment -> {
-                    setBubbleVideoAttachment(thread.mediaAttachment)
+                    setBubbleVideoAttachment(thread.mediaAttachment, true)
                 }
                 is LayoutState.Bubble.ContainerSecond.AudioAttachment -> {
                     setBubbleAudioAttachment(
@@ -1077,35 +1079,9 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                         true)
                 }
                 is LayoutState.Bubble.ContainerSecond.FileAttachment -> {
-                    setBubbleFileAttachment(thread.mediaAttachment)
+                    setBubbleFileAttachment(thread.mediaAttachment, true)
                 }
             }
-
-//            thread.imageAttachment?.let { image ->
-//                setBubbleImageAttachment(
-//                    image,
-//                    true,
-//                    lastReplyImage
-//                )
-//            }
-//
-//            thread.videoAttachment?.let { video ->
-//                setBubbleVideoAttachment(
-//                    video
-//                )
-//            }
-//
-//            thread.audioAttachment?.let { audio ->
-//                setBubbleAudioAttachment(
-//                    audio,
-//                    audioPlayerController,
-//                    dispatchers,
-//                    holderJobs,
-//                    lifecycleScope,
-//                    true
-//                )
-//            }
-
         }
     }
 
