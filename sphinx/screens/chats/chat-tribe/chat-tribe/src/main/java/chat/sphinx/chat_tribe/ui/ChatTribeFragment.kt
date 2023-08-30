@@ -837,9 +837,12 @@ internal class ChatTribeFragment: ChatFragment<
                                     }
                                 }
                                 
-                                viewState.fileAttachment?.let {
+                                viewState.fileAttachment?.let { fileAttachment ->
                                     layoutConstraintMediaContainer.visible
                                     textViewAttachmentFileIcon.visible
+                                    (fileAttachment as? LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable)?.let {
+                                        threadOriginalMessageBinding?.textViewThreadMessageContent?.text = it.fileName?.value ?: "Unnamed File"
+                                    }
                                 }
                             }
                         }
