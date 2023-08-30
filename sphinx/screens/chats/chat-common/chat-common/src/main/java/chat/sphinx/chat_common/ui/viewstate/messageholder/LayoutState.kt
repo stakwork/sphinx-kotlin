@@ -217,7 +217,8 @@ sealed class LayoutState private constructor() {
                 val lastReplyMessage: String?,
                 val lastReplyDate: String,
                 val lastReplyUser: ReplyUserHolder,
-                val isSentMessage: Boolean
+                val isSentMessage: Boolean,
+                val mediaAttachment: ContainerSecond?
             )
 
             data class PaidMessage(

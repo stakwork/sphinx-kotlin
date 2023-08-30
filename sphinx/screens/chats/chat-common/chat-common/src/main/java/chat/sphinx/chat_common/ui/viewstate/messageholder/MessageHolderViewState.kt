@@ -3,6 +3,7 @@ package chat.sphinx.chat_common.ui.viewstate.messageholder
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import android.os.ParcelFileDescriptor.MODE_READ_ONLY
+import android.util.Log
 import chat.sphinx.chat_common.model.MessageLinkPreview
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
 import chat.sphinx.chat_common.ui.viewstate.selected.MenuItemState
@@ -23,7 +24,6 @@ import chat.sphinx.wrapper_message.*
 import chat.sphinx.wrapper_message_media.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.io.File
 
 
 // TODO: Remove
@@ -300,13 +300,23 @@ internal sealed class MessageHolderViewState(
 
                     val sent = message.sender == chat.contactIds.firstOrNull()
 
+                    val lastReplyAttachment: LayoutState.Bubble.ContainerSecond? =
+                        when(replies.last().messageMedia?.mediaType) {
+                            is MediaType.Image -> { getImageAttachment(replies.last()) }
+                            is MediaType.Video -> { getVideoAttachment(replies.last()) }
+                            is MediaType.Audio -> { getAudioAttachment(replies.last()) }
+                            is MediaType.Pdf -> { getFileAttachment(replies.last())}
+                            else -> { null }
+                    }
+
                     LayoutState.Bubble.ContainerThird.Thread(
                         replyCount = replies.size,
                         users = users,
                         lastReplyMessage = replies.last().retrieveTextToShow(),
                         lastReplyDate = replies.last().date.chatTimeFormat(),
                         lastReplyUser = lastReplyUser,
-                        isSentMessage = sent
+                        isSentMessage = sent,
+                        mediaAttachment = lastReplyAttachment
                     )
                 }
             }
@@ -397,36 +407,7 @@ internal sealed class MessageHolderViewState(
         if (message == null) {
             null
         } else {
-            val nnMessage = message!!
-
-            nnMessage.messageMedia?.let { nnMessageMedia ->
-                if (nnMessageMedia.mediaType.isAudio) {
-
-                    nnMessageMedia.localFile?.let { nnFile ->
-
-                        LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(
-                            message.id,
-                            nnFile
-                        )
-
-                    } ?: run {
-                        val pendingPayment = this is Received && nnMessage.isPaidPendingMessage
-
-                        // will only be called once when value is lazily initialized upon binding
-                        // data to view.
-                        if (!pendingPayment) {
-                            onBindDownloadMedia.invoke()
-                        }
-
-                        LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(
-                            nnMessage.id,
-                            pendingPayment
-                        )
-                    }
-                } else {
-                    null
-                }
-            }
+            getAudioAttachment(message)
         }
     }
 
@@ -448,20 +429,7 @@ internal sealed class MessageHolderViewState(
         if (message == null) {
             null
         } else {
-            val pendingPayment = this is Received && message.isPaidPendingMessage
-            if (!pendingPayment) {
-                onBindDownloadMedia.invoke()
-            }
-            val isThread = message.thread?.isNotEmpty() ?: false
-
-            message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
-                LayoutState.Bubble.ContainerSecond.ImageAttachment(
-                    mediaData.first,
-                    mediaData.second,
-                    pendingPayment,
-                    isThread
-                )
-            }
+            getImageAttachment(message)
         }
     }
 
@@ -469,73 +437,16 @@ internal sealed class MessageHolderViewState(
         if (message == null) {
             null
         } else {
-            val nnMessage = message!!
-
-            message.messageMedia?.let { nnMessageMedia ->
-                if (nnMessageMedia.mediaType.isVideo) {
-                    nnMessageMedia.localFile?.let { nnFile ->
-                        LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable(nnFile)
-                    } ?: run {
-                        val pendingPayment = this is Received && nnMessage.isPaidPendingMessage
-
-                        // will only be called once when value is lazily initialized upon binding
-                        // data to view.
-                        if (!pendingPayment) {
-                            onBindDownloadMedia.invoke()
-                        }
-
-                        LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable(
-                            pendingPayment
-                        )
-                    }
-                } else {
-                    null
-                }
-            }
+            getVideoAttachment(message)
         }
     }
 
+
     val bubbleFileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment? by lazy(LazyThreadSafetyMode.NONE) {
-        if(message == null){
+        if (message == null){
             null
         } else {
-            val nnMessage = message!!
-
-            nnMessage.messageMedia?.let { nnMessageMedia ->
-                if (nnMessageMedia.mediaType.isPdf || nnMessageMedia.mediaType.isUnknown) {
-
-                    nnMessageMedia.localFile?.let { nnFile ->
-
-                        val pageCount = if (nnMessageMedia.mediaType.isPdf) {
-                            val fileDescriptor = ParcelFileDescriptor.open(nnFile, MODE_READ_ONLY)
-                            val renderer = PdfRenderer(fileDescriptor)
-                            renderer.pageCount
-                        } else {
-                            0
-                        }
-
-                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
-                            nnMessageMedia.fileName,
-                            FileSize(nnFile.length()),
-                            nnMessageMedia.mediaType.isPdf,
-                            pageCount
-                        )
-                    } ?: run {
-                        val pendingPayment = this is Received && nnMessage.isPaidPendingMessage
-
-                        if (!pendingPayment) {
-                            onBindDownloadMedia.invoke()
-                        }
-
-                        LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable(
-                            pendingPayment
-                        )
-
-                    }
-                } else {
-                    null
-                }
-            }
+            getFileAttachment(message)
         }
     }
 
@@ -754,6 +665,117 @@ internal sealed class MessageHolderViewState(
                 list
             }
         }
+    }
+
+    private fun getImageAttachment(message: Message): LayoutState.Bubble.ContainerSecond.ImageAttachment? {
+        val pendingPayment = this is Received && message.isPaidPendingMessage
+        if (!pendingPayment) {
+            onBindDownloadMedia.invoke()
+        }
+        val isThread = message.thread?.isNotEmpty() ?: false
+
+        return message.retrieveImageUrlAndMessageMedia()?.let { mediaData ->
+            LayoutState.Bubble.ContainerSecond.ImageAttachment(
+                mediaData.first,
+                mediaData.second,
+                pendingPayment,
+                isThread
+            )
+        }
+    }
+
+    private fun getVideoAttachment(message: Message): LayoutState.Bubble.ContainerSecond.VideoAttachment? {
+        return message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isVideo) {
+                nnMessageMedia.localFile?.let { nnFile ->
+                    LayoutState.Bubble.ContainerSecond.VideoAttachment.FileAvailable(nnFile)
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    // will only be called once when value is lazily initialized upon binding
+                    // data to view.
+                    if (!pendingPayment) {
+                        onBindDownloadMedia.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable(
+                        pendingPayment
+                    )
+                }
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun getFileAttachment(message: Message): LayoutState.Bubble.ContainerSecond.FileAttachment? {
+        return message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isPdf || nnMessageMedia.mediaType.isUnknown) {
+
+                nnMessageMedia.localFile?.let { nnFile ->
+
+                    val pageCount = if (nnMessageMedia.mediaType.isPdf) {
+                        val fileDescriptor = ParcelFileDescriptor.open(nnFile, MODE_READ_ONLY)
+                        val renderer = PdfRenderer(fileDescriptor)
+                        renderer.pageCount
+                    } else {
+                        0
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable(
+                        nnMessageMedia.fileName,
+                        FileSize(nnFile.length()),
+                        nnMessageMedia.mediaType.isPdf,
+                        pageCount
+                    )
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    if (!pendingPayment) {
+                        onBindDownloadMedia.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable(
+                        pendingPayment
+                    )
+
+                }
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun getAudioAttachment(message: Message): LayoutState.Bubble.ContainerSecond.AudioAttachment? {
+        return message.messageMedia?.let { nnMessageMedia ->
+            if (nnMessageMedia.mediaType.isAudio) {
+
+                nnMessageMedia.localFile?.let { nnFile ->
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable(
+                        message.id,
+                        nnFile
+                    )
+
+                } ?: run {
+                    val pendingPayment = this is Received && message.isPaidPendingMessage
+
+                    // will only be called once when value is lazily initialized upon binding
+                    // data to view.
+                    if (!pendingPayment) {
+                        onBindDownloadMedia.invoke()
+                    }
+
+                    LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(
+                        message.id,
+                        pendingPayment
+                    )
+                }
+            } else {
+                null
+            }
+        }
+
     }
 
     class Sent(
