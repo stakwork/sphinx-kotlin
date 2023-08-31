@@ -1062,6 +1062,8 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                 textViewLastReplyMessageText.goneIfFalse(thread.lastReplyMessage?.isNotEmpty() == true)
             }
 
+            includeMessageTypeAudioAttachment.seekBarAttachmentAudio.thumb = null
+
             when (thread.mediaAttachment) {
                 is LayoutState.Bubble.ContainerSecond.ImageAttachment -> {
                     setBubbleImageAttachment(thread.mediaAttachment, true, lastReplyImage)
