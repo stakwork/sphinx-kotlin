@@ -19,6 +19,7 @@ sealed class ThreadHeaderViewState: ViewState<ThreadHeaderViewState>() {
         val imageAttachment: LayoutState.Bubble.ContainerSecond.ImageAttachment? = null,
         val videoAttachment: LayoutState.Bubble.ContainerSecond.VideoAttachment? = null,
         val fileAttachment: LayoutState.Bubble.ContainerSecond.FileAttachment? = null,
+        val audioAttachment: LayoutState.Bubble.ContainerSecond.AudioAttachment? = null
     ): ThreadHeaderViewState()
 
 }

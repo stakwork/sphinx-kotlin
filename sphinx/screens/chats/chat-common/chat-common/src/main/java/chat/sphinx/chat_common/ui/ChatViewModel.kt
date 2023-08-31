@@ -1493,7 +1493,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     viewState.bubbleMessage?.text,
                     viewState.bubbleImageAttachment,
                     viewState.bubbleVideoAttachment,
-                    viewState.bubbleFileAttachment
+                    viewState.bubbleFileAttachment,
+                    viewState.bubbleAudioAttachment
                 )
                 threadHeaderViewState.updateViewState(threadHeader)
             }
