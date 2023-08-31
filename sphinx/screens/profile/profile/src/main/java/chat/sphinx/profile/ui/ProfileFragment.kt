@@ -586,9 +586,13 @@ internal class ProfileFragment: SideEffectFragment<
                     is SignerViewState.Idle -> {}
                     is SignerViewState.HardwareDevice -> {
                         signerManager.setupSignerHardware(viewModel)
+
+                        viewModel.signerViewStateContainer.updateViewState(SignerViewState.Idle)
                     }
                     is SignerViewState.PhoneDevice -> {
                         signerManager.setupPhoneSigner()
+
+                        viewModel.signerViewStateContainer.updateViewState(SignerViewState.Idle)
                     }
                 }
             }
