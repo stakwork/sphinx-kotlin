@@ -708,7 +708,7 @@ internal class ChatTribeFragment: ChatFragment<
                                     )
                                 }
 
-                                viewState.senderAlias?.let { senderAlias ->
+                                viewState.senderAlias.let { senderAlias ->
                                     textViewPinnedBottomBodyUsername.text = senderAlias
                                     textViewPinnedBottomBodyUsername.setTextColor(
                                         Color.parseColor(
@@ -814,7 +814,7 @@ internal class ChatTribeFragment: ChatFragment<
                                                 it,
                                                 ImageLoaderOptions.Builder().build()
                                             )
-                                        } ?: imageAttachment?.url?.let {
+                                        } ?: imageAttachment.url.let {
                                             imageLoader.load(
                                                 imageViewElementPicture,
                                                 it,
@@ -846,12 +846,12 @@ internal class ChatTribeFragment: ChatFragment<
                                         threadOriginalMessageBinding?.textViewThreadMessageContent?.text = it.fileName?.value ?: "Unnamed File"
                                     }
                                 }
+
                                 viewState.audioAttachment?.let { audioAttachment ->
                                     layoutConstraintMediaContainer.visible
                                     textViewAttachmentFileIcon.visible
                                     textViewAttachmentFileIcon.text = getString(chat.sphinx.chat_common.R.string.material_icon_name_volume_up)
                                     threadOriginalMessageBinding?.textViewThreadMessageContent?.text = "Audio Clip"
-
                                 }
                             }
                         }

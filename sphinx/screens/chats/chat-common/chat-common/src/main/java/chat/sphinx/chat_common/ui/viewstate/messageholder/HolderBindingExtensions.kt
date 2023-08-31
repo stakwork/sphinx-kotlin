@@ -1066,12 +1066,33 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
 
             when (thread.mediaAttachment) {
                 is LayoutState.Bubble.ContainerSecond.ImageAttachment -> {
+                    constraintMediaThreadContainer.visible
+
+                    includeMessageTypeImageAttachment.root.visible
+                    includeMessageTypeVideoAttachment.root.gone
+                    includeMessageTypeAudioAttachment.root.gone
+                    includeMessageTypeFileAttachment.root.gone
+
                     setBubbleImageAttachment(thread.mediaAttachment, true, lastReplyImage)
                 }
                 is LayoutState.Bubble.ContainerSecond.VideoAttachment -> {
+                    constraintMediaThreadContainer.visible
+
+                    includeMessageTypeImageAttachment.root.gone
+                    includeMessageTypeVideoAttachment.root.visible
+                    includeMessageTypeAudioAttachment.root.gone
+                    includeMessageTypeFileAttachment.root.gone
+
                     setBubbleVideoAttachment(thread.mediaAttachment, true)
                 }
                 is LayoutState.Bubble.ContainerSecond.AudioAttachment -> {
+                    constraintMediaThreadContainer.visible
+
+                    includeMessageTypeImageAttachment.root.gone
+                    includeMessageTypeVideoAttachment.root.gone
+                    includeMessageTypeAudioAttachment.root.visible
+                    includeMessageTypeFileAttachment.root.gone
+
                     setBubbleAudioAttachment(
                         thread.mediaAttachment,
                         audioPlayerController,
@@ -1081,7 +1102,17 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                         true)
                 }
                 is LayoutState.Bubble.ContainerSecond.FileAttachment -> {
+                    constraintMediaThreadContainer.visible
+
+                    includeMessageTypeImageAttachment.root.gone
+                    includeMessageTypeVideoAttachment.root.gone
+                    includeMessageTypeAudioAttachment.root.gone
+                    includeMessageTypeFileAttachment.root.visible
+
                     setBubbleFileAttachment(thread.mediaAttachment, true)
+                }
+                else -> {
+                    constraintMediaThreadContainer.gone
                 }
             }
         }
