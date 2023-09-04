@@ -68,16 +68,8 @@ internal sealed class MessageHolderViewState(
     private val previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
     private val paidTextAttachmentContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
     private val onBindDownloadMedia: () -> Unit,
+    private val onBindThreadDownloadMedia: () -> Unit,
 ) {
-
-    companion object {
-        val unsupportedMessageTypes: List<MessageType> by lazy {
-            listOf(
-                MessageType.Payment,
-                MessageType.GroupAction.TribeDelete,
-            )
-        }
-    }
 
     val isPinned: Boolean by lazy(LazyThreadSafetyMode.NONE) {
         (message?.uuid?.value == chat.pinedMessage?.value)
@@ -302,12 +294,32 @@ internal sealed class MessageHolderViewState(
 
                     val lastReplyAttachment: LayoutState.Bubble.ContainerSecond? =
                         when(replies.last().messageMedia?.mediaType) {
-                            is MediaType.Image -> { getImageAttachment(replies.last()) }
-                            is MediaType.Video -> { getVideoAttachment(replies.last()) }
-                            is MediaType.Audio -> { getAudioAttachment(replies.last()) }
-                            is MediaType.Pdf -> { getFileAttachment(replies.last())}
+                            is MediaType.Image -> {
+                                getImageAttachment(
+                                    replies.last(),
+                                    true
+                                )
+                            }
+                            is MediaType.Video -> {
+                                getVideoAttachment(
+                                    replies.last(),
+                                    true
+                                )
+                            }
+                            is MediaType.Audio -> {
+                                getAudioAttachment(
+                                    replies.last(),
+                                    true
+                                )
+                            }
+                            is MediaType.Pdf -> {
+                                getFileAttachment(
+                                    replies.last(),
+                                    true
+                                )
+                            }
                             else -> { null }
-                    }
+                        }
 
                     LayoutState.Bubble.ContainerThird.Thread(
                         replyCount = replies.size,
@@ -446,7 +458,8 @@ internal sealed class MessageHolderViewState(
         if (message == null){
             null
         } else {
-            getFileAttachment(message)
+            null
+//            getFileAttachment(message)
         }
     }
 
@@ -667,10 +680,18 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    private fun getImageAttachment(message: Message): LayoutState.Bubble.ContainerSecond.ImageAttachment? {
+    private fun getImageAttachment(
+        message: Message,
+        isThread: Boolean = false
+    ): LayoutState.Bubble.ContainerSecond.ImageAttachment? {
         val pendingPayment = this is Received && message.isPaidPendingMessage
+
         if (!pendingPayment) {
-            onBindDownloadMedia.invoke()
+            if (isThread) {
+                onBindThreadDownloadMedia.invoke()
+            } else {
+                onBindDownloadMedia.invoke()
+            }
         }
         val isThread = message.thread?.isNotEmpty() ?: false
 
@@ -684,7 +705,10 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    private fun getVideoAttachment(message: Message): LayoutState.Bubble.ContainerSecond.VideoAttachment? {
+    private fun getVideoAttachment(
+        message: Message,
+        isThread: Boolean = false
+    ): LayoutState.Bubble.ContainerSecond.VideoAttachment? {
         return message.messageMedia?.let { nnMessageMedia ->
             if (nnMessageMedia.mediaType.isVideo) {
                 nnMessageMedia.localFile?.let { nnFile ->
@@ -695,7 +719,11 @@ internal sealed class MessageHolderViewState(
                     // will only be called once when value is lazily initialized upon binding
                     // data to view.
                     if (!pendingPayment) {
-                        onBindDownloadMedia.invoke()
+                        if (isThread) {
+                            onBindThreadDownloadMedia.invoke()
+                        } else {
+                            onBindDownloadMedia.invoke()
+                        }
                     }
 
                     LayoutState.Bubble.ContainerSecond.VideoAttachment.FileUnavailable(
@@ -708,7 +736,10 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    private fun getFileAttachment(message: Message): LayoutState.Bubble.ContainerSecond.FileAttachment? {
+    private fun getFileAttachment(
+        message: Message,
+        isThread: Boolean = false
+    ): LayoutState.Bubble.ContainerSecond.FileAttachment? {
         return message.messageMedia?.let { nnMessageMedia ->
             if (nnMessageMedia.mediaType.isPdf || nnMessageMedia.mediaType.isUnknown) {
 
@@ -732,7 +763,11 @@ internal sealed class MessageHolderViewState(
                     val pendingPayment = this is Received && message.isPaidPendingMessage
 
                     if (!pendingPayment) {
-                        onBindDownloadMedia.invoke()
+                        if (isThread) {
+                            onBindThreadDownloadMedia.invoke()
+                        } else {
+                            onBindDownloadMedia.invoke()
+                        }
                     }
 
                     LayoutState.Bubble.ContainerSecond.FileAttachment.FileUnavailable(
@@ -746,7 +781,10 @@ internal sealed class MessageHolderViewState(
         }
     }
 
-    private fun getAudioAttachment(message: Message): LayoutState.Bubble.ContainerSecond.AudioAttachment? {
+    private fun getAudioAttachment(
+        message: Message,
+        isThread: Boolean = false
+    ): LayoutState.Bubble.ContainerSecond.AudioAttachment? {
         return message.messageMedia?.let { nnMessageMedia ->
             if (nnMessageMedia.mediaType.isAudio) {
 
@@ -763,7 +801,11 @@ internal sealed class MessageHolderViewState(
                     // will only be called once when value is lazily initialized upon binding
                     // data to view.
                     if (!pendingPayment) {
-                        onBindDownloadMedia.invoke()
+                        if (isThread) {
+                            onBindThreadDownloadMedia.invoke()
+                        } else {
+                            onBindDownloadMedia.invoke()
+                        }
                     }
 
                     LayoutState.Bubble.ContainerSecond.AudioAttachment.FileUnavailable(
@@ -791,6 +833,7 @@ internal sealed class MessageHolderViewState(
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
         onBindDownloadMedia: () -> Unit,
+        onBindThreadDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -807,6 +850,7 @@ internal sealed class MessageHolderViewState(
         previewProvider,
         paidTextMessageContentProvider,
         onBindDownloadMedia,
+        onBindThreadDownloadMedia
     )
 
     class Received(
@@ -823,6 +867,7 @@ internal sealed class MessageHolderViewState(
         previewProvider: suspend (link: MessageLinkPreview) -> LayoutState.Bubble.ContainerThird.LinkPreview?,
         paidTextMessageContentProvider: suspend (message: Message) -> LayoutState.Bubble.ContainerThird.Message?,
         onBindDownloadMedia: () -> Unit,
+        onBindThreadDownloadMedia: () -> Unit,
     ) : MessageHolderViewState(
         message,
         chat,
@@ -839,6 +884,7 @@ internal sealed class MessageHolderViewState(
         previewProvider,
         paidTextMessageContentProvider,
         onBindDownloadMedia,
+        onBindThreadDownloadMedia,
     )
 
     class Separator(
@@ -865,7 +911,8 @@ internal sealed class MessageHolderViewState(
         false,
         previewProvider = { null },
         paidTextAttachmentContentProvider = { null },
-        onBindDownloadMedia = {}
+        onBindDownloadMedia = {},
+        onBindThreadDownloadMedia = {}
     )
 
     class ThreadHeader(
@@ -893,6 +940,7 @@ internal sealed class MessageHolderViewState(
         false,
         { null },
         { null },
+        {},
         {}
     ) {
         fun copy(isExpanded: Boolean = this.isExpanded): ThreadHeader {

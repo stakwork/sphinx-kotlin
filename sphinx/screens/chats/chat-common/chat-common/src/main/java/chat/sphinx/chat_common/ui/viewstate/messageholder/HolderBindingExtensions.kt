@@ -1109,7 +1109,10 @@ internal inline fun LayoutMessageHolderBinding.setBubbleThreadLayout(
                     includeMessageTypeAudioAttachment.root.gone
                     includeMessageTypeFileAttachment.root.visible
 
-                    setBubbleFileAttachment(thread.mediaAttachment, true)
+                    setBubbleFileAttachment(
+                        thread.mediaAttachment,
+                        true
+                    )
                 }
                 else -> {
                     constraintMediaThreadContainer.gone

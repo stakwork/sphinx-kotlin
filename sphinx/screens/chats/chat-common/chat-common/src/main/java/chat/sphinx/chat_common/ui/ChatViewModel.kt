@@ -621,6 +621,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                             },
                             onBindDownloadMedia = {
                                 repositoryMedia.downloadMediaIfApplicable(message, sent)
+                            },
+                            onBindThreadDownloadMedia = {
+                                message.thread?.last()?.let { lastReplyMessage ->
+                                    repositoryMedia.downloadMediaIfApplicable(lastReplyMessage, sent)
+                                }
                             }
                         )
                     )
@@ -699,6 +704,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                                 },
                                 onBindDownloadMedia = {
                                     repositoryMedia.downloadMediaIfApplicable(message, sent)
+                                },
+                                onBindThreadDownloadMedia = {
+                                    message.thread?.last()?.let { lastReplyMessage ->
+                                        repositoryMedia.downloadMediaIfApplicable(lastReplyMessage, sent)
+                                    }
                                 }
                             )
                         )
