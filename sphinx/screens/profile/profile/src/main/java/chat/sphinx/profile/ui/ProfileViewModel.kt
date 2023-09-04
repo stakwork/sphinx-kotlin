@@ -20,6 +20,7 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
 import chat.sphinx.concept_signer_manager.SignerCallback
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
@@ -37,6 +38,7 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
+import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -126,16 +128,22 @@ internal class ProfileViewModel @Inject constructor(
         const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
     }
 
+    private lateinit var signerManager: SignerManager
+
+    fun setSignerManager(signerManager: SignerManager) {
+        signerManager.setWalletDataHandler(walletDataHandler)
+        signerManager.setMoshi(moshi)
+        signerManager.setNetworkQueryCrypter(networkQueryCrypter)
+
+        this.signerManager = signerManager
+    }
+
     val storageBarViewStateContainer: ViewStateContainer<StorageBarViewState> by lazy {
         ViewStateContainer(StorageBarViewState.Loading)
     }
 
     val updatingImageViewStateContainer: ViewStateContainer<UpdatingImageViewState> by lazy {
         ViewStateContainer(UpdatingImageViewState.Idle)
-    }
-
-    val signerViewStateContainer: ViewStateContainer<SignerViewState> by lazy {
-        ViewStateContainer(SignerViewState.Idle)
     }
 
     override val pictureMenuHandler: PictureMenuHandler by lazy {
@@ -185,11 +193,11 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     override fun setupHardwareSigner() {
-        signerViewStateContainer.updateViewState(SignerViewState.HardwareDevice)
+        signerManager.setupSignerHardware(this)
     }
 
     override fun setupPhoneSigner() {
-        signerViewStateContainer.updateViewState(SignerViewState.PhoneDevice)
+        signerManager.setupPhoneSigner()
     }
 
     private fun setUpManageStorage(){

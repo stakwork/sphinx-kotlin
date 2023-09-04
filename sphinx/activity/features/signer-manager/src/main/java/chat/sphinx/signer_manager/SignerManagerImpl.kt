@@ -56,19 +56,19 @@ class SignerManagerImpl(
     private lateinit var walletDataHandler: WalletDataHandler
     private lateinit var networkQueryCrypter: NetworkQueryCrypter
 
-    override fun initWalletDataHandler(walletDataHandlerInstance: Any) {
+    override fun setWalletDataHandler(walletDataHandlerInstance: Any) {
         (walletDataHandlerInstance as WalletDataHandler).let {
             walletDataHandler = it
         }
     }
 
-    override fun initMoshi(moshiInstance: Any) {
+    override fun setMoshi(moshiInstance: Any) {
         (moshiInstance as Moshi).let {
             moshi = it
         }
     }
 
-    override fun initNetworkQueryCrypter(networkQueryCrypterInstance: Any) {
+    override fun setNetworkQueryCrypter(networkQueryCrypterInstance: Any) {
         (networkQueryCrypterInstance as NetworkQueryCrypter).let {
             networkQueryCrypter = it
         }
@@ -562,10 +562,7 @@ class SignerManagerImpl(
                         val words = wordsArray.joinToString(" ")
 
                         words.toWalletMnemonic()?.let { walletMnemonic ->
-                            if (walletDataHandler.persistWalletMnemonic(walletMnemonic)) {
-//                            LOG.d("MNEMONIC WORDS SAVED" , words)
-//                            LOG.d("MNEMONIC WORDS SAVED" , words)
-                            }
+                            walletDataHandler.persistWalletMnemonic(walletMnemonic)
                             walletMnemonic
                         }
                     }
