@@ -22,6 +22,7 @@ import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_signer_manager.SignerCallback
 import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -98,7 +99,7 @@ internal class ProfileFragment: SideEffectFragment<
         setupProfileHeader()
         setupProfileTabs()
         setupProfile()
-        setupSignerDependencies()
+        setupSignerManager()
 
 
         bottomMenuPicture.initialize(
@@ -143,10 +144,8 @@ internal class ProfileFragment: SideEffectFragment<
         }
     }
 
-    private fun setupSignerDependencies(){
-        signerManager.initWalletDataHandler(viewModel.walletDataHandler)
-        signerManager.initMoshi(viewModel.moshi)
-        signerManager.initNetworkQueryCrypter(viewModel.networkQueryCrypter)
+    private fun setupSignerManager(){
+        viewModel.setSignerManager(signerManager)
     }
 
     private fun setupProfileHeader() {
@@ -164,6 +163,9 @@ internal class ProfileFragment: SideEffectFragment<
                 )
                 .addNavigationBarPadding(
                     includeLayoutMenuBottomProfilePic.includeLayoutMenuBottomOptions.root
+                )
+                .addNavigationBarPadding(
+                    includeLayoutMenuBottomSigner.includeLayoutMenuBottomOptions.root
                 )
 
             includeProfileNamePictureHolder.imageViewProfilePicture.setOnClickListener {
@@ -296,7 +298,6 @@ internal class ProfileFragment: SideEffectFragment<
                         }
 
                         override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                            signerManager.initWalletDataHandler(viewModel.pictureMenuHandler)
                             viewModel.persistPINTimeout()
                         }
                     }
@@ -576,23 +577,6 @@ internal class ProfileFragment: SideEffectFragment<
 
                             setProgressStorageBar(viewState)
                         }
-                    }
-                }
-            }
-        }
-        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
-            viewModel.signerViewStateContainer.collect { viewState ->
-                when (viewState) {
-                    is SignerViewState.Idle -> {}
-                    is SignerViewState.HardwareDevice -> {
-                        signerManager.setupSignerHardware(viewModel)
-
-                        viewModel.signerViewStateContainer.updateViewState(SignerViewState.Idle)
-                    }
-                    is SignerViewState.PhoneDevice -> {
-                        signerManager.setupPhoneSigner()
-
-                        viewModel.signerViewStateContainer.updateViewState(SignerViewState.Idle)
                     }
                 }
             }
