@@ -8,9 +8,6 @@ import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
-import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toEntropy
-import cash.z.ecc.android.bip39.toSeed
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_crypter.model.SendSeedDto

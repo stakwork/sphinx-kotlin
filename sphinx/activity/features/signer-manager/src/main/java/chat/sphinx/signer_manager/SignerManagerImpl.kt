@@ -3,9 +3,6 @@ package chat.sphinx.signer_manager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
-import cash.z.ecc.android.bip39.Mnemonics
-import cash.z.ecc.android.bip39.toEntropy
-import cash.z.ecc.android.bip39.toSeed
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
 import chat.sphinx.concept_signer_manager.SignerCallback

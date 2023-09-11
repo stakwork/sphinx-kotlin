@@ -68,7 +68,6 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    implementation deps.bip39.sdk
     implementation deps.jna.sdk
     implementation deps.paho.sdk
     implementation deps.kotlinx.serialization
