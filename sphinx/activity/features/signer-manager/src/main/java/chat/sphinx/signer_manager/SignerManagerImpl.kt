@@ -40,7 +40,9 @@ import uniffi.sphinxrs.Keys
 import uniffi.sphinxrs.VlsResponse
 import uniffi.sphinxrs.deriveSharedSecret
 import uniffi.sphinxrs.encrypt
+import uniffi.sphinxrs.entropyFromMnemonic
 import uniffi.sphinxrs.makeAuthToken
+import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.nodeKeys
 import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
@@ -552,31 +554,30 @@ class SignerManagerImpl(
         coroutineScope {
             launch {
                 walletMnemonic = walletDataHandler.retrieveWalletMnemonic() ?: run {
-                    val entropy = (Mnemonics.WordCount.COUNT_12).toEntropy()
 
-                    Mnemonics.MnemonicCode(entropy).use { mnemonicCode ->
-                        val wordsArray: MutableList<String> = mutableListOf()
-                        mnemonicCode.words.forEach { word ->
-                            wordsArray.add(word.joinToString(""))
-                        }
-                        val words = wordsArray.joinToString(" ")
+                    val randomBytes = generateRandomBytes().take(32)
+                    val randomBytesString = randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
 
+                    try {
+                        val words = mnemonicFromEntropy(randomBytesString)
                         words.toWalletMnemonic()?.let { walletMnemonic ->
                             walletDataHandler.persistWalletMnemonic(walletMnemonic)
                             walletMnemonic
                         }
+                    } catch (e: Exception) {
+                        null
                     }
                 }
 
-                walletMnemonic?.value?.toCharArray()?.let { words ->
-                    val mnemonic = Mnemonics.MnemonicCode(words)
-
-                    val seedData = mnemonic.toSeed().take(32).toByteArray()
-                    seed = seedData.toHex()
+                walletMnemonic?.value?.let { words ->
+                    try {
+                        val mnemonic = entropyFromMnemonic(words)
+                        val seedData = mnemonic.take(32).toByteArray()
+                        seed = seedData.toHex()
+                    } catch (e: Exception) {}
                 }
             }.join()
         }
-
         return Pair(seed, walletMnemonic)
     }
 
