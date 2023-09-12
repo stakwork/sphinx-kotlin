@@ -1,9 +1,15 @@
 package chat.sphinx.onboard_connect.ui
 
+import android.app.Application
 import android.content.Context
+import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
+import chat.sphinx.concept_signer_manager.SignerCallback
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_signer.SignerMenuHandler
@@ -21,7 +27,9 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import chat.sphinx.onboard_common.model.RedemptionCode
+import chat.sphinx.onboard_connect.R
 import chat.sphinx.onboard_connect.model.Glyph
+import com.squareup.moshi.Moshi
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
@@ -36,16 +44,29 @@ internal class OnBoardConnectViewModel @Inject constructor(
     dispatchers: CoroutineDispatchers,
     handle: SavedStateHandle,
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
-    val navigator: OnBoardConnectNavigator,
-): SideEffectViewModel<
+    private val walletDataHandler: WalletDataHandler,
+    private val networkQueryCrypter: NetworkQueryCrypter,
+    private val app: Application,
+    val moshi: Moshi,
+    val navigator: OnBoardConnectNavigator
+    ): SideEffectViewModel<
         Context,
         OnBoardConnectSideEffect,
         OnBoardConnectViewState
-        >(dispatchers, OnBoardConnectViewState.Idle), SignerMenuViewModel
+        >(dispatchers, OnBoardConnectViewState.Idle), SignerMenuViewModel, SignerCallback
 {
 
     private val args: OnBoardConnectFragmentArgs by handle.navArgs()
-    lateinit var glyph: Glyph
+    private lateinit var glyph: Glyph
+    private lateinit var signerManager: SignerManager
+
+    companion object {
+        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
+        const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
+
+        const val BITCOIN_NETWORK_REG_TEST = "regtest"
+        const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
+    }
 
     val submitButtonViewStateContainer: ViewStateContainer<OnBoardConnectSubmitButtonViewState> by lazy {
         ViewStateContainer(OnBoardConnectSubmitButtonViewState.Disabled)
@@ -170,15 +191,135 @@ internal class OnBoardConnectViewModel @Inject constructor(
         }
     }
 
+    fun setSignerManager(signerManager: SignerManager) {
+        signerManager.setWalletDataHandler(walletDataHandler)
+        signerManager.setMoshi(moshi)
+        signerManager.setNetworkQueryCrypter(networkQueryCrypter)
+
+        this.signerManager = signerManager
+    }
+
     override val signerMenuHandler: SignerMenuHandler by lazy {
         SignerMenuHandler()
     }
 
     override fun setupHardwareSigner() {
-        TODO("Not yet implemented")
+        signerManager.setupSignerHardware(this)
     }
 
     override fun setupPhoneSigner() {
-        TODO("Not yet implemented")
+        signerManager.setupPhoneSigner()
     }
+
+    override fun checkNetwork(callback: (Boolean) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.CheckNetwork {
+                callback.invoke(true)
+            })
+        }
+    }
+
+    override fun signingDeviceNetwork(
+        callback: (String) -> Unit
+    ) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.SigningDeviceInfo(
+                app.getString(R.string.network_name_title),
+                app.getString(R.string.network_name_message)
+            ) { networkName ->
+                if (networkName == null) {
+                    viewModelScope.launch(mainImmediate) {
+                        submitSideEffect(OnBoardConnectSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
+                        return@launch
+                    }
+                } else {
+                    callback.invoke(networkName)
+                }
+            })
+        }
+    }
+
+    override fun signingDevicePassword(networkName: String, callback: (String) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.SigningDeviceInfo(
+                app.getString(R.string.network_password_title),
+                app.getString(
+                    R.string.network_password_message,
+                    networkName ?: "-"
+                ),
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            ) { networkPass ->
+                viewModelScope.launch(mainImmediate) {
+                    if (networkPass == null) {
+                        submitSideEffect(OnBoardConnectSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
+                        return@launch
+                    } else {
+                        callback.invoke(networkPass)
+                    }
+                }
+            })
+        }
+    }
+
+    override fun signingDeviceLightningNodeUrl(callback: (String) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.SigningDeviceInfo(
+                app.getString(R.string.lightning_node_url_title),
+                app.getString(R.string.lightning_node_url_message),
+            ) { lightningNodeUrl ->
+                viewModelScope.launch(mainImmediate) {
+                    if (lightningNodeUrl == null) {
+                        submitSideEffect(OnBoardConnectSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
+                        return@launch
+                    }
+                    else {
+                        callback.invoke(lightningNodeUrl)
+                    }
+                }
+            })
+        }
+    }
+
+    override fun signingDeviceCheckBitcoinNetwork(network: (String) -> Unit, linkSigningDevice: (Boolean) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.CheckBitcoinNetwork(
+                regTestCallback = {
+                    network.invoke(BITCOIN_NETWORK_REG_TEST)
+                }, mainNetCallback = {
+                    network.invoke(BITCOIN_NETWORK_MAIN_NET)
+                }, callback = {
+                    viewModelScope.launch(mainImmediate) {
+                        linkSigningDevice.invoke(true)
+                    }
+                }
+            ))
+        }
+    }
+
+    override fun failedToSetupSigningDevice(message: String) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.FailedToSetupSigningDevice(message))
+        }
+    }
+
+    override fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit) {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.ShowMnemonicToUser(message) {
+                callback.invoke(true)
+            })
+        }
+    }
+
+    override fun sendingSeedToHardware() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.SendingSeedToHardware)
+        }
+    }
+
+    override fun signingDeviceSuccessfullySet() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(OnBoardConnectSideEffect.SigningDeviceSuccessfullySet)
+        }
+    }
+
 }

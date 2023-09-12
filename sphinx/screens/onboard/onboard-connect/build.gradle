@@ -36,11 +36,14 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
+    implementation deps.square.moshi
 
     // Sphinx
     implementation project(path: ':sphinx:activity:insetter-activity')
     implementation project(path: ':sphinx:screens-detail:scanner:scanner-view-model-coordinator')
     implementation project(path: ':sphinx:activity:concepts:concept-signer-manager')
+    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
     api project(path: ':sphinx:screens:onboard:onboard-common')
     api project(path: ':sphinx:screens:onboard:onboard-resources')
     api project(path: ':sphinx:application:common:menus:menu-bottom-signer')

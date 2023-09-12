@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -24,6 +25,7 @@ import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class OnBoardConnectFragment: SideEffectFragment<
@@ -37,19 +39,22 @@ internal class OnBoardConnectFragment: SideEffectFragment<
     override val viewModel: OnBoardConnectViewModel by viewModels()
     override val binding: FragmentOnBoardConnectBinding by viewBinding(FragmentOnBoardConnectBinding::bind)
 
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var signerManager: SignerManager
+
     private val bottomMenuSigner: BottomSignerMenu by lazy(LazyThreadSafetyMode.NONE) {
         BottomSignerMenu(
             onStopSupervisor,
             viewModel
         )
     }
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupHeaderAndFooter()
         setupEditText()
+        setupSignerManager()
 
         binding.apply {
             imageButtonScanner.setOnClickListener {
@@ -165,5 +170,9 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 }
             }
         }
+    }
+
+    private fun setupSignerManager(){
+        viewModel.setSignerManager(signerManager)
     }
 }
