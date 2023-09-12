@@ -77,6 +77,11 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 redemptionCode is RedemptionCode.SwarmClaim) {
                 isValid = true
             }
+            if (redemptionCode != null &&
+                redemptionCode is RedemptionCode.Glyph) {
+                isValid = true
+            }
+
         } else if (vs is OnBoardConnectViewState.ExistingUser) {
             if (redemptionCode != null &&
                 redemptionCode is RedemptionCode.AccountRestoration) {
