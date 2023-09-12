@@ -12,10 +12,11 @@ import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_phone_signer_method.PhoneSignerMethodMenuHandler
+import chat.sphinx.menu_bottom_phone_signer_method.PhoneSignerMethodMenuViewModel
 import chat.sphinx.menu_bottom_signer.SignerMenuHandler
 import chat.sphinx.menu_bottom_signer.SignerMenuViewModel
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
-import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
 import chat.sphinx.scanner_view_model_coordinator.response.ScannerResponse
 import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
@@ -53,7 +54,10 @@ internal class OnBoardConnectViewModel @Inject constructor(
         Context,
         OnBoardConnectSideEffect,
         OnBoardConnectViewState
-        >(dispatchers, OnBoardConnectViewState.Idle), SignerMenuViewModel, SignerCallback
+        >(dispatchers, OnBoardConnectViewState.Idle),
+    SignerMenuViewModel,
+    PhoneSignerMethodMenuViewModel,
+    SignerCallback
 {
 
     private val args: OnBoardConnectFragmentArgs by handle.navArgs()
@@ -203,12 +207,24 @@ internal class OnBoardConnectViewModel @Inject constructor(
         SignerMenuHandler()
     }
 
+    override val phoneSignerMethodMenuHandler: PhoneSignerMethodMenuHandler by lazy {
+        PhoneSignerMethodMenuHandler()
+    }
+
     override fun setupHardwareSigner() {
         signerManager.setupSignerHardware(this)
     }
 
     override fun setupPhoneSigner() {
+        phoneSignerMethodMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+    }
+
+    override fun generateSeed() {
         signerManager.setupPhoneSigner()
+    }
+
+    override fun importSeed() {
+        TODO("Not yet implemented")
     }
 
     override fun checkNetwork(callback: (Boolean) -> Unit) {

@@ -15,6 +15,7 @@ import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.menu_bottom_phone_signer_method.PhoneSignerMethodMenu
 import chat.sphinx.menu_bottom_signer.BottomSignerMenu
 import chat.sphinx.onboard_connect.R
 import chat.sphinx.onboard_connect.databinding.FragmentOnBoardConnectBinding
@@ -49,6 +50,14 @@ internal class OnBoardConnectFragment: SideEffectFragment<
             viewModel
         )
     }
+
+    private val phoneSignerMethodMenu: PhoneSignerMethodMenu by lazy(LazyThreadSafetyMode.NONE) {
+        PhoneSignerMethodMenu(
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -77,6 +86,12 @@ internal class OnBoardConnectFragment: SideEffectFragment<
         bottomMenuSigner.initialize(
             R.string.bottom_menu_signer_header_text,
             binding.includeLayoutMenuBottomSigner,
+            viewLifecycleOwner
+        )
+
+        phoneSignerMethodMenu.initialize(
+            R.string.bottom_menu_phone_signer_method_header_text,
+            binding.includeLayoutMenuBottomPhoneSignerMethod,
             viewLifecycleOwner
         )
     }
