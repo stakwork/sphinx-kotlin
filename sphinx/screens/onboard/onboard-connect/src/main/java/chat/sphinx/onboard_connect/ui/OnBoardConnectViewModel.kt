@@ -5,6 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.Response
+import chat.sphinx.menu_bottom.ui.MenuBottomViewState
+import chat.sphinx.menu_bottom_signer.SignerMenuHandler
+import chat.sphinx.menu_bottom_signer.SignerMenuViewModel
 import chat.sphinx.onboard_connect.navigation.OnBoardConnectNavigator
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerFilter
 import chat.sphinx.scanner_view_model_coordinator.request.ScannerRequest
@@ -18,6 +21,7 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import chat.sphinx.onboard_common.model.RedemptionCode
+import chat.sphinx.onboard_connect.model.Glyph
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
@@ -37,10 +41,11 @@ internal class OnBoardConnectViewModel @Inject constructor(
         Context,
         OnBoardConnectSideEffect,
         OnBoardConnectViewState
-        >(dispatchers, OnBoardConnectViewState.Idle)
+        >(dispatchers, OnBoardConnectViewState.Idle), SignerMenuViewModel
 {
 
     private val args: OnBoardConnectFragmentArgs by handle.navArgs()
+    lateinit var glyph: Glyph
 
     val submitButtonViewStateContainer: ViewStateContainer<OnBoardConnectSubmitButtonViewState> by lazy {
         ViewStateContainer(OnBoardConnectSubmitButtonViewState.Disabled)
@@ -107,11 +112,23 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 submitSideEffect(OnBoardConnectSideEffect.FromScanner(response.value))
 
                 val code = response.value.value
+                val redemptionCode = RedemptionCode.decode(code)
                 validateCode(code)
 
                 if (submitButtonViewStateContainer.value is OnBoardConnectSubmitButtonViewState.Enabled) {
-                    viewModelScope.launch(mainImmediate) {
-                        navigator.toOnBoardConnectingScreen(code)
+
+                    if (redemptionCode is RedemptionCode.Glyph) {
+                        glyph = Glyph(
+                            redemptionCode.mqtt,
+                            redemptionCode.network,
+                            redemptionCode.relay
+                        )
+
+                        signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+                    } else {
+                        viewModelScope.launch(mainImmediate) {
+                            navigator.toOnBoardConnectingScreen(code)
+                        }
                     }
                 }
             }
@@ -120,11 +137,24 @@ internal class OnBoardConnectViewModel @Inject constructor(
 
     fun continueToConnectingScreen(code: String) {
         val submitButtonVS = submitButtonViewStateContainer.value
+        val redemptionCode = RedemptionCode.decode(code)
 
         if (submitButtonVS is OnBoardConnectSubmitButtonViewState.Enabled) {
-            viewModelScope.launch(mainImmediate) {
-                navigator.toOnBoardConnectingScreen(code)
+
+            if (redemptionCode is RedemptionCode.Glyph) {
+                glyph = Glyph(
+                    redemptionCode.mqtt,
+                    redemptionCode.network,
+                    redemptionCode.relay
+                )
+
+                signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+            } else {
+                viewModelScope.launch(mainImmediate) {
+                    navigator.toOnBoardConnectingScreen(code)
+                }
             }
+
         } else {
             viewModelScope.launch(mainImmediate) {
                 val vs = currentViewState
@@ -138,5 +168,17 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 ))
             }
         }
+    }
+
+    override val signerMenuHandler: SignerMenuHandler by lazy {
+        SignerMenuHandler()
+    }
+
+    override fun setupHardwareSigner() {
+        TODO("Not yet implemented")
+    }
+
+    override fun setupPhoneSigner() {
+        TODO("Not yet implemented")
     }
 }

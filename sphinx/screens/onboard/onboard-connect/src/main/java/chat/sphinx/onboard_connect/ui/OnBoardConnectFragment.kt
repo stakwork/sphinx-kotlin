@@ -14,6 +14,7 @@ import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.menu_bottom_signer.BottomSignerMenu
 import chat.sphinx.onboard_connect.R
 import chat.sphinx.onboard_connect.databinding.FragmentOnBoardConnectBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,6 +36,14 @@ internal class OnBoardConnectFragment: SideEffectFragment<
 {
     override val viewModel: OnBoardConnectViewModel by viewModels()
     override val binding: FragmentOnBoardConnectBinding by viewBinding(FragmentOnBoardConnectBinding::bind)
+
+    private val bottomMenuSigner: BottomSignerMenu by lazy(LazyThreadSafetyMode.NONE) {
+        BottomSignerMenu(
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -59,6 +68,12 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 )
             }
         }
+
+        bottomMenuSigner.initialize(
+            R.string.bottom_menu_signer_header_text,
+            binding.includeLayoutMenuBottomSigner,
+            viewLifecycleOwner
+        )
     }
 
     private fun setupHeaderAndFooter() {
