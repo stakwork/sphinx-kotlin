@@ -151,5 +151,6 @@
     <string name="mnemonic_words_title">Enter your mnemonic words</string>
     <string name="mnemonic_words_confirm">Confirm</string>
     <string name="mnemonic_words_cancel">Cancel</string>
+    <string name="mnemonic_words_loading">Loading, please wait…</string>
 
 </resources>

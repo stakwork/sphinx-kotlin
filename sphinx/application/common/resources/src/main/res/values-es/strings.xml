@@ -154,4 +154,5 @@
     <string name="mnemonic_words_title">Ingrese sus palabras mnemotécnicas</string>
     <string name="mnemonic_words_confirm">Aceptar</string>
     <string name="mnemonic_words_cancel">Cancelar</string>
+    <string name="mnemonic_words_loading">Cargando...</string>
 </resources>
