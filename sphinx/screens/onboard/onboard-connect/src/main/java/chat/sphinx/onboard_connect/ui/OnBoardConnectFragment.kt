@@ -7,8 +7,11 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_signer_manager.SignerManager
@@ -24,6 +27,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
 import javax.inject.Inject
@@ -61,6 +65,7 @@ internal class OnBoardConnectFragment: SideEffectFragment<
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
         setupHeaderAndFooter()
         setupEditText()
         setupSignerManager()
@@ -101,6 +106,35 @@ internal class OnBoardConnectFragment: SideEffectFragment<
             .addStatusBarPadding(binding.layoutConstraintOnBoardConnect)
             .addNavigationBarPadding(binding.layoutConstraintOnBoardConnect)
     }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            when {
+                (viewModel.mnemonicWordsViewStateContainer.value is MnemonicWordsViewState.Open) -> {
+                    viewModel.mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Closed)
+                }
+                else -> {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.popBackStack()
+                    }
+                }
+            }
+        }
+    }
+
 
     private fun setupEditText() {
         binding.editTextCodeInput.addTextChangedListener(object : TextWatcher {
@@ -185,6 +219,20 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.mnemonicWordsViewStateContainer.collect { viewState ->
+                binding.includeLayoutMnemonicWords.apply {
+                    when (viewState) {
+                        is MnemonicWordsViewState.Open -> {}
+                        is MnemonicWordsViewState.Closed -> {}
+                    }
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+
     }
 
     private fun setupSignerManager(){

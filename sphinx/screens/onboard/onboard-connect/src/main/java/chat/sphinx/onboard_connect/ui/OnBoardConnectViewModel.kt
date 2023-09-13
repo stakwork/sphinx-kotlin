@@ -76,6 +76,10 @@ internal class OnBoardConnectViewModel @Inject constructor(
         ViewStateContainer(OnBoardConnectSubmitButtonViewState.Disabled)
     }
 
+    val mnemonicWordsViewStateContainer: ViewStateContainer<MnemonicWordsViewState> by lazy {
+        ViewStateContainer(MnemonicWordsViewState.Closed)
+    }
+
     init {
         updateViewState(
             if (args.newUser) {
@@ -224,7 +228,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
     }
 
     override fun importSeed() {
-        TODO("Not yet implemented")
+        mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Open)
     }
 
     override fun checkNetwork(callback: (Boolean) -> Unit) {
