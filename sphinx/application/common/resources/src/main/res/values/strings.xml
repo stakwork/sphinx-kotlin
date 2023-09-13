@@ -229,7 +229,6 @@
     <string name="manage_storage_limit_warning" >Saving this limit\nwill delete %s of your oldest content</string>
     <string name="manage_storage_deleted_all_files">All files</string>
 
-
     <string name="video_sats_per_minute">Sats per minute</string>
 
     <string name="time_left">%s left</string>
@@ -270,5 +269,9 @@
     <string name="threads_plus" translatable="false">+%s</string>
     <string name="threads_more_replies">more replies</string>
     <string name="thread_header" translatable="false">Thread</string>
+
+    <string name="mnemonic_words_title">Enter your mnemonic words</string>
+    <string name="mnemonic_words_confirm">Confirm</string>
+    <string name="mnemonic_words_cancel">Cancel</string>
 
 </resources>

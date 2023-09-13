@@ -151,4 +151,7 @@
     <string name="select_bitcoin_network">Seleccioná la red de Bitcoin</string>
     <string name="replies_amount">%s respuestas</string>
     <string name="threads_more_replies">respuestas más</string>
+    <string name="mnemonic_words_title">Ingrese sus palabras mnemotécnicas</string>
+    <string name="mnemonic_words_confirm">Aceptar</string>
+    <string name="mnemonic_words_cancel">Cancelar</string>
 </resources>

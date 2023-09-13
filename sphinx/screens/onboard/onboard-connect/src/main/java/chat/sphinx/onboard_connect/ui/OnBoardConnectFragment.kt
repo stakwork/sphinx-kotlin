@@ -86,6 +86,12 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                     binding.editTextCodeInput.text.toString()
                 )
             }
+
+            includeLayoutMnemonicWords.includeLayoutMnemonicWordsDetail.apply {
+                buttonCancel.setOnClickListener {
+                    viewModel.mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Closed)
+                }
+            }
         }
 
         bottomMenuSigner.initialize(

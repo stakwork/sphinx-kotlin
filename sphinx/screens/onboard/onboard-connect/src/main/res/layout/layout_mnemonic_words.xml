@@ -7,10 +7,6 @@
     android:layout_height="match_parent"
     app:layoutDescription="@xml/motion_mnemonic_words">
 
-<!--    app:layoutDescription="@xml/motion_manage_storage_limit">-->
-
-
-<!--    android:id="@+id/view_storage_limit_details_lock"-->
     <View
         android:id="@+id/view_mnemonic_words_details_lock"
         android:layout_width="match_parent"
@@ -18,8 +14,6 @@
         android:clickable="true"
         android:background="@android:color/black" />
 
-<!--    android:id="@+id/include_layout_change_storage_limit_detail"-->
-    <!--    layout="@layout/layout_change_storage_limit_detail"-->
     <include
         android:id="@+id/include_layout_mnemonic_words_detail"
         layout="@layout/layout_mnemonic_words_detail"
