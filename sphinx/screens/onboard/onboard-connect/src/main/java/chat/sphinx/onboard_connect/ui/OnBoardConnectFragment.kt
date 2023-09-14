@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
@@ -85,6 +86,8 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 viewModel.continueToConnectingScreen(
                     binding.editTextCodeInput.text.toString()
                 )
+
+                hideKeyboardFrom(buttonSubmit.context, buttonSubmit)
             }
 
             includeLayoutMnemonicWords.includeLayoutMnemonicWordsDetail.apply {
@@ -95,6 +98,8 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 buttonConfirm.setOnClickListener {
                     val words = editTextMnemonic.text.toString()
                     viewModel.validateSeed(words)
+
+                    hideKeyboardFrom(buttonConfirm.context, buttonConfirm)
                 }
             }
         }
@@ -110,6 +115,11 @@ internal class OnBoardConnectFragment: SideEffectFragment<
             binding.includeLayoutMenuBottomPhoneSignerMethod,
             viewLifecycleOwner
         )
+    }
+
+    private fun hideKeyboardFrom(context: Context, view: View) {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun setupHeaderAndFooter() {
