@@ -91,6 +91,11 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 buttonCancel.setOnClickListener {
                     viewModel.mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Closed)
                 }
+
+                buttonConfirm.setOnClickListener {
+                    val words = editTextMnemonic.text.toString()
+                    viewModel.validateSeed(words)
+                }
             }
         }
 
