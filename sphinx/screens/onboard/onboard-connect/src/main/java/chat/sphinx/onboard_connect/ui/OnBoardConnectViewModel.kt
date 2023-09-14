@@ -325,8 +325,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
         }
     }
 
-
-
     override fun failedToSetupSigningDevice(message: String) {
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(OnBoardConnectSideEffect.FailedToSetupSigningDevice(message))
@@ -367,6 +365,9 @@ internal class OnBoardConnectViewModel @Inject constructor(
             }
 
             if (mnemonicUtils.validateWords(words)) {
+                signerManager.setMnemonicWords(seed.trim())
+                signerManager.setupPhoneSigner()
+
                 mnemonicDialogViewStateContainer.updateViewState(MnemonicDialogViewState.Loading)
             } else {
                 submitSideEffect(

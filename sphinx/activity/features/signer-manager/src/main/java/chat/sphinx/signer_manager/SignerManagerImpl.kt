@@ -24,7 +24,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttClient
@@ -55,6 +54,8 @@ class SignerManagerImpl(
     private lateinit var walletDataHandler: WalletDataHandler
     private lateinit var networkQueryCrypter: NetworkQueryCrypter
 
+    private var mnemonicWords: String? = null
+
     override fun setWalletDataHandler(walletDataHandlerInstance: Any) {
         (walletDataHandlerInstance as WalletDataHandler).let {
             walletDataHandler = it
@@ -71,6 +72,10 @@ class SignerManagerImpl(
         (networkQueryCrypterInstance as NetworkQueryCrypter).let {
             networkQueryCrypter = it
         }
+    }
+
+    override fun setMnemonicWords(words: String) {
+        mnemonicWords = words
     }
 
     private val job = SupervisorJob()
@@ -552,14 +557,21 @@ class SignerManagerImpl(
             launch {
                 walletMnemonic = walletDataHandler.retrieveWalletMnemonic() ?: run {
 
-                    val randomBytes = generateRandomBytes().take(32)
-                    val randomBytesString = randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
-
                     try {
-                        val words = mnemonicFromEntropy(randomBytesString)
-                        words.toWalletMnemonic()?.let { walletMnemonic ->
-                            walletDataHandler.persistWalletMnemonic(walletMnemonic)
-                            walletMnemonic
+                        if (mnemonicWords != null) {
+                            mnemonicWords!!.toWalletMnemonic()?.let { nnWalletMnemonic ->
+                                walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
+                                nnWalletMnemonic
+                            }
+                        } else {
+                            val randomBytes = generateRandomBytes().take(32)
+                            val randomBytesString = randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
+                            val words = mnemonicFromEntropy(randomBytesString)
+
+                            words.toWalletMnemonic()?.let { walletMnemonic ->
+                                walletDataHandler.persistWalletMnemonic(walletMnemonic)
+                                walletMnemonic
+                            }
                         }
                     } catch (e: Exception) {
                         null

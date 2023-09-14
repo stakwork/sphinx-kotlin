@@ -6,4 +6,5 @@ abstract class SignerManager {
     abstract fun setWalletDataHandler(walletDataHandlerInstance: Any)
     abstract fun setMoshi(moshiInstance: Any)
     abstract fun setNetworkQueryCrypter(networkQueryCrypterInstance: Any)
+    abstract fun setMnemonicWords(words: String)
 }
