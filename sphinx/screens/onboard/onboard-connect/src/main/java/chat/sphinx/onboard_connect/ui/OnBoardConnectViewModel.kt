@@ -3,7 +3,6 @@ package chat.sphinx.onboard_connect.ui
 import android.app.Application
 import android.content.Context
 import android.text.InputType
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
@@ -31,8 +30,11 @@ import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.onboard_connect.R
 import chat.sphinx.onboard_connect.model.Glyph
+import chat.sphinx.onboard_connect.viewstate.MnemonicDialogViewState
+import chat.sphinx.onboard_connect.viewstate.MnemonicWordsViewState
+import chat.sphinx.onboard_connect.viewstate.OnBoardConnectSubmitButtonViewState
+import chat.sphinx.onboard_connect.viewstate.OnBoardConnectViewState
 import chat.sphinx.resources.MnemonicLanguagesUtils
-import chat.sphinx.resources.SeedValidationError
 import com.squareup.moshi.Moshi
 import io.matthewnelson.android_feature_viewmodel.currentViewState
 import io.matthewnelson.concept_views.viewstate.value
@@ -81,6 +83,10 @@ internal class OnBoardConnectViewModel @Inject constructor(
 
     val mnemonicWordsViewStateContainer: ViewStateContainer<MnemonicWordsViewState> by lazy {
         ViewStateContainer(MnemonicWordsViewState.Closed)
+    }
+
+    val mnemonicDialogViewStateContainer: ViewStateContainer<MnemonicDialogViewState> by lazy {
+        ViewStateContainer(MnemonicDialogViewState.Idle)
     }
 
     init {
@@ -347,15 +353,29 @@ internal class OnBoardConnectViewModel @Inject constructor(
         }
     }
 
-    fun validateSeed(seed: String): Pair<SeedValidationError?, String?> {
-        val mnemonicUtils = MnemonicLanguagesUtils(app.applicationContext)
-        val words = seed.trim().split(" ")
+    fun validateSeed(seed: String) {
+        viewModelScope.launch(mainImmediate) {
+            val mnemonicUtils = MnemonicLanguagesUtils(app.applicationContext)
+            val words = seed.trim().split(" ")
 
-        if (words.size != 12 && words.size != 24) {
-            return Pair(SeedValidationError.IncorrectWordNumber, null)
+            if (words.size != 12 && words.size != 24) {
+                submitSideEffect(
+                    OnBoardConnectSideEffect.Notify(
+                        app.getString(R.string.mnemonic_incorrect_length)
+                    )
+                )
+            }
+
+            if (mnemonicUtils.validateWords(words)) {
+                mnemonicDialogViewStateContainer.updateViewState(MnemonicDialogViewState.Loading)
+            } else {
+                submitSideEffect(
+                    OnBoardConnectSideEffect.Notify(
+                        app.getString(R.string.mnemonic_invalid_word)
+                    )
+                )
+            }
         }
-
-        return mnemonicUtils.validateWords(words)
     }
 
 }

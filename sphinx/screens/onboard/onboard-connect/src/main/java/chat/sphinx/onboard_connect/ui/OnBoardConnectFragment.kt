@@ -23,6 +23,10 @@ import chat.sphinx.menu_bottom_phone_signer_method.PhoneSignerMethodMenu
 import chat.sphinx.menu_bottom_signer.BottomSignerMenu
 import chat.sphinx.onboard_connect.R
 import chat.sphinx.onboard_connect.databinding.FragmentOnBoardConnectBinding
+import chat.sphinx.onboard_connect.viewstate.MnemonicDialogViewState
+import chat.sphinx.onboard_connect.viewstate.MnemonicWordsViewState
+import chat.sphinx.onboard_connect.viewstate.OnBoardConnectSubmitButtonViewState
+import chat.sphinx.onboard_connect.viewstate.OnBoardConnectViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
@@ -250,6 +254,23 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                     }
                     root.setTransitionDuration(300)
                     viewState.transitionToEndSet(root)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.mnemonicDialogViewStateContainer.collect { viewState ->
+                binding.includeLayoutMnemonicWords.includeLayoutMnemonicWordsDetail.apply {
+                    when (viewState) {
+                        is MnemonicDialogViewState.Idle -> {
+                            layoutConstraintEnterWordsContainer.visible
+                            layoutConstraintLoadingContainer.gone
+                        }
+                        is MnemonicDialogViewState.Loading -> {
+                            layoutConstraintLoadingContainer.visible
+                            layoutConstraintEnterWordsContainer.gone
+                        }
+                    }
                 }
             }
         }

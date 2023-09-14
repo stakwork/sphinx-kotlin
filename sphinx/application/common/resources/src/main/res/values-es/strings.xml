@@ -155,4 +155,6 @@
     <string name="mnemonic_words_confirm">Aceptar</string>
     <string name="mnemonic_words_cancel">Cancelar</string>
     <string name="mnemonic_words_loading">Cargando...</string>
+    <string name="mnemonic_incorrect_length">Tu frase de recuperación debe tener exactamente 12 o 24 palabras</string>
+    <string name="mnemonic_invalid_word">Parece que has ingresado una palabra no válida</string>
 </resources>

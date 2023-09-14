@@ -1,4 +1,4 @@
-package chat.sphinx.onboard_connect.ui
+package chat.sphinx.onboard_connect.viewstate
 
 import androidx.constraintlayout.motion.widget.MotionLayout
 import chat.sphinx.onboard_connect.R

@@ -66,7 +66,7 @@ class MnemonicLanguagesUtils(private val context: Context) {
         return null
     }
 
-    fun validateWords(words: List<String>): Pair<SeedValidationError?, String?> {
+    fun validateWords(words: List<String>): Boolean {
         val language = findLanguage(words[0])
 
         if (language != null) {
@@ -74,25 +74,13 @@ class MnemonicLanguagesUtils(private val context: Context) {
 
             for (word in words) {
                 if (!wordsList.contains(word)) {
-                    return Pair(SeedValidationError.InvalidWord, word)
+                    return false
                 }
             }
         } else {
-            return Pair(SeedValidationError.InvalidWord, words[0])
+            return false
         }
 
-        return Pair(null, null)
+        return true
     }
-}
-
-sealed class SeedValidationError : Throwable() {
-
-    object IncorrectWordNumber : SeedValidationError() {
-        override val message: String get() = "profile.mnemonic-incorrect-length"
-    }
-
-    object InvalidWord : SeedValidationError() {
-        override val message: String get() = "profile.mnemonic-invalid-word"
-    }
-
 }
