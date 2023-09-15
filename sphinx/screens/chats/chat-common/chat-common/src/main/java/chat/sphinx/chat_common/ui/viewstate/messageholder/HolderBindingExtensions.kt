@@ -1214,6 +1214,10 @@ internal fun LayoutMessageHolderBinding.setBubbleMessageLinkPreviewLayout(
     viewState: MessageHolderViewState,
     onRowLayoutListener: MessageListAdapter.OnRowLayoutListener?,
 ) {
+    if (viewState.message?.thread?.isNotEmpty() == true) {
+        return
+    }
+
     includeMessageHolderBubble.apply {
         val previewLink = viewState.messageLinkPreview
 
