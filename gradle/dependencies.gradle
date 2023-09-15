@@ -101,6 +101,9 @@ ext.deps = [
         coroutinesCore: "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.coroutines}",
         reflect: "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}",
     ],
+    kotlinx: [
+        serialization: "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2",
+    ],
     matthewNelson: [
         toplService: "io.matthewnelson.topl-android:topl-service:${versions.toplAndroid}",
         toplServiceBase: "io.matthewnelson.topl-android:topl-service-base:${versions.toplAndroid}",
@@ -122,16 +125,16 @@ ext.deps = [
     ],
     viewBindingDelegateNoReflect: "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.7",
     giphy: [
-            sdk: "com.giphy.sdk:ui:2.1.2"
+        sdk: "com.giphy.sdk:ui:2.1.2"
     ],
     jitsi: [
-            sdk: "org.jitsi.react:jitsi-meet-sdk:7.0.0"
+        sdk: "org.jitsi.react:jitsi-meet-sdk:7.0.0"
     ],
     lottie: [
-            sdk: "com.airbnb.android:lottie:4.0.0"
+        sdk: "com.airbnb.android:lottie:4.0.0"
     ],
     bip39: [
-            sdk: "cash.z.ecc.android:kotlin-bip39:${versions.bip39}"
+        sdk: "cash.z.ecc.android:kotlin-bip39:${versions.bip39}"
     ],
     jna: [
             sdk: "net.java.dev.jna:jna:5.8.0@aar"
@@ -141,6 +144,9 @@ ext.deps = [
     ],
     paho: [
             sdk: "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
+    ],
+    msgpack: [
+        sdk: "com.ensarsarajcic.kotlinx:serialization-msgpack:0.5.0"
     ]
 ]
 
@@ -176,7 +182,7 @@ ext.plugin = [
     square: [
         exhaustive: "app.cash.exhaustive:exhaustive-gradle:0.2.0",
         sqlDelight: "com.squareup.sqldelight:gradle-plugin:${versions.sqlDelight}"
-    ],
+    ]
 ]
 
 /**
@@ -228,5 +234,5 @@ ext.kaptDeps = [
     ],
     square: [
         moshiCodegen: "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
-    ],
+    ]
 ]
