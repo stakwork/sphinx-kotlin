@@ -54,8 +54,6 @@ class SignerManagerImpl(
     private lateinit var walletDataHandler: WalletDataHandler
     private lateinit var networkQueryCrypter: NetworkQueryCrypter
 
-    private var mnemonicWords: String? = null
-
     override fun setWalletDataHandler(walletDataHandlerInstance: Any) {
         (walletDataHandlerInstance as WalletDataHandler).let {
             walletDataHandler = it
@@ -72,10 +70,6 @@ class SignerManagerImpl(
         (networkQueryCrypterInstance as NetworkQueryCrypter).let {
             networkQueryCrypter = it
         }
-    }
-
-    override fun setMnemonicWords(words: String) {
-        mnemonicWords = words
     }
 
     private val job = SupervisorJob()
@@ -187,7 +181,7 @@ class SignerManagerImpl(
 
             pk2?.let { nnPk2 ->
                 val sec1 = deriveSharedSecret(nnPk2, sk1)
-                val seedAndMnemonic = generateAndPersistMnemonic()
+                val seedAndMnemonic = generateAndPersistMnemonic(null)
 
                 seedAndMnemonic.second?.let { mnemonic ->
                     signerCallback.showMnemonicToUser(mnemonic.value) { callback ->
@@ -251,9 +245,9 @@ class SignerManagerImpl(
         seedDto = SendSeedDto()
     }
 
-    override fun setupPhoneSigner() {
+    override fun setupPhoneSigner(mnemonicWords: String?) {
         launch {
-            val (seed, mnemonic) = generateAndPersistMnemonic()
+            val (seed, mnemonic) = generateAndPersistMnemonic(mnemonicWords)
 
             val keys: Keys? = try {
                 nodeKeys(net = "regtest", seed = seed!!)
@@ -400,12 +394,8 @@ class SignerManagerImpl(
     }
 
     private suspend fun makeArgs(): Map<String, Any>? {
-        val seedBytes = generateAndPersistMnemonic().first?.encodeToByteArray()?.take(32)
+        val seedBytes = getStoredMnemonicAndSeed()
         val lssNonce = retrieveOrGenerateLssNonce()
-
-        if (seedBytes == null) {
-            return null
-        }
 
         val defaultPolicy = mapOf(
             "msat_per_interval" to 21000000000L,
@@ -442,6 +432,7 @@ class SignerManagerImpl(
         return result
     }
 
+    @OptIn(ExperimentalUnsignedTypes::class)
     private fun retrieveOrGenerateLssNonce(): List<Int> {
         val storedLssNonceString = lssNonceSharedPreferences.getString(SIGNER_LSS_NONCE, "")
         val storedLssNonce = storedLssNonceString?.split(",")?.mapNotNull { it.toIntOrNull() }
@@ -450,7 +441,7 @@ class SignerManagerImpl(
             storedLssNonce
         } else {
             val editor = lssNonceSharedPreferences.edit()
-            val randomBytes = generateRandomBytes().take(32)
+            val randomBytes = generateRandomBytes(32)
             val randomBytesString = randomBytes.joinToString(",") { it.toString() }
 
             editor.putString(SIGNER_LSS_NONCE, randomBytesString)
@@ -536,11 +527,11 @@ class SignerManagerImpl(
         return adapter.toJson(map)
     }
 
-    private fun generateRandomBytes(): UByteArray {
+    private fun generateRandomBytes(size: Int): UByteArray {
         val random = SecureRandom()
-        val bytes = ByteArray(32)
+        val bytes = ByteArray(size)
         random.nextBytes(bytes)
-        val uByteArray = UByteArray(32)
+        val uByteArray = UByteArray(size)
 
         for (i in bytes.indices) {
             uByteArray[i] = bytes[i].toUByte()
@@ -549,7 +540,8 @@ class SignerManagerImpl(
         return uByteArray
     }
 
-    private suspend fun generateAndPersistMnemonic() : Pair<String?, WalletMnemonic?> {
+    @OptIn(ExperimentalUnsignedTypes::class)
+    private suspend fun generateAndPersistMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
         var walletMnemonic: WalletMnemonic? = null
         var seed: String? = null
 
@@ -559,12 +551,12 @@ class SignerManagerImpl(
 
                     try {
                         if (mnemonicWords != null) {
-                            mnemonicWords!!.toWalletMnemonic()?.let { nnWalletMnemonic ->
+                            mnemonicWords.toWalletMnemonic()?.let { nnWalletMnemonic ->
                                 walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
                                 nnWalletMnemonic
                             }
                         } else {
-                            val randomBytes = generateRandomBytes().take(32)
+                            val randomBytes = generateRandomBytes(16)
                             val randomBytesString = randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
                             val words = mnemonicFromEntropy(randomBytesString)
 
@@ -586,6 +578,20 @@ class SignerManagerImpl(
                     } catch (e: Exception) {}
                 }
             }.join()
+        }
+        return Pair(seed, walletMnemonic)
+    }
+
+    private suspend fun getStoredMnemonicAndSeed(): Pair<String?, WalletMnemonic?> {
+        val walletMnemonic = walletDataHandler.retrieveWalletMnemonic()
+        var seed: String? = null
+
+        walletMnemonic?.value?.let { words ->
+            try {
+                val mnemonic = entropyFromMnemonic(words)
+                val seedData = mnemonic.take(32).toByteArray()
+                seed = seedData.toHex()
+            } catch (e: Exception) {}
         }
         return Pair(seed, walletMnemonic)
     }

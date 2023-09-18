@@ -38,7 +38,6 @@ import chat.sphinx.wrapper_common.lightning.Sat
 import chat.sphinx.wrapper_common.message.SphinxCallLink
 import chat.sphinx.wrapper_contact.Contact
 import chat.sphinx.wrapper_contact.PrivatePhoto
-import chat.sphinx.wrapper_feed.Feed
 import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_relay.AuthorizationToken
 import chat.sphinx.wrapper_relay.RelayUrl
@@ -197,7 +196,7 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     override fun setupPhoneSigner() {
-        signerManager.setupPhoneSigner()
+        signerManager.setupPhoneSigner(null)
     }
 
     private fun setUpManageStorage(){
