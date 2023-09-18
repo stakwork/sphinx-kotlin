@@ -374,9 +374,13 @@ internal interface _UniFFILib : Library {
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_node_keys(`net`: RustBuffer.ByValue,`seed`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
-    fun uniffi_sphinxrs_fn_func_mnemonic_from_entropy(`seed`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    fun uniffi_sphinxrs_fn_func_mnemonic_from_entropy(`entropy`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_entropy_from_mnemonic(`mnemonic`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_mnemonic_to_seed(`mnemonic`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
+    ): RustBuffer.ByValue
+    fun uniffi_sphinxrs_fn_func_entropy_to_seed(`entropy`: RustBuffer.ByValue,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
     fun uniffi_sphinxrs_fn_func_build_request(`msg`: RustBuffer.ByValue,`secret`: RustBuffer.ByValue,`nonce`: Long,_uniffi_out_err: RustCallStatus, 
     ): RustBuffer.ByValue
@@ -407,6 +411,10 @@ internal interface _UniFFILib : Library {
     fun uniffi_sphinxrs_checksum_func_mnemonic_from_entropy(
     ): Short
     fun uniffi_sphinxrs_checksum_func_entropy_from_mnemonic(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_mnemonic_to_seed(
+    ): Short
+    fun uniffi_sphinxrs_checksum_func_entropy_to_seed(
     ): Short
     fun uniffi_sphinxrs_checksum_func_build_request(
     ): Short
@@ -448,10 +456,16 @@ private fun uniffiCheckApiChecksums(lib: _UniFFILib) {
     if (lib.uniffi_sphinxrs_checksum_func_node_keys() != 21192.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_sphinxrs_checksum_func_mnemonic_from_entropy() != 16221.toShort()) {
+    if (lib.uniffi_sphinxrs_checksum_func_mnemonic_from_entropy() != 32309.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_entropy_from_mnemonic() != 33294.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_mnemonic_to_seed() != 23084.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_sphinxrs_checksum_func_entropy_to_seed() != 33710.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_sphinxrs_checksum_func_build_request() != 31264.toShort()) {
@@ -1134,10 +1148,10 @@ fun `nodeKeys`(`net`: String, `seed`: String): Keys {
 
 @Throws(SphinxException::class)
 
-fun `mnemonicFromEntropy`(`seed`: String): String {
+fun `mnemonicFromEntropy`(`entropy`: String): String {
     return FfiConverterString.lift(
     rustCallWithError(SphinxException) { _status ->
-    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_mnemonic_from_entropy(FfiConverterString.lower(`seed`),_status)
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_mnemonic_from_entropy(FfiConverterString.lower(`entropy`),_status)
 })
 }
 
@@ -1147,6 +1161,24 @@ fun `entropyFromMnemonic`(`mnemonic`: String): String {
     return FfiConverterString.lift(
     rustCallWithError(SphinxException) { _status ->
     _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_entropy_from_mnemonic(FfiConverterString.lower(`mnemonic`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `mnemonicToSeed`(`mnemonic`: String): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_mnemonic_to_seed(FfiConverterString.lower(`mnemonic`),_status)
+})
+}
+
+@Throws(SphinxException::class)
+
+fun `entropyToSeed`(`entropy`: String): String {
+    return FfiConverterString.lift(
+    rustCallWithError(SphinxException) { _status ->
+    _UniFFILib.INSTANCE.uniffi_sphinxrs_fn_func_entropy_to_seed(FfiConverterString.lower(`entropy`),_status)
 })
 }
 

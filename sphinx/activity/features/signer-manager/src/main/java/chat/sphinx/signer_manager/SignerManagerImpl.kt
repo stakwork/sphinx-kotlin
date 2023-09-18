@@ -39,6 +39,7 @@ import uniffi.sphinxrs.encrypt
 import uniffi.sphinxrs.entropyFromMnemonic
 import uniffi.sphinxrs.makeAuthToken
 import uniffi.sphinxrs.mnemonicFromEntropy
+import uniffi.sphinxrs.mnemonicToSeed
 import uniffi.sphinxrs.nodeKeys
 import uniffi.sphinxrs.pubkeyFromSecretKey
 import java.security.SecureRandom
@@ -393,8 +394,8 @@ class SignerManagerImpl(
         }
     }
 
-    private suspend fun makeArgs(): Map<String, Any>? {
-        val seedBytes = getStoredMnemonicAndSeed()
+    private suspend fun makeArgs(): Map<String, Any?> {
+        val seedBytes = getStoredMnemonicAndSeed().first?.encodeToByteArray()?.take(32)
         val lssNonce = retrieveOrGenerateLssNonce()
 
         val defaultPolicy = mapOf(
@@ -522,7 +523,7 @@ class SignerManagerImpl(
         return decodedMap
     }
 
-    private fun argsToJson(map: Map<String, Any>?): String? {
+    private fun argsToJson(map: Map<String, Any?>): String? {
         val adapter = moshi.adapter(Map::class.java)
         return adapter.toJson(map)
     }
@@ -572,7 +573,7 @@ class SignerManagerImpl(
 
                 walletMnemonic?.value?.let { words ->
                     try {
-                        val mnemonic = entropyFromMnemonic(words)
+                        val mnemonic = mnemonicToSeed(words)
                         val seedData = mnemonic.take(32).toByteArray()
                         seed = seedData.toHex()
                     } catch (e: Exception) {}
@@ -588,7 +589,7 @@ class SignerManagerImpl(
 
         walletMnemonic?.value?.let { words ->
             try {
-                val mnemonic = entropyFromMnemonic(words)
+                val mnemonic = mnemonicToSeed(words)
                 val seedData = mnemonic.take(32).toByteArray()
                 seed = seedData.toHex()
             } catch (e: Exception) {}
