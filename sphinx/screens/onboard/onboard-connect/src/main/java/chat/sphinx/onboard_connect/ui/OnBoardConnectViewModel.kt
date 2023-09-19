@@ -233,7 +233,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
     }
 
     override fun generateSeed() {
-        signerManager.setupPhoneSigner(null)
+        signerManager.setupPhoneSigner(null, this)
     }
 
     override fun importSeed() {
@@ -365,8 +365,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
             }
 
             if (mnemonicUtils.validateWords(words)) {
-                signerManager.setupPhoneSigner(seed.lowercase().trim())
-
+                signerManager.setupPhoneSigner(seed.lowercase().trim(), this@OnBoardConnectViewModel)
                 mnemonicDialogViewStateContainer.updateViewState(MnemonicDialogViewState.Loading)
             } else {
                 submitSideEffect(

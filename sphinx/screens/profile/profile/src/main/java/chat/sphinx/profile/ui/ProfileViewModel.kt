@@ -196,7 +196,7 @@ internal class ProfileViewModel @Inject constructor(
     }
 
     override fun setupPhoneSigner() {
-        signerManager.setupPhoneSigner(null)
+        signerManager.setupPhoneSigner(null, this)
     }
 
     private fun setUpManageStorage(){

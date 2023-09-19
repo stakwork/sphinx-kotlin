@@ -36,7 +36,6 @@ import uniffi.sphinxrs.Keys
 import uniffi.sphinxrs.VlsResponse
 import uniffi.sphinxrs.deriveSharedSecret
 import uniffi.sphinxrs.encrypt
-import uniffi.sphinxrs.entropyFromMnemonic
 import uniffi.sphinxrs.makeAuthToken
 import uniffi.sphinxrs.mnemonicFromEntropy
 import uniffi.sphinxrs.mnemonicToSeed
@@ -134,7 +133,6 @@ class SignerManagerImpl(
                                 }
                             )
                         }
-
                     }
                 }
             }
@@ -184,7 +182,7 @@ class SignerManagerImpl(
 
             pk2?.let { nnPk2 ->
                 val sec1 = deriveSharedSecret(nnPk2, sk1)
-                val seedAndMnemonic = generateAndPersistMnemonic(null)
+                val seedAndMnemonic = generateAndPersistMnemonic(null, null)
 
                 seedAndMnemonic.second?.let { mnemonic ->
                     signerCallback.showMnemonicToUser(mnemonic.value) { callback ->
@@ -248,9 +246,9 @@ class SignerManagerImpl(
         seedDto = SendSeedDto()
     }
 
-    override fun setupPhoneSigner(mnemonicWords: String?) {
+    override fun setupPhoneSigner(mnemonicWords: String?, signerCallback: SignerCallback) {
         launch {
-            val (seed, mnemonic) = generateAndPersistMnemonic(mnemonicWords)
+            val (seed, mnemonic) = generateAndPersistMnemonic(mnemonicWords, signerCallback)
 
             val keys: Keys? = try {
                 nodeKeys(net = "regtest", seed = seed!!)
@@ -544,7 +542,7 @@ class SignerManagerImpl(
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    private suspend fun generateAndPersistMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
+    private suspend fun generateAndPersistMnemonic(mnemonicWords: String?, signerCallback: SignerCallback?): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
         coroutineScope {
@@ -566,6 +564,7 @@ class SignerManagerImpl(
                             words.toWalletMnemonic()?.let { nnWalletMnemonic ->
                                 walletMnemonic = nnWalletMnemonic
                                 walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
+                                signerCallback?.showMnemonicToUser(words) {}
                                 walletMnemonic
                             }
                         }
