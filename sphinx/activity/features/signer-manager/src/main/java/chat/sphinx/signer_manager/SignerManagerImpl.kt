@@ -55,6 +55,8 @@ class SignerManagerImpl(
     private lateinit var walletDataHandler: WalletDataHandler
     private lateinit var networkQueryCrypter: NetworkQueryCrypter
 
+    private var walletMnemonic: WalletMnemonic? = null
+
     override fun setWalletDataHandler(walletDataHandlerInstance: Any) {
         (walletDataHandlerInstance as WalletDataHandler).let {
             walletDataHandler = it
@@ -543,7 +545,6 @@ class SignerManagerImpl(
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private suspend fun generateAndPersistMnemonic(mnemonicWords: String?): Pair<String?, WalletMnemonic?> {
-        var walletMnemonic: WalletMnemonic? = null
         var seed: String? = null
 
         coroutineScope {
@@ -553,7 +554,8 @@ class SignerManagerImpl(
                     try {
                         if (mnemonicWords != null) {
                             mnemonicWords.toWalletMnemonic()?.let { nnWalletMnemonic ->
-                                walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
+                            walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
+                                walletMnemonic = nnWalletMnemonic
                                 nnWalletMnemonic
                             }
                         } else {
@@ -561,8 +563,9 @@ class SignerManagerImpl(
                             val randomBytesString = randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
                             val words = mnemonicFromEntropy(randomBytesString)
 
-                            words.toWalletMnemonic()?.let { walletMnemonic ->
-                                walletDataHandler.persistWalletMnemonic(walletMnemonic)
+                            words.toWalletMnemonic()?.let { nnWalletMnemonic ->
+                                walletMnemonic = nnWalletMnemonic
+                                walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
                                 walletMnemonic
                             }
                         }
@@ -583,8 +586,7 @@ class SignerManagerImpl(
         return Pair(seed, walletMnemonic)
     }
 
-    private suspend fun getStoredMnemonicAndSeed(): Pair<String?, WalletMnemonic?> {
-        val walletMnemonic = walletDataHandler.retrieveWalletMnemonic()
+    private fun getStoredMnemonicAndSeed(): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
         walletMnemonic?.value?.let { words ->
