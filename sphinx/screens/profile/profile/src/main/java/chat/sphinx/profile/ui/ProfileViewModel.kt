@@ -4,14 +4,12 @@ import android.app.Application
 import android.content.Context
 import android.os.Environment
 import android.os.StatFs
-import android.text.InputType
 import android.webkit.URLUtil
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.camera_view_model_coordinator.request.CameraRequest
 import chat.sphinx.camera_view_model_coordinator.response.CameraResponse
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
@@ -19,10 +17,7 @@ import chat.sphinx.concept_repository_contact.ContactRepository
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_repository_lightning.LightningRepository
 import chat.sphinx.concept_repository_media.RepositoryMedia
-import chat.sphinx.concept_signer_manager.SignerCallback
-import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
-import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
 import chat.sphinx.kotlin_response.ResponseError
@@ -30,8 +25,6 @@ import chat.sphinx.logger.SphinxLogger
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuHandler
 import chat.sphinx.menu_bottom_profile_pic.PictureMenuViewModel
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
-import chat.sphinx.menu_bottom_signer.SignerMenuHandler
-import chat.sphinx.menu_bottom_signer.SignerMenuViewModel
 import chat.sphinx.profile.R
 import chat.sphinx.wrapper_common.*
 import chat.sphinx.wrapper_common.lightning.Sat
@@ -107,17 +100,15 @@ internal class ProfileViewModel @Inject constructor(
     private val feedRepository: FeedRepository,
     private val repositoryMedia: RepositoryMedia,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
-    val networkQueryCrypter: NetworkQueryCrypter,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
     private val LOG: SphinxLogger,
-    val walletDataHandler: WalletDataHandler,
     val moshi: Moshi
     ): SideEffectViewModel<
         Context,
         ProfileSideEffect,
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
-    PictureMenuViewModel, SignerMenuViewModel, SignerCallback
+    PictureMenuViewModel
 {
     companion object {
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
@@ -125,16 +116,6 @@ internal class ProfileViewModel @Inject constructor(
 
         const val BITCOIN_NETWORK_REG_TEST = "regtest"
         const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
-    }
-
-    private lateinit var signerManager: SignerManager
-
-    fun setSignerManager(signerManager: SignerManager) {
-        signerManager.setWalletDataHandler(walletDataHandler)
-        signerManager.setMoshi(moshi)
-        signerManager.setNetworkQueryCrypter(networkQueryCrypter)
-
-        this.signerManager = signerManager
     }
 
     val storageBarViewStateContainer: ViewStateContainer<StorageBarViewState> by lazy {
@@ -185,18 +166,6 @@ internal class ProfileViewModel @Inject constructor(
                 }
             }
         )
-    }
-
-    override val signerMenuHandler: SignerMenuHandler by lazy {
-        SignerMenuHandler()
-    }
-
-    override fun setupHardwareSigner() {
-        signerManager.setupSignerHardware(this)
-    }
-
-    override fun setupPhoneSigner() {
-        signerManager.setupPhoneSigner(null, this)
     }
 
     private fun setUpManageStorage(){
@@ -626,127 +595,6 @@ internal class ProfileViewModel @Inject constructor(
             SIGNING_DEVICE_SETUP_KEY,
             false
         )
-    }
-
-
-    override fun checkNetwork(callback: (Boolean) -> Unit) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.CheckNetwork {
-                callback.invoke(true)
-            })
-        }
-    }
-
-    override fun signingDeviceNetwork(
-        callback: (String) -> Unit
-    ) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                app.getString(R.string.network_name_title),
-                app.getString(R.string.network_name_message)
-            ) { networkName ->
-                if (networkName == null) {
-                    viewModelScope.launch(mainImmediate) {
-                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network can not be empty"))
-                        return@launch
-                    }
-                } else {
-                    callback.invoke(networkName)
-                }
-            })
-        }
-    }
-
-    override fun signingDevicePassword(networkName: String, callback: (String) -> Unit) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                app.getString(R.string.network_password_title),
-                app.getString(
-                    R.string.network_password_message,
-                    networkName ?: "-"
-                ),
-                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
-            ) { networkPass ->
-                viewModelScope.launch(mainImmediate) {
-                    if (networkPass == null) {
-                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Network password can not be empty"))
-                        return@launch
-                    } else {
-                        callback.invoke(networkPass)
-                    }
-                }
-            })
-        }
-    }
-
-    override fun signingDeviceLightningNodeUrl(callback: (String) -> Unit) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.SigningDeviceInfo(
-                app.getString(R.string.lightning_node_url_title),
-                app.getString(R.string.lightning_node_url_message),
-            ) { lightningNodeUrl ->
-                viewModelScope.launch(mainImmediate) {
-                    if (lightningNodeUrl == null) {
-                        submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice("Lightning node URL can not be empty"))
-                        return@launch
-                    }
-                    else {
-                        callback.invoke(lightningNodeUrl)
-                    }
-                }
-            })
-        }
-    }
-
-    override fun signingDeviceCheckBitcoinNetwork(network: (String) -> Unit, linkSigningDevice: (Boolean) -> Unit) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.CheckBitcoinNetwork(
-                regTestCallback = {
-                    network.invoke(BITCOIN_NETWORK_REG_TEST)
-                }, mainNetCallback = {
-                    network.invoke(BITCOIN_NETWORK_MAIN_NET)
-                }, callback = {
-                    viewModelScope.launch(mainImmediate) {
-                        linkSigningDevice.invoke(true)
-                    }
-                }
-            ))
-        }
-    }
-
-    override fun failedToSetupSigningDevice(message: String) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.FailedToSetupSigningDevice(message))
-        }
-    }
-
-    override fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit) {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.ShowMnemonicToUser(message) {
-            callback.invoke(true)
-            })
-        }
-    }
-
-    override fun sendingSeedToHardware() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.SendingSeedToHardware)
-        }
-    }
-
-    override fun signingDeviceSuccessfullySet() {
-        viewModelScope.launch(mainImmediate) {
-            submitSideEffect(ProfileSideEffect.SigningDeviceSuccessfullySet)
-            switchTabTo(false)
-        }
-    }
-
-    override fun phoneSignerSuccessfullySet() {
-
-    }
-
-    override fun phoneSignerSetupError() {
-
     }
 
     override val sideEffectContainer: SideEffectContainer<Context, ProfileSideEffect>

@@ -20,17 +20,12 @@ import app.cash.exhaustive.Exhaustive
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
-import chat.sphinx.concept_signer_manager.SignerCallback
-import chat.sphinx.concept_signer_manager.SignerManager
-import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
-import chat.sphinx.menu_bottom.ui.BottomMenu
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.menu_bottom_profile_pic.BottomMenuPicture
 import chat.sphinx.menu_bottom_profile_pic.UpdatingImageViewState
-import chat.sphinx.menu_bottom_signer.BottomSignerMenu
 import chat.sphinx.profile.R
 import chat.sphinx.profile.databinding.FragmentProfileBinding
 import chat.sphinx.profile.navigation.ProfileNavigator
@@ -65,10 +60,6 @@ internal class ProfileFragment: SideEffectFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
-    @Inject
-    @Suppress("ProtectedInFinal")
-    protected lateinit var signerManager: SignerManager
-
     override val viewModel: ProfileViewModel by viewModels()
     override val binding: FragmentProfileBinding by viewBinding(FragmentProfileBinding::bind)
 
@@ -84,13 +75,6 @@ internal class ProfileFragment: SideEffectFragment<
         )
     }
 
-    private val bottomMenuSigner: BottomSignerMenu by lazy(LazyThreadSafetyMode.NONE) {
-        BottomSignerMenu(
-            onStopSupervisor,
-            viewModel
-        )
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -99,18 +83,10 @@ internal class ProfileFragment: SideEffectFragment<
         setupProfileHeader()
         setupProfileTabs()
         setupProfile()
-        setupSignerManager()
-
 
         bottomMenuPicture.initialize(
             R.string.bottom_menu_profile_pic_header_text,
             binding.includeLayoutMenuBottomProfilePic,
-            viewLifecycleOwner
-        )
-
-        bottomMenuSigner.initialize(
-            R.string.bottom_menu_signer_header_text,
-            binding.includeLayoutMenuBottomSigner,
             viewLifecycleOwner
         )
     }
@@ -133,19 +109,10 @@ internal class ProfileFragment: SideEffectFragment<
             if (viewModel.pictureMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
                 viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
             }
-            if (viewModel.signerMenuHandler.viewStateContainer.value is MenuBottomViewState.Open) {
-                viewModel.signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Closed)
-            }
-            else {
-                lifecycleScope.launch(viewModel.mainImmediate) {
-                    profileNavigator.popBackStack()
-                }
+            lifecycleScope.launch(viewModel.mainImmediate) {
+                profileNavigator.popBackStack()
             }
         }
-    }
-
-    private fun setupSignerManager(){
-        viewModel.setSignerManager(signerManager)
     }
 
     private fun setupProfileHeader() {
@@ -305,10 +272,6 @@ internal class ProfileFragment: SideEffectFragment<
 
                 buttonProfileAdvancedContainerGithubPat.setOnClickListener {
                     viewModel.setGithubPAT()
-                }
-
-                buttonProfileAdvancedContainerSigningDevice.setOnClickListener {
-                    viewModel.signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
                 }
 
                 buttonProfileAdvancedContainerChangePin.setOnClickListener {
@@ -493,7 +456,6 @@ internal class ProfileFragment: SideEffectFragment<
                 }
             } catch (e: NumberFormatException) {}
         }
-
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ProfileViewState) {
@@ -508,8 +470,6 @@ internal class ProfileFragment: SideEffectFragment<
                     }
                     includeProfileBasicContainerHolder.root.gone
                     includeProfileAdvancedContainerHolder.root.visible
-
-                    includeProfileAdvancedContainerHolder.buttonProfileAdvancedContainerSigningDevice.text = viewState.deviceSetupButtonTitle
                 }
                 is ProfileViewState.Basic -> {
                     includeProfileTabsHolder.apply {
