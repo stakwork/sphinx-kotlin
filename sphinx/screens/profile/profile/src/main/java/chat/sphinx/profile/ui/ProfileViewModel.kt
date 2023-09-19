@@ -111,9 +111,6 @@ internal class ProfileViewModel @Inject constructor(
     PictureMenuViewModel
 {
     companion object {
-        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
-        const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
-
         const val BITCOIN_NETWORK_REG_TEST = "regtest"
         const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
     }
@@ -243,11 +240,7 @@ internal class ProfileViewModel @Inject constructor(
         } else {
             updateViewState(
                 ProfileViewState.Advanced(
-                    if (isSigningDeviceSetupDone()) {
-                        app.getString(R.string.configure_signing_device)
-                    } else {
                         app.getString(R.string.setup_signing_device)
-                    }
                 )
             )
         }
@@ -585,16 +578,6 @@ internal class ProfileViewModel @Inject constructor(
         )
         feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
         _feedRecommendationsStateFlow.value = feedRecommendationsToggle
-    }
-
-    private fun isSigningDeviceSetupDone(): Boolean {
-        val appContext: Context = app.applicationContext
-        val sharedPreferences = appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
-
-        return sharedPreferences.getBoolean(
-            SIGNING_DEVICE_SETUP_KEY,
-            false
-        )
     }
 
     override val sideEffectContainer: SideEffectContainer<Context, ProfileSideEffect>
