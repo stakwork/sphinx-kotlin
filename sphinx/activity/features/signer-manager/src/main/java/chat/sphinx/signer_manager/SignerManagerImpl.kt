@@ -54,6 +54,7 @@ class SignerManagerImpl(
     private lateinit var walletDataHandler: WalletDataHandler
     private lateinit var networkQueryCrypter: NetworkQueryCrypter
 
+    private var seedDto = SendSeedDto()
     private var walletMnemonic: WalletMnemonic? = null
 
     override fun setWalletDataHandler(walletDataHandlerInstance: Any) {
@@ -72,6 +73,12 @@ class SignerManagerImpl(
         (networkQueryCrypterInstance as NetworkQueryCrypter).let {
             networkQueryCrypter = it
         }
+    }
+
+    override fun setSeedFromGlyph(mqtt: String, network: String, relay: String) {
+        seedDto.lightningNodeUrl = mqtt
+        seedDto.network = network
+        seedDto.relay = relay
     }
 
     private val job = SupervisorJob()
@@ -107,11 +114,11 @@ class SignerManagerImpl(
     private val signingDeviceSharedPreferences =
         appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
-    private var seedDto = SendSeedDto()
     private var setupSignerHardwareJob: Job? = null
 
     override fun setupSignerHardware(signerCallback: SignerCallback) {
         if (setupSignerHardwareJob?.isActive == true) return
+        resetSeedDto()
 
         setupSignerHardwareJob = launch {
             signerCallback.checkNetwork {
@@ -251,7 +258,7 @@ class SignerManagerImpl(
             val (seed, mnemonic) = generateAndPersistMnemonic(mnemonicWords, signerCallback)
 
             val keys: Keys? = try {
-                nodeKeys(net = "regtest", seed = seed!!)
+                nodeKeys(net = seedDto.network ?:"regtest", seed = seed!!)
             } catch (e: Exception) {
                 println(e.message)
                 null
@@ -271,7 +278,7 @@ class SignerManagerImpl(
     }
 
     private fun connectToMQTTWith(keys: Keys, password: String) {
-        val serverURI = "tcp://192.168.0.199:1883"
+        val serverURI = seedDto.lightningNodeUrl ?: ""
         val clientId = retrieveOrGenerateClientId()
         val mqttClient = MqttClient(serverURI, clientId, null)
 

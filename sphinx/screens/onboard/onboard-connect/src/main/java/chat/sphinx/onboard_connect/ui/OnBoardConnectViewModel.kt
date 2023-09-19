@@ -29,7 +29,6 @@ import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
 import chat.sphinx.onboard_common.model.RedemptionCode
 import chat.sphinx.onboard_connect.R
-import chat.sphinx.onboard_connect.model.Glyph
 import chat.sphinx.onboard_connect.viewstate.MnemonicDialogViewState
 import chat.sphinx.onboard_connect.viewstate.MnemonicWordsViewState
 import chat.sphinx.onboard_connect.viewstate.OnBoardConnectSubmitButtonViewState
@@ -66,7 +65,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
 {
 
     private val args: OnBoardConnectFragmentArgs by handle.navArgs()
-    private lateinit var glyph: Glyph
     private lateinit var signerManager: SignerManager
 
     companion object {
@@ -122,6 +120,11 @@ internal class OnBoardConnectViewModel @Inject constructor(
             }
             if (redemptionCode != null &&
                 redemptionCode is RedemptionCode.Glyph) {
+                signerManager.setSeedFromGlyph(
+                    redemptionCode.mqtt,
+                    redemptionCode.network,
+                    redemptionCode.relay
+                )
                 isValid = true
             }
 
@@ -156,7 +159,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 if (submitButtonViewStateContainer.value is OnBoardConnectSubmitButtonViewState.Enabled) {
 
                     if (redemptionCode is RedemptionCode.Glyph) {
-                        glyph = Glyph(
+                        signerManager.setSeedFromGlyph(
                             redemptionCode.mqtt,
                             redemptionCode.network,
                             redemptionCode.relay
@@ -180,11 +183,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
         if (submitButtonVS is OnBoardConnectSubmitButtonViewState.Enabled) {
 
             if (redemptionCode is RedemptionCode.Glyph) {
-                glyph = Glyph(
-                    redemptionCode.mqtt,
-                    redemptionCode.network,
-                    redemptionCode.relay
-                )
 
                 signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
             } else {

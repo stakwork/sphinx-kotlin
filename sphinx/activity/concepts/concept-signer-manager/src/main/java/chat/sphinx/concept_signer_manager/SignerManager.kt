@@ -7,4 +7,6 @@ abstract class SignerManager {
     abstract fun setMoshi(moshiInstance: Any)
     abstract fun setNetworkQueryCrypter(networkQueryCrypterInstance: Any)
 
+    abstract fun setSeedFromGlyph(mqtt: String, network: String, relay: String)
+
 }
