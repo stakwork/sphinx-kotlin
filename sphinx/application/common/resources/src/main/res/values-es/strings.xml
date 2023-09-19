@@ -157,4 +157,5 @@
     <string name="mnemonic_words_loading">Cargando...</string>
     <string name="mnemonic_incorrect_length">Tu frase de recuperación debe tener exactamente 12 o 24 palabras</string>
     <string name="mnemonic_invalid_word">Parece que has ingresado una palabra no válida</string>
+    <string name="signer_phone_error_mqtt">Error al concterse con MQTT</string>
 </resources>

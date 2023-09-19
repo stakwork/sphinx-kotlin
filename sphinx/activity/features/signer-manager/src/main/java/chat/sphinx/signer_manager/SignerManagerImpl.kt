@@ -283,9 +283,15 @@ class SignerManagerImpl(
 
     private fun connectToMQTTWith(keys: Keys, password: String, signerCallback: SignerCallback) {
         seedDto.lightningNodeUrl?.let { lightningNodeUrl ->
-            val serverURI = "tcp://$lightningNodeUrl"
+            val serverURI = processLightningNodeUrl(lightningNodeUrl)
             val clientId = retrieveOrGenerateClientId()
-            val mqttClient = MqttClient(serverURI, clientId, null)
+
+            val mqttClient: MqttClient? = try {
+                MqttClient(serverURI, clientId, null)
+            } catch (e: Exception) {
+                signerCallback.phoneSignerSetupError()
+                null
+            }
 
             val options = MqttConnectOptions().apply {
                 this.userName = keys.pubkey
@@ -293,9 +299,9 @@ class SignerManagerImpl(
             }
 
             try {
-                mqttClient.connect(options)
+                mqttClient?.connect(options)
 
-                if (mqttClient.isConnected) {
+                if (mqttClient?.isConnected == true) {
 
                     val topics = arrayOf(
                         "${clientId}/${SignerTopics.VLS}",
@@ -314,7 +320,7 @@ class SignerManagerImpl(
 
                 }
 
-                mqttClient.setCallback(object : MqttCallback {
+                mqttClient?.setCallback(object : MqttCallback {
 
                     override fun connectionLost(cause: Throwable?) {
                         restart(mqttClient)
@@ -338,6 +344,14 @@ class SignerManagerImpl(
             }
         } ?: run {
             signerCallback.phoneSignerSetupError()
+        }
+    }
+
+    private fun processLightningNodeUrl(lightningNodeUrl: String): String {
+        return if (lightningNodeUrl.endsWith(":8883")) {
+            "ssl://$lightningNodeUrl"
+        } else {
+            "tcp://$lightningNodeUrl"
         }
     }
 

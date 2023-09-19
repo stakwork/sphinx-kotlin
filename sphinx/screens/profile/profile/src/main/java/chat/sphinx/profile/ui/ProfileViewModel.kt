@@ -110,10 +110,6 @@ internal class ProfileViewModel @Inject constructor(
         ProfileViewState>(dispatchers, ProfileViewState.Basic),
     PictureMenuViewModel
 {
-    companion object {
-        const val BITCOIN_NETWORK_REG_TEST = "regtest"
-        const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
-    }
 
     val storageBarViewStateContainer: ViewStateContainer<StorageBarViewState> by lazy {
         ViewStateContainer(StorageBarViewState.Loading)

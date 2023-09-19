@@ -68,9 +68,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
     private lateinit var signerManager: SignerManager
 
     companion object {
-        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
-        const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
-
         const val BITCOIN_NETWORK_REG_TEST = "regtest"
         const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
     }
@@ -389,7 +386,13 @@ internal class OnBoardConnectViewModel @Inject constructor(
     }
 
     override fun phoneSignerSetupError() {
-
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                OnBoardConnectSideEffect.Notify(
+                    app.getString(R.string.signer_phone_error_mqtt)
+                )
+            )
+        }
     }
 
 }
