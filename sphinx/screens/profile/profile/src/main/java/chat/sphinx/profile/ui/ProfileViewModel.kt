@@ -741,6 +741,13 @@ internal class ProfileViewModel @Inject constructor(
         }
     }
 
+    override fun phoneSignerSuccessfullySet() {
+
+    }
+
+    override fun phoneSignerSetupError() {
+
+    }
 
     override val sideEffectContainer: SideEffectContainer<Context, ProfileSideEffect>
         get() = super.sideEffectContainer

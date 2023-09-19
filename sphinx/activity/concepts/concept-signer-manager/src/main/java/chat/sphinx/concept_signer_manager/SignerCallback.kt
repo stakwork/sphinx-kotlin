@@ -7,7 +7,10 @@ interface SignerCallback {
     fun signingDeviceLightningNodeUrl(callback: (String) -> Unit)
     fun signingDeviceCheckBitcoinNetwork(network: (String) -> Unit, linkSigningDevice: (Boolean) -> Unit)
     fun failedToSetupSigningDevice(message: String)
-    fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit)
     fun sendingSeedToHardware()
     fun signingDeviceSuccessfullySet()
+
+    fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit)
+    fun phoneSignerSuccessfullySet()
+    fun phoneSignerSetupError()
 }

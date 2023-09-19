@@ -164,7 +164,6 @@ internal class OnBoardConnectViewModel @Inject constructor(
                             redemptionCode.network,
                             redemptionCode.relay
                         )
-
                         signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
                     } else {
                         viewModelScope.launch(mainImmediate) {
@@ -183,14 +182,17 @@ internal class OnBoardConnectViewModel @Inject constructor(
         if (submitButtonVS is OnBoardConnectSubmitButtonViewState.Enabled) {
 
             if (redemptionCode is RedemptionCode.Glyph) {
-
+                signerManager.setSeedFromGlyph(
+                    redemptionCode.mqtt,
+                    redemptionCode.network,
+                    redemptionCode.relay
+                )
                 signerMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
             } else {
                 viewModelScope.launch(mainImmediate) {
                     navigator.toOnBoardConnectingScreen(code)
                 }
             }
-
         } else {
             viewModelScope.launch(mainImmediate) {
                 val vs = currentViewState
@@ -222,20 +224,9 @@ internal class OnBoardConnectViewModel @Inject constructor(
         PhoneSignerMethodMenuHandler()
     }
 
+    ///Signing Hardware device
     override fun setupHardwareSigner() {
         signerManager.setupSignerHardware(this)
-    }
-
-    override fun setupPhoneSigner() {
-        phoneSignerMethodMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
-    }
-
-    override fun generateSeed() {
-        signerManager.setupPhoneSigner(null, this)
-    }
-
-    override fun importSeed() {
-        mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Open)
     }
 
     override fun checkNetwork(callback: (Boolean) -> Unit) {
@@ -349,6 +340,19 @@ internal class OnBoardConnectViewModel @Inject constructor(
         }
     }
 
+    ///Phone Signer setup
+    override fun setupPhoneSigner() {
+        phoneSignerMethodMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
+    }
+
+    override fun generateSeed() {
+        signerManager.setupPhoneSigner(null, this)
+    }
+
+    override fun importSeed() {
+        mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Open)
+    }
+
     fun validateSeed(seed: String) {
         viewModelScope.launch(mainImmediate) {
             val mnemonicUtils = MnemonicLanguagesUtils(app.applicationContext)
@@ -363,7 +367,10 @@ internal class OnBoardConnectViewModel @Inject constructor(
             }
 
             if (mnemonicUtils.validateWords(words)) {
-                signerManager.setupPhoneSigner(seed.lowercase().trim(), this@OnBoardConnectViewModel)
+                signerManager.setupPhoneSigner(
+                    seed.lowercase().trim(),
+                    this@OnBoardConnectViewModel
+                )
                 mnemonicDialogViewStateContainer.updateViewState(MnemonicDialogViewState.Loading)
             } else {
                 submitSideEffect(
@@ -373,6 +380,16 @@ internal class OnBoardConnectViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    override fun phoneSignerSuccessfullySet() {
+//        viewModelScope.launch(mainImmediate) {
+//            navigator.toOnBoardConnectingScreen(code)
+//        }
+    }
+
+    override fun phoneSignerSetupError() {
+
     }
 
 }

@@ -118,6 +118,7 @@ class SignerManagerImpl(
 
     override fun setupSignerHardware(signerCallback: SignerCallback) {
         if (setupSignerHardwareJob?.isActive == true) return
+
         resetSeedDto()
 
         setupSignerHardwareJob = launch {
@@ -250,7 +251,10 @@ class SignerManagerImpl(
     }
 
     private fun resetSeedDto() {
-        seedDto = SendSeedDto()
+        seedDto.seed = null
+        seedDto.network = null
+        seedDto.pass = null
+        seedDto.ssid = null
     }
 
     override fun setupPhoneSigner(mnemonicWords: String?, signerCallback: SignerCallback) {
@@ -272,61 +276,68 @@ class SignerManagerImpl(
             }
 
             if (keys != null && password != null) {
-                connectToMQTTWith(keys, password)
+                connectToMQTTWith(keys, password, signerCallback)
             }
         }
     }
 
-    private fun connectToMQTTWith(keys: Keys, password: String) {
-        val serverURI = seedDto.lightningNodeUrl ?: ""
-        val clientId = retrieveOrGenerateClientId()
-        val mqttClient = MqttClient(serverURI, clientId, null)
+    private fun connectToMQTTWith(keys: Keys, password: String, signerCallback: SignerCallback) {
+        seedDto.lightningNodeUrl?.let { lightningNodeUrl ->
+            val serverURI = "tcp://$lightningNodeUrl"
+            val clientId = retrieveOrGenerateClientId()
+            val mqttClient = MqttClient(serverURI, clientId, null)
 
-        val options = MqttConnectOptions().apply {
-            this.userName = keys.pubkey
-            this.password = password.toCharArray()
-        }
-
-        try {
-            mqttClient.connect(options)
-
-            if (mqttClient.isConnected) {
-
-                val topics = arrayOf(
-                    "${clientId}/${SignerTopics.VLS}",
-                    "${clientId}/${SignerTopics.INIT_1_MSG}",
-                    "${clientId}/${SignerTopics.INIT_2_MSG}",
-                    "${clientId}/${SignerTopics.LSS_MSG}"
-                )
-                val qos = IntArray(topics.size) { 1 }
-
-                mqttClient.subscribe(topics, qos)
-
-                val topic = "${clientId}/${SignerTopics.HELLO}"
-                val message = MqttMessage()
-
-                mqttClient.publish(topic, message)
-
+            val options = MqttConnectOptions().apply {
+                this.userName = keys.pubkey
+                this.password = password.toCharArray()
             }
 
-            mqttClient.setCallback(object : MqttCallback {
+            try {
+                mqttClient.connect(options)
 
-                override fun connectionLost(cause: Throwable?) {
-                    restart(mqttClient)
+                if (mqttClient.isConnected) {
+
+                    val topics = arrayOf(
+                        "${clientId}/${SignerTopics.VLS}",
+                        "${clientId}/${SignerTopics.INIT_1_MSG}",
+                        "${clientId}/${SignerTopics.INIT_2_MSG}",
+                        "${clientId}/${SignerTopics.LSS_MSG}"
+                    )
+                    val qos = IntArray(topics.size) { 1 }
+
+                    mqttClient.subscribe(topics, qos)
+
+                    val topic = "${clientId}/${SignerTopics.HELLO}"
+                    val message = MqttMessage()
+
+                    mqttClient.publish(topic, message)
+
                 }
 
-                override fun messageArrived(topic: String?, message: MqttMessage?) {
-                    val payload = message?.payload ?: byteArrayOf()
-                    val modifiedTopic = topic?.replace("${clientId}/", "") ?: ""
+                mqttClient.setCallback(object : MqttCallback {
 
-                    processMessage(modifiedTopic, payload, mqttClient)
-                }
+                    override fun connectionLost(cause: Throwable?) {
+                        restart(mqttClient)
+                    }
 
-                override fun deliveryComplete(token: IMqttDeliveryToken?) {}
-            })
+                    override fun messageArrived(topic: String?, message: MqttMessage?) {
+                        val payload = message?.payload ?: byteArrayOf()
+                        val modifiedTopic = topic?.replace("${clientId}/", "") ?: ""
 
-        } catch (e: MqttException) {
-            e.printStackTrace()
+                        processMessage(modifiedTopic, payload, mqttClient)
+                    }
+
+                    override fun deliveryComplete(token: IMqttDeliveryToken?) {}
+                })
+
+                signerCallback.phoneSignerSuccessfullySet()
+
+            } catch (e: MqttException) {
+                e.printStackTrace()
+                signerCallback.phoneSignerSetupError()
+            }
+        } ?: run {
+            signerCallback.phoneSignerSetupError()
         }
     }
 
@@ -362,7 +373,7 @@ class SignerManagerImpl(
         }
     }
 
-     private suspend fun argsAndState(): Pair<String, ByteArray> {
+     private fun argsAndState(): Pair<String, ByteArray> {
         val args = makeArgs()
         val stringArgs = argsToJson(args) ?: ""
         val mutationsState: Map<String, ByteArray> = retrieveMutations()
@@ -401,7 +412,7 @@ class SignerManagerImpl(
         }
     }
 
-    private suspend fun makeArgs(): Map<String, Any?> {
+    private fun makeArgs(): Map<String, Any?> {
         val seedBytes = getStoredMnemonicAndSeed().first?.encodeToByteArray()?.take(32)
         val lssNonce = retrieveOrGenerateLssNonce()
 
@@ -549,30 +560,26 @@ class SignerManagerImpl(
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
-    private suspend fun generateAndPersistMnemonic(mnemonicWords: String?, signerCallback: SignerCallback?): Pair<String?, WalletMnemonic?> {
+    private suspend fun generateAndPersistMnemonic(
+        mnemonicWords: String?,
+        signerCallback: SignerCallback?
+    ): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
         coroutineScope {
             launch {
-                walletMnemonic = walletDataHandler.retrieveWalletMnemonic() ?: run {
-
+                walletMnemonic = run {
                     try {
-                        if (mnemonicWords != null) {
-                            mnemonicWords.toWalletMnemonic()?.let { nnWalletMnemonic ->
-                            walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
-                                walletMnemonic = nnWalletMnemonic
-                                nnWalletMnemonic
-                            }
-                        } else {
+                        mnemonicWords?.toWalletMnemonic()?.let { nnWalletMnemonic ->
+                            nnWalletMnemonic
+                        } ?: run {
                             val randomBytes = generateRandomBytes(16)
                             val randomBytesString = randomBytes.joinToString("") { it.toString(16).padStart(2, '0') }
                             val words = mnemonicFromEntropy(randomBytesString)
 
                             words.toWalletMnemonic()?.let { nnWalletMnemonic ->
-                                walletMnemonic = nnWalletMnemonic
-                                walletDataHandler.persistWalletMnemonic(nnWalletMnemonic)
                                 signerCallback?.showMnemonicToUser(words) {}
-                                walletMnemonic
+                                nnWalletMnemonic
                             }
                         }
                     } catch (e: Exception) {
@@ -582,9 +589,7 @@ class SignerManagerImpl(
 
                 walletMnemonic?.value?.let { words ->
                     try {
-                        val mnemonic = mnemonicToSeed(words)
-                        val seedData = mnemonic.take(32).toByteArray()
-                        seed = seedData.toHex()
+                        seed = mnemonicToSeed(words)
                     } catch (e: Exception) {}
                 }
             }.join()
@@ -602,6 +607,7 @@ class SignerManagerImpl(
                 seed = seedData.toHex()
             } catch (e: Exception) {}
         }
+
         return Pair(seed, walletMnemonic)
     }
 
