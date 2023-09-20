@@ -12,18 +12,14 @@ class ToOnBoardConnectingScreen(
 
     override fun navigate(controller: NavController) {
 
-        OnBoardConnectingFragmentArgs.Builder(
-            code,
-        ).build().toBundle()?.let { args ->
+        val args = OnBoardConnectingFragmentArgs.Builder()
+        args.argCode = code
 
-            controller.navigate(
-                R.id.on_board_connecting_nav_graph,
-                args,
-                DefaultNavOptions.defaultAnims
-                    .build()
-            )
-
-        }
+        controller.navigate(
+            R.id.on_board_connecting_nav_graph,
+            args.build().toBundle(),
+            DefaultNavOptions.defaultAnims.build()
+        )
     }
 
 }

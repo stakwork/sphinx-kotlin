@@ -283,7 +283,9 @@ class SignerManagerImpl(
     }
 
     private fun resetMQTT() {
-        mqttClient?.disconnect()
+        if (mqttClient?.isConnected == true) {
+            mqttClient?.disconnect()
+        }
         mqttClient = null
     }
 
