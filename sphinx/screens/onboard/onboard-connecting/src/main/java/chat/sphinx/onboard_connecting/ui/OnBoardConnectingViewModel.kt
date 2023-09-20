@@ -626,7 +626,7 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     override fun checkAdminSucceeded() {
         viewModelScope.launch(mainImmediate) {
             signerManager.getPublicKeyAndRelayUrl()?.let { publicKeyAndRelayUrl ->
-                publicKeyAndRelayUrl.second?.toRelayUrl()?.let {
+                publicKeyAndRelayUrl.second.toRelayUrl()?.let {
                     getTransportKey(
                         ip = it,
                         publicKeyAndRelayUrl.first,

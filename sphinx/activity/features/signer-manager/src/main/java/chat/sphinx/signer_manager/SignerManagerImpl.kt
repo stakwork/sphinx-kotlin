@@ -135,6 +135,8 @@ class SignerManagerImpl(
         appContext.getSharedPreferences(PHONE_SIGNER_SETUP_KEY, Context.MODE_PRIVATE)
 
     private var setupSignerHardwareJob: Job? = null
+    private var setupPhoneSignerJob: Job? = null
+
 
     override fun isPhoneSignerSettingUp() : Boolean {
         return mqttClient != null
@@ -290,7 +292,10 @@ class SignerManagerImpl(
     }
 
     override fun setupPhoneSigner(mnemonicWords: String?, signerCallback: SignerCallback) {
-        launch {
+
+        if (setupPhoneSignerJob?.isActive == true) return
+
+        setupPhoneSignerJob = launch {
             val (seed, mnemonic) = generateAndPersistMnemonic(mnemonicWords, signerCallback)
 
             val keys: Keys? = try {
@@ -685,7 +690,7 @@ class SignerManagerImpl(
     override suspend fun checkHasAdmin(
         checkAdminCallback: CheckAdminCallback
     ) {
-        seedDto?.relayUrl?.toRelayUrl()?.let { relayUrl ->
+        seedDto.relayUrl?.toRelayUrl()?.let { relayUrl ->
             if (hasAdminRetries < 50) {
                 hasAdminRetries += 1
 
