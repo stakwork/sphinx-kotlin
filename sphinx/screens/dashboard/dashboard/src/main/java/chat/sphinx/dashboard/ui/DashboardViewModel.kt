@@ -9,6 +9,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
@@ -29,6 +30,7 @@ import chat.sphinx.concept_repository_dashboard_android.RepositoryDashboardAndro
 import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -63,6 +65,7 @@ import chat.sphinx.wrapper_lightning.NodeBalance
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.RelayUrl
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -107,6 +110,7 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryPeople: NetworkQueryPeople,
     private val pushNotificationRegistrar: PushNotificationRegistrar,
     private val networkQueryCrypter: NetworkQueryCrypter,
+    private val networkQueryContact: NetworkQueryContact,
 
     private val walletDataHandler: WalletDataHandler,
 
@@ -114,6 +118,7 @@ internal class DashboardViewModel @Inject constructor(
     private val mediaPlayerServiceController: MediaPlayerServiceController,
 
     private val scannerCoordinator: ViewModelCoordinator<ScannerRequest, ScannerResponse>,
+    private val moshi: Moshi,
 
     private val LOG: SphinxLogger,
     private val socketIOManager: SocketIOManager,
@@ -138,6 +143,8 @@ internal class DashboardViewModel @Inject constructor(
     private val scannedNodeAddress: MutableStateFlow<Pair<LightningNodePubKey, LightningRouteHint?>?> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow(null)
     }
+
+    private lateinit var signerManager: SignerManager
 
     companion object {
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
@@ -203,6 +210,14 @@ internal class DashboardViewModel @Inject constructor(
             FeedRecommendationsToggle.FEED_RECOMMENDATIONS_ENABLED_KEY, false
         )
         feedRepository.setRecommendationsToggle(feedRecommendationsToggle)
+    }
+
+    fun setSignerManager(signerManager: SignerManager) {
+        signerManager.setWalletDataHandler(walletDataHandler)
+        signerManager.setMoshi(moshi)
+        signerManager.setNetworkQueryContact(networkQueryContact)
+
+        this.signerManager = signerManager
     }
 
     fun toScanner(isPayment: Boolean) {
