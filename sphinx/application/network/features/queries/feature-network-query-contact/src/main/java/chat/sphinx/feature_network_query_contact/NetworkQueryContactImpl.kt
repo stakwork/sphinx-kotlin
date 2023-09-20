@@ -259,7 +259,7 @@ class NetworkQueryContactImpl(
         url: RelayUrl
     ): Flow<LoadResponse<Any, ResponseError>> =
         networkRelayCall.get(
-            url = url.value,
+            url = "${url.value}$ENDPOINT_HAS_ADMIN",
             responseJsonClass = HasAdminRelayResponse::class.java,
         )
 

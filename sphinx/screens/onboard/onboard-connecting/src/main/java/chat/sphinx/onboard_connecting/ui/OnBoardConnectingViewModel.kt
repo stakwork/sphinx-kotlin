@@ -634,15 +634,18 @@ internal class OnBoardConnectingViewModel @Inject constructor(
                         null,
                         token = null
                     )
-                    return@launch
+                } ?: run {
+                    checkAdminFailed()
                 }
+            } ?: run {
+                checkAdminFailed()
             }
         }
-        checkAdminFailed()
     }
 
     override fun checkAdminFailed() {
         viewModelScope.launch(mainImmediate) {
+            signerManager.reset()
             submitSideEffect(OnBoardConnectingSideEffect.CheckAdminFailed)
             navigator.popBackStack()
         }

@@ -138,7 +138,7 @@ ext.deps = [
             shimmer: "com.facebook.shimmer:shimmer:0.5.0"
     ],
     paho: [
-            sdk: "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0"
+            sdk: "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.1"
     ],
     msgpack: [
         sdk: "com.ensarsarajcic.kotlinx:serialization-msgpack:0.5.0"

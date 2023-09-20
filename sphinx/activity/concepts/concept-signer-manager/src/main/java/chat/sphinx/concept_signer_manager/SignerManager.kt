@@ -16,4 +16,5 @@ abstract class SignerManager {
     abstract suspend fun getPublicKeyAndRelayUrl(): Pair<String, String>?
     abstract suspend fun checkHasAdmin(checkAdminCallback: CheckAdminCallback)
 
+    abstract fun reset()
 }

@@ -15,7 +15,9 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.SignerTopics
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
+import chat.sphinx.wrapper_message_media.token.MediaUrl
 import chat.sphinx.wrapper_relay.toRelayUrl
+import chat.sphinx.wrapper_relay.withProtocol
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
@@ -27,12 +29,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.MqttCallback
-import org.eclipse.paho.client.mqttv3.MqttClient
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions
-import org.eclipse.paho.client.mqttv3.MqttException
-import org.eclipse.paho.client.mqttv3.MqttMessage
+import org.eclipse.paho.client.mqttv3.*
 import org.json.JSONException
 import org.json.JSONObject
 import uniffi.sphinxrs.Keys
@@ -94,7 +91,7 @@ class SignerManagerImpl(
     ) {
         seedDto.lightningNodeUrl = mqtt
         seedDto.network = network
-        seedDto.relayUrl = relay
+        seedDto.relayUrl = relay.withProtocol
     }
 
     private val job = SupervisorJob()
@@ -102,37 +99,22 @@ class SignerManagerImpl(
         get() = job + dispatchers.mainImmediate
 
     companion object {
-        const val SIGNER_CLIENT_ID = "signer_client_id"
-        const val SIGNER_LSS_NONCE = "signer_lss_nonce"
-        const val SIGNER_MUTATIONS = "signer_mutations"
-        const val SIGNER_SEQUENCE = "signer_sequence"
-
         const val VLS_ERROR = "Error: VLS Failed: invalid sequence"
 
-        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
+        const val SIGNING_DEVICE_SHARED_PREFERENCES = "signer_settings"
+
+        const val SIGNER_CLIENT_ID_KEY = "signer_client_id"
+        const val SIGNER_LSS_NONCE_KEY = "signer_lss_nonce"
+        const val SIGNER_MUTATIONS_KEY = "signer_mutations"
+        const val SIGNER_SEQUENCE_KEY = "signer_sequence"
         const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
         const val PHONE_SIGNER_SETUP_KEY = "phone-signer-setup"
     }
 
     private val appContext: Context = context.applicationContext
 
-    private val clientIdSharedPreferences: SharedPreferences =
-        appContext.getSharedPreferences(SIGNER_CLIENT_ID, Context.MODE_PRIVATE)
-
-    private val lssNonceSharedPreferences: SharedPreferences =
-        appContext.applicationContext.getSharedPreferences(SIGNER_LSS_NONCE, Context.MODE_PRIVATE)
-
-    private val mutationsSharedPreferences: SharedPreferences =
-        appContext.applicationContext.getSharedPreferences(SIGNER_MUTATIONS, Context.MODE_PRIVATE)
-
-    private val sequenceSharedPreferences: SharedPreferences =
-        appContext.applicationContext.getSharedPreferences(SIGNER_SEQUENCE, Context.MODE_PRIVATE)
-
-    private val signingDeviceSharedPreferences =
+    private val signerSharedPreferences: SharedPreferences =
         appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
-
-    private val phoneSignerSharedPreferences =
-        appContext.getSharedPreferences(PHONE_SIGNER_SETUP_KEY, Context.MODE_PRIVATE)
 
     private var setupSignerHardwareJob: Job? = null
     private var setupPhoneSignerJob: Job? = null
@@ -268,13 +250,18 @@ class SignerManagerImpl(
     private fun setSigningDeviceSetupDone(
         signerCallback: SignerCallback
     ) {
-        signingDeviceSharedPreferences.edit().putBoolean(SIGNING_DEVICE_SETUP_KEY, true)
+        signerSharedPreferences.edit().putBoolean(SIGNING_DEVICE_SETUP_KEY, true)
             .let { editor ->
                 if (!editor.commit()) {
                     editor.apply()
                 }
                 signerCallback.signingDeviceSuccessfullySet()
             }
+    }
+
+    override fun reset() {
+        resetMQTT()
+        resetSeedDto()
     }
 
     private fun resetSeedDto() {
@@ -325,14 +312,16 @@ class SignerManagerImpl(
 
             mqttClient = try {
                 MqttClient(serverURI, clientId, null)
-            } catch (e: Exception) {
+            } catch (e: MqttException) {
+                reset()
                 signerCallback.phoneSignerSetupError()
-                null
+                return
             }
 
             val options = MqttConnectOptions().apply {
                 this.userName = keys.pubkey
                 this.password = password.toCharArray()
+                this.keepAliveInterval = 60
             }
 
             try {
@@ -367,6 +356,10 @@ class SignerManagerImpl(
                         val payload = message?.payload ?: byteArrayOf()
                         val modifiedTopic = topic?.replace("${clientId}/", "") ?: ""
 
+                        if (topic?.contains("vls") == true) {
+                            println("MQTT message arrived $topic")
+                        }
+
                         processMessage(modifiedTopic, payload)
                     }
 
@@ -377,9 +370,11 @@ class SignerManagerImpl(
 
             } catch (e: MqttException) {
                 e.printStackTrace()
+                reset()
                 signerCallback.phoneSignerSetupError()
             }
         } ?: run {
+            reset()
             signerCallback.phoneSignerSetupError()
         }
     }
@@ -429,20 +424,18 @@ class SignerManagerImpl(
         val args = makeArgs()
         val stringArgs = argsToJson(args) ?: ""
         val mutationsState: Map<String, ByteArray> = retrieveMutations()
+
         val state = MsgPack.encodeToByteArray(MsgPackDynamicSerializer, mutationsState)
 
         return Pair(stringArgs, state)
     }
 
     private fun restartMQTT() {
-        val mutationsEditor = mutationsSharedPreferences.edit()
-        val sequenceEditor = sequenceSharedPreferences.edit()
+        val editor = signerSharedPreferences.edit()
 
-        mutationsEditor.putString(SIGNER_MUTATIONS, "")
-        mutationsEditor.apply()
-
-        sequenceEditor.putInt(SIGNER_SEQUENCE, 0)
-        sequenceEditor.apply()
+        editor.putString(SIGNER_MUTATIONS_KEY, "")
+        editor.putInt(SIGNER_SEQUENCE_KEY, 0)
+        editor.apply()
 
         val clientId = retrieveOrGenerateClientId()
         val topic = "${clientId}/${SignerTopics.HELLO}"
@@ -466,7 +459,7 @@ class SignerManagerImpl(
     }
 
     private suspend fun makeArgs(): Map<String, Any?> {
-        val seedBytes = getStoredMnemonicAndSeed().first?.encodeToByteArray()?.take(32)
+        val seedBytes = getStoredMnemonicAndSeed().first?.hexToByArray()
         val lssNonce = retrieveOrGenerateLssNonce()
 
         val defaultPolicy = mapOf(
@@ -477,7 +470,7 @@ class SignerManagerImpl(
 
         val args = mapOf(
             "seed" to seedBytes,
-            "network" to "regtest",
+            "network" to (seedDto.network ?: "regtest"),
             "policy" to defaultPolicy,
             "allowlist" to emptyList<Any>(),
             "timestamp" to Date().time / 1000L,
@@ -488,15 +481,15 @@ class SignerManagerImpl(
     }
 
     private fun retrieveOrGenerateClientId(): String {
-        clientIdSharedPreferences.getString(SIGNER_CLIENT_ID, null)?.let {
+        signerSharedPreferences.getString(SIGNER_CLIENT_ID_KEY, null)?.let {
             return it
         }
 
         val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
         val newClientId = (1..20).map { allowedChars.random() }.joinToString("")
 
-        val editor = clientIdSharedPreferences.edit()
-        editor.putString(SIGNER_CLIENT_ID, newClientId)
+        val editor = signerSharedPreferences.edit()
+        editor.putString(SIGNER_CLIENT_ID_KEY, newClientId)
         editor.apply()
 
         return newClientId
@@ -504,17 +497,17 @@ class SignerManagerImpl(
 
     @OptIn(ExperimentalUnsignedTypes::class)
     private fun retrieveOrGenerateLssNonce(): List<Int> {
-        val storedLssNonceString = lssNonceSharedPreferences.getString(SIGNER_LSS_NONCE, "")
+        val storedLssNonceString = signerSharedPreferences.getString(SIGNER_LSS_NONCE_KEY, "")
         val storedLssNonce = storedLssNonceString?.split(",")?.mapNotNull { it.toIntOrNull() }
 
         val result = if (!storedLssNonce.isNullOrEmpty()) {
             storedLssNonce
         } else {
-            val editor = lssNonceSharedPreferences.edit()
+            val editor = signerSharedPreferences.edit()
             val randomBytes = generateRandomBytes(32)
             val randomBytesString = randomBytes.joinToString(",") { it.toString() }
 
-            editor.putString(SIGNER_LSS_NONCE, randomBytesString)
+            editor.putString(SIGNER_LSS_NONCE_KEY, randomBytesString)
             editor.apply()
 
             randomBytes.map { it.toInt() }
@@ -528,14 +521,15 @@ class SignerManagerImpl(
         existingMutations.putAll(newMutations)
 
         val encodedString = encodeMapToBase64(existingMutations)
-        val editor = mutationsSharedPreferences.edit()
+        val editor = signerSharedPreferences.edit()
 
-        editor.putString(SIGNER_MUTATIONS, encodedString)
+        editor.putString(SIGNER_MUTATIONS_KEY, encodedString)
         editor.apply()
     }
 
     private fun retrieveMutations(): MutableMap<String, ByteArray> {
-        val encodedString = mutationsSharedPreferences.getString(SIGNER_MUTATIONS, null)
+        val encodedString = signerSharedPreferences.getString(SIGNER_MUTATIONS_KEY, null)
+
         val result = encodedString?.let {
             decodeBase64ToMap(it)
         } ?: mutableMapOf()
@@ -545,17 +539,20 @@ class SignerManagerImpl(
 
     private fun storeAndIncrementSequence(sequence: UShort) {
         val newSequence = sequence.toInt().plus(1)
-        val editor = sequenceSharedPreferences.edit()
+        val editor = signerSharedPreferences.edit()
 
-        editor.putInt(SIGNER_SEQUENCE, newSequence)
+        editor.putInt(SIGNER_SEQUENCE_KEY, newSequence)
         editor.apply()
     }
 
-    private fun retrieveSequence(): UShort {
-        val sequence = sequenceSharedPreferences.getInt(SIGNER_SEQUENCE, 0)
-        val result = sequence.toUShort()
+    private fun retrieveSequence(): UShort? {
+        val sequence = signerSharedPreferences.getInt(SIGNER_SEQUENCE_KEY, 0)
 
-        return result
+        if (sequence == 0) {
+            return null
+        }
+
+        return sequence.toUShort()
     }
 
     private fun encodeMapToBase64(map: MutableMap<String, ByteArray>): String {
@@ -653,9 +650,7 @@ class SignerManagerImpl(
 
         (walletDataHandler?.retrieveWalletMnemonic() ?: walletMnemonic)?.value?.let { words ->
             try {
-                val mnemonic = mnemonicToSeed(words)
-                val seedData = mnemonic.take(32).toByteArray()
-                seed = seedData.toHex()
+                seed = mnemonicToSeed(words)
             } catch (e: Exception) {}
         }
 
@@ -694,19 +689,17 @@ class SignerManagerImpl(
             if (hasAdminRetries < 50) {
                 hasAdminRetries += 1
 
-                launch {
-                    networkQueryContact?.hasAdmin(
-                        relayUrl
-                    )?.collect { loadResponse ->
-                        when (loadResponse) {
-                            is LoadResponse.Loading -> {}
-                            is Response.Error -> {
-                                checkHasAdmin(checkAdminCallback)
-                            }
+                networkQueryContact?.hasAdmin(
+                    relayUrl
+                )?.collect { loadResponse ->
+                    when (loadResponse) {
+                        is LoadResponse.Loading -> {}
+                        is Response.Error -> {
+                            checkHasAdmin(checkAdminCallback)
+                        }
 
-                            is Response.Success -> {
-                                checkAdminCallback.checkAdminSucceeded()
-                            }
+                        is Response.Success -> {
+                            checkAdminCallback.checkAdminSucceeded()
                         }
                     }
                 }
@@ -734,11 +727,20 @@ class SignerManagerImpl(
     }
 
     private fun setPhoneSignerSetupDone() {
-        phoneSignerSharedPreferences.edit().putBoolean(PHONE_SIGNER_SETUP_KEY, true)
+        signerSharedPreferences.edit().putBoolean(PHONE_SIGNER_SETUP_KEY, true)
             .let { editor ->
                 if (!editor.commit()) {
                     editor.apply()
                 }
             }
     }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.hexToByArray(): ByteArray {
+    val byteIterator = chunkedSequence(2)
+        .map { it.toInt(16).toByte() }
+        .iterator()
+
+    return ByteArray(length / 2) { byteIterator.next() }
 }
