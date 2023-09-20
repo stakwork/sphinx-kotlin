@@ -10,7 +10,7 @@ abstract class OnBoardConnectNavigator(
 ): Navigator<NavController>(navigationDriver) {
 
     abstract suspend fun toOnBoardConnectingScreen(
-        code: String,
+        code: String?,
     )
 
     suspend fun popBackStack() {

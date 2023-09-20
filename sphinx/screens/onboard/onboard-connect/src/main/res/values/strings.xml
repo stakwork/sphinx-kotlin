@@ -18,4 +18,5 @@
     <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
     <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
     <string name="github_pat_failed">Github Personal Access Token could not be set</string>
+    <string name="phone_signer_error">Something went wrong while setting up the phone signer. Please try again later</string>
 </resources>

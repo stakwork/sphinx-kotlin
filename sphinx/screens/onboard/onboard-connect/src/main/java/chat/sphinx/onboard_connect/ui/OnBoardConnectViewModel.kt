@@ -380,16 +380,16 @@ internal class OnBoardConnectViewModel @Inject constructor(
     }
 
     override fun phoneSignerSuccessfullySet() {
-//        viewModelScope.launch(mainImmediate) {
-//            navigator.toOnBoardConnectingScreen(code)
-//        }
+        viewModelScope.launch(mainImmediate) {
+            navigator.toOnBoardConnectingScreen(null)
+        }
     }
 
     override fun phoneSignerSetupError() {
         viewModelScope.launch(mainImmediate) {
             submitSideEffect(
                 OnBoardConnectSideEffect.Notify(
-                    app.getString(R.string.signer_phone_error_mqtt)
+                    app.getString(R.string.phone_signer_error)
                 )
             )
         }

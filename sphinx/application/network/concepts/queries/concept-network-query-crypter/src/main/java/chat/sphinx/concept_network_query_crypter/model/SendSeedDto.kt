@@ -7,5 +7,5 @@ class SendSeedDto {
     var lightningNodeUrl: String? = null
     var pubkey: String? = null
     var network: String? = null
-    var relay: String? = null
+    var relayUrl: String? = null
 }

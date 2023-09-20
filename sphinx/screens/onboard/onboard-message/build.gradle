@@ -34,6 +34,8 @@ dependencies {
     // KotlinAndroid
     implementation project(path: ':android:features:android-feature-screens')
     implementation project(path: ':kotlin:concepts:authentication:concept-authentication')
+    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
+    implementation project(path: ':sphinx:activity:concepts:concept-signer-manager')
     implementation project(path: ':kotlin:encoders:base64')
 
     implementation deps.androidx.lifecycle.hilt

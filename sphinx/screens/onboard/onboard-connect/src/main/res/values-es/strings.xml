@@ -20,6 +20,5 @@
     <string name="github_pat_message">Crea un Personal Access Token en Github con permisos para el repositorio</string>
     <string name="github_pat_succeed">El Personal Access Token de Github ha sido establecido con éxito</string>
     <string name="github_pat_failed">No se pudo establecer el Github Personal Access Token</string>
-
-
+    <string name="phone_signer_error">Ocurrió un error configurado el phone signer. Por favor volvé a intentarlo más tarde.</string>
 </resources>

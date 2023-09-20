@@ -12,7 +12,7 @@ internal class OnBoardConnectNavigatorImpl @Inject constructor(
 ): OnBoardConnectNavigator(navigationDriver) {
 
     override suspend fun toOnBoardConnectingScreen(
-        code: String,
+        code: String?,
     ) {
         navigationDriver.submitNavigationRequest(
             ToOnBoardConnectingScreen(

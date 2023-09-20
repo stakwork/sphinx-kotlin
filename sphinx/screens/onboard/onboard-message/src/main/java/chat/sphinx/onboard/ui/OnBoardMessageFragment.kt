@@ -6,6 +6,7 @@ import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -28,6 +29,7 @@ import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import javax.annotation.meta.Exhaustive
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class OnBoardMessageFragment: SideEffectFragment<
@@ -49,10 +51,15 @@ internal class OnBoardMessageFragment: SideEffectFragment<
     override val viewModel: OnBoardMessageViewModel by viewModels()
     override val binding: FragmentOnBoardMessageBinding by viewBinding(FragmentOnBoardMessageBinding::bind)
 
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var signerManager: SignerManager
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupHeaderAndFooter()
+        setupSignerManager()
 
         CloseAppOnBackPress(view.context)
             .enableDoubleTapToClose(viewLifecycleOwner, SphinxToastUtils())
@@ -62,8 +69,18 @@ internal class OnBoardMessageFragment: SideEffectFragment<
         binding.inviterMessageTextView.text = inviterData.message ?: ""
 
         binding.buttonContinue.setOnClickListener {
-            viewModel.presentLoginModal(relayUrl, authorizationToken, transportKey, hMacKey, inviterData)
+            viewModel.presentLoginModal(
+                relayUrl,
+                authorizationToken,
+                transportKey,
+                hMacKey,
+                inviterData
+            )
         }
+    }
+
+    private fun setupSignerManager(){
+        viewModel.setSignerManager(signerManager)
     }
 
     private fun setupHeaderAndFooter() {

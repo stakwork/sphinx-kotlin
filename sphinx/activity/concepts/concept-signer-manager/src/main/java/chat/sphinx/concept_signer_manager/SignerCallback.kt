@@ -14,3 +14,8 @@ interface SignerCallback {
     fun phoneSignerSuccessfullySet()
     fun phoneSignerSetupError()
 }
+
+interface CheckAdminCallback {
+    fun checkAdminFailed()
+    fun checkAdminSucceeded()
+}

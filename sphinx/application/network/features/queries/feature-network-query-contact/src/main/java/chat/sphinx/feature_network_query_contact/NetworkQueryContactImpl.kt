@@ -256,12 +256,11 @@ class NetworkQueryContactImpl(
         )
 
     override fun hasAdmin(
-        relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>?
+        url: RelayUrl
     ): Flow<LoadResponse<Any, ResponseError>> =
-        networkRelayCall.relayGet(
+        networkRelayCall.get(
+            url = url.value,
             responseJsonClass = HasAdminRelayResponse::class.java,
-            relayEndpoint = ENDPOINT_HAS_ADMIN,
-            relayData = relayData,
         )
 
 }

@@ -3,8 +3,10 @@ package chat.sphinx.signer_manager
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
+import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
+import chat.sphinx.concept_signer_manager.CheckAdminCallback
 import chat.sphinx.concept_signer_manager.SignerCallback
 import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.concept_wallet.WalletDataHandler
@@ -13,6 +15,7 @@ import chat.sphinx.kotlin_response.Response
 import chat.sphinx.wrapper_common.SignerTopics
 import chat.sphinx.wrapper_lightning.WalletMnemonic
 import chat.sphinx.wrapper_lightning.toWalletMnemonic
+import chat.sphinx.wrapper_relay.toRelayUrl
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPack
 import com.ensarsarajcic.kotlinx.serialization.msgpack.MsgPackDynamicSerializer
 import com.squareup.moshi.Moshi
@@ -51,11 +54,14 @@ class SignerManagerImpl(
 ): SignerManager(), CoroutineScope {
 
     private lateinit var moshi: Moshi
-    private lateinit var walletDataHandler: WalletDataHandler
-    private lateinit var networkQueryCrypter: NetworkQueryCrypter
+    private var walletDataHandler: WalletDataHandler? = null
+    private var networkQueryCrypter: NetworkQueryCrypter? = null
+    private var networkQueryContact: NetworkQueryContact? = null
 
     private var seedDto = SendSeedDto()
     private var walletMnemonic: WalletMnemonic? = null
+
+    private var mqttClient: MqttClient? = null
 
     override fun setWalletDataHandler(walletDataHandlerInstance: Any) {
         (walletDataHandlerInstance as WalletDataHandler).let {
@@ -75,10 +81,20 @@ class SignerManagerImpl(
         }
     }
 
-    override fun setSeedFromGlyph(mqtt: String, network: String, relay: String) {
+    override fun setNetworkQueryContact(networkQueryContactInstance: Any) {
+        (networkQueryContactInstance as NetworkQueryContact).let {
+            networkQueryContact = it
+        }
+    }
+
+    override fun setSeedFromGlyph(
+        mqtt: String,
+        network: String,
+        relay: String
+    ) {
         seedDto.lightningNodeUrl = mqtt
         seedDto.network = network
-        seedDto.relay = relay
+        seedDto.relayUrl = relay
     }
 
     private val job = SupervisorJob()
@@ -95,6 +111,7 @@ class SignerManagerImpl(
 
         const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
         const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
+        const val PHONE_SIGNER_SETUP_KEY = "phone-signer-setup"
     }
 
     private val appContext: Context = context.applicationContext
@@ -114,12 +131,20 @@ class SignerManagerImpl(
     private val signingDeviceSharedPreferences =
         appContext.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
+    private val phoneSignerSharedPreferences =
+        appContext.getSharedPreferences(PHONE_SIGNER_SETUP_KEY, Context.MODE_PRIVATE)
+
     private var setupSignerHardwareJob: Job? = null
+
+    override fun isPhoneSignerSettingUp() : Boolean {
+        return mqttClient != null
+    }
 
     override fun setupSignerHardware(signerCallback: SignerCallback) {
         if (setupSignerHardwareJob?.isActive == true) return
 
         resetSeedDto()
+        resetMQTT()
 
         setupSignerHardwareJob = launch {
             signerCallback.checkNetwork {
@@ -174,7 +199,7 @@ class SignerManagerImpl(
                 return@launch
             }
 
-            networkQueryCrypter.getCrypterPubKey().collect { loadResponse ->
+            networkQueryCrypter?.getCrypterPubKey()?.collect { loadResponse ->
                 when (loadResponse) {
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
@@ -220,7 +245,7 @@ class SignerManagerImpl(
 
                     signerCallback.sendingSeedToHardware()
 
-                    networkQueryCrypter.sendEncryptedSeed(seedDto).collect { loadResponse ->
+                    networkQueryCrypter?.sendEncryptedSeed(seedDto)?.collect { loadResponse ->
                         when (loadResponse) {
                             is LoadResponse.Loading -> {}
                             is Response.Error -> {
@@ -257,6 +282,11 @@ class SignerManagerImpl(
         seedDto.ssid = null
     }
 
+    private fun resetMQTT() {
+        mqttClient?.disconnect()
+        mqttClient = null
+    }
+
     override fun setupPhoneSigner(mnemonicWords: String?, signerCallback: SignerCallback) {
         launch {
             val (seed, mnemonic) = generateAndPersistMnemonic(mnemonicWords, signerCallback)
@@ -286,7 +316,7 @@ class SignerManagerImpl(
             val serverURI = processLightningNodeUrl(lightningNodeUrl)
             val clientId = retrieveOrGenerateClientId()
 
-            val mqttClient: MqttClient? = try {
+            mqttClient = try {
                 MqttClient(serverURI, clientId, null)
             } catch (e: Exception) {
                 signerCallback.phoneSignerSetupError()
@@ -311,26 +341,26 @@ class SignerManagerImpl(
                     )
                     val qos = IntArray(topics.size) { 1 }
 
-                    mqttClient.subscribe(topics, qos)
+                    mqttClient?.subscribe(topics, qos)
 
                     val topic = "${clientId}/${SignerTopics.HELLO}"
                     val message = MqttMessage()
 
-                    mqttClient.publish(topic, message)
+                    mqttClient?.publish(topic, message)
 
                 }
 
                 mqttClient?.setCallback(object : MqttCallback {
 
                     override fun connectionLost(cause: Throwable?) {
-                        restart(mqttClient)
+                        restartMQTT()
                     }
 
                     override fun messageArrived(topic: String?, message: MqttMessage?) {
                         val payload = message?.payload ?: byteArrayOf()
                         val modifiedTopic = topic?.replace("${clientId}/", "") ?: ""
 
-                        processMessage(modifiedTopic, payload, mqttClient)
+                        processMessage(modifiedTopic, payload)
                     }
 
                     override fun deliveryComplete(token: IMqttDeliveryToken?) {}
@@ -355,7 +385,7 @@ class SignerManagerImpl(
         }
     }
 
-    private fun processMessage(topic: String, payload: ByteArray, mqttClient: MqttClient) {
+    private fun processMessage(topic: String, payload: ByteArray) {
         launch {
             val (args, state) = argsAndState()
 
@@ -370,7 +400,7 @@ class SignerManagerImpl(
                     )
                 } catch (e: Exception) {
                     if (e.localizedMessage?.contains(VLS_ERROR) == true) {
-                        restart(mqttClient)
+                        restartMQTT()
                     }
                     null
                 }
@@ -378,7 +408,8 @@ class SignerManagerImpl(
             ret?.let {
                 storeMutations(it.state)
 
-                mqttClient.publish("${mqttClient.clientId}/${it.topic}", MqttMessage(it.bytes))
+                val clientId = retrieveOrGenerateClientId()
+                mqttClient?.publish("${clientId}/${it.topic}", MqttMessage(it.bytes))
 
                 if (topic.contains(SignerTopics.VLS)) {
                     storeAndIncrementSequence(ret.sequence)
@@ -387,7 +418,7 @@ class SignerManagerImpl(
         }
     }
 
-     private fun argsAndState(): Pair<String, ByteArray> {
+     private suspend fun argsAndState(): Pair<String, ByteArray> {
         val args = makeArgs()
         val stringArgs = argsToJson(args) ?: ""
         val mutationsState: Map<String, ByteArray> = retrieveMutations()
@@ -396,7 +427,7 @@ class SignerManagerImpl(
         return Pair(stringArgs, state)
     }
 
-    private fun restart(mqttClient: MqttClient) {
+    private fun restartMQTT() {
         val mutationsEditor = mutationsSharedPreferences.edit()
         val sequenceEditor = sequenceSharedPreferences.edit()
 
@@ -406,10 +437,11 @@ class SignerManagerImpl(
         sequenceEditor.putInt(SIGNER_SEQUENCE, 0)
         sequenceEditor.apply()
 
-        val topic = "${mqttClient.clientId}/${SignerTopics.HELLO}"
+        val clientId = retrieveOrGenerateClientId()
+        val topic = "${clientId}/${SignerTopics.HELLO}"
         val message = MqttMessage()
 
-        mqttClient.publish(topic, message)
+        mqttClient?.publish(topic, message)
     }
 
 
@@ -426,7 +458,7 @@ class SignerManagerImpl(
         }
     }
 
-    private fun makeArgs(): Map<String, Any?> {
+    private suspend fun makeArgs(): Map<String, Any?> {
         val seedBytes = getStoredMnemonicAndSeed().first?.encodeToByteArray()?.take(32)
         val lssNonce = retrieveOrGenerateLssNonce()
 
@@ -449,20 +481,18 @@ class SignerManagerImpl(
     }
 
     private fun retrieveOrGenerateClientId(): String {
-        val storedClientId = clientIdSharedPreferences.getString(SIGNER_CLIENT_ID, "") ?: ""
-
-        val result = storedClientId.ifEmpty {
-            val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
-            val newClientId = (1..20).map { allowedChars.random() }.joinToString("")
-
-            val editor = clientIdSharedPreferences.edit()
-            editor.putString(SIGNER_CLIENT_ID, newClientId)
-            editor.apply()
-
-            newClientId
+        clientIdSharedPreferences.getString(SIGNER_CLIENT_ID, null)?.let {
+            return it
         }
 
-        return result
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        val newClientId = (1..20).map { allowedChars.random() }.joinToString("")
+
+        val editor = clientIdSharedPreferences.edit()
+        editor.putString(SIGNER_CLIENT_ID, newClientId)
+        editor.apply()
+
+        return newClientId
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
@@ -611,10 +641,10 @@ class SignerManagerImpl(
         return Pair(seed, walletMnemonic)
     }
 
-    private fun getStoredMnemonicAndSeed(): Pair<String?, WalletMnemonic?> {
+    private suspend fun getStoredMnemonicAndSeed(): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
-        walletMnemonic?.value?.let { words ->
+        (walletDataHandler?.retrieveWalletMnemonic() ?: walletMnemonic)?.value?.let { words ->
             try {
                 val mnemonic = mnemonicToSeed(words)
                 val seedData = mnemonic.take(32).toByteArray()
@@ -625,4 +655,83 @@ class SignerManagerImpl(
         return Pair(seed, walletMnemonic)
     }
 
+    override suspend fun getPublicKeyAndRelayUrl(): Pair<String, String>? {
+        var keys: Keys? = null
+
+        launch {
+            getStoredMnemonicAndSeed()?.first?.let { seed ->
+                seedDto.network?.let { nnNetwork ->
+                    keys = try {
+                        nodeKeys(net = nnNetwork, seed = seed)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+            }
+        }.join()
+
+        seedDto?.relayUrl?.let { relayUrl ->
+            keys?.pubkey?.let { publicKey ->
+                return Pair(publicKey, relayUrl)
+            }
+        }
+
+        return null
+    }
+
+    private var hasAdminRetries = 0
+    override suspend fun checkHasAdmin(
+        checkAdminCallback: CheckAdminCallback
+    ) {
+        seedDto?.relayUrl?.toRelayUrl()?.let { relayUrl ->
+            if (hasAdminRetries < 50) {
+                hasAdminRetries += 1
+
+                launch {
+                    networkQueryContact?.hasAdmin(
+                        relayUrl
+                    )?.collect { loadResponse ->
+                        when (loadResponse) {
+                            is LoadResponse.Loading -> {}
+                            is Response.Error -> {
+                                checkHasAdmin(checkAdminCallback)
+                            }
+
+                            is Response.Success -> {
+                                checkAdminCallback.checkAdminSucceeded()
+                            }
+                        }
+                    }
+                }
+            } else {
+                hasAdminRetries = 0
+                checkAdminCallback.checkAdminFailed()
+            }
+        } ?: run {
+            hasAdminRetries = 0
+            checkAdminCallback.checkAdminFailed()
+        }
+    }
+
+    override fun persistMnemonic() {
+        walletMnemonic?.let {
+            launch {
+                val success = walletDataHandler?.persistWalletMnemonic(it) ?: false
+
+                if (success) {
+                    walletMnemonic = null
+                    setPhoneSignerSetupDone()
+                }
+            }
+        }
+    }
+
+    private fun setPhoneSignerSetupDone() {
+        phoneSignerSharedPreferences.edit().putBoolean(PHONE_SIGNER_SETUP_KEY, true)
+            .let { editor ->
+                if (!editor.commit()) {
+                    editor.apply()
+                }
+            }
+    }
 }
