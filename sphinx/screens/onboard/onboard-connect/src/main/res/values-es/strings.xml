@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_export_keys_title_alert">Exportar Claves</string>
+    <string name="profile_export_keys_pin_message">"Ingresa tu PIN para encriptar las claves. ¡Recuérdalo! Lo necesitarás para restaurar tu cuenta en otro dispositivo"</string>
+    <string name="profile_keys_copied_clipboard">"Tus claves se copiarán al portapapeles. Guarda las claves y recuerda tu PIN antes de borrar la aplicación o toda la información se perderá"</string>
+    <string name="side_effect_backup_keys_exported">Claves copiadas al portapapeles</string>
+    <string name="side_effect_wrong_pin">PIN incorrecto</string>
+    <string name="side_effect_backup_keys_failed">Guardado de claves fallido</string>
+    <string name="failed_to_process_image">No se ha podido procesar la imagen</string>
+    <string name="image_uploaded_successfully">Imagen cargada con éxito</string>
+    <string name="invalid_meeting_server_url">Url de Meeting Server inválida</string>
+
+    <string name="invalid_relay_url">La nueva URL de Relay es inválida</string>
+    <string name="relay_url_update_from_http_to_tor_not_implemented">Actualización a una dirección de tipo onion no soportado actualmente</string>
+    <string name="testing_new_relay_url">Verificando la nueva URL de Relay…</string>
+    <string name="failed_updating_relay_url">La verificación de la nueva URL de Relay ha fallado, restaurando configuración previa…</string>
+    <string name="updating_relay_url_succeed">La URL de Relay ha sido actualizada con éxito</string>
+
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Crea un Personal Access Token en Github con permisos para el repositorio</string>
+    <string name="github_pat_succeed">El Personal Access Token de Github ha sido establecido con éxito</string>
+    <string name="github_pat_failed">No se pudo establecer el Github Personal Access Token</string>
+    <string name="phone_signer_error">Ocurrió un error configurado el phone signer. Por favor volvé a intentarlo más tarde.</string>
+</resources>

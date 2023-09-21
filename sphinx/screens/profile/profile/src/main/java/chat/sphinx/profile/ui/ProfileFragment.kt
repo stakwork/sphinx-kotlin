@@ -132,6 +132,9 @@ internal class ProfileFragment: SideEffectFragment<
                 .addNavigationBarPadding(
                     includeLayoutMenuBottomProfilePic.includeLayoutMenuBottomOptions.root
                 )
+                .addNavigationBarPadding(
+                    includeLayoutMenuBottomSigner.includeLayoutMenuBottomOptions.root
+                )
 
             includeProfileNamePictureHolder.imageViewProfilePicture.setOnClickListener {
                 viewModel.pictureMenuHandler.viewStateContainer.updateViewState(MenuBottomViewState.Open)
@@ -207,7 +210,7 @@ internal class ProfileFragment: SideEffectFragment<
                                 val key = owner.routeHint?.let { routeHint ->
                                     "${pubKey.value}:${routeHint.value}"
                                 } ?: pubKey.value
-                                
+
                                 profileNavigator.toQRCodeDetail(key, getString(R.string.profile_qr_code_header_name))
                             }
                         }
@@ -263,7 +266,6 @@ internal class ProfileFragment: SideEffectFragment<
                         }
 
                         override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                            // only persist when tracking is stopped (key up)
                             viewModel.persistPINTimeout()
                         }
                     }
@@ -271,10 +273,6 @@ internal class ProfileFragment: SideEffectFragment<
 
                 buttonProfileAdvancedContainerGithubPat.setOnClickListener {
                     viewModel.setGithubPAT()
-                }
-
-                buttonProfileAdvancedContainerSigningDevice.setOnClickListener {
-                    viewModel.setupSigningDevice()
                 }
 
                 buttonProfileAdvancedContainerChangePin.setOnClickListener {
@@ -459,7 +457,6 @@ internal class ProfileFragment: SideEffectFragment<
                 }
             } catch (e: NumberFormatException) {}
         }
-
     }
 
     override suspend fun onViewStateFlowCollect(viewState: ProfileViewState) {
@@ -474,8 +471,6 @@ internal class ProfileFragment: SideEffectFragment<
                     }
                     includeProfileBasicContainerHolder.root.gone
                     includeProfileAdvancedContainerHolder.root.visible
-
-                    includeProfileAdvancedContainerHolder.buttonProfileAdvancedContainerSigningDevice.text = viewState.deviceSetupButtonTitle
                 }
                 is ProfileViewState.Basic -> {
                     includeProfileTabsHolder.apply {

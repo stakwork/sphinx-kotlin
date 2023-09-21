@@ -52,4 +52,10 @@ internal sealed class OnBoardConnectingSideEffect: SideEffect<Context>() {
         }
     }
 
+    object CheckAdminFailed: OnBoardConnectingSideEffect() {
+        override suspend fun execute(value: Context) {
+            SphinxToastUtils().show(value, R.string.side_effect_check_admin_failed)
+        }
+    }
+
 }

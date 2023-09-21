@@ -44,5 +44,4 @@ internal sealed class FooterViewState: ViewState<FooterViewState>() {
         override val messagingEnabled: Boolean
             get() = false
     }
-    object ThreadChat: FooterViewState()
 }

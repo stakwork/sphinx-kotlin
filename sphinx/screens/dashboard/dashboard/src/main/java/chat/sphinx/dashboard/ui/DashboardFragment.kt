@@ -24,6 +24,7 @@ import chat.sphinx.concept_image_loader.Disposable
 import chat.sphinx.concept_image_loader.ImageLoader
 import chat.sphinx.concept_image_loader.ImageLoaderOptions
 import chat.sphinx.concept_image_loader.Transformation
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.dashboard.R
 import chat.sphinx.dashboard.databinding.FragmentDashboardBinding
 import chat.sphinx.dashboard.ui.viewstates.*
@@ -67,6 +68,10 @@ internal class DashboardFragment : MotionLayoutFragment<
     @Suppress("ProtectedInFinal")
     protected lateinit var imageLoader: ImageLoader<ImageView>
 
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var signerManager: SignerManager
+
     override val viewModel: DashboardViewModel by viewModels()
     private val dashboardPodcastViewModel: DashboardPodcastViewModel by viewModels()
 
@@ -98,6 +103,7 @@ internal class DashboardFragment : MotionLayoutFragment<
         setupPopups()
         setupRestorePopup()
         setupBottomMenuScanner()
+        setupSignerManager()
     }
 
     override fun onPause() {
@@ -120,6 +126,10 @@ internal class DashboardFragment : MotionLayoutFragment<
     override fun onRefresh() {
         binding.swipeRefreshLayoutDataReload.isRefreshing = false
         viewModel.networkRefresh(true)
+    }
+
+    private fun setupSignerManager(){
+        viewModel.setSignerManager(signerManager)
     }
 
     fun closeDrawerIfOpen(): Boolean {

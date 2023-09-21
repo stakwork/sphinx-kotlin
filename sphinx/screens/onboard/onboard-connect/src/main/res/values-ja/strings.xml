@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_export_keys_title_alert">バックアップキーをエクスポート</string>
+    <string name="profile_export_keys_pin_message">バックアップキーを暗号化するPINコードを入力してください。このPINコードは別の端末でアカウントを復元する時に必要です。</string>
+    <string name="profile_keys_copied_clipboard">バックアップキーをクリップボードにコピーします。アプリを削除する前に、この文字列とPINコードを保存してください。一方でも失くすとアプリ再インストール後にデータを復元できません。</string>
+    <string name="side_effect_backup_keys_exported">クリップボードにコピーしたバックアップキーをエクスポート</string>
+    <string name="side_effect_wrong_pin">PINコードが違います</string>
+    <string name="side_effect_backup_keys_failed">バックアップキーの生成と暗号化に失敗しました</string>
+    <string name="failed_to_process_image">写真をアップロードできませんでした</string>
+    <string name="image_uploaded_successfully">写真をアップロードしました</string>
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+
+    <string name="invalid_relay_url">新しいRelay URLは無効です</string>
+    <string name="relay_url_update_from_http_to_tor_not_implemented">.onionアドレスへの変更はまだできません</string>
+    <string name="testing_new_relay_url">新しいRelay URLをテストしています</string>
+    <string name="failed_updating_relay_url">新しいURLのテストに失敗しました。既存設定を復元しています。</string>
+    <string name="updating_relay_url_succeed">Relay URLを更新しました</string>
+
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
+    <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
+    <string name="github_pat_failed">Github Personal Access Token coult not be set</string>
+    <string name="phone_signer_error">Something went wrong while setting up the phone signer. Please try again later</string>
+</resources>

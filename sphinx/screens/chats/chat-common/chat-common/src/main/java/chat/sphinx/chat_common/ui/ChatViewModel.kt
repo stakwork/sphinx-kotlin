@@ -621,6 +621,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                             },
                             onBindDownloadMedia = {
                                 repositoryMedia.downloadMediaIfApplicable(message, sent)
+                            },
+                            onBindThreadDownloadMedia = {
+                                message.thread?.last()?.let { lastReplyMessage ->
+                                    repositoryMedia.downloadMediaIfApplicable(lastReplyMessage, sent)
+                                }
                             }
                         )
                     )
@@ -699,6 +704,11 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                                 },
                                 onBindDownloadMedia = {
                                     repositoryMedia.downloadMediaIfApplicable(message, sent)
+                                },
+                                onBindThreadDownloadMedia = {
+                                    message.thread?.last()?.let { lastReplyMessage ->
+                                        repositoryMedia.downloadMediaIfApplicable(lastReplyMessage, sent)
+                                    }
                                 }
                             )
                         )
@@ -1320,11 +1330,7 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     @JvmSynthetic
     internal fun getFooterViewStateFlow(): StateFlow<FooterViewState> =
-        if (isThreadChat()) {
-            MutableStateFlow(FooterViewState.ThreadChat)
-        } else {
-            footerViewStateContainer.viewStateFlow
-        }
+        footerViewStateContainer.viewStateFlow
 
     @JvmSynthetic
     internal fun updateFooterViewState(viewState: FooterViewState) {
@@ -1497,7 +1503,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                     viewState.bubbleMessage?.text,
                     viewState.bubbleImageAttachment,
                     viewState.bubbleVideoAttachment,
-                    viewState.bubbleFileAttachment
+                    viewState.bubbleFileAttachment,
+                    viewState.bubbleAudioAttachment
                 )
                 threadHeaderViewState.updateViewState(threadHeader)
             }

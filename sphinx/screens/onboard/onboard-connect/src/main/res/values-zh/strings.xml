@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_export_keys_title_alert">匯出私鏈</string>
+    <string name="profile_export_keys_pin_message">"請輸入加密私鏈PIN. 您備份恢復將需要它."</string>
+    <string name="profile_keys_copied_clipboard">私鏈已複製到剪貼板. 請保留 &amp; 警告! 請刪除APP之前記住私鏈PIN 免得資料損失.</string>
+    <string name="side_effect_backup_keys_exported">私鏈已複製到剪貼板</string>
+    <string name="side_effect_wrong_pin">密碼錯誤</string>
+    <string name="side_effect_backup_keys_failed">備份私鏈失敗</string>
+    <string name="failed_to_process_image">圖片上傳失敗</string>
+    <string name="image_uploaded_successfully">圖片上傳成功</string>
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+
+    <string name="invalid_relay_url">更新 Relay URL 失敗</string>
+    <string name="relay_url_update_from_http_to_tor_not_implemented">目前不支持轉換洋蔥住址(TOR).</string>
+    <string name="testing_new_relay_url">測試 新 Relay URL…</string>
+    <string name="failed_updating_relay_url">新 URL 測試失敗, 恢復設定…</string>
+    <string name="updating_relay_url_succeed">Relay URL 更新成功</string>
+
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
+    <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
+    <string name="github_pat_failed">Github Personal Access Token coult not be set</string>
+    <string name="phone_signer_error">Something went wrong while setting up the phone signer. Please try again later</string>
+</resources>

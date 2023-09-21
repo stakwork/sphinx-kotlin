@@ -130,6 +130,19 @@
                     app:layout_constraintTop_toTopOf="parent"
                     tools:visibility="visible" />
 
+                <include
+                    android:id="@+id/include_message_type_audio_attachment"
+                    layout="@layout/layout_message_type_attachment_audio"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/message_type_file_attachment_height"
+                    android:layout_marginTop="@dimen/default_half_layout_margin"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="gone" />
+
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.appcompat.widget.AppCompatTextView

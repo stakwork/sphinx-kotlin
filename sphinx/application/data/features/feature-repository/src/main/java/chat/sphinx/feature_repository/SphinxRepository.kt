@@ -1196,7 +1196,9 @@ abstract class SphinxRepository(
                         response = loadResponse
                     }
                     is Response.Success -> {
-                        val contact = getContactByPubKey(lightningNodePubKey).firstOrNull()
+                        val contact = getContactByPubKey(lightningNodePubKey).firstOrNull {
+                            it?.rsaPublicKey != null
+                        }
 
                         response = if (contact != null) {
                             val messageBuilder = SendMessage.Builder()

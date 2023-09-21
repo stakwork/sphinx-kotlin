@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
 import chat.sphinx.authentication_resources.databinding.LayoutAuthenticationBinding
 import chat.sphinx.concept_image_loader.ImageLoader
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
@@ -48,6 +49,10 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
     @Inject
     lateinit var imageLoaderInj: ImageLoader<ImageView>
 
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var signerManager: SignerManager
+
     private val imageLoader: ImageLoader<ImageView>
         get() = imageLoaderInj
 
@@ -57,6 +62,7 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
         OnBackPress(binding.root.context).addCallback(viewLifecycleOwner, requireActivity())
 
         setupHeaderAndFooter()
+        setupSignerManager()
 
         lifecycleScope.launch {
             imageLoader.load(
@@ -64,6 +70,10 @@ internal class OnBoardConnectingFragment: MotionLayoutFragment<
                 R.drawable.connecting,
             )
         }
+    }
+
+    private fun setupSignerManager(){
+        viewModel.setSignerManager(signerManager)
     }
 
     private fun setupHeaderAndFooter() {

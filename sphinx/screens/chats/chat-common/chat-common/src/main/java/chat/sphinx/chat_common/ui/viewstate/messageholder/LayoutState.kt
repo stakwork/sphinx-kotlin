@@ -153,7 +153,8 @@ sealed class LayoutState private constructor() {
             data class ImageAttachment(
                 val url: String,
                 val media: MessageMedia?,
-                val showPaidOverlay: Boolean
+                val showPaidOverlay: Boolean,
+                val isThread: Boolean
             ): ContainerSecond()
 
             sealed class VideoAttachment : ContainerSecond()  {
@@ -216,7 +217,8 @@ sealed class LayoutState private constructor() {
                 val lastReplyMessage: String?,
                 val lastReplyDate: String,
                 val lastReplyUser: ReplyUserHolder,
-                val isSentMessage: Boolean
+                val isSentMessage: Boolean,
+                val mediaAttachment: ContainerSecond?
             )
 
             data class PaidMessage(

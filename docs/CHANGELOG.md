@@ -1,5 +1,11 @@
 # ChangeLog
 
+# Version 1.0.0-beta04 (2023-09-21)
+- Improves media support on threads
+- Adds support for signup with phone signer
+- Adds support for signup with signing hardware
+- Adds fixes and improvements
+
 # Version 1.0.0-beta03 (2023-08-21)
 - Upgrades target SDK
 

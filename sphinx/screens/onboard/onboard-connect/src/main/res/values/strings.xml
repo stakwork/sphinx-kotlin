@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_export_keys_title_alert">Export Keys</string>
+    <string name="profile_export_keys_pin_message">"Enter your PIN to encrypt your keys. You will need it when restoring account on other device."</string>
+    <string name="profile_keys_copied_clipboard">Your keys will be copied to the clipboard. Save this string &amp; remember your pin before deleting the app or all data will be lost.</string>
+    <string name="side_effect_backup_keys_exported">Export keys copied to clipboard</string>
+    <string name="side_effect_wrong_pin">Wrong PIN provided</string>
+    <string name="side_effect_backup_keys_failed">Backup keys failed</string>
+    <string name="failed_to_process_image">Failed to process image</string>
+    <string name="image_uploaded_successfully">Image uploaded successfully</string>
+    <string name="invalid_relay_url">New Relay URL is invalid</string>
+    <string name="testing_new_relay_url">Testing new Relay URL…</string>
+    <string name="relay_url_update_from_http_to_tor_not_implemented">Updating to an onion address is currently not supported.</string>
+    <string name="updating_relay_url_succeed">Relay URL successfully updated</string>
+    <string name="failed_updating_relay_url">New URL test failed, restoring previous setting…</string>
+    <string name="invalid_meeting_server_url">Invalid Meeting Server Url</string>
+    <string name="github_pat_title">Github Personal Access Token</string>
+    <string name="github_pat_message">Generate a Personal Access Token on github with the repo scope</string>
+    <string name="github_pat_succeed">Github Personal Access Token successfully set</string>
+    <string name="github_pat_failed">Github Personal Access Token could not be set</string>
+    <string name="phone_signer_error">Something went wrong while setting up the phone signer. Please try again later</string>
+</resources>

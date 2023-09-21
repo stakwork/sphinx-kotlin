@@ -13,6 +13,9 @@ import chat.sphinx.concept_network_query_relay_keys.NetworkQueryRelayKeys
 import chat.sphinx.concept_network_query_relay_keys.model.PostHMacKeyDto
 import chat.sphinx.concept_network_tor.TorManager
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_signer_manager.CheckAdminCallback
+import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.key_restore.KeyRestore
 import chat.sphinx.key_restore.KeyRestoreResponse
 import chat.sphinx.kotlin_response.LoadResponse
@@ -29,6 +32,7 @@ import chat.sphinx.wrapper_invite.toValidInviteStringOrNull
 import chat.sphinx.wrapper_relay.*
 import chat.sphinx.wrapper_rsa.RsaPrivateKey
 import chat.sphinx.wrapper_rsa.RsaPublicKey
+import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.matthewnelson.android_feature_navigation.util.navArgs
 import io.matthewnelson.android_feature_viewmodel.MotionLayoutViewModel
@@ -47,46 +51,59 @@ import javax.inject.Inject
 
 internal inline val OnBoardConnectingFragmentArgs.restoreCode: RedemptionCode.AccountRestoration?
     get() {
-        val redemptionCode = RedemptionCode.decode(argCode)
+        argCode?.let {
+            val redemptionCode = RedemptionCode.decode(it)
 
-        if (redemptionCode is RedemptionCode.AccountRestoration) {
-            return redemptionCode
+            if (redemptionCode is RedemptionCode.AccountRestoration) {
+                return redemptionCode
+            }
         }
         return null
     }
 
 internal inline val OnBoardConnectingFragmentArgs.connectionCode: RedemptionCode.NodeInvite?
     get() {
-        val redemptionCode = RedemptionCode.decode(argCode)
+        argCode?.let {
+            val redemptionCode = RedemptionCode.decode(it)
 
-        if (redemptionCode is RedemptionCode.NodeInvite) {
-            return redemptionCode
+            if (redemptionCode is RedemptionCode.NodeInvite) {
+                return redemptionCode
+            }
         }
         return null
     }
 
 internal inline val OnBoardConnectingFragmentArgs.swarmConnect: RedemptionCode.SwarmConnect?
     get() {
-        val redemptionCode = RedemptionCode.decode(argCode)
+        argCode?.let {
+            val redemptionCode = RedemptionCode.decode(it)
 
-        if (redemptionCode is RedemptionCode.SwarmConnect) {
-            return redemptionCode
+            if (redemptionCode is RedemptionCode.SwarmConnect) {
+                return redemptionCode
+            }
         }
         return null
     }
 
 internal inline val OnBoardConnectingFragmentArgs.swarmClaim: RedemptionCode.SwarmClaim?
     get() {
-        val redemptionCode = RedemptionCode.decode(argCode)
+        argCode?.let {
+            val redemptionCode = RedemptionCode.decode(it)
 
-        if (redemptionCode is RedemptionCode.SwarmClaim) {
-            return redemptionCode
+            if (redemptionCode is RedemptionCode.SwarmClaim) {
+                return redemptionCode
+            }
         }
         return null
     }
 
 internal inline val OnBoardConnectingFragmentArgs.inviteCode: InviteString?
-    get() = argCode.toValidInviteStringOrNull()
+    get() {
+        argCode?.let {
+            return it.toValidInviteStringOrNull()
+        }
+        return null
+    }
 
 @HiltViewModel
 internal class OnBoardConnectingViewModel @Inject constructor(
@@ -94,22 +111,26 @@ internal class OnBoardConnectingViewModel @Inject constructor(
     handle: SavedStateHandle,
     val navigator: OnBoardConnectingNavigator,
     private val keyRestore: KeyRestore,
+    private val walletDataHandler: WalletDataHandler,
     private val relayDataHandler: RelayDataHandler,
     private val torManager: TorManager,
     private val networkQueryContact: NetworkQueryContact,
     private val networkQueryInvite: NetworkQueryInvite,
     private val networkQueryRelayKeys: NetworkQueryRelayKeys,
     private val onBoardStepHandler: OnBoardStepHandler,
+    val moshi: Moshi,
     private val rsa: RSA,
 ): MotionLayoutViewModel<
         Any,
         Context,
         OnBoardConnectingSideEffect,
         OnBoardConnectingViewState
-        >(dispatchers, OnBoardConnectingViewState.Connecting)
+        >(dispatchers, OnBoardConnectingViewState.Connecting),
+    CheckAdminCallback
 {
 
     private val args: OnBoardConnectingFragmentArgs by handle.navArgs()
+    private lateinit var signerManager: SignerManager
 
     init {
         viewModelScope.launch(mainImmediate) {
@@ -117,6 +138,14 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
             processCode()
         }
+    }
+
+    fun setSignerManager(signerManager: SignerManager) {
+        signerManager.setWalletDataHandler(walletDataHandler)
+        signerManager.setMoshi(moshi)
+        signerManager.setNetworkQueryContact(networkQueryContact)
+
+        this.signerManager = signerManager
     }
 
     private fun processCode() {
@@ -150,8 +179,12 @@ internal class OnBoardConnectingViewModel @Inject constructor(
             } ?: args.inviteCode?.let { inviteCode ->
                 redeemInvite(inviteCode)
             } ?: run {
-                submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
-                navigator.popBackStack()
+                if (signerManager.isPhoneSignerSettingUp()) {
+                    continuePhoneSignerSetup()
+                } else {
+                    submitSideEffect(OnBoardConnectingSideEffect.InvalidCode)
+                    navigator.popBackStack()
+                }
             }
         }
     }
@@ -582,5 +615,39 @@ internal class OnBoardConnectingViewModel @Inject constructor(
 
     override suspend fun onMotionSceneCompletion(value: Any) {
         return
+    }
+
+    private fun continuePhoneSignerSetup() {
+        viewModelScope.launch(mainImmediate) {
+            signerManager.checkHasAdmin(this@OnBoardConnectingViewModel)
+        }
+    }
+
+    override fun checkAdminSucceeded() {
+        viewModelScope.launch(mainImmediate) {
+            signerManager.getPublicKeyAndRelayUrl()?.let { publicKeyAndRelayUrl ->
+                publicKeyAndRelayUrl.second.toRelayUrl()?.let {
+                    getTransportKey(
+                        ip = it,
+                        publicKeyAndRelayUrl.first,
+                        null,
+                        null,
+                        token = null
+                    )
+                } ?: run {
+                    checkAdminFailed()
+                }
+            } ?: run {
+                checkAdminFailed()
+            }
+        }
+    }
+
+    override fun checkAdminFailed() {
+        viewModelScope.launch(mainImmediate) {
+            signerManager.reset()
+            submitSideEffect(OnBoardConnectingSideEffect.CheckAdminFailed)
+            navigator.popBackStack()
+        }
     }
 }

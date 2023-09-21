@@ -11,7 +11,9 @@
         tools:layout="@layout/fragment_on_board_connecting">
         <argument
             android:name="argCode"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null"/>
     </fragment>
 
 </navigation>

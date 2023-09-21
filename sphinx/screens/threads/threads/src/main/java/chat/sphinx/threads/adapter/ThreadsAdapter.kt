@@ -32,6 +32,7 @@ import chat.sphinx.wrapper_common.util.getInitials
 import chat.sphinx.wrapper_view.Px
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.invisible
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.android_feature_viewmodel.util.OnStopSupervisor
 import io.matthewnelson.concept_views.viewstate.collect
@@ -199,6 +200,8 @@ internal class ThreadsAdapter(
                 textViewRepliesQuantity.text = threadItem.repliesAmount
                 textViewThreadTime.text = threadItem.lastReplyDate
 
+                textViewThreadMessageContent.goneIfFalse(threadItem.message.isNotEmpty())
+
                 // User Profile Picture
                 layoutLayoutChatImageSmallInitialHolder.apply {
                     textViewInitialsName.visible
@@ -318,6 +321,22 @@ internal class ThreadsAdapter(
                             threadItem.fileAttachment.fileSize.asFormattedString()
                         }
                     } else {
+                        root.gone
+                    }
+                }
+
+                // Audio Attachment header
+
+                binding.includeMessageTypeAudioAttachment.apply {
+                    if (threadItem.audioAttachment != null) {
+                        root.visible
+                        progressBarAttachmentAudioFileLoading.gone
+                        textViewAttachmentPlayPauseButton.visible
+                        textViewAttachmentAudioRemainingDuration.gone
+
+                        includeMessageTypeAudioAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
+                    }
+                    else {
                         root.gone
                     }
                 }
