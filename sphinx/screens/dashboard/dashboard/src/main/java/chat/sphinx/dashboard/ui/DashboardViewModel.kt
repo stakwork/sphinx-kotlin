@@ -3,6 +3,7 @@ package chat.sphinx.dashboard.ui
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.net.Uri
 import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
@@ -31,6 +32,7 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.concept_signer_manager.SignerPhone
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -128,9 +130,19 @@ internal class DashboardViewModel @Inject constructor(
         ChatListSideEffect,
         DashboardMotionViewState
         >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible),
-    ScannerMenuViewModel{
+    ScannerMenuViewModel,
+    SignerPhone
+{
 
     private val args: DashboardFragmentArgs by handler.navArgs()
+
+    companion object {
+        const val SIGNING_DEVICE_SHARED_PREFERENCES = "signer_settings"
+        const val PHONE_SIGNER_SETUP_KEY = "phone-signer-setup"
+
+        const val BITCOIN_NETWORK_REG_TEST = "regtest"
+        const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
+    }
 
     val newVersionAvailable: MutableStateFlow<Boolean> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow(false)
@@ -144,15 +156,11 @@ internal class DashboardViewModel @Inject constructor(
         MutableStateFlow(null)
     }
 
+    private val signerSharedPreferences: SharedPreferences =
+        app.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
+
+
     private lateinit var signerManager: SignerManager
-
-    companion object {
-        const val SIGNING_DEVICE_SHARED_PREFERENCES = "general_settings"
-        const val SIGNING_DEVICE_SETUP_KEY = "signing-device-setup"
-
-        const val BITCOIN_NETWORK_REG_TEST = "regtest"
-        const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
-    }
 
     init {
         if (args.updateBackgroundLoginTime) {
@@ -218,6 +226,39 @@ internal class DashboardViewModel @Inject constructor(
         signerManager.setNetworkQueryContact(networkQueryContact)
 
         this.signerManager = signerManager
+    }
+
+    private fun reconnectMQTT(){
+        signerSharedPreferences.getBoolean(PHONE_SIGNER_SETUP_KEY, false).let { phoneSigner ->
+            if (phoneSigner) {
+                signerManager.reconnectMQTT(this)
+            }
+        }
+    }
+
+    override fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit) {
+        return
+    }
+
+    override fun phoneSignerSuccessfullySet() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatListSideEffect.Notify(
+                    app.getString(R.string.signer_phone_connected_to_mqtt)
+                )
+            )
+
+        }
+    }
+
+    override fun phoneSignerSetupError() {
+        viewModelScope.launch(mainImmediate) {
+            submitSideEffect(
+                ChatListSideEffect.Notify(
+                    app.getString(R.string.signer_phone_error_mqtt)
+                )
+            )
+        }
     }
 
     fun toScanner(isPayment: Boolean) {
@@ -911,6 +952,8 @@ internal class DashboardViewModel @Inject constructor(
                 )
             )
         }
+
+        reconnectMQTT()
     }
 
     fun updateTabsState(
