@@ -1,6 +1,6 @@
 package chat.sphinx.concept_signer_manager
 
-interface SignerHardware {
+interface SignerHardwareCallback {
     fun checkNetwork(callback: (Boolean) -> Unit)
     fun signingDeviceNetwork(callback: (String) -> Unit)
     fun signingDevicePassword(networkName: String, callback: (String) -> Unit)
@@ -10,6 +10,12 @@ interface SignerHardware {
     fun sendingSeedToHardware()
     fun signingDeviceSuccessfullySet()
     fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit)
+}
+
+interface SignerPhoneCallback {
+    fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit)
+    fun phoneSignerSuccessfullySet()
+    fun phoneSignerSetupError()
 }
 
 interface CheckAdminCallback {

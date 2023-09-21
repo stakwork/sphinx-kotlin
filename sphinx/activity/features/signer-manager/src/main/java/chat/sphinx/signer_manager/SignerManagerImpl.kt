@@ -7,9 +7,9 @@ import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
 import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
 import chat.sphinx.concept_signer_manager.CheckAdminCallback
-import chat.sphinx.concept_signer_manager.SignerHardware
+import chat.sphinx.concept_signer_manager.SignerHardwareCallback
 import chat.sphinx.concept_signer_manager.SignerManager
-import chat.sphinx.concept_signer_manager.SignerPhone
+import chat.sphinx.concept_signer_manager.SignerPhoneCallback
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.LoadResponse
 import chat.sphinx.kotlin_response.Response
@@ -126,28 +126,28 @@ class SignerManagerImpl(
         return mqttClient != null
     }
 
-    override fun setupSignerHardware(signerHardware: SignerHardware) {
+    override fun setupSignerHardware(signerHardwareCallback: SignerHardwareCallback) {
         if (setupSignerHardwareJob?.isActive == true) return
 
         resetSeedDto()
         resetMQTT()
 
         setupSignerHardwareJob = launch {
-            signerHardware.checkNetwork {
-                signerHardware.signingDeviceNetwork { networkName ->
+            signerHardwareCallback.checkNetwork {
+                signerHardwareCallback.signingDeviceNetwork { networkName ->
                     seedDto.ssid = networkName
 
-                    signerHardware.signingDevicePassword(networkName) { networkPass ->
+                    signerHardwareCallback.signingDevicePassword(networkName) { networkPass ->
                         seedDto.pass = networkPass
 
-                        signerHardware.signingDeviceLightningNodeUrl { lightningNodeUrl ->
+                        signerHardwareCallback.signingDeviceLightningNodeUrl { lightningNodeUrl ->
                             seedDto.lightningNodeUrl = lightningNodeUrl
 
-                            signerHardware.signingDeviceCheckBitcoinNetwork(
+                            signerHardwareCallback.signingDeviceCheckBitcoinNetwork(
                                 network = { seedDto.network = it },
                                 linkSigningDevice = { callback ->
                                     if (callback) {
-                                        linkSigningDevice(signerHardware)
+                                        linkSigningDevice(signerHardwareCallback)
                                     }
                                 }
                             )
@@ -158,7 +158,7 @@ class SignerManagerImpl(
         }
     }
 
-    private fun linkSigningDevice(signerHardware: SignerHardware) {
+    private fun linkSigningDevice(signerHardwareCallback: SignerHardwareCallback) {
         launch {
             val secKey = ByteArray(32)
             SecureRandom().nextBytes(secKey)
@@ -169,7 +169,7 @@ class SignerManagerImpl(
             var pk2: String? = null
 
             if (pk1 == null) {
-                signerHardware.failedToSetupSigningDevice("error generating secret key")
+                signerHardwareCallback.failedToSetupSigningDevice("error generating secret key")
                 resetSeedDto()
                 return@launch
             }
@@ -181,7 +181,7 @@ class SignerManagerImpl(
                 seedDto.lightningNodeUrl?.isEmpty() == true
             ) {
                 resetSeedDto()
-                signerHardware.failedToSetupSigningDevice("lightning node URL can't be empty")
+                signerHardwareCallback.failedToSetupSigningDevice("lightning node URL can't be empty")
                 return@launch
             }
 
@@ -190,7 +190,7 @@ class SignerManagerImpl(
                     is LoadResponse.Loading -> {}
                     is Response.Error -> {
                         resetSeedDto()
-                        signerHardware.failedToSetupSigningDevice("error getting public key from hardware")
+                        signerHardwareCallback.failedToSetupSigningDevice("error getting public key from hardware")
                     }
 
                     is Response.Success -> {
@@ -204,10 +204,10 @@ class SignerManagerImpl(
                 val seedAndMnemonic = generateAndPersistMnemonic(null, null)
 
                 seedAndMnemonic.second?.let { mnemonic ->
-                    signerHardware.showMnemonicToUser(mnemonic.value) { callback ->
+                    signerHardwareCallback.showMnemonicToUser(mnemonic.value) { callback ->
                          if (callback) {
                              seedAndMnemonic.first?.let { seed ->
-                                 encryptAndSendSeed(seed, sec1, signerHardware)
+                                 encryptAndSendSeed(seed, sec1, signerHardwareCallback)
                              }
                          }
                     }
@@ -219,7 +219,7 @@ class SignerManagerImpl(
     private fun encryptAndSendSeed(
         seed: String,
         sec1: String,
-        signerHardware: SignerHardware
+        signerHardwareCallback: SignerHardwareCallback
     ) {
         launch {
             val nonce = ByteArray(12)
@@ -229,18 +229,18 @@ class SignerManagerImpl(
                 if (cipher.isNotEmpty()) {
                     seedDto.seed = cipher
 
-                    signerHardware.sendingSeedToHardware()
+                    signerHardwareCallback.sendingSeedToHardware()
 
                     networkQueryCrypter?.sendEncryptedSeed(seedDto)?.collect { loadResponse ->
                         when (loadResponse) {
                             is LoadResponse.Loading -> {}
                             is Response.Error -> {
                                 resetSeedDto()
-                                signerHardware.failedToSetupSigningDevice("error sending seed to hardware")
+                                signerHardwareCallback.failedToSetupSigningDevice("error sending seed to hardware")
                             }
 
                             is Response.Success -> {
-                                setSigningDeviceSetupDone(signerHardware)
+                                setSigningDeviceSetupDone(signerHardwareCallback)
                             }
                         }
                     }
@@ -250,14 +250,14 @@ class SignerManagerImpl(
     }
 
     private fun setSigningDeviceSetupDone(
-        signerHardware: SignerHardware
+        signerHardwareCallback: SignerHardwareCallback
     ) {
         signerSharedPreferences.edit().putBoolean(SIGNING_DEVICE_SETUP_KEY, true)
             .let { editor ->
                 if (!editor.commit()) {
                     editor.apply()
                 }
-                signerHardware.signingDeviceSuccessfullySet()
+                signerHardwareCallback.signingDeviceSuccessfullySet()
             }
     }
 
@@ -280,43 +280,57 @@ class SignerManagerImpl(
         mqttClient = null
     }
 
-    override fun setupPhoneSigner(mnemonicWords: String?, signerPhone: SignerPhone) {
+    override fun setupPhoneSigner(
+        mnemonicWords: String?,
+        signerPhoneCallback: SignerPhoneCallback
+    ) {
 
         if (setupPhoneSignerJob?.isActive == true) return
 
         setupPhoneSignerJob = launch {
-            val (seed, mnemonic) = generateAndPersistMnemonic(mnemonicWords, signerPhone)
+            val (seed, _) = generateAndPersistMnemonic(mnemonicWords, signerPhoneCallback)
+
+            if (seedDto.network == null) {
+                signerPhoneCallback.phoneSignerSetupError()
+                return@launch
+            }
 
             val keys: Keys? = try {
-                nodeKeys(net = seedDto.network ?:"regtest", seed = seed!!)
+                nodeKeys(net = seedDto.network!!, seed = seed!!)
             } catch (e: Exception) {
                 println(e.message)
                 null
             }
 
-            val password: String? = try {
-                makeAuthToken(ts = (Date().time / 1000).toUInt(), secret = keys?.secret!!)
-            } catch (e: Exception) {
-                println(e.message)
-                null
-            }
+            keys?.let { nnKeys ->
+                val password: String? = try {
+                    makeAuthToken(ts = (Date().time / 1000).toUInt(), secret = nnKeys.secret)
+                } catch (e: Exception) {
+                    println(e.message)
+                    null
+                }
 
-            if (keys != null && password != null) {
-                connectToMQTTWith(keys, password, signerPhone)
+                if (password != null) {
+                    connectToMQTTWith(keys, password, signerPhoneCallback)
+                } else {
+                    signerPhoneCallback.phoneSignerSetupError()
+                }
+            } ?: run {
+                signerPhoneCallback.phoneSignerSetupError()
             }
         }
     }
 
-    private fun connectToMQTTWith(keys: Keys, password: String, signerPhone: SignerPhone) {
+    private fun connectToMQTTWith(keys: Keys, password: String, signerPhoneCallback: SignerPhoneCallback) {
         seedDto.lightningNodeUrl?.let { lightningNodeUrl ->
-            val serverURI = processLightningNodeUrl(lightningNodeUrl)
+            val serverURI = lightningNodeUrl.toMQTTUrl()
             val clientId = retrieveOrGenerateClientId()
 
             mqttClient = try {
                 MqttClient(serverURI, clientId, null)
             } catch (e: MqttException) {
                 reset()
-                signerPhone.phoneSignerSetupError()
+                signerPhoneCallback.phoneSignerSetupError()
                 return
             }
 
@@ -370,24 +384,16 @@ class SignerManagerImpl(
 
                 persistServerUrlAndNetwork()
 
-                signerPhone.phoneSignerSuccessfullySet()
+                signerPhoneCallback.phoneSignerSuccessfullySet()
 
             } catch (e: MqttException) {
                 e.printStackTrace()
                 reset()
-                signerPhone.phoneSignerSetupError()
+                signerPhoneCallback.phoneSignerSetupError()
             }
         } ?: run {
             reset()
-            signerPhone.phoneSignerSetupError()
-        }
-    }
-
-    private fun processLightningNodeUrl(lightningNodeUrl: String): String {
-        return if (lightningNodeUrl.endsWith(":8883")) {
-            "ssl://$lightningNodeUrl"
-        } else {
-            "tcp://$lightningNodeUrl"
+            signerPhoneCallback.phoneSignerSetupError()
         }
     }
 
@@ -614,7 +620,7 @@ class SignerManagerImpl(
     @OptIn(ExperimentalUnsignedTypes::class)
     private suspend fun generateAndPersistMnemonic(
         mnemonicWords: String?,
-        signerPhone: SignerPhone?
+        signerPhoneCallback: SignerPhoneCallback?
     ): Pair<String?, WalletMnemonic?> {
         var seed: String? = null
 
@@ -630,7 +636,7 @@ class SignerManagerImpl(
                             val words = mnemonicFromEntropy(randomBytesString)
 
                             words.toWalletMnemonic()?.let { nnWalletMnemonic ->
-                                signerPhone?.showMnemonicToUser(words) {}
+                                signerPhoneCallback?.showMnemonicToUser(words) {}
                                 nnWalletMnemonic
                             }
                         }
@@ -755,33 +761,50 @@ class SignerManagerImpl(
         }
     }
 
-    override fun reconnectMQTT(signerPhone: SignerPhone) {
-        seedDto.lightningNodeUrl = signerSharedPreferences.getString(SIGNER_LIGHTNING_NODE_URL_KEY, "")
-        seedDto.network = signerSharedPreferences.getString(SIGNER_NETWORK_KEY, "")
+    override fun reconnectMQTT(signerPhoneCallback: SignerPhoneCallback) {
+        if (!signerSharedPreferences.getBoolean(PHONE_SIGNER_SETUP_KEY, false)) {
+            return
+        }
+
+        val mqttUrl = signerSharedPreferences.getString(SIGNER_LIGHTNING_NODE_URL_KEY, null)
+        val network = signerSharedPreferences.getString(SIGNER_NETWORK_KEY, null)
+
+        if (mqttUrl == null || mqttUrl.isEmpty() || network == null || network.isEmpty()) {
+            signerPhoneCallback.phoneSignerSetupError()
+            return
+        }
+
+        seedDto.lightningNodeUrl = mqttUrl
+        seedDto.network = network
 
         launch {
             getStoredMnemonicAndSeed().first?.let { nnSeed ->
 
                 val keys: Keys? = try {
-                    nodeKeys(net = seedDto.network ?: "regtest", seed = nnSeed)
+                    nodeKeys(net = seedDto.network!!, seed = nnSeed)
                 } catch (e: Exception) {
                     println(e.message)
                     null
                 }
 
-                val password: String? = try {
-                    makeAuthToken(ts = (Date().time / 1000).toUInt(), secret = keys?.secret!!)
-                } catch (e: Exception) {
-                    println(e.message)
-                    null
-                }
+                keys?.let { nnKeys ->
+                    val password: String? = try {
+                        makeAuthToken(ts = (Date().time / 1000).toUInt(), secret = nnKeys.secret)
+                    } catch (e: Exception) {
+                        println(e.message)
+                        null
+                    }
 
-                if (keys != null && password != null) {
-                    connectToMQTTWith(keys, password, signerPhone)
+                    if (password != null) {
+                        connectToMQTTWith(keys, password, signerPhoneCallback)
+                    } else {
+                        signerPhoneCallback.phoneSignerSetupError()
+                    }
+                } ?: run {
+                    signerPhoneCallback.phoneSignerSetupError()
                 }
             } ?: run {
-                reset()
-                signerPhone.phoneSignerSetupError()
+                signerPhoneCallback.phoneSignerSetupError()
             }
         }
     }
@@ -794,4 +817,20 @@ inline fun String.hexToByArray(): ByteArray {
         .iterator()
 
     return ByteArray(length / 2) { byteIterator.next() }
+}
+
+@Suppress("NOTHING_TO_INLINE")
+inline fun String.toMQTTUrl(): String {
+    if (this.contains("https://")) {
+        return this.replace("https://", "ssl://")
+    }
+    if (this.contains("http://")) {
+        return this.replace("http://", "tcp://")
+    }
+
+    return if (this.endsWith(":8883")) {
+        "ssl://$this"
+    } else {
+        "tcp://$this"
+    }
 }

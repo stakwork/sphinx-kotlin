@@ -3,16 +3,12 @@ package chat.sphinx.dashboard.ui
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
-import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import app.cash.exhaustive.Exhaustive
 import chat.sphinx.concept_background_login.BackgroundLoginHandler
-import chat.sphinx.concept_network_query_contact.NetworkQueryContact
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
-import chat.sphinx.concept_network_query_crypter.model.SendSeedDto
 import chat.sphinx.concept_network_query_lightning.NetworkQueryLightning
 import chat.sphinx.concept_network_query_lightning.model.invoice.PayRequestDto
 import chat.sphinx.concept_network_query_lightning.model.invoice.PostRequestPaymentDto
@@ -32,7 +28,7 @@ import chat.sphinx.concept_repository_feed.FeedRepository
 import chat.sphinx.concept_service_media.MediaPlayerServiceController
 import chat.sphinx.concept_service_notification.PushNotificationRegistrar
 import chat.sphinx.concept_signer_manager.SignerManager
-import chat.sphinx.concept_signer_manager.SignerPhone
+import chat.sphinx.concept_signer_manager.SignerPhoneCallback
 import chat.sphinx.concept_socket_io.SocketIOManager
 import chat.sphinx.concept_socket_io.SocketIOState
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
@@ -64,8 +60,6 @@ import chat.sphinx.wrapper_common.tribe.toTribeJoinLink
 import chat.sphinx.wrapper_contact.*
 import chat.sphinx.wrapper_feed.*
 import chat.sphinx.wrapper_lightning.NodeBalance
-import chat.sphinx.wrapper_lightning.WalletMnemonic
-import chat.sphinx.wrapper_lightning.toWalletMnemonic
 import chat.sphinx.wrapper_relay.RelayUrl
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,13 +70,8 @@ import io.matthewnelson.android_feature_viewmodel.updateViewState
 import io.matthewnelson.build_config.BuildConfigVersionCode
 import io.matthewnelson.concept_coroutines.CoroutineDispatchers
 import io.matthewnelson.concept_views.viewstate.ViewStateContainer
-import io.matthewnelson.crypto_common.extensions.toHex
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import uniffi.sphinxrs.deriveSharedSecret
-import uniffi.sphinxrs.encrypt
-import uniffi.sphinxrs.pubkeyFromSecretKey
-import java.security.SecureRandom
 import javax.inject.Inject
 
 @HiltViewModel
@@ -112,7 +101,6 @@ internal class DashboardViewModel @Inject constructor(
     private val networkQueryPeople: NetworkQueryPeople,
     private val pushNotificationRegistrar: PushNotificationRegistrar,
     private val networkQueryCrypter: NetworkQueryCrypter,
-    private val networkQueryContact: NetworkQueryContact,
 
     private val walletDataHandler: WalletDataHandler,
 
@@ -131,18 +119,10 @@ internal class DashboardViewModel @Inject constructor(
         DashboardMotionViewState
         >(dispatchers, DashboardMotionViewState.DrawerCloseNavBarVisible),
     ScannerMenuViewModel,
-    SignerPhone
+    SignerPhoneCallback
 {
 
     private val args: DashboardFragmentArgs by handler.navArgs()
-
-    companion object {
-        const val SIGNING_DEVICE_SHARED_PREFERENCES = "signer_settings"
-        const val PHONE_SIGNER_SETUP_KEY = "phone-signer-setup"
-
-        const val BITCOIN_NETWORK_REG_TEST = "regtest"
-        const val BITCOIN_NETWORK_MAIN_NET = "mainnet"
-    }
 
     val newVersionAvailable: MutableStateFlow<Boolean> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow(false)
@@ -155,10 +135,6 @@ internal class DashboardViewModel @Inject constructor(
     private val scannedNodeAddress: MutableStateFlow<Pair<LightningNodePubKey, LightningRouteHint?>?> by lazy(LazyThreadSafetyMode.NONE) {
         MutableStateFlow(null)
     }
-
-    private val signerSharedPreferences: SharedPreferences =
-        app.getSharedPreferences(SIGNING_DEVICE_SHARED_PREFERENCES, Context.MODE_PRIVATE)
-
 
     private lateinit var signerManager: SignerManager
 
@@ -223,17 +199,14 @@ internal class DashboardViewModel @Inject constructor(
     fun setSignerManager(signerManager: SignerManager) {
         signerManager.setWalletDataHandler(walletDataHandler)
         signerManager.setMoshi(moshi)
-        signerManager.setNetworkQueryContact(networkQueryContact)
 
         this.signerManager = signerManager
+
+        reconnectMQTT()
     }
 
     private fun reconnectMQTT(){
-        signerSharedPreferences.getBoolean(PHONE_SIGNER_SETUP_KEY, false).let { phoneSigner ->
-            if (phoneSigner) {
-                signerManager.reconnectMQTT(this)
-            }
-        }
+        signerManager.reconnectMQTT(this)
     }
 
     override fun showMnemonicToUser(message: String, callback: (Boolean) -> Unit) {
@@ -952,8 +925,6 @@ internal class DashboardViewModel @Inject constructor(
                 )
             )
         }
-
-        reconnectMQTT()
     }
 
     fun updateTabsState(
