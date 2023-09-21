@@ -4,6 +4,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'kotlinx-serialization'
 }
 
 android {
@@ -41,6 +42,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-feed')
 
     api project(path: ':sphinx:application:common:menus:menu-bottom-picture')
+    api project(path: ':sphinx:application:common:menus:menu-bottom-signer')
     implementation project(path: ':sphinx:application:common:logger')
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:common:resources')
@@ -52,6 +54,8 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
+    implementation project(path: ':sphinx:activity:concepts:concept-signer-manager')
+
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
@@ -66,5 +70,10 @@ dependencies {
     implementation deps.google.hilt
     implementation deps.bip39.sdk
     implementation deps.jna.sdk
+    implementation deps.paho.sdk
+    implementation deps.kotlinx.serialization
+    implementation deps.msgpack.sdk
+    implementation deps.square.moshi
+
     kapt kaptDeps.google.hilt
 }

@@ -20,6 +20,7 @@ data class ThreadItem(
     val imageAttachment: Pair<String, File?>?,
     val videoAttachment: File?,
     val fileAttachment: FileAttachment?,
+    val audioAttachment: Boolean?
 )
 
 data class FileAttachment(

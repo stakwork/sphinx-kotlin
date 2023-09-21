@@ -21,6 +21,8 @@ import chat.sphinx.chat_common.model.TribeLink
 import chat.sphinx.chat_common.ui.ChatViewModel
 import chat.sphinx.chat_common.ui.isMessageSelected
 import chat.sphinx.chat_common.ui.viewstate.InitialHolderViewState
+import chat.sphinx.chat_common.ui.viewstate.audio.AudioMessageState
+import chat.sphinx.chat_common.ui.viewstate.audio.AudioPlayState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.*
 import chat.sphinx.chat_common.ui.viewstate.selected.SelectedMessageViewState
 import chat.sphinx.chat_common.util.*
@@ -687,6 +689,17 @@ internal class MessageListAdapter<ARGS : NavArgs>(
     ) : RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
         private var threadHeaderViewState: MessageHolderViewState.ThreadHeader? = null
 
+        private var audioAttachmentJob: Job? = null
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+
+            audioAttachmentJob?.let { job ->
+                if (!job.isActive) {
+                    observeAudioAttachmentState()
+                }
+            }
+        }
+
         init {
             binding.apply {
 
@@ -720,7 +733,30 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
 
+                includeMessageTypeAudioAttachment.apply {
+                    textViewAttachmentPlayPauseButton.setOnClickListener {
+                        threadHeaderViewState?.bubbleAudioAttachment?.let { bubbleAudioAttachment ->
+                            viewModel.audioPlayerController.togglePlayPause(bubbleAudioAttachment)
+                        }
+                    }
+                    seekBarAttachmentAudio.setOnTouchListener { _, _ -> true }
+                }
+
                 includeMessageTypeFileAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
+            }
+        }
+
+        private fun observeAudioAttachmentState() {
+            threadHeaderViewState?.bubbleAudioAttachment?.let { audioAttachment ->
+                if (audioAttachment is LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable) {
+                    audioAttachmentJob?.cancel()
+                    audioAttachmentJob = onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                        viewModel.audioPlayerController.getAudioState(audioAttachment)
+                            ?.collect { audioState ->
+                                binding.includeMessageTypeAudioAttachment.setAudioAttachmentLayoutForState(audioState)
+                            }
+                    }
+                }
             }
         }
 
@@ -862,6 +898,36 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                             }
                         }
 
+                        binding.includeMessageTypeAudioAttachment.apply {
+                            (threadHeader.bubbleAudioAttachment as? LayoutState.Bubble.ContainerSecond.AudioAttachment.FileAvailable)?.let { audioAttachment ->
+                                binding.constraintMediaThreadContainer.visible
+                                root.visible
+                                includeMessageTypeAudioAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
+
+                                onStopSupervisor.scope.launch(viewModel.io) {
+                                    viewModel.audioPlayerController.getAudioState(audioAttachment)?.value?.let { state ->
+                                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                            setAudioAttachmentLayoutForState(state)
+                                        }
+                                    } ?: run {
+                                        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+                                            setAudioAttachmentLayoutForState(
+                                                AudioMessageState(
+                                                    audioAttachment.messageId,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    AudioPlayState.Error,
+                                                    1L,
+                                                    0L,
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         senderInfo?.first?.let { photoUrl ->
                             textViewInitialsName.gone
                             imageViewChatPicture.visible
@@ -878,6 +944,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                     }
                 }
             }
+            observeAudioAttachmentState()
         }
 
         init {

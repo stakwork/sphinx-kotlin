@@ -213,6 +213,65 @@
                 tools:text="6:05 PM"
                 tools:visibility="visible" />
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraint_media_thread_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:visibility="visible"
+                android:layout_marginTop="@dimen/default_layout_margin"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/layout_layout_chat_image_small_initial_holder_four"
+                tools:visibility="visible">
+
+                <include
+                    android:id="@+id/include_message_type_image_attachment"
+                    layout="@layout/layout_message_type_attachment_image"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/thread_thumbnail_reply_height"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+
+                <include
+                    android:id="@+id/include_message_type_video_attachment"
+                    layout="@layout/layout_message_type_attachment_video"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/thread_thumbnail_height"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+
+                <include
+                    android:id="@+id/include_message_type_file_attachment"
+                    layout="@layout/layout_message_type_attachment_file"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/message_type_file_attachment_height"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="visible" />
+
+                <include
+                    android:id="@+id/include_message_type_audio_attachment"
+                    layout="@layout/layout_message_type_attachment_audio"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/message_type_file_attachment_height"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:visibility="gone" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/text_view_last_reply_message_text"
                 style="@style/chat_message_body_text"
@@ -225,7 +284,7 @@
                 android:maxLines="3"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/layout_layout_chat_image_small_initial_holder_four"
-                app:layout_constraintTop_toBottomOf="@+id/layout_layout_chat_image_small_initial_holder_four"
+                app:layout_constraintTop_toBottomOf="@+id/constraint_media_thread_container"
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:text="At vero"
                 tools:visibility="visible" />

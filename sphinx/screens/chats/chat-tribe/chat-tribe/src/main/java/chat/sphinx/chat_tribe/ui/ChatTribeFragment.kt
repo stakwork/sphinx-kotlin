@@ -708,7 +708,7 @@ internal class ChatTribeFragment: ChatFragment<
                                     )
                                 }
 
-                                viewState.senderAlias?.let { senderAlias ->
+                                viewState.senderAlias.let { senderAlias ->
                                     textViewPinnedBottomBodyUsername.text = senderAlias
                                     textViewPinnedBottomBodyUsername.setTextColor(
                                         Color.parseColor(
@@ -771,7 +771,7 @@ internal class ChatTribeFragment: ChatFragment<
                                     textViewInitialsName.apply {
                                         text = (senderInfo.second?.value ?: "").getInitials()
 
-                                        senderInfo.third?.let { colorKey ->
+                                        senderInfo.third.let { colorKey ->
                                             setBackgroundRandomColor(
                                                 chat.sphinx.chat_common.R.drawable.chat_initials_circle,
                                                 Color.parseColor(
@@ -814,7 +814,7 @@ internal class ChatTribeFragment: ChatFragment<
                                                 it,
                                                 ImageLoaderOptions.Builder().build()
                                             )
-                                        } ?: imageAttachment?.url?.let {
+                                        } ?: imageAttachment.url.let {
                                             imageLoader.load(
                                                 imageViewElementPicture,
                                                 it,
@@ -837,9 +837,21 @@ internal class ChatTribeFragment: ChatFragment<
                                     }
                                 }
                                 
-                                viewState.fileAttachment?.let {
+                                viewState.fileAttachment?.let { fileAttachment ->
                                     layoutConstraintMediaContainer.visible
                                     textViewAttachmentFileIcon.visible
+                                    textViewAttachmentFileIcon.text = getString(chat.sphinx.chat_common.R.string.material_icon_name_file_pdf)
+
+                                    (fileAttachment as? LayoutState.Bubble.ContainerSecond.FileAttachment.FileAvailable)?.let {
+                                        threadOriginalMessageBinding?.textViewThreadMessageContent?.text = it.fileName?.value ?: "Unnamed File"
+                                    }
+                                }
+
+                                viewState.audioAttachment?.let { audioAttachment ->
+                                    layoutConstraintMediaContainer.visible
+                                    textViewAttachmentFileIcon.visible
+                                    textViewAttachmentFileIcon.text = getString(chat.sphinx.chat_common.R.string.material_icon_name_volume_up)
+                                    threadOriginalMessageBinding?.textViewThreadMessageContent?.text = "Audio Clip"
                                 }
                             }
                         }
