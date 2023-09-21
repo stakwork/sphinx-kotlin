@@ -6,8 +6,9 @@ import android.text.InputType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_network_query_crypter.NetworkQueryCrypter
-import chat.sphinx.concept_signer_manager.SignerCallback
+import chat.sphinx.concept_signer_manager.SignerHardware
 import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.concept_signer_manager.SignerPhone
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.kotlin_response.Response
@@ -61,7 +62,8 @@ internal class OnBoardConnectViewModel @Inject constructor(
         >(dispatchers, OnBoardConnectViewState.Idle),
     SignerMenuViewModel,
     PhoneSignerMethodMenuViewModel,
-    SignerCallback
+    SignerHardware,
+    SignerPhone
 {
 
     private val args: OnBoardConnectFragmentArgs by handle.navArgs()

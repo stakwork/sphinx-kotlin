@@ -1,8 +1,10 @@
 package chat.sphinx.concept_signer_manager
 
 abstract class SignerManager {
-    abstract fun setupPhoneSigner(mnemonicWords: String?, signerCallback: SignerCallback)
-    abstract fun setupSignerHardware(signerCallback: SignerCallback)
+    abstract fun setupPhoneSigner(mnemonicWords: String?, signerPhone: SignerPhone)
+    abstract fun setupSignerHardware(signerHardware: SignerHardware)
+
+    abstract fun reconnectMQTT(signerPhone: SignerPhone)
 
     abstract fun setWalletDataHandler(walletDataHandlerInstance: Any)
     abstract fun setMoshi(moshiInstance: Any)
