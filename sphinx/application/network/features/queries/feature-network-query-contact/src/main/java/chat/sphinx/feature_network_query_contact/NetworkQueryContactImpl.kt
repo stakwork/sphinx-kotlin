@@ -32,6 +32,8 @@ class NetworkQueryContactImpl(
         private const val ENDPOINT_GENERATE_TOKEN = "/contacts/tokens"
         private const val ENDPOINT_KEYS_EXCHANGE = "/contacts/%d/keys"
         private const val ENDPOINT_GENERATE_GITHUB_PAT = "/bot/git"
+        private const val ENDPOINT_HAS_ADMIN = "/has_admin"
+
 
         private const val ENDPOINT_CREATE_INVITE = "/invites"
 
@@ -252,4 +254,13 @@ class NetworkQueryContactImpl(
             requestBody = mapOf(Pair("", "")),
             relayData = relayData
         )
+
+    override fun hasAdmin(
+        url: RelayUrl
+    ): Flow<LoadResponse<Any, ResponseError>> =
+        networkRelayCall.get(
+            url = "${url.value}$ENDPOINT_HAS_ADMIN",
+            responseJsonClass = HasAdminRelayResponse::class.java,
+        )
+
 }

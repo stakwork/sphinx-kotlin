@@ -10,7 +10,8 @@ inline fun String.toWalletMnemonic(): WalletMnemonic? =
 
 inline val String.isValidWalletMnemonic: Boolean
     get() {
-        return this.split(" ").size == 12
+        val wordCount = this.split(" ").size
+        return wordCount == 12 || wordCount == 24
     }
 
 @JvmInline

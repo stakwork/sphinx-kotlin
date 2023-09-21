@@ -47,7 +47,6 @@ dependencies {
     implementation project(path: ':sphinx:application:common:wrappers:wrapper-message-media')
     implementation project(path: ':sphinx:application:common:resources')
 
-    implementation project(path: ':sphinx:application:data:concepts:concept-wallet')
     implementation project(path: ':sphinx:application:data:concepts:concept-background-login')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     implementation project(path: ':sphinx:application:data:concepts:concept-image-loader')
@@ -55,6 +54,7 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-lightning')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
     implementation project(path: ':sphinx:activity:concepts:concept-signer-manager')
+
 
 
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-relay-keys')
@@ -68,11 +68,8 @@ dependencies {
 
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    implementation deps.bip39.sdk
     implementation deps.jna.sdk
-    implementation deps.paho.sdk
     implementation deps.kotlinx.serialization
-    implementation deps.msgpack.sdk
     implementation deps.square.moshi
 
     kapt kaptDeps.google.hilt

@@ -51,6 +51,21 @@ sealed class RedemptionCode {
                     }
                 }
             }
+
+            if (code.startsWith(Glyph.REGEX)) {
+                val parameters = code.substringAfter(Glyph.REGEX).split("&").mapNotNull { code ->
+                    code.split("=").takeIf { it.size == 2 }?.let { pair ->
+                        pair[0] to pair[1]
+                    }
+                }.toMap()
+
+                val mqtt = parameters[Glyph.PARAM_MQTT] ?: return null
+                val network = parameters[Glyph.PARAM_NETWORK] ?: return null
+                val relay = parameters[Glyph.PARAM_RELAY] ?: return null
+
+                return Glyph(mqtt, network, relay)
+            }
+
             return null
         }
     }
@@ -161,4 +176,24 @@ sealed class RedemptionCode {
                     SwarmClaim(ip, token)
             }
         }
+
+    @Suppress("DataClassPrivateConstructor")
+    data class Glyph private constructor(
+        val mqtt: String,
+        val network: String,
+        val relay: String,
+    ) : RedemptionCode() {
+
+        companion object {
+            const val REGEX = "sphinx.chat://?action=glyph"
+            const val PARAM_MQTT = "mqtt"
+            const val PARAM_NETWORK = "network"
+            const val PARAM_RELAY = "relay"
+
+            @JvmSynthetic
+            internal operator fun invoke(mqtt: String, network: String, relay: String): Glyph =
+                Glyph(mqtt, network, relay)
+        }
+    }
+
 }

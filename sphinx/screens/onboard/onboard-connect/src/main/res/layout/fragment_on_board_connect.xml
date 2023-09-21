@@ -102,5 +102,20 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <include
+        android:id="@+id/include_layout_menu_bottom_signer"
+        layout="@layout/layout_menu_bottom" />
+
+    <include
+        android:id="@+id/include_layout_menu_bottom_phone_signer_method"
+        layout="@layout/layout_menu_bottom" />
+
+    <include
+        android:id="@+id/include_layout_mnemonic_words"
+        layout="@layout/layout_mnemonic_words"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:visibility="gone"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

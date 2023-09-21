@@ -16,6 +16,15 @@ inline val String.isOnionAddress: Boolean
         .replaceFirst("https://", "")
         .matches("([a-z2-7]{56}).onion.*".toRegex())
 
+inline val String.withProtocol: String
+    get() {
+        return if (!this.contains("http")) {
+            "https://$this"
+        }  else {
+            this
+        }
+    }
+
 inline val String.isValidRelayUrl: Boolean
     get() = toRelayUrl() != null
 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="bottom_menu_phone_signer_method_header_text">Elige un método para el seed</string>
+    <string name="bottom_menu_phone_signer_method_sub_header_text">¿Desea generar una nueva seed o importar una existente?</string>
+
+    <!-- Menu -->
+    <string name="bottom_menu_phone_signer_method_generate">Generar</string>
+    <string name="bottom_menu_phone_signer_method_import">Importar</string>
+</resources>

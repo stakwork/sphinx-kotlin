@@ -168,7 +168,9 @@
                 android:text="@string/manage_storage_save"
                 android:textAllCaps="false"
                 android:textColor="@color/text"
-                android:textSize="@dimen/chat_footer_episode_title_text_size" />
+                android:textSize="@dimen/chat_footer_episode_title_text_size"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="0dp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

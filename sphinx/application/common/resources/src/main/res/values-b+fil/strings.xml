@@ -220,6 +220,15 @@
     <string name="select_bitcoin_network">Piliin ang Bitcoin Network</string>
     <string name="replies_amount">%s replies</string>
     <string name="threads_more_replies">more replies</string>
+    <string name="mnemonic_words_title">Enter your mnemonic words</string>
+    <string name="mnemonic_words_confirm">Confirm</string>
+    <string name="mnemonic_words_cancel">Cancel</string>
+    <string name="mnemonic_words_loading">Loading, please wait...</string>
+    <string name="mnemonic_incorrect_length">Your seed phrase must be exactly 12 or 24 words</string>
+    <string name="mnemonic_invalid_word">It appears you\'ve typed an invalid word</string>
+    <string name="signer_phone_error_mqtt">Error connecting with MQTT</string>
+    <string name="signer_phone_connected_to_mqtt">Phone connected MQTT</string>
+
 
 
 </resources>

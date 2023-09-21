@@ -7,22 +7,35 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import by.kirich1409.viewbindingdelegate.viewBinding
+import chat.sphinx.concept_signer_manager.SignerManager
 import chat.sphinx.insetter_activity.InsetterActivity
 import chat.sphinx.insetter_activity.addNavigationBarPadding
 import chat.sphinx.insetter_activity.addStatusBarPadding
+import chat.sphinx.menu_bottom_phone_signer_method.PhoneSignerMethodMenu
+import chat.sphinx.menu_bottom_signer.BottomSignerMenu
 import chat.sphinx.onboard_connect.R
 import chat.sphinx.onboard_connect.databinding.FragmentOnBoardConnectBinding
+import chat.sphinx.onboard_connect.viewstate.MnemonicDialogViewState
+import chat.sphinx.onboard_connect.viewstate.MnemonicWordsViewState
+import chat.sphinx.onboard_connect.viewstate.OnBoardConnectSubmitButtonViewState
+import chat.sphinx.onboard_connect.viewstate.OnBoardConnectViewState
 import dagger.hilt.android.AndroidEntryPoint
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
+import io.matthewnelson.concept_views.viewstate.value
 import kotlinx.coroutines.launch
 import javax.annotation.meta.Exhaustive
+import javax.inject.Inject
 
 @AndroidEntryPoint
 internal class OnBoardConnectFragment: SideEffectFragment<
@@ -36,11 +49,31 @@ internal class OnBoardConnectFragment: SideEffectFragment<
     override val viewModel: OnBoardConnectViewModel by viewModels()
     override val binding: FragmentOnBoardConnectBinding by viewBinding(FragmentOnBoardConnectBinding::bind)
 
+    @Inject
+    @Suppress("ProtectedInFinal")
+    protected lateinit var signerManager: SignerManager
+
+    private val bottomMenuSigner: BottomSignerMenu by lazy(LazyThreadSafetyMode.NONE) {
+        BottomSignerMenu(
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
+    private val phoneSignerMethodMenu: PhoneSignerMethodMenu by lazy(LazyThreadSafetyMode.NONE) {
+        PhoneSignerMethodMenu(
+            onStopSupervisor,
+            viewModel
+        )
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        BackPressHandler(viewLifecycleOwner, requireActivity())
         setupHeaderAndFooter()
         setupEditText()
+        setupSignerManager()
 
         binding.apply {
             imageButtonScanner.setOnClickListener {
@@ -57,8 +90,44 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 viewModel.continueToConnectingScreen(
                     binding.editTextCodeInput.text.toString()
                 )
+
+                hideKeyboardFrom(buttonSubmit.context, buttonSubmit)
+            }
+
+            includeLayoutMnemonicWords.includeLayoutMnemonicWordsDetail.apply {
+                buttonCancel.setOnClickListener {
+                    viewModel.mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Closed)
+                }
+
+                buttonConfirm.setOnClickListener {
+                    val words = editTextMnemonic.text.toString()
+                    viewModel.validateSeed(words)
+
+                    hideKeyboardFrom(buttonConfirm.context, buttonConfirm)
+                }
             }
         }
+
+        bottomMenuSigner.initialize(
+            R.string.bottom_menu_signer_header_text,
+            binding.includeLayoutMenuBottomSigner,
+            viewLifecycleOwner
+        )
+
+        phoneSignerMethodMenu.initialize(
+            R.string.bottom_menu_phone_signer_method_header_text,
+            binding.includeLayoutMenuBottomPhoneSignerMethod,
+            viewLifecycleOwner
+        )
+    }
+
+    private fun setupSignerManager(){
+        viewModel.setSignerManager(signerManager)
+    }
+
+    private fun hideKeyboardFrom(context: Context, view: View) {
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
     private fun setupHeaderAndFooter() {
@@ -66,6 +135,35 @@ internal class OnBoardConnectFragment: SideEffectFragment<
             .addStatusBarPadding(binding.layoutConstraintOnBoardConnect)
             .addNavigationBarPadding(binding.layoutConstraintOnBoardConnect)
     }
+
+    private inner class BackPressHandler(
+        owner: LifecycleOwner,
+        activity: FragmentActivity,
+    ): OnBackPressedCallback(true) {
+
+        init {
+            activity.apply {
+                onBackPressedDispatcher.addCallback(
+                    owner,
+                    this@BackPressHandler,
+                )
+            }
+        }
+
+        override fun handleOnBackPressed() {
+            when {
+                (viewModel.mnemonicWordsViewStateContainer.value is MnemonicWordsViewState.Open) -> {
+                    viewModel.mnemonicWordsViewStateContainer.updateViewState(MnemonicWordsViewState.Closed)
+                }
+                else -> {
+                    lifecycleScope.launch(viewModel.mainImmediate) {
+                        viewModel.navigator.popBackStack()
+                    }
+                }
+            }
+        }
+    }
+
 
     private fun setupEditText() {
         binding.editTextCodeInput.addTextChangedListener(object : TextWatcher {
@@ -150,5 +248,36 @@ internal class OnBoardConnectFragment: SideEffectFragment<
                 }
             }
         }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.mnemonicWordsViewStateContainer.collect { viewState ->
+                binding.includeLayoutMnemonicWords.apply {
+                    when (viewState) {
+                        is MnemonicWordsViewState.Open -> {}
+                        is MnemonicWordsViewState.Closed -> {}
+                    }
+                    root.setTransitionDuration(300)
+                    viewState.transitionToEndSet(root)
+                }
+            }
+        }
+
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.mnemonicDialogViewStateContainer.collect { viewState ->
+                binding.includeLayoutMnemonicWords.includeLayoutMnemonicWordsDetail.apply {
+                    when (viewState) {
+                        is MnemonicDialogViewState.Idle -> {
+                            layoutConstraintEnterWordsContainer.visible
+                            layoutConstraintLoadingContainer.gone
+                        }
+                        is MnemonicDialogViewState.Loading -> {
+                            layoutConstraintLoadingContainer.visible
+                            layoutConstraintEnterWordsContainer.gone
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

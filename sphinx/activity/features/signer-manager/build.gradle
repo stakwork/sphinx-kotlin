@@ -46,12 +46,12 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-media')
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-contact')
     implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-crypter')
+    implementation project(path: ':sphinx:application:network:concepts:queries:concept-network-query-contact')
     implementation project(path: ':sphinx:application:data:concepts:concept-relay')
 
     implementation deps.jncryptor
 
     implementation deps.androidx.lifecycle.hilt
-    implementation deps.bip39.sdk
     implementation deps.jna.sdk
     implementation deps.paho.sdk
     implementation deps.kotlinx.serialization

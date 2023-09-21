@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Set the background color of the rectangle here -->
+    <solid android:color="@color/headerBG" />
+    <corners android:radius="24dp" />
+</shape>

@@ -1,4 +1,4 @@
-package chat.sphinx.onboard_connect.ui
+package chat.sphinx.onboard_connect.viewstate
 
 import io.matthewnelson.concept_views.viewstate.ViewState
 

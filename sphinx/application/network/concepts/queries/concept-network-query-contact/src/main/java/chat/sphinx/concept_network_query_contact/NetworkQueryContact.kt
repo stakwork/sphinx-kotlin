@@ -97,6 +97,10 @@ abstract class NetworkQueryContact {
         relayData: Triple<Pair<AuthorizationToken, TransportToken?>, RequestSignature?, RelayUrl>? = null
     ): Flow<LoadResponse<ContactDto, ResponseError>>
 
+    abstract fun hasAdmin(
+        url: RelayUrl
+    ): Flow<LoadResponse<Any, ResponseError>>
+
     //    app.post('/contacts/:id/keys', contacts.exchangeKeys)
     //    app.post('/contacts', contacts.createContact)
 }

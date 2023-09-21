@@ -229,7 +229,6 @@
     <string name="manage_storage_limit_warning" >Saving this limit\nwill delete %s of your oldest content</string>
     <string name="manage_storage_deleted_all_files">All files</string>
 
-
     <string name="video_sats_per_minute">Sats per minute</string>
 
     <string name="time_left">%s left</string>
@@ -270,5 +269,14 @@
     <string name="threads_plus" translatable="false">+%s</string>
     <string name="threads_more_replies">more replies</string>
     <string name="thread_header" translatable="false">Thread</string>
+
+    <string name="mnemonic_words_title">Enter your mnemonic words</string>
+    <string name="mnemonic_words_confirm">Confirm</string>
+    <string name="mnemonic_words_cancel">Cancel</string>
+    <string name="mnemonic_words_loading">Loading, please wait...</string>
+    <string name="mnemonic_incorrect_length">Your seed phrase must be exactly 12 or 24 words</string>
+    <string name="mnemonic_invalid_word">It appears you\'ve typed an invalid word</string>
+    <string name="signer_phone_error_mqtt">Error connecting with MQTT</string>
+    <string name="signer_phone_connected_to_mqtt">MQTT connected</string>
 
 </resources>

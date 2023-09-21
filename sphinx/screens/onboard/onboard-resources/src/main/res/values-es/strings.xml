@@ -44,4 +44,5 @@
     <string name="sphinx_ready_label">"Estás lista/o\npara usar Sphinx!"</string>
     <string name="sphinx_ready_balance_label">"Puedes enviar mensajes,\nenviar %d sats, o recibir\nhasta %d sats"</string>
     <string name="sphinx_ready_loading_balance">Cargando el balance del node…</string>
+    <string name="side_effect_check_admin_failed">Ocurrió un error al verificar el administrador</string>
 </resources>

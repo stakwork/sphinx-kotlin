@@ -3,6 +3,8 @@ package chat.sphinx.onboard.ui
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import chat.sphinx.concept_relay.RelayDataHandler
+import chat.sphinx.concept_signer_manager.SignerManager
+import chat.sphinx.concept_wallet.WalletDataHandler
 import chat.sphinx.onboard.navigation.OnBoardMessageNavigator
 import chat.sphinx.onboard_common.OnBoardStepHandler
 import chat.sphinx.onboard_common.model.OnBoardInviterData
@@ -31,6 +33,7 @@ internal class OnBoardMessageViewModel @Inject constructor(
     private val navigator: OnBoardMessageNavigator,
     private val onBoardStepHandler: OnBoardStepHandler,
     private val relayDataHandler: RelayDataHandler,
+    private val walletDataHandler: WalletDataHandler,
     private val authenticationCoordinator: AuthenticationCoordinator
 ): SideEffectViewModel<
         Context,
@@ -38,6 +41,14 @@ internal class OnBoardMessageViewModel @Inject constructor(
         OnBoardMessageViewState
         >(dispatchers, OnBoardMessageViewState.Idle)
 {
+
+    private lateinit var signerManager: SignerManager
+
+    fun setSignerManager(signerManager: SignerManager) {
+        signerManager.setWalletDataHandler(walletDataHandler)
+
+        this.signerManager = signerManager
+    }
 
     private var loginJob: Job? = null
     fun presentLoginModal(
@@ -120,6 +131,7 @@ internal class OnBoardMessageViewModel @Inject constructor(
         proceedJob = viewModelScope.launch(mainImmediate) {
             relayDataHandler.persistAuthorizationToken(authorizationToken)
             relayDataHandler.persistRelayUrl(relayUrl)
+            signerManager.persistMnemonic()
 
             transportKey?.let { key ->
                 relayDataHandler.persistRelayTransportKey(key)
