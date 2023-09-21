@@ -84,7 +84,7 @@ internal class OnBoardReadyFragment: SideEffectFragment<
             } else if (inviteString != null){
                 viewModel.finishInvite(inviteString)
             } else {
-                viewModel.loadAndJoinDefaultTribeData()
+                viewModel.finishSignup()
             }
         }
     }
