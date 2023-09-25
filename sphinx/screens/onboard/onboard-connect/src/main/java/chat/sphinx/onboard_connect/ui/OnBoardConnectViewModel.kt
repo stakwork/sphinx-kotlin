@@ -394,6 +394,7 @@ internal class OnBoardConnectViewModel @Inject constructor(
                     app.getString(R.string.phone_signer_error)
                 )
             )
+            mnemonicDialogViewStateContainer.updateViewState(MnemonicDialogViewState.Idle)
         }
     }
 

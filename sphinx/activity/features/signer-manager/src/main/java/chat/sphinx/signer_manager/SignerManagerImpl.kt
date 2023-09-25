@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import org.eclipse.paho.client.mqttv3.*
@@ -702,6 +703,7 @@ class SignerManagerImpl(
                     when (loadResponse) {
                         is LoadResponse.Loading -> {}
                         is Response.Error -> {
+                            delay(1000L)
                             checkHasAdmin(checkAdminCallback)
                         }
 
