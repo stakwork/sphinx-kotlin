@@ -181,7 +181,9 @@ internal class OnBoardConnectFragment: SideEffectFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardConnectSideEffect) {
         if (sideEffect is OnBoardConnectSideEffect.FromScanner) {
-            binding.editTextCodeInput.setText(sideEffect.value.value)
+            val editTextCodeInput = binding.editTextCodeInput
+            editTextCodeInput.setText(sideEffect.value.value)
+            hideKeyboardFrom(editTextCodeInput.context, editTextCodeInput)
         } else {
             sideEffect.execute(binding.root.context)
         }
