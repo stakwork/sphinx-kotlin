@@ -1,7 +1,9 @@
 package chat.sphinx.web_view.ui
 
 import android.animation.Animator
+import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -200,6 +202,13 @@ internal class WebViewFragment: SideEffectDetailFragment<
             webView.webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                     val url = request?.url.toString()
+
+                    if (url.contains("open=system")) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                        view?.context?.startActivity(intent)
+                        return true
+                    }
+
                     view?.loadUrl(url)
                     return super.shouldOverrideUrlLoading(view, request)
                 }

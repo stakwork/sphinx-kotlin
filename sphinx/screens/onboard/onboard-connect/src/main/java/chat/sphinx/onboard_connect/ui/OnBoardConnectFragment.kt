@@ -130,6 +130,12 @@ internal class OnBoardConnectFragment: SideEffectFragment<
         imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
+    private fun showKeyboardFrom(context: Context, view: View) {
+        view.requestFocus()
+        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
+
     private fun setupHeaderAndFooter() {
         (requireActivity() as InsetterActivity)
             .addStatusBarPadding(binding.layoutConstraintOnBoardConnect)
@@ -181,7 +187,9 @@ internal class OnBoardConnectFragment: SideEffectFragment<
 
     override suspend fun onSideEffectCollect(sideEffect: OnBoardConnectSideEffect) {
         if (sideEffect is OnBoardConnectSideEffect.FromScanner) {
-            binding.editTextCodeInput.setText(sideEffect.value.value)
+            val editTextCodeInput = binding.editTextCodeInput
+            editTextCodeInput.setText(sideEffect.value.value)
+            hideKeyboardFrom(editTextCodeInput.context, editTextCodeInput)
         } else {
             sideEffect.execute(binding.root.context)
         }
@@ -253,8 +261,20 @@ internal class OnBoardConnectFragment: SideEffectFragment<
             viewModel.mnemonicWordsViewStateContainer.collect { viewState ->
                 binding.includeLayoutMnemonicWords.apply {
                     when (viewState) {
-                        is MnemonicWordsViewState.Open -> {}
-                        is MnemonicWordsViewState.Closed -> {}
+                        is MnemonicWordsViewState.Open -> {
+                            val editText = binding
+                                .includeLayoutMnemonicWords
+                                .includeLayoutMnemonicWordsDetail
+                                .editTextMnemonic
+                            showKeyboardFrom(editText.context, editText)
+                        }
+                        is MnemonicWordsViewState.Closed -> {
+                            val cancelButton = binding
+                                .includeLayoutMnemonicWords
+                                .includeLayoutMnemonicWordsDetail
+                                .buttonCancel
+                            hideKeyboardFrom(cancelButton.context, cancelButton)
+                        }
                     }
                     root.setTransitionDuration(300)
                     viewState.transitionToEndSet(root)
