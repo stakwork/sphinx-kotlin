@@ -688,6 +688,7 @@ internal class MessageListAdapter<ARGS : NavArgs>(
         private val binding: LayoutThreadMessageHeaderBinding
     ) : RecyclerView.ViewHolder(binding.root), DefaultLifecycleObserver {
         private var threadHeaderViewState: MessageHolderViewState.ThreadHeader? = null
+        private val onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
 
         private var audioAttachmentJob: Job? = null
         override fun onStart(owner: LifecycleOwner) {
@@ -743,6 +744,37 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                 }
 
                 includeMessageTypeFileAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
+
+                val selectedMessageLongClickListener = OnLongClickListener {
+                    SelectedMessageViewState.SelectedMessage.instantiate(
+                        messageHolderViewState = threadHeaderViewState,
+                        holderYPosTop = Px(binding.root.y + binding.root.y),
+                        holderHeight = Px(binding.root.measuredHeight.toFloat()),
+                        holderWidth = Px(binding.root.measuredWidth.toFloat()),
+                        bubbleXPosStart = Px(root.x),
+                        bubbleWidth = Px(root.measuredWidth.toFloat()),
+                        bubbleHeight = Px(root.measuredHeight.toFloat()),
+                        headerHeight = headerHeight,
+                        recyclerViewWidth = recyclerViewWidth,
+                        screenHeight = screenHeight,
+                        pinedHeaderHeight = pinedMessageHeader
+                    ).let { vs ->
+                        viewModel.updateSelectedMessageViewState(vs)
+                    }
+                    true
+                }
+
+                onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
+                    selectedMessageLongClickListener
+                ) {
+                    override fun onClick(url: String?) {
+                        viewModel.handleContactTribeLinks(url)
+                    }
+                }
+
+                root.setOnLongClickListener(onSphinxInteractionListener)
+
+                textViewThreadMessageContent.setOnLongClickListener(onSphinxInteractionListener)
             }
         }
 
@@ -795,6 +827,8 @@ internal class MessageListAdapter<ARGS : NavArgs>(
                         }
                     }
                 })
+
+                SphinxLinkify.addLinks(textViewThreadMessageContent, SphinxLinkify.ALL, binding.root.context, onSphinxInteractionListener)
 
                 onStopSupervisor.scope.launch(viewModel.mainImmediate) {
 
