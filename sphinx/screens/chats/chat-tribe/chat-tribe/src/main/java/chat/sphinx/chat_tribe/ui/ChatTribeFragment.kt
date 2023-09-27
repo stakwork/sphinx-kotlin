@@ -32,6 +32,8 @@ import chat.sphinx.chat_common.ui.viewstate.menu.MoreMenuOptionsViewState
 import chat.sphinx.chat_common.ui.viewstate.messageholder.LayoutState
 import chat.sphinx.chat_common.ui.viewstate.messagereply.MessageReplyViewState
 import chat.sphinx.chat_common.ui.viewstate.thread.ThreadHeaderViewState
+import chat.sphinx.chat_common.util.SphinxLinkify
+import chat.sphinx.chat_common.util.SphinxUrlSpan
 import chat.sphinx.chat_common.util.VideoThumbnailUtil
 import chat.sphinx.chat_tribe.R
 import chat.sphinx.chat_tribe.adapters.BadgesItemAdapter
@@ -169,6 +171,8 @@ internal class ChatTribeFragment: ChatFragment<
     protected lateinit var _imageLoader: ImageLoader<ImageView>
     override val imageLoader: ImageLoader<ImageView>
         get() = _imageLoader
+
+    private lateinit var onSphinxInteractionListener: SphinxUrlSpan.OnInteractionListener
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -370,7 +374,18 @@ internal class ChatTribeFragment: ChatFragment<
                 adapter = badgesItemsAdapter
                 itemAnimator = null
             }
+
+        onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
+            null
+        ) {
+            override fun onClick(url: String?) {
+                viewModel.handleContactTribeLinks(url)
+            }
+        }
+
+
     }
+
 
     private suspend fun loadBadgeImage(imageView: ImageView, photoUrl: String?) {
         if (photoUrl == null) {
@@ -760,6 +775,11 @@ internal class ChatTribeFragment: ChatFragment<
 
                             textViewThreadDate.text = viewState.date
                             threadOriginalMessageBinding?.textViewThreadMessageContent?.text = viewState.message
+
+                            threadOriginalMessageBinding?.textViewThreadMessageContent?.let {
+                                SphinxLinkify.addLinks(
+                                    it, SphinxLinkify.ALL, binding.root.context, onSphinxInteractionListener)
+                            }
 
                             binding.includeLayoutThreadHeader.layoutContactInitialHolder.apply {
                                 textViewInitialsName.visible

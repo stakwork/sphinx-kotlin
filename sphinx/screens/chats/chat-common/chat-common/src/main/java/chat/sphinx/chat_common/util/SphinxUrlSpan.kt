@@ -45,7 +45,7 @@ open class SphinxUrlSpan(
 
     }
 
-    abstract class OnInteractionListener(private val onLongClickListener: View.OnLongClickListener) : View.OnLongClickListener {
+    abstract class OnInteractionListener(private val onLongClickListener: View.OnLongClickListener?) : View.OnLongClickListener {
         val longClickCounter = AtomicInteger(0)
 
         /**
@@ -58,7 +58,7 @@ open class SphinxUrlSpan(
         override fun onLongClick(view: View): Boolean {
             longClickCounter.incrementAndGet()
 
-            return onLongClickListener.onLongClick(view)
+            return onLongClickListener?.onLongClick(view) ?: false
         }
     }
 }

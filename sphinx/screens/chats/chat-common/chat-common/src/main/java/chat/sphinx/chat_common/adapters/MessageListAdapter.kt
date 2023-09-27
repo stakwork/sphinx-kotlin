@@ -745,36 +745,13 @@ internal class MessageListAdapter<ARGS : NavArgs>(
 
                 includeMessageTypeFileAttachment.root.setBackgroundResource(R.drawable.background_thread_file_attachment)
 
-                val selectedMessageLongClickListener = OnLongClickListener {
-                    SelectedMessageViewState.SelectedMessage.instantiate(
-                        messageHolderViewState = threadHeaderViewState,
-                        holderYPosTop = Px(binding.root.y + binding.root.y),
-                        holderHeight = Px(binding.root.measuredHeight.toFloat()),
-                        holderWidth = Px(binding.root.measuredWidth.toFloat()),
-                        bubbleXPosStart = Px(root.x),
-                        bubbleWidth = Px(root.measuredWidth.toFloat()),
-                        bubbleHeight = Px(root.measuredHeight.toFloat()),
-                        headerHeight = headerHeight,
-                        recyclerViewWidth = recyclerViewWidth,
-                        screenHeight = screenHeight,
-                        pinedHeaderHeight = pinedMessageHeader
-                    ).let { vs ->
-                        viewModel.updateSelectedMessageViewState(vs)
-                    }
-                    true
-                }
-
                 onSphinxInteractionListener = object: SphinxUrlSpan.OnInteractionListener(
-                    selectedMessageLongClickListener
+                    null
                 ) {
                     override fun onClick(url: String?) {
                         viewModel.handleContactTribeLinks(url)
                     }
                 }
-
-                root.setOnLongClickListener(onSphinxInteractionListener)
-
-                textViewThreadMessageContent.setOnLongClickListener(onSphinxInteractionListener)
             }
         }
 
