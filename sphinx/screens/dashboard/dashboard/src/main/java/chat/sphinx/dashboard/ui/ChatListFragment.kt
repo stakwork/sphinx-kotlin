@@ -24,6 +24,7 @@ import chat.sphinx.dashboard.ui.adapter.DashboardFooterAdapter
 import chat.sphinx.dashboard.ui.viewstates.ChatFilter
 import chat.sphinx.dashboard.ui.viewstates.ChatListFooterButtonsViewState
 import chat.sphinx.dashboard.ui.viewstates.ChatListViewState
+import chat.sphinx.dashboard.ui.viewstates.ChatViewState
 import chat.sphinx.resources.SphinxToastUtils
 import chat.sphinx.resources.inputMethodManager
 import chat.sphinx.wrapper_chat.ChatType
@@ -32,6 +33,7 @@ import io.matthewnelson.android_feature_screens.navigation.CloseAppOnBackPress
 import io.matthewnelson.android_feature_screens.ui.sideeffect.SideEffectFragment
 import io.matthewnelson.android_feature_screens.util.gone
 import io.matthewnelson.android_feature_screens.util.goneIfFalse
+import io.matthewnelson.android_feature_screens.util.visible
 import io.matthewnelson.concept_views.viewstate.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -216,5 +218,22 @@ internal class ChatListFragment : SideEffectFragment<
                 }
             }
         }
+    }
+
+    override fun subscribeToViewStateFlow() {
+        onStopSupervisor.scope.launch(viewModel.mainImmediate) {
+            viewModel.chatViewStateContainer.collect { viewState ->
+                when {
+                    viewState.list.isEmpty() -> {
+                        binding.progressBarChatList.visible
+                    }
+                    viewState.list.isNotEmpty() -> {
+                        binding.progressBarChatList.gone
+                    }
+                }
+            }
+        }
+
+        super.subscribeToViewStateFlow()
     }
 }
