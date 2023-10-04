@@ -2118,6 +2118,9 @@ abstract class SphinxRepository(
                     .map { listMessageDbo ->
                         withContext(default) {
 
+                            val startProcessingTime = System.currentTimeMillis()
+                            LOG.d("MessageFetch", "Start processing messages")
+
                             val reactionsMap: MutableMap<MessageUUID, ArrayList<Message>> =
                                 LinkedHashMap(listMessageDbo.size)
 
@@ -2146,6 +2149,9 @@ abstract class SphinxRepository(
                             val purchaseItemsMUIDs =
                                 purchaseItemsMap.keys.map { MessageMUID(it.value) }
 
+                            val replyProcessingStart = System.currentTimeMillis()
+                            LOG.d("MessageFetch", "Start processing replies")
+
                             replyUUIDs.chunked(500).forEach { chunkedIds ->
                                 queries.messageGetAllReactionsByUUID(
                                     chatId,
@@ -2164,6 +2170,12 @@ abstract class SphinxRepository(
                                         }
                                     }
                             }
+                            LOG.d("MessageFetch", "Finished processing replies - Duration: ${System.currentTimeMillis() - replyProcessingStart}ms")
+
+
+                            val threadProcessingStart = System.currentTimeMillis()
+                            LOG.d("MessageFetch", "Start processing threads")
+
 
                             threadUUID.chunked(500).forEach { chunkedThreadUUID ->
                                 queries.messageGetAllMessagesByThreadUUID(
@@ -2183,6 +2195,11 @@ abstract class SphinxRepository(
                                         }
                                     }
                             }
+
+                            LOG.d("MessageFetch", "Finished processing threads - Duration: ${System.currentTimeMillis() - threadProcessingStart}ms")
+
+                            val purchaseItemsProcessingStart = System.currentTimeMillis()
+                            LOG.d("MessageFetch", "Start processing purchase items")
 
                             purchaseItemsMUIDs.chunked(500).forEach { chunkedMUIDs ->
                                 queries.messageGetAllPurchaseItemsByMUID(
@@ -2211,6 +2228,11 @@ abstract class SphinxRepository(
                                     }
                             }
 
+                            LOG.d("MessageFetch", "Finished processing purchase items - Duration: ${System.currentTimeMillis() - purchaseItemsProcessingStart}ms")
+
+                            val mappingStart = System.currentTimeMillis()
+                            LOG.d("MessageFetch", "Start mapping messages")
+
                             val chat = queries.chatGetById(chatId).executeAsOneOrNull()
 
                             listMessageDbo.reversed().map { dbo ->
@@ -2223,6 +2245,11 @@ abstract class SphinxRepository(
                                     dbo.reply_uuid,
                                     chat
                                 )
+                            }.also {
+
+                                LOG.d("MessageFetch", "Finished mapping messages - Duration: ${System.currentTimeMillis() - mappingStart}ms")
+
+                                LOG.d("MessageFetch", "Finished processing messages - Total Duration: ${System.currentTimeMillis() - startProcessingTime}ms")
                             }
                         }
                     }

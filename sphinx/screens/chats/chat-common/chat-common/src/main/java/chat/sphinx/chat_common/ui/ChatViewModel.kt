@@ -65,6 +65,7 @@ import chat.sphinx.concept_repository_message.model.SendMessage
 import chat.sphinx.concept_view_model_coordinator.ViewModelCoordinator
 import chat.sphinx.kotlin_response.*
 import chat.sphinx.logger.SphinxLogger
+import chat.sphinx.logger.d
 import chat.sphinx.logger.e
 import chat.sphinx.menu_bottom.ui.MenuBottomViewState
 import chat.sphinx.resources.getRandomHexCode
@@ -987,12 +988,22 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
     var messagesLoadJob: Job? = null
     fun screenInit() {
+        val startTime = System.currentTimeMillis()
+        LOG.d("ScreenInit", "Screen initialization started")
         if (messageHolderViewStateFlow.value.isNotEmpty()) {
+            LOG.d("ScreenInit", "Exiting early - Duration: ${System.currentTimeMillis() - startTime}ms")
             return
+        }
+
+        if (messagesLoadJob?.isActive == true) {
+            messagesLoadJob?.cancel()
         }
 
         var isScrollDownButtonSetup = false
         messagesLoadJob = viewModelScope.launch(mainImmediate) {
+            val fetchStartTime = System.currentTimeMillis()
+            LOG.d("ScreenInit", "Message fetch started")
+
             if (isThreadChat()) {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 0, getThreadUUID()).distinctUntilChanged().collect { messages ->
                     delay(200)
@@ -1009,6 +1020,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
             } else {
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 100).firstOrNull()?.let { messages ->
+                    LOG.d("ScreenInit", "First fetch duration: ${System.currentTimeMillis() - fetchStartTime}ms")
+
                     delay(200)
 
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
@@ -1017,7 +1030,13 @@ abstract class ChatViewModel<ARGS : NavArgs>(
 
                 delay(1000L)
 
+                val secondFetchStartTime = System.currentTimeMillis()
+                LOG.d("ScreenInit", "Second message fetch started")
+
+
                 messageRepository.getAllMessagesToShowByChatId(getChat().id, 1000).distinctUntilChanged().collect { messages ->
+                    LOG.d("ScreenInit", "Second fetch duration: ${System.currentTimeMillis() - secondFetchStartTime}ms")
+
                     messageHolderViewStateFlow.value = getMessageHolderViewStateList(messages).toList()
                     shimmerViewState.updateViewState(ShimmerViewState.Off)
 
@@ -1030,6 +1049,8 @@ abstract class ChatViewModel<ARGS : NavArgs>(
                 }
             }
         }
+        LOG.d("ScreenInit", "Screen initialization finished - Total Duration: ${System.currentTimeMillis() - startTime}ms")
+
         collectThread()
         collectUnseenMessagesNumber()
     }
