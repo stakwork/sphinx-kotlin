@@ -56,5 +56,5 @@ dependencies {
     implementation deps.google.hilt
     implementation project(path: ':sphinx:application:common:menus:menu-bottom-share-qr-code')
     implementation project(path: ':sphinx:application:data:concepts:concept-media-cache')
-    kapt kaptDeps.google.hilt
+    implementation deps.google.hiltCompiler
 }

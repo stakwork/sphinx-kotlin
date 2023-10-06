@@ -41,7 +41,7 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-common')
     api project(path: ':sphinx:screens:onboard:onboard-resources')
 
-    kapt kaptDeps.google.hilt
+    implementation deps.google.hiltCompiler
 
     testImplementation testDeps.junit
 

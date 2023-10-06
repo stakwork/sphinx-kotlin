@@ -61,7 +61,7 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation deps.lottie.sdk
-    kapt kaptDeps.google.hilt
+    implementation deps.google.hiltCompiler
 
     testImplementation testDeps.junit
 

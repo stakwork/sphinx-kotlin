@@ -53,7 +53,7 @@ dependencies {
     implementation project(path: ':sphinx:application:network:concepts:tor:concept-network-tor')
     implementation project(path: ':sphinx:screens:authentication:authentication-resources')
 
-    kapt kaptDeps.google.hilt
+    implementation deps.google.hiltCompiler
 
     testImplementation testDeps.junit
 

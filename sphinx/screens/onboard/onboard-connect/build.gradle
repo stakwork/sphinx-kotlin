@@ -48,7 +48,7 @@ dependencies {
     api project(path: ':sphinx:application:common:menus:menu-bottom-signer')
     api project(path: ':sphinx:application:common:menus:menu-bottom-phone-signer-method')
 
-    kapt kaptDeps.google.hilt
+    implementation deps.google.hiltCompiler
 
     testImplementation testDeps.junit
 

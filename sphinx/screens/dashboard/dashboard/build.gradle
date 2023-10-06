@@ -79,7 +79,7 @@ dependencies {
     implementation deps.jna.sdk
     implementation deps.lottie.sdk
     implementation deps.square.moshi
-    kapt kaptDeps.google.hilt
+    implementation deps.google.hiltCompiler
 
     testImplementation testDeps.junit
 
