@@ -11,5 +11,5 @@ dependencies {
     api project(path: ':sphinx:application:common:wrappers:wrapper-feed')
 
     implementation deps.square.moshi
-    kapt kaptDeps.square.moshiCodegen
+    implementation deps.square.moshiCodegen
 }

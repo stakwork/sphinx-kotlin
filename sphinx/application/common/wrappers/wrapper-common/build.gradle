@@ -10,5 +10,5 @@ dependencies {
     testImplementation testDeps.junit
 
     implementation deps.square.moshi
-    kapt kaptDeps.square.moshiCodegen
+    implementation deps.square.moshiCodegen
 }

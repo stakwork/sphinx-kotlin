@@ -57,6 +57,6 @@ dependencies {
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
 
     implementation deps.google.hiltCompiler
-    kapt kaptDeps.square.moshiCodegen
+    implementation deps.square.moshiCodegen
 
 }
