@@ -31,7 +31,7 @@ inline fun Context.getRandomHexCode(): String {
 @ColorRes
 @Suppress("NOTHING_TO_INLINE")
 inline fun Context.getRandomColorRes(): Int {
-    return listOf<@ColorRes Int>(
+    return listOf(
         R.color.randomColor1,
         R.color.randomColor2,
         R.color.randomColor3,

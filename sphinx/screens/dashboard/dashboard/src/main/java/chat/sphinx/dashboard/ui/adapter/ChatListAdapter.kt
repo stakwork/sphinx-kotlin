@@ -266,6 +266,7 @@ internal class ChatListAdapter(
             }
         }
 
+        @OptIn(ExperimentalStdlibApi::class)
         fun bind(position: Int) {
             binding.apply {
                 val dashboardChat: DashboardChat = dashboardChats.getOrNull(position) ?: let {
