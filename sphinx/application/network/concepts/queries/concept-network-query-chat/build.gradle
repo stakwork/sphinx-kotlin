@@ -18,7 +18,3 @@ dependencies {
     implementation deps.square.moshi
     implementation deps.square.moshiCodegen
 }
-
-android {
-    namespace 'chat.sphinx.concept_network_query_chat'
-}
