@@ -168,6 +168,7 @@ ext.plugin = [
     ],
     google: [
         hilt: "com.google.dagger:hilt-android-gradle-plugin:${versions.hilt}",
+        secretsGradle: "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
     ],
     gradleVersions: "com.github.ben-manes:gradle-versions-plugin:0.39.0",
     kotlin: [

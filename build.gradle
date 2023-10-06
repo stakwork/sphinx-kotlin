@@ -13,6 +13,7 @@ buildscript {
         classpath plugin.androidGradle
         classpath plugin.androidx.navigation.safeArgs
         classpath plugin.google.hilt
+        classpath plugin.google.secretsGradle
         classpath plugin.gradleVersions
         classpath plugin.kotlin.gradle
         classpath plugin.square.exhaustive
@@ -31,6 +32,7 @@ allprojects {
         maven { url "https://github.com/jitsi/jitsi-maven-repository/raw/master/releases" }
         maven { url 'https://jitpack.io' }
         maven { url "https://chaquo.com/maven" }
+        maven { url "https://plugins.gradle.org/m2/" }
     }
 
     tasks.withType(Test) {
