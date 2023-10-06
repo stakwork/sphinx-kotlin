@@ -171,6 +171,7 @@ ext.plugin = [
         secretsGradle: "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin:2.0.1"
     ],
     gradleVersions: "com.github.ben-manes:gradle-versions-plugin:0.39.0",
+    node: "com.github.node-gradle:gradle-node-plugin:7.0.1",
     kotlin: [
         dokka: "org.jetbrains.dokka:dokka-gradle-plugin:0.10.1",
         gradle: "org.jetbrains.kotlin:kotlin-gradle-plugin:${versions.kotlin}",

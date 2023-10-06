@@ -15,6 +15,7 @@ buildscript {
         classpath plugin.google.hilt
         classpath plugin.google.secretsGradle
         classpath plugin.gradleVersions
+        classpath plugin.node
         classpath plugin.kotlin.gradle
         classpath plugin.square.exhaustive
         classpath plugin.square.sqlDelight
