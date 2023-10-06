@@ -4,7 +4,6 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'androidx.navigation.safeargs'
     id 'kotlin-android'
-    id 'kotlin-kapt'
     id 'com.google.android.secrets-gradle-plugin' version '1.1.0'
 }
 
@@ -16,8 +15,6 @@ android {
     defaultConfig {
         minSdkVersion versions.minSdk
         targetSdkVersion versions.targetSdk
-        versionCode VERSION_CODE.toInteger()
-        versionName VERSION_NAME
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments disableAnalytics: 'true'
@@ -29,6 +26,7 @@ android {
             minifyEnabled false
         }
     }
+    namespace 'chat.sphinx.common_player'
 }
 
 dependencies {

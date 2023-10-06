@@ -66,6 +66,7 @@ android {
             universalApk true
         }
     }
+    namespace 'chat.sphinx'
 }
 
 dependencies {

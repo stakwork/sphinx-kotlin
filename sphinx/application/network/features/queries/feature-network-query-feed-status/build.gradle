@@ -18,3 +18,7 @@ dependencies {
 
     testImplementation project(path: ':sphinx:test:test-network-query')
 }
+
+android {
+    namespace 'chat.sphinx.feature_network_query_feed_status'
+}

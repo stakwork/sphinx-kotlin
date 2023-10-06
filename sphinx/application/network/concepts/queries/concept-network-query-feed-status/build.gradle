@@ -20,3 +20,7 @@ dependencies {
     implementation deps.square.moshi
     kapt kaptDeps.square.moshiCodegen
 }
+
+android {
+    namespace 'chat.sphinx.concept_network_feed_status'
+}

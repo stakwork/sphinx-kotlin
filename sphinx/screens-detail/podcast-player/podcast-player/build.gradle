@@ -16,10 +16,8 @@ android {
   defaultConfig {
     minSdkVersion versions.minSdk
     targetSdkVersion versions.targetSdk
-    versionCode VERSION_CODE.toInteger()
-    versionName VERSION_NAME
 
-    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+      testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     testInstrumentationRunnerArguments disableAnalytics: 'true'
     consumerProguardFiles "consumer-rules.pro"
   }
@@ -29,6 +27,7 @@ android {
       minifyEnabled false
     }
   }
+    namespace 'chat.sphinx.podcast_player'
 }
 
 dependencies {
