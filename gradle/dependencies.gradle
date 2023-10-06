@@ -19,7 +19,7 @@ ext.versions = [
     'moshi'      : '1.12.0',
     'navigation' : '2.4.1',
     'okhttp'     : '4.9.1',
-    'sqlDelight' : '1.5.5',
+    'sqlDelight' : '1.5.4',
     'toplAndroid': '2.1.2',
     'targetSdk'  : 33
 ]
