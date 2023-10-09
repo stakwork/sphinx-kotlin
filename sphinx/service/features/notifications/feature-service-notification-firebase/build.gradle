@@ -48,7 +48,7 @@ dependencies {
     api project(path: ':sphinx:service:concepts:concept-service-notification')
 
     implementation deps.google.hilt
-    implementation deps.google.hiltCompiler
+    kapt kaptDeps.google.hilt
 
     api platform('com.google.firebase:firebase-bom:27.1.0')
     api 'com.google.firebase:firebase-messaging-ktx'

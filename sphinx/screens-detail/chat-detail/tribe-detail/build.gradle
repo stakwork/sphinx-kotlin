@@ -51,5 +51,5 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
     implementation project(path: ':sphinx:application:common:logger')
-    implementation deps.google.hiltCompiler
+    kapt kaptDeps.google.hilt
 }

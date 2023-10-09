@@ -77,7 +77,6 @@ ext.deps = [
         material: "com.google.android.material:material:1.4.0-beta01",
         mlKitBarcodeScanning: "com.google.mlkit:barcode-scanning:16.2.0",
         zxing: "com.google.zxing:core:3.4.1",
-        hiltCompiler: "com.google.dagger:hilt-compiler:${versions.hilt}"
     ],
     guardianProject: [
         jtorctl: "info.guardianproject:jtorctl:0.4",
@@ -121,7 +120,6 @@ ext.deps = [
         sqlDelightJvm: "com.squareup.sqldelight:sqlite-driver:${versions.sqlDelight}",
         sqlDelightNative: "com.squareup.sqldelight:native-driver:${versions.sqlDelight}",
         sqlDelightRuntime: "com.squareup.sqldelight:runtime:${versions.sqlDelight}",
-        moshiCodegen: "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}"
     ],
     viewBindingDelegateNoReflect: "com.github.kirich1409:viewbindingpropertydelegate-noreflection:1.4.7",
     giphy: [

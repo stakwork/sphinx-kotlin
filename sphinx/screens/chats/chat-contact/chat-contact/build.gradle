@@ -37,5 +37,5 @@ dependencies {
     implementation deps.square.moshi
     implementation deps.facebook.shimmer
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
-    implementation deps.google.hiltCompiler
+    kapt kaptDeps.google.hilt
 }

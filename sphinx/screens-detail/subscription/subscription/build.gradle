@@ -43,5 +43,5 @@ dependencies {
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
 
-    implementation deps.google.hiltCompiler
+    kapt kaptDeps.google.hilt
 }

@@ -24,5 +24,5 @@ dependencies {
     // needed to override moshi's use of 1.4.31
     api deps.kotlin.reflect
     api deps.square.moshi
-    implementation deps.square.moshiCodegen
+    kapt kaptDeps.square.moshiCodegen
 }

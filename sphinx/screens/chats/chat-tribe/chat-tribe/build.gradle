@@ -56,7 +56,7 @@ dependencies {
     implementation deps.lottie.sdk
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
 
-    implementation deps.google.hiltCompiler
-    implementation deps.square.moshiCodegen
+    kapt kaptDeps.google.hilt
+    kapt kaptDeps.square.moshiCodegen
 
 }

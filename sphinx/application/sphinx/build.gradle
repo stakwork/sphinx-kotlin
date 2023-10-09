@@ -128,7 +128,7 @@ dependencies {
     }
 
     implementation deps.google.hilt
-    implementation deps.google.hiltCompiler
+    kapt kaptDeps.google.hilt
 
     implementation deps.sqlCipher
     implementation deps.sqlRequery

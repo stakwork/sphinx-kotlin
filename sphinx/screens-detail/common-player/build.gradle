@@ -58,7 +58,7 @@ dependencies {
     implementation deps.google.hilt
     implementation deps.square.moshi
     implementation deps.lottie.sdk
-    implementation deps.google.hiltCompiler
+    kapt kaptDeps.google.hilt
 
     testImplementation testDeps.junit
 
