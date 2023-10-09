@@ -44,7 +44,7 @@ dependencies {
     api project(path: ':sphinx:application:data:concepts:repositories:concept-repository-actions')
 
     implementation deps.google.hilt
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 
     implementation deps.androidx.media
 }

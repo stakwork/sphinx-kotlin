@@ -129,7 +129,7 @@ dependencies {
     }
 
     implementation deps.google.hilt
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 
     implementation deps.sqlCipher
     implementation deps.sqlRequery

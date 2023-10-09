@@ -43,7 +43,7 @@ dependencies {
     api project(path: ':sphinx:screens:onboard:onboard-resources')
     api project(path: ':sphinx:application:data:concepts:concept-image-loader')
 
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 
     testImplementation testDeps.junit
 

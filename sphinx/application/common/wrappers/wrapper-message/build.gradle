@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'kotlin'
     id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
 }
 
 dependencies {
@@ -13,5 +14,5 @@ dependencies {
     // needed to override moshi's use of 1.4.31
     implementation deps.kotlin.reflect
     implementation deps.square.moshi
-    kapt kaptDeps.square.moshiCodegen
+    ksp kaptDeps.square.moshiCodegen
 }

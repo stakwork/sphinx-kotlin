@@ -4,6 +4,7 @@ plugins {
     id 'androidx.navigation.safeargs'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
 }
 
 android {
@@ -48,7 +49,7 @@ dependencies {
     api project(path: ':sphinx:application:common:menus:menu-bottom-signer')
     api project(path: ':sphinx:application:common:menus:menu-bottom-phone-signer-method')
 
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 
     testImplementation testDeps.junit
 

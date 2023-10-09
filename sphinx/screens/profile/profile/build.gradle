@@ -72,5 +72,5 @@ dependencies {
     implementation deps.kotlinx.serialization
     implementation deps.square.moshi
 
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 }

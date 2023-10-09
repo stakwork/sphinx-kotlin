@@ -60,5 +60,5 @@ dependencies {
     implementation deps.androidx.concurrent.futures
     implementation deps.androidx.lifecycle.hilt
     implementation deps.google.hilt
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 }

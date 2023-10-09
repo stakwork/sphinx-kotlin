@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'kotlin'
     id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
 }
 
 dependencies {
@@ -10,5 +11,5 @@ dependencies {
     testImplementation testDeps.junit
 
     implementation deps.square.moshi
-    kapt kaptDeps.square.moshiCodegen
+    ksp kaptDeps.square.moshiCodegen
 }

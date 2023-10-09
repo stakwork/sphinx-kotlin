@@ -34,5 +34,5 @@ dependencies {
     api project(path: ':sphinx:service:concepts:concept-service-notification')
 
     implementation deps.google.hilt
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 }

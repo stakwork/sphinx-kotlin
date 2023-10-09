@@ -37,5 +37,5 @@ dependencies {
     implementation deps.google.hilt
     implementation deps.square.moshi
     implementation project(path: ':sphinx:application:data:concepts:repositories:concept-repository-dashboard-android')
-    kapt kaptDeps.google.hilt
+    ksp kaptDeps.google.hilt
 }
