@@ -13,10 +13,10 @@ ext.versions = [
     'coroutines': '1.5.1',
     'insetter': '0.5.0',
     'lifecycle'  : '2.3.1',
-    'hilt'       : '2.40.1',
+    'hilt'       : '2.48',
     'hiltJetpack': '1.0.0-alpha03',
-    'kotlin'     : '1.5.31',
-    'moshi'      : '1.12.0',
+    'kotlin'     : '1.9.0',
+    'moshi'      : '1.15.0',
     'navigation' : '2.4.1',
     'okhttp'     : '4.9.1',
     'sqlDelight' : '1.5.4',
@@ -179,7 +179,8 @@ ext.plugin = [
     square: [
         exhaustive: "app.cash.exhaustive:exhaustive-gradle:0.2.0",
         sqlDelight: "com.squareup.sqldelight:gradle-plugin:${versions.sqlDelight}"
-    ]
+    ],
+    ksp: "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:1.9.0-1.0.13"
 ]
 
 /**

@@ -20,6 +20,7 @@ buildscript {
         classpath plugin.square.exhaustive
         classpath plugin.square.sqlDelight
         classpath plugin.kotlin.serialization
+        classpath plugin.ksp
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
