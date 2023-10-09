@@ -68,53 +68,44 @@ class CreateTribe private constructor(
                 return requiredFieldsFilled
             }
 
-        @Synchronized
         fun setName(name: String?): Builder {
             this.name = name
             return this
         }
 
-        @Synchronized
         fun setImageUrl(imgUrl: String?): Builder {
             this.imgUrl = imgUrl
             return this
         }
 
-        @Synchronized
         fun setDescription(description: String?): Builder {
             this.description = description
             return this
         }
 
-        @Synchronized
         fun setIsTribe(isTribe: Boolean?): Builder {
             this.isTribe = isTribe
             return this
         }
 
-        @Synchronized
         fun setPricePerMessage(pricePerMessage: Long?): Builder {
             this.pricePerMessage = pricePerMessage
             return this
         }
 
-        @Synchronized
         fun setPriceToJoin(priceToJoin: Long?): Builder {
             this.priceToJoin = priceToJoin
             return this
         }
-        @Synchronized
         fun setEscrowAmount(escrowAmount: Long?): Builder {
             this.escrowAmount = escrowAmount
             return this
         }
 
-        @Synchronized
         fun setEscrowMillis(escrowMillis: Long?): Builder {
             this.escrowMillis = escrowMillis
             return this
         }
-        @Synchronized
         fun setImg(img: File?): Builder {
             this.img?.let {
                 try {
@@ -125,13 +116,11 @@ class CreateTribe private constructor(
             return this
         }
 
-        @Synchronized
         fun selectTag(index: Int, isSelected: Boolean): Builder {
             this.tags[index].isSelected = isSelected
             return this
         }
 
-        @Synchronized
         fun toggleTag(index: Int): Builder {
             this.tags[index].isSelected = !this.tags[index].isSelected
             return this
@@ -143,36 +132,30 @@ class CreateTribe private constructor(
             }.toTypedArray()
         }
 
-        @Synchronized
         fun setUnlisted(unlisted: Boolean?): Builder {
             this.unlisted = unlisted
             return this
         }
 
-        @Synchronized
         fun setPrivate(private: Boolean?): Builder {
             this.private = private
             return this
         }
-        @Synchronized
         fun setAppUrl(appUrl: String?): Builder {
             this.appUrl = appUrl?.toAppUrl()
             return this
         }
 
-        @Synchronized
         fun setFeedUrl(feedUrl: String?): Builder {
             this.feedUrl = feedUrl?.toFeedUrl()
             return this
         }
 
-        @Synchronized
         fun setFeedType(feedType: Int?): Builder {
             this.feedType = feedType?.toFeedType()
             return this
         }
 
-        @Synchronized
         fun load(tribeDto: TribeDto) {
             name = tribeDto.name
             imgUrl = tribeDto.img
@@ -191,7 +174,6 @@ class CreateTribe private constructor(
             unlisted = tribeDto.unlisted
         }
 
-        @Synchronized
         fun build(): CreateTribe? =
             if (!hasRequiredFields) {
                 null

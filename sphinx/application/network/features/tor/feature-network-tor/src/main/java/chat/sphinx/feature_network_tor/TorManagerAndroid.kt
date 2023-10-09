@@ -228,7 +228,6 @@ class TorManagerAndroid(
     private inner class SynchronizedListenerHolder {
         private val listeners: LinkedHashSet<TorManagerListener> = LinkedHashSet(0)
 
-        @Synchronized
         fun addListener(listener: TorManagerListener): Boolean {
             val bool = listeners.add(listener)
             if (bool) {
@@ -237,7 +236,6 @@ class TorManagerAndroid(
             return bool
         }
 
-        @Synchronized
         fun removeListener(listener: TorManagerListener): Boolean {
             val bool = listeners.remove(listener)
             if (bool) {
@@ -246,14 +244,12 @@ class TorManagerAndroid(
             return bool
         }
 
-        @Synchronized
         suspend fun dispatchRequirementChange(required: Boolean) {
             for (listener in listeners) {
                 listener.onTorRequirementChange(required)
             }
         }
 
-        @Synchronized
         suspend fun dispatchSocksProxyAddressChange(socksProxyAddress: SocksProxyAddress?) {
             for (listener in listeners) {
                 listener.onTorSocksProxyAddressChange(socksProxyAddress)

@@ -47,7 +47,6 @@ class SendMessage private constructor(
             EMPTY_PRICE, EMPTY_DESTINATION, EMPTY_CONTENT
         }
 
-        @Synchronized
         fun clear() {
             attachmentInfo = null
             chatId = null
@@ -64,7 +63,6 @@ class SendMessage private constructor(
             threadUUID = null
         }
 
-        @Synchronized
         fun isValid(): Pair<Boolean, ValidationError?> {
             if (chatId == null && contactId == null) {
                 return Pair(false, ValidationError.EMPTY_DESTINATION)
@@ -106,37 +104,31 @@ class SendMessage private constructor(
             return Pair(true, null)
         }
 
-        @Synchronized
         fun setAttachmentInfo(attachmentInfo: AttachmentInfo?): Builder {
             this.attachmentInfo = attachmentInfo
             return this
         }
 
-        @Synchronized
         fun setChatId(chatId: ChatId?): Builder {
             this.chatId = chatId
             return this
         }
 
-        @Synchronized
         fun setContactId(contactId: ContactId?): Builder {
             this.contactId = contactId
             return this
         }
 
-        @Synchronized
         fun setTribePaymentAmount(tribePaymentAmount: Sat?): Builder {
             this.tribePaymentAmount = tribePaymentAmount
             return this
         }
 
-        @Synchronized
         fun setReplyUUID(replyUUID: ReplyUUID?): Builder {
             this.replyUUID = replyUUID
             return this
         }
 
-        @Synchronized
         fun setText(text: String?): Builder {
             if (text == null || text.isEmpty()) {
                 this.text = null
@@ -146,55 +138,46 @@ class SendMessage private constructor(
             return this
         }
 
-        @Synchronized
         fun setGiphyData(giphyData: GiphyData?): Builder {
             this.giphyData = giphyData
             return this
         }
 
-        @Synchronized
         fun setPodcastClip(podcastClip: PodcastClip?): Builder {
             this.podcastClip = podcastClip
             return this
         }
 
-        @Synchronized
         fun setIsBoost(isBoost: Boolean): Builder {
             this.isBoost = isBoost
             return this
         }
 
-        @Synchronized
         fun setIsCall(isCall: Boolean): Builder {
             this.isCall = isCall
             return this
         }
 
-        @Synchronized
         fun setIsTribePayment(isTribePayment: Boolean): Builder {
             this.isTribePayment = isTribePayment
             return this
         }
 
-        @Synchronized
         fun setPriceToMeet(priceToMeet: Sat?): Builder {
             this.priceToMeet = priceToMeet
             return this
         }
 
-        @Synchronized
         fun setPaidMessagePrice(paidMessagePrice: Sat?): Builder {
             this.paidMessagePrice = paidMessagePrice
             return this
         }
 
-        @Synchronized
         fun setThreadUUID(threadUUID: ThreadUUID?): Builder {
             this.threadUUID = threadUUID
             return this
         }
 
-        @Synchronized
         fun build(): Pair<SendMessage?, ValidationError?> {
             val isValid = isValid()
 

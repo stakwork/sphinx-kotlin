@@ -72,7 +72,6 @@ FullscreenVideoActivity : AppCompatActivity() {
         }
     }
 
-    @Synchronized
     fun setOrientation(orientation: Int) {
         if (requestedOrientation != orientation) {
             // TODO: Delayed orientation update

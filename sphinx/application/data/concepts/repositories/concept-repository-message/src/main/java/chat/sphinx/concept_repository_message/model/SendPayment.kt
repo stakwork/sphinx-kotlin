@@ -24,7 +24,6 @@ class SendPayment private constructor(
         private var paymentTemplate: PaymentTemplate?    = null
         private var routeHint: LightningRouteHint?       = null
 
-        @Synchronized
         fun clear() {
             chatId = null
             contactId = null
@@ -68,43 +67,36 @@ class SendPayment private constructor(
         val paymentAmount: Long
             get() = amount
 
-        @Synchronized
         fun setChatId(chatId: ChatId?): Builder {
             this.chatId = chatId
             return this
         }
 
-        @Synchronized
         fun setContactId(contactId: ContactId?): Builder {
             this.contactId = contactId
             return this
         }
 
-        @Synchronized
         fun setDestinationKey(destinationKey: LightningNodePubKey?): Builder {
             this.destinationKey = destinationKey
             return this
         }
 
-        @Synchronized
         fun setRouteHint(routeHint: LightningRouteHint?): Builder {
             this.routeHint = routeHint
             return this
         }
 
-        @Synchronized
         fun setAmount(amount: Long): Builder {
             this.amount = amount
             return this
         }
 
-        @Synchronized
         fun setPaymentTemplate(paymentTemplate: PaymentTemplate?): Builder {
             this.paymentTemplate = paymentTemplate
             return this
         }
 
-        @Synchronized
         fun setText(text: String?): Builder {
             if (text == null || text.isEmpty()) {
                 this.text = null
@@ -114,7 +106,6 @@ class SendPayment private constructor(
             return this
         }
 
-        @Synchronized
         fun build(): SendPayment? =
             if (!isValid) {
                 null

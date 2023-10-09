@@ -17,21 +17,18 @@ abstract class MediaPlayerServiceController {
     protected inner class ListenerHandler {
         private val listeners: MutableSet<MediaServiceListener> = LinkedHashSet(3)
 
-        @Synchronized
         fun dispatch(mediaPlayerServiceState: MediaPlayerServiceState) {
             for (listener in listeners) {
                 listener.mediaServiceState(mediaPlayerServiceState)
             }
         }
 
-        @Synchronized
         fun add(listener: MediaServiceListener) {
             if (listeners.add(listener)) {
                 listener.mediaServiceState(getCurrentState())
             }
         }
 
-        @Synchronized
         fun remove(listener: MediaServiceListener) {
             listeners.remove(listener)
         }

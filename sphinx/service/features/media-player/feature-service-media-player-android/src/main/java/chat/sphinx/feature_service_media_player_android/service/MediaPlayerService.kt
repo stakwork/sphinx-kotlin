@@ -85,7 +85,6 @@ internal abstract class MediaPlayerService: SphinxService() {
         private var startTimestamp: Long = 0
         private var currentPauseTime: Long = 0
         private var history: ArrayList<ContentConsumedHistoryItem> = arrayListOf()
-        @Synchronized
         fun audioFocusLost() {
             podData?.let { nnData ->
                 if (nnData.mediaPlayer.isPlaying) {
@@ -98,7 +97,6 @@ internal abstract class MediaPlayerService: SphinxService() {
             }
         }
 
-        @Synchronized
         fun audioFocusGained() {
             podData?.let { nnData ->
                 if (!nnData.mediaPlayer.isPlaying) {
@@ -130,12 +128,10 @@ internal abstract class MediaPlayerService: SphinxService() {
         }
 
 
-        @Synchronized
         fun soundIsComingOut(){
             soundPlaying = true
         }
 
-        @Synchronized
         fun soundIsNotComingOut(){
             soundPlaying = false
         }
@@ -174,7 +170,6 @@ internal abstract class MediaPlayerService: SphinxService() {
             }
         }
 
-        @Synchronized
         fun processUserAction(userAction: UserAction) {
             @Exhaustive
             when (userAction) {
@@ -651,7 +646,6 @@ internal abstract class MediaPlayerService: SphinxService() {
             }
         }
 
-        @Synchronized
         fun clear() {
             stateDispatcherJob?.cancel()
             currentState = MediaPlayerServiceState.ServiceInactive

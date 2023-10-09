@@ -43,37 +43,31 @@ class AddMember private constructor(
                 return img != null
             }
 
-        @Synchronized
         fun setAlias(alias: String?): Builder {
             this.alias = alias
             return this
         }
 
-        @Synchronized
         fun setPhotoUrl(photoUrl: String?): Builder {
             this.photoUrl = photoUrl
             return this
         }
 
-        @Synchronized
         fun setPublicKey(publicKey: String?): Builder {
             this.publicKey = publicKey
             return this
         }
 
-        @Synchronized
         fun setRouteHint(routeHint: String?): Builder {
             this.routeHint = routeHint
             return this
         }
 
-        @Synchronized
         fun setContactKey(contactKey: String?): Builder {
             this.contactKey = contactKey
             return this
         }
 
-        @Synchronized
         fun setImg(img: File?): Builder {
             this.img?.let {
                 try {
@@ -84,13 +78,11 @@ class AddMember private constructor(
             return this
         }
 
-        @Synchronized
         fun setChatId(chatId: Long?): Builder {
             this.chatId = chatId
             return this
         }
 
-        @Synchronized
         fun build(): Pair<AddMember?, ValidationError?> {
             return  if (!hasRequiredFields) {
                 Pair(null, ValidationError.MISSING_FIELDS)

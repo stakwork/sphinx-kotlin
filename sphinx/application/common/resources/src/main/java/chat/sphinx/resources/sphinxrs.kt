@@ -335,7 +335,6 @@ internal class UniFfiHandleMap<T: Any> {
 
 // Contains loading, initialization code,
 // and the FFI Function declarations in a com.sun.jna.Library.
-@Synchronized
 private fun findLibraryName(componentName: String): String {
     val libOverride = System.getProperty("uniffi.component.$componentName.libraryOverride")
     if (libOverride != null) {

@@ -15,7 +15,6 @@ class SendPaymentRequest private constructor(
         private var memo: String?           = null
         private var amount: Long            = 0
 
-        @Synchronized
         fun clear() {
             chatId = null
             contactId = null
@@ -31,25 +30,21 @@ class SendPaymentRequest private constructor(
         val isContactRequest: Boolean
             get() = amount > 0 && contactId != null
 
-        @Synchronized
         fun setChatId(chatId: ChatId?): Builder {
             this.chatId = chatId
             return this
         }
 
-        @Synchronized
         fun setContactId(contactId: ContactId?): Builder {
             this.contactId = contactId
             return this
         }
 
-        @Synchronized
         fun setAmount(amount: Long): Builder {
             this.amount = amount
             return this
         }
 
-        @Synchronized
         fun setMemo(text: String?): Builder {
             if (text == null || text.isEmpty()) {
                 this.memo = null
@@ -59,7 +54,6 @@ class SendPaymentRequest private constructor(
             return this
         }
 
-        @Synchronized
         fun build(): SendPaymentRequest? =
             if (!isValid) {
                 null
