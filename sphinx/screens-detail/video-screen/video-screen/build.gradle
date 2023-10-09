@@ -5,7 +5,6 @@ plugins {
     id 'androidx.navigation.safeargs'
     id 'kotlin-android'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
-    id 'kotlin-kapt'
     id 'com.google.devtools.ksp'
 }
 

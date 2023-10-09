@@ -2,7 +2,6 @@ plugins {
     id 'app.cash.exhaustive'
     id 'java-library'
     id 'kotlin'
-    id 'kotlin-kapt'
     id 'com.google.devtools.ksp'
 
 }
