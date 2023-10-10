@@ -80,7 +80,7 @@ internal class ChatListFragment : SideEffectFragment<
         override fun handleOnBackPressed() {
             if (
                 parentFragment is DashboardFragment &&
-                (parentFragment as DashboardFragment)?.closeDrawerIfOpen()
+                (parentFragment as DashboardFragment)?.closeDrawerIfOpen() == true
             ) {
                 return
             } else {

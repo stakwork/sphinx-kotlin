@@ -411,7 +411,7 @@ fun TransactionCallbacks.upsertMessage(
         false.toFlagged()
     )
 
-    if (dto.type.toMessageType()?.isInvoicePayment()) {
+    if (dto.type.toMessageType()?.isInvoicePayment() == true) {
         dto.payment_hash?.toLightningPaymentHash()?.let {
             queries.messageUpdateInvoiceAsPaidByPaymentHash(it)
         }
